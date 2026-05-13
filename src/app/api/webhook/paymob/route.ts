@@ -85,9 +85,7 @@ export async function POST(request: Request) {
       }
 
       // Log success
-      console.log(
-        "Successfully processed and sent email to " + customerEmail
-      );
+      console.log("Successfully processed and sent email to " + customerEmail);
 
       return NextResponse.json({
         success: true,
