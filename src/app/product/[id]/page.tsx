@@ -363,11 +363,11 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                     </div>
                   </div>
 
-                  <Button className="w-full h-14 lg:h-16 text-lg lg:text-xl font-bold bg-indigo-600 hover:bg-indigo-500 text-white font-cairo mb-4 shadow-[0_0_30px_rgba(79,70,229,0.4)] hover:shadow-[0_0_50px_rgba(79,70,229,0.6)] transition-all rounded-xl border border-indigo-400/20" asChild>
+                  <Button className="w-full h-14 lg:h-16 text-lg lg:text-xl font-bold bg-indigo-600 hover:bg-indigo-500 text-white font-cairo mb-4 shadow-[0_0_30px_rgba(79,70,229,0.4)] hover:shadow-[0_0_50px_rgba(79,70,229,0.6)] transition-all rounded-xl border border-indigo-400/20" render={
                     <Link href={`/checkout/${resolvedParams.id}`} className="w-full h-full flex items-center justify-center">
                       شراء المكتبة الكاملة الآن
                     </Link>
-                  </Button>
+                  } />
                   
                   <div className="mt-4 p-3 bg-emerald-500/10 rounded-lg border border-emerald-500/20 flex items-start gap-3">
                     <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse mt-1.5 shrink-0" />
@@ -384,11 +384,11 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                       <span className="text-sm text-zinc-400 font-cairo line-through decoration-red-500/50">{currentProduct.originalPrice} ج.م</span>
                       <span className="text-2xl font-bold font-alexandria text-white">{currentProduct.price} ج.م</span>
                     </div>
-                    <Button className="h-12 flex-1 font-bold bg-indigo-600 hover:bg-indigo-500 text-white font-cairo shadow-[0_0_20px_rgba(79,70,229,0.4)] rounded-xl" asChild>
+                    <Button className="h-12 flex-1 font-bold bg-indigo-600 hover:bg-indigo-500 text-white font-cairo shadow-[0_0_20px_rgba(79,70,229,0.4)] rounded-xl" render={
                       <Link href={`/checkout/${resolvedParams.id}`} className="w-full h-full flex items-center justify-center">
                         شراء المكتبة الآن
                       </Link>
-                    </Button>
+                    } />
                   </div>
                 </div>
 

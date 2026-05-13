@@ -66,12 +66,12 @@ export default function Home() {
               </p>
               
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <Button size="lg" className="h-16 px-10 text-xl bg-indigo-600 hover:bg-indigo-700 text-white w-full sm:w-auto font-cairo shadow-[0_0_40px_rgba(79,70,229,0.4)] hover:shadow-[0_0_60px_rgba(79,70,229,0.6)] transition-all rounded-xl" asChild>
+                <Button size="lg" className="h-16 px-10 text-xl bg-indigo-600 hover:bg-indigo-700 text-white w-full sm:w-auto font-cairo shadow-[0_0_40px_rgba(79,70,229,0.4)] hover:shadow-[0_0_60px_rgba(79,70,229,0.6)] transition-all rounded-xl" render={
                   <Link href="#products" className="w-full h-full flex items-center justify-center">
                     تصفح الحزم الآن
                     <ChevronLeft className="w-6 h-6 mr-2" />
                   </Link>
-                </Button>
+                } />
                 <p className="text-sm text-zinc-500 font-cairo mt-4 sm:hidden">عدد النسخ المتاحة محدود جداً</p>
               </div>
             </motion.div>
@@ -183,11 +183,11 @@ export default function Home() {
                         </li>
                       </ul>
 
-                      <Button className="w-full h-14 text-lg bg-indigo-600 hover:bg-indigo-500 text-white font-cairo mt-auto relative overflow-hidden group-hover:shadow-[0_0_30px_rgba(79,70,229,0.3)] transition-all rounded-xl" asChild>
+                      <Button className="w-full h-14 text-lg bg-indigo-600 hover:bg-indigo-500 text-white font-cairo mt-auto relative overflow-hidden group-hover:shadow-[0_0_30px_rgba(79,70,229,0.3)] transition-all rounded-xl" render={
                         <Link href={`/product/${product.id}`} className="w-full h-full flex items-center justify-center z-10">
                           شراء الآن والتسليم فوري
                         </Link>
-                      </Button>
+                      } />
                     </div>
                   </Card>
                 </motion.div>

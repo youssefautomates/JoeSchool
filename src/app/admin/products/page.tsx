@@ -190,12 +190,12 @@ export default function AdminProducts() {
         
         {/* ADD PRODUCT DIALOG */}
         <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
-          <DialogTrigger asChild>
+          <DialogTrigger render={
             <Button onClick={resetForm} className="bg-indigo-600 hover:bg-indigo-700 text-white font-cairo">
               <Plus className="w-4 h-4 mr-2" />
               إضافة منتج جديد
             </Button>
-          </DialogTrigger>
+          } />
           <DialogContent className="bg-zinc-950 border-zinc-800 text-white sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="font-alexandria text-xl">منتج رقمي جديد</DialogTitle>
@@ -303,9 +303,9 @@ export default function AdminProducts() {
 
             </div>
             <DialogFooter>
-              <DialogClose asChild>
+              <DialogClose render={
                 <Button variant="ghost" className="text-zinc-400 hover:text-white font-cairo">إلغاء</Button>
-              </DialogClose>
+              } />
               <Button onClick={handleAddProduct} className="bg-indigo-600 hover:bg-indigo-700 text-white font-cairo">حفظ المنتج</Button>
             </DialogFooter>
           </DialogContent>
@@ -368,12 +368,12 @@ export default function AdminProducts() {
                 </TableCell>
                 <TableCell className="text-left">
                   <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
+                    <DropdownMenuTrigger render={
                       <Button variant="ghost" className="h-8 w-8 p-0 text-zinc-400 hover:text-white">
                         <span className="sr-only">فتح القائمة</span>
                         <MoreHorizontal className="h-4 w-4" />
                       </Button>
-                    </DropdownMenuTrigger>
+                    } />
                     <DropdownMenuContent align="end" className="bg-zinc-900 border-zinc-800 font-cairo">
                       <DropdownMenuItem onClick={() => openEditDialog(product)} className="text-white hover:bg-zinc-800 focus:bg-zinc-800 cursor-pointer">
                         <Edit className="w-4 h-4 ml-2" />
@@ -505,9 +505,9 @@ export default function AdminProducts() {
 
           </div>
           <DialogFooter>
-            <DialogClose asChild>
+            <DialogClose render={
               <Button variant="ghost" className="text-zinc-400 hover:text-white font-cairo">إلغاء</Button>
-            </DialogClose>
+            } />
             <Button onClick={handleEditProduct} className="bg-indigo-600 hover:bg-indigo-700 text-white font-cairo">حفظ التغييرات</Button>
           </DialogFooter>
         </DialogContent>

@@ -62,19 +62,19 @@ export default function SuccessPage() {
             </div>
 
             <div className="space-y-4">
-              <Button className="w-full h-14 text-lg bg-emerald-600 hover:bg-emerald-700 text-white font-cairo shadow-lg shadow-emerald-900/20 rounded-xl" asChild>
+              <Button className="w-full h-14 text-lg bg-emerald-600 hover:bg-emerald-700 text-white font-cairo shadow-lg shadow-emerald-900/20 rounded-xl" render={
                 <Link href="/download/temporary-direct-link">
                   <Download className="w-5 h-5 ml-2" />
                   تحميل الملفات الآن (رابط مباشر مؤقت)
                 </Link>
-              </Button>
+              } />
               
-              <Button variant="outline" className="w-full h-14 text-lg border-zinc-800 text-white hover:bg-zinc-800 font-cairo rounded-xl" asChild>
+               <Button variant="outline" className="w-full h-14 text-lg border-zinc-800 text-white hover:bg-zinc-800 font-cairo rounded-xl" render={
                 <Link href="/">
                   العودة للصفحة الرئيسية
                   <ArrowRight className="w-5 h-5 mr-2" />
                 </Link>
-              </Button>
+              } />
             </div>
           </div>
 

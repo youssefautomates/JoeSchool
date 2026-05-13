@@ -22,15 +22,15 @@ export function Navbar() {
         </div>
 
         <div className="flex items-center gap-4">
-          <Button variant="ghost" className="hidden sm:flex text-zinc-300 hover:text-white" asChild>
+          <Button variant="ghost" className="hidden sm:flex text-zinc-300 hover:text-white" render={
             <Link href="/login" className="w-full h-full flex items-center justify-center">تسجيل الدخول</Link>
-          </Button>
-          <Button className="bg-indigo-600 hover:bg-indigo-700 text-white font-cairo" asChild>
+          } />
+          <Button className="bg-indigo-600 hover:bg-indigo-700 text-white font-cairo" render={
             <Link href="#products" className="w-full h-full flex items-center justify-center">
               تصفح المنتجات
               <ChevronLeft className="w-4 h-4 mr-2" />
             </Link>
-          </Button>
+          } />
         </div>
       </div>
     </nav>

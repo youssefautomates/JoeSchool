@@ -80,7 +80,7 @@ export async function POST(request: Request) {
       }
 
       // Update Order Status in Database to 'Completed'
-      console.log(\`Successfully processed and sent email to \${customerEmail}\`);
+      console.log(`Successfully processed and sent email to ${customerEmail}`);
 
       return NextResponse.json({ success: true, message: "Order processed and email sent" });
     }
