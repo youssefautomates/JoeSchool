@@ -3,10 +3,9 @@
 import { motion } from "framer-motion";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ChevronLeft, Zap, Shield, Clock, CheckCircle2, ChevronDown } from "lucide-react";
+import { Zap, Shield, Clock, CheckCircle2, ChevronDown, ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect } from "react";
@@ -36,7 +35,7 @@ export default function Home() {
       
       <main className="flex-1 flex flex-col pt-16 bg-white">
         {/* Premium Hero Section */}
-        <section className="relative overflow-hidden pt-32 pb-40">
+        <section className="relative overflow-hidden pt-20 pb-32 md:pt-32 md:pb-40">
           {/* Animated Background Gradients - Light Blue Tones */}
           <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-blue-100 rounded-full blur-[120px] pointer-events-none opacity-60" />
           <div className="absolute top-1/2 right-1/4 w-[400px] h-[400px] bg-sky-50 rounded-full blur-[100px] pointer-events-none opacity-60" />
@@ -65,14 +64,15 @@ export default function Home() {
                 وفر مئات الساعات شهرياً باستخدام حزم n8n الجاهزة. ملفات PDF دقيقة وروابط استيراد مباشر لتدفقات عمل احترافية.
               </p>
               
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <Button size="lg" className="h-16 px-10 text-xl bg-blue-600 hover:bg-blue-700 text-white w-full sm:w-auto font-cairo shadow-[0_10px_30px_rgba(37,99,235,0.2)] hover:shadow-[0_15px_40px_rgba(37,99,235,0.3)] transition-all rounded-xl" render={
-                  <Link href="#products" className="w-full h-full flex items-center justify-center">
-                    تصفح الحزم الآن
-                    <ChevronLeft className="w-6 h-6 mr-2" />
-                  </Link>
-                } />
-                <p className="text-sm text-zinc-500 font-cairo mt-4 sm:hidden">عدد النسخ المتاحة محدود جداً</p>
+              <div className="flex flex-col items-center justify-center gap-3 w-full sm:w-auto">
+                <Link
+                  href="#products"
+                  className="inline-flex items-center justify-center gap-2 h-16 px-10 text-xl bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white w-full sm:w-auto font-cairo font-semibold shadow-[0_10px_30px_rgba(37,99,235,0.25)] hover:shadow-[0_15px_40px_rgba(37,99,235,0.35)] transition-all rounded-xl"
+                >
+                  تصفح الحزم الآن
+                  <ChevronLeft className="w-5 h-5" />
+                </Link>
+                <p className="text-sm text-zinc-500 font-cairo sm:hidden">عدد النسخ المتاحة محدود جداً</p>
               </div>
             </motion.div>
           </div>
@@ -109,7 +109,7 @@ export default function Home() {
         </section>
 
         {/* Products Showcase (Conversion Optimized) */}
-        <section id="products" className="py-32 relative bg-white">
+        <section id="products" className="py-16 md:py-32 relative bg-white">
           <div className="container mx-auto px-4">
             <div className="text-center mb-20">
               <Badge className="bg-blue-50 text-blue-600 mb-4 font-cairo border-blue-100">الأكثر طلباً 🔥</Badge>
@@ -119,7 +119,7 @@ export default function Home() {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-8">
               {products.map((product, idx) => (
                 <motion.div 
                   key={product.id}
@@ -128,7 +128,7 @@ export default function Home() {
                   viewport={{ once: true, margin: "-100px" }}
                   transition={{ delay: idx * 0.1, duration: 0.5 }}
                 >
-                  <Card className="bg-white border-zinc-200 overflow-hidden group hover:border-blue-500/50 transition-all duration-500 h-full flex flex-col hover:shadow-[0_20px_50px_rgba(37,99,235,0.1)] relative">
+                  <Card className="bg-white border-zinc-200 overflow-hidden group hover:border-blue-500/50 transition-all duration-500 h-full flex flex-col hover:shadow-[0_20px_50px_rgba(37,99,235,0.1)] relative rounded-2xl">
                     {/* Subtle Blue glow on hover */}
                     <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-b from-blue-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                     
@@ -137,6 +137,7 @@ export default function Home() {
                         src={product.image || product.img} 
                         alt={product.title || product.name}
                         fill
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                         className="object-cover group-hover:scale-110 transition-transform duration-700 opacity-100"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-white/20 via-transparent to-transparent z-10" />
@@ -150,7 +151,7 @@ export default function Home() {
                       )}
                     </div>
                     
-                    <div className="p-8 relative z-20 flex-1 flex flex-col">
+                    <div className="p-5 md:p-8 relative z-20 flex-1 flex flex-col">
                       <div className="flex items-center justify-between mb-4">
                         {product.isFeatured && (
                           <Badge className="bg-blue-50 text-blue-600 border border-blue-100 px-3 py-1 font-cairo">الأكثر مبيعاً</Badge>
@@ -183,11 +184,12 @@ export default function Home() {
                         </li>
                       </ul>
 
-                      <Button className="w-full h-14 text-lg bg-blue-600 hover:bg-blue-700 text-white font-cairo mt-auto relative overflow-hidden group-hover:shadow-[0_10px_30px_rgba(37,99,235,0.2)] transition-all rounded-xl" render={
-                        <Link href={`/product/${product.id}`} className="w-full h-full flex items-center justify-center z-10">
-                          شراء الآن والتسليم فوري
-                        </Link>
-                      } />
+                      <Link
+                        href={`/product/${product.id}`}
+                        className="mt-auto w-full h-14 inline-flex items-center justify-center text-base md:text-lg font-semibold bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-cairo rounded-xl transition-all shadow-md hover:shadow-[0_10px_30px_rgba(37,99,235,0.25)]"
+                      >
+                        شراء الآن والتسليم فوري
+                      </Link>
                     </div>
                   </Card>
                 </motion.div>

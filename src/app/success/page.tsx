@@ -4,7 +4,6 @@ import { useEffect, useState, Suspense } from "react";
 import { motion } from "framer-motion";
 import { CheckCircle2, Download, Mail, ArrowRight, ShieldCheck } from "lucide-react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { useSearchParams } from "next/navigation";
@@ -62,19 +61,21 @@ function SuccessContent() {
             </div>
 
             <div className="space-y-4">
-              <Button className="w-full h-14 text-lg bg-emerald-600 hover:bg-emerald-700 text-white font-cairo shadow-lg shadow-emerald-500/10 rounded-xl" render={
-                <Link href="/download/temporary-direct-link">
-                  <Download className="w-5 h-5 ml-2" />
-                  تحميل الملفات الآن (رابط مباشر مؤقت)
-                </Link>
-              } />
+              <Link
+                href="/download/temporary-direct-link"
+                className="w-full h-14 inline-flex items-center justify-center gap-2 text-lg font-semibold bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-cairo rounded-xl shadow-lg shadow-emerald-500/20 transition-all"
+              >
+                <Download className="w-5 h-5" />
+                تحميل الملفات الآن (رابط مباشر مؤقت)
+              </Link>
               
-              <Button variant="outline" className="w-full h-14 text-lg border-zinc-200 text-zinc-900 hover:bg-zinc-50 font-cairo rounded-xl" render={
-                <Link href="/">
-                  العودة للصفحة الرئيسية
-                  <ArrowRight className="w-5 h-5 mr-2" />
-                </Link>
-              } />
+              <Link
+                href="/"
+                className="w-full h-14 inline-flex items-center justify-center gap-2 text-lg font-semibold border border-zinc-200 text-zinc-900 hover:bg-zinc-50 font-cairo rounded-xl transition-all"
+              >
+                العودة للصفحة الرئيسية
+                <ArrowRight className="w-5 h-5" />
+              </Link>
             </div>
           </div>
 

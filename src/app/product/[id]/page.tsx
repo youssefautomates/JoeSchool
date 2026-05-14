@@ -2,7 +2,6 @@
 
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -78,6 +77,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                   src={currentProduct.image} 
                   alt={currentProduct.name} 
                   fill 
+                  sizes="(max-width: 1024px) 100vw, 66vw"
                   className="object-cover group-hover:scale-105 transition-transform duration-700"
                   priority
                 />
@@ -240,6 +240,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                           src="https://images.unsplash.com/photo-1618401471353-b98afee0b2eb?q=80&w=1200&auto=format&fit=crop" 
                           alt="Video Thumbnail" 
                           fill 
+                          sizes="(max-width: 1024px) 100vw, 66vw"
                           className="object-cover opacity-60 group-hover:opacity-80 transition-opacity duration-500"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-white/40 via-transparent to-transparent z-10" />
@@ -363,11 +364,12 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                     </div>
                   </div>
 
-                  <Button className="w-full h-14 lg:h-16 text-lg lg:text-xl font-bold bg-blue-600 hover:bg-blue-700 text-white font-cairo mb-4 shadow-[0_10px_30px_rgba(37,99,235,0.2)] transition-all rounded-xl border border-blue-400/20" render={
-                    <Link href={`/checkout/${resolvedParams.id}`} className="w-full h-full flex items-center justify-center">
-                      شراء المكتبة الكاملة الآن
-                    </Link>
-                  } />
+                  <Link
+                    href={`/checkout/${resolvedParams.id}`}
+                    className="w-full h-14 lg:h-16 inline-flex items-center justify-center text-lg lg:text-xl font-bold bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-cairo mb-4 rounded-xl transition-all shadow-[0_10px_30px_rgba(37,99,235,0.2)] hover:shadow-[0_15px_40px_rgba(37,99,235,0.3)]"
+                  >
+                    شراء المكتبة الكاملة الآن
+                  </Link>
                   
                   <div className="mt-4 p-3 bg-emerald-50 rounded-lg border border-emerald-100 flex items-start gap-3">
                     <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse mt-1.5 shrink-0" />
@@ -384,11 +386,12 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                       <span className="text-sm text-zinc-400 font-cairo line-through decoration-red-400">{currentProduct.originalPrice} ج.م</span>
                       <span className="text-2xl font-bold font-alexandria text-zinc-900">{currentProduct.price} ج.م</span>
                     </div>
-                    <Button className="h-12 flex-1 font-bold bg-blue-600 hover:bg-blue-700 text-white font-cairo shadow-lg rounded-xl" render={
-                      <Link href={`/checkout/${resolvedParams.id}`} className="w-full h-full flex items-center justify-center">
-                        شراء المكتبة الآن
-                      </Link>
-                    } />
+                    <Link
+                      href={`/checkout/${resolvedParams.id}`}
+                      className="h-12 flex-1 inline-flex items-center justify-center font-bold text-base bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-cairo rounded-xl transition-all shadow-lg"
+                    >
+                      شراء المكتبة الآن
+                    </Link>
                   </div>
                 </div>
 
