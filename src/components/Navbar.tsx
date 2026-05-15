@@ -86,7 +86,7 @@ export function Navbar() {
               </Link>
               <Link
                 href="#products"
-                className="relative group overflow-hidden inline-flex items-center gap-2 bg-rose-600 hover:bg-rose-500 text-white font-cairo text-sm font-semibold px-6 py-2.5 rounded-xl transition-all shadow-[0_0_20px_rgba(239,0,85,0.3)]"
+                className="relative group overflow-hidden inline-flex items-center gap-2 bg-[#D6004B] hover:bg-[#b0003d] text-white font-cairo text-sm font-semibold px-6 py-2.5 rounded-xl transition-all shadow-[0_0_20px_rgba(214,0,75,0.3)]"
               >
                 <span className="relative z-10">ابدأ الأتمتة الآن</span>
                 <ChevronLeft className="w-4 h-4 relative z-10 group-hover:-translate-x-1 transition-transform" />
@@ -153,7 +153,7 @@ export function Navbar() {
                   <Link
                     href="#products"
                     onClick={() => setMobileOpen(false)}
-                    className="w-full mt-2 bg-rose-600 hover:bg-rose-500 text-white font-cairo font-bold rounded-xl py-3 flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(239,0,85,0.3)] transition-all"
+                    className="w-full mt-2 bg-[#D6004B] hover:bg-[#b0003d] text-white font-cairo font-bold rounded-xl py-3 flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(214,0,75,0.3)] transition-all"
                   >
                     تصفح المنتجات
                   </Link>

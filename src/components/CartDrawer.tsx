@@ -90,7 +90,7 @@ export function CartDrawer() {
                 <Link
                   href="/checkout/cart"
                   onClick={() => setIsCartOpen(false)}
-                  className="w-full h-14 bg-rose-600 hover:bg-rose-500 text-white font-cairo font-black text-lg rounded-xl flex items-center justify-center gap-2 transition-all shadow-[0_0_20px_rgba(239,0,85,0.3)] hover:shadow-[0_0_30px_rgba(239,0,85,0.5)]"
+                  className="w-full h-14 bg-[#D6004B] hover:bg-[#b0003d] text-white font-cairo font-black text-lg rounded-xl flex items-center justify-center gap-2 transition-all shadow-[0_0_20px_rgba(214,0,75,0.3)] hover:shadow-[0_0_30px_rgba(214,0,75,0.5)]"
                 >
                   إتمام الشراء
                   <ArrowLeft className="w-5 h-5 rtl:rotate-180" />

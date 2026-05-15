@@ -58,7 +58,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[#050505] flex items-center justify-center">
-        <div className="w-12 h-12 border-4 border-blue-600/30 border-t-blue-600 rounded-full animate-spin" />
+        <div className="w-12 h-12 border-4 border-rose-600/30 border-t-rose-600 rounded-full animate-spin" />
       </div>
     );
   }
@@ -67,7 +67,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
     return (
       <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center text-white font-cairo">
         <h1 className="text-4xl font-alexandria font-bold mb-4">المنتج غير موجود</h1>
-        <Link href="/" className="text-blue-400 hover:text-blue-300 underline">العودة للرئيسية</Link>
+        <Link href="/" className="text-rose-400 hover:text-rose-300 underline">العودة للرئيسية</Link>
       </div>
     );
   }
@@ -76,7 +76,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   const discountPct = calcDiscount(product.price, product.original_price);
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white font-cairo selection:bg-blue-500/30">
+    <div className="min-h-screen bg-[#050505] text-white font-cairo selection:bg-rose-500/30">
       <Navbar />
       
       <main className="pt-24 md:pt-32 pb-24">
@@ -108,7 +108,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                 </motion.div>
                 
                 {product.is_featured && (
-                  <div className="absolute top-6 right-6 bg-blue-600 px-4 py-2 rounded-2xl flex items-center gap-2 shadow-lg">
+                  <div className="absolute top-6 right-6 bg-[#D6004B] px-4 py-2 rounded-2xl flex items-center gap-2 shadow-[0_0_20px_rgba(214,0,75,0.3)]">
                     <span className="font-cairo text-xs font-bold text-white uppercase">الأكثر مبيعاً</span>
                   </div>
                 )}
@@ -117,7 +117,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
               {/* Quick Benefits Grid */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[
-                  { icon: Download, label: "تسليم فوري", color: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/20" },
+                  { icon: Download, label: "تسليم فوري", color: "text-rose-400", bg: "bg-rose-500/10", border: "border-rose-500/20" },
                   { icon: Clock, label: "توفير وقت", color: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/20" },
                   { icon: ShieldCheck, label: "دفع آمن", color: "text-purple-400", bg: "bg-purple-500/10", border: "border-purple-500/20" },
                   { icon: HeartHandshake, label: "دعم فني", color: "text-amber-400", bg: "bg-amber-500/10", border: "border-amber-500/20" }
@@ -162,7 +162,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
               {/* Desktop Checkout Box */}
               <div className="hidden lg:block bg-[#0a0a0f] p-8 rounded-[2rem] border border-white/10 shadow-2xl relative overflow-hidden">
                 {/* Glow effect */}
-                <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/10 rounded-full blur-[80px] pointer-events-none" />
+                <div className="absolute top-0 right-0 w-64 h-64 bg-rose-600/10 rounded-full blur-[80px] pointer-events-none" />
                 
                 <div className="flex items-center justify-between mb-8 relative z-10">
                   <div className="flex flex-col">
@@ -188,7 +188,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                 <div className="flex flex-col gap-3">
                   <Link
                     href={`/checkout/${product.id}`}
-                    className="w-full h-16 inline-flex items-center justify-center gap-3 bg-blue-600 hover:bg-blue-500 text-white font-cairo text-xl font-black rounded-2xl transition-all shadow-[0_0_30px_rgba(37,99,235,0.3)] hover:shadow-[0_0_40px_rgba(37,99,235,0.5)] active:scale-95 relative z-10"
+                    className="w-full h-16 inline-flex items-center justify-center gap-3 bg-[#D6004B] hover:bg-[#b0003d] text-white font-cairo text-xl font-black rounded-2xl transition-all shadow-[0_0_30px_rgba(214,0,75,0.3)] hover:shadow-[0_0_40px_rgba(214,0,75,0.5)] active:scale-95 relative z-10"
                   >
                     شراء الآن والتنزيل الفوري
                     <ArrowLeft className="w-6 h-6 rtl:rotate-180" />
@@ -221,7 +221,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
         <section className="bg-[#0a0a0f] border-y border-white/5 py-24 md:py-32">
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto text-center mb-20">
-              <h2 className="text-4xl md:text-5xl font-alexandria font-black text-white mb-6 tracking-tight">ماذا ستحصل عليه <span className="text-blue-500">بالضبط؟</span></h2>
+              <h2 className="text-4xl md:text-5xl font-alexandria font-black text-white mb-6 tracking-tight">ماذا ستحصل عليه <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ff0f53] to-[#ff00b3]">بالضبط؟</span></h2>
               <p className="text-zinc-400 font-cairo text-lg md:text-xl">نحن لا نبيعك ملفات فقط، بل نبيعك "الوقت" والحرية.</p>
             </div>
 
@@ -231,7 +231,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                   title: "الملفات الأصلية", 
                   desc: "ملفات النظام كاملة جاهزة للاستيراد والاستخدام المباشر في بيئتك.",
                   icon: Rocket,
-                  color: "text-blue-400", bg: "bg-blue-500/10"
+                  color: "text-rose-400", bg: "bg-rose-500/10"
                 },
                 { 
                   title: "دليل الإعداد السريع", 
@@ -285,7 +285,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                       className={cn(
                         "flex items-center justify-between px-6 py-5 rounded-2xl font-cairo font-bold text-lg transition-all duration-300",
                         activeTab === tab.id 
-                          ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20" 
+                          ? "bg-[#D6004B] text-white shadow-lg shadow-[#D6004B]/20" 
                           : "bg-white/5 border border-white/10 text-zinc-400 hover:bg-white/10 hover:text-white"
                       )}
                     >
@@ -332,7 +332,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                               "سهولة التخصيص والتعديل"
                             ].map((item, i) => (
                               <li key={i} className="flex items-start gap-3 bg-white/5 p-4 rounded-xl border border-white/5">
-                                <CheckCircle2 className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
+                                <CheckCircle2 className="w-5 h-5 text-rose-500 shrink-0 mt-0.5" />
                                 <span className="text-zinc-300">{item}</span>
                               </li>
                             ))}
@@ -344,8 +344,8 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
 
                   {activeTab === "previews" && (
                     <div className="space-y-8 text-center flex flex-col items-center justify-center h-full min-h-[400px]">
-                      <div className="w-20 h-20 bg-blue-500/10 rounded-full flex items-center justify-center mb-4">
-                        <PlayCircle className="w-10 h-10 text-blue-500" />
+                      <div className="w-20 h-20 bg-rose-500/10 rounded-full flex items-center justify-center mb-4">
+                        <PlayCircle className="w-10 h-10 text-rose-500" />
                       </div>
                       <h3 className="text-2xl font-alexandria font-black text-white">معاينة الفيديو قريباً</h3>
                       <p className="text-zinc-400 font-cairo">نعمل حالياً على إضافة فيديوهات توضيحية لجميع المنتجات.</p>
@@ -409,7 +409,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
             </button>
             <Link
               href={`/checkout/${product.id}`}
-              className="flex-1 h-12 bg-blue-600 text-white font-cairo font-black text-sm md:text-lg rounded-xl flex items-center justify-center gap-2 active:scale-95 transition-all shadow-[0_0_20px_rgba(37,99,235,0.3)]"
+              className="flex-1 h-12 bg-[#D6004B] hover:bg-[#b0003d] text-white font-cairo font-black text-sm md:text-lg rounded-xl flex items-center justify-center gap-2 active:scale-95 transition-all shadow-[0_0_20px_rgba(214,0,75,0.3)]"
             >
               شراء فوري
               <ArrowLeft className="w-4 h-4 rtl:rotate-180" />

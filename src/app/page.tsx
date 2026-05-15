@@ -74,7 +74,7 @@ export default function Home() {
                 className="text-5xl md:text-7xl lg:text-8xl font-alexandria font-black text-white mb-8 leading-[1.1] tracking-tighter"
               >
                 ضاعف إنتاجيتك مع <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-400 via-orange-400 to-amber-300">
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ff0f53] to-[#ff00b3]">
                   حلول الأتمتة الذكية
                 </span>
               </motion.h1>
@@ -96,11 +96,12 @@ export default function Home() {
               >
                 <Link
                   href="#products"
-                  className="group relative h-16 md:h-20 px-8 md:px-12 inline-flex items-center justify-center gap-3 bg-rose-600 text-white rounded-2xl font-cairo text-lg md:text-xl font-bold shadow-[0_0_40px_rgba(239,0,85,0.4)] hover:shadow-[0_0_60px_rgba(239,0,85,0.6)] transition-all hover:-translate-y-1 active:scale-95 w-full md:w-auto"
+                  className="group relative h-16 md:h-20 px-8 md:px-12 inline-flex items-center justify-center gap-3 bg-[#D6004B] hover:bg-[#b0003d] text-white rounded-2xl font-cairo text-lg md:text-xl font-bold shadow-[0_0_40px_rgba(214,0,75,0.4)] hover:shadow-[0_0_60px_rgba(214,0,75,0.6)] transition-all hover:-translate-y-1 active:scale-95 w-full md:w-auto"
                 >
-                  <span className="relative z-10">استكشف المنتجات</span>
+                  <span className="relative z-10">تصفح الحزم الآن</span>
                   <ArrowLeft className="w-6 h-6 relative z-10 group-hover:-translate-x-2 transition-transform" />
-                  <div className="absolute inset-0 bg-gradient-to-r from-rose-500 to-amber-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl" />
+                  {/* Subtle inner hover glow */}
+                  <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl" />
                 </Link>
                 
                 <div className="flex items-center gap-4 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-3 md:p-4 pr-6 w-full md:w-auto">

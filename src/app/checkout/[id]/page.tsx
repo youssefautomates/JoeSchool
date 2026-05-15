@@ -242,7 +242,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
   if (isFetching) {
     return (
       <div className="min-h-screen bg-[#050505] flex items-center justify-center">
-        <div className="w-12 h-12 border-4 border-blue-600/30 border-t-blue-600 rounded-full animate-spin" />
+        <div className="w-12 h-12 border-4 border-rose-600/30 border-t-rose-600 rounded-full animate-spin" />
       </div>
     );
   }
@@ -252,7 +252,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
       <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center text-white font-cairo">
         <Package className="w-16 h-16 text-zinc-700 mb-4" />
         <h1 className="text-3xl font-alexandria font-bold mb-4">عذراً، المنتج غير متاح للcheckout</h1>
-        <Link href="/" className="text-blue-400 hover:text-blue-300 underline">العودة للرئيسية</Link>
+        <Link href="/" className="text-rose-400 hover:text-rose-300 underline">العودة للرئيسية</Link>
       </div>
     );
   }
@@ -266,7 +266,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
       
       <main className="pt-32 pb-24 relative overflow-hidden">
         {/* Glow Effects */}
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[100px] pointer-events-none" />
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-rose-600/10 rounded-full blur-[100px] pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-sky-500/10 rounded-full blur-[100px] pointer-events-none" />
 
         <div className="container mx-auto px-4 max-w-6xl relative z-10">
@@ -290,7 +290,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                 animate={{ opacity: 1, x: 0 }}
                 className="bg-[#0a0a0f]/80 backdrop-blur-2xl rounded-[2rem] p-6 md:p-8 border border-white/5 shadow-2xl relative overflow-hidden"
               >
-                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-600 to-sky-400" />
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#ff0f53] to-[#ff00b3]" />
                 
                 <h2 className="text-xl font-alexandria font-bold text-white mb-6">معلومات الاستلام</h2>
                 
@@ -309,7 +309,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                   </div>
 
                   <div className="space-y-2">
-                    <Label className="font-cairo font-bold text-zinc-400 text-sm">البريد الإلكتروني <span className="text-[10px] font-normal text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded ml-2">هام: سيتم إرسال الملفات هنا</span></Label>
+                    <Label className="font-cairo font-bold text-zinc-400 text-sm">البريد الإلكتروني <span className="text-[10px] font-normal text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded ml-2">هام: سيتم إرسال الملفات هنا</span></Label>
                     <div className="relative">
                       <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
                       <Input 
@@ -336,14 +336,14 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                         className={cn(
                           "cursor-pointer border rounded-2xl p-3.5 flex items-center gap-3 transition-all duration-300 hover:scale-[1.01] active:scale-[0.99]",
                           paymentMethod === "card" 
-                            ? "border-blue-500/50 bg-blue-500/10 shadow-[inset_0_0_30px_rgba(59,130,246,0.1)]" 
+                            ? "border-rose-500/50 bg-rose-500/10 shadow-[inset_0_0_30px_rgba(244,63,94,0.1)]" 
                             : "border-white/5 bg-white/5 hover:border-white/10 hover:shadow-[inset_0_0_20px_rgba(255,255,255,0.02)]"
                         )}
                       >
-                        <div className={cn("w-5 h-5 rounded-full border-2 flex items-center justify-center", paymentMethod === "card" ? "border-blue-500" : "border-zinc-500")}>
-                          {paymentMethod === "card" && <div className="w-2.5 h-2.5 rounded-full bg-blue-500" />}
+                        <div className={cn("w-5 h-5 rounded-full border-2 flex items-center justify-center", paymentMethod === "card" ? "border-rose-500" : "border-zinc-500")}>
+                          {paymentMethod === "card" && <div className="w-2.5 h-2.5 rounded-full bg-rose-500" />}
                         </div>
-                        <CreditCard className={cn("w-6 h-6", paymentMethod === "card" ? "text-blue-400" : "text-zinc-500")} />
+                        <CreditCard className={cn("w-6 h-6", paymentMethod === "card" ? "text-rose-400" : "text-zinc-500")} />
                         <div className="font-cairo">
                           <p className={cn("font-bold", paymentMethod === "card" ? "text-white" : "text-zinc-300")}>البطاقات البنكية</p>
                           <p className="text-xs text-zinc-500">Visa / Mastercard / Meeza</p>
@@ -459,7 +459,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                       </div>
 
                       <div className="flex items-center gap-2 pt-2 cursor-pointer" onClick={() => setSaveCard(!saveCard)}>
-                        <div className={cn("w-4 h-4 rounded border flex items-center justify-center transition-all", saveCard ? "bg-blue-600 border-blue-600" : "border-white/20 bg-transparent")}>
+                        <div className={cn("w-4 h-4 rounded border flex items-center justify-center transition-all", saveCard ? "bg-rose-600 border-rose-600" : "border-white/20 bg-transparent")}>
                           {saveCard && <CheckCircle2 className="w-3 h-3 text-white" />}
                         </div>
                         <Label className="font-cairo text-xs text-zinc-400 cursor-pointer select-none">حفظ بيانات البطاقة للمدفوعات القادمة بأمان</Label>
@@ -482,7 +482,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                       className={cn(
                         "w-full h-14 text-white font-alexandria text-lg font-bold rounded-xl transition-all active:scale-[0.98]",
                         paymentMethod === "card" 
-                          ? "bg-blue-600 hover:bg-blue-500 shadow-[0_4px_14px_0_rgba(37,99,235,0.39)] hover:shadow-[0_6px_20px_rgba(37,99,235,0.23)] hover:-translate-y-0.5" 
+                          ? "bg-[#D6004B] hover:bg-[#b0003d] shadow-[0_4px_14px_0_rgba(214,0,75,0.39)] hover:shadow-[0_6px_20px_rgba(214,0,75,0.23)] hover:-translate-y-0.5" 
                           : "bg-emerald-600 hover:bg-emerald-500 shadow-[0_4px_14px_0_rgba(16,185,129,0.39)] hover:shadow-[0_6px_20px_rgba(16,185,129,0.23)] hover:-translate-y-0.5"
                       )}
                     >
@@ -509,7 +509,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
               <div className="sticky top-24 space-y-6">
                 <div className="bg-white/5 border border-white/5 rounded-[2rem] p-6 md:p-8 backdrop-blur-2xl">
                   <h3 className="font-alexandria font-bold text-white text-lg mb-5 flex items-center gap-2">
-                    <Package className="w-5 h-5 text-blue-500" />
+                    <Package className="w-5 h-5 text-rose-500" />
                     ملخص الطلب
                   </h3>
                   
@@ -521,7 +521,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                     </div>
                     <div>
                       <h4 className="font-cairo font-bold text-white text-lg leading-tight mb-2 line-clamp-2">{product.title}</h4>
-                      <div className="flex items-center gap-1.5 bg-blue-500/10 text-blue-400 px-2 py-1 rounded-md w-fit">
+                      <div className="flex items-center gap-1.5 bg-rose-500/10 text-rose-400 px-2 py-1 rounded-md w-fit">
                         <Sparkles className="w-3 h-3" />
                         <span className="text-[10px] font-bold uppercase tracking-widest">تنزيل فوري</span>
                       </div>

@@ -440,7 +440,7 @@ export default function CartCheckoutPage() {
                       className={cn(
                         "w-full h-14 text-white font-alexandria text-lg font-bold rounded-xl transition-all active:scale-[0.98]",
                         paymentMethod === "card" 
-                          ? "bg-rose-600 hover:bg-rose-500 shadow-[0_4px_14px_0_rgba(239,0,85,0.39)] hover:shadow-[0_6px_20px_rgba(239,0,85,0.23)] hover:-translate-y-0.5" 
+                          ? "bg-[#D6004B] hover:bg-[#b0003d] shadow-[0_4px_14px_0_rgba(214,0,75,0.39)] hover:shadow-[0_6px_20px_rgba(214,0,75,0.23)] hover:-translate-y-0.5" 
                           : "bg-emerald-600 hover:bg-emerald-500 shadow-[0_4px_14px_0_rgba(16,185,129,0.39)] hover:shadow-[0_6px_20px_rgba(16,185,129,0.23)] hover:-translate-y-0.5"
                       )}
                     >
