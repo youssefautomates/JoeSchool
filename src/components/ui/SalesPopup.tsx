@@ -52,7 +52,7 @@ export function SalesPopup() {
           exit={{ opacity: 0, y: 20, scale: 0.9 }}
           className="fixed bottom-6 left-6 z-50 max-w-sm"
         >
-          <div className="bg-white/95 backdrop-blur-md border border-blue-100 rounded-xl shadow-xl p-4 flex items-start gap-4 shadow-blue-500/10">
+          <div className="bg-white/95 backdrop-blur-md border border-rose-100 rounded-xl shadow-xl p-4 flex items-start gap-4 shadow-rose-500/10">
             <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center shrink-0 border border-emerald-100">
               <CheckCircle2 className="w-5 h-5 text-emerald-600" />
             </div>
@@ -60,7 +60,7 @@ export function SalesPopup() {
               <p className="text-sm text-zinc-600">
                 قام <span className="font-bold text-zinc-900">{data.name}</span> بشراء
               </p>
-              <p className="text-sm font-bold text-blue-600 truncate w-48">
+              <p className="text-sm font-bold text-rose-600 truncate w-48">
                 {data.product}
               </p>
               <p className="text-xs text-zinc-400 mt-1">{data.time}</p>

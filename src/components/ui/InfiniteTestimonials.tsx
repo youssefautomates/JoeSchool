@@ -54,7 +54,7 @@ export function InfiniteTestimonials() {
             key={`${testimonial.id}-${idx}`} 
             className="w-[300px] md:w-[400px] shrink-0 px-4"
           >
-            <div className="bg-zinc-50 border border-zinc-200 rounded-2xl p-6 h-full flex flex-col hover:bg-white hover:border-blue-500/50 transition-all shadow-sm hover:shadow-md">
+            <div className="bg-zinc-50 border border-zinc-200 rounded-2xl p-6 h-full flex flex-col hover:bg-white hover:border-rose-500/50 transition-all shadow-sm hover:shadow-md">
               <div className="flex items-center gap-1 mb-4 text-emerald-500">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <Star key={star} className="w-4 h-4 fill-emerald-500" />

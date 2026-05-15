@@ -27,7 +27,7 @@ function SuccessContent() {
         {/* Celebrate Background Particles/Glows */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full pointer-events-none">
           <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-emerald-500/10 rounded-full blur-[120px] animate-pulse" />
-          <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[100px] animate-pulse delay-700" />
+          <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-rose-500/10 rounded-full blur-[100px] animate-pulse delay-700" />
         </div>
 
         <div className="container mx-auto px-4 flex flex-col items-center">
@@ -39,7 +39,7 @@ function SuccessContent() {
             {/* Main Success Card */}
             <div className="glass-card rounded-[3rem] p-8 md:p-16 border-emerald-100 bg-white/80 shadow-2xl text-center relative overflow-hidden">
               {/* Confetti-like elements */}
-              <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-emerald-400 via-blue-500 to-teal-500" />
+              <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-emerald-400 via-rose-500 to-teal-500" />
               
               <motion.div 
                 initial={{ rotate: -20, scale: 0 }}
@@ -91,7 +91,7 @@ function SuccessContent() {
               <div className="pt-8 border-t border-zinc-100">
                 <p className="font-cairo text-zinc-400 text-sm mb-6">هل أنت متحمس؟ شاركنا نجاحك!</p>
                 <div className="flex justify-center gap-4">
-                  <Link href="#" className="w-12 h-12 rounded-xl bg-zinc-50 border border-zinc-100 flex items-center justify-center text-zinc-400 hover:text-blue-500 transition-colors">
+                  <Link href="#" className="w-12 h-12 rounded-xl bg-zinc-50 border border-zinc-100 flex items-center justify-center text-zinc-400 hover:text-rose-500 transition-colors">
                     <X className="w-5 h-5" />
                   </Link>
                   <Link href="#" className="w-12 h-12 rounded-xl bg-zinc-50 border border-zinc-100 flex items-center justify-center text-zinc-400 hover:text-pink-500 transition-colors">
@@ -108,7 +108,7 @@ function SuccessContent() {
                 <span>جميع ملفاتك مؤمنة بضمان يوسف أوتميتس</span>
               </div>
               <p className="text-sm text-zinc-400 font-cairo">
-                تواجه مشكلة؟ <Link href="#" className="text-blue-600 font-bold hover:underline">تحدث مع الدعم الفني مباشرة</Link>
+                تواجه مشكلة؟ <Link href="#" className="text-rose-600 font-bold hover:underline">تحدث مع الدعم الفني مباشرة</Link>
               </p>
             </div>
           </motion.div>
@@ -135,7 +135,7 @@ export default function SuccessPage() {
         <motion.div 
           animate={{ rotate: 360 }}
           transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full"
+          className="w-12 h-12 border-4 border-rose-600 border-t-transparent rounded-full"
         />
       </div>
     }>

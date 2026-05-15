@@ -47,8 +47,8 @@ export default function AdminLogin() {
     <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center p-4 relative overflow-hidden">
       {/* Cinematic Background */}
       <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-blue-600/10 rounded-full blur-[160px]" />
-        <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-indigo-600/5 rounded-full blur-[100px]" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-rose-600/10 rounded-full blur-[160px]" />
+        <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-pink-600/5 rounded-full blur-[100px]" />
         <div className="absolute inset-0 bg-grid-pattern opacity-5" />
       </div>
 
@@ -67,7 +67,7 @@ export default function AdminLogin() {
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 0.2 }}
-            className="w-20 h-20 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-blue-500/20"
+            className="w-20 h-20 bg-gradient-to-br from-rose-600 to-pink-700 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-rose-500/20"
           >
             <Fingerprint className="w-10 h-10 text-white" />
           </motion.div>
@@ -81,11 +81,11 @@ export default function AdminLogin() {
               <div className="space-y-3">
                 <Label className="font-alexandria font-bold text-zinc-400 text-sm">البريد الإلكتروني للإدارة</Label>
                 <div className="relative group">
-                  <Mail className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-600 group-focus-within:text-blue-500 transition-colors" />
+                  <Mail className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-600 group-focus-within:text-rose-500 transition-colors" />
                   <Input 
                     type="email" 
                     placeholder="admin@youssefautomates.com" 
-                    className="bg-white/5 border-white/10 text-white font-cairo h-16 pr-12 focus:border-blue-500 transition-all rounded-2xl placeholder:text-zinc-700"
+                    className="bg-white/5 border-white/10 text-white font-cairo h-16 pr-12 focus:border-rose-500 transition-all rounded-2xl placeholder:text-zinc-700"
                     dir="ltr"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -97,11 +97,11 @@ export default function AdminLogin() {
               <div className="space-y-3">
                 <Label className="font-alexandria font-bold text-zinc-400 text-sm">كلمة المرور السرية</Label>
                 <div className="relative group">
-                  <Lock className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-600 group-focus-within:text-blue-500 transition-colors" />
+                  <Lock className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-600 group-focus-within:text-rose-500 transition-colors" />
                   <Input 
                     type={showPassword ? "text" : "password"} 
                     placeholder="••••••••••••" 
-                    className="bg-white/5 border-white/10 text-white font-cairo h-16 pr-12 pl-12 focus:border-blue-500 transition-all rounded-2xl placeholder:text-zinc-700"
+                    className="bg-white/5 border-white/10 text-white font-cairo h-16 pr-12 pl-12 focus:border-rose-500 transition-all rounded-2xl placeholder:text-zinc-700"
                     dir="ltr"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -120,7 +120,7 @@ export default function AdminLogin() {
 
             <Button 
               type="submit" 
-              className="w-full h-16 bg-blue-600 hover:bg-blue-500 text-white font-alexandria font-black text-xl rounded-2xl shadow-2xl shadow-blue-500/10 transition-all active:scale-95" 
+              className="w-full h-16 bg-rose-600 hover:bg-rose-500 text-white font-alexandria font-black text-xl rounded-2xl shadow-2xl shadow-rose-500/10 transition-all active:scale-95" 
               disabled={isLoading || !email || !password}
             >
               {isLoading ? (

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, use, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -16,9 +16,7 @@ import { toast } from "sonner";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-
-import { supabase } from "@/lib/supabase";
-import { type Product, calcDiscount } from "@/lib/products";
+import { useCart } from "@/context/CartContext";
 
 const checkoutSchema = z.object({
   fullName: z.string().min(3, { message: "الاسم يجب أن يكون 3 أحرف على الأقل" }),
@@ -27,12 +25,9 @@ const checkoutSchema = z.object({
 
 type CheckoutValues = z.infer<typeof checkoutSchema>;
 
-export default function CheckoutPage({ params }: { params: Promise<{ id: string }> }) {
-  const resolvedParams = use(params);
+export default function CartCheckoutPage() {
+  const { items, cartTotal, clearCart } = useCart();
   const [isLoading, setIsLoading] = useState(false);
-  const [isFetching, setIsFetching] = useState(true);
-  const [product, setProduct] = useState<Product | null>(null);
-  const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<"card" | "wallet">("card");
   
   // Card Fields State
@@ -117,35 +112,11 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
     }
   };
 
-  useEffect(() => {
-    fetchProduct();
-  }, [resolvedParams.id]); // eslint-disable-line
-
-  async function fetchProduct() {
-    setIsFetching(true);
-    try {
-      const { data, error } = await supabase
-        .from("products")
-        .select("*")
-        .eq("id", resolvedParams.id)
-        .single();
-
-      if (error) throw error;
-      setProduct(data as Product);
-    } catch (error) {
-      console.error("Error fetching product:", error);
-      toast.error("فشل تحميل تفاصيل المنتج للcheckout");
-    } finally {
-      setIsFetching(false);
-    }
-  }
-
   const { register, handleSubmit, formState: { errors } } = useForm<CheckoutValues>({
     resolver: zodResolver(checkoutSchema),
     defaultValues: {
       fullName: "",
       email: "",
-      phone: "",
     },
   });
 
@@ -177,7 +148,10 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
   };
 
   async function onSubmit(data: CheckoutValues) {
-    if (!product) return;
+    if (items.length === 0) {
+      toast.error("السلة فارغة!");
+      return;
+    }
 
     if (paymentMethod === "card") {
       const isValid = validateCardFields();
@@ -187,16 +161,14 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
       }
     }
 
-    console.log("[CARD_NAME_INPUT] Final React State Value:", cardHolder);
-
     setIsLoading(true);
     try {
       const payloadBody = {
-        amount: product.price,
+        items: items.map(i => ({ id: i.id, price: i.price, title: i.title })),
+        amount: cartTotal,
         email: data.email,
         firstName: data.fullName.split(" ")[0],
         lastName: data.fullName.split(" ").slice(1).join(" ") || "Customer",
-        productId: resolvedParams.id,
         paymentMethod: paymentMethod, 
         cardData: paymentMethod === "card" ? {
           cardNumber,
@@ -206,9 +178,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
         } : undefined
       };
 
-      console.log("[FORM_SUBMIT_DATA] Request body before fetch:", JSON.stringify(payloadBody, null, 2));
-
-      const response = await fetch("/api/paymob/initiate", {
+      const response = await fetch("/api/paymob/initiate-cart", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payloadBody),
@@ -217,15 +187,16 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
       const result = await response.json();
 
       if (result.checkoutUrl) {
+        clearCart();
         if (paymentMethod === "wallet") {
           toast.success("جاري تحويلك لمحفظتك الإلكترونية...");
           window.location.href = result.checkoutUrl; 
         } else {
-          // For cards, it's either the 3DS OTP redirect or direct success page
           toast.success("جاري تأكيد عملية الدفع...");
           window.location.href = result.checkoutUrl; 
         }
       } else if (result.success) {
+         clearCart();
          toast.success("تم الدفع بنجاح!");
          router.push(`/success?order_id=${result.orderId}`);
       } else {
@@ -239,26 +210,15 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
     }
   }
 
-  if (isFetching) {
-    return (
-      <div className="min-h-screen bg-[#050505] flex items-center justify-center">
-        <div className="w-12 h-12 border-4 border-blue-600/30 border-t-blue-600 rounded-full animate-spin" />
-      </div>
-    );
-  }
-
-  if (!product) {
+  if (items.length === 0) {
     return (
       <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center text-white font-cairo">
         <Package className="w-16 h-16 text-zinc-700 mb-4" />
-        <h1 className="text-3xl font-alexandria font-bold mb-4">عذراً، المنتج غير متاح للcheckout</h1>
-        <Link href="/" className="text-blue-400 hover:text-blue-300 underline">العودة للرئيسية</Link>
+        <h1 className="text-3xl font-alexandria font-bold mb-4">السلة فارغة حالياً</h1>
+        <Link href="/" className="text-rose-400 hover:text-rose-300 underline">العودة للرئيسية</Link>
       </div>
     );
   }
-
-  const discountPct = calcDiscount(product.price, product.original_price);
-  const savings = product.original_price ? product.original_price - product.price : 0;
 
   return (
     <div className="min-h-screen bg-[#050505] text-white font-cairo">
@@ -266,16 +226,16 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
       
       <main className="pt-32 pb-24 relative overflow-hidden">
         {/* Glow Effects */}
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[100px] pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-sky-500/10 rounded-full blur-[100px] pointer-events-none" />
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-rose-600/10 rounded-full blur-[100px] pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-orange-500/10 rounded-full blur-[100px] pointer-events-none" />
 
         <div className="container mx-auto px-4 max-w-6xl relative z-10">
           {/* Header */}
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
             <div>
-              <Link href={`/product/${resolvedParams.id}`} className="inline-flex items-center text-zinc-500 hover:text-white font-cairo transition-all mb-4 group">
+              <Link href="/" className="inline-flex items-center text-zinc-500 hover:text-white font-cairo transition-all mb-4 group">
                 <ChevronRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
-                العودة لتفاصيل المنتج
+                العودة للتسوق
               </Link>
               <h1 className="text-3xl md:text-5xl font-alexandria font-black text-white tracking-tight">إتمام الطلب بأمان</h1>
             </div>
@@ -290,7 +250,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                 animate={{ opacity: 1, x: 0 }}
                 className="bg-[#0a0a0f]/80 backdrop-blur-2xl rounded-[2rem] p-6 md:p-8 border border-white/5 shadow-2xl relative overflow-hidden"
               >
-                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-600 to-sky-400" />
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-rose-600 to-orange-400" />
                 
                 <h2 className="text-xl font-alexandria font-bold text-white mb-6">معلومات الاستلام</h2>
                 
@@ -309,7 +269,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                   </div>
 
                   <div className="space-y-2">
-                    <Label className="font-cairo font-bold text-zinc-400 text-sm">البريد الإلكتروني <span className="text-[10px] font-normal text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded ml-2">هام: سيتم إرسال الملفات هنا</span></Label>
+                    <Label className="font-cairo font-bold text-zinc-400 text-sm">البريد الإلكتروني <span className="text-[10px] font-normal text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded ml-2">هام: سيتم إرسال الملفات هنا</span></Label>
                     <div className="relative">
                       <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
                       <Input 
@@ -324,8 +284,6 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                     {errors.email && <p className="text-xs text-red-400 font-cairo flex items-center gap-1 mt-1"><ShieldAlert className="w-3 h-3" /> {errors.email.message}</p>}
                   </div>
 
-
-
                   {/* Payment Method Selector */}
                   <div className="pt-4 mt-4">
                     <Label className="font-cairo font-bold text-zinc-400 text-sm mb-3 block">طريقة الدفع</Label>
@@ -336,14 +294,14 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                         className={cn(
                           "cursor-pointer border rounded-2xl p-3.5 flex items-center gap-3 transition-all duration-300 hover:scale-[1.01] active:scale-[0.99]",
                           paymentMethod === "card" 
-                            ? "border-blue-500/50 bg-blue-500/10 shadow-[inset_0_0_30px_rgba(59,130,246,0.1)]" 
+                            ? "border-rose-500/50 bg-rose-500/10 shadow-[inset_0_0_30px_rgba(59,130,246,0.1)]" 
                             : "border-white/5 bg-white/5 hover:border-white/10 hover:shadow-[inset_0_0_20px_rgba(255,255,255,0.02)]"
                         )}
                       >
-                        <div className={cn("w-5 h-5 rounded-full border-2 flex items-center justify-center", paymentMethod === "card" ? "border-blue-500" : "border-zinc-500")}>
-                          {paymentMethod === "card" && <div className="w-2.5 h-2.5 rounded-full bg-blue-500" />}
+                        <div className={cn("w-5 h-5 rounded-full border-2 flex items-center justify-center", paymentMethod === "card" ? "border-rose-500" : "border-zinc-500")}>
+                          {paymentMethod === "card" && <div className="w-2.5 h-2.5 rounded-full bg-rose-500" />}
                         </div>
-                        <CreditCard className={cn("w-6 h-6", paymentMethod === "card" ? "text-blue-400" : "text-zinc-500")} />
+                        <CreditCard className={cn("w-6 h-6", paymentMethod === "card" ? "text-rose-400" : "text-zinc-500")} />
                         <div className="font-cairo">
                           <p className={cn("font-bold", paymentMethod === "card" ? "text-white" : "text-zinc-300")}>البطاقات البنكية</p>
                           <p className="text-xs text-zinc-500">Visa / Mastercard / Meeza</p>
@@ -459,7 +417,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                       </div>
 
                       <div className="flex items-center gap-2 pt-2 cursor-pointer" onClick={() => setSaveCard(!saveCard)}>
-                        <div className={cn("w-4 h-4 rounded border flex items-center justify-center transition-all", saveCard ? "bg-blue-600 border-blue-600" : "border-white/20 bg-transparent")}>
+                        <div className={cn("w-4 h-4 rounded border flex items-center justify-center transition-all", saveCard ? "bg-rose-600 border-rose-600" : "border-white/20 bg-transparent")}>
                           {saveCard && <CheckCircle2 className="w-3 h-3 text-white" />}
                         </div>
                         <Label className="font-cairo text-xs text-zinc-400 cursor-pointer select-none">حفظ بيانات البطاقة للمدفوعات القادمة بأمان</Label>
@@ -482,7 +440,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                       className={cn(
                         "w-full h-14 text-white font-alexandria text-lg font-bold rounded-xl transition-all active:scale-[0.98]",
                         paymentMethod === "card" 
-                          ? "bg-blue-600 hover:bg-blue-500 shadow-[0_4px_14px_0_rgba(37,99,235,0.39)] hover:shadow-[0_6px_20px_rgba(37,99,235,0.23)] hover:-translate-y-0.5" 
+                          ? "bg-rose-600 hover:bg-rose-500 shadow-[0_4px_14px_0_rgba(239,0,85,0.39)] hover:shadow-[0_6px_20px_rgba(239,0,85,0.23)] hover:-translate-y-0.5" 
                           : "bg-emerald-600 hover:bg-emerald-500 shadow-[0_4px_14px_0_rgba(16,185,129,0.39)] hover:shadow-[0_6px_20px_rgba(16,185,129,0.23)] hover:-translate-y-0.5"
                       )}
                     >
@@ -508,43 +466,32 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
             <div className="lg:col-span-5 order-1 lg:order-2">
               <div className="sticky top-24 space-y-6">
                 <div className="bg-white/5 border border-white/5 rounded-[2rem] p-6 md:p-8 backdrop-blur-2xl">
-                  <h3 className="font-alexandria font-bold text-white text-lg mb-5 flex items-center gap-2">
-                    <Package className="w-5 h-5 text-blue-500" />
-                    ملخص الطلب
+                  <h3 className="font-alexandria font-bold text-white text-lg mb-5 flex items-center gap-2 border-b border-white/10 pb-4">
+                    <Package className="w-5 h-5 text-rose-500" />
+                    منتجات السلة ({items.length})
                   </h3>
                   
-                  <div className="flex gap-4 items-start pb-6 border-b border-white/10">
-                    <div className="w-24 h-24 rounded-2xl bg-zinc-900 border border-white/10 relative overflow-hidden shrink-0">
-                      {product.image_url && (
-                        <Image src={product.image_url} alt={product.title} fill className="object-cover" />
-                      )}
-                    </div>
-                    <div>
-                      <h4 className="font-cairo font-bold text-white text-lg leading-tight mb-2 line-clamp-2">{product.title}</h4>
-                      <div className="flex items-center gap-1.5 bg-blue-500/10 text-blue-400 px-2 py-1 rounded-md w-fit">
-                        <Sparkles className="w-3 h-3" />
-                        <span className="text-[10px] font-bold uppercase tracking-widest">تنزيل فوري</span>
+                  <div className="flex flex-col gap-4 mb-6">
+                    {items.map((item) => (
+                      <div key={item.id} className="flex gap-4 items-start pb-4 border-b border-white/5 last:border-0 last:pb-0">
+                        <div className="w-16 h-16 rounded-xl bg-zinc-900 border border-white/10 relative overflow-hidden shrink-0">
+                          {item.image_url && (
+                            <Image src={item.image_url} alt={item.title} fill className="object-cover" />
+                          )}
+                        </div>
+                        <div>
+                          <h4 className="font-cairo font-bold text-white text-sm leading-tight mb-1 line-clamp-2">{item.title}</h4>
+                          <span className="text-rose-400 font-bold text-sm">{item.price} ج.م</span>
+                        </div>
                       </div>
-                    </div>
+                    ))}
                   </div>
 
-                  <div className="py-6 space-y-4">
-                    {product.original_price && (
-                      <div className="flex justify-between items-center text-zinc-400 font-cairo">
-                        <span>السعر الأصلي</span>
-                        <span className="line-through">{product.original_price} ج.م</span>
-                      </div>
-                    )}
-                    {discountPct && (
-                      <div className="flex justify-between items-center text-emerald-400 font-cairo font-bold">
-                        <span>الخصم ({discountPct}%)</span>
-                        <span>- {savings} ج.م</span>
-                      </div>
-                    )}
-                    <div className="flex justify-between items-center pt-4 border-t border-white/10">
+                  <div className="py-6 space-y-4 border-t border-white/10">
+                    <div className="flex justify-between items-center">
                       <span className="font-alexandria font-bold text-white text-xl">الإجمالي</span>
                       <div className="flex items-baseline gap-1 text-white">
-                        <span className="text-3xl font-alexandria font-black">{product.price}</span>
+                        <span className="text-3xl font-alexandria font-black">{cartTotal}</span>
                         <span className="text-sm font-cairo">ج.م</span>
                       </div>
                     </div>
@@ -553,7 +500,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                   <div className="bg-[#050505] rounded-2xl p-4 border border-white/5">
                     <ul className="space-y-3">
                       {[
-                        "ملفات المنتج الأصلية والكاملة",
+                        "ملفات المنتجات الأصلية والكاملة",
                         "دعم فني وتحديثات مجانية",
                         "إرسال تلقائي للبريد الإلكتروني"
                       ].map((benefit, i) => (
@@ -565,7 +512,6 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                     </ul>
                   </div>
                 </div>
-
 
               </div>
             </div>

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Cairo, Alexandria } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
+import { Providers } from "@/components/Providers";
 import "./globals.css";
 
 const cairo = Cairo({
@@ -51,9 +52,11 @@ export default function RootLayout({
       dir="rtl"
       className={`${cairo.variable} ${alexandria.variable} scroll-smooth`}
     >
-      <body className="min-h-screen bg-white text-zinc-900 font-cairo flex flex-col antialiased selection:bg-blue-600/10 selection:text-blue-600">
-        {children}
-        <Toaster theme="light" position="top-center" closeButton richColors />
+      <body className="min-h-screen bg-white text-zinc-900 font-cairo flex flex-col antialiased selection:bg-rose-600/10 selection:text-rose-600">
+        <Providers>
+          {children}
+          <Toaster theme="light" position="top-center" closeButton richColors />
+        </Providers>
       </body>
     </html>
   );
