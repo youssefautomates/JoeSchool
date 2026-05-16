@@ -2,10 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card } from "@/components/ui/card";
-import { Lock, Loader2, ShieldAlert, Mail, Eye, EyeOff, ShieldCheck, ArrowLeft, Fingerprint } from "lucide-react";
+import { Lock, Loader2, Mail, Eye, EyeOff, ShieldCheck, ArrowLeft, Fingerprint } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -44,107 +42,205 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center p-4 relative overflow-hidden">
-      {/* Cinematic Background */}
-      <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-rose-600/10 rounded-full blur-[160px]" />
-        <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-pink-600/5 rounded-full blur-[100px]" />
-        <div className="absolute inset-0 bg-grid-pattern opacity-5" />
+    <div
+      className="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden"
+      style={{ background: "linear-gradient(135deg, #080810 0%, #0f0f1a 45%, #130810 100%)" }}
+    >
+      {/* Background Glows */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full"
+          style={{ background: "radial-gradient(circle, rgba(214,0,75,0.13) 0%, transparent 70%)" }}
+        />
+        <div
+          className="absolute top-0 right-0 w-[350px] h-[350px] rounded-full"
+          style={{ background: "radial-gradient(circle, rgba(214,0,75,0.07) 0%, transparent 70%)" }}
+        />
+        <div
+          className="absolute bottom-0 left-0 w-[300px] h-[300px] rounded-full"
+          style={{ background: "radial-gradient(circle, rgba(90,0,180,0.07) 0%, transparent 70%)" }}
+        />
       </div>
 
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-lg relative z-10"
+        transition={{ duration: 0.45, ease: "easeOut" }}
+        className="w-full max-w-md relative z-10"
       >
-        <Link href="/" className="inline-flex items-center gap-2 text-zinc-500 hover:text-white font-cairo transition-all mb-12 group">
+        {/* Back Link */}
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 font-cairo text-sm transition-colors duration-200 mb-10 group"
+          style={{ color: "#71717a" }}
+          onMouseEnter={e => (e.currentTarget.style.color = "#ffffff")}
+          onMouseLeave={e => (e.currentTarget.style.color = "#71717a")}
+        >
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform rtl:rotate-180" />
           العودة للمتجر الرئيسي
         </Link>
-        
-        <div className="text-center mb-10">
-          <motion.div 
-            initial={{ scale: 0.8, opacity: 0 }}
+
+        {/* Header */}
+        <div className="text-center mb-8">
+          <motion.div
+            initial={{ scale: 0.75, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            className="w-20 h-20 bg-gradient-to-br from-rose-600 to-pink-700 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-rose-500/20"
+            transition={{ delay: 0.15, type: "spring", stiffness: 200, damping: 16 }}
+            className="w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-6"
+            style={{
+              background: "linear-gradient(135deg, #D6004B 0%, #ff2d6b 100%)",
+              boxShadow: "0 20px 60px rgba(214,0,75,0.4), 0 0 0 1px rgba(214,0,75,0.25)",
+            }}
           >
             <Fingerprint className="w-10 h-10 text-white" />
           </motion.div>
-          <h1 className="text-4xl font-alexandria font-black text-white mb-3 tracking-tighter">بوابة الإدارة</h1>
-          <p className="text-zinc-500 font-cairo text-lg">نظام وصول محمي بتقنيات التشفير المتقدمة</p>
+
+          <h1 className="text-4xl font-alexandria font-black tracking-tighter mb-2" style={{ color: "#ffffff" }}>
+            بوابة الإدارة
+          </h1>
+          <p className="font-cairo text-base" style={{ color: "#71717a" }}>
+            نظام وصول محمي بتقنيات التشفير المتقدمة
+          </p>
         </div>
 
-        <Card className="glass-card border-white/5 bg-white/5 p-8 md:p-10 rounded-[2.5rem] shadow-2xl">
-          <form onSubmit={handleLogin} className="space-y-8">
-            <div className="space-y-6">
-              <div className="space-y-3">
-                <Label className="font-alexandria font-bold text-zinc-400 text-sm">البريد الإلكتروني للإدارة</Label>
-                <div className="relative group">
-                  <Mail className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-600 group-focus-within:text-rose-500 transition-colors" />
-                  <Input 
-                    type="email" 
-                    placeholder="admin@youssefautomates.com" 
-                    className="bg-white/5 border-white/10 text-white font-cairo h-16 pr-12 focus:border-rose-500 transition-all rounded-2xl placeholder:text-zinc-700"
-                    dir="ltr"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    disabled={isLoading}
-                  />
-                </div>
-              </div>
+        {/* Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.22, duration: 0.4 }}
+          className="rounded-3xl p-8"
+          style={{
+            background: "rgba(16, 16, 26, 0.88)",
+            backdropFilter: "blur(28px)",
+            WebkitBackdropFilter: "blur(28px)",
+            border: "1px solid rgba(255,255,255,0.09)",
+            boxShadow: "0 40px 90px rgba(0,0,0,0.55), inset 0 0 0 1px rgba(214,0,75,0.07)",
+          }}
+        >
+          <form onSubmit={handleLogin} className="space-y-5">
 
-              <div className="space-y-3">
-                <Label className="font-alexandria font-bold text-zinc-400 text-sm">كلمة المرور السرية</Label>
-                <div className="relative group">
-                  <Lock className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-600 group-focus-within:text-rose-500 transition-colors" />
-                  <Input 
-                    type={showPassword ? "text" : "password"} 
-                    placeholder="••••••••••••" 
-                    className="bg-white/5 border-white/10 text-white font-cairo h-16 pr-12 pl-12 focus:border-rose-500 transition-all rounded-2xl placeholder:text-zinc-700"
-                    dir="ltr"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    disabled={isLoading}
-                  />
-                  <button 
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600 hover:text-white transition-colors"
-                  >
-                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                  </button>
-                </div>
+            {/* Email */}
+            <div className="space-y-2">
+              <label className="block font-cairo text-sm font-semibold" style={{ color: "#d4d4d8" }}>
+                البريد الإلكتروني للإدارة
+              </label>
+              <div className="relative">
+                <Mail
+                  className="absolute right-4 top-1/2 -translate-y-1/2 w-[18px] h-[18px] pointer-events-none transition-colors duration-200"
+                  style={{ color: "#52525b" }}
+                />
+                <Input
+                  type="email"
+                  placeholder="admin@youssefautomates.com"
+                  dir="ltr"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  disabled={isLoading}
+                  className="h-14 pr-12 font-cairo text-sm rounded-xl transition-all duration-200 outline-none ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+                  style={{
+                    background: "rgba(255,255,255,0.045)",
+                    border: "1.5px solid rgba(255,255,255,0.1)",
+                    color: "#f4f4f5",
+                  }}
+                  onFocus={e => {
+                    e.currentTarget.style.border = "1.5px solid #D6004B";
+                    e.currentTarget.style.background = "rgba(214,0,75,0.07)";
+                  }}
+                  onBlur={e => {
+                    e.currentTarget.style.border = "1.5px solid rgba(255,255,255,0.1)";
+                    e.currentTarget.style.background = "rgba(255,255,255,0.045)";
+                  }}
+                />
               </div>
             </div>
 
-            <Button 
-              type="submit" 
-              className="w-full h-16 bg-rose-600 hover:bg-rose-500 text-white font-alexandria font-black text-xl rounded-2xl shadow-2xl shadow-rose-500/10 transition-all active:scale-95" 
+            {/* Password */}
+            <div className="space-y-2">
+              <label className="block font-cairo text-sm font-semibold" style={{ color: "#d4d4d8" }}>
+                كلمة المرور السرية
+              </label>
+              <div className="relative">
+                <Lock
+                  className="absolute right-4 top-1/2 -translate-y-1/2 w-[18px] h-[18px] pointer-events-none transition-colors duration-200"
+                  style={{ color: "#52525b" }}
+                />
+                <Input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••••••"
+                  dir="ltr"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  disabled={isLoading}
+                  className="h-14 pr-12 pl-12 font-cairo text-sm rounded-xl transition-all duration-200 outline-none ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+                  style={{
+                    background: "rgba(255,255,255,0.045)",
+                    border: "1.5px solid rgba(255,255,255,0.1)",
+                    color: "#f4f4f5",
+                  }}
+                  onFocus={e => {
+                    e.currentTarget.style.border = "1.5px solid #D6004B";
+                    e.currentTarget.style.background = "rgba(214,0,75,0.07)";
+                  }}
+                  onBlur={e => {
+                    e.currentTarget.style.border = "1.5px solid rgba(255,255,255,0.1)";
+                    e.currentTarget.style.background = "rgba(255,255,255,0.045)";
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 transition-colors duration-200"
+                  style={{ color: "#52525b" }}
+                  onMouseEnter={e => (e.currentTarget.style.color = "#ffffff")}
+                  onMouseLeave={e => (e.currentTarget.style.color = "#52525b")}
+                >
+                  {showPassword ? <EyeOff className="w-[18px] h-[18px]" /> : <Eye className="w-[18px] h-[18px]" />}
+                </button>
+              </div>
+            </div>
+
+            {/* Submit */}
+            <button
+              type="submit"
               disabled={isLoading || !email || !password}
+              className="w-full h-14 mt-2 rounded-xl font-alexandria font-black text-lg text-white transition-all duration-200 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed"
+              style={{
+                background: "linear-gradient(135deg, #D6004B 0%, #ff2d6b 100%)",
+                boxShadow: "0 8px 32px rgba(214,0,75,0.38)",
+              }}
+              onMouseEnter={e => {
+                if (!isLoading && (email || password))
+                  (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 14px 44px rgba(214,0,75,0.55)";
+              }}
+              onMouseLeave={e => {
+                (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 8px 32px rgba(214,0,75,0.38)";
+              }}
             >
               {isLoading ? (
-                <div className="flex items-center gap-3">
+                <span className="flex items-center justify-center gap-3">
                   <Loader2 className="h-5 w-5 animate-spin" />
                   جاري التحقق من الهوية...
-                </div>
+                </span>
               ) : (
                 "تسجيل الدخول الآمن"
               )}
-            </Button>
+            </button>
           </form>
 
-          <div className="mt-10 flex items-center justify-center gap-3 py-4 bg-white/5 rounded-2xl border border-white/5 text-zinc-500 font-cairo text-xs">
-            <ShieldCheck className="w-4 h-4 text-emerald-500" />
+          {/* Security Footer */}
+          <div
+            className="mt-6 flex items-center justify-center gap-2.5 py-3.5 rounded-xl font-cairo text-xs"
+            style={{
+              background: "rgba(255,255,255,0.03)",
+              border: "1px solid rgba(255,255,255,0.06)",
+              color: "#52525b",
+            }}
+          >
+            <ShieldCheck className="w-4 h-4 shrink-0" style={{ color: "#22c55e" }} />
             نظام وصول مشفر ومراقب على مدار الساعة
           </div>
-        </Card>
+        </motion.div>
       </motion.div>
     </div>
   );
 }
-
-function Label({ children, className }: { children: React.ReactNode, className?: string }) {
-  return <label className={className}>{children}</label>;
-}
-
