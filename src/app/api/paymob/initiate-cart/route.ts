@@ -161,6 +161,11 @@ export async function POST(req: Request) {
       const detectedSubtype = "CARD";
       const cleanCard = cardData.cardNumber.replace(/\s/g, '');
 
+      const cardName = cardData.cardHolder?.trim() || `${firstName} ${lastName}`;
+      if (!cardName) {
+        throw new Error("No cardholder name provided from frontend");
+      }
+
       const payPayload = {
         source: {
           identifier: cleanCard,
@@ -168,8 +173,9 @@ export async function POST(req: Request) {
           cvn: cardData.cvv,
           expiry_month: cardData.expiry.split("/")[0],
           expiry_year: cardData.expiry.split("/")[1],
-          name: cardData.cardHolder || `${firstName} ${lastName}`,
-          cardholder_name: cardData.cardHolder || `${firstName} ${lastName}`
+          name: cardName,
+          cardholder_name: cardName,
+          card_holder_name: cardName
         },
         payment_token: paymentKey
       };
