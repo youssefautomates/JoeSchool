@@ -145,7 +145,6 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
     defaultValues: {
       fullName: "",
       email: "",
-      phone: "",
     },
   });
 
