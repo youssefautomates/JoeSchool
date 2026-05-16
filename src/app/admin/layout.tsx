@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Package, ShoppingCart, Settings, LogOut, Search, Bell, Sparkles } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingCart, Settings, LogOut, Search, Bell, Sparkles, Target, Star } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { motion } from "framer-motion";
@@ -15,6 +15,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { name: "لوحة التحكم", href: "/admin", icon: LayoutDashboard },
     { name: "المنتجات", href: "/admin/products", icon: Package },
     { name: "الطلبات", href: "/admin/orders", icon: ShoppingCart },
+    { name: "التسويق", href: "/admin/marketing", icon: Target },
+    { name: "التقييمات", href: "/admin/reviews", icon: Star },
     { name: "الإعدادات", href: "/admin/settings", icon: Settings },
   ];
 

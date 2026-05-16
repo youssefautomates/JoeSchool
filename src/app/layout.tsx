@@ -4,6 +4,7 @@ import { Cairo, Alexandria } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import { Providers } from "@/components/Providers";
 import { PixelTracker } from "@/components/PixelTracker";
+import { getKV } from "@/lib/kv";
 import "./globals.css";
 
 const cairo = Cairo({
@@ -43,11 +44,13 @@ export const viewport: Viewport = {
   maximumScale: 1,
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const settings = await getKV("marketing_settings");
+
   return (
     <html
       lang="ar"
@@ -57,7 +60,7 @@ export default function RootLayout({
       <body className="min-h-screen bg-white text-zinc-900 font-cairo flex flex-col antialiased selection:bg-rose-600/10 selection:text-rose-600">
         <Providers>
           <Suspense fallback={null}>
-            <PixelTracker />
+            <PixelTracker initialSettings={settings} />
           </Suspense>
           {children}
           <Toaster theme="light" position="top-center" closeButton richColors />

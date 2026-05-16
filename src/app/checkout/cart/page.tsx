@@ -49,6 +49,32 @@ export default function CartCheckoutPage() {
 
   const router = useRouter();
 
+  // Track InitiateCheckout on mount
+  useEffect(() => {
+    if (items.length > 0) {
+      if ((window as any).fbq) {
+        (window as any).fbq('track', 'InitiateCheckout', {
+          content_ids: items.map(i => i.id),
+          content_type: 'product',
+          value: cartTotal,
+          currency: 'EGP'
+        });
+      }
+      if ((window as any).ttq) {
+        (window as any).ttq.track('InitiateCheckout', {
+          contents: items.map(i => ({
+            content_id: i.id,
+            content_name: i.title,
+            quantity: 1,
+            price: i.price
+          })),
+          value: cartTotal,
+          currency: 'EGP'
+        });
+      }
+    }
+  }, []);
+
   // Card Formatting & Validation Handlers
   const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/\D/g, "");

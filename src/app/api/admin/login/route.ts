@@ -13,7 +13,7 @@ export async function POST(request: Request) {
       const cookieStore = await cookies();
       const maxAge = rememberMe ? 60 * 60 * 24 * 30 : undefined; // 30 days if checked, else session cookie
 
-      cookieStore.set('admin_session', 'authenticated', {
+      cookieStore.set('admin_token', 'authenticated', {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',

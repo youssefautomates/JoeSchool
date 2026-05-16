@@ -28,27 +28,42 @@ export async function getKV<T>(key: string): Promise<T | null> {
 export async function setKV<T>(key: string, value: T): Promise<boolean> {
   try {
     const stringValue = JSON.stringify(value);
-    const { data: existing } = await supabaseAdmin
+    const slug = `kv-${key}`;
+    console.log(`[KV Store] Setting key: ${key}, slug: ${slug}`);
+
+    // Check if exists
+    const { data: existing, error: fetchError } = await supabaseAdmin
       .from('products')
       .select('id')
-      .eq('slug', `kv-${key}`)
-      .single();
-    
+      .eq('slug', slug)
+      .maybeSingle();
+
+    if (fetchError) {
+      console.error(`[KV Store] Fetch error for ${key}:`, fetchError);
+    }
+
     if (existing) {
-      const { error } = await supabaseAdmin
+      console.log(`[KV Store] Updating existing record for ${key} (ID: ${existing.id})`);
+      const { error: updateError } = await supabaseAdmin
         .from('products')
-        .update({ description: stringValue })
+        .update({ 
+          description: stringValue,
+          title: `System Data - ${key}`, // Keep title updated
+          status: 'مخفي'
+        })
         .eq('id', existing.id);
-      if (error) {
-        console.error(`[KV Store] Supabase UPDATE Error for ${key}:`, error);
-        throw error;
+      
+      if (updateError) {
+        console.error(`[KV Store] Update error for ${key}:`, updateError);
+        return false;
       }
     } else {
-      const { error } = await supabaseAdmin
+      console.log(`[KV Store] Inserting new record for ${key}`);
+      const { error: insertError } = await supabaseAdmin
         .from('products')
         .insert({
+          slug: slug,
           title: `System Data - ${key}`,
-          slug: `kv-${key}`,
           short_description: 'System internal data. Do not delete.',
           description: stringValue,
           price: 0,
@@ -58,15 +73,18 @@ export async function setKV<T>(key: string, value: T): Promise<boolean> {
           sales: 0,
           views: 0
         });
-      if (error) {
-        console.error(`[KV Store] Supabase INSERT Error for ${key}:`, error);
-        throw error;
+
+      if (insertError) {
+        console.error(`[KV Store] Insert error for ${key}:`, insertError);
+        return false;
       }
     }
-    console.log(`[KV Store] Successfully saved key ${key}`);
+
+    console.log(`[KV Store] Successfully persisted key: ${key}`);
     return true;
   } catch (error) {
-    console.error(`[KV Store] Final Catch Error writing key ${key}:`, error);
+    console.error(`[KV Store] Critical exception for key ${key}:`, error);
     return false;
   }
 }
+

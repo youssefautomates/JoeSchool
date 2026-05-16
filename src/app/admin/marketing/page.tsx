@@ -33,16 +33,24 @@ export default function MarketingPage() {
 
   const handleSave = async () => {
     setSaving(true);
+    console.log("[Marketing] Attempting to save settings:", settings);
     try {
       const res = await fetch("/api/admin/settings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(settings),
       });
-      if (!res.ok) throw new Error();
+      
+      const data = await res.json();
+      console.log("[Marketing] API Response:", res.status, data);
+
+      if (!res.ok) {
+        throw new Error(data.error || "فشل الحفظ");
+      }
       toast.success("تم حفظ إعدادات بيكسل التتبع بنجاح");
-    } catch {
-      toast.error("حدث خطأ أثناء الحفظ");
+    } catch (err: any) {
+      console.error("[Marketing] Save error:", err);
+      toast.error(err.message || "حدث خطأ أثناء الحفظ");
     } finally {
       setSaving(false);
     }
