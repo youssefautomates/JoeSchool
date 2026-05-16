@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, use, useEffect, useRef } from "react";
+import { useApplePay } from "@/hooks/useApplePay";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -33,7 +34,8 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
   const [isFetching, setIsFetching] = useState(true);
   const [product, setProduct] = useState<Product | null>(null);
   const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null);
-  const [paymentMethod, setPaymentMethod] = useState<"card" | "wallet">("card");
+  const [paymentMethod, setPaymentMethod] = useState<"card" | "wallet" | "apple_pay">("card");
+  const isApplePayAvailable = useApplePay();
   
   // Card Fields State
   const [cardNumber, setCardNumber] = useState("");
@@ -216,11 +218,13 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
       const result = await response.json();
 
       if (result.checkoutUrl) {
-        if (paymentMethod === "wallet") {
+        if (paymentMethod === "apple_pay") {
+          toast.success("جاري تحويلك لبوابة Apple Pay...");
+          window.location.href = result.checkoutUrl;
+        } else if (paymentMethod === "wallet") {
           toast.success("جاري تحويلك لمحفظتك الإلكترونية...");
           window.location.href = result.checkoutUrl; 
         } else {
-          // For cards, it's either the 3DS OTP redirect or direct success page
           toast.success("جاري تأكيد عملية الدفع...");
           window.location.href = result.checkoutUrl; 
         }
@@ -370,6 +374,30 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                         </div>
                       </div>
 
+                      {/* Apple Pay — only visible on Apple devices */}
+                      {isApplePayAvailable && (
+                        <div 
+                          onClick={() => setPaymentMethod("apple_pay")}
+                          className={cn(
+                            "cursor-pointer border rounded-2xl p-3.5 flex items-center gap-3 transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] md:col-span-2",
+                            paymentMethod === "apple_pay" 
+                              ? "border-white/30 bg-white/10 shadow-[inset_0_0_30px_rgba(255,255,255,0.05)]" 
+                              : "border-white/5 bg-white/5 hover:border-white/10 hover:shadow-[inset_0_0_20px_rgba(255,255,255,0.02)]"
+                          )}
+                        >
+                          <div className={cn("w-5 h-5 rounded-full border-2 flex items-center justify-center", paymentMethod === "apple_pay" ? "border-white" : "border-zinc-500")}>
+                            {paymentMethod === "apple_pay" && <div className="w-2.5 h-2.5 rounded-full bg-white" />}
+                          </div>
+                          <svg className={cn("w-6 h-6", paymentMethod === "apple_pay" ? "text-white" : "text-zinc-500")} viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M17.72 7.56c-.12.09-2.24 1.29-2.24 3.95 0 3.08 2.7 4.17 2.78 4.2-.01.05-.43 1.49-1.43 2.95-.87 1.29-1.78 2.58-3.17 2.58s-1.74-.8-3.34-.8c-1.56 0-2.12.83-3.39.83s-2.17-1.19-3.17-2.65C2.55 16.73 1.67 14.16 1.67 11.73c0-3.88 2.52-5.94 5.01-5.94 1.32 0 2.42.87 3.25.87.79 0 2.03-.92 3.52-.92.57 0 2.61.05 3.96 1.98l.31-.16zM14.59 3.82c.64-.76 1.09-1.82 1.09-2.88 0-.15-.01-.3-.04-.43-1.04.04-2.27.69-3.02 1.56-.59.67-1.14 1.73-1.14 2.81 0 .16.03.33.04.38.07.01.18.03.29.03.93 0 2.1-.63 2.78-1.47z" />
+                          </svg>
+                          <div className="font-cairo">
+                            <p className={cn("font-bold", paymentMethod === "apple_pay" ? "text-white" : "text-zinc-300")}>Apple Pay</p>
+                            <p className="text-xs text-zinc-500">ادفع بلمسة واحدة</p>
+                          </div>
+                        </div>
+                      )}
+
                     </div>
                   </div>
 
@@ -480,9 +508,11 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                       disabled={isLoading}
                       className={cn(
                         "w-full h-14 text-white font-alexandria text-lg font-bold rounded-xl transition-all active:scale-[0.98]",
-                        paymentMethod === "card" 
-                          ? "bg-[#D6004B] hover:bg-[#b0003d] shadow-[0_4px_14px_0_rgba(214,0,75,0.39)] hover:shadow-[0_6px_20px_rgba(214,0,75,0.23)] hover:-translate-y-0.5" 
-                          : "bg-emerald-600 hover:bg-emerald-500 shadow-[0_4px_14px_0_rgba(16,185,129,0.39)] hover:shadow-[0_6px_20px_rgba(16,185,129,0.23)] hover:-translate-y-0.5"
+                        paymentMethod === "apple_pay"
+                          ? "bg-black hover:bg-zinc-900 shadow-[0_4px_14px_0_rgba(0,0,0,0.39)] hover:shadow-[0_6px_20px_rgba(0,0,0,0.23)] hover:-translate-y-0.5 border border-white/10"
+                          : paymentMethod === "card" 
+                            ? "bg-[#D6004B] hover:bg-[#b0003d] shadow-[0_4px_14px_0_rgba(214,0,75,0.39)] hover:shadow-[0_6px_20px_rgba(214,0,75,0.23)] hover:-translate-y-0.5" 
+                            : "bg-emerald-600 hover:bg-emerald-500 shadow-[0_4px_14px_0_rgba(16,185,129,0.39)] hover:shadow-[0_6px_20px_rgba(16,185,129,0.23)] hover:-translate-y-0.5"
                       )}
                     >
                       {isLoading ? (
@@ -491,7 +521,9 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                           جاري تجهيز الدفع...
                         </>
                       ) : (
-                        paymentMethod === "card" ? (
+                        paymentMethod === "apple_pay" ? (
+                          <span className="flex items-center gap-2">ادفع بواسطة <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M17.72 7.56c-.12.09-2.24 1.29-2.24 3.95 0 3.08 2.7 4.17 2.78 4.2-.01.05-.43 1.49-1.43 2.95-.87 1.29-1.78 2.58-3.17 2.58s-1.74-.8-3.34-.8c-1.56 0-2.12.83-3.39.83s-2.17-1.19-3.17-2.65C2.55 16.73 1.67 14.16 1.67 11.73c0-3.88 2.52-5.94 5.01-5.94 1.32 0 2.42.87 3.25.87.79 0 2.03-.92 3.52-.92.57 0 2.61.05 3.96 1.98l.31-.16zM14.59 3.82c.64-.76 1.09-1.82 1.09-2.88 0-.15-.01-.3-.04-.43-1.04.04-2.27.69-3.02 1.56-.59.67-1.14 1.73-1.14 2.81 0 .16.03.33.04.38.07.01.18.03.29.03.93 0 2.1-.63 2.78-1.47z" /></svg> Pay</span>
+                        ) : paymentMethod === "card" ? (
                           <>إتمام الدفع الآمن <Lock className="w-5 h-5 mr-3 opacity-80" /></>
                         ) : (
                           <>إتمام الطلب بواسطة المحفظة</>

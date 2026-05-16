@@ -103,6 +103,39 @@ export async function POST(req: Request) {
         orderId: dbOrders[0].id
       });
     }
+    // ==========================================
+    // APPLE PAY FLOW: INTENTION API → UNIFIED CHECKOUT
+    // ==========================================
+    if (paymentMethod === "apple_pay") {
+      if (!secretKey) throw new Error("PAYMOB_SECRET_KEY is missing for Apple Pay Intention API.");
+      console.log(`[APPLE_PAY_CART_INTEGRATION] Using Card Integration for Apple Pay: ${envCardIntegrationId}`);
+      
+      const intentionResponse = await fetch("https://accept.paymob.com/v1/intention/", {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Token ${secretKey}`
+        },
+        body: JSON.stringify({
+          amount: amountCents,
+          currency: "EGP",
+          payment_methods: [envCardIntegrationId],
+          items: [{ name: cartTitle, amount: amountCents, description: "Digital Cart Purchase", quantity: 1 }],
+          billing_data: billingData,
+          extras: { supabase_order_id: dbOrders[0].id }
+        }),
+      });
+
+      const intentionData = await intentionResponse.json();
+      if (!intentionResponse.ok) throw new Error(`Apple Pay Intention failed: ${JSON.stringify(intentionData)}`);
+
+      await supabase.from("orders").update({ payment_id: intentionData.id?.toString() }).in("id", dbOrders.map(o => o.id));
+      
+      return NextResponse.json({
+        checkoutUrl: `https://accept.paymob.com/unifiedcheckout/?publicKey=${publicKey}&clientSecret=${intentionData.client_secret}`,
+        orderId: dbOrders[0].id
+      });
+    }
 
     // ==========================================
     // CARD FLOW: SERVER-TO-SERVER (CLASSIC API)
