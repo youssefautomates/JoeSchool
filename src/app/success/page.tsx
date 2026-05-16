@@ -12,10 +12,53 @@ function SuccessContent() {
   const searchParams = useSearchParams();
   const orderId = searchParams.get("order_id") || "ORD-" + Math.floor(Math.random() * 100000);
   const [mounted, setMounted] = useState(false);
+  const [deliveryStatus, setDeliveryStatus] = useState<"verifying" | "delivered" | "pending" | "error">("verifying");
 
   useEffect(() => {
     setMounted(true);
-  }, []);
+
+    // Automatically verify payment and trigger delivery
+    async function verifyAndDeliver() {
+      if (!orderId || orderId.startsWith("ORD-")) return;
+      
+      let attempts = 0;
+      const maxAttempts = 5;
+
+      while (attempts < maxAttempts) {
+        attempts++;
+        try {
+          const res = await fetch("/api/paymob/verify-and-deliver", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ orderId }),
+          });
+          const data = await res.json();
+          
+          if (data.success) {
+            setDeliveryStatus("delivered");
+            console.log("[SUCCESS] ✅ Product delivered via email.", data.alreadyDelivered ? "(already sent)" : "(just sent)");
+            return;
+          }
+          
+          if (data.status === "pending" && attempts < maxAttempts) {
+            console.log(`[SUCCESS] ⏳ Payment pending, retrying in 3s... (${attempts}/${maxAttempts})`);
+            await new Promise(r => setTimeout(r, 3000));
+            continue;
+          }
+
+          setDeliveryStatus("pending");
+          return;
+        } catch (err) {
+          console.error("[SUCCESS] Verification error:", err);
+          if (attempts >= maxAttempts) {
+            setDeliveryStatus("error");
+          }
+        }
+      }
+    }
+
+    verifyAndDeliver();
+  }, [orderId]);
 
   if (!mounted) return null;
 
