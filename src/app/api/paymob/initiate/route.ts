@@ -14,13 +14,20 @@ export async function POST(req: Request) {
     const publicKey = process.env.NEXT_PUBLIC_PAYMOB_PUBLIC_KEY || process.env.PAYMOB_PUBLIC_KEY;
     
     // Read the specific integration IDs from env
-    const envCardIntegrationId = parseInt(process.env.PAYMOB_CARD_INTEGRATION_ID as string, 10);
-    const envWalletIntegrationId = parseInt(process.env.PAYMOB_WALLET_INTEGRATION_ID as string, 10);
+    const rawCardId = process.env.PAYMOB_CARD_INTEGRATION_ID;
+    const rawWalletId = process.env.PAYMOB_WALLET_INTEGRATION_ID;
+    const envCardIntegrationId = parseInt(rawCardId || "", 10);
+    const envWalletIntegrationId = parseInt(rawWalletId || "", 10);
 
     console.log("[PAYMOB_INITIATE] Payment Method:", paymentMethod);
+    console.log("[PAYMOB_ENV_DEBUG] rawCardId:", rawCardId, "| parsed:", envCardIntegrationId, "| rawWalletId:", rawWalletId, "| parsed:", envWalletIntegrationId);
 
-    if (isNaN(envCardIntegrationId) || isNaN(envWalletIntegrationId)) {
-      throw new Error("Missing or invalid PAYMOB_CARD_INTEGRATION_ID or PAYMOB_WALLET_INTEGRATION_ID in .env.local");
+    // Only validate the integration ID needed for the selected method
+    if (paymentMethod === "card" && isNaN(envCardIntegrationId)) {
+      throw new Error("Missing or invalid PAYMOB_CARD_INTEGRATION_ID in .env.local");
+    }
+    if (paymentMethod === "wallet" && isNaN(envWalletIntegrationId)) {
+      throw new Error("Missing or invalid PAYMOB_WALLET_INTEGRATION_ID in .env.local");
     }
 
     // 1. Fetch Product Details
