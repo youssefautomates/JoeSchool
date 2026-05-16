@@ -7,10 +7,11 @@ import {
   CheckCircle2, FileText, Zap, ChevronRight, Lock, PlayCircle, Star, 
   ShieldCheck, Download, Users, Infinity, Target, Sparkles, 
   MonitorPlay, ArrowLeft, Rocket, HeartHandshake,
-  Clock, ShoppingCart, Play, FileJson, Link as LinkIcon, Archive
+  Clock, ShoppingCart, Play, FileJson, Link as LinkIcon, Archive,
+  Volume2, VolumeX
 } from "lucide-react";
 import Link from "next/link";
-import { useState, useEffect, use } from "react";
+import { useState, useEffect, use, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
@@ -40,6 +41,9 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"details" | "previews" | "reviews">("details");
   const [activeMedia, setActiveMedia] = useState<string | null>(null); // URL of active image or 'video'
+  const [isMuted, setIsMuted] = useState(true);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  
   const { addToCart } = useCart();
 
   useEffect(() => {
@@ -58,7 +62,14 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
       if (error) throw error;
       const unpacked = unpackProduct(data as Product);
       setProduct(unpacked);
-      setActiveMedia(unpacked.image_url);
+      
+      // If there's a video and NO image, or if the user prefers video, set active media to 'video'
+      // The user said: "If a video is added without a thumbnail image, use the video as the primary visual"
+      if (unpacked.video_url && (!unpacked.image_url || unpacked.image_url.includes("unsplash.com"))) {
+        setActiveMedia('video');
+      } else {
+        setActiveMedia(unpacked.image_url);
+      }
       
       // Update views non-blocking
       if (data) {
@@ -71,6 +82,15 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
       setIsLoading(false);
     }
   }
+
+  const handleUnmute = () => {
+    if (videoRef.current) {
+      videoRef.current.muted = false;
+      videoRef.current.currentTime = 0;
+      videoRef.current.play();
+      setIsMuted(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -105,6 +125,8 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   };
   const FileIcon = getFileIcon(product.file_type);
 
+  const isYouTube = product.video_url?.includes('youtube.com') || product.video_url?.includes('youtu.be');
+
   return (
     <div className="min-h-screen bg-[#050505] text-white font-cairo selection:bg-rose-500/30">
       <Navbar />
@@ -130,27 +152,60 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                       exit={{ opacity: 0 }}
                       className="absolute inset-0 z-20 bg-black"
                     >
-                      {product.video_url.includes('youtube.com') || product.video_url.includes('youtu.be') ? (
+                      {isYouTube ? (
                         <iframe 
-                          src={`https://www.youtube.com/embed/${product.video_url.split('v=')[1]?.split('&')[0] || product.video_url.split('/').pop()}?autoplay=1&mute=0`}
+                          src={`https://www.youtube.com/embed/${product.video_url.split('v=')[1]?.split('&')[0] || product.video_url.split('/').pop()}?autoplay=1&mute=1&loop=1&playlist=${product.video_url.split('v=')[1]?.split('&')[0] || product.video_url.split('/').pop()}`}
                           className="w-full h-full border-none"
                           allow="autoplay; encrypted-media"
                           allowFullScreen
                         />
                       ) : (
-                        <video 
-                          src={product.video_url} 
-                          controls 
-                          autoPlay 
-                          className="w-full h-full object-contain"
-                        />
+                        <div className="relative w-full h-full">
+                          <video 
+                            ref={videoRef}
+                            src={product.video_url} 
+                            muted={isMuted}
+                            autoPlay 
+                            playsInline
+                            loop
+                            className="w-full h-full object-contain cursor-pointer"
+                            onClick={isMuted ? handleUnmute : undefined}
+                          />
+                          {isMuted && (
+                            <div 
+                              onClick={handleUnmute}
+                              className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 backdrop-blur-[2px] cursor-pointer group/unmute transition-all hover:bg-black/20"
+                            >
+                               <div className="w-20 h-20 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full flex items-center justify-center mb-4 transition-transform group-hover/unmute:scale-110">
+                                  <VolumeX className="w-8 h-8 text-white" />
+                               </div>
+                               <span className="font-alexandria font-black text-xl text-white tracking-widest uppercase bg-rose-600 px-6 py-2 rounded-full shadow-[0_0_30px_rgba(214,0,75,0.5)]">
+                                  اضغط لفتح الصوت
+                               </span>
+                            </div>
+                          )}
+                          {!isMuted && (
+                            <div className="absolute bottom-6 right-6">
+                               <button 
+                                onClick={() => setIsMuted(true)}
+                                className="bg-black/50 backdrop-blur-md p-3 rounded-full text-white hover:bg-rose-600 transition-colors"
+                               >
+                                  <Volume2 className="w-5 h-5" />
+                               </button>
+                            </div>
+                          )}
+                        </div>
                       )}
-                      <button 
-                        onClick={() => setActiveMedia(product.image_url)}
-                        className="absolute top-4 right-4 bg-black/50 backdrop-blur-md p-2 rounded-full text-white hover:bg-rose-600 transition-colors z-30"
-                      >
-                        <X className="w-5 h-5" />
-                      </button>
+                      
+                      {/* Only show close button if there is an image to go back to */}
+                      {product.image_url && (
+                        <button 
+                          onClick={() => setActiveMedia(product.image_url)}
+                          className="absolute top-4 right-4 bg-black/50 backdrop-blur-md p-2 rounded-full text-white hover:bg-rose-600 transition-colors z-30"
+                        >
+                          <X className="w-5 h-5" />
+                        </button>
+                      )}
                     </motion.div>
                   ) : (
                     <motion.div
@@ -222,7 +277,8 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                         activeMedia === 'video' ? "border-rose-600 scale-105 shadow-lg shadow-rose-600/20" : "border-white/5 opacity-60 hover:opacity-100"
                       )}
                     >
-                       <Image src={product.image_url} alt="video" fill className="object-cover blur-[1px]" />
+                       {/* If no thumbnail, use a generic video icon background or the first image */}
+                       <Image src={product.image_url || "/api/placeholder/400/320"} alt="video" fill className="object-cover blur-[1px]" />
                        <div className="absolute inset-0 flex items-center justify-center bg-black/40">
                           <Play className="w-6 h-6 text-white" />
                        </div>
@@ -472,10 +528,12 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                       {product.video_url && (
                         <div className="space-y-4">
                            <h4 className="text-lg font-bold text-white font-alexandria">الفيديو التعريفي</h4>
-                           <div className="aspect-video rounded-2xl overflow-hidden border border-white/10 bg-black">
-                              {product.video_url.includes('youtube.com') || product.video_url.includes('youtu.be') ? (
+                           <div className="aspect-video rounded-2xl overflow-hidden border border-white/10 bg-black relative">
+                              {isYouTube ? (
                                 <iframe src={`https://www.youtube.com/embed/${product.video_url.split('v=')[1]?.split('&')[0] || product.video_url.split('/').pop()}`} className="w-full h-full border-none" allowFullScreen />
-                              ) : <video src={product.video_url} controls className="w-full h-full" />}
+                              ) : (
+                                <video src={product.video_url} controls className="w-full h-full" />
+                              )}
                            </div>
                         </div>
                       )}
