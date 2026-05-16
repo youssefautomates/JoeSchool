@@ -132,6 +132,27 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
 
       if (error) throw error;
       setProduct(data as Product);
+      
+      // Track InitiateCheckout
+      if (typeof window !== "undefined") {
+        if ((window as any).fbq) {
+          (window as any).fbq('track', 'InitiateCheckout', {
+            content_name: data.title,
+            content_ids: [data.id],
+            content_type: 'product',
+            value: data.price,
+            currency: 'EGP'
+          });
+        }
+        if ((window as any).ttq) {
+          (window as any).ttq.track('InitiateCheckout', {
+            contents: [{ content_id: data.id, content_name: data.title, price: data.price, quantity: 1 }],
+            content_type: 'product',
+            value: data.price,
+            currency: 'EGP'
+          });
+        }
+      }
     } catch (error) {
       console.error("Error fetching product:", error);
       toast.error("فشل تحميل تفاصيل المنتج للcheckout");

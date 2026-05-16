@@ -53,6 +53,28 @@ export function CartProvider({ children }: { children: ReactNode }) {
       }
       toast.success("تمت الإضافة إلى السلة بنجاح! 🛒");
       setIsCartOpen(true);
+      
+      // Track AddToCart Event
+      if (typeof window !== "undefined") {
+        if ((window as any).fbq) {
+          (window as any).fbq('track', 'AddToCart', {
+            content_name: product.title,
+            content_ids: [product.id],
+            content_type: 'product',
+            value: product.price,
+            currency: 'EGP'
+          });
+        }
+        if ((window as any).ttq) {
+          (window as any).ttq.track('AddToCart', {
+            contents: [{ content_id: product.id, content_name: product.title, price: product.price, quantity: 1 }],
+            content_type: 'product',
+            value: product.price,
+            currency: 'EGP'
+          });
+        }
+      }
+      
       return [...prev, { ...product, quantity: 1 }];
     });
   };

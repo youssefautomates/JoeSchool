@@ -37,6 +37,27 @@ function SuccessContent() {
           if (data.success) {
             setDeliveryStatus("delivered");
             console.log("[SUCCESS] ✅ Product delivered via email.", data.alreadyDelivered ? "(already sent)" : "(just sent)");
+            
+            // Fire Purchase Pixel Events (only once per session if possible, but safe here)
+            if (!data.alreadyDelivered && typeof window !== "undefined") {
+              if (window.fbq) {
+                window.fbq('track', 'Purchase', {
+                  value: data.orderValue,
+                  currency: data.currency,
+                  content_name: data.productNames,
+                  content_ids: [orderId],
+                  content_type: 'product'
+                });
+              }
+              if (window.ttq) {
+                window.ttq.track('CompletePayment', {
+                  value: data.orderValue,
+                  currency: data.currency,
+                  contents: [{ content_id: orderId, content_name: data.productNames, quantity: 1 }],
+                  content_type: 'product'
+                });
+              }
+            }
             return;
           }
           

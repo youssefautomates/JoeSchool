@@ -15,6 +15,7 @@ import { useState, useEffect, use, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
+import { ProductReviews } from "@/components/ProductReviews";
 
 import { supabase } from "@/lib/supabase";
 import { type Product, calcDiscount } from "@/lib/products";
@@ -73,6 +74,27 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
       // Update views non-blocking
       if (data) {
         supabase.rpc('increment_product_views', { product_id: data.id }).then(() => {});
+        
+        // Pixel Tracking
+        if (typeof window !== "undefined") {
+          if (window.fbq) {
+            window.fbq('track', 'ViewContent', {
+              content_name: unpacked.title,
+              content_ids: [unpacked.id],
+              content_type: 'product',
+              value: unpacked.price,
+              currency: 'EGP'
+            });
+          }
+          if (window.ttq) {
+            window.ttq.track('ViewContent', {
+              contents: [{ content_id: unpacked.id, content_name: unpacked.title, price: unpacked.price, quantity: 1 }],
+              content_type: 'product',
+              value: unpacked.price,
+              currency: 'EGP'
+            });
+          }
+        }
       }
     } catch (error) {
       console.error("Error fetching product:", error);
@@ -388,6 +410,9 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
             </div>
           </div>
         </section>
+
+        {/* Reviews Section */}
+        <ProductReviews productId={product.id} />
 
         {/* Mobile Sticky Bar - Professional & Compact */}
         <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-[#050505]/95 backdrop-blur-3xl border-t border-white/10 p-5 z-50 flex items-center justify-between gap-4 pb-safe shadow-[0_-20px_50px_rgba(0,0,0,0.9)]">

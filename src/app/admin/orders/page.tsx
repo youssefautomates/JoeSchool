@@ -43,7 +43,7 @@ export default function AdminOrders() {
         .range(from, to);
 
       if (error) throw error;
-      
+
       if (data) {
         setHasMore(data.length === PAGE_SIZE);
         if (isLoadMore) {
@@ -70,7 +70,7 @@ export default function AdminOrders() {
     toast.success(`تم إرسال رسالة التحميل مجدداً إلى ${email}`);
   };
 
-  const filteredOrders = orders.filter(order => 
+  const filteredOrders = orders.filter(order =>
     order.customer_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     order.customer_email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     order.payment_id?.includes(searchQuery)
@@ -127,8 +127,8 @@ export default function AdminOrders() {
         <div className="p-6 flex flex-col lg:flex-row gap-4 items-center justify-between" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.02)" }}>
           <div className="relative w-full lg:w-96">
             <Search className="w-4.5 h-4.5 absolute right-4 top-1/2 -translate-y-1/2" style={{ color: "#52525b" }} />
-            <Input 
-              type="text" 
+            <Input
+              type="text"
               placeholder="ابحث بالاسم، الإيميل أو رقم الطلب..."
               className="h-12 pr-12 font-cairo rounded-xl text-white"
               style={{ background: "rgba(255,255,255,0.05)", border: "1.5px solid rgba(255,255,255,0.1)", color: "#f4f4f5" }}
@@ -176,7 +176,7 @@ export default function AdminOrders() {
                 </TableRow>
               ) : (
                 filteredOrders.map((order, idx) => (
-                  <motion.tr 
+                  <motion.tr
                     key={order.id}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -208,11 +208,11 @@ export default function AdminOrders() {
                     </TableCell>
                     <TableCell>
                       <Badge className={
-                        order.status === 'completed' 
-                          ? 'bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border-emerald-500/20 px-3 py-1 rounded-lg font-cairo' 
+                        order.status === 'completed'
+                          ? 'bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border-emerald-500/20 px-3 py-1 rounded-lg font-cairo'
                           : order.status === 'pending'
-                          ? 'bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 border-amber-500/20 px-3 py-1 rounded-lg font-cairo'
-                          : 'bg-red-500/10 text-red-400 hover:bg-red-500/20 border-red-500/20 px-3 py-1 rounded-lg font-cairo'
+                            ? 'bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 border-amber-500/20 px-3 py-1 rounded-lg font-cairo'
+                            : 'bg-red-500/10 text-red-400 hover:bg-red-500/20 border-red-500/20 px-3 py-1 rounded-lg font-cairo'
                       }>
                         {order.status === 'completed' ? 'تم الدفع' : order.status === 'pending' ? 'قيد الانتظار' : 'فشل الدفع'}
                       </Badge>
@@ -233,7 +233,7 @@ export default function AdminOrders() {
                             <Eye className="w-5 h-5 ml-3 text-rose-400" /> عرض تفاصيل الطلب
                           </DropdownMenuItem>
                           {order.status === 'completed' && (
-                            <DropdownMenuItem 
+                            <DropdownMenuItem
                               className="hover:bg-zinc-800 hover:text-white cursor-pointer focus:bg-zinc-800 focus:text-white rounded-xl p-3"
                               onClick={() => handleResendEmail(order.customer_email)}
                             >
@@ -278,27 +278,27 @@ export default function AdminOrders() {
 
 function Sparkles({ className }: { className?: string }) {
   return (
-    <svg 
-      className={className} 
+    <svg
+      className={className}
       width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
     >
-      <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
-      <path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/>
+      <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
+      <path d="M5 3v4" /><path d="M19 17v4" /><path d="M3 5h4" /><path d="M17 19h4" />
     </svg>
   );
 }
 
 function Rocket({ className }: { className?: string }) {
   return (
-    <svg 
-      className={className} 
+    <svg
+      className={className}
       width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
     >
-      <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/>
-      <path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/>
-      <path d="M9 12H4s.5-1 1-4c2 0 3.27 1 4 2z"/>
-      <path d="M12 15v5s1 .5 4 1c0-2-1-3.27-2-4z"/>
-      <path d="m15 5 4 4"/>
+      <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z" />
+      <path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z" />
+      <path d="M9 12H4s.5-1 1-4c2 0 3.27 1 4 2z" />
+      <path d="M12 15v5s1 .5 4 1c0-2-1-3.27-2-4z" />
+      <path d="m15 5 4 4" />
     </svg>
   );
 }

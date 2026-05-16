@@ -325,6 +325,9 @@ export async function POST(req: Request) {
       success: true, 
       emailSent: true,
       transactionId,
+      orderValue: amountPaid,
+      currency: currency,
+      productNames: productTitles.join(", ")
     });
 
   } catch (error: any) {
