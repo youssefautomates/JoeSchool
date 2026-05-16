@@ -30,87 +30,7 @@ export default function CartCheckoutPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<"card" | "wallet">("card");
   
-  // Card Fields State
-  const [cardNumber, setCardNumber] = useState("");
-  const [expiryDate, setExpiryDate] = useState("");
-  const [cvv, setCvv] = useState("");
-  const [cardHolder, setCardHolder] = useState("");
-  const [cardErrors, setCardErrors] = useState({ number: "", expiry: "", cvv: "", holder: "" });
-  const [cardType, setCardType] = useState<"visa" | "mastercard" | "meeza" | null>(null);
-  const [saveCard, setSaveCard] = useState(true);
-  const cardNumberRef = useRef<HTMLInputElement>(null);
 
-  // Auto-focus card number when selected
-  useEffect(() => {
-    if (paymentMethod === "card" && cardNumberRef.current) {
-      setTimeout(() => cardNumberRef.current?.focus(), 100);
-    }
-  }, [paymentMethod]);
-
-  const router = useRouter();
-
-  // Card Formatting & Validation Handlers
-  const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/\D/g, "");
-    if (value.startsWith("50")) setCardType("meeza");
-    else if (value.startsWith("4")) setCardType("visa");
-    else if (value.match(/^(5[1-5]|2[2-7])/)) setCardType("mastercard");
-    else setCardType(null);
-
-    const formatted = value.match(/.{1,4}/g)?.join(" ") || value;
-    setCardNumber(formatted.substring(0, 19));
-    
-    if (value.length > 0 && value.length < 16) {
-      setCardErrors(prev => ({ ...prev, number: "رقم البطاقة غير مكتمل" }));
-    } else {
-      setCardErrors(prev => ({ ...prev, number: "" }));
-    }
-  };
-
-  const handleExpiryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let value = e.target.value.replace(/\D/g, "");
-    if (value.length >= 2) {
-      const month = parseInt(value.substring(0, 2));
-      if (month > 12) value = "12" + value.substring(2);
-      if (month === 0) value = "01" + value.substring(2);
-      value = value.substring(0, 2) + "/" + value.substring(2);
-    }
-    setExpiryDate(value.substring(0, 5));
-
-    if (value.length === 5) {
-      const [m, y] = value.split("/");
-      const expDate = new Date(2000 + parseInt(y), parseInt(m)); // End of month
-      if (expDate < new Date()) {
-        setCardErrors(prev => ({ ...prev, expiry: "البطاقة منتهية" }));
-      } else {
-        setCardErrors(prev => ({ ...prev, expiry: "" }));
-      }
-    } else if (value.length > 0) {
-      setCardErrors(prev => ({ ...prev, expiry: "صيغة غير صحيحة" }));
-    } else {
-      setCardErrors(prev => ({ ...prev, expiry: "" }));
-    }
-  };
-
-  const handleCvvChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/\D/g, "").substring(0, 4);
-    setCvv(value);
-    if (value.length > 0 && value.length < 3) {
-      setCardErrors(prev => ({ ...prev, cvv: "غير مكتمل" }));
-    } else {
-      setCardErrors(prev => ({ ...prev, cvv: "" }));
-    }
-  };
-
-  const handleCardHolderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/[0-9!@#$%^&*()_+={}\[\]|\\:;"'<>,.?\/]/g, "").toUpperCase();
-    setCardHolder(value);
-    if (value.length > 0 && value.length < 3) {
-      setCardErrors(prev => ({ ...prev, holder: "الاسم قصير جداً" }));
-    } else {
-      setCardErrors(prev => ({ ...prev, holder: "" }));
-    }
-  };
 
   const { register, handleSubmit, formState: { errors } } = useForm<CheckoutValues>({
     resolver: zodResolver(checkoutSchema),
@@ -120,45 +40,14 @@ export default function CartCheckoutPage() {
     },
   });
 
-  const validateCardFields = () => {
-    if (paymentMethod !== "card") return true;
-    let hasEmptyError = false;
-    const currentErrors = { ...cardErrors };
-    
-    if (!cardNumber) { currentErrors.number = "يرجى إدخال رقم البطاقة"; hasEmptyError = true; }
-    if (!expiryDate) { currentErrors.expiry = "مطلوب"; hasEmptyError = true; }
-    if (!cvv) { currentErrors.cvv = "مطلوب"; hasEmptyError = true; }
-    if (!cardHolder) { currentErrors.holder = "يرجى إدخال اسم حامل البطاقة"; hasEmptyError = true; }
-
-    if (hasEmptyError) {
-      setCardErrors(currentErrors);
-      return false;
-    }
-    if (cardErrors.number || cardErrors.expiry || cardErrors.cvv || cardErrors.holder) {
-      return false;
-    }
-    return true;
-  };
-
   const onInvalid = () => {
-    if (paymentMethod === "card") {
-      validateCardFields();
-      toast.error("يرجى إكمال جميع الحقول المطلوبة بشكل صحيح.");
-    }
+    toast.error("يرجى إكمال جميع الحقول المطلوبة بشكل صحيح.");
   };
 
   async function onSubmit(data: CheckoutValues) {
     if (items.length === 0) {
       toast.error("السلة فارغة!");
       return;
-    }
-
-    if (paymentMethod === "card") {
-      const isValid = validateCardFields();
-      if (!isValid) {
-        toast.error("توجد أخطاء في بيانات البطاقة، يرجى مراجعتها.");
-        return;
-      }
     }
 
     setIsLoading(true);
@@ -170,12 +59,6 @@ export default function CartCheckoutPage() {
         firstName: data.fullName.split(" ")[0],
         lastName: data.fullName.split(" ").slice(1).join(" ") || "Customer",
         paymentMethod: paymentMethod, 
-        cardData: paymentMethod === "card" ? {
-          cardNumber,
-          expiry: expiryDate,
-          cvv,
-          cardHolder
-        } : undefined
       };
 
       const response = await fetch("/api/paymob/initiate-cart", {
@@ -188,13 +71,8 @@ export default function CartCheckoutPage() {
 
       if (result.checkoutUrl) {
         clearCart();
-        if (paymentMethod === "wallet") {
-          toast.success("جاري تحويلك لمحفظتك الإلكترونية...");
-          window.location.href = result.checkoutUrl; 
-        } else {
-          toast.success("جاري تأكيد عملية الدفع...");
-          window.location.href = result.checkoutUrl; 
-        }
+        toast.success("جاري تحويلك لبوابة الدفع الآمنة...");
+        window.location.href = result.checkoutUrl; 
       } else if (result.success) {
          clearCart();
          toast.success("تم الدفع بنجاح!");
@@ -332,99 +210,6 @@ export default function CartCheckoutPage() {
                     </div>
                   </div>
 
-                  {/* Inline Card Fields (Animated transition) */}
-                  <div className={cn(
-                    "transition-all duration-500 ease-in-out overflow-hidden border-t border-white/5",
-                    paymentMethod === "card" ? "max-h-[600px] opacity-100 pt-6 mt-6" : "max-h-0 opacity-0 pt-0 mt-0 border-transparent pointer-events-none"
-                  )}>
-                    <div className="mb-4">
-                      <h3 className="font-cairo font-bold text-white flex items-center gap-2 text-sm">
-                        <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                        بيانات البطاقة
-                      </h3>
-                    </div>
-
-                    <div className="space-y-3">
-                      <div className="space-y-1.5">
-                        <Label className="font-cairo text-xs text-zinc-400">رقم البطاقة</Label>
-                        <div className="relative">
-                          <Input 
-                            ref={cardNumberRef}
-                            value={cardNumber}
-                            onChange={handleCardNumberChange}
-                            placeholder="0000 0000 0000 0000" 
-                            dir="ltr"
-                            maxLength={19}
-                            inputMode="numeric"
-                            className={cn("h-14 rounded-xl bg-white/5 border-white/5 text-white font-mono text-lg tracking-widest hover:bg-white/[0.07] focus:bg-white/10 focus:border-white/20 focus:ring-1 focus:ring-white/20 transition-all", 
-                              cardErrors.number ? "border-red-500/50 focus:ring-red-500" : (cardNumber.length === 19 ? "border-emerald-500/50 focus:ring-emerald-500" : "")
-                            )}
-                              disabled={isLoading}
-                            />
-                            {cardNumber.length === 19 && !cardErrors.number && <CheckCircle2 className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-emerald-500" />}
-                          </div>
-                          {cardErrors.number && <p className="text-xs text-red-400 font-cairo flex items-center gap-1 mt-1"><ShieldAlert className="w-3 h-3" /> {cardErrors.number}</p>}
-                        </div>
-
-                      <div className="grid grid-cols-2 gap-3">
-                        <div className="space-y-1.5">
-                          <Label className="font-cairo text-xs text-zinc-400">تاريخ الانتهاء</Label>
-                          <Input 
-                            value={expiryDate}
-                            onChange={handleExpiryChange}
-                            placeholder="MM/YY" 
-                            dir="ltr"
-                            maxLength={5}
-                            inputMode="numeric"
-                            className={cn("h-12 rounded-xl bg-white/5 border-white/5 text-white font-mono text-base text-center hover:bg-white/[0.07] focus:bg-white/10 focus:border-white/20 focus:ring-1 focus:ring-white/20 transition-all", 
-                              cardErrors.expiry ? "border-red-500/50 focus:ring-red-500" : (expiryDate.length === 5 ? "border-emerald-500/50 focus:ring-emerald-500" : "")
-                            )}
-                            disabled={isLoading}
-                          />
-                          {cardErrors.expiry && <p className="text-[10px] text-red-400 font-cairo flex items-center gap-1 mt-1"><ShieldAlert className="w-3 h-3" /> {cardErrors.expiry}</p>}
-                        </div>
-                        <div className="space-y-1.5">
-                          <Label className="font-cairo text-xs text-zinc-400">رمز الأمان (CVV)</Label>
-                          <Input 
-                            value={cvv}
-                            onChange={handleCvvChange}
-                            placeholder="123" 
-                            type="password"
-                            dir="ltr"
-                            maxLength={3}
-                            inputMode="numeric"
-                            className={cn("h-12 rounded-xl bg-white/5 border-white/5 text-white font-mono text-base text-center hover:bg-white/[0.07] focus:bg-white/10 focus:border-white/20 focus:ring-1 focus:ring-white/20 transition-all", 
-                              cardErrors.cvv ? "border-red-500/50 focus:ring-red-500" : (cvv.length === 3 ? "border-emerald-500/50 focus:ring-emerald-500" : "")
-                            )}
-                              disabled={isLoading}
-                            />
-                            {cardErrors.cvv && <p className="text-xs text-red-400 font-cairo flex items-center gap-1 mt-1"><ShieldAlert className="w-3 h-3" /> {cardErrors.cvv}</p>}
-                          </div>
-                        </div>
-
-                      <div className="space-y-1.5">
-                        <Label className="font-cairo text-xs text-zinc-400">اسم حامل البطاقة</Label>
-                        <Input 
-                          value={cardHolder}
-                          onChange={handleCardHolderChange}
-                          placeholder="الاسم كما هو مكتوب على البطاقة" 
-                          className={cn("h-12 rounded-xl bg-white/5 border-white/5 text-white text-sm font-cairo hover:bg-white/[0.07] focus:bg-white/10 focus:border-white/20 focus:ring-1 focus:ring-white/20 transition-all", 
-                            cardErrors.holder ? "border-red-500/50 focus:ring-red-500" : (cardHolder.length >= 3 ? "border-emerald-500/50 focus:ring-emerald-500" : "")
-                          )}
-                          disabled={isLoading}
-                        />
-                        {cardErrors.holder && <p className="text-[10px] text-red-400 font-cairo flex items-center gap-1 mt-1"><ShieldAlert className="w-3 h-3" /> {cardErrors.holder}</p>}
-                      </div>
-
-                      <div className="flex items-center gap-2 pt-2 cursor-pointer" onClick={() => setSaveCard(!saveCard)}>
-                        <div className={cn("w-4 h-4 rounded border flex items-center justify-center transition-all", saveCard ? "bg-rose-600 border-rose-600" : "border-white/20 bg-transparent")}>
-                          {saveCard && <CheckCircle2 className="w-3 h-3 text-white" />}
-                        </div>
-                        <Label className="font-cairo text-xs text-zinc-400 cursor-pointer select-none">حفظ بيانات البطاقة للمدفوعات القادمة بأمان</Label>
-                      </div>
-                    </div>
-                  </div>
-
                   <div className="pt-6 border-t border-white/5 mt-8">
                     <div className="flex flex-wrap items-center justify-center gap-4 md:gap-6 mb-6 opacity-50 hover:opacity-80 transition-opacity">
                       <div className="flex items-center gap-1.5"><Lock className="w-3.5 h-3.5"/><span className="text-[10px] uppercase tracking-widest font-bold">SSL Secure</span></div>
@@ -450,11 +235,7 @@ export default function CartCheckoutPage() {
                           جاري تجهيز الدفع...
                         </>
                       ) : (
-                        paymentMethod === "card" ? (
-                          <>إتمام الدفع الآمن <Lock className="w-5 h-5 mr-3 opacity-80" /></>
-                        ) : (
-                          <>إتمام الطلب بواسطة المحفظة</>
-                        )
+                        <>إتمام الدفع الآمن <Lock className="w-5 h-5 mr-3 opacity-80" /></>
                       )}
                     </Button>
                   </div>

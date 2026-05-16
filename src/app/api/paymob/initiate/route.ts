@@ -69,135 +69,38 @@ export async function POST(req: Request) {
     };
 
     // ==========================================
-    // WALLET FLOW: USE INTENTION API & UNIFIED CHECKOUT REDIRECT
+    // UNIFIED CHECKOUT FLOW (CARD & WALLET)
     // ==========================================
-    if (paymentMethod === "wallet") {
-      if (!secretKey) throw new Error("PAYMOB_SECRET_KEY is missing for Wallet Intention API.");
-      console.log(`[WALLET_INTEGRATION] Selected Wallet Integration: ${envWalletIntegrationId}`);
-      
-      const intentionResponse = await fetch("https://accept.paymob.com/v1/intention/", {
-        method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "Authorization": `Token ${secretKey}`
-        },
-        body: JSON.stringify({
-          amount: amountCents,
-          currency: "EGP",
-          payment_methods: [envWalletIntegrationId],
-          items: [{ name: product.title, amount: amountCents, description: "Digital Purchase", quantity: 1 }],
-          billing_data: billingData,
-          extras: { supabase_order_id: dbOrder.id }
-        }),
-      });
+    if (!secretKey) throw new Error("PAYMOB_SECRET_KEY is missing for Intention API.");
+    
+    const integrationId = paymentMethod === "wallet" ? envWalletIntegrationId : envCardIntegrationId;
+    console.log(`[PAYMOB_INTEGRATION] Selected Integration: ${integrationId} for method: ${paymentMethod}`);
+    
+    const intentionResponse = await fetch("https://accept.paymob.com/v1/intention/", {
+      method: "POST",
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Token ${secretKey}`
+      },
+      body: JSON.stringify({
+        amount: amountCents,
+        currency: "EGP",
+        payment_methods: [integrationId],
+        items: [{ name: product.title, amount: amountCents, description: "Digital Purchase", quantity: 1 }],
+        billing_data: billingData,
+        extras: { supabase_order_id: dbOrder.id }
+      }),
+    });
 
-      const intentionData = await intentionResponse.json();
-      if (!intentionResponse.ok) throw new Error(`Wallet Intention failed: ${JSON.stringify(intentionData)}`);
+    const intentionData = await intentionResponse.json();
+    if (!intentionResponse.ok) throw new Error(`Intention failed: ${JSON.stringify(intentionData)}`);
 
-      await supabase.from("orders").update({ payment_id: intentionData.id?.toString() }).eq("id", dbOrder.id);
-      
-      return NextResponse.json({
-        checkoutUrl: `https://accept.paymob.com/unifiedcheckout/?publicKey=${publicKey}&clientSecret=${intentionData.client_secret}`,
-        orderId: dbOrder.id
-      });
-    }
-
-    // ==========================================
-    // CARD FLOW: SERVER-TO-SERVER (CLASSIC API)
-    // ==========================================
-    if (paymentMethod === "card") {
-      if (!apiKey) throw new Error("PAYMOB_API_KEY is missing for Card S2S Flow.");
-      if (!cardData) throw new Error("Card data is required for inline processing.");
-      
-      console.log(`[CARD_INTEGRATION] Processing Inline Card S2S: ${envCardIntegrationId}`);
-
-      // 1. Auth
-      const authResponse = await fetch("https://accept.paymob.com/api/auth/tokens", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ api_key: apiKey }),
-      });
-      if (!authResponse.ok) throw new Error(`Auth failed`);
-      const authToken = (await authResponse.json()).token;
-
-      // 2. Order
-      const orderResponse = await fetch("https://accept.paymob.com/api/ecommerce/orders", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          auth_token: authToken,
-          delivery_needed: "false",
-          amount_cents: amountCents.toString(),
-          currency: "EGP",
-          items: [],
-        }),
-      });
-      if (!orderResponse.ok) throw new Error(`Order failed`);
-      const paymobOrderId = (await orderResponse.json()).id;
-
-      await supabase.from("orders").update({ payment_id: String(paymobOrderId) }).eq("id", dbOrder.id);
-
-      // 3. Payment Key
-      const paymentKeyResponse = await fetch("https://accept.paymob.com/api/acceptance/payment_keys", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          auth_token: authToken,
-          amount_cents: amountCents.toString(), 
-          expiration: 3600,
-          order_id: paymobOrderId.toString(),
-          billing_data: billingData,
-          currency: "EGP",
-          integration_id: envCardIntegrationId,
-        }),
-      });
-      if (!paymentKeyResponse.ok) throw new Error(`Payment key failed`);
-      const paymentKey = (await paymentKeyResponse.json()).token;
-
-      // Paymob API expects "CARD" as the subtype for all credit/debit cards
-      const detectedSubtype = "CARD";
-      const cleanCard = cardData.cardNumber.replace(/\s/g, '');
-
-      const payPayload = {
-        source: {
-          identifier: cleanCard,
-          subtype: detectedSubtype,
-          cvn: cardData.cvv,
-          expiry_month: cardData.expiry.split("/")[0],
-          expiry_year: cardData.expiry.split("/")[1],
-          name: cardData.cardHolder || `${firstName} ${lastName}`,
-          cardholder_name: cardData.cardHolder || `${firstName} ${lastName}`
-        },
-        payment_token: paymentKey
-      };
-
-      console.log("[FINAL_PAYLOAD] Submitting to Paymob:", JSON.stringify({ ...payPayload, source: { ...payPayload.source, identifier: "MASKED", cvn: "***" } }, null, 2));
-      
-      const payResponse = await fetch("https://accept.paymob.com/api/acceptance/payments/pay", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payPayload),
-      });
-      
-      const payData = await payResponse.json();
-      console.log("[CARD_INTEGRATION] Pay Response:", payData.success, payData.redirection_url ? "Requires 3DS OTP" : "Direct Success");
-
-      if (!payResponse.ok && !payData.redirection_url) {
-        throw new Error(`Payment processing failed: ${payData.message || JSON.stringify(payData)}`);
-      }
-
-      // If it requires 3DS OTP
-      if (payData.redirection_url) {
-        return NextResponse.json({ checkoutUrl: payData.redirection_url, orderId: dbOrder.id });
-      }
-
-      // Direct Success
-      if (payData.success) {
-        return NextResponse.json({ success: true, checkoutUrl: `/success?order_id=${dbOrder.id}` });
-      }
-
-      throw new Error(`Payment declined: ${payData.data?.message || 'Unknown error'}`);
-    }
+    await supabase.from("orders").update({ payment_id: intentionData.id?.toString() }).eq("id", dbOrder.id);
+    
+    return NextResponse.json({
+      checkoutUrl: `https://accept.paymob.com/unifiedcheckout/?publicKey=${publicKey}&clientSecret=${intentionData.client_secret}`,
+      orderId: dbOrder.id
+    });
 
     throw new Error("Invalid Payment Method");
   } catch (error: any) {
