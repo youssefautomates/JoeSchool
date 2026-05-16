@@ -109,23 +109,23 @@ function ProductFormDialog({ open, onClose, onSaved, initial }: { open: boolean;
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="bg-[#0a0a0f] border-white/10 text-white sm:max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl">
+      <DialogContent className="border-white/8 text-white sm:max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl" style={{ background: "#0d0d1a", border: "1px solid rgba(255,255,255,0.08)" }}>
         <DialogHeader>
-          <DialogTitle className="font-alexandria text-2xl">{initial ? "تعديل المنتج" : "منتج جديد"}</DialogTitle>
+          <DialogTitle className="font-alexandria text-2xl" style={{ color: "#ffffff" }}>{initial ? "تعديل المنتج" : "منتج جديد"}</DialogTitle>
         </DialogHeader>
         <div className="grid gap-4 py-4 font-cairo">
           <div className="space-y-1.5">
-            <Label className="text-zinc-400">اسم المنتج *</Label>
-            <Input value={form.title} onChange={e => setForm({...form, title: e.target.value})} className="bg-zinc-900 border-white/10 text-white" />
+            <Label className="text-sm font-semibold" style={{ color: "#d4d4d8" }}>اسم المنتج *</Label>
+            <Input value={form.title} onChange={e => setForm({...form, title: e.target.value})} className="h-11 rounded-xl text-white" style={{ background: "rgba(255,255,255,0.05)", border: "1.5px solid rgba(255,255,255,0.1)" }} />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label className="text-zinc-400">السعر *</Label>
-              <Input type="number" value={form.price} onChange={e => setForm({...form, price: e.target.value})} className="bg-zinc-900 border-white/10 text-white" />
+              <Label className="text-sm font-semibold" style={{ color: "#d4d4d8" }}>السعر *</Label>
+              <Input type="number" value={form.price} onChange={e => setForm({...form, price: e.target.value})} className="h-11 rounded-xl text-white" style={{ background: "rgba(255,255,255,0.05)", border: "1.5px solid rgba(255,255,255,0.1)" }} />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-zinc-400">الحالة</Label>
-              <select value={form.status} onChange={e => setForm({...form, status: e.target.value as any})} className="w-full h-10 bg-zinc-900 border border-white/10 rounded-md px-3 text-white">
+              <Label className="text-sm font-semibold" style={{ color: "#d4d4d8" }}>الحالة</Label>
+              <select value={form.status} onChange={e => setForm({...form, status: e.target.value as any})} className="w-full h-11 rounded-xl px-3 text-white" style={{ background: "rgba(255,255,255,0.05)", border: "1.5px solid rgba(255,255,255,0.1)" }}>
                 <option value="نشط">نشط</option>
                 <option value="مسودة">مسودة</option>
                 <option value="مخفي">مخفي</option>
@@ -133,22 +133,22 @@ function ProductFormDialog({ open, onClose, onSaved, initial }: { open: boolean;
             </div>
           </div>
           <div className="space-y-1.5">
-            <Label className="text-zinc-400">وصف قصير</Label>
-            <Input value={form.short_description} onChange={e => setForm({...form, short_description: e.target.value})} className="bg-zinc-900 border-white/10 text-white" />
+            <Label className="text-sm font-semibold" style={{ color: "#d4d4d8" }}>وصف قصير</Label>
+            <Input value={form.short_description} onChange={e => setForm({...form, short_description: e.target.value})} className="h-11 rounded-xl text-white" style={{ background: "rgba(255,255,255,0.05)", border: "1.5px solid rgba(255,255,255,0.1)" }} />
           </div>
           <div className="space-y-1.5">
-            <Label className="text-zinc-400">رابط الصورة</Label>
-            <Input value={form.image_url} onChange={e => setForm({...form, image_url: e.target.value})} dir="ltr" className="bg-zinc-900 border-white/10 text-white" />
+            <Label className="text-sm font-semibold" style={{ color: "#d4d4d8" }}>رابط الصورة</Label>
+            <Input value={form.image_url} onChange={e => setForm({...form, image_url: e.target.value})} dir="ltr" className="h-11 rounded-xl text-white" style={{ background: "rgba(255,255,255,0.05)", border: "1.5px solid rgba(255,255,255,0.1)" }} />
           </div>
           <div className="space-y-1.5">
-            <Label className="text-zinc-400">رابط الملف</Label>
-            <Input value={form.file_url} onChange={e => setForm({...form, file_url: e.target.value})} dir="ltr" className="bg-zinc-900 border-white/10 text-white" />
+            <Label className="text-sm font-semibold" style={{ color: "#d4d4d8" }}>رابط الملف</Label>
+            <Input value={form.file_url} onChange={e => setForm({...form, file_url: e.target.value})} dir="ltr" className="h-11 rounded-xl text-white" style={{ background: "rgba(255,255,255,0.05)", border: "1.5px solid rgba(255,255,255,0.1)" }} />
           </div>
         </div>
         <DialogFooter className="gap-2">
-          <Button variant="outline" onClick={onClose} className="border-white/10 text-white hover:bg-white/5">إلغاء</Button>
-          <Button onClick={handleSave} disabled={saving} className="bg-rose-600 hover:bg-rose-700 text-white">
-            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : "حفظ"}
+          <Button variant="outline" onClick={onClose} className="border-white/10 text-white hover:bg-white/5 rounded-xl">إلغاء</Button>
+          <Button onClick={handleSave} disabled={saving} className="text-white rounded-xl" style={{ background: "linear-gradient(135deg, #D6004B, #ff2d6b)", boxShadow: "0 4px 16px rgba(214,0,75,0.3)" }}>
+            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : "حفظ المنتج"}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -245,16 +245,20 @@ export default function AdminProductsPage() {
   }, []); // Strictly empty dependency array
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500 p-2 md:p-8">
+    <div className="space-y-6 animate-in fade-in duration-500 p-2 md:p-8" style={{ background: "#080810", minHeight: "100vh" }}>
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-alexandria font-bold text-white">المنتجات</h1>
-          <p className="text-zinc-500 font-cairo text-sm mt-1">نسخة مستقرة (Stable Architecture)</p>
+          <h1 className="text-3xl font-alexandria font-black" style={{ color: "#ffffff" }}>المنتجات</h1>
+          <p className="font-cairo text-sm mt-1" style={{ color: "#52525b" }}>نسخة مستقرة · Stable Architecture</p>
         </div>
-        <Button onClick={() => setAddOpen(true)} className="bg-rose-600 hover:bg-rose-700 text-white font-cairo rounded-xl shadow-lg shadow-rose-600/20">
-          <Plus className="w-5 h-5 ml-2" /> إضافة منتج
-        </Button>
+        <button
+          onClick={() => setAddOpen(true)}
+          className="flex items-center gap-2 px-5 h-11 rounded-xl font-cairo font-bold text-white text-sm transition-all active:scale-95"
+          style={{ background: "linear-gradient(135deg, #D6004B, #ff2d6b)", boxShadow: "0 4px 20px rgba(214,0,75,0.35)" }}
+        >
+          <Plus className="w-4 h-4" /> إضافة منتج
+        </button>
       </div>
 
       {error && (
@@ -264,15 +268,15 @@ export default function AdminProductsPage() {
       )}
 
       {/* Stable Table */}
-      <Card className="bg-zinc-900/50 border-white/5 overflow-hidden shadow-2xl rounded-2xl">
+      <div className="overflow-hidden rounded-2xl" style={{ background: "rgba(16,16,26,0.8)", border: "1px solid rgba(255,255,255,0.07)", boxShadow: "0 16px 48px rgba(0,0,0,0.4)" }}>
         <div className="overflow-x-auto">
           <Table>
-            <TableHeader className="bg-white/[0.03]">
-              <TableRow className="border-white/5 hover:bg-transparent">
-                <TableHead className="font-cairo text-zinc-500 text-right py-5 pr-6">المنتج</TableHead>
-                <TableHead className="font-cairo text-zinc-500 text-right">السعر</TableHead>
-                <TableHead className="font-cairo text-zinc-500 text-right">المبيعات</TableHead>
-                <TableHead className="font-cairo text-zinc-500 text-right">الحالة</TableHead>
+            <TableHeader>
+              <TableRow className="hover:bg-transparent" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.02)" }}>
+                <TableHead className="font-cairo text-right py-5 pr-6 text-xs uppercase tracking-widest font-bold" style={{ color: "#71717a" }}>المنتج</TableHead>
+                <TableHead className="font-cairo text-right text-xs uppercase tracking-widest font-bold" style={{ color: "#71717a" }}>السعر</TableHead>
+                <TableHead className="font-cairo text-right text-xs uppercase tracking-widest font-bold" style={{ color: "#71717a" }}>المبيعات</TableHead>
+                <TableHead className="font-cairo text-right text-xs uppercase tracking-widest font-bold" style={{ color: "#71717a" }}>الحالة</TableHead>
                 <TableHead className="w-16" />
               </TableRow>
             </TableHeader>
@@ -339,7 +343,7 @@ export default function AdminProductsPage() {
             </TableBody>
           </Table>
         </div>
-      </Card>
+      </div>
 
       {/* Modals */}
       <ProductFormDialog open={addOpen} onClose={() => setAddOpen(false)} onSaved={fetchProducts} />

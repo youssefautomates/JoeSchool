@@ -88,91 +88,75 @@ export default function AdminOrders() {
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 p-2 md:p-8" style={{ background: "#080810", minHeight: "100vh" }}>
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
-          <h1 className="text-4xl font-alexandria font-black text-white mb-3 tracking-tight">لوحة تحكم الطلبات</h1>
-          <p className="text-zinc-400 font-cairo text-lg">إدارة المبيعات، تتبع حالات الدفع، وأتمتة تسليم المنتجات الرقمية.</p>
+          <h1 className="text-4xl font-alexandria font-black tracking-tight mb-2" style={{ color: "#ffffff" }}>لوحة تحكم الطلبات</h1>
+          <p className="font-cairo" style={{ color: "#71717a" }}>إدارة المبيعات، تتبع حالات الدفع، وأتمتة تسليم المنتجات الرقمية.</p>
         </div>
-        <Button 
-          onClick={() => { setPage(1); fetchOrders(1); }} 
-          variant="outline" 
-          className="border-zinc-800 text-zinc-300 hover:bg-zinc-800 hover:text-white font-cairo h-12 px-6 rounded-xl transition-all"
+        <button
+          onClick={() => { setPage(1); fetchOrders(1); }}
+          className="flex items-center gap-2 px-6 h-12 rounded-xl font-cairo font-semibold text-sm transition-all active:scale-95"
+          style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "#d4d4d8" }}
         >
-          {isLoading ? <Loader2 className="w-5 h-5 animate-spin ml-2" /> : <RefreshCw className="w-5 h-5 ml-2" />}
+          {isLoading ? <Loader2 className="w-5 h-5 animate-spin" style={{ color: "#D6004B" }} /> : <RefreshCw className="w-5 h-5" />}
           تحديث البيانات
-        </Button>
+        </button>
       </div>
 
-      {/* Stats Quick View */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="bg-zinc-900 border-zinc-800 p-6 rounded-2xl relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-rose-500/10 rounded-full blur-3xl group-hover:bg-rose-500/20 transition-all" />
-          <p className="text-zinc-500 font-cairo mb-1">إجمالي المبيعات</p>
-          <h3 className="text-3xl font-alexandria font-black text-white">
-            {orders.filter(o => o.status === 'completed').reduce((acc, curr) => acc + parseFloat(curr.amount || 0), 0).toFixed(2)} ج.م
-          </h3>
-          <div className="mt-4 flex items-center text-emerald-400 text-sm font-cairo">
-            <Sparkles className="w-4 h-4 ml-1" />
-            +12% عن الشهر الماضي
+      {/* Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        {[
+          { label: "إجمالي المبيعات", value: `${orders.filter(o => o.status === 'completed').reduce((acc, curr) => acc + parseFloat(curr.amount || 0), 0).toFixed(2)} ج.م`, sub: "+12% عن الشهر الماضي", accent: "#D6004B", glow: "rgba(214,0,75,0.12)" },
+          { label: "الطلبات المكتملة", value: orders.filter(o => o.status === 'completed').length, sub: `من إجمالي ${orders.length} طلب`, accent: "#10b981", glow: "rgba(16,185,129,0.12)" },
+          { label: "معدل التحويل", value: `${orders.length > 0 ? ((orders.filter(o => o.status === 'completed').length / orders.length) * 100).toFixed(1) : 0}%`, sub: "أداء مستقر", accent: "#f59e0b", glow: "rgba(245,158,11,0.12)" },
+        ].map((stat) => (
+          <div key={stat.label} className="rounded-2xl p-6 relative overflow-hidden" style={{ background: "rgba(16,16,26,0.85)", border: "1px solid rgba(255,255,255,0.07)", boxShadow: "0 8px 32px rgba(0,0,0,0.3)" }}>
+            <div className="absolute top-0 right-0 w-28 h-28 rounded-full blur-3xl pointer-events-none" style={{ background: stat.glow }} />
+            <p className="font-cairo mb-1 text-sm relative z-10" style={{ color: "#71717a" }}>{stat.label}</p>
+            <h3 className="text-3xl font-alexandria font-black relative z-10" style={{ color: "#ffffff" }}>{stat.value}</h3>
+            <div className="mt-3 flex items-center text-sm font-cairo relative z-10" style={{ color: stat.accent }}>
+              <Sparkles className="w-4 h-4 ml-1" />
+              {stat.sub}
+            </div>
           </div>
-        </Card>
-        <Card className="bg-zinc-900 border-zinc-800 p-6 rounded-2xl relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/10 rounded-full blur-3xl group-hover:bg-emerald-500/20 transition-all" />
-          <p className="text-zinc-500 font-cairo mb-1">الطلبات المكتملة</p>
-          <h3 className="text-3xl font-alexandria font-black text-white">
-            {orders.filter(o => o.status === 'completed').length}
-          </h3>
-          <div className="mt-4 flex items-center text-zinc-500 text-sm font-cairo">
-            من إجمالي {orders.length} طلب
-          </div>
-        </Card>
-        <Card className="bg-zinc-900 border-zinc-800 p-6 rounded-2xl relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-amber-500/10 rounded-full blur-3xl group-hover:bg-amber-500/20 transition-all" />
-          <p className="text-zinc-500 font-cairo mb-1">معدل التحويل</p>
-          <h3 className="text-3xl font-alexandria font-black text-white">
-            {orders.length > 0 ? ((orders.filter(o => o.status === 'completed').length / orders.length) * 100).toFixed(1) : 0}%
-          </h3>
-          <div className="mt-4 flex items-center text-amber-400 text-sm font-cairo">
-            أداء مستقر
-          </div>
-        </Card>
+        ))}
       </div>
 
-      <Card className="bg-zinc-900 border-zinc-800 shadow-2xl overflow-hidden rounded-[2rem]">
-        <div className="p-6 border-b border-zinc-800 bg-zinc-900/50 backdrop-blur-xl flex flex-col lg:flex-row gap-6 items-center justify-between">
+      <div className="overflow-hidden rounded-[2rem]" style={{ background: "rgba(16,16,26,0.85)", border: "1px solid rgba(255,255,255,0.07)", boxShadow: "0 24px 64px rgba(0,0,0,0.4)" }}>
+        <div className="p-6 flex flex-col lg:flex-row gap-4 items-center justify-between" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.02)" }}>
           <div className="relative w-full lg:w-96">
-            <Search className="w-5 h-5 absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500" />
+            <Search className="w-4.5 h-4.5 absolute right-4 top-1/2 -translate-y-1/2" style={{ color: "#52525b" }} />
             <Input 
               type="text" 
-              placeholder="ابحث بالاسم، الإيميل أو رقم الطلب..." 
-              className="bg-zinc-950 border-zinc-800 pl-4 pr-12 text-white font-cairo h-14 rounded-2xl focus:ring-rose-600 focus:border-rose-600 transition-all text-lg shadow-inner"
+              placeholder="ابحث بالاسم، الإيميل أو رقم الطلب..."
+              className="h-12 pr-12 font-cairo rounded-xl text-white"
+              style={{ background: "rgba(255,255,255,0.05)", border: "1.5px solid rgba(255,255,255,0.1)", color: "#f4f4f5" }}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-          
           <div className="flex items-center gap-3 w-full lg:w-auto">
-            <Button variant="outline" className="border-zinc-800 text-zinc-300 hover:bg-zinc-800 h-14 rounded-2xl font-cairo flex-1 lg:flex-none px-6">
-              <Filter className="w-5 h-5 ml-2" />
+            <button className="flex items-center gap-2 px-5 h-12 rounded-xl font-cairo text-sm transition-all" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "#d4d4d8" }}>
+              <Filter className="w-4 h-4" />
               تصفية النتائج
-            </Button>
-            <Button variant="outline" className="border-zinc-800 text-zinc-300 hover:bg-zinc-800 h-14 rounded-2xl font-cairo flex-1 lg:flex-none px-6">
-              <Download className="w-5 h-5 ml-2" />
+            </button>
+            <button className="flex items-center gap-2 px-5 h-12 rounded-xl font-cairo text-sm transition-all" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "#d4d4d8" }}>
+              <Download className="w-4 h-4" />
               تصدير CSV
-            </Button>
+            </button>
           </div>
         </div>
 
         <div className="overflow-x-auto">
           <Table>
-            <TableHeader className="bg-zinc-950/30">
-              <TableRow className="border-zinc-800 hover:bg-transparent">
-                <TableHead className="text-right text-zinc-400 font-cairo py-6 pr-8 uppercase text-xs tracking-widest">تفاصيل الطلب</TableHead>
-                <TableHead className="text-right text-zinc-400 font-cairo py-6 uppercase text-xs tracking-widest">العميل</TableHead>
-                <TableHead className="text-right text-zinc-400 font-cairo py-6 uppercase text-xs tracking-widest">المنتج</TableHead>
-                <TableHead className="text-right text-zinc-400 font-cairo py-6 uppercase text-xs tracking-widest">الحالة</TableHead>
-                <TableHead className="text-right text-zinc-400 font-cairo py-6 uppercase text-xs tracking-widest">التاريخ</TableHead>
+            <TableHeader>
+              <TableRow className="hover:bg-transparent" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.01)" }}>
+                <TableHead className="text-right font-cairo py-5 pr-8 text-xs uppercase tracking-widest font-bold" style={{ color: "#71717a" }}>تفاصيل الطلب</TableHead>
+                <TableHead className="text-right font-cairo py-5 text-xs uppercase tracking-widest font-bold" style={{ color: "#71717a" }}>العميل</TableHead>
+                <TableHead className="text-right font-cairo py-5 text-xs uppercase tracking-widest font-bold" style={{ color: "#71717a" }}>المنتج</TableHead>
+                <TableHead className="text-right font-cairo py-5 text-xs uppercase tracking-widest font-bold" style={{ color: "#71717a" }}>الحالة</TableHead>
+                <TableHead className="text-right font-cairo py-5 text-xs uppercase tracking-widest font-bold" style={{ color: "#71717a" }}>التاريخ</TableHead>
                 <TableHead className="w-[80px]"></TableHead>
               </TableRow>
             </TableHeader>
@@ -272,9 +256,9 @@ export default function AdminOrders() {
             </TableBody>
           </Table>
         </div>
-      </Card>
+      </div>
 
-      <div className="bg-rose-600/10 border border-rose-500/20 rounded-3xl p-8 flex flex-col md:flex-row items-center justify-between gap-6">
+      <div className="rounded-3xl p-8 flex flex-col md:flex-row items-center justify-between gap-6" style={{ background: "rgba(214,0,75,0.07)", border: "1px solid rgba(214,0,75,0.2)" }}>
         <div className="flex items-center gap-6">
           <div className="w-16 h-16 bg-rose-600 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-rose-600/20">
             <Rocket className="w-8 h-8" />
