@@ -188,23 +188,44 @@ export async function POST(req: Request) {
       });
       
       const payData = await payResponse.json();
-      console.log("[CARD_INTEGRATION] Pay Response:", payData.success, payData.redirection_url ? "Requires 3DS OTP" : "Direct Success");
+      
+      const redirectUrl = payData.redirection_url || payData.redirect_url || payData.iframe_redirection_url;
+      console.log("[CARD_CART_INTEGRATION] FULL Pay Response:", JSON.stringify({
+        status: payResponse.status,
+        success: payData.success,
+        pending: payData.pending,
+        is_3d_secure: payData.is_3d_secure,
+        redirection_url: payData.redirection_url,
+        redirect_url: payData.redirect_url,
+        iframe_redirection_url: payData.iframe_redirection_url,
+        data_message: payData.data?.message,
+        txn_response_code: payData.data?.txn_response_code,
+        message: payData.message,
+        id: payData.id,
+      }, null, 2));
 
-      if (!payResponse.ok && !payData.redirection_url) {
+      if (!payResponse.ok && !redirectUrl) {
         throw new Error(`Payment processing failed: ${payData.message || JSON.stringify(payData)}`);
       }
 
-      // If it requires 3DS OTP
-      if (payData.redirection_url) {
-        return NextResponse.json({ checkoutUrl: payData.redirection_url, orderId: dbOrders[0].id });
+      if (redirectUrl) {
+        return NextResponse.json({ checkoutUrl: redirectUrl, orderId: dbOrders[0].id });
       }
 
-      // Direct Success
       if (payData.success) {
         return NextResponse.json({ success: true, checkoutUrl: `/success?order_id=${dbOrders[0].id}` });
       }
 
-      throw new Error(`Payment declined: ${payData.data?.message || 'Unknown error'}`);
+      if (payData.pending) {
+        return NextResponse.json({ success: true, checkoutUrl: `/success?order_id=${dbOrders[0].id}&pending=true` });
+      }
+
+      const declineReason = payData.data?.message 
+        || payData.data?.txn_response_code 
+        || payData.message 
+        || payData.detail 
+        || (payData.data ? JSON.stringify(payData.data) : 'Unknown error');
+      throw new Error(`Payment declined: ${declineReason}`);
     }
 
     throw new Error("Invalid Payment Method");
