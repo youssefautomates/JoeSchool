@@ -1,13 +1,17 @@
-import { supabase } from "./supabase";
+import { createClient } from "@supabase/supabase-js";
 
-/**
+// Use service role key to bypass RLS for KV operations
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);/**
  * A Key-Value store implementation using the existing `products` table.
  * This ensures no database migrations are needed while providing a robust, deploy-safe storage.
  */
 
 export async function getKV<T>(key: string): Promise<T | null> {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('products')
       .select('description')
       .eq('slug', `kv-${key}`)
@@ -24,20 +28,23 @@ export async function getKV<T>(key: string): Promise<T | null> {
 export async function setKV<T>(key: string, value: T): Promise<boolean> {
   try {
     const stringValue = JSON.stringify(value);
-    const { data: existing } = await supabase
+    const { data: existing } = await supabaseAdmin
       .from('products')
       .select('id')
       .eq('slug', `kv-${key}`)
       .single();
     
     if (existing) {
-      const { error } = await supabase
+      const { error } = await supabaseAdmin
         .from('products')
         .update({ description: stringValue })
         .eq('id', existing.id);
-      if (error) throw error;
+      if (error) {
+        console.error(`[KV Store] Supabase UPDATE Error for ${key}:`, error);
+        throw error;
+      }
     } else {
-      const { error } = await supabase
+      const { error } = await supabaseAdmin
         .from('products')
         .insert({
           title: `System Data - ${key}`,
@@ -51,11 +58,15 @@ export async function setKV<T>(key: string, value: T): Promise<boolean> {
           sales: 0,
           views: 0
         });
-      if (error) throw error;
+      if (error) {
+        console.error(`[KV Store] Supabase INSERT Error for ${key}:`, error);
+        throw error;
+      }
     }
+    console.log(`[KV Store] Successfully saved key ${key}`);
     return true;
   } catch (error) {
-    console.error(`[KV Store] Error writing key ${key}:`, error);
+    console.error(`[KV Store] Final Catch Error writing key ${key}:`, error);
     return false;
   }
 }
