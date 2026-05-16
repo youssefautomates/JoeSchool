@@ -3,64 +3,98 @@
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
-import { Plus, Trash2, Edit2, Loader2, ImageIcon } from "lucide-react";
+import { 
+  Plus, Trash2, Edit2, Loader2, ImageIcon, 
+  Video, FileText, Image as ImageIcon2, 
+  Globe, Layout, ChevronRight, X, Save
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger, DialogClose } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { generateSlug, calcDiscount } from "@/lib/products";
+import { generateSlug, calcDiscount, type Product } from "@/lib/products";
 import Image from "next/image";
+import { cn } from "@/lib/utils";
+import { motion, AnimatePresence } from "framer-motion";
 
-// ── Types ──────────────────────────────────────────────────────────────
-export interface Product {
-  id: string;
-  title: string;
-  slug: string;
-  description: string;
-  short_description: string;
-  price: number;
-  original_price: number | null;
-  discount_pct: number | null;
-  status: "نشط" | "مسودة" | "مخفي";
-  is_featured: boolean;
-  image_url: string;
-  file_url: string | null;
-  category: string | null;
-  tags: string[] | null;
-  sales: number;
+// ── Helper: Pack/Unpack Tags ───────────────────────────────────────────
+function unpackProduct(p: Product) {
+  const video_url = p.tags?.find(t => t.startsWith("video:"))?.replace("video:", "") || "";
+  const gallery = p.tags?.filter(t => t.startsWith("gallery:"))?.map(t => t.replace("gallery:", "")) || [];
+  const file_type = p.tags?.find(t => t.startsWith("type:"))?.replace("type:", "") || "zip";
+  const normalTags = p.tags?.filter(t => !t.startsWith("video:") && !t.startsWith("gallery:") && !t.startsWith("type:")) || [];
+  
+  return {
+    ...p,
+    video_url,
+    gallery,
+    file_type,
+    displayTags: normalTags.join(", ")
+  };
+}
+
+function packTags(form: any) {
+  const tags: string[] = [];
+  if (form.video_url) tags.push(`video:${form.video_url}`);
+  if (form.gallery && form.gallery.length > 0) {
+    form.gallery.forEach((url: string) => {
+      if (url.trim()) tags.push(`gallery:${url.trim()}`);
+    });
+  }
+  if (form.file_type) tags.push(`type:${form.file_type}`);
+  if (form.displayTags) {
+    form.displayTags.split(",").forEach((t: string) => {
+      const trimmed = t.trim();
+      if (trimmed) tags.push(trimmed);
+    });
+  }
+  return tags;
 }
 
 // ── Product Form Dialog ────────────────────────────────────────────────
 function ProductFormDialog({ open, onClose, onSaved, initial }: { open: boolean; onClose: () => void; onSaved: () => void; initial?: Product | null; }) {
   const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState({
+  const [activeTab, setActiveTab] = useState<"general" | "media" | "files" | "seo">("general");
+  
+  const [form, setForm] = useState<any>({
     title: "", slug: "", description: "", short_description: "",
-    price: "", original_price: "", status: "نشط" as Product["status"],
-    is_featured: false, image_url: "", file_url: "", category: "", tags: ""
+    price: "", original_price: "", status: "نشط",
+    is_featured: false, image_url: "", file_url: "", category: "", 
+    video_url: "", gallery: [""], file_type: "zip", displayTags: "",
+    seo_title: "", seo_description: ""
   });
 
   useEffect(() => {
     if (open) {
       if (initial) {
+        const unpacked = unpackProduct(initial);
         setForm({
-          title: initial.title, slug: initial.slug,
-          description: initial.description || "", short_description: initial.short_description || "",
-          price: String(initial.price), original_price: String(initial.original_price || ""),
-          status: initial.status, is_featured: initial.is_featured,
-          image_url: initial.image_url || "", file_url: initial.file_url || "",
-          category: initial.category || "", tags: (initial.tags || []).join(", ")
+          title: unpacked.title, slug: unpacked.slug,
+          description: unpacked.description || "", short_description: unpacked.short_description || "",
+          price: String(unpacked.price), original_price: String(unpacked.original_price || ""),
+          status: unpacked.status, is_featured: unpacked.is_featured,
+          image_url: unpacked.image_url || "", file_url: unpacked.file_url || "",
+          category: unpacked.category || "", 
+          video_url: unpacked.video_url,
+          gallery: unpacked.gallery.length > 0 ? unpacked.gallery : [""],
+          file_type: unpacked.file_type,
+          displayTags: unpacked.displayTags,
+          seo_title: unpacked.seo_title || "",
+          seo_description: unpacked.seo_description || ""
         });
       } else {
         setForm({
           title: "", slug: "", description: "", short_description: "",
           price: "", original_price: "", status: "نشط",
-          is_featured: false, image_url: "", file_url: "", category: "", tags: ""
+          is_featured: false, image_url: "", file_url: "", category: "", 
+          video_url: "", gallery: [""], file_type: "zip", displayTags: "",
+          seo_title: "", seo_description: ""
         });
       }
+      setActiveTab("general");
     }
   }, [open, initial]);
 
@@ -85,7 +119,9 @@ function ProductFormDialog({ open, onClose, onSaved, initial }: { open: boolean;
       image_url: form.image_url || "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=800",
       file_url: form.file_url || null,
       category: form.category || null,
-      tags: form.tags ? form.tags.split(",").map(t => t.trim()).filter(Boolean) : null,
+      tags: packTags(form),
+      seo_title: form.seo_title || null,
+      seo_description: form.seo_description || null
     };
 
     try {
@@ -107,50 +143,265 @@ function ProductFormDialog({ open, onClose, onSaved, initial }: { open: boolean;
     }
   }
 
+  const addGalleryItem = () => setForm({ ...form, gallery: [...form.gallery, ""] });
+  const updateGalleryItem = (index: number, val: string) => {
+    const newGallery = [...form.gallery];
+    newGallery[index] = val;
+    setForm({ ...form, gallery: newGallery });
+  };
+  const removeGalleryItem = (index: number) => {
+    const newGallery = form.gallery.filter((_: any, i: number) => i !== index);
+    setForm({ ...form, gallery: newGallery.length > 0 ? newGallery : [""] });
+  };
+
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="border-white/8 text-white sm:max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl" style={{ background: "#0d0d1a", border: "1px solid rgba(255,255,255,0.08)" }}>
-        <DialogHeader>
-          <DialogTitle className="font-alexandria text-2xl" style={{ color: "#ffffff" }}>{initial ? "تعديل المنتج" : "منتج جديد"}</DialogTitle>
-        </DialogHeader>
-        <div className="grid gap-4 py-4 font-cairo">
-          <div className="space-y-1.5">
-            <Label className="text-sm font-semibold" style={{ color: "#d4d4d8" }}>اسم المنتج *</Label>
-            <Input value={form.title} onChange={e => setForm({...form, title: e.target.value})} className="h-11 rounded-xl text-white" style={{ background: "rgba(255,255,255,0.05)", border: "1.5px solid rgba(255,255,255,0.1)" }} />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <Label className="text-sm font-semibold" style={{ color: "#d4d4d8" }}>السعر *</Label>
-              <Input type="number" value={form.price} onChange={e => setForm({...form, price: e.target.value})} className="h-11 rounded-xl text-white" style={{ background: "rgba(255,255,255,0.05)", border: "1.5px solid rgba(255,255,255,0.1)" }} />
+      <DialogContent className="border-white/8 text-white sm:max-w-4xl max-h-[95vh] overflow-hidden p-0 rounded-[2rem]" style={{ background: "#080810", border: "1px solid rgba(255,255,255,0.08)" }}>
+        <div className="flex h-full min-h-[600px]">
+          {/* Sidebar Tabs */}
+          <div className="w-64 border-l border-white/5 bg-black/20 p-6 flex flex-col gap-2">
+            <DialogHeader className="mb-8">
+              <DialogTitle className="font-alexandria text-xl pr-2" style={{ color: "#ffffff" }}>
+                {initial ? "تعديل المنتج" : "منتج جديد"}
+              </DialogTitle>
+            </DialogHeader>
+            
+            {[
+              { id: "general", label: "المعلومات العامة", icon: Layout },
+              { id: "media", label: "الوسائط والمعرض", icon: Video },
+              { id: "files", label: "الملفات الرقمية", icon: FileText },
+              { id: "seo", label: "إعدادات SEO", icon: Globe },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as any)}
+                className={cn(
+                  "flex items-center gap-3 px-4 py-3 rounded-xl font-cairo text-sm font-bold transition-all",
+                  activeTab === tab.id 
+                    ? "bg-[#D6004B] text-white shadow-lg shadow-[#D6004B]/20" 
+                    : "text-zinc-500 hover:text-white hover:bg-white/5"
+                )}
+              >
+                <tab.icon className="w-4 h-4" />
+                {tab.label}
+              </button>
+            ))}
+
+            <div className="mt-auto pt-6 border-t border-white/5">
+               <button
+                  onClick={onClose}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-cairo text-sm font-bold text-zinc-500 hover:bg-white/5 transition-all"
+                >
+                  إلغاء التغييرات
+                </button>
             </div>
-            <div className="space-y-1.5">
-              <Label className="text-sm font-semibold" style={{ color: "#d4d4d8" }}>الحالة</Label>
-              <select value={form.status} onChange={e => setForm({...form, status: e.target.value as any})} className="w-full h-11 rounded-xl px-3 text-white" style={{ background: "rgba(255,255,255,0.05)", border: "1.5px solid rgba(255,255,255,0.1)" }}>
-                <option value="نشط">نشط</option>
-                <option value="مسودة">مسودة</option>
-                <option value="مخفي">مخفي</option>
-              </select>
+          </div>
+
+          {/* Main Content Area */}
+          <div className="flex-1 flex flex-col min-w-0">
+            <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activeTab}
+                  initial={{ opacity: 0, x: 10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -10 }}
+                  transition={{ duration: 0.2 }}
+                  className="space-y-6"
+                >
+                  {activeTab === "general" && (
+                    <div className="grid gap-6">
+                      <div className="space-y-1.5">
+                        <Label className="text-sm font-bold" style={{ color: "#d4d4d8" }}>عنوان المنتج *</Label>
+                        <Input value={form.title} onChange={e => setForm({...form, title: e.target.value})} className="h-12 rounded-xl text-white" style={{ background: "rgba(255,255,255,0.05)", border: "1.5px solid rgba(255,255,255,0.1)" }} placeholder="مثال: حزمة قوالب n8n الاحترافية" />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-1.5">
+                          <Label className="text-sm font-bold" style={{ color: "#d4d4d8" }}>السعر الحالي (ج.م) *</Label>
+                          <Input type="number" value={form.price} onChange={e => setForm({...form, price: e.target.value})} className="h-12 rounded-xl text-white" style={{ background: "rgba(255,255,255,0.05)", border: "1.5px solid rgba(255,255,255,0.1)" }} />
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label className="text-sm font-bold" style={{ color: "#d4d4d8" }}>السعر الأصلي (للخصم)</Label>
+                          <Input type="number" value={form.original_price} onChange={e => setForm({...form, original_price: e.target.value})} className="h-12 rounded-xl text-white" style={{ background: "rgba(255,255,255,0.05)", border: "1.5px solid rgba(255,255,255,0.1)" }} />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-1.5">
+                          <Label className="text-sm font-bold" style={{ color: "#d4d4d8" }}>الحالة</Label>
+                          <select value={form.status} onChange={e => setForm({...form, status: e.target.value as any})} className="w-full h-12 rounded-xl px-4 text-white appearance-none outline-none" style={{ background: "rgba(255,255,255,0.05)", border: "1.5px solid rgba(255,255,255,0.1)" }}>
+                            <option value="نشط">نشط (يظهر في المتجر)</option>
+                            <option value="مسودة">مسودة (للمعاينة فقط)</option>
+                            <option value="مخفي">مخفي (لا يظهر نهائياً)</option>
+                          </select>
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label className="text-sm font-bold" style={{ color: "#d4d4d8" }}>التصنيف</Label>
+                          <Input value={form.category} onChange={e => setForm({...form, category: e.target.value})} className="h-12 rounded-xl text-white" style={{ background: "rgba(255,255,255,0.05)", border: "1.5px solid rgba(255,255,255,0.1)" }} placeholder="مثال: n8n, Workflows" />
+                        </div>
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-sm font-bold" style={{ color: "#d4d4d8" }}>وصف مختصر</Label>
+                        <Input value={form.short_description} onChange={e => setForm({...form, short_description: e.target.value})} className="h-12 rounded-xl text-white" style={{ background: "rgba(255,255,255,0.05)", border: "1.5px solid rgba(255,255,255,0.1)" }} placeholder="يظهر تحت العنوان مباشرة" />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-sm font-bold" style={{ color: "#d4d4d8" }}>الوصف الكامل</Label>
+                        <textarea 
+                          value={form.description} 
+                          onChange={e => setForm({...form, description: e.target.value})} 
+                          rows={6}
+                          className="w-full p-4 rounded-xl text-white font-cairo text-sm outline-none resize-none" 
+                          style={{ background: "rgba(255,255,255,0.05)", border: "1.5px solid rgba(255,255,255,0.1)" }}
+                          placeholder="اكتب وصفاً تفصيلياً للمنتج..."
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {activeTab === "media" && (
+                    <div className="grid gap-6">
+                      <div className="space-y-1.5">
+                        <div className="flex items-center gap-2 mb-2">
+                          <ImageIcon2 className="w-4 h-4 text-rose-500" />
+                          <Label className="text-sm font-bold" style={{ color: "#d4d4d8" }}>الصورة الأساسية (Thumbnail)</Label>
+                        </div>
+                        <Input value={form.image_url} onChange={e => setForm({...form, image_url: e.target.value})} dir="ltr" className="h-12 rounded-xl text-white" style={{ background: "rgba(255,255,255,0.05)", border: "1.5px solid rgba(255,255,255,0.1)" }} placeholder="https://..." />
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Video className="w-4 h-4 text-rose-500" />
+                          <Label className="text-sm font-bold" style={{ color: "#d4d4d8" }}>رابط الفيديو التعريفي (MP4/YouTube/Vimeo)</Label>
+                        </div>
+                        <Input value={form.video_url} onChange={e => setForm({...form, video_url: e.target.value})} dir="ltr" className="h-12 rounded-xl text-white" style={{ background: "rgba(255,255,255,0.05)", border: "1.5px solid rgba(255,255,255,0.1)" }} placeholder="https://..." />
+                        <p className="text-[10px] text-zinc-500 mr-2">اتركه فارغاً إذا لم يتوفر فيديو.</p>
+                      </div>
+
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between mb-1">
+                          <div className="flex items-center gap-2">
+                            <Layout className="w-4 h-4 text-rose-500" />
+                            <Label className="text-sm font-bold" style={{ color: "#d4d4d8" }}>معرض الصور (Gallery)</Label>
+                          </div>
+                          <button onClick={addGalleryItem} className="text-xs font-bold text-rose-500 flex items-center gap-1 hover:underline">
+                            <Plus className="w-3 h-3" /> إضافة صورة للمرض
+                          </button>
+                        </div>
+                        <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
+                          {form.gallery.map((url: string, idx: number) => (
+                            <div key={idx} className="flex gap-2">
+                              <Input 
+                                value={url} 
+                                onChange={e => updateGalleryItem(idx, e.target.value)} 
+                                dir="ltr" 
+                                className="h-11 rounded-xl text-white flex-1" 
+                                style={{ background: "rgba(255,255,255,0.05)", border: "1.5px solid rgba(255,255,255,0.1)" }} 
+                                placeholder="رابط صورة إضافية..." 
+                              />
+                              <button 
+                                onClick={() => removeGalleryItem(idx)}
+                                className="w-11 h-11 rounded-xl flex items-center justify-center text-zinc-500 hover:text-red-500 transition-colors"
+                                style={{ background: "rgba(255,255,255,0.03)" }}
+                              >
+                                <X className="w-4 h-4" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {activeTab === "files" && (
+                    <div className="grid gap-6">
+                      <div className="space-y-1.5">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Globe className="w-4 h-4 text-emerald-500" />
+                          <Label className="text-sm font-bold" style={{ color: "#d4d4d8" }}>رابط الملف الرقمي للتسليم</Label>
+                        </div>
+                        <Input value={form.file_url} onChange={e => setForm({...form, file_url: e.target.value})} dir="ltr" className="h-12 rounded-xl text-white" style={{ background: "rgba(255,255,255,0.05)", border: "1.5px solid rgba(255,255,255,0.1)" }} placeholder="رابط التحميل المباشر (Google Drive, S3, etc.)" />
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-1.5">
+                          <Label className="text-sm font-bold" style={{ color: "#d4d4d8" }}>صيغة الملف</Label>
+                          <select value={form.file_type} onChange={e => setForm({...form, file_type: e.target.value})} className="w-full h-12 rounded-xl px-4 text-white outline-none appearance-none" style={{ background: "rgba(255,255,255,0.05)", border: "1.5px solid rgba(255,255,255,0.1)" }}>
+                            <option value="zip">ZIP / Archive</option>
+                            <option value="pdf">PDF Document</option>
+                            <option value="json">JSON File</option>
+                            <option value="video">MP4 Video</option>
+                            <option value="link">External Link</option>
+                          </select>
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label className="text-sm font-bold" style={{ color: "#d4d4d8" }}>الكلمات الدلالية (Tags)</Label>
+                          <Input value={form.displayTags} onChange={e => setForm({...form, displayTags: e.target.value})} className="h-12 rounded-xl text-white" style={{ background: "rgba(255,255,255,0.05)", border: "1.5px solid rgba(255,255,255,0.1)" }} placeholder="قالب، n8n، أتمتة" />
+                        </div>
+                      </div>
+
+                      <div className="p-6 rounded-2xl bg-emerald-500/5 border border-emerald-500/10 flex items-start gap-4">
+                        <FileText className="w-6 h-6 text-emerald-500 mt-1" />
+                        <div className="text-xs font-cairo text-zinc-400 space-y-1">
+                          <p className="font-bold text-white mb-1">تعليمات التسليم:</p>
+                          <p>• سيتم إرسال هذا الرابط للعميل تلقائياً عبر البريد الإلكتروني بعد نجاح الدفع.</p>
+                          <p>• تأكد من أن الرابط "عام" أو متاح لمن يملك الرابط.</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {activeTab === "seo" && (
+                    <div className="grid gap-6">
+                      <div className="space-y-1.5">
+                        <Label className="text-sm font-bold" style={{ color: "#d4d4d8" }}>عنوان SEO (Meta Title)</Label>
+                        <Input value={form.seo_title} onChange={e => setForm({...form, seo_title: e.target.value})} className="h-12 rounded-xl text-white" style={{ background: "rgba(255,255,255,0.05)", border: "1.5px solid rgba(255,255,255,0.1)" }} placeholder="يظهر في نتائج البحث" />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-sm font-bold" style={{ color: "#d4d4d8" }}>وصف SEO (Meta Description)</Label>
+                        <textarea 
+                          value={form.seo_description} 
+                          onChange={e => setForm({...form, seo_description: e.target.value})} 
+                          rows={4}
+                          className="w-full p-4 rounded-xl text-white font-cairo text-sm outline-none resize-none" 
+                          style={{ background: "rgba(255,255,255,0.05)", border: "1.5px solid rgba(255,255,255,0.1)" }}
+                          placeholder="وصف مختصر لظهور المنتج في محركات البحث..."
+                        />
+                      </div>
+                    </div>
+                  )}
+                </motion.div>
+              </AnimatePresence>
             </div>
-          </div>
-          <div className="space-y-1.5">
-            <Label className="text-sm font-semibold" style={{ color: "#d4d4d8" }}>وصف قصير</Label>
-            <Input value={form.short_description} onChange={e => setForm({...form, short_description: e.target.value})} className="h-11 rounded-xl text-white" style={{ background: "rgba(255,255,255,0.05)", border: "1.5px solid rgba(255,255,255,0.1)" }} />
-          </div>
-          <div className="space-y-1.5">
-            <Label className="text-sm font-semibold" style={{ color: "#d4d4d8" }}>رابط الصورة</Label>
-            <Input value={form.image_url} onChange={e => setForm({...form, image_url: e.target.value})} dir="ltr" className="h-11 rounded-xl text-white" style={{ background: "rgba(255,255,255,0.05)", border: "1.5px solid rgba(255,255,255,0.1)" }} />
-          </div>
-          <div className="space-y-1.5">
-            <Label className="text-sm font-semibold" style={{ color: "#d4d4d8" }}>رابط الملف</Label>
-            <Input value={form.file_url} onChange={e => setForm({...form, file_url: e.target.value})} dir="ltr" className="h-11 rounded-xl text-white" style={{ background: "rgba(255,255,255,0.05)", border: "1.5px solid rgba(255,255,255,0.1)" }} />
+
+            {/* Footer Buttons */}
+            <div className="p-8 border-t border-white/5 flex items-center justify-between bg-black/20">
+               <div className="text-xs text-zinc-600 font-cairo">
+                  * الحقول المميزة بعلامة مطلوبة
+               </div>
+               <Button 
+                onClick={handleSave} 
+                disabled={saving} 
+                className="h-14 px-10 rounded-2xl font-alexandria font-black text-lg transition-all active:scale-95"
+                style={{ 
+                  background: "linear-gradient(135deg, #D6004B, #ff2d6b)", 
+                  boxShadow: "0 8px 32px rgba(214,0,75,0.4)",
+                  color: "#ffffff"
+                }}
+              >
+                {saving ? (
+                  <span className="flex items-center gap-2">
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    جاري الحفظ...
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-2">
+                    <Save className="w-5 h-5" />
+                    حفظ المنتج بالكامل
+                  </span>
+                )}
+              </Button>
+            </div>
           </div>
         </div>
-        <DialogFooter className="gap-2">
-          <Button variant="outline" onClick={onClose} className="border-white/10 text-white hover:bg-white/5 rounded-xl">إلغاء</Button>
-          <Button onClick={handleSave} disabled={saving} className="text-white rounded-xl" style={{ background: "linear-gradient(135deg, #D6004B, #ff2d6b)", boxShadow: "0 4px 16px rgba(214,0,75,0.3)" }}>
-            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : "حفظ المنتج"}
-          </Button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
@@ -175,15 +426,15 @@ function DeleteDialog({ product, onClose, onDeleted }: { product: Product; onClo
   }
   return (
     <Dialog open onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="bg-[#0a0a0f] border-red-500/20 text-white sm:max-w-md rounded-3xl">
-        <DialogHeader><DialogTitle className="text-red-500">حذف المنتج</DialogTitle></DialogHeader>
-        <p className="py-4 text-zinc-400">هل أنت متأكد من حذف "{product.title}"؟</p>
-        <DialogFooter className="gap-2">
-          <Button variant="ghost" onClick={onClose} className="text-zinc-400 hover:text-white">إلغاء</Button>
-          <Button onClick={handleDelete} disabled={deleting} variant="destructive" className="bg-red-500 hover:bg-red-600">
+      <DialogContent className="bg-[#080810] border-red-500/20 text-white sm:max-w-md rounded-[2rem] p-8">
+        <DialogHeader><DialogTitle className="text-red-500 font-alexandria text-xl">حذف المنتج نهائياً</DialogTitle></DialogHeader>
+        <p className="py-6 text-zinc-400 font-cairo leading-relaxed">أنت على وشك حذف <span className="text-white font-bold">"{product.title}"</span>. لن تتمكن من استعادة البيانات بعد هذه الخطوة.</p>
+        <div className="flex gap-3">
+          <Button variant="ghost" onClick={onClose} className="flex-1 h-12 rounded-xl text-zinc-400 hover:text-white hover:bg-white/5 font-cairo">إلغاء</Button>
+          <Button onClick={handleDelete} disabled={deleting} variant="destructive" className="flex-1 h-12 rounded-xl font-cairo bg-red-600 hover:bg-red-700 shadow-lg shadow-red-600/20">
             {deleting ? <Loader2 className="w-4 h-4 animate-spin" /> : "تأكيد الحذف"}
           </Button>
-        </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
   );
@@ -201,138 +452,133 @@ export default function AdminProductsPage() {
 
   const hasFetched = useRef(false);
 
-  // Single source of truth for fetching
   async function fetchProducts() {
     setLoading(true);
-    console.log("[FETCH_START] Requesting products...");
     try {
-      // Diagnostic Query
-      const res = await supabase
+      const { data, error } = await supabase
         .from("products")
-        .select("id, title") // Minimal columns to isolate missing column errors
-        .limit(5);
-        
-      console.log("[DEBUG_RESPONSE_METADATA]", {
-        status: res.status,
-        statusText: res.statusText,
-        count: res.count,
-        hasData: !!res.data,
-        dataLength: res.data?.length
-      });
+        .select("*")
+        .order("created_at", { ascending: false });
 
-      if (res.error) {
-        console.error("[RAW_SUPABASE_ERROR]", JSON.stringify(res.error, null, 2));
-        throw res.error;
-      }
-      
-      // Update state with partial data for now to keep table from crashing
-      setProducts((res.data as any) || []);
-      console.log(`[FETCH_DONE] Fetched ${res.data?.length || 0} products.`);
+      if (error) throw error;
+      setProducts(data as Product[]);
     } catch (err: any) {
       console.error("[FETCH_ERROR]", err);
-      console.error("[RAW_CATCH_ERROR]", JSON.stringify(err, null, 2));
-      setError(err.message || err.details || err.hint || "Unknown fetch error");
+      setError(err.message || "فشل تحميل المنتجات");
     } finally {
       setLoading(false);
     }
   }
 
   useEffect(() => {
-    // Only run fetch exactly once on mount
     if (hasFetched.current) return;
     hasFetched.current = true;
     fetchProducts();
-  }, []); // Strictly empty dependency array
+  }, []);
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500 p-2 md:p-8" style={{ background: "#080810", minHeight: "100vh" }}>
+    <div className="space-y-8 animate-in fade-in duration-700 p-2 md:p-4" style={{ minHeight: "100vh" }}>
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-alexandria font-black" style={{ color: "#ffffff" }}>المنتجات</h1>
-          <p className="font-cairo text-sm mt-1" style={{ color: "#52525b" }}>نسخة مستقرة · Stable Architecture</p>
+          <h1 className="text-3xl font-alexandria font-black" style={{ color: "#ffffff" }}>إدارة المنتجات</h1>
+          <p className="font-cairo text-sm mt-1" style={{ color: "#52525b" }}>إجمالي {products.length} منتج مسجل في النظام</p>
         </div>
         <button
           onClick={() => setAddOpen(true)}
-          className="flex items-center gap-2 px-5 h-11 rounded-xl font-cairo font-bold text-white text-sm transition-all active:scale-95"
-          style={{ background: "linear-gradient(135deg, #D6004B, #ff2d6b)", boxShadow: "0 4px 20px rgba(214,0,75,0.35)" }}
+          className="flex items-center gap-2 px-6 h-12 rounded-2xl font-cairo font-bold text-white transition-all active:scale-95"
+          style={{ background: "linear-gradient(135deg, #D6004B, #ff2d6b)", boxShadow: "0 8px 32px rgba(214,0,75,0.35)" }}
         >
-          <Plus className="w-4 h-4" /> إضافة منتج
+          <Plus className="w-5 h-5" /> إضافة منتج جديد
         </button>
       </div>
 
       {error && (
-        <div className="p-4 bg-red-500/10 border border-red-500/30 text-red-400 rounded-xl font-cairo">
-          حدث خطأ: {error}
+        <div className="p-4 bg-red-500/10 border border-red-500/30 text-red-400 rounded-xl font-cairo flex items-center gap-3">
+          <X className="w-5 h-5" /> {error}
         </div>
       )}
 
-      {/* Stable Table */}
-      <div className="overflow-hidden rounded-2xl" style={{ background: "rgba(16,16,26,0.8)", border: "1px solid rgba(255,255,255,0.07)", boxShadow: "0 16px 48px rgba(0,0,0,0.4)" }}>
+      {/* Table Card */}
+      <div className="overflow-hidden rounded-[2.5rem]" style={{ background: "rgba(16,16,26,0.8)", border: "1px solid rgba(255,255,255,0.07)", boxShadow: "0 24px 64px rgba(0,0,0,0.4)" }}>
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow className="hover:bg-transparent" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.02)" }}>
-                <TableHead className="font-cairo text-right py-5 pr-6 text-xs uppercase tracking-widest font-bold" style={{ color: "#71717a" }}>المنتج</TableHead>
-                <TableHead className="font-cairo text-right text-xs uppercase tracking-widest font-bold" style={{ color: "#71717a" }}>السعر</TableHead>
-                <TableHead className="font-cairo text-right text-xs uppercase tracking-widest font-bold" style={{ color: "#71717a" }}>المبيعات</TableHead>
-                <TableHead className="font-cairo text-right text-xs uppercase tracking-widest font-bold" style={{ color: "#71717a" }}>الحالة</TableHead>
-                <TableHead className="w-16" />
+                <TableHead className="font-cairo text-right py-6 pr-8 text-xs uppercase tracking-widest font-black" style={{ color: "#71717a" }}>المنتج</TableHead>
+                <TableHead className="font-cairo text-right text-xs uppercase tracking-widest font-black" style={{ color: "#71717a" }}>السعر</TableHead>
+                <TableHead className="font-cairo text-right text-xs uppercase tracking-widest font-black" style={{ color: "#71717a" }}>المبيعات</TableHead>
+                <TableHead className="font-cairo text-right text-xs uppercase tracking-widest font-black" style={{ color: "#71717a" }}>الحالة</TableHead>
+                <TableHead className="w-20" />
               </TableRow>
             </TableHeader>
             <TableBody>
               {loading ? (
-                <TableRow>
-                  <TableCell colSpan={5} className="h-32 text-center text-zinc-500 font-cairo animate-pulse">
-                    جاري التحميل بأمان...
-                  </TableCell>
-                </TableRow>
+                Array.from({ length: 5 }).map((_, i) => (
+                  <TableRow key={i} className="border-white/5">
+                    <TableCell className="py-6 pr-8">
+                       <div className="flex items-center gap-4 animate-pulse">
+                          <div className="w-14 h-14 rounded-2xl bg-white/5" />
+                          <div className="space-y-2">
+                             <div className="h-4 w-32 bg-white/5 rounded" />
+                             <div className="h-3 w-48 bg-white/5 rounded" />
+                          </div>
+                       </div>
+                    </TableCell>
+                    <TableCell><div className="h-4 w-16 bg-white/5 rounded animate-pulse" /></TableCell>
+                    <TableCell><div className="h-4 w-8 bg-white/5 rounded animate-pulse" /></TableCell>
+                    <TableCell><div className="h-6 w-16 bg-white/5 rounded animate-pulse" /></TableCell>
+                    <TableCell />
+                  </TableRow>
+                ))
               ) : products.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="h-32 text-center text-zinc-500 font-cairo">
-                    لا توجد منتجات مسجلة.
+                  <TableCell colSpan={5} className="h-64 text-center text-zinc-600 font-cairo">
+                    <Layout className="w-12 h-12 mx-auto mb-4 opacity-10" />
+                    لا توجد منتجات مسجلة حتى الآن.
                   </TableCell>
                 </TableRow>
               ) : (
                 products.map((p) => (
-                  <TableRow key={p.id} className="border-white/5 hover:bg-white/[0.02] transition-colors">
-                    <TableCell className="py-4 pr-6">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-xl bg-zinc-800 relative overflow-hidden shrink-0 flex items-center justify-center">
+                  <TableRow key={p.id} className="border-white/5 hover:bg-white/[0.02] transition-colors group">
+                    <TableCell className="py-5 pr-8">
+                      <div className="flex items-center gap-5">
+                        <div className="w-14 h-14 rounded-2xl bg-zinc-800 relative overflow-hidden shrink-0 flex items-center justify-center border border-white/5 group-hover:border-rose-500/30 transition-all">
                           {p.image_url ? (
-                            <Image src={p.image_url} alt={p.title} fill className="object-cover" sizes="48px" />
+                            <Image src={p.image_url} alt={p.title} fill className="object-cover" sizes="56px" />
                           ) : (
-                            <ImageIcon className="w-5 h-5 text-zinc-600" />
+                            <ImageIcon className="w-6 h-6 text-zinc-600" />
                           )}
                         </div>
                         <div className="font-cairo">
-                          <div className="font-bold text-white">{p.title}</div>
-                          {p.short_description && <div className="text-xs text-zinc-500">{p.short_description}</div>}
+                          <div className="font-bold text-white text-base group-hover:text-rose-500 transition-colors">{p.title}</div>
+                          {p.short_description && <div className="text-[11px] text-zinc-500 mt-0.5 line-clamp-1">{p.short_description}</div>}
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell className="font-bold text-white">{p.price} ج.م</TableCell>
-                    <TableCell className="text-zinc-400">{p.sales || 0}</TableCell>
+                    <TableCell className="font-alexandria font-bold text-white">{p.price} ج.م</TableCell>
+                    <TableCell className="text-zinc-400 font-bold">{p.sales || 0}</TableCell>
                     <TableCell>
-                      <Badge className={
-                        p.status === 'نشط' ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" :
-                        p.status === 'مسودة' ? "bg-amber-500/10 text-amber-400 border-amber-500/20" :
+                      <Badge className={cn(
+                        "font-cairo px-3 py-1 rounded-lg border-none",
+                        p.status === 'نشط' ? "bg-emerald-500/10 text-emerald-400" :
+                        p.status === 'مسودة' ? "bg-amber-500/10 text-amber-400" :
                         "bg-zinc-800 text-zinc-500"
-                      }>
+                      )}>
                         {p.status}
                       </Badge>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="pl-8">
                       <DropdownMenu>
-                        <DropdownMenuTrigger className="h-8 w-8 p-0 text-zinc-500 hover:bg-zinc-800 hover:text-white rounded-lg flex items-center justify-center outline-none">
-                          ...
+                        <DropdownMenuTrigger className="h-10 w-10 flex items-center justify-center rounded-xl text-zinc-500 hover:bg-white/10 hover:text-white transition-all outline-none">
+                          <ChevronRight className="w-5 h-5 rotate-90" />
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="bg-zinc-950 border-zinc-800">
-                          <DropdownMenuItem onClick={() => setEditProduct(p)} className="cursor-pointer text-zinc-300 hover:bg-zinc-800">
-                            <Edit2 className="w-4 h-4 ml-2" /> تعديل
+                        <DropdownMenuContent align="end" className="bg-[#0d0d1a] border-white/10 p-2 rounded-2xl shadow-2xl">
+                          <DropdownMenuItem onClick={() => setEditProduct(p)} className="cursor-pointer text-zinc-300 hover:bg-white/5 rounded-xl p-3 font-cairo gap-3">
+                            <Edit2 className="w-4 h-4 text-rose-500" /> تعديل البيانات
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => setDeleteProduct(p)} className="cursor-pointer text-red-400 hover:bg-red-500/10">
-                            <Trash2 className="w-4 h-4 ml-2" /> حذف
+                          <DropdownMenuItem onClick={() => setDeleteProduct(p)} className="cursor-pointer text-red-400 hover:bg-red-500/10 rounded-xl p-3 font-cairo gap-3">
+                            <Trash2 className="w-4 h-4" /> حذف المنتج
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>

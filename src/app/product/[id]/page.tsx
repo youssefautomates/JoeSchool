@@ -7,7 +7,7 @@ import {
   CheckCircle2, FileText, Zap, ChevronRight, Lock, PlayCircle, Star, 
   ShieldCheck, Download, Users, Infinity, Target, Sparkles, 
   MonitorPlay, ArrowLeft, Rocket, HeartHandshake,
-  Clock, ChevronDown, ShoppingCart
+  Clock, ShoppingCart, Play, FileJson, Link as LinkIcon, Archive
 } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect, use } from "react";
@@ -20,11 +20,26 @@ import { type Product, calcDiscount } from "@/lib/products";
 import { toast } from "sonner";
 import { useCart } from "@/context/CartContext";
 
+// ── Helper: Unpack Tags ───────────────────────────────────────────────
+function unpackProduct(p: Product) {
+  const video_url = p.tags?.find(t => t.startsWith("video:"))?.replace("video:", "") || "";
+  const gallery = p.tags?.filter(t => t.startsWith("gallery:"))?.map(t => t.replace("gallery:", "")) || [];
+  const file_type = p.tags?.find(t => t.startsWith("type:"))?.replace("type:", "") || "zip";
+  
+  return {
+    ...p,
+    video_url,
+    gallery: gallery.length > 0 ? gallery : [],
+    file_type
+  };
+}
+
 export default function ProductPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
-  const [product, setProduct] = useState<Product | null>(null);
+  const [product, setProduct] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"details" | "previews" | "reviews">("details");
+  const [activeMedia, setActiveMedia] = useState<string | null>(null); // URL of active image or 'video'
   const { addToCart } = useCart();
 
   useEffect(() => {
@@ -41,11 +56,13 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
         .single();
 
       if (error) throw error;
-      setProduct(data as Product);
+      const unpacked = unpackProduct(data as Product);
+      setProduct(unpacked);
+      setActiveMedia(unpacked.image_url);
       
       // Update views non-blocking
       if (data) {
-        supabase.rpc('increment_product_views', { product_id: data.id }).then();
+        supabase.rpc('increment_product_views', { product_id: data.id }).then(() => {});
       }
     } catch (error) {
       console.error("Error fetching product:", error);
@@ -67,13 +84,26 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
     return (
       <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center text-white font-cairo">
         <h1 className="text-4xl font-alexandria font-bold mb-4">المنتج غير موجود</h1>
-        <Link href="/" className="text-rose-400 hover:text-rose-300 underline">العودة للرئيسية</Link>
+        <Link href="/" className="text-rose-400 hover:text-rose-300 underline font-bold">العودة للرئيسية</Link>
       </div>
     );
   }
 
   const savings = product.original_price ? product.original_price - product.price : 0;
   const discountPct = calcDiscount(product.price, product.original_price);
+  const allImages = [product.image_url, ...product.gallery].filter(Boolean);
+
+  // File type icon helper
+  const getFileIcon = (type: string) => {
+    switch (type) {
+      case 'pdf': return FileText;
+      case 'json': return FileJson;
+      case 'video': return Play;
+      case 'link': return LinkIcon;
+      default: return Archive;
+    }
+  };
+  const FileIcon = getFileIcon(product.file_type);
 
   return (
     <div className="min-h-screen bg-[#050505] text-white font-cairo selection:bg-rose-500/30">
@@ -89,30 +119,130 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
           >
             {/* Left: Product Visuals */}
             <div className="w-full lg:w-[55%] space-y-6">
-              <div className="relative aspect-[16/10] bg-[#0a0a0f] rounded-[2.5rem] overflow-hidden shadow-[0_0_50px_rgba(37,99,235,0.1)] group border border-white/5">
-                <Image 
-                  src={product.image_url || "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=1200&auto=format&fit=crop"} 
-                  alt={product.title} 
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-1000 opacity-90"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/20 to-transparent opacity-80" />
-                <motion.div 
-                  initial={{ scale: 0.8, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ delay: 0.5 }}
-                  className="absolute top-6 left-6 bg-white/10 backdrop-blur-md border border-white/20 px-4 py-2 rounded-2xl flex items-center gap-2"
-                >
-                  <Sparkles className="w-4 h-4 text-yellow-400" />
-                  <span className="font-cairo text-xs font-bold text-white uppercase tracking-widest">Premium Asset</span>
-                </motion.div>
+              <div className="relative aspect-[16/10] bg-[#0a0a0f] rounded-[2.5rem] overflow-hidden shadow-[0_0_80px_rgba(214,0,75,0.1)] group border border-white/5">
+                
+                <AnimatePresence mode="wait">
+                  {activeMedia === 'video' ? (
+                    <motion.div 
+                      key="video"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="absolute inset-0 z-20 bg-black"
+                    >
+                      {product.video_url.includes('youtube.com') || product.video_url.includes('youtu.be') ? (
+                        <iframe 
+                          src={`https://www.youtube.com/embed/${product.video_url.split('v=')[1]?.split('&')[0] || product.video_url.split('/').pop()}?autoplay=1&mute=0`}
+                          className="w-full h-full border-none"
+                          allow="autoplay; encrypted-media"
+                          allowFullScreen
+                        />
+                      ) : (
+                        <video 
+                          src={product.video_url} 
+                          controls 
+                          autoPlay 
+                          className="w-full h-full object-contain"
+                        />
+                      )}
+                      <button 
+                        onClick={() => setActiveMedia(product.image_url)}
+                        className="absolute top-4 right-4 bg-black/50 backdrop-blur-md p-2 rounded-full text-white hover:bg-rose-600 transition-colors z-30"
+                      >
+                        <X className="w-5 h-5" />
+                      </button>
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key={activeMedia}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="absolute inset-0"
+                    >
+                      <Image 
+                        src={activeMedia || product.image_url} 
+                        alt={product.title} 
+                        fill
+                        className="object-cover opacity-90 transition-all duration-700"
+                        priority
+                      />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-transparent opacity-60 pointer-events-none" />
+                
+                {/* Badges */}
+                <div className="absolute top-6 left-6 flex flex-col gap-2 z-10">
+                  <motion.div 
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    className="bg-white/10 backdrop-blur-md border border-white/20 px-4 py-2 rounded-2xl flex items-center gap-2"
+                  >
+                    <Sparkles className="w-4 h-4 text-yellow-400" />
+                    <span className="font-cairo text-xs font-bold text-white uppercase tracking-widest">Premium Asset</span>
+                  </motion.div>
+                  {product.file_type && (
+                     <div className="bg-emerald-500/10 backdrop-blur-md border border-emerald-500/20 px-4 py-2 rounded-2xl flex items-center gap-2 self-start">
+                        <FileIcon className="w-4 h-4 text-emerald-400" />
+                        <span className="font-cairo text-xs font-bold text-emerald-400 uppercase tracking-widest">{product.file_type}</span>
+                     </div>
+                  )}
+                </div>
                 
                 {product.is_featured && (
-                  <div className="absolute top-6 right-6 bg-[#D6004B] px-4 py-2 rounded-2xl flex items-center gap-2 shadow-[0_0_20px_rgba(214,0,75,0.3)]">
+                  <div className="absolute top-6 right-6 bg-[#D6004B] px-4 py-2 rounded-2xl flex items-center gap-2 shadow-[0_0_30px_rgba(214,0,75,0.4)] z-10">
                     <span className="font-cairo text-xs font-bold text-white uppercase">الأكثر مبيعاً</span>
                   </div>
                 )}
+
+                {/* Video Play Trigger Over Image */}
+                {product.video_url && activeMedia !== 'video' && (
+                  <button 
+                    onClick={() => setActiveMedia('video')}
+                    className="absolute inset-0 flex items-center justify-center group/play z-10"
+                  >
+                    <div className="w-20 h-20 bg-rose-600 rounded-full flex items-center justify-center shadow-2xl transition-transform group-hover/play:scale-110">
+                      <Play className="w-8 h-8 text-white fill-current ml-1" />
+                    </div>
+                  </button>
+                )}
               </div>
+
+              {/* Gallery / Slider under main media */}
+              {allImages.length > 1 || product.video_url ? (
+                <div className="flex gap-4 overflow-x-auto pb-4 custom-scrollbar">
+                  {/* Video Thumbnail */}
+                  {product.video_url && (
+                    <button 
+                      onClick={() => setActiveMedia('video')}
+                      className={cn(
+                        "relative w-24 h-16 rounded-xl overflow-hidden shrink-0 border-2 transition-all",
+                        activeMedia === 'video' ? "border-rose-600 scale-105 shadow-lg shadow-rose-600/20" : "border-white/5 opacity-60 hover:opacity-100"
+                      )}
+                    >
+                       <Image src={product.image_url} alt="video" fill className="object-cover blur-[1px]" />
+                       <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+                          <Play className="w-6 h-6 text-white" />
+                       </div>
+                    </button>
+                  )}
+                  {/* Images */}
+                  {allImages.map((img, i) => (
+                    <button 
+                      key={i}
+                      onClick={() => setActiveMedia(img)}
+                      className={cn(
+                        "relative w-24 h-16 rounded-xl overflow-hidden shrink-0 border-2 transition-all",
+                        activeMedia === img ? "border-rose-600 scale-105 shadow-lg shadow-rose-600/20" : "border-white/5 opacity-60 hover:opacity-100"
+                      )}
+                    >
+                      <Image src={img} alt={`Gallery ${i}`} fill className="object-cover" />
+                    </button>
+                  ))}
+                </div>
+              ) : null}
 
               {/* Quick Benefits Grid */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -122,7 +252,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                   { icon: ShieldCheck, label: "دفع آمن", color: "text-purple-400", bg: "bg-purple-500/10", border: "border-purple-500/20" },
                   { icon: HeartHandshake, label: "دعم فني", color: "text-amber-400", bg: "bg-amber-500/10", border: "border-amber-500/20" }
                 ].map((item, i) => (
-                  <div key={i} className={cn("p-4 rounded-2xl flex flex-col items-center justify-center text-center gap-2 border", item.bg, item.border)}>
+                  <div key={i} className={cn("p-4 rounded-2xl flex flex-col items-center justify-center text-center gap-2 border transition-all hover:bg-white/5", item.bg, item.border)}>
                     <item.icon className={cn("w-6 h-6", item.color)} />
                     <span className="font-cairo text-[11px] font-bold text-zinc-300 tracking-wide">{item.label}</span>
                   </div>
@@ -156,12 +286,11 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
               </div>
 
               <p className="text-lg text-zinc-400 font-cairo leading-relaxed">
-                {product.short_description || product.description || "أداة متقدمة تضمن لك توفير مئات الساعات وتعظيم نتائجك بأقل مجهود. صُممت لرواد الأعمال والمحترفين."}
+                {product.short_description || product.description || "أداة متقدمة تضمن لك توفير مئات الساعات وتعظيم نتائجك بأقل مجهود."}
               </p>
 
               {/* Desktop Checkout Box */}
-              <div className="hidden lg:block bg-[#0a0a0f] p-8 rounded-[2rem] border border-white/10 shadow-2xl relative overflow-hidden">
-                {/* Glow effect */}
+              <div className="hidden lg:block bg-[#0a0a0f] p-8 rounded-[2.5rem] border border-white/10 shadow-2xl relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-rose-600/10 rounded-full blur-[80px] pointer-events-none" />
                 
                 <div className="flex items-center justify-between mb-8 relative z-10">
@@ -185,10 +314,10 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                     </div>
                   )}
                 </div>
-                <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-3 relative z-10">
                   <Link
                     href={`/checkout/${product.id}`}
-                    className="w-full h-16 inline-flex items-center justify-center gap-3 bg-[#D6004B] hover:bg-[#b0003d] text-white font-cairo text-xl font-black rounded-2xl transition-all shadow-[0_0_30px_rgba(214,0,75,0.3)] hover:shadow-[0_0_40px_rgba(214,0,75,0.5)] active:scale-95 relative z-10"
+                    className="w-full h-16 inline-flex items-center justify-center gap-3 bg-[#D6004B] hover:bg-[#b0003d] text-white font-cairo text-xl font-black rounded-2xl transition-all shadow-[0_0_30px_rgba(214,0,75,0.3)] hover:shadow-[0_0_40px_rgba(214,0,75,0.5)] active:scale-95"
                   >
                     شراء الآن والتنزيل الفوري
                     <ArrowLeft className="w-6 h-6 rtl:rotate-180" />
@@ -196,9 +325,9 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
 
                   <button
                     onClick={() => addToCart(product)}
-                    className="w-full h-14 inline-flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 hover:border-white/30 text-white font-cairo text-lg font-bold rounded-2xl border border-white/10 transition-all duration-300 hover:shadow-[0_0_20px_rgba(255,255,255,0.05)] hover:-translate-y-1 active:scale-95 relative z-10 group/addcart"
+                    className="w-full h-14 inline-flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 hover:border-white/30 text-white font-cairo text-lg font-bold rounded-2xl border border-white/10 transition-all duration-300 hover:shadow-[0_0_20px_rgba(255,255,255,0.05)] active:scale-95 group/addcart"
                   >
-                    <ShoppingCart className="w-5 h-5 group-hover/addcart:scale-110 group-hover/addcart:-translate-y-0.5 transition-transform duration-300" />
+                    <ShoppingCart className="w-5 h-5 group-hover/addcart:scale-110 transition-transform duration-300" />
                     إضافة إلى السلة
                   </button>
                 </div>
@@ -207,10 +336,6 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                   <p className="text-center font-cairo text-xs text-zinc-500 flex items-center justify-center gap-2">
                     <Lock className="w-3 h-3" /> دفع إلكتروني آمن 100%
                   </p>
-                  <div className="flex items-center justify-center gap-2 opacity-50 grayscale">
-                    {/* Placeholder for payment methods logos if needed */}
-                    <span className="text-[10px] font-bold tracking-widest uppercase">Paymob Secure</span>
-                  </div>
                 </div>
               </div>
             </div>
@@ -228,15 +353,15 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {[
                 { 
-                  title: "الملفات الأصلية", 
-                  desc: "ملفات النظام كاملة جاهزة للاستيراد والاستخدام المباشر في بيئتك.",
-                  icon: Rocket,
+                  title: `ملف الـ ${product.file_type?.toUpperCase() || "أصلي"}`, 
+                  desc: `ستحصل على الملف بصيغة ${product.file_type || "رقمية"} جاهزاً للاستخدام المباشر.`,
+                  icon: FileIcon,
                   color: "text-rose-400", bg: "bg-rose-500/10"
                 },
                 { 
                   title: "دليل الإعداد السريع", 
                   desc: "خطوات واضحة وبسيطة لضمان تفعيل الحزمة في أقل من 5 دقائق.",
-                  icon: FileText,
+                  icon: Rocket,
                   color: "text-sky-400", bg: "bg-sky-500/10"
                 },
                 { 
@@ -276,7 +401,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                 <div className="flex flex-col gap-3">
                   {[
                     { id: "details", label: "تفاصيل المنتج", icon: Target },
-                    { id: "previews", label: "معاينة سريعة", icon: MonitorPlay },
+                    { id: "previews", label: "معاينة الوسائط", icon: MonitorPlay },
                     { id: "reviews", label: "آراء العملاء", icon: Star },
                   ].map((tab) => (
                     <button
@@ -315,7 +440,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                       <div className="prose prose-invert prose-zinc max-w-none font-cairo leading-relaxed">
                         <h3 className="text-2xl font-alexandria font-black text-white mb-6">الوصف الكامل</h3>
                         {product.description ? (
-                          <div dangerouslySetInnerHTML={{ __html: product.description.replace(/\n/g, '<br/>') }} />
+                          <div className="text-zinc-300 space-y-4" dangerouslySetInnerHTML={{ __html: product.description.replace(/\n/g, '<br/>') }} />
                         ) : (
                           <p className="text-zinc-400">
                             هذا المنتج مصمم بعناية فائقة ليلبي احتياجاتك الاحترافية. يتضمن كل ما تحتاجه للبدء فوراً دون تعقيدات تقنية.
@@ -328,7 +453,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                             {[
                               "تصميم جاهز للاستخدام الفوري",
                               "متوافق مع أحدث المعايير",
-                              "كود نظيف وموثق (إن وجد)",
+                              `بصيغة ${product.file_type || "عالمية"} مرنة`,
                               "سهولة التخصيص والتعديل"
                             ].map((item, i) => (
                               <li key={i} className="flex items-start gap-3 bg-white/5 p-4 rounded-xl border border-white/5">
@@ -343,12 +468,37 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                   )}
 
                   {activeTab === "previews" && (
-                    <div className="space-y-8 text-center flex flex-col items-center justify-center h-full min-h-[400px]">
-                      <div className="w-20 h-20 bg-rose-500/10 rounded-full flex items-center justify-center mb-4">
-                        <PlayCircle className="w-10 h-10 text-rose-500" />
-                      </div>
-                      <h3 className="text-2xl font-alexandria font-black text-white">معاينة الفيديو قريباً</h3>
-                      <p className="text-zinc-400 font-cairo">نعمل حالياً على إضافة فيديوهات توضيحية لجميع المنتجات.</p>
+                    <div className="grid gap-4">
+                      {product.video_url && (
+                        <div className="space-y-4">
+                           <h4 className="text-lg font-bold text-white font-alexandria">الفيديو التعريفي</h4>
+                           <div className="aspect-video rounded-2xl overflow-hidden border border-white/10 bg-black">
+                              {product.video_url.includes('youtube.com') || product.video_url.includes('youtu.be') ? (
+                                <iframe src={`https://www.youtube.com/embed/${product.video_url.split('v=')[1]?.split('&')[0] || product.video_url.split('/').pop()}`} className="w-full h-full border-none" allowFullScreen />
+                              ) : <video src={product.video_url} controls className="w-full h-full" />}
+                           </div>
+                        </div>
+                      )}
+                      
+                      {product.gallery.length > 0 && (
+                        <div className="space-y-4 mt-8">
+                           <h4 className="text-lg font-bold text-white font-alexandria">معرض الصور</h4>
+                           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                              {product.gallery.map((img: string, i: number) => (
+                                <div key={i} className="relative aspect-square rounded-xl overflow-hidden border border-white/5 group">
+                                   <Image src={img} alt={`Gallery ${i}`} fill className="object-cover group-hover:scale-110 transition-all duration-700" />
+                                </div>
+                              ))}
+                           </div>
+                        </div>
+                      )}
+
+                      {!product.video_url && product.gallery.length === 0 && (
+                        <div className="py-20 text-center space-y-4">
+                           <MonitorPlay className="w-12 h-12 text-zinc-700 mx-auto" />
+                           <p className="text-zinc-500 font-cairo">لا توجد وسائط إضافية لهذا المنتج.</p>
+                        </div>
+                      )}
                     </div>
                   )}
 
@@ -373,16 +523,6 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                           ))}
                         </div>
                       </div>
-                      
-                      <div className="grid gap-4">
-                        <div className="p-6 bg-white/[0.02] border border-white/5 rounded-2xl">
-                          <div className="flex text-yellow-400 mb-3 gap-1">
-                            {[1,2,3,4,5].map(i => <Star key={i} className="w-4 h-4 fill-current" />)}
-                          </div>
-                          <p className="text-zinc-300 font-cairo mb-4 leading-relaxed">"تجربة رائعة ومنتج ممتاز جداً، وفر علي الكثير من الوقت والجهد. الدعم الفني كان متجاوباً للغاية."</p>
-                          <p className="font-cairo font-bold text-zinc-500 text-sm">أحمد س. <span className="mx-2 opacity-50">•</span> <span className="text-emerald-400 text-xs">مشتري مؤكد</span></p>
-                        </div>
-                      </div>
                     </div>
                   )}
                 </motion.div>
@@ -392,24 +532,23 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
         </section>
 
         {/* Mobile Sticky CTA */}
-        <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-[#050505]/90 backdrop-blur-xl border-t border-white/10 p-4 z-50 flex items-center justify-between gap-4 pb-safe shadow-[0_-20px_40px_rgba(0,0,0,0.5)]">
-          <div className="flex flex-col">
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-[#050505]/95 backdrop-blur-2xl border-t border-white/10 p-4 z-50 flex items-center justify-between gap-4 pb-safe shadow-[0_-20px_40px_rgba(0,0,0,0.8)]">
+          <div className="flex flex-col pl-4">
             {product.original_price && (
-              <span className="text-zinc-500 font-cairo text-xs line-through">{product.original_price} ج.م</span>
+              <span className="text-zinc-500 font-cairo text-[10px] line-through">{product.original_price} ج.م</span>
             )}
-            <span className="text-2xl font-alexandria font-black text-white">{product.price} <span className="text-xs font-cairo text-zinc-400 font-normal">ج.م</span></span>
+            <span className="text-2xl font-alexandria font-black text-white leading-none">{product.price} <span className="text-[10px] font-cairo text-zinc-500 font-normal">ج.م</span></span>
           </div>
-          <div className="flex gap-2 w-[60%]">
+          <div className="flex gap-2 flex-1">
             <button
               onClick={() => addToCart(product)}
-              className="h-12 w-12 bg-white/10 border border-white/10 text-white rounded-xl flex items-center justify-center active:scale-95 transition-all shrink-0"
-              aria-label="إضافة للسلة"
+              className="h-12 w-12 bg-white/5 border border-white/10 text-white rounded-xl flex items-center justify-center active:scale-90 transition-all shrink-0"
             >
               <ShoppingCart className="w-5 h-5" />
             </button>
             <Link
               href={`/checkout/${product.id}`}
-              className="flex-1 h-12 bg-[#D6004B] hover:bg-[#b0003d] text-white font-cairo font-black text-sm md:text-lg rounded-xl flex items-center justify-center gap-2 active:scale-95 transition-all shadow-[0_0_20px_rgba(214,0,75,0.3)]"
+              className="flex-1 h-12 bg-[#D6004B] text-white font-cairo font-black text-sm rounded-xl flex items-center justify-center gap-2 active:scale-95 transition-all shadow-lg shadow-rose-600/20"
             >
               شراء فوري
               <ArrowLeft className="w-4 h-4 rtl:rotate-180" />
@@ -422,3 +561,9 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
     </div>
   );
 }
+
+const X = ({ className }: { className?: string }) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+  </svg>
+);

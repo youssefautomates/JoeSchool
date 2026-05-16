@@ -43,6 +43,10 @@ export interface Product {
   seo_description: string | null;
   created_at: string;
   updated_at: string;
+  // Extended fields (stored in tags with prefixes)
+  video_url?: string;
+  gallery?: string[];
+  file_type?: string;
 }
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -87,8 +91,8 @@ export async function fetchAdminProducts(opts: any = {}): Promise<{ products: an
     // SIMPLEST POSSIBLE QUERY
     const query = supabase
       .from("products")
-      .select("id, title, price, status")
-      .limit(5);
+      .select("*")
+      .order("created_at", { ascending: false });
 
     console.log(`[DEBUG_ISOLATION] Executing simplest Supabase query...`);
     const { data, error } = await query;
