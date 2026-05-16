@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { 
   Plus, Trash2, Edit2, Loader2, ImageIcon, 
   Video, FileText, Image as ImageIcon2, 
-  Globe, Layout, ChevronRight, X, Save
+  Globe, Layout, ChevronRight, X, Save, UploadCloud, FileUp
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,6 +19,13 @@ import { generateSlug, calcDiscount, type Product } from "@/lib/products";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
+
+// ── Helper: Safe Image Src ───────────────────────────────────────────
+function safeImageSrc(src: string) {
+  if (!src) return "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=800";
+  if (src.startsWith("file://")) return "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=800";
+  return src;
+}
 
 // ── Helper: Pack/Unpack Tags ───────────────────────────────────────────
 function unpackProduct(p: Product) {
@@ -54,10 +61,44 @@ function packTags(form: any) {
   return tags;
 }
 
+// ── File Upload Hook ──────────────────────────────────────────────────
+function useFileUpload() {
+  const [uploading, setUploading] = useState(false);
+
+  const upload = async (file: File, folder: string = "products") => {
+    setUploading(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
+      const filePath = `${folder}/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('products')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data } = supabase.storage
+        .from('products')
+        .getPublicUrl(filePath);
+
+      return data.publicUrl;
+    } catch (err: any) {
+      toast.error(`فشل الرفع: ${err.message}`);
+      return null;
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  return { upload, uploading };
+}
+
 // ── Product Form Dialog ────────────────────────────────────────────────
 function ProductFormDialog({ open, onClose, onSaved, initial }: { open: boolean; onClose: () => void; onSaved: () => void; initial?: Product | null; }) {
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState<"general" | "media" | "files" | "seo">("general");
+  const { upload, uploading } = useFileUpload();
   
   const [form, setForm] = useState<any>({
     title: "", slug: "", description: "", short_description: "",
@@ -66,6 +107,10 @@ function ProductFormDialog({ open, onClose, onSaved, initial }: { open: boolean;
     video_url: "", gallery: [""], file_type: "zip", displayTags: "",
     seo_title: "", seo_description: ""
   });
+
+  const imgRef = useRef<HTMLInputElement>(null);
+  const vidRef = useRef<HTMLInputElement>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (open) {
@@ -152,6 +197,19 @@ function ProductFormDialog({ open, onClose, onSaved, initial }: { open: boolean;
   const removeGalleryItem = (index: number) => {
     const newGallery = form.gallery.filter((_: any, i: number) => i !== index);
     setForm({ ...form, gallery: newGallery.length > 0 ? newGallery : [""] });
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, target: "image" | "video" | "file") => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    const url = await upload(file);
+    if (url) {
+      if (target === "image") setForm({ ...form, image_url: url });
+      if (target === "video") setForm({ ...form, video_url: url });
+      if (target === "file") setForm({ ...form, file_url: url });
+      toast.success("تم رفع الملف بنجاح");
+    }
   };
 
   return (
@@ -260,20 +318,41 @@ function ProductFormDialog({ open, onClose, onSaved, initial }: { open: boolean;
                   {activeTab === "media" && (
                     <div className="grid gap-6">
                       <div className="space-y-1.5">
-                        <div className="flex items-center gap-2 mb-2">
-                          <ImageIcon2 className="w-4 h-4 text-rose-500" />
-                          <Label className="text-sm font-bold" style={{ color: "#d4d4d8" }}>الصورة الأساسية (Thumbnail)</Label>
+                        <div className="flex items-center justify-between mb-2">
+                           <div className="flex items-center gap-2">
+                             <ImageIcon2 className="w-4 h-4 text-rose-500" />
+                             <Label className="text-sm font-bold" style={{ color: "#d4d4d8" }}>الصورة الأساسية (Thumbnail)</Label>
+                           </div>
+                           <button 
+                            onClick={() => imgRef.current?.click()} 
+                            disabled={uploading}
+                            className="text-[10px] font-bold text-rose-500 flex items-center gap-1 hover:underline"
+                           >
+                              <UploadCloud className="w-3.5 h-3.5" />
+                              رفع من الكمبيوتر
+                           </button>
+                           <input type="file" ref={imgRef} className="hidden" accept="image/*" onChange={(e) => handleFileUpload(e, "image")} />
                         </div>
-                        <Input value={form.image_url} onChange={e => setForm({...form, image_url: e.target.value})} dir="ltr" className="h-12 rounded-xl text-white" style={{ background: "rgba(255,255,255,0.05)", border: "1.5px solid rgba(255,255,255,0.1)" }} placeholder="https://..." />
+                        <Input value={form.image_url} onChange={e => setForm({...form, image_url: e.target.value})} dir="ltr" className="h-12 rounded-xl text-white" style={{ background: "rgba(255,255,255,0.05)", border: "1.5px solid rgba(255,255,255,0.1)" }} placeholder="رابط الصورة المباشر..." />
                       </div>
 
                       <div className="space-y-1.5">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Video className="w-4 h-4 text-rose-500" />
-                          <Label className="text-sm font-bold" style={{ color: "#d4d4d8" }}>رابط الفيديو التعريفي (MP4/YouTube/Vimeo)</Label>
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <Video className="w-4 h-4 text-rose-500" />
+                            <Label className="text-sm font-bold" style={{ color: "#d4d4d8" }}>رابط الفيديو التعريفي</Label>
+                          </div>
+                           <button 
+                            onClick={() => vidRef.current?.click()} 
+                            disabled={uploading}
+                            className="text-[10px] font-bold text-rose-500 flex items-center gap-1 hover:underline"
+                           >
+                              <UploadCloud className="w-3.5 h-3.5" />
+                              رفع فيديو
+                           </button>
+                           <input type="file" ref={vidRef} className="hidden" accept="video/*" onChange={(e) => handleFileUpload(e, "video")} />
                         </div>
-                        <Input value={form.video_url} onChange={e => setForm({...form, video_url: e.target.value})} dir="ltr" className="h-12 rounded-xl text-white" style={{ background: "rgba(255,255,255,0.05)", border: "1.5px solid rgba(255,255,255,0.1)" }} placeholder="https://..." />
-                        <p className="text-[10px] text-zinc-500 mr-2">اتركه فارغاً إذا لم يتوفر فيديو.</p>
+                        <Input value={form.video_url} onChange={e => setForm({...form, video_url: e.target.value})} dir="ltr" className="h-12 rounded-xl text-white" style={{ background: "rgba(255,255,255,0.05)", border: "1.5px solid rgba(255,255,255,0.1)" }} placeholder="رابط فيديو MP4 أو YouTube..." />
                       </div>
 
                       <div className="space-y-3">
@@ -314,11 +393,22 @@ function ProductFormDialog({ open, onClose, onSaved, initial }: { open: boolean;
                   {activeTab === "files" && (
                     <div className="grid gap-6">
                       <div className="space-y-1.5">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Globe className="w-4 h-4 text-emerald-500" />
-                          <Label className="text-sm font-bold" style={{ color: "#d4d4d8" }}>رابط الملف الرقمي للتسليم</Label>
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <Globe className="w-4 h-4 text-emerald-500" />
+                            <Label className="text-sm font-bold" style={{ color: "#d4d4d8" }}>رابط الملف الرقمي للتسليم</Label>
+                          </div>
+                           <button 
+                            onClick={() => fileRef.current?.click()} 
+                            disabled={uploading}
+                            className="text-[10px] font-bold text-emerald-500 flex items-center gap-1 hover:underline"
+                           >
+                              <FileUp className="w-3.5 h-3.5" />
+                              رفع ملف
+                           </button>
+                           <input type="file" ref={fileRef} className="hidden" onChange={(e) => handleFileUpload(e, "file")} />
                         </div>
-                        <Input value={form.file_url} onChange={e => setForm({...form, file_url: e.target.value})} dir="ltr" className="h-12 rounded-xl text-white" style={{ background: "rgba(255,255,255,0.05)", border: "1.5px solid rgba(255,255,255,0.1)" }} placeholder="رابط التحميل المباشر (Google Drive, S3, etc.)" />
+                        <Input value={form.file_url} onChange={e => setForm({...form, file_url: e.target.value})} dir="ltr" className="h-12 rounded-xl text-white" style={{ background: "rgba(255,255,255,0.05)", border: "1.5px solid rgba(255,255,255,0.1)" }} placeholder="رابط التحميل المباشر..." />
                       </div>
 
                       <div className="grid grid-cols-2 gap-4">
@@ -335,15 +425,6 @@ function ProductFormDialog({ open, onClose, onSaved, initial }: { open: boolean;
                         <div className="space-y-1.5">
                           <Label className="text-sm font-bold" style={{ color: "#d4d4d8" }}>الكلمات الدلالية (Tags)</Label>
                           <Input value={form.displayTags} onChange={e => setForm({...form, displayTags: e.target.value})} className="h-12 rounded-xl text-white" style={{ background: "rgba(255,255,255,0.05)", border: "1.5px solid rgba(255,255,255,0.1)" }} placeholder="قالب، n8n، أتمتة" />
-                        </div>
-                      </div>
-
-                      <div className="p-6 rounded-2xl bg-emerald-500/5 border border-emerald-500/10 flex items-start gap-4">
-                        <FileText className="w-6 h-6 text-emerald-500 mt-1" />
-                        <div className="text-xs font-cairo text-zinc-400 space-y-1">
-                          <p className="font-bold text-white mb-1">تعليمات التسليم:</p>
-                          <p>• سيتم إرسال هذا الرابط للعميل تلقائياً عبر البريد الإلكتروني بعد نجاح الدفع.</p>
-                          <p>• تأكد من أن الرابط "عام" أو متاح لمن يملك الرابط.</p>
                         </div>
                       </div>
                     </div>
@@ -363,7 +444,7 @@ function ProductFormDialog({ open, onClose, onSaved, initial }: { open: boolean;
                           rows={4}
                           className="w-full p-4 rounded-xl text-white font-cairo text-sm outline-none resize-none" 
                           style={{ background: "rgba(255,255,255,0.05)", border: "1.5px solid rgba(255,255,255,0.1)" }}
-                          placeholder="وصف مختصر لظهور المنتج في محركات البحث..."
+                          placeholder="وصف مختصر..."
                         />
                       </div>
                     </div>
@@ -375,11 +456,15 @@ function ProductFormDialog({ open, onClose, onSaved, initial }: { open: boolean;
             {/* Footer Buttons */}
             <div className="p-8 border-t border-white/5 flex items-center justify-between bg-black/20">
                <div className="text-xs text-zinc-600 font-cairo">
-                  * الحقول المميزة بعلامة مطلوبة
+                  {uploading ? (
+                    <span className="text-rose-500 flex items-center gap-2 animate-pulse">
+                      <Loader2 className="w-4 h-4 animate-spin" /> جاري رفع الملف...
+                    </span>
+                  ) : "* الحقول المميزة بعلامة مطلوبة"}
                </div>
                <Button 
                 onClick={handleSave} 
-                disabled={saving} 
+                disabled={saving || uploading} 
                 className="h-14 px-10 rounded-2xl font-alexandria font-black text-lg transition-all active:scale-95"
                 style={{ 
                   background: "linear-gradient(135deg, #D6004B, #ff2d6b)", 
@@ -428,10 +513,10 @@ function DeleteDialog({ product, onClose, onDeleted }: { product: Product; onClo
     <Dialog open onOpenChange={(v) => !v && onClose()}>
       <DialogContent className="bg-[#080810] border-red-500/20 text-white sm:max-w-md rounded-[2rem] p-8">
         <DialogHeader><DialogTitle className="text-red-500 font-alexandria text-xl">حذف المنتج نهائياً</DialogTitle></DialogHeader>
-        <p className="py-6 text-zinc-400 font-cairo leading-relaxed">أنت على وشك حذف <span className="text-white font-bold">"{product.title}"</span>. لن تتمكن من استعادة البيانات بعد هذه الخطوة.</p>
+        <p className="py-6 text-zinc-400 font-cairo leading-relaxed">أنت على وشك حذف <span className="text-white font-bold">"{product.title}"</span>.</p>
         <div className="flex gap-3">
           <Button variant="ghost" onClick={onClose} className="flex-1 h-12 rounded-xl text-zinc-400 hover:text-white hover:bg-white/5 font-cairo">إلغاء</Button>
-          <Button onClick={handleDelete} disabled={deleting} variant="destructive" className="flex-1 h-12 rounded-xl font-cairo bg-red-600 hover:bg-red-700 shadow-lg shadow-red-600/20">
+          <Button onClick={handleDelete} disabled={deleting} variant="destructive" className="flex-1 h-12 rounded-xl font-cairo bg-red-600 hover:bg-red-700">
             {deleting ? <Loader2 className="w-4 h-4 animate-spin" /> : "تأكيد الحذف"}
           </Button>
         </div>
@@ -493,12 +578,6 @@ export default function AdminProductsPage() {
         </button>
       </div>
 
-      {error && (
-        <div className="p-4 bg-red-500/10 border border-red-500/30 text-red-400 rounded-xl font-cairo flex items-center gap-3">
-          <X className="w-5 h-5" /> {error}
-        </div>
-      )}
-
       {/* Table Card */}
       <div className="overflow-hidden rounded-[2.5rem]" style={{ background: "rgba(16,16,26,0.8)", border: "1px solid rgba(255,255,255,0.07)", boxShadow: "0 24px 64px rgba(0,0,0,0.4)" }}>
         <div className="overflow-x-auto">
@@ -514,38 +593,34 @@ export default function AdminProductsPage() {
             </TableHeader>
             <TableBody>
               {loading ? (
-                Array.from({ length: 5 }).map((_, i) => (
+                Array.from({ length: 3 }).map((_, i) => (
                   <TableRow key={i} className="border-white/5">
-                    <TableCell className="py-6 pr-8">
-                       <div className="flex items-center gap-4 animate-pulse">
-                          <div className="w-14 h-14 rounded-2xl bg-white/5" />
-                          <div className="space-y-2">
-                             <div className="h-4 w-32 bg-white/5 rounded" />
-                             <div className="h-3 w-48 bg-white/5 rounded" />
-                          </div>
-                       </div>
-                    </TableCell>
-                    <TableCell><div className="h-4 w-16 bg-white/5 rounded animate-pulse" /></TableCell>
-                    <TableCell><div className="h-4 w-8 bg-white/5 rounded animate-pulse" /></TableCell>
-                    <TableCell><div className="h-6 w-16 bg-white/5 rounded animate-pulse" /></TableCell>
+                    <TableCell className="py-6 pr-8 animate-pulse"><div className="h-10 w-full bg-white/5 rounded" /></TableCell>
+                    <TableCell><div className="h-4 w-16 bg-white/5 rounded" /></TableCell>
+                    <TableCell><div className="h-4 w-8 bg-white/5 rounded" /></TableCell>
+                    <TableCell><div className="h-6 w-16 bg-white/5 rounded" /></TableCell>
                     <TableCell />
                   </TableRow>
                 ))
               ) : products.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="h-64 text-center text-zinc-600 font-cairo">
-                    <Layout className="w-12 h-12 mx-auto mb-4 opacity-10" />
-                    لا توجد منتجات مسجلة حتى الآن.
-                  </TableCell>
+                  <TableCell colSpan={5} className="h-64 text-center text-zinc-600 font-cairo">لا توجد منتجات.</TableCell>
                 </TableRow>
               ) : (
                 products.map((p) => (
                   <TableRow key={p.id} className="border-white/5 hover:bg-white/[0.02] transition-colors group">
                     <TableCell className="py-5 pr-8">
                       <div className="flex items-center gap-5">
-                        <div className="w-14 h-14 rounded-2xl bg-zinc-800 relative overflow-hidden shrink-0 flex items-center justify-center border border-white/5 group-hover:border-rose-500/30 transition-all">
+                        <div className="w-14 h-14 rounded-2xl bg-zinc-800 relative overflow-hidden shrink-0 flex items-center justify-center border border-white/5">
                           {p.image_url ? (
-                            <Image src={p.image_url} alt={p.title} fill className="object-cover" sizes="56px" />
+                            <Image 
+                              src={safeImageSrc(p.image_url)} 
+                              alt={p.title} 
+                              fill 
+                              className="object-cover" 
+                              sizes="56px" 
+                              unoptimized={p.image_url.startsWith("file://")}
+                            />
                           ) : (
                             <ImageIcon className="w-6 h-6 text-zinc-600" />
                           )}
@@ -573,12 +648,12 @@ export default function AdminProductsPage() {
                         <DropdownMenuTrigger className="h-10 w-10 flex items-center justify-center rounded-xl text-zinc-500 hover:bg-white/10 hover:text-white transition-all outline-none">
                           <ChevronRight className="w-5 h-5 rotate-90" />
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="bg-[#0d0d1a] border-white/10 p-2 rounded-2xl shadow-2xl">
+                        <DropdownMenuContent align="end" className="bg-[#0d0d1a] border-white/10 p-2 rounded-2xl">
                           <DropdownMenuItem onClick={() => setEditProduct(p)} className="cursor-pointer text-zinc-300 hover:bg-white/5 rounded-xl p-3 font-cairo gap-3">
-                            <Edit2 className="w-4 h-4 text-rose-500" /> تعديل البيانات
+                            <Edit2 className="w-4 h-4 text-rose-500" /> تعديل
                           </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => setDeleteProduct(p)} className="cursor-pointer text-red-400 hover:bg-red-500/10 rounded-xl p-3 font-cairo gap-3">
-                            <Trash2 className="w-4 h-4" /> حذف المنتج
+                            <Trash2 className="w-4 h-4" /> حذف
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -591,14 +666,9 @@ export default function AdminProductsPage() {
         </div>
       </div>
 
-      {/* Modals */}
       <ProductFormDialog open={addOpen} onClose={() => setAddOpen(false)} onSaved={fetchProducts} />
-      {editProduct && (
-        <ProductFormDialog open initial={editProduct} onClose={() => setEditProduct(null)} onSaved={fetchProducts} />
-      )}
-      {deleteProduct && (
-        <DeleteDialog product={deleteProduct} onClose={() => setDeleteProduct(null)} onDeleted={fetchProducts} />
-      )}
+      {editProduct && <ProductFormDialog open initial={editProduct} onClose={() => setEditProduct(null)} onSaved={fetchProducts} />}
+      {deleteProduct && <DeleteDialog product={deleteProduct} onClose={() => setDeleteProduct(null)} onDeleted={fetchProducts} />}
     </div>
   );
 }
