@@ -206,17 +206,17 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
   const isYouTube = product.video_url?.includes('youtube.com') || product.video_url?.includes('youtu.be');
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white font-cairo selection:bg-rose-500/30">
+    <div className="min-h-screen bg-[#050505] text-white font-cairo selection:bg-rose-500/30" style={{ isolation: 'isolate' }}>
       <Navbar />
       
-      <main className="pt-24 md:pt-32 pb-24">
-        <section className="container mx-auto px-4">
-          <div className="flex flex-col lg:flex-row gap-12 items-start">
+      <main className="pt-24 md:pt-32 pb-24 relative z-0">
+        <section className="container mx-auto px-4 md:px-6">
+          <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 items-start">
             
             {/* Left Column: Visuals & Description */}
             <div className="w-full lg:w-[62%] space-y-8">
               {/* Main Viewer */}
-              <div className="relative aspect-video bg-[#08080c] rounded-[2.5rem] overflow-hidden shadow-2xl border border-white/5 flex items-center justify-center">
+              <div className="relative aspect-video bg-[#08080c] rounded-2xl md:rounded-[2.5rem] overflow-hidden shadow-2xl border border-white/5 flex items-center justify-center">
                 <AnimatePresence mode="wait">
                   {activeMedia?.type === 'video' ? (
                     <motion.div 
@@ -224,7 +224,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
-                      className="absolute inset-0 z-20 flex items-center justify-center bg-black"
+                      className="absolute inset-0 z-10 flex items-center justify-center bg-black"
                     >
                       {activeMedia.url.includes('youtube.com') || activeMedia.url.includes('youtu.be') ? (
                         <iframe 
@@ -252,7 +252,8 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                           {!hasInteracted && (
                             <div 
                               onClick={handleUnmuteAndStart}
-                              className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 backdrop-blur-[2px] cursor-pointer group/unmute transition-all hover:bg-black/20 z-30"
+                              className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 backdrop-blur-[2px] cursor-pointer group/unmute transition-all hover:bg-black/20"
+                              style={{ zIndex: 10 }}
                             >
                                <motion.div 
                                 animate={{ scale: [1, 1.1, 1] }}
@@ -293,7 +294,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                 </AnimatePresence>
 
                 {/* Badges */}
-                <div className="absolute top-6 left-6 flex flex-col gap-3 z-30 pointer-events-none">
+                <div className="absolute top-4 left-4 md:top-6 md:left-6 flex flex-col gap-3 z-20 pointer-events-none">
                   <div className="bg-white/5 backdrop-blur-xl border border-white/10 px-4 py-2 rounded-xl flex items-center gap-2 shadow-2xl">
                     <Sparkles className="w-4 h-4 text-rose-500" />
                     <span className="font-alexandria text-[9px] font-black text-white uppercase tracking-widest">Premium Content</span>
