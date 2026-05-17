@@ -452,67 +452,67 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
             </div>
 
             {/* Right Column: Pricing & Conversion */}
-            <div className="w-full lg:w-[38%] sticky top-32 space-y-8">
-              <div className="bg-[#0c0c12] p-10 md:p-12 rounded-[3rem] border border-white/10 shadow-2xl relative overflow-hidden">
+            <div className="w-full lg:w-[38%] lg:sticky lg:top-32 space-y-8">
+              <div className="bg-[#0c0c12] p-6 sm:p-8 md:p-10 lg:p-12 rounded-3xl md:rounded-[2.5rem] lg:rounded-[3rem] border border-white/10 shadow-2xl relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-br from-rose-600/5 to-transparent opacity-50" />
                 
-                <div className="relative z-10 space-y-8">
-                  <div className="space-y-4">
+                <div className="relative z-10 space-y-6 md:space-y-8">
+                  <div className="space-y-3 md:space-y-4">
                     {discountPct && (
-                      <Badge className="bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 font-alexandria px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest">
+                      <Badge className="bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 font-alexandria px-3 py-1.5 md:px-4 md:py-2 rounded-xl text-[9px] md:text-[10px] font-black uppercase tracking-widest">
                         🔥 عرض خاص لفترة محدودة
                       </Badge>
                     )}
-                    <h1 className="text-4xl md:text-5xl font-alexandria font-black text-white leading-tight tracking-tighter">
+                    <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-alexandria font-black text-white leading-tight tracking-tighter">
                       {product.title}
                     </h1>
                   </div>
 
-                  <div className="flex items-center justify-between py-6 border-y border-white/5">
+                  <div className="flex items-center justify-between py-4 md:py-6 border-y border-white/5">
                     <div className="flex flex-col">
                       {product.original_price && (
-                        <span className="text-zinc-600 font-alexandria text-xl line-through decoration-rose-500/30 mb-1">
-                          {product.original_price} <span className="text-xs">ج.م</span>
+                        <span className="text-zinc-600 font-alexandria text-sm sm:text-base md:text-xl line-through decoration-rose-500/30 mb-0.5">
+                          {product.original_price} <span className="text-[10px] md:text-xs">ج.م</span>
                         </span>
                       )}
-                      <div className="flex items-baseline gap-3">
-                        <span className="text-6xl font-alexandria font-black text-white tracking-tighter">{product.price}</span>
-                        <span className="text-xl font-alexandria font-black text-rose-500 uppercase">ج.م</span>
+                      <div className="flex items-baseline gap-2 md:gap-3">
+                        <span className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-alexandria font-black text-white tracking-tighter">{product.price}</span>
+                        <span className="text-base sm:text-lg md:text-xl font-alexandria font-black text-rose-500 uppercase">ج.م</span>
                       </div>
                     </div>
                     {discountPct && (
-                      <div className="bg-rose-600 text-white font-alexandria font-black px-4 py-2 rounded-xl text-sm shadow-xl shadow-rose-600/20">
+                      <div className="bg-rose-600 text-white font-alexandria font-black px-3 py-1.5 md:px-4 md:py-2 rounded-xl text-xs md:text-sm shadow-xl shadow-rose-600/20">
                         -{discountPct}%
                       </div>
                     )}
                   </div>
 
-                  <div className="space-y-4 pt-4">
+                  <div className="space-y-3 md:space-y-4 pt-2 md:pt-4">
                     <Link
                       href={`/checkout/${product.id}`}
-                      className="w-full h-20 inline-flex items-center justify-center gap-4 bg-[#D6004B] hover:bg-[#ff0059] text-white font-alexandria font-black text-2xl rounded-[2rem] transition-all shadow-[0_20px_50px_rgba(214,0,75,0.4)] hover:shadow-[0_25px_60px_rgba(214,0,75,0.6)] active:scale-95 group"
+                      className="w-full h-14 sm:h-16 md:h-20 inline-flex items-center justify-center gap-3 md:gap-4 bg-[#D6004B] hover:bg-[#ff0059] text-white font-alexandria font-black text-base sm:text-lg md:text-2xl rounded-2xl md:rounded-[2rem] transition-all shadow-[0_15px_40px_rgba(214,0,75,0.35)] hover:shadow-[0_20px_50px_rgba(214,0,75,0.5)] active:scale-95 group"
                     >
                       شراء الآن (تحميل فوري)
-                      <ArrowLeft className="w-7 h-7 rtl:rotate-180 group-hover:-translate-x-2 transition-transform" />
+                      <ArrowLeft className="w-5 h-5 md:w-7 md:h-7 rtl:rotate-180 group-hover:-translate-x-2 transition-transform" />
                     </Link>
 
                     <button
                       onClick={() => addToCart(product)}
-                      className="w-full h-16 inline-flex items-center justify-center gap-3 bg-white/5 hover:bg-white/10 text-white font-alexandria font-black text-lg rounded-[1.5rem] border border-white/10 transition-all active:scale-95"
+                      className="w-full h-12 sm:h-14 md:h-16 inline-flex items-center justify-center gap-2 md:gap-3 bg-white/5 hover:bg-white/10 text-white font-alexandria font-black text-sm sm:text-base md:text-lg rounded-xl md:rounded-[1.5rem] border border-white/10 transition-all active:scale-95"
                     >
-                      <ShoppingCart className="w-5 h-5" />
+                      <ShoppingCart className="w-4 h-4 md:w-5 md:h-5" />
                       إضافة إلى السلة
                     </button>
                   </div>
 
-                  <div className="flex items-center justify-center gap-6 pt-6 text-zinc-500">
-                    <div className="flex items-center gap-2">
-                       <ShieldCheck className="w-4 h-4 text-emerald-500" />
-                       <span className="text-[9px] font-alexandria font-black uppercase tracking-widest">آمن 100%</span>
+                  <div className="flex items-center justify-center gap-4 md:gap-6 pt-4 md:pt-6 text-zinc-500">
+                    <div className="flex items-center gap-1.5 md:gap-2">
+                       <ShieldCheck className="w-3.5 h-3.5 md:w-4 md:h-4 text-emerald-500" />
+                       <span className="text-[8px] md:text-[9px] font-alexandria font-black uppercase tracking-widest">آمن 100%</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                       <Lock className="w-4 h-4" />
-                       <span className="text-[9px] font-alexandria font-black uppercase tracking-widest">تشفير SSL</span>
+                    <div className="flex items-center gap-1.5 md:gap-2">
+                       <Lock className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                       <span className="text-[8px] md:text-[9px] font-alexandria font-black uppercase tracking-widest">تشفير SSL</span>
                     </div>
                   </div>
                 </div>
