@@ -8,57 +8,80 @@ interface Review {
   text: string;
   stars: number;
   seed: string;
+  gender: "male" | "female";
+}
+
+// Dicebear adventurer seeds that are confirmed to produce correct gendered avatars
+const MALE_SEEDS = ["Felix", "Oliver", "Charlie", "Jack", "Liam", "Noah", "James", "Ethan"];
+const FEMALE_SEEDS = ["Mia", "Lily", "Emma", "Sara", "Luna", "Aria", "Zoe", "Chloe"];
+
+function getAvatarUrl(seed: string, gender: "male" | "female"): string {
+  const seeds = gender === "female" ? FEMALE_SEEDS : MALE_SEEDS;
+  // Use seed string to consistently pick the same avatar for same name
+  let hash = 0;
+  for (let i = 0; i < seed.length; i++) {
+    hash = seed.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const chosen = seeds[Math.abs(hash) % seeds.length];
+  return `https://api.dicebear.com/9.x/adventurer/svg?seed=${chosen}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc`;
 }
 
 const reviews: Review[] = [
   {
-    name: "المهندس عادل الحربي",
+    name: "عادل الحربي",
     title: "مشتري موثق · حزمة n8n للشركات",
     text: "قمت بشراء حزمة أتمتة n8n لربط متجري تلقائيًا وإرسال الفواتير للعملاء عبر الواتساب. استثمار جبار ووفر عليّ راتب موظف كامل!",
     stars: 5,
-    seed: "adnan"
+    seed: "adil",
+    gender: "male"
   },
   {
     name: "شروق عبد العزيز",
     title: "مشتري موثق · بوت أتمتة التلغرام",
     text: "خدمة استثنائية! حصلت على حزم جاهزة لـ n8n والربط كان فوري، وتفاجأت أن الملفات المرسلة عبر البريد الإلكتروني مشفرة ومحمية بـ Tokens مخصصة.",
     stars: 5,
-    seed: "sara"
+    seed: "shrouk",
+    gender: "female"
   },
   {
-    name: "أبو تميم - متجر تقني",
+    name: "أبو تميم",
     title: "مشتري موثق · بوابة دفع Paymob",
     text: "الدعم ما بعد البيع فوق الخيال. واجهت مشكلة بسيطة في الربط مع بوابة Paymob وساعدني فريق العمل بشكل فوري ومجاني حتى أتممت أول عملية دفع.",
     stars: 5,
-    seed: "tamim"
+    seed: "abutamim",
+    gender: "male"
   },
   {
     name: "خالد الدوسري",
     title: "مشتري موثق · حزم أتمتة السحابة",
     text: "تطبيق فكرة Premium SaaS حقيقي. الواجهات وتدفقات الأتمتة خالية من الأخطاء، وكل التقييمات والأحداث تتزامن بشكل فوري. عمل متقن للغاية.",
     stars: 5,
-    seed: "khalid"
+    seed: "khaled",
+    gender: "male"
   },
   {
     name: "سارة العتيبي",
     title: "مشتري موثق · أتمتة الذكاء الاصطناعي",
     text: "من أفضل المتاجر الرقمية التي تعاملت معها. سهولة التحميل ووضوح الشرح لحزمة الذكاء الاصطناعي والأتمتة لا يعلى عليها.",
     stars: 5,
-    seed: "sarah"
+    seed: "sara",
+    gender: "female"
   },
   {
     name: "د. فيصل القحطاني",
     title: "مشتري موثق · أتمتة تدفق الأعمال",
     text: "حزم الأتمتة والمنتجات الرقمية هنا ليست مجرد ملفات، بل هي حلول برمجية متكاملة تزيد من كفاءة العمل وتقلل المصاريف بشكل فوري.",
     stars: 5,
-    seed: "faisal"
+    seed: "faisal",
+    gender: "male"
   },
   {
     name: "عبد الرحمن السديري",
     title: "مشتري موثق · حزمة بيكسل متكاملة",
     text: "كود نظيف، ترتيب رائع، وتكامل فريد مع بيكسل فيسبوك وتيك توك لتتبع المبيعات الحقيقية. أنصح كل صاحب متجر رقمي بالشراء دون تردد.",
     stars: 5,
-    seed: "abdul"
+    seed: "abdulrahman",
+    gender: "male"
   }
 ];
 
@@ -119,7 +142,7 @@ export function ReviewsMarquee() {
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-2xl bg-zinc-800 overflow-hidden shadow-lg border border-white/10 shrink-0 relative">
                     <img 
-                      src={`https://api.dicebear.com/9.x/adventurer/svg?seed=${review.seed}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc`} 
+                      src={getAvatarUrl(review.seed, review.gender)} 
                       alt={review.name} 
                       className="w-full h-full object-cover" 
                     />

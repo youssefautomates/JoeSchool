@@ -24,20 +24,17 @@ interface Review {
   createdAt: string;
 }
 
+const MALE_SEEDS = ["Felix", "Oliver", "Charlie", "Jack", "Liam", "Noah", "James", "Ethan"];
+const FEMALE_SEEDS = ["Mia", "Lily", "Emma", "Sara", "Luna", "Aria", "Zoe", "Chloe"];
+
 const getAvatarUrl = (firstName: string, gender?: string) => {
-  const maleSeeds = ["felix", "adnan", "jack", "alex", "oliver", "abdul", "peter"];
-  const femaleSeeds = ["sara", "mia", "lily", "sarah", "lisa", "jane", "maya"];
-  
-  const seeds = gender === "female" ? femaleSeeds : maleSeeds;
-  
+  const seeds = gender === "female" ? FEMALE_SEEDS : MALE_SEEDS;
   let hash = 0;
   for (let i = 0; i < firstName.length; i++) {
     hash = firstName.charCodeAt(i) + ((hash << 5) - hash);
   }
-  const index = Math.abs(hash) % seeds.length;
-  const chosenSeed = seeds[index];
-  
-  return `https://api.dicebear.com/9.x/adventurer/svg?seed=${chosenSeed}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc`;
+  const chosen = seeds[Math.abs(hash) % seeds.length];
+  return `https://api.dicebear.com/9.x/adventurer/svg?seed=${chosen}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc`;
 };
 
 export default function ReviewsPage() {
