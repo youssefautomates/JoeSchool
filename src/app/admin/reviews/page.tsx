@@ -2,12 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { Star, Save, Trash2, Plus, MessageSquareQuote, CheckCircle2, ShieldCheck, User } from "lucide-react";
+import { Star, Save, Trash2, Plus, MessageSquareQuote, ShieldCheck } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import Image from "next/image";
 import { supabase } from "@/lib/supabase";
 import { Product } from "@/lib/products";
 
@@ -19,10 +18,27 @@ interface Review {
   rating: number;
   text: string;
   avatarUrl: string;
+  gender?: string;
   isVerified: boolean;
   isHidden: boolean;
   createdAt: string;
 }
+
+const getAvatarUrl = (firstName: string, gender?: string) => {
+  const maleSeeds = ["felix", "adnan", "jack", "alex", "oliver", "abdul", "peter"];
+  const femaleSeeds = ["sara", "mia", "lily", "sarah", "lisa", "jane", "maya"];
+  
+  const seeds = gender === "female" ? femaleSeeds : maleSeeds;
+  
+  let hash = 0;
+  for (let i = 0; i < firstName.length; i++) {
+    hash = firstName.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const index = Math.abs(hash) % seeds.length;
+  const chosenSeed = seeds[index];
+  
+  return `https://api.dicebear.com/9.x/adventurer/svg?seed=${chosenSeed}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc`;
+};
 
 export default function ReviewsPage() {
   const [loading, setLoading] = useState(true);
@@ -39,6 +55,7 @@ export default function ReviewsPage() {
     rating: 5,
     text: "",
     avatarUrl: "",
+    gender: "male",
     isVerified: true,
     isHidden: false,
   });
@@ -94,6 +111,7 @@ export default function ReviewsPage() {
         rating: 5,
         text: "",
         avatarUrl: "",
+        gender: "male",
         isVerified: true,
         isHidden: false,
       });
@@ -204,6 +222,18 @@ export default function ReviewsPage() {
                 </div>
 
                 <div className="space-y-3">
+                  <Label className="text-zinc-300 font-bold">جنس صاحب التقييم (للأفاتار الكرتوني)</Label>
+                  <select 
+                    value={newReview.gender}
+                    onChange={(e) => setNewReview({...newReview, gender: e.target.value})}
+                    className="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-white font-cairo outline-none focus:border-rose-500"
+                  >
+                    <option value="male" className="bg-zinc-900 text-white">ذكر 🧔</option>
+                    <option value="female" className="bg-zinc-900 text-white">أنثى 👩</option>
+                  </select>
+                </div>
+
+                <div className="space-y-3">
                   <Label className="text-zinc-300 font-bold">التقييم (عدد النجوم)</Label>
                   <div className="flex gap-2 bg-white/5 p-3 rounded-xl border border-white/10 w-fit cursor-pointer">
                     {[1,2,3,4,5].map(star => (
@@ -216,8 +246,8 @@ export default function ReviewsPage() {
                   </div>
                 </div>
 
-                <div className="space-y-3">
-                  <Label className="text-zinc-300 font-bold">رابط الصورة الرمزية (Avatar URL - اختياري)</Label>
+                <div className="space-y-3 md:col-span-2">
+                  <Label className="text-zinc-300 font-bold">رابط صورة رمزية مخصصة (اختياري - يغطي على الأفاتار الكرتوني)</Label>
                   <Input 
                     value={newReview.avatarUrl}
                     onChange={(e) => setNewReview({...newReview, avatarUrl: e.target.value})}
@@ -285,11 +315,11 @@ export default function ReviewsPage() {
           <div key={review.id} className={`bg-[#0a0a0f] p-6 rounded-[2rem] border transition-all ${review.isHidden ? 'border-red-500/30 opacity-50' : 'border-white/5 hover:border-rose-500/30'} flex flex-col`}>
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-zinc-800 rounded-full overflow-hidden flex items-center justify-center shrink-0 border border-white/10">
-                  {review.avatarUrl ? (
-                    <Image src={review.avatarUrl} alt={review.firstName} width={48} height={48} className="object-cover" />
+                <div className="w-12 h-12 bg-zinc-800 rounded-full overflow-hidden flex items-center justify-center shrink-0 border border-white/10 relative">
+                  {review.avatarUrl && !review.avatarUrl.includes("pravatar") ? (
+                    <img src={review.avatarUrl} alt={review.firstName} className="w-full h-full object-cover" />
                   ) : (
-                    <User className="w-6 h-6 text-zinc-500" />
+                    <img src={getAvatarUrl(review.firstName, review.gender)} alt={review.firstName} className="w-full h-full object-cover" />
                   )}
                 </div>
                 <div>

@@ -7,14 +7,32 @@ import Image from "next/image";
 
 interface Review {
   id: string;
+  productId: string;
   firstName: string;
   lastName: string;
   rating: number;
   text: string;
   avatarUrl: string;
+  gender?: string;
   isVerified: boolean;
   createdAt: string;
 }
+
+const getAvatarUrl = (firstName: string, gender?: string) => {
+  const maleSeeds = ["felix", "adnan", "jack", "alex", "oliver", "abdul", "peter"];
+  const femaleSeeds = ["sara", "mia", "lily", "sarah", "lisa", "jane", "maya"];
+  
+  const seeds = gender === "female" ? femaleSeeds : maleSeeds;
+  
+  let hash = 0;
+  for (let i = 0; i < firstName.length; i++) {
+    hash = firstName.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const index = Math.abs(hash) % seeds.length;
+  const chosenSeed = seeds[index];
+  
+  return `https://api.dicebear.com/9.x/adventurer/svg?seed=${chosenSeed}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc`;
+};
 
 export function ProductReviews({ productId }: { productId: string }) {
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -57,7 +75,7 @@ export function ProductReviews({ productId }: { productId: string }) {
                   {review.avatarUrl && !review.avatarUrl.includes("pravatar") ? (
                     <img src={review.avatarUrl} alt={review.firstName} className="w-full h-full object-cover" />
                   ) : (
-                    <img src={`https://api.dicebear.com/9.x/adventurer/svg?seed=${review.firstName}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc`} alt={review.firstName} className="w-full h-full object-cover" />
+                    <img src={getAvatarUrl(review.firstName, review.gender)} alt={review.firstName} className="w-full h-full object-cover" />
                   )}
                 </div>
                 <div>
