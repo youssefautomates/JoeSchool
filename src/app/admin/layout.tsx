@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import {
   LayoutDashboard, Package, ShoppingCart, Settings, LogOut,
   Search, Bell, Sparkles, Target, Star, BarChart3, ShieldAlert,
-  Flame, Globe, ShieldCheck
+  Flame, Globe, ShieldCheck, BookOpen, Video, Users, Award
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { motion } from "framer-motion";
@@ -31,6 +31,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         { name: "أداء المنتجات الرقمية", href: "/admin/products/performance", icon: Sparkles },
         { name: "الطلبات", href: "/admin/orders", icon: ShoppingCart },
         { name: "تغذية المبيعات الحية", href: "/admin/orders/live", icon: Flame }
+      ]
+    },
+    {
+      title: "نظام التعليم والمساقات",
+      items: [
+        { name: "إدارة المساقات", href: "/admin/courses", icon: BookOpen },
+        { name: "إدارة قائمة الطلاب", href: "/admin/courses/students", icon: Users },
+        { name: "الشهادات المصدرة", href: "/admin/courses/certificates", icon: Award }
       ]
     },
     {
@@ -65,6 +73,23 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <p className="px-4 text-[9px] font-black text-zinc-500 uppercase tracking-widest">{group.title}</p>
               {group.items.map((item) => {
                 const isActive = pathname === item.href;
+                
+                // If it is an inactive/disabled preview item, render it with a premium disabled look
+                if ((item as any).disabled) {
+                  return (
+                    <div
+                      key={item.name}
+                      className="flex items-center justify-between px-4 py-2.5 rounded-2xl opacity-35 cursor-not-allowed select-none bg-white/[0.01] border border-transparent"
+                    >
+                      <div className="flex items-center gap-4">
+                        <item.icon className="w-4 h-4 text-zinc-500" />
+                        <span className="font-bold text-xs tracking-wide font-cairo text-zinc-400">{item.name}</span>
+                      </div>
+                      <span className="text-[8px] bg-rose-950 text-rose-400 border border-rose-900/30 px-1.5 py-0.5 rounded font-black uppercase tracking-wider scale-90">قريباً</span>
+                    </div>
+                  );
+                }
+
                 return (
                   <Link
                     key={item.href}

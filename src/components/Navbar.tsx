@@ -1,12 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { ChevronLeft, Menu, X, ShoppingCart, Home } from "lucide-react";
+import { ChevronLeft, Menu, X, ShoppingCart, Home, User, LogOut, LogIn, BookOpen } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { useCart } from "@/context/CartContext";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { supabaseClient } from "@/lib/supabaseClient";
+import { toast } from "sonner";
 
 export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -14,8 +16,44 @@ export function Navbar() {
   const [activeSection, setActiveSection] = useState("");
   const { cartCount, setIsCartOpen } = useCart();
   const pathname = usePathname();
+  const router = useRouter();
+
+  const [user, setUser] = useState<any>(null);
 
   const isHomePage = pathname === "/";
+
+  // Check and listen for auth session state changes in real-time
+  useEffect(() => {
+    // 1. Initial retrieval
+    supabaseClient.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    // 2. Listen to state changes
+    const { data: { subscription } } = supabaseClient.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  const handleLogout = async () => {
+    setMobileOpen(false);
+    try {
+      const { error } = await supabaseClient.auth.signOut();
+      if (error) {
+        toast.error(error.message || "حدث خطأ أثناء تسجيل الخروج");
+      } else {
+        toast.success("تم تسجيل الخروج بنجاح. نراك قريباً!");
+        router.push("/");
+        router.refresh();
+      }
+    } catch (err) {
+      toast.error("حدث خطأ غير متوقع أثناء تسجيل الخروج");
+    }
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -32,7 +70,7 @@ export function Navbar() {
   // Active section tracker (only on home page)
   useEffect(() => {
     if (!isHomePage) return;
-    const sections = ["products", "faq", "reviews"];
+    const sections = ["courses", "products", "faq", "reviews"];
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -79,8 +117,7 @@ export function Navbar() {
   );
 
   const navLinks = [
-    { href: isHomePage ? "#products" : "/#products", label: "المنتجات", section: "products" },
-    { href: isHomePage ? "#reviews" : "/#reviews", label: "آراء العملاء", section: "reviews" },
+    { href: isHomePage ? "#products" : "/#products", label: "المنتجات الرقمية", section: "products" },
     { href: isHomePage ? "#faq" : "/#faq", label: "الأسئلة الشائعة", section: "faq" },
   ];
 
@@ -91,7 +128,6 @@ export function Navbar() {
           "fixed top-0 w-full z-50 transition-all duration-500 ease-in-out px-4 py-4 md:px-8",
           scrolled ? "py-2 md:py-3" : "py-4 md:py-6"
         )}
-        // Ensure pointer events are always enabled on the nav
         style={{ pointerEvents: "auto" }}
       >
         <div
@@ -104,7 +140,7 @@ export function Navbar() {
         >
           <div className="flex items-center justify-between h-full">
 
-            {/* Right Side: Logo & Brand (Logo only on mobile, full branding on desktop) */}
+            {/* Right Side: Logo & Brand */}
             <Link href="/" onClick={handleHomeClick} className="flex items-center gap-2.5 group">
               <div className="relative">
                 <div className="w-10 h-10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
@@ -121,7 +157,6 @@ export function Navbar() {
 
             {/* Middle: Desktop Nav Links */}
             <div className="hidden md:flex items-center gap-6 font-cairo text-[15px] font-medium text-zinc-300">
-              {/* Home Link */}
               <Link
                 href="/"
                 onClick={handleHomeClick}
@@ -134,6 +169,21 @@ export function Navbar() {
                 <span className={cn(
                   "absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-rose-600 to-orange-400 rounded-full transition-all duration-300",
                   isHomePage && activeSection === "" ? "w-full" : "w-0 group-hover:w-full"
+                )} />
+              </Link>
+
+              <Link
+                href={isHomePage ? "#courses" : "/courses"}
+                onClick={(e) => handleNavClick(e, isHomePage ? "#courses" : "/courses")}
+                className={cn(
+                  "relative group py-2 transition-all hover:text-rose-500",
+                  (pathname.startsWith("/courses") || (isHomePage && activeSection === "courses")) ? "text-white" : ""
+                )}
+              >
+                الدورات التعليمية
+                <span className={cn(
+                  "absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-rose-600 to-orange-400 rounded-full transition-all duration-300",
+                  (pathname.startsWith("/courses") || (isHomePage && activeSection === "courses")) ? "w-full" : "w-0 group-hover:w-full"
                 )} />
               </Link>
 
@@ -173,17 +223,55 @@ export function Navbar() {
                 )}
               </button>
 
-              {/* Desktop CTA Button */}
-              <Link
-                href={isHomePage ? "#products" : "/#products"}
-                onClick={(e) => handleNavClick(e, "#products")}
-                className="relative group overflow-hidden hidden md:inline-flex items-center gap-2 bg-[#D6004B] hover:bg-[#b0003d] text-white font-cairo text-sm font-semibold px-6 py-2.5 rounded-xl transition-all shadow-[0_0_20px_rgba(214,0,75,0.3)] shrink-0"
-                style={{ pointerEvents: "auto" }}
-              >
-                <span className="relative z-10">ابدأ الأتمتة الآن</span>
-                <ChevronLeft className="w-4 h-4 relative z-10 group-hover:-translate-x-1 transition-transform" />
-                <div className="absolute inset-0 bg-gradient-to-r from-rose-600 to-orange-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              </Link>
+              {/* Integrated Auth CTA Actions for Desktop */}
+              {user ? (
+                <div className="hidden md:flex items-center gap-4">
+                  {/* Logout link */}
+                  <button
+                    onClick={handleLogout}
+                    className="font-cairo text-xs font-bold text-zinc-400 hover:text-red-400 transition-colors cursor-pointer"
+                  >
+                    تسجيل الخروج
+                  </button>
+
+                  <span className="text-white/10 text-xs select-none">|</span>
+
+                  {/* Dashboard link */}
+                  <Link
+                    href="/dashboard"
+                    className="relative group overflow-hidden inline-flex items-center gap-2 bg-[#D6004B] hover:bg-[#b0003d] text-white font-cairo text-xs font-bold px-4 py-2 rounded-xl transition-all shadow-[0_0_15px_rgba(214,0,75,0.2)] shrink-0"
+                  >
+                    <span className="relative z-10">لوحة التحكم</span>
+                    <ChevronLeft className="w-3.5 h-3.5 relative z-10 group-hover:-translate-x-0.5 transition-transform" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-rose-600 to-orange-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+                  </Link>
+
+                  {/* Optional user avatar */}
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-rose-600 to-orange-500 flex items-center justify-center font-alexandria font-bold text-white text-[10px] select-none shadow-[0_0_10px_rgba(214,0,75,0.35)]">
+                    {(user.user_metadata?.full_name || user.email || "U").substring(0, 1).toUpperCase()}
+                  </div>
+                </div>
+              ) : (
+                <div className="hidden md:flex items-center gap-4">
+                  {/* Login Link */}
+                  <Link
+                    href="/login"
+                    className="font-cairo text-xs font-bold text-zinc-300 hover:text-rose-500 transition-colors"
+                  >
+                    تسجيل الدخول
+                  </Link>
+
+                  {/* Signup CTA Button */}
+                  <Link
+                    href="/signup"
+                    className="relative group overflow-hidden inline-flex items-center gap-2 bg-[#D6004B] hover:bg-[#b0003d] text-white font-cairo text-xs font-bold px-4 py-2.5 rounded-xl transition-all shadow-[0_0_15px_rgba(214,0,75,0.25)] shrink-0"
+                  >
+                    <span className="relative z-10">إنشاء حساب</span>
+                    <ChevronLeft className="w-3.5 h-3.5 relative z-10 group-hover:-translate-x-0.5 transition-transform" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-rose-600 to-orange-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+                  </Link>
+                </div>
+              )}
 
               {/* Mobile Burger Menu Button */}
               <button
@@ -234,6 +322,21 @@ export function Navbar() {
                     <ChevronLeft className="w-4 h-4 opacity-0 group-hover:opacity-100 group-hover:-translate-x-1 transition-all" />
                   </Link>
 
+                  <Link
+                    href={isHomePage ? "#courses" : "/courses"}
+                    onClick={(e) => handleNavClick(e, isHomePage ? "#courses" : "/courses")}
+                    className={cn(
+                      "p-3 rounded-xl hover:bg-white/5 font-cairo text-zinc-300 hover:text-white transition-all flex items-center justify-between group",
+                      (pathname.startsWith("/courses") || (isHomePage && activeSection === "courses")) ? "text-white bg-white/5" : ""
+                    )}
+                  >
+                    <span className="flex items-center gap-2">
+                      <BookOpen className="w-4 h-4 text-rose-500" />
+                      الدورات التعليمية
+                    </span>
+                    <ChevronLeft className="w-4 h-4 opacity-0 group-hover:opacity-100 group-hover:-translate-x-1 transition-all" />
+                  </Link>
+
                   {navLinks.map((link) => (
                     <Link
                       key={link.href}
@@ -254,8 +357,62 @@ export function Navbar() {
                     onClick={(e) => handleNavClick(e, "#products")}
                     className="w-full mt-2 bg-[#D6004B] hover:bg-[#b0003d] text-white font-cairo font-bold rounded-xl py-3 flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(214,0,75,0.3)] transition-all"
                   >
-                    تصفح المنتجات
+                    تصفح المنتجات الرقمية
                   </Link>
+
+                  {/* Integrated Auth Drawer Actions for Mobile */}
+                  <div className="border-t border-white/5 my-2 pt-2 flex flex-col gap-1">
+                    {user ? (
+                      <>
+                        {/* Mobile Dashboard */}
+                        <Link
+                          href="/dashboard"
+                          onClick={() => setMobileOpen(false)}
+                          className="p-3 rounded-xl hover:bg-white/5 font-cairo text-zinc-300 hover:text-white transition-all flex items-center justify-between group"
+                        >
+                          <span className="flex items-center gap-2.5">
+                            <User className="w-4 h-4 text-rose-500" />
+                            لوحة التحكم الخاصة بي
+                          </span>
+                          <ChevronLeft className="w-4 h-4 opacity-0 group-hover:opacity-100 group-hover:-translate-x-1 transition-all" />
+                        </Link>
+
+                        {/* Mobile Logout */}
+                        <button
+                          onClick={handleLogout}
+                          className="p-3 rounded-xl hover:bg-red-500/10 font-cairo text-red-400 hover:text-red-300 transition-all flex items-center gap-2.5 text-right w-full cursor-pointer"
+                        >
+                          <LogOut className="w-4 h-4 text-red-500" />
+                          <span>تسجيل الخروج</span>
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        {/* Mobile Login */}
+                        <Link
+                          href="/login"
+                          onClick={() => setMobileOpen(false)}
+                          className="p-3 rounded-xl hover:bg-white/5 font-cairo text-zinc-300 hover:text-white transition-all flex items-center justify-between group"
+                        >
+                          <span className="flex items-center gap-2.5">
+                            <LogIn className="w-4 h-4 text-rose-500" />
+                            تسجيل الدخول للمنصة
+                          </span>
+                          <ChevronLeft className="w-4 h-4 opacity-0 group-hover:opacity-100 group-hover:-translate-x-1 transition-all" />
+                        </Link>
+
+                        {/* Mobile Signup */}
+                        <Link
+                          href="/signup"
+                          onClick={() => setMobileOpen(false)}
+                          className="w-full mt-1 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-cairo font-bold rounded-xl py-3 flex items-center justify-center gap-2 transition-all text-center"
+                        >
+                          <span>إنشاء حساب جديد</span>
+                        </Link>
+                      </>
+                    )}
+                  </div>
+
                 </div>
               </div>
             </motion.div>

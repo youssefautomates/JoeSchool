@@ -18,11 +18,35 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 import { supabase } from "@/lib/supabase";
+import { supabaseClient } from "@/lib/supabaseClient";
 import { type Product, calcDiscount } from "@/lib/products";
+
+const COUNTRY_CODES = [
+  { code: "+20", name: "مصر (Egypt)", flag: "🇪🇬" },
+  { code: "+966", name: "السعودية (Saudi Arabia)", flag: "🇸🇦" },
+  { code: "+971", name: "الإمارات (UAE)", flag: "🇦🇪" },
+  { code: "+965", name: "الكويت (Kuwait)", flag: "🇰🇼" },
+  { code: "+974", name: "قطر (Qatar)", flag: "🇶🇦" },
+  { code: "+968", name: "عمان (Oman)", flag: "🇴🇲" },
+  { code: "+973", name: "البحرين (Bahrain)", flag: "🇧🇭" },
+  { code: "+962", name: "الأردن (Jordan)", flag: "🇯🇴" },
+  { code: "+964", name: "العراق (Iraq)", flag: "🇮🇶" },
+  { code: "+212", name: "المغرب (Morocco)", flag: "🇲🇦" },
+  { code: "+213", name: "الجزائر (Algeria)", flag: "🇩🇿" },
+  { code: "+216", name: "تونس (Tunisia)", flag: "🇹🇳" },
+  { code: "+218", name: "ليبيا (Libya)", flag: "🇱🇾" },
+  { code: "+249", name: "السودان (Sudan)", flag: "🇸🇩" },
+  { code: "+963", name: "سوريا (Syria)", flag: "🇸🇾" },
+  { code: "+961", name: "لبنان (Lebanon)", flag: "🇱🇧" },
+  { code: "+970", name: "فلسطين (Palestine)", flag: "🇵🇸" },
+  { code: "+967", name: "اليمن (Yemen)", flag: "🇾🇪" },
+];
 
 const checkoutSchema = z.object({
   fullName: z.string().min(3, { message: "الاسم يجب أن يكون 3 أحرف على الأقل" }),
   email: z.string().email({ message: "البريد الإلكتروني غير صالح" }),
+  password: z.string().optional(),
+  phone: z.string().min(6, { message: "يرجى إدخال رقم هاتف صحيح" }),
 });
 
 type CheckoutValues = z.infer<typeof checkoutSchema>;
@@ -161,13 +185,61 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
     }
   }
 
-  const { register, handleSubmit, formState: { errors } } = useForm<CheckoutValues>({
+  const [user, setUser] = useState<any>(null);
+  const [checkingAuth, setCheckingAuth] = useState(true);
+  const [countryCode, setCountryCode] = useState("+20");
+
+  const { register, handleSubmit, setValue, formState: { errors } } = useForm<CheckoutValues>({
     resolver: zodResolver(checkoutSchema),
     defaultValues: {
       fullName: "",
       email: "",
+      password: "",
+      phone: "",
     },
   });
+
+  // Auto-detect visitor country calling code
+  useEffect(() => {
+    async function detectCountryCode() {
+      try {
+        const response = await fetch("https://ipapi.co/json/");
+        const data = await response.json();
+        if (data && data.country_calling_code) {
+          let prefix = data.country_calling_code;
+          if (!prefix.startsWith("+")) prefix = "+" + prefix;
+          setCountryCode(prefix);
+        }
+      } catch (err) {
+        console.error("Failed to auto-detect country calling code:", err);
+      }
+    }
+    detectCountryCode();
+  }, []);
+
+  useEffect(() => {
+    async function checkUser() {
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      if (session?.user) {
+        setUser(session.user);
+        setValue("fullName", session.user.user_metadata?.full_name || "");
+        setValue("email", session.user.email || "");
+
+        const storedPhone = session.user.user_metadata?.phone || "";
+        if (storedPhone) {
+          const matchingCode = COUNTRY_CODES.find(c => storedPhone.startsWith(c.code));
+          if (matchingCode) {
+            setCountryCode(matchingCode.code);
+            setValue("phone", storedPhone.slice(matchingCode.code.length));
+          } else {
+            setValue("phone", storedPhone);
+          }
+        }
+      }
+      setCheckingAuth(false);
+    }
+    checkUser();
+  }, [setValue]);
 
   const validateCardFields = () => {
     if (paymentMethod !== "card") return true;
@@ -207,15 +279,66 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
       }
     }
 
-    console.log("[CARD_NAME_INPUT] Final React State Value:", cardHolder);
-
     setIsLoading(true);
     try {
+      let activeUser = user;
+
+      // If user is not logged in, perform Instant Purchase Authentication
+      if (!activeUser) {
+        if (!data.password) {
+          toast.error("يرجى إدخال كلمة مرور لإنشاء حسابك وتأمين مشترياتك.");
+          setIsLoading(false);
+          return;
+        }
+
+        const fullPhone = `${countryCode}${data.phone}`;
+
+        // Try to sign up
+        const { data: signUpData, error: signUpError } = await supabaseClient.auth.signUp({
+          email: data.email,
+          password: data.password,
+          options: {
+            data: {
+              full_name: data.fullName,
+              phone: fullPhone,
+            }
+          }
+        });
+
+        if (signUpError) {
+          // If already registered, try signing in with password automatically
+          if (signUpError.message.includes("already registered") || signUpError.status === 422) {
+            const { data: signInData, error: signInError } = await supabaseClient.auth.signInWithPassword({
+              email: data.email,
+              password: data.password,
+            });
+
+            if (signInError) {
+              toast.error("هذا البريد مسجل بالفعل بكلمة مرور أخرى. يرجى إدخال كلمة المرور الصحيحة لحسابك، أو تسجيل الدخول.");
+              setIsLoading(false);
+              return;
+            }
+            activeUser = signInData.user;
+          } else {
+            toast.error(`فشل إنشاء الحساب: ${signUpError.message}`);
+            setIsLoading(false);
+            return;
+          }
+        } else {
+          activeUser = signUpData.user;
+        }
+      }
+
+      console.log("[CARD_NAME_INPUT] Final React State Value:", cardHolder);
+
+      const fullPhone = `${countryCode}${data.phone}`;
+
       const payloadBody = {
         amount: product.price,
         email: data.email,
         firstName: data.fullName.split(" ")[0],
         lastName: data.fullName.split(" ").slice(1).join(" ") || "Customer",
+        phone: fullPhone,
         productId: resolvedParams.id,
         paymentMethod: paymentMethod, 
         cardData: paymentMethod === "card" ? {
@@ -241,13 +364,12 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
           toast.success("جاري تحويلك لمحفظتك الإلكترونية...");
           window.location.href = result.checkoutUrl; 
         } else {
-          // For cards, it's either the 3DS OTP redirect or direct success page
           toast.success("جاري تأكيد عملية الدفع...");
           window.location.href = result.checkoutUrl; 
         }
       } else if (result.success) {
          toast.success("تم الدفع بنجاح!");
-         router.push(`/success?order_id=${result.orderId}`);
+         router.push(`/checkout/success?order_id=${result.orderId}`);
       } else {
         throw new Error(result.error || "فشل بدء عملية الدفع");
       }
@@ -343,6 +465,71 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                     </div>
                     {errors.email && <p className="text-xs text-red-400 font-cairo flex items-center gap-1 mt-1"><ShieldAlert className="w-3 h-3" /> {errors.email.message}</p>}
                   </div>
+
+                  <div className="space-y-2">
+                    <Label className="font-cairo font-bold text-zinc-400 text-sm">رقم الهاتف (الواتساب) <span className="text-[10px] font-normal text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded ml-2">هام: لمتابعة الطلبات وتفعيل الدعم</span></Label>
+                    <div className="flex gap-2 relative group" dir="ltr">
+                      <select
+                        value={countryCode}
+                        onChange={(e) => setCountryCode(e.target.value)}
+                        className="h-12 rounded-xl bg-white/5 border border-white/5 hover:border-white/10 px-3 text-sm font-medium focus:outline-none focus:border-white/20 focus:bg-white/10 transition-all text-white max-w-[100px] appearance-none cursor-pointer text-center select-none"
+                      >
+                        {COUNTRY_CODES.map((c) => (
+                          <option key={c.code} value={c.code} className="bg-[#0a0a0f] text-white">
+                            {c.flag} {c.code}
+                          </option>
+                        ))}
+                        {!COUNTRY_CODES.some(c => c.code === countryCode) && (
+                          <option value={countryCode} className="bg-[#0a0a0f] text-white">
+                            🌐 {countryCode}
+                          </option>
+                        )}
+                      </select>
+
+                      <div className="relative flex-1">
+                        <Input 
+                          placeholder="100000000" 
+                          type="tel"
+                          dir="ltr"
+                          className={cn("h-12 rounded-xl bg-white/5 border-white/5 text-white text-sm font-cairo hover:bg-white/[0.07] focus:bg-white/10 focus:border-white/20 focus:ring-1 focus:ring-white/20 transition-all pl-4", errors.phone && "border-red-500/50 focus:ring-red-500")}
+                          disabled={isLoading}
+                          {...register("phone")}
+                          onChange={(e) => {
+                            e.target.value = e.target.value.replace(/\D/g, "");
+                            register("phone").onChange(e);
+                          }}
+                        />
+                      </div>
+                    </div>
+                    {errors.phone && <p className="text-xs text-red-400 font-cairo flex items-center gap-1 mt-1"><ShieldAlert className="w-3 h-3" /> {errors.phone.message}</p>}
+                  </div>
+
+                  {!user && (
+                    <>
+                      <div className="space-y-2">
+                        <Label className="font-cairo font-bold text-zinc-400 text-sm">كلمة المرور <span className="text-[10px] font-normal text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded ml-2">لإنشاء حسابك وتفعيل لوحة التحكم فوراً</span></Label>
+                        <div className="relative">
+                          <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                          <Input 
+                            placeholder="••••••••" 
+                            type="password"
+                            dir="ltr"
+                            className={cn("h-12 rounded-xl bg-white/5 border-white/5 text-white text-sm font-cairo hover:bg-white/[0.07] focus:bg-white/10 focus:border-white/20 focus:ring-1 focus:ring-white/20 transition-all pl-11", errors.password && "border-red-500/50 focus:ring-red-500")}
+                            disabled={isLoading}
+                            {...register("password")}
+                          />
+                        </div>
+                        {errors.password && <p className="text-xs text-red-400 font-cairo flex items-center gap-1 mt-1"><ShieldAlert className="w-3 h-3" /> {errors.password.message}</p>}
+                      </div>
+                      
+                      <p className="text-xs text-zinc-500 font-cairo mt-1.5">
+                        لديك حساب بالفعل؟{" "}
+                        <Link href={`/login?redirect=/checkout/${resolvedParams.id}`} className="text-rose-400 hover:text-rose-300 underline font-bold transition-all">
+                          اضغط هنا لتسجيل الدخول
+                        </Link>
+                      </p>
+                    </>
+                  )}
 
 
 

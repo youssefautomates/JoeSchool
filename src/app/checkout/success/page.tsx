@@ -12,6 +12,7 @@ import {
   Package,
   Copy,
   ExternalLink,
+  BookOpen,
 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
@@ -58,6 +59,8 @@ interface OrderData {
   downloadToken: string | null;
   transactionId: string;
   alreadyDelivered?: boolean;
+  category?: string | null;
+  tags?: string[] | null;
 }
 
 function SuccessContent() {
@@ -107,6 +110,8 @@ function SuccessContent() {
             downloadToken: data.downloadToken || null,
             transactionId: data.transactionId || "",
             alreadyDelivered: data.alreadyDelivered,
+            category: data.category || null,
+            tags: data.tags || null,
           });
           setPhase("success");
           setTimeout(() => setShowParticles(true), 300);
@@ -222,6 +227,16 @@ function SuccessContent() {
     router.replace(`/checkout/failed?order_id=${orderId}&reason=verification_timeout`);
     return null;
   }
+
+  const isCourse = orderData?.category?.toLowerCase() === "courses" || 
+                   orderData?.category === "دورة" || 
+                   orderData?.category === "تعليمي" ||
+                   (orderData?.tags && orderData.tags.some(tag => ["course", "dora", "دورة", "تعليمي"].includes(tag.toLowerCase()))) ||
+                   orderData?.productTitle?.toLowerCase().includes("course") ||
+                   orderData?.productTitle?.includes("دورة") ||
+                   orderData?.productTitle?.includes("مساق");
+
+  const hasDigitalDownload = !!orderData?.downloadUrl;
 
   return (
     <div className="min-h-screen bg-[#050505] text-white overflow-hidden relative font-cairo">
@@ -369,21 +384,38 @@ function SuccessContent() {
                 </div>
               </div>
 
-              {orderData?.downloadUrl ? (
-                <a
-                  href={`/api/download?token=${orderData.downloadToken || orderData.id}`}
-                  className="group w-full h-16 flex items-center justify-center gap-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-alexandria font-black text-xl rounded-2xl transition-all shadow-[0_8px_30px_rgba(16,185,129,0.3)] hover:shadow-[0_12px_40px_rgba(16,185,129,0.4)] hover:-translate-y-0.5 active:scale-[0.98]"
-                >
-                  <Download className="w-6 h-6 group-hover:translate-y-0.5 transition-transform" />
-                  تحميل المنتج الآن
-                  <ExternalLink className="w-4 h-4 opacity-60" />
-                </a>
-              ) : (
-                <div className="w-full h-16 flex items-center justify-center gap-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-alexandria font-bold text-lg rounded-2xl">
-                  <Mail className="w-6 h-6" />
-                  تم الإرسال لبريدك
-                </div>
-              )}
+              <div className="space-y-4">
+                {/* Course Access Button */}
+                {isCourse && (
+                  <Link
+                    href="/dashboard"
+                    className="group w-full h-16 flex items-center justify-center gap-3 bg-gradient-to-r from-[#D6004B] to-orange-500 hover:from-[#b0003d] hover:to-orange-600 text-white font-alexandria font-black text-lg rounded-2xl transition-all shadow-[0_8px_30px_rgba(214,0,75,0.3)] hover:shadow-[0_12px_40px_rgba(214,0,75,0.4)] hover:-translate-y-0.5 active:scale-[0.98] select-none text-center"
+                  >
+                    <BookOpen className="w-5 h-5 animate-pulse" />
+                    <span>الدخول للوحة الطالب والكورس 🚀</span>
+                  </Link>
+                )}
+
+                {/* Direct Digital Product Download Button */}
+                {hasDigitalDownload && (
+                  <a
+                    href={`/api/download?token=${orderData?.downloadToken || orderData?.id}`}
+                    className="group w-full h-16 flex items-center justify-center gap-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-alexandria font-black text-lg rounded-2xl transition-all shadow-[0_8px_30px_rgba(16,185,129,0.25)] hover:shadow-[0_12px_40px_rgba(16,185,129,0.35)] hover:-translate-y-0.5 active:scale-[0.98] text-center"
+                  >
+                    <Download className="w-5 h-5 group-hover:translate-y-0.5 transition-transform" />
+                    <span>تحميل الملف الرقمي المباشر ⬇️</span>
+                    <ExternalLink className="w-4 h-4 opacity-60" />
+                  </a>
+                )}
+
+                {/* Fallback if neither */}
+                {!isCourse && !hasDigitalDownload && (
+                  <div className="w-full h-16 flex items-center justify-center gap-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-alexandria font-bold text-base rounded-2xl select-none">
+                    <Mail className="w-5 h-5" />
+                    <span>تم إرسال الملفات والتعليمات لبريدك الإلكتروني</span>
+                  </div>
+                )}
+              </div>
             </div>
           </motion.div>
 

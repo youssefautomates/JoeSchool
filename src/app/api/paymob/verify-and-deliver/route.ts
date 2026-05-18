@@ -1,8 +1,16 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@supabase/supabase-js";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
+
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL || "",
+  process.env.SUPABASE_SERVICE_ROLE_KEY || "",
+  {
+    auth: { persistSession: false },
+  }
+);
 
 /**
  * POST /api/paymob/verify-and-deliver
@@ -23,7 +31,7 @@ export async function POST(req: Request) {
     console.log(`[VERIFY][${requestId}] Internal Order ID: ${orderId}`);
 
     // 1. Fetch order from Supabase
-    const { data: orders, error: orderError } = await supabase
+    const { data: orders, error: orderError } = await supabaseAdmin
       .from("orders")
       .select("*")
       .eq("id", orderId);
@@ -120,13 +128,10 @@ export async function POST(req: Request) {
 
     // 4. Update order in Supabase
     console.log(`[VERIFY][${requestId}] 🔄 Updating DB status to completed...`);
-    const completedAt = new Date().toISOString();
-    const { error: updateError } = await supabase
+    const { error: updateError } = await supabaseAdmin
       .from("orders")
       .update({ 
-        status: "completed",
-        completed_at: completedAt,
-        transaction_id: String(transactionId)
+        status: "completed"
       })
       .eq("id", orderId);
 
@@ -137,18 +142,62 @@ export async function POST(req: Request) {
     }
 
     // 5. Update Product Sales
-    const { data: product } = await supabase
+    const { data: product } = await supabaseAdmin
       .from("products")
-      .select("title, sales")
+      .select("title, sales, category, tags, file_url")
       .eq("id", order.product_id)
       .single();
 
     if (product) {
-      await supabase
+      await supabaseAdmin
         .from("products")
         .update({ sales: (product.sales || 0) + 1 })
         .eq("id", order.product_id);
       console.log(`[VERIFY][${requestId}] 📈 Product sales incremented`);
+      
+      // Auto-enroll customer in LMS Course if purchased
+      const isCourse = 
+        product.category === "courses" || 
+        product.category === "الدورات التعليمية" || 
+        product.category === "الدورات التدريبية" ||
+        order.product_title?.includes("دورة") || 
+        order.product_title?.includes("كورس");
+
+      if (isCourse) {
+        console.log(`[VERIFY][${requestId}] 🎓 Detected Course Purchase! Proceeding to auto-enroll...`);
+        try {
+          const { getCoursesList, enrollUser } = await import("@/lib/coursesDb");
+          const coursesList = await getCoursesList();
+          
+          // Match course by title or category
+          const matchedCourse = coursesList.find(c => 
+            c.title.toLowerCase().includes(order.product_title?.toLowerCase()) || 
+            order.product_title?.toLowerCase().includes(c.title.toLowerCase())
+          ) || coursesList[0];
+
+          if (matchedCourse) {
+            // Retrieve customer's Supabase User ID from profiles
+            let userId = order.customer_id;
+            if (!userId || userId === "anonymous") {
+              const { data: profile } = await supabaseAdmin
+                .from("profiles")
+                .select("id")
+                .eq("email", order.customer_email)
+                .maybeSingle();
+              
+              userId = profile?.id || "usr-student-" + Math.random().toString(36).substring(2, 11);
+            }
+
+            console.log(`[VERIFY][${requestId}] 🎓 Auto-enrolling user ${userId} in course: ${matchedCourse.title}`);
+            await enrollUser(userId, matchedCourse.id, {
+              email: order.customer_email,
+              name: order.customer_name
+            });
+          }
+        } catch (enrollErr) {
+          console.error(`[VERIFY][${requestId}] ❌ Auto-enrollment error:`, enrollErr);
+        }
+      }
     }
 
     // 6. Build and send email (Fallback if webhook failed or is slow)
@@ -196,7 +245,9 @@ export async function POST(req: Request) {
       orderValue: amountPaid,
       currency: "EGP",
       downloadToken: downloadToken,
-      downloadUrl: downloadLink
+      downloadUrl: product?.file_url ? downloadLink : null,
+      category: product?.category || null,
+      tags: product?.tags || null
     });
 
   } catch (error: any) {
