@@ -11,6 +11,7 @@ import {
   ExternalLink, PlayCircle, Clock, FileText, ArrowLeft, RefreshCw, X, Printer, Send
 } from "lucide-react";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 import { 
   getCoursesList, getUserEnrollments, getCourseProgressPercent, 
   getUserCertificates, getCourseBySlug, type LmsCourse, type LmsCertificate 
@@ -813,15 +814,25 @@ export default function DashboardPage() {
 
             {selectedCert.certificate_bg_url ? (
               <div className="w-full aspect-[1.414/1] bg-[#0a0a0f] border border-amber-500/30 rounded-2xl overflow-hidden relative shadow-2xl">
+                <style dangerouslySetInnerHTML={{__html: `
+                  @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@700;800;900&family=Alexandria:wght@800;900&display=swap');
+                  @import url('https://fonts.cdnfonts.com/css/lovelo');
+                `}} />
                 <img src={selectedCert.certificate_bg_url} alt="Certificate Background" className="absolute inset-0 w-full h-full object-cover" />
-                <div className="absolute inset-0 z-10 font-alexandria font-bold" style={{ color: selectedCert.certificate_text_color || "#000000" }}>
-                  <div className="absolute whitespace-nowrap text-lg sm:text-xl lg:text-2xl" style={{ left: `${selectedCert.certificate_name_x || 50}%`, top: `${selectedCert.certificate_name_y || 40}%`, transform: 'translate(-50%, -50%)' }}>
+                <div className="absolute inset-0 z-10 font-bold" style={{ color: selectedCert.certificate_text_color || "#000000" }}>
+                  <div 
+                    className="absolute whitespace-nowrap text-lg sm:text-xl lg:text-2xl transition-all" 
+                    style={{ 
+                      left: `${selectedCert.certificate_name_x || 50}%`, 
+                      top: `${selectedCert.certificate_name_y || 40}%`, 
+                      transform: 'translate(-50%, -50%)',
+                      fontFamily: /[\u0600-\u06FF]/.test(selectedCert.student_name) ? "'Cairo', 'Alexandria', sans-serif" : "'Lovelo', sans-serif",
+                      fontWeight: /[\u0600-\u06FF]/.test(selectedCert.student_name) ? 900 : 'bold',
+                    }}
+                  >
                     {selectedCert.student_name}
                   </div>
-                  <div className="absolute whitespace-nowrap text-xs sm:text-sm lg:text-base" style={{ left: `${selectedCert.certificate_course_x || 50}%`, top: `${selectedCert.certificate_course_y || 55}%`, transform: 'translate(-50%, -50%)' }}>
-                    {selectedCert.course_name}
-                  </div>
-                  <div className="absolute whitespace-nowrap text-[10px] sm:text-xs" style={{ left: `${selectedCert.certificate_date_x || 50}%`, top: `${selectedCert.certificate_date_y || 70}%`, transform: 'translate(-50%, -50%)' }}>
+                  <div className="absolute whitespace-nowrap text-[10px] sm:text-xs font-mono" style={{ left: `${selectedCert.certificate_date_x || 50}%`, top: `${selectedCert.certificate_date_y || 70}%`, transform: 'translate(-50%, -50%)' }}>
                     {selectedCert.issued_at}
                   </div>
                 </div>

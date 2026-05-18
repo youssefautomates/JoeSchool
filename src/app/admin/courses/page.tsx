@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { 
   Plus, Edit, Trash2, BookOpen, Clock, 
   Video, Save, FileText, Link as LinkIcon, Download, 
-  AlertCircle, Loader2, GripVertical, ChevronDown, ChevronUp, Image as ImageIcon, CheckCircle, Users
+  AlertCircle, Loader2, GripVertical, ChevronDown, ChevronUp, Image as ImageIcon, CheckCircle, Users, Award
 } from "lucide-react";
 import { 
   getCoursesList, upsertCourse, deleteCourse, getCourseBySlug, 
@@ -15,6 +15,7 @@ import {
 import { uploadFile } from "@/lib/upload";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { RichTextEditor } from "@/components/RichTextEditor";
 import {
   DndContext,
   closestCenter,
@@ -110,6 +111,7 @@ function SortableLesson({ lesson, onEdit, onDelete }: any) {
         {lesson.lecture_type === "pdf" && <FileText className="w-4 h-4 text-emerald-500" />}
         {lesson.lecture_type === "link" && <LinkIcon className="w-4 h-4 text-sky-500" />}
         {lesson.lecture_type === "download" && <Download className="w-4 h-4 text-amber-500" />}
+        {lesson.lecture_type === "text" && <FileText className="w-4 h-4 text-purple-500" />}
         
         <div className="text-right">
           <div className="flex items-center gap-2 flex-wrap">
@@ -168,6 +170,7 @@ export default function AdminCoursesPage() {
 
   // Analytics State
   const [studentsData, setStudentsData] = useState<LmsEnrollment[]>([]);
+  const [testStudentName, setTestStudentName] = useState("يوسف أحمد");
 
   // Form State
   const [courseForm, setCourseForm] = useState<Partial<LmsCourse>>({
@@ -440,8 +443,39 @@ export default function AdminCoursesPage() {
               </div>
               
               <div className="flex flex-col gap-2">
-                <label className="text-xs font-bold text-zinc-400">السعر (USD)</label>
-                <input type="number" value={courseForm.price} onChange={e => setCourseForm({ ...courseForm, price: Number(e.target.value) })} className="bg-white/5 border border-white/5 rounded-xl py-3 px-4 text-sm" />
+                <label className="text-xs font-bold text-zinc-400">السعر بالجنيه المصري (EGP) *</label>
+                <input type="number" required value={courseForm.price} onChange={e => setCourseForm({ ...courseForm, price: Number(e.target.value) })} className="bg-white/5 border border-white/5 rounded-xl py-3 px-4 text-sm" />
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-bold text-zinc-400">السعر الأصلي قبل الخصم (EGP)</label>
+                <input type="number" value={courseForm.original_price || ""} onChange={e => setCourseForm({ ...courseForm, original_price: Number(e.target.value) })} className="bg-white/5 border border-white/5 rounded-xl py-3 px-4 text-sm" />
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-bold text-zinc-400">مستوى الكورس</label>
+                <select value={courseForm.level} onChange={e => setCourseForm({ ...courseForm, level: e.target.value as any })} className="bg-[#0f0f15] border border-white/5 rounded-xl py-3 px-4 text-sm">
+                  <option value="مبتدئ">مبتدئ (Beginner)</option>
+                  <option value="متوسط">متوسط (Intermediate)</option>
+                  <option value="متقدم">متقدم (Advanced)</option>
+                </select>
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-bold text-zinc-400">تصنيف الكورس</label>
+                <select value={courseForm.category} onChange={e => setCourseForm({ ...courseForm, category: e.target.value })} className="bg-[#0f0f15] border border-white/5 rounded-xl py-3 px-4 text-sm">
+                  <option value="الأتمتة">الأتمتة</option>
+                  <option value="الذكاء الاصطناعي">الذكاء الاصطناعي</option>
+                  <option value="صناعة المحتوى">صناعة المحتوى</option>
+                  <option value="التسويق">التسويق</option>
+                </select>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-bold text-zinc-400">حالة النشر</label>
+                <select value={courseForm.status} onChange={e => setCourseForm({ ...courseForm, status: e.target.value as any })} className="bg-[#0f0f15] border border-white/5 rounded-xl py-3 px-4 text-sm">
+                  <option value="draft">مسودة (Draft)</option>
+                  <option value="published">منشور (Published)</option>
+                  <option value="hidden">مخفي (Hidden)</option>
+                </select>
               </div>
               <div className="flex flex-col gap-2">
                 <label className="text-xs font-bold text-zinc-400">صورة غلاف الكورس (Thumbnail)</label>
@@ -454,15 +488,128 @@ export default function AdminCoursesPage() {
                   </label>
                 </div>
               </div>
-              
-              <div className="flex flex-col gap-2 md:col-span-2">
-                <label className="text-xs font-bold text-zinc-400">الوصف القصير</label>
-                <textarea rows={2} required value={courseForm.short_description} onChange={e => setCourseForm({ ...courseForm, short_description: e.target.value })} className="bg-white/5 border border-white/5 rounded-xl py-3 px-4 text-sm focus:border-rose-500/50" />
+
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-bold text-zinc-400">صورة البانر (Banner URL)</label>
+                <div className="flex gap-2">
+                  <input value={courseForm.banner_url || ""} onChange={e => setCourseForm({ ...courseForm, banner_url: e.target.value })} className="bg-white/5 border border-white/5 rounded-xl py-3 px-4 text-sm flex-1 text-zinc-300" />
+                  <label className="h-[46px] px-4 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer">
+                    {uploadingField === "banner_url" ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4 rotate-180" />}
+                    <span>رفع بانر</span>
+                    <input type="file" accept="image/*" className="hidden" onChange={e => handleFileUpload(e, "banner_url")} disabled={uploadingField !== null} />
+                  </label>
+                </div>
               </div>
               
-              <div className="flex flex-col gap-2 md:col-span-2">
-                <label className="text-xs font-bold text-zinc-400">الوصف الشامل للكورس</label>
-                <textarea rows={4} required value={courseForm.description} onChange={e => setCourseForm({ ...courseForm, description: e.target.value })} className="bg-white/5 border border-white/5 rounded-xl py-3 px-4 text-sm focus:border-rose-500/50" />
+              <div className="flex flex-col gap-4 py-2 justify-center">
+                <div className="flex items-center gap-3 select-none">
+                  <input type="checkbox" id="isFreeCheckbox" checked={courseForm.is_free || false} onChange={e => setCourseForm({ ...courseForm, is_free: e.target.checked })} className="w-4 h-4 rounded accent-rose-600 cursor-pointer" />
+                  <label htmlFor="isFreeCheckbox" className="text-xs font-bold text-zinc-300 cursor-pointer">
+                    هذا الكورس مجاني بالكامل (Free Course)
+                  </label>
+                </div>
+                <div className="flex items-center gap-3 select-none">
+                  <input type="checkbox" id="isFeaturedCheckbox" checked={courseForm.is_featured || false} onChange={e => setCourseForm({ ...courseForm, is_featured: e.target.checked })} className="w-4 h-4 rounded accent-rose-600 cursor-pointer" />
+                  <label htmlFor="isFeaturedCheckbox" className="text-xs font-bold text-zinc-300 cursor-pointer">
+                    كورس مميز (يظهر في الصفحة الرئيسية كأكثر مبيعاً)
+                  </label>
+                </div>
+              </div>
+
+              {/* Coupon Management Block */}
+              <div className="bg-white/[0.01] border border-white/5 rounded-2xl p-4 md:col-span-2 space-y-4">
+                <label className="text-xs font-bold text-rose-400 block font-alexandria">إدارة كوبونات الخصم لهذا الكورس</label>
+                
+                <div className="flex flex-wrap gap-4 items-end">
+                  <div className="flex flex-col gap-1.5">
+                    <span className="text-[10px] text-zinc-500 font-bold">كود الكوبون (مثال: YA50)</span>
+                    <input id="couponCodeInput" type="text" placeholder="YA50" className="bg-white/5 border border-white/5 rounded-lg py-2 px-3 text-xs w-36 uppercase font-mono" />
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <span className="text-[10px] text-zinc-500 font-bold">نسبة الخصم %</span>
+                    <input id="couponPercentInput" type="number" defaultValue="50" min="1" max="100" className="bg-white/5 border border-white/5 rounded-lg py-2 px-3 text-xs w-24 font-mono" />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const codeEl = document.getElementById("couponCodeInput") as HTMLInputElement;
+                      const percentEl = document.getElementById("couponPercentInput") as HTMLInputElement;
+                      if (codeEl && percentEl) {
+                        const code = codeEl.value.trim();
+                        const percent = parseInt(percentEl.value);
+                        if (!code || isNaN(percent) || percent < 1 || percent > 100) {
+                          toast.error("يرجى إدخال قيم صحيحة للكوبون");
+                          return;
+                        }
+                        const cleanCode = code.toUpperCase().replace(/[^A-Z0-9]/g, "");
+                        const newTag = `coupon:${cleanCode}:${percent}`;
+                        const currentTags = courseForm.tags || [];
+                        if (currentTags.some(t => t.startsWith(`coupon:${cleanCode}:`))) {
+                          toast.error("هذا الكوبون موجود بالفعل");
+                          return;
+                        }
+                        setCourseForm(prev => ({
+                          ...prev,
+                          tags: [...(prev.tags || []), newTag]
+                        }));
+                        codeEl.value = "";
+                        toast.success(`تمت إضافة الكوبون ${cleanCode} بنجاح!`);
+                      }
+                    }}
+                    className="h-9 px-4 bg-[#D6004B] hover:bg-[#b0003d] text-white rounded-lg font-bold text-xs flex items-center justify-center cursor-pointer"
+                  >
+                    <span>إضافة كود خصم</span>
+                  </button>
+                </div>
+
+                <div className="flex flex-wrap gap-2 pt-2">
+                  {(courseForm.tags || [])
+                    .filter(t => t.startsWith("coupon:"))
+                    .map(t => {
+                      const parts = t.split(":");
+                      const code = parts[1];
+                      const percent = parts[2];
+                      return (
+                        <div key={t} className="flex items-center gap-1.5 bg-rose-500/10 border border-rose-500/20 text-rose-400 px-2.5 py-1 rounded-lg text-xs font-bold font-mono">
+                          <span>{code} ({percent}%)</span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setCourseForm(prev => ({
+                                ...prev,
+                                tags: (prev.tags || []).filter(tag => tag !== t)
+                              }));
+                              toast.success("تم حذف الكوبون");
+                            }}
+                            className="text-rose-500 hover:text-rose-300 font-sans"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      );
+                    })}
+                  {!(courseForm.tags || []).some(t => t.startsWith("coupon:")) && (
+                    <span className="text-zinc-600 text-xs italic">لا توجد كوبونات خصم نشطة لهذا الكورس حالياً.</span>
+                  )}
+                </div>
+              </div>
+              
+              <div className="md:col-span-2">
+                <RichTextEditor 
+                  label="الوصف القصير والملخص السريع للكورس"
+                  value={courseForm.short_description || ""}
+                  onChange={val => setCourseForm({ ...courseForm, short_description: val })}
+                  placeholder="اكتب هنا ملخصاً سريعاً ومقنعاً يظهر للطلاب في بطاقة الكورس..."
+                />
+              </div>
+              
+              <div className="md:col-span-2">
+                <RichTextEditor 
+                  label="الوصف الشامل والاحترافي للكورس"
+                  value={courseForm.description || ""}
+                  onChange={val => setCourseForm({ ...courseForm, description: val })}
+                  placeholder="اكتب هنا محتوى ووصف الكورس بشكل احترافي وجاذب للطلاب..."
+                />
               </div>
             </form>
           </div>
@@ -509,13 +656,38 @@ export default function AdminCoursesPage() {
               )}
             </div>
           ) : (
-            <div className="p-8 text-center bg-[#0a0a0f] border border-white/5 rounded-3xl opacity-50">
-              <p className="text-zinc-400 font-bold">يرجى حفظ بيانات الكورس الأساسية أولاً لتفعيل بناء المنهج والشهادات.</p>
+            <div className="bg-[#0a0a0f] border border-white/5 rounded-3xl p-8 text-center relative overflow-hidden shadow-2xl space-y-6">
+              {/* Decorative radial glow */}
+              <div className="absolute w-80 h-80 bg-rose-500/5 rounded-full blur-[80px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
+
+              <div className="mx-auto w-20 h-20 rounded-full bg-rose-600/10 border border-rose-500/20 flex items-center justify-center text-rose-500 animate-pulse">
+                <Video className="w-10 h-10" />
+              </div>
+
+              <div className="space-y-2 max-w-lg mx-auto">
+                <h3 className="font-alexandria font-bold text-white text-lg md:text-xl">
+                  نظام إدارة المناهج والمحاضرات (LMS Builder) جاهز للعمل!
+                </h3>
+                <p className="text-zinc-400 text-xs md:text-sm leading-relaxed">
+                  أنت تبني مساراً تعليمياً عظيماً! 🚀 يرجى حفظ بيانات الكورس الأساسية أولاً (العنوان والسعر والغلاف) ليتم إنشاء الدورة في قاعدة البيانات، ثم سيفتح لك فوراً محرك بناء الوحدات، ورفع محاضرات الفيديو، وإدراج المرفقات وملفات PDF للطلاب بأسلوب السحب والإفلات الاحترافي!
+                </p>
+              </div>
+
+              <div className="pt-2">
+                <button
+                  type="button"
+                  onClick={() => handleSaveCourse()}
+                  className="h-11 px-8 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-2 mx-auto active:scale-95 transition-all shadow-lg shadow-rose-600/20 cursor-pointer"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>حفظ بيانات الكورس وتفعيل منشئ المحاضرات الآن 🚀</span>
+                </button>
+              </div>
             </div>
           )}
 
           {/* Section 3: Certificate Builder */}
-          {selectedCourse && (
+          {selectedCourse ? (
             <div className="bg-[#0a0a0f] border border-white/5 rounded-3xl p-6 md:p-8 shadow-2xl">
               <div className="flex items-center justify-between mb-8 border-b border-white/5 pb-4">
                 <h2 className="text-xl font-alexandria font-bold text-white flex items-center gap-2">
@@ -542,8 +714,8 @@ export default function AdminCoursesPage() {
                   </div>
                   
                   <div className="flex flex-col gap-2">
-                    <label className="text-xs font-bold text-zinc-400">لون النص (Hex Color)</label>
-                    <input type="color" value={courseForm.certificate_text_color} onChange={e => setCourseForm({ ...courseForm, certificate_text_color: e.target.value })} className="w-full h-12 bg-transparent border border-white/5 rounded-xl cursor-pointer" />
+                    <label className="text-xs font-bold text-zinc-400">اسم الطالب للتجربة (المعاينة الحية)</label>
+                    <input type="text" value={testStudentName} onChange={e => setTestStudentName(e.target.value)} placeholder="مثال: يوسف أحمد أو Youssef Ahmed..." className="bg-white/5 border border-white/5 rounded-xl py-3 px-4 text-sm focus:border-rose-500/50 text-white" />
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
@@ -557,38 +729,40 @@ export default function AdminCoursesPage() {
                     </div>
                     
                     <div className="flex flex-col gap-2">
-                      <label className="text-xs font-bold text-zinc-400">موضع اسم الكورس أفقي (X %)</label>
-                      <input type="number" value={courseForm.certificate_course_x} onChange={e => setCourseForm({...courseForm, certificate_course_x: Number(e.target.value)})} className="bg-white/5 border border-white/5 rounded-xl py-2 px-4 text-sm" />
-                    </div>
-                    <div className="flex flex-col gap-2">
-                      <label className="text-xs font-bold text-zinc-400">موضع اسم الكورس عمودي (Y %)</label>
-                      <input type="number" value={courseForm.certificate_course_y} onChange={e => setCourseForm({...courseForm, certificate_course_y: Number(e.target.value)})} className="bg-white/5 border border-white/5 rounded-xl py-2 px-4 text-sm" />
-                    </div>
-                    
-                    <div className="flex flex-col gap-2">
                       <label className="text-xs font-bold text-zinc-400">موضع التاريخ أفقي (X %)</label>
                       <input type="number" value={courseForm.certificate_date_x} onChange={e => setCourseForm({...courseForm, certificate_date_x: Number(e.target.value)})} className="bg-white/5 border border-white/5 rounded-xl py-2 px-4 text-sm" />
                     </div>
                     <div className="flex flex-col gap-2">
                       <label className="text-xs font-bold text-zinc-400">موضع التاريخ عمودي (Y %)</label>
-                      <input type="number" value={courseForm.certificate_date_y} onChange={e => setCourseForm({...courseForm, certificate_date_y: Number(e.target.value)})} className="bg-white/5 border border-white/5 rounded-xl py-2 px-4 text-sm" />
+                      <input type="number" value={courseForm.certificate_date_y} onChange={e => setCourseForm({...courseForm, certificate_date_y: Number(e.target.value)})} className="bg-[#0f0f15] border border-white/5 rounded-xl py-2 px-4 text-sm" />
                     </div>
                   </div>
                 </div>
                 
                 {/* Certificate Preview Box */}
                 <div className="relative w-full aspect-[1.414/1] bg-white/5 rounded-xl border border-white/10 overflow-hidden flex items-center justify-center">
+                  <style dangerouslySetInnerHTML={{__html: `
+                    @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@700;800;900&family=Alexandria:wght@800;900&display=swap');
+                    @import url('https://fonts.cdnfonts.com/css/lovelo');
+                  `}} />
                   {courseForm.certificate_bg_url ? (
                     <>
                       <img src={courseForm.certificate_bg_url} alt="Certificate Background" className="absolute inset-0 w-full h-full object-contain" />
                       <div className="absolute inset-0 z-10 font-bold" style={{ color: courseForm.certificate_text_color }}>
-                        <div className="absolute whitespace-nowrap text-xl sm:text-2xl lg:text-3xl" style={{ left: `${courseForm.certificate_name_x}%`, top: `${courseForm.certificate_name_y}%`, transform: 'translate(-50%, -50%)' }}>
-                          [اسم الطالب هنا]
+                        {/* Auto-detected Language Font Selection */}
+                        <div 
+                          className="absolute whitespace-nowrap text-xl sm:text-2xl lg:text-3xl transition-all" 
+                          style={{ 
+                            left: `${courseForm.certificate_name_x}%`, 
+                            top: `${courseForm.certificate_name_y}%`, 
+                            transform: 'translate(-50%, -50%)',
+                            fontFamily: /[\u0600-\u06FF]/.test(testStudentName) ? "'Cairo', 'Alexandria', sans-serif" : "'Lovelo', sans-serif",
+                            fontWeight: /[\u0600-\u06FF]/.test(testStudentName) ? 900 : 'bold',
+                          }}
+                        >
+                          {testStudentName || "[اسم الطالب هنا]"}
                         </div>
-                        <div className="absolute whitespace-nowrap text-sm sm:text-base lg:text-lg" style={{ left: `${courseForm.certificate_course_x}%`, top: `${courseForm.certificate_course_y}%`, transform: 'translate(-50%, -50%)' }}>
-                          {courseForm.title || "[اسم الكورس]"}
-                        </div>
-                        <div className="absolute whitespace-nowrap text-xs sm:text-sm" style={{ left: `${courseForm.certificate_date_x}%`, top: `${courseForm.certificate_date_y}%`, transform: 'translate(-50%, -50%)' }}>
+                        <div className="absolute whitespace-nowrap text-xs sm:text-sm font-mono" style={{ left: `${courseForm.certificate_date_x}%`, top: `${courseForm.certificate_date_y}%`, transform: 'translate(-50%, -50%)' }}>
                           {new Date().toLocaleDateString("ar-EG")}
                         </div>
                       </div>
@@ -597,6 +771,24 @@ export default function AdminCoursesPage() {
                     <span className="text-zinc-500 font-bold text-sm">الرجاء إدخال رابط أو رفع خلفية الشهادة لمعاينتها.</span>
                   )}
                 </div>
+              </div>
+            </div>
+          ) : (
+            <div className="bg-[#0a0a0f] border border-white/5 rounded-3xl p-8 text-center relative overflow-hidden shadow-2xl space-y-6">
+              {/* Decorative radial glow */}
+              <div className="absolute w-80 h-80 bg-emerald-500/5 rounded-full blur-[80px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
+
+              <div className="mx-auto w-20 h-20 rounded-full bg-emerald-600/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 animate-pulse">
+                <Award className="w-10 h-10" />
+              </div>
+
+              <div className="space-y-2 max-w-lg mx-auto">
+                <h3 className="font-alexandria font-bold text-white text-lg md:text-xl">
+                  منشئ الشهادات التلقائية للطلاب (Certificate Builder)
+                </h3>
+                <p className="text-zinc-400 text-xs md:text-sm leading-relaxed">
+                  امنح طلابك شهادات إكمال رسمية وموثقة بكود QR ديناميكي بمجرد إتمامهم متطلبات الدورة! يرجى حفظ بيانات الكورس الأساسية أولاً لتفعيل لوحة التحكم في تموضع الأسماء والتواريخ ولون النص فوق قالب شهادتك الخاصة.
+                </p>
               </div>
             </div>
           )}
@@ -609,6 +801,30 @@ export default function AdminCoursesPage() {
                     <Users className="w-5 h-5 text-blue-500" />
                     لوحة متابعة تقدم الطلاب (Students Progress)
                   </h2>
+                  {studentsData.length > 0 && (
+                    <button 
+                      onClick={() => {
+                        let csvContent = "\uFEFF";
+                        csvContent += "الاسم,البريد الإلكتروني,تاريخ التسجيل,الحالة\n";
+                        studentsData.forEach(student => {
+                          csvContent += `"${student.user_name || "طالب"}","${student.user_email}","${new Date(student.enrolled_at).toLocaleDateString("ar-EG")}","نشط"\n`;
+                        });
+                        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+                        const url = URL.createObjectURL(blob);
+                        const link = document.createElement("a");
+                        link.setAttribute("href", url);
+                        link.setAttribute("download", `طلاب_${selectedCourse?.title || "كورس"}.csv`);
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                        toast.success("تم تصدير ملف الـ CSV بنجاح! 📂");
+                      }}
+                      className="h-9 px-4 bg-blue-600/10 hover:bg-blue-600 text-blue-400 hover:text-white border border-blue-500/20 hover:border-blue-600 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      <span>تصدير CSV</span>
+                    </button>
+                  )}
                 </div>
                 
                 {studentsData.length === 0 ? (
@@ -688,6 +904,7 @@ export default function AdminCoursesPage() {
                   <option value="pdf">ملف دراسي PDF</option>
                   <option value="link">رابط خارجي (External Link)</option>
                   <option value="download">ملف مرفق للتحميل</option>
+                  <option value="text">درس نصي (Text Lesson)</option>
                 </select>
               </div>
               <div className="flex flex-col gap-1.5">
@@ -712,7 +929,17 @@ export default function AdminCoursesPage() {
                     <div className="mt-2 rounded-xl overflow-hidden border border-white/10 bg-zinc-950 aspect-video relative">
                       <span className="absolute top-2 right-2 bg-black/60 text-[9px] text-zinc-400 font-black px-2 py-0.5 rounded backdrop-blur z-20">Live Preview</span>
                       <iframe
-                        src={editingLesson.video_url.includes("watch?v=") ? `https://www.youtube.com/embed/${editingLesson.video_url.split("v=")[1]?.split("&")[0]}` : editingLesson.video_url.includes("youtu.be/") ? `https://www.youtube.com/embed/${editingLesson.video_url.split("youtu.be/")[1]?.split("?")[0]}` : editingLesson.video_url}
+                        src={
+                          editingLesson.video_url.includes("youtube.com/shorts/") 
+                            ? `https://www.youtube.com/embed/${editingLesson.video_url.split("/shorts/")[1]?.split("?")[0]}`
+                            : editingLesson.video_url.includes("watch?v=") 
+                            ? `https://www.youtube.com/embed/${editingLesson.video_url.split("v=")[1]?.split("&")[0]}` 
+                            : editingLesson.video_url.includes("youtu.be/") 
+                            ? `https://www.youtube.com/embed/${editingLesson.video_url.split("youtu.be/")[1]?.split("?")[0]}`
+                            : editingLesson.video_url.includes("vimeo.com/") 
+                            ? `https://player.vimeo.com/video/${editingLesson.video_url.split("vimeo.com/")[1]?.split("?")[0]?.split("/")[0]}`
+                            : editingLesson.video_url
+                        }
                         title="Preview" className="w-full h-full border-none" allowFullScreen
                       />
                     </div>
@@ -749,9 +976,13 @@ export default function AdminCoursesPage() {
                 </label>
               </div>
 
-              <div className="flex flex-col gap-1.5 sm:col-span-2">
-                <label className="text-xs text-zinc-400 font-bold">الوصف والتفاصيل الإضافية للمحاضرة</label>
-                <textarea rows={4} value={editingLesson.content} onChange={e => setEditingLesson({ ...editingLesson, content: e.target.value })} className="bg-white/5 border border-white/5 rounded-xl py-3 px-4 text-sm focus:border-rose-500/50" />
+              <div className="sm:col-span-2">
+                <RichTextEditor 
+                  label="الوصف والتفاصيل الإضافية للمحاضرة"
+                  value={editingLesson.content || ""}
+                  onChange={val => setEditingLesson({ ...editingLesson, content: val })}
+                  placeholder="اكتب هنا تفاصيل ومحتوى المحاضرة النصي أو الملاحظات الهامة للطلاب..."
+                />
               </div>
             </div>
             <div className="flex items-center justify-end gap-2 border-t border-white/5 pt-4">

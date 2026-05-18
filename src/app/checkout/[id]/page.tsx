@@ -58,6 +58,10 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
   const [product, setProduct] = useState<Product | null>(null);
   const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<"card" | "wallet">("card");
+  const [isCourse, setIsCourse] = useState(false);
+  const [couponInput, setCouponInput] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; percent: number } | null>(null);
+  const [couponError, setCouponError] = useState("");
   
   // Card Fields State
   const [cardNumber, setCardNumber] = useState("");
@@ -148,14 +152,51 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
   async function fetchProduct() {
     setIsFetching(true);
     try {
-      const { data, error } = await supabase
-        .from("products")
-        .select("*")
-        .eq("id", resolvedParams.id)
-        .single();
+      let data: any = null;
+      let isCourseItem = false;
 
-      if (error) throw error;
+      // Try fetching from courses first if it starts with "course-"
+      if (resolvedParams.id.startsWith("course-")) {
+        const { data: courseData, error: courseError } = await supabaseClient
+          .from("courses")
+          .select("*")
+          .eq("id", resolvedParams.id)
+          .maybeSingle();
+        if (courseData) {
+          data = courseData;
+          isCourseItem = true;
+        }
+      }
+
+      // Fallback/direct query from products if not loaded yet
+      if (!data) {
+        const { data: productData } = await supabase
+          .from("products")
+          .select("*")
+          .eq("id", resolvedParams.id)
+          .maybeSingle();
+        if (productData) {
+          data = productData;
+        }
+      }
+
+      // If still not loaded, query courses again without startWith constraint just in case
+      if (!data) {
+        const { data: courseData } = await supabaseClient
+          .from("courses")
+          .select("*")
+          .eq("id", resolvedParams.id)
+          .maybeSingle();
+        if (courseData) {
+          data = courseData;
+          isCourseItem = true;
+        }
+      }
+
+      if (!data) throw new Error("المحتوى المطلوب غير متوفر حالياً");
+      
       setProduct(data as Product);
+      setIsCourse(isCourseItem);
       
       // Track InitiateCheckout
       if (typeof window !== "undefined") {
@@ -163,7 +204,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
           (window as any).fbq('track', 'InitiateCheckout', {
             content_name: data.title,
             content_ids: [data.id],
-            content_type: 'product',
+            content_type: isCourseItem ? 'course' : 'product',
             value: data.price,
             currency: 'EGP'
           });
@@ -171,15 +212,15 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
         if ((window as any).ttq) {
           (window as any).ttq.track('InitiateCheckout', {
             contents: [{ content_id: data.id, content_name: data.title, price: data.price, quantity: 1 }],
-            content_type: 'product',
+            content_type: isCourseItem ? 'course' : 'product',
             value: data.price,
             currency: 'EGP'
           });
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching product:", error);
-      toast.error("فشل تحميل تفاصيل المنتج للcheckout");
+      toast.error(error.message || "فشل تحميل تفاصيل المنتج للcheckout");
     } finally {
       setIsFetching(false);
     }
@@ -333,14 +374,19 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
 
       const fullPhone = `${countryCode}${data.phone}`;
 
+      const finalPrice = appliedCoupon 
+        ? Math.round(product.price * (1 - appliedCoupon.percent / 100)) 
+        : product.price;
+
       const payloadBody = {
-        amount: product.price,
+        amount: finalPrice,
         email: data.email,
         firstName: data.fullName.split(" ")[0],
         lastName: data.fullName.split(" ").slice(1).join(" ") || "Customer",
         phone: fullPhone,
         productId: resolvedParams.id,
         paymentMethod: paymentMethod, 
+        couponCode: appliedCoupon ? appliedCoupon.code : undefined,
         cardData: paymentMethod === "card" ? {
           cardNumber,
           expiry: expiryDate,
@@ -730,28 +776,109 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                       <h4 className="font-cairo font-bold text-white text-lg leading-tight mb-2 line-clamp-2">{product.title}</h4>
                       <div className="flex items-center gap-1.5 bg-rose-500/10 text-rose-400 px-2 py-1 rounded-md w-fit">
                         <Sparkles className="w-3 h-3" />
-                        <span className="text-[10px] font-bold uppercase tracking-widest">تنزيل فوري</span>
+                        <span className="text-[10px] font-bold uppercase tracking-widest">
+                          {isCourse ? "انضمام فوري للمساق" : "تنزيل فوري"}
+                        </span>
                       </div>
                     </div>
                   </div>
 
+                  {/* Coupon Code Input Block */}
+                  <div className="py-4 border-b border-white/10 space-y-2">
+                    <Label className="font-cairo text-xs text-zinc-400 font-bold block">كود الخصم (Coupon)</Label>
+                    <div className="flex gap-2">
+                      <Input 
+                        value={couponInput}
+                        onChange={e => {
+                          setCouponInput(e.target.value);
+                          setCouponError("");
+                        }}
+                        placeholder="أدخل كوبون الخصم هنا..." 
+                        className="h-10 rounded-xl bg-white/5 border-white/5 text-white text-xs font-cairo"
+                        disabled={isLoading || !!appliedCoupon}
+                      />
+                      {appliedCoupon ? (
+                        <Button 
+                          type="button" 
+                          onClick={() => {
+                            setAppliedCoupon(null);
+                            setCouponInput("");
+                          }}
+                          className="h-10 px-4 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-xl font-bold text-xs"
+                        >
+                          إلغاء
+                        </Button>
+                      ) : (
+                        <Button 
+                          type="button" 
+                          onClick={async () => {
+                            const code = couponInput.trim().toUpperCase();
+                            if (!code) return;
+                            
+                            setIsLoading(true);
+                            setCouponError("");
+                            try {
+                              const res = await fetch(`/api/coupons/validate?code=${encodeURIComponent(code)}&itemId=${encodeURIComponent(product.id)}`);
+                              const data = await res.json();
+                              
+                              if (!res.ok || !data.success) {
+                                throw new Error(data.error || "كود الخصم غير صالح");
+                              }
+                              
+                              setAppliedCoupon({ code: data.code, percent: data.discount_percent });
+                              toast.success(`تم تطبيق الكوبون ${data.code} بنجاح! خصم ${data.discount_percent}%`);
+                            } catch (err: any) {
+                              setCouponError(err.message || "كود الخصم غير صالح لهذا المنتج.");
+                              toast.error(err.message || "كود الخصم غير صالح.");
+                            } finally {
+                              setIsLoading(false);
+                            }
+                          }}
+                          className="h-10 px-4 bg-[#D6004B] hover:bg-[#b0003d] text-white border-none rounded-xl font-bold text-xs"
+                          disabled={isLoading}
+                        >
+                          تطبيق
+                        </Button>
+                      )}
+                    </div>
+                    {couponError && <p className="text-[10px] text-red-400 font-cairo">{couponError}</p>}
+                    {appliedCoupon && (
+                      <div className="flex items-center gap-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-2 py-1 rounded-lg text-[10px] font-bold font-mono w-fit">
+                        <span>الكوبون {appliedCoupon.code} نشط (-{appliedCoupon.percent}%)</span>
+                      </div>
+                    )}
+                  </div>
+
                   <div className="py-6 space-y-4">
-                    {product.original_price && (
+                    {product.original_price ? (
                       <div className="flex justify-between items-center text-zinc-400 font-cairo">
                         <span>السعر الأصلي</span>
                         <span className="line-through">{product.original_price} ج.م</span>
                       </div>
-                    )}
-                    {discountPct && (
+                    ) : null}
+                    
+                    {discountPct ? (
                       <div className="flex justify-between items-center text-emerald-400 font-cairo font-bold">
-                        <span>الخصم ({discountPct}%)</span>
+                        <span>خصم الدورة ({discountPct}%)</span>
                         <span>- {savings} ج.م</span>
                       </div>
-                    )}
+                    ) : null}
+
+                    {appliedCoupon ? (
+                      <div className="flex justify-between items-center text-emerald-400 font-cairo font-bold bg-emerald-500/5 p-2.5 rounded-xl border border-emerald-500/10">
+                        <span>خصم الكوبون ({appliedCoupon.percent}%)</span>
+                        <span>- {Math.round(product.price * (appliedCoupon.percent / 100))} ج.م</span>
+                      </div>
+                    ) : null}
+
                     <div className="flex justify-between items-center pt-4 border-t border-white/10">
                       <span className="font-alexandria font-bold text-white text-xl">الإجمالي</span>
                       <div className="flex items-baseline gap-1 text-white">
-                        <span className="text-3xl font-alexandria font-black">{product.price}</span>
+                        <span className="text-3xl font-alexandria font-black">
+                          {appliedCoupon 
+                            ? Math.round(product.price * (1 - appliedCoupon.percent / 100)) 
+                            : product.price}
+                        </span>
                         <span className="text-sm font-cairo">ج.م</span>
                       </div>
                     </div>
@@ -759,11 +886,16 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
 
                   <div className="bg-[#050505] rounded-2xl p-4 border border-white/5">
                     <ul className="space-y-3">
-                      {[
+                      {(isCourse ? [
+                        "دخول كامل للمحاضرات والدروس مدى الحياة",
+                        "ملفات ومواد الدورة التفاعلية جاهزة للتحميل",
+                        "شهادة إتمام معتمدة قابلة للتحقق التلقائي",
+                        "دعم فني واستشارات حقيقية مع يوسف"
+                      ] : [
                         "ملفات المنتج الأصلية والكاملة",
-                        "دعم فني وتحديثات مجانية",
-                        "إرسال تلقائي للبريد الإلكتروني"
-                      ].map((benefit, i) => (
+                        "دعم فني وتحديثات مجانية مدى الحياة",
+                        "إرسال تلقائي وفوري للبريد الإلكتروني"
+                      ]).map((benefit, i) => (
                         <li key={i} className="flex items-center gap-2 text-zinc-400 font-cairo text-sm">
                           <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
                           {benefit}

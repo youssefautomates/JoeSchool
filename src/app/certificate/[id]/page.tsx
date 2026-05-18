@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { Award, ShieldCheck, Calendar, User, BookOpen, AlertTriangle, ArrowLeft, Printer, Sparkles, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { getCertificateByVerificationId, type LmsCertificate } from "@/lib/coursesDb";
+import { cn } from "@/lib/utils";
 
 export default function CertificateVerificationPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -56,15 +57,25 @@ export default function CertificateVerificationPage({ params }: { params: Promis
               {/* Customizable Certificate Live Template OR Gold Certificate Frame */}
               {cert.certificate_bg_url ? (
                 <div className="w-full aspect-[1.414/1] bg-[#0a0a0f] border border-amber-500/30 rounded-3xl overflow-hidden relative shadow-2xl print:m-0 print:border-none print:shadow-none">
+                  <style dangerouslySetInnerHTML={{__html: `
+                    @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@700;800;900&family=Alexandria:wght@800;900&display=swap');
+                    @import url('https://fonts.cdnfonts.com/css/lovelo');
+                  `}} />
                   <img src={cert.certificate_bg_url} alt="Certificate Background" className="absolute inset-0 w-full h-full object-cover" />
-                  <div className="absolute inset-0 z-10 font-alexandria font-bold" style={{ color: cert.certificate_text_color || "#000000" }}>
-                    <div className="absolute whitespace-nowrap text-xl sm:text-2xl lg:text-3xl" style={{ left: `${cert.certificate_name_x || 50}%`, top: `${cert.certificate_name_y || 40}%`, transform: 'translate(-50%, -50%)' }}>
+                  <div className="absolute inset-0 z-10 font-bold" style={{ color: cert.certificate_text_color || "#000000" }}>
+                    <div 
+                      className="absolute whitespace-nowrap text-xl sm:text-2xl lg:text-3xl transition-all" 
+                      style={{ 
+                        left: `${cert.certificate_name_x || 50}%`, 
+                        top: `${cert.certificate_name_y || 40}%`, 
+                        transform: 'translate(-50%, -50%)',
+                        fontFamily: /[\u0600-\u06FF]/.test(cert.student_name) ? "'Cairo', 'Alexandria', sans-serif" : "'Lovelo', sans-serif",
+                        fontWeight: /[\u0600-\u06FF]/.test(cert.student_name) ? 900 : 'bold',
+                      }}
+                    >
                       {cert.student_name}
                     </div>
-                    <div className="absolute whitespace-nowrap text-sm sm:text-base lg:text-lg" style={{ left: `${cert.certificate_course_x || 50}%`, top: `${cert.certificate_course_y || 55}%`, transform: 'translate(-50%, -50%)' }}>
-                      {cert.course_name}
-                    </div>
-                    <div className="absolute whitespace-nowrap text-xs sm:text-sm" style={{ left: `${cert.certificate_date_x || 50}%`, top: `${cert.certificate_date_y || 70}%`, transform: 'translate(-50%, -50%)' }}>
+                    <div className="absolute whitespace-nowrap text-xs sm:text-sm font-mono" style={{ left: `${cert.certificate_date_x || 50}%`, top: `${cert.certificate_date_y || 70}%`, transform: 'translate(-50%, -50%)' }}>
                       {cert.issued_at}
                     </div>
                   </div>

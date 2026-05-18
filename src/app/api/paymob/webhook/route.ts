@@ -158,60 +158,138 @@ export async function POST(request: Request) {
             continue;
           }
 
-          // Fetch product metadata for sales count increment and category checks
-          const { data: product } = await supabaseAdmin
-            .from("products")
-            .select("title, sales, category")
-            .eq("id", ord.product_id)
-            .single();
+          // If a coupon code was used, increment its usage count securely
+          if (ord.coupon_code) {
+            try {
+              const { data: cData } = await supabaseAdmin
+                .from("coupons")
+                .select("id, used_count")
+                .eq("code", ord.coupon_code.trim().toUpperCase())
+                .maybeSingle();
+              if (cData) {
+                await supabaseAdmin
+                  .from("coupons")
+                  .update({ used_count: cData.used_count + 1 })
+                  .eq("id", cData.id);
+                console.log(`[PAYMOB_WEBHOOK][${requestId}] ✅ Successfully incremented usage for coupon: ${ord.coupon_code}`);
+              }
+            } catch (couponErr) {
+              console.error(`[PAYMOB_WEBHOOK][${requestId}] ❌ Coupon increment exception:`, couponErr);
+            }
+          }
 
-          if (product) {
-            // Increment sales count
-            await supabaseAdmin
-              .from("products")
-              .update({ sales: (product.sales || 0) + 1 })
-              .eq("id", ord.product_id);
-            console.log(`[PAYMOB_WEBHOOK][${requestId}] 📈 Sales incremented for product: ${product.title}`);
+          // Fetch item metadata (product or course) for sales count increment and category checks
+          let itemMetadata: { title: string; sales: number; category: string } | null = null;
+          let isCourse = ord.product_id?.startsWith("course-") || false;
 
-            // LMS Course Auto-Enrollment
-            const isCourse = 
-              product.category === "courses" || 
-              product.category === "الدورات التعليمية" || 
-              product.category === "الدورات التدريبية" ||
+          try {
+            if (isCourse) {
+              const { data: courseItem } = await supabaseAdmin
+                .from("courses")
+                .select("title, sales_count, category")
+                .eq("id", ord.product_id)
+                .maybeSingle();
+              if (courseItem) {
+                itemMetadata = {
+                  title: courseItem.title,
+                  sales: courseItem.sales_count || 0,
+                  category: courseItem.category || "courses"
+                };
+              }
+            } else {
+              const { data: prodItem } = await supabaseAdmin
+                .from("products")
+                .select("title, sales, category")
+                .eq("id", ord.product_id)
+                .maybeSingle();
+              if (prodItem) {
+                itemMetadata = {
+                  title: prodItem.title,
+                  sales: prodItem.sales || 0,
+                  category: prodItem.category || "products"
+                };
+              } else {
+                // Fallback query to courses
+                const { data: courseItem } = await supabaseAdmin
+                  .from("courses")
+                  .select("title, sales_count, category")
+                  .eq("id", ord.product_id)
+                  .maybeSingle();
+                if (courseItem) {
+                  itemMetadata = {
+                    title: courseItem.title,
+                    sales: courseItem.sales_count || 0,
+                    category: courseItem.category || "courses"
+                  };
+                  isCourse = true;
+                }
+              }
+            }
+          } catch (metadataErr) {
+            console.error(`[PAYMOB_WEBHOOK][${requestId}] Error fetching item metadata:`, metadataErr);
+          }
+
+          // If still not definitively course but title matches course signature
+          if (!isCourse && itemMetadata) {
+            isCourse = 
+              itemMetadata.category === "courses" || 
+              itemMetadata.category === "الدورات التعليمية" || 
+              itemMetadata.category === "الدورات التدريبية" ||
               ord.product_title?.includes("دورة") || 
               ord.product_title?.includes("كورس");
+          }
 
-            if (isCourse) {
-              console.log(`[PAYMOB_WEBHOOK][${requestId}] 🎓 Auto-enrolling student in LMS Course: ${product.title}...`);
-              try {
-                const { getCoursesList, enrollUser } = await import("@/lib/coursesDb");
-                const coursesList = await getCoursesList();
-                const matchedCourse = coursesList.find(c => 
-                  c.title.toLowerCase().includes(ord.product_title?.toLowerCase()) || 
-                  ord.product_title?.toLowerCase().includes(c.title.toLowerCase())
-                ) || coursesList[0];
-
-                if (matchedCourse) {
-                  let userId = ord.customer_id;
-                  if (!userId || userId === "anonymous") {
-                    const { data: profile } = await supabaseAdmin
-                      .from("profiles")
-                      .select("id")
-                      .eq("email", customerEmail)
-                      .maybeSingle();
-                    userId = profile?.id || "usr-student-" + Math.random().toString(36).substring(2, 11);
-                  }
-                  
-                  console.log(`[PAYMOB_WEBHOOK][${requestId}] 🎓 Enrolling user ${userId} in course: ${matchedCourse.title}`);
-                  await enrollUser(userId, matchedCourse.id, {
-                    email: customerEmail,
-                    name: customerName
-                  });
-                  console.log(`[PAYMOB_WEBHOOK][${requestId}] 🎓 Auto-enrollment successful`);
-                }
-              } catch (enrollErr) {
-                console.error(`[PAYMOB_WEBHOOK][${requestId}] ❌ Auto-enrollment error:`, enrollErr);
+          if (itemMetadata) {
+            // Increment sales count in respective table
+            try {
+              if (isCourse) {
+                await supabaseAdmin
+                  .from("courses")
+                  .update({ sales_count: (itemMetadata.sales || 0) + 1 })
+                  .eq("id", ord.product_id);
+              } else {
+                await supabaseAdmin
+                  .from("products")
+                  .update({ sales: (itemMetadata.sales || 0) + 1 })
+                  .eq("id", ord.product_id);
               }
+              console.log(`[PAYMOB_WEBHOOK][${requestId}] 📈 Sales incremented for: ${itemMetadata.title}`);
+            } catch (salesErr) {
+              console.error(`[PAYMOB_WEBHOOK][${requestId}] Error incrementing sales:`, salesErr);
+            }
+          }
+
+          if (isCourse) {
+            console.log(`[PAYMOB_WEBHOOK][${requestId}] 🎓 Auto-enrolling student in LMS Course: ${ord.product_title}...`);
+            try {
+              const { getCoursesList, enrollUser } = await import("@/lib/coursesDb");
+              const coursesList = await getCoursesList();
+              const matchedCourse = coursesList.find(c => 
+                c.id === ord.product_id ||
+                c.title.toLowerCase().includes(ord.product_title?.toLowerCase()) || 
+                ord.product_title?.toLowerCase().includes(c.title.toLowerCase())
+              ) || coursesList[0];
+
+              if (matchedCourse) {
+                let userId = ord.customer_id;
+                if (!userId || userId === "anonymous") {
+                  const { data: profile } = await supabaseAdmin
+                    .from("profiles")
+                    .select("id")
+                    .eq("email", customerEmail)
+                    .maybeSingle();
+                  userId = profile?.id || "usr-student-" + Math.random().toString(36).substring(2, 11);
+                }
+                
+                console.log(`[PAYMOB_WEBHOOK][${requestId}] 🎓 Enrolling user ${userId} in course: ${matchedCourse.title}`);
+                await enrollUser(userId, matchedCourse.id, {
+                  email: customerEmail,
+                  name: customerName
+                });
+                console.log(`[PAYMOB_WEBHOOK][${requestId}] 🎓 Auto-enrollment successful`);
+              }
+            } catch (enrollErr) {
+              console.error(`[PAYMOB_WEBHOOK][${requestId}] ❌ Auto-enrollment error:`, enrollErr);
             }
           }
         }

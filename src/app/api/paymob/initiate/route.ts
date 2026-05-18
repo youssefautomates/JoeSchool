@@ -1,12 +1,18 @@
 import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 import { createOrder } from "@/lib/orders";
+import { createClient } from "@supabase/supabase-js";
+
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
     console.log("[BACKEND_REQUEST_BODY] Received:", JSON.stringify(body, null, 2));
-    const { amount, email, firstName, lastName, phone, productId, paymentMethod, cardData } = body;
+    const { amount, email, firstName, lastName, phone, productId, paymentMethod, cardData, couponCode } = body;
 
     // --- Env Validation ---
     const secretKey = process.env.PAYMOB_SECRET_KEY;
@@ -30,28 +36,118 @@ export async function POST(req: Request) {
       throw new Error("Missing or invalid PAYMOB_WALLET_INTEGRATION_ID in .env.local");
     }
 
-    // 1. Fetch Product Details
-    const { data: product, error: productError } = await supabase
-      .from("products")
-      .select("title, price")
-      .eq("id", productId)
-      .single();
+    // 1. Fetch Item (Product or Course) Details
+    let dbItem: { title: string; price: number; tags?: string[] } | null = null;
+    let isCourseItem = productId.startsWith("course-");
 
-    if (productError || !product) throw new Error("Product not found in database");
-    
-    const amountCents = Math.round(parseFloat(amount) * 100);
+    if (isCourseItem) {
+      const { data: course } = await supabase
+        .from("courses")
+        .select("title, price, tags")
+        .eq("id", productId)
+        .maybeSingle();
+      if (course) {
+        dbItem = {
+          title: course.title,
+          price: course.price,
+          tags: course.tags || []
+        };
+      }
+    }
 
-    // 2. Create Order in Supabase locally first
+    if (!dbItem) {
+      const { data: product } = await supabase
+        .from("products")
+        .select("title, price, tags")
+        .eq("id", productId)
+        .maybeSingle();
+      if (product) {
+        dbItem = {
+          title: product.title,
+          price: product.price,
+          tags: product.tags || []
+        };
+      }
+    }
+
+    // Secondary fallback to courses
+    if (!dbItem) {
+      const { data: course } = await supabase
+        .from("courses")
+        .select("title, price, tags")
+        .eq("id", productId)
+        .maybeSingle();
+      if (course) {
+        dbItem = {
+          title: course.title,
+          price: course.price,
+          tags: course.tags || []
+        };
+        isCourseItem = true;
+      }
+    }
+
+    if (!dbItem) throw new Error("المحتوى المطلوب غير متوفر حالياً في قاعدة البيانات");
+
+    // 2. Validate Price and Applied Coupon
+    let expectedPrice = dbItem.price;
+    if (couponCode) {
+      const upperCode = couponCode.trim().toUpperCase();
+      // Query the database for the coupon
+      const { data: dbCoupon, error: couponErr } = await supabaseAdmin
+        .from("coupons")
+        .select("*")
+        .eq("code", upperCode)
+        .maybeSingle();
+
+      if (couponErr || !dbCoupon) {
+        throw new Error("كود الخصم المدخل غير صالح أو غير متوفر");
+      }
+
+      // Check expiry
+      if (dbCoupon.expiry_date && new Date(dbCoupon.expiry_date) < new Date()) {
+        throw new Error("عذراً، كود الخصم هذا قد انتهت صلاحيته");
+      }
+
+      // Check max uses
+      if (dbCoupon.used_count >= dbCoupon.max_uses) {
+        throw new Error("عذراً، كود الخصم هذا وصل للحد الأقصى من الاستخدام");
+      }
+
+      // Check product restriction
+      if (dbCoupon.applies_to_type !== "all") {
+        const isMatch = dbCoupon.applies_to_id === productId || 
+                        `course-${dbCoupon.applies_to_id}` === productId ||
+                        productId.replace("course-", "") === dbCoupon.applies_to_id;
+        if (!isMatch) {
+          throw new Error("كود الخصم هذا غير صالح للمنتج المختار");
+        }
+      }
+
+      expectedPrice = Math.round(dbItem.price * (1 - dbCoupon.discount_percent / 100));
+      console.log(`[PAYMOB_INITIATE] Applied database coupon: ${upperCode} | Percent: ${dbCoupon.discount_percent}% | Expected Price: ${expectedPrice}`);
+    }
+
+    // Prevent price spoofing from the client side
+    const clientAmount = parseFloat(amount);
+    if (Math.abs(clientAmount - expectedPrice) > 1) {
+      throw new Error(`محاولة تلاعب بالسعر! السعر الفعلي هو ${expectedPrice} ج.م`);
+    }
+
+    const amountCents = Math.round(expectedPrice * 100);
+
+    // 3. Create Order in Supabase locally first
     const dbOrder = await createOrder({
       customer_name: `${firstName} ${lastName}`,
       customer_email: email,
       customer_phone: phone,
       product_id: productId,
-      product_title: product.title,
-      amount: parseFloat(amount),
+      product_title: dbItem.title,
+      amount: expectedPrice,
       currency: "EGP",
       status: "pending",
       payment_id: "PENDING", 
+      coupon_code: couponCode ? couponCode.trim().toUpperCase() : undefined
     });
 
     const safeFirstName = (firstName || "Test").replace(/[^a-zA-Z\u0600-\u06FF]/g, "");
@@ -92,7 +188,7 @@ export async function POST(req: Request) {
           amount: amountCents,
           currency: "EGP",
           payment_methods: [envWalletIntegrationId],
-          items: [{ name: product.title, amount: amountCents, description: "Digital Purchase", quantity: 1 }],
+          items: [{ name: dbItem.title, amount: amountCents, description: "Digital Purchase", quantity: 1 }],
           billing_data: billingData,
           extras: { supabase_order_id: dbOrder.id, source: "store" }
         }),

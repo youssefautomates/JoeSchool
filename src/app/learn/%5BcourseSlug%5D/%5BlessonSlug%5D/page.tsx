@@ -850,6 +850,10 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ courseS
               </div>
 
               <div className="space-y-1">
+                <style dangerouslySetInnerHTML={{__html: `
+                  @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@700;800;900&family=Alexandria:wght@800;900&display=swap');
+                  @import url('https://fonts.cdnfonts.com/css/lovelo');
+                `}} />
                 <h3 className="font-alexandria font-black text-white text-lg sm:text-2xl tracking-tighter uppercase text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-yellow-200 to-amber-500">
                   شهادة إكمال ومثابرة موثقة
                 </h3>
@@ -860,7 +864,13 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ courseS
                 يُشهد فريق عمل أكاديمية <span className="font-bold text-white">Youssef Automates</span> الفنية بأن الطالب البارز:
               </p>
 
-              <h4 className="font-alexandria font-black text-white text-2xl sm:text-4xl underline decoration-amber-500/50 underline-offset-8">
+              <h4 
+                className="text-white text-2xl sm:text-4xl underline decoration-amber-500/50 underline-offset-8 transition-all"
+                style={{
+                  fontFamily: /[\u0600-\u06FF]/.test(activeCert.student_name) ? "'Cairo', 'Alexandria', sans-serif" : "'Lovelo', sans-serif",
+                  fontWeight: /[\u0600-\u06FF]/.test(activeCert.student_name) ? 900 : 'bold',
+                }}
+              >
                 {activeCert.student_name}
               </h4>
 
@@ -872,20 +882,32 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ courseS
                 {activeCert.course_name}
               </h5>
 
-              <div className="flex flex-col sm:flex-row items-center justify-between border-t border-white/5 pt-6 gap-4 text-xs font-bold text-zinc-500">
-                <div>
-                  <span className="block text-[10px] text-zinc-600 font-medium">تاريخ إصدار الشهادة:</span>
-                  <span className="text-zinc-300 font-mono mt-0.5 block">{activeCert.issued_at}</span>
-                </div>
-                <div>
-                  <div className="flex items-center gap-1 text-[10px] text-emerald-400 bg-emerald-950/40 border border-emerald-900/30 px-2 py-0.5 rounded">
-                    <ShieldCheck className="w-3.5 h-3.5" />
-                    <span>شهادة رقمية معتمدة</span>
+              <div className="flex flex-col sm:flex-row items-center justify-between border-t border-white/5 pt-6 gap-6 text-xs font-bold text-zinc-500">
+                <div className="text-right space-y-3 shrink-0">
+                  <div>
+                    <span className="block text-[10px] text-zinc-600 font-medium">تاريخ إصدار الشهادة:</span>
+                    <span className="text-zinc-300 font-mono mt-0.5 block">{activeCert.issued_at}</span>
+                  </div>
+                  <div>
+                    <span className="block text-[10px] text-zinc-600 font-medium">رقم التوثيق الرقمي (Verification ID):</span>
+                    <span className="text-rose-400 font-mono mt-0.5 block">{activeCert.verification_id}</span>
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-1.5 text-[10px] text-emerald-400 bg-emerald-950/40 border border-emerald-900/30 px-3 py-1 rounded w-fit">
+                      <ShieldCheck className="w-4 h-4" />
+                      <span>شهادة رقمية معتمدة وآمنة</span>
+                    </div>
                   </div>
                 </div>
-                <div>
-                  <span className="block text-[10px] text-zinc-600 font-medium">رقم التوثيق الرقمي (Verification ID):</span>
-                  <span className="text-rose-400 font-mono mt-0.5 block">{activeCert.verification_id}</span>
+
+                {/* Real-time Dynamic Verification QR Code */}
+                <div className="flex flex-col items-center gap-2 bg-white/5 border border-white/5 p-3 rounded-2xl shrink-0">
+                  <img 
+                    src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&color=d97706&bgcolor=0a0a0f&data=${encodeURIComponent(`https://youssefautomates.com/certificates/verify?id=${activeCert.verification_id}`)}`}
+                    alt="Certificate QR Verification" 
+                    className="w-20 h-20 rounded-lg border border-amber-500/20"
+                  />
+                  <span className="text-[8px] text-amber-500/70 font-mono tracking-widest block uppercase">Scan to Verify</span>
                 </div>
               </div>
             </div>

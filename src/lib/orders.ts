@@ -16,6 +16,7 @@ export interface Order {
   transaction_id?: string;
   completed_at?: string;
   created_at?: string;
+  coupon_code?: string;
 }
 
 export async function createOrder(order: Order) {

@@ -209,6 +209,26 @@ export async function POST(req: Request) {
         console.error(`[VERIFY][${requestId}] ❌ Update Error for order ${order.id}:`, updateError);
       } else {
         console.log(`[VERIFY][${requestId}] ✅ Order ${order.id} status updated to completed`);
+        
+        // Increment coupon count if used
+        if (order.coupon_code) {
+          try {
+            const { data: cData } = await supabaseAdmin
+              .from("coupons")
+              .select("id, used_count")
+              .eq("code", order.coupon_code.trim().toUpperCase())
+              .maybeSingle();
+            if (cData) {
+              await supabaseAdmin
+                .from("coupons")
+                .update({ used_count: cData.used_count + 1 })
+                .eq("id", cData.id);
+              console.log(`[VERIFY][${requestId}] ✅ Successfully incremented usage for coupon: ${order.coupon_code}`);
+            }
+          } catch (couponErr) {
+            console.error(`[VERIFY][${requestId}] ❌ Coupon increment exception:`, couponErr);
+          }
+        }
       }
 
       // Fetch Product Info for exact Category, tags, and Sales increment

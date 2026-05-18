@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import {
   LayoutDashboard, Package, ShoppingCart, Settings, LogOut,
   Search, Bell, Sparkles, Target, Star, BarChart3, ShieldAlert,
-  Flame, Globe, ShieldCheck, BookOpen, Video, Users, Award
+  Flame, Globe, ShieldCheck, BookOpen, Video, Users, Award, Mail
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { motion } from "framer-motion";
@@ -28,7 +28,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       title: "عمليات المتجر",
       items: [
         { name: "المنتجات", href: "/admin/products", icon: Package },
-        { name: "أداء المنتجات الرقمية", href: "/admin/products/performance", icon: Sparkles },
+        { name: "الكوبونات والتسويق", href: "/admin/marketing", icon: Target },
         { name: "الطلبات", href: "/admin/orders", icon: ShoppingCart },
         { name: "تغذية المبيعات الحية", href: "/admin/orders/live", icon: Flame }
       ]
@@ -38,12 +38,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       items: [
         { name: "إدارة المساقات", href: "/admin/courses", icon: BookOpen },
         { name: "إدارة قائمة الطلاب", href: "/admin/courses/students", icon: Users },
-        { name: "الشهادات المصدرة", href: "/admin/courses/certificates", icon: Award }
+        { name: "الشهادات المصدرة", href: "/admin/courses/certificates", icon: Award },
+        { name: "مكتبة الوسائط", href: "/admin/media", icon: Video }
       ]
     },
     {
       title: "الإدارة والأمن",
       items: [
+        { name: "نظام البريد الإلكتروني", href: "/admin/email-system", icon: Mail },
         { name: "التقييمات", href: "/admin/reviews", icon: Star },
         { name: "الإعدادات العامة", href: "/admin/settings", icon: Settings },
         { name: "حماية وأمن النظام", href: "/admin/settings/security", icon: ShieldCheck }
