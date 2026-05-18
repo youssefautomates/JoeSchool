@@ -18,10 +18,16 @@ export function Navbar() {
   const isHomePage = pathname === "/";
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20);
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+      if (isHomePage && window.scrollY < 200) {
+        setActiveSection("");
+      }
+    };
     window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [isHomePage]);
 
   // Active section tracker (only on home page)
   useEffect(() => {
@@ -221,7 +227,7 @@ export function Navbar() {
                     onClick={handleHomeClick}
                     className={cn(
                       "p-3 rounded-xl hover:bg-white/5 font-cairo text-zinc-300 hover:text-white transition-all flex items-center justify-between group",
-                      isHomePage ? "text-white bg-white/5" : ""
+                      isHomePage && activeSection === "" ? "text-white bg-white/5" : ""
                     )}
                   >
                     <span className="flex items-center gap-2">
