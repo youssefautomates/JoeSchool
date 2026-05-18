@@ -21,6 +21,7 @@ import { ReviewsMarquee } from "@/components/ReviewsMarquee";
 import { FAQSection } from "@/components/FAQSection";
 import { ProductMedia } from "@/components/ProductMedia";
 import { getCoursesList, type LmsCourse } from "@/lib/coursesDb";
+import { supabaseClient } from "@/lib/supabaseClient";
 
 // ── Helper: Unpack Product Media Tags ───────────────────────────────────────────────
 function unpackProduct(p: any) {
@@ -58,6 +59,9 @@ export default function Home() {
   // Active Category Tabs
   const [activeCourseCategory, setActiveCourseCategory] = useState("الكل");
   const [activeProductCategory, setActiveProductCategory] = useState("الكل");
+  
+  // Dynamic categories from Supabase
+  const [dynamicCourseCategories, setDynamicCourseCategories] = useState<string[]>([]);
 
   // Fetch initial data
   useEffect(() => {
@@ -86,15 +90,26 @@ export default function Home() {
       })
       .catch(() => {});
 
+    // Fetch course categories from Supabase (dynamic)
+    supabaseClient
+      .from("course_categories")
+      .select("name")
+      .order("order_index", { ascending: true })
+      .then(({ data }) => {
+        if (!cancelled && data && data.length > 0) {
+          setDynamicCourseCategories(data.map((c: {name: string}) => c.name));
+        }
+      });
+
     return () => { cancelled = true; };
   }, []);
 
-  // Course categories filter list
+  // Course categories filter list — dynamic from Supabase, fallback to static
   const courseCategories = [
     "الكل",
-    "دورات الأتمتة",
-    "دورات صناعة المحتوى",
-    "الدورات المجانية"
+    ...(dynamicCourseCategories.length > 0
+      ? dynamicCourseCategories
+      : ["دورات الأتمتة", "دورات صناعة المحتوى", "الدورات المجانية"])
   ];
 
   // Digital product categories filter list
@@ -149,12 +164,17 @@ export default function Home() {
   const filteredCourses = coursesList.filter((course) => {
     if (activeCourseCategory === "الكل") return true;
     if (activeCourseCategory === "الدورات المجانية") return course.is_free || course.price === 0;
-    
-    let dbCategory = activeCourseCategory;
-    if (activeCourseCategory === "دورات الأتمتة") dbCategory = "الأتمتة";
-    if (activeCourseCategory === "دورات صناعة المحتوى") dbCategory = "صناعة المحتوى";
-    
-    return course.category === dbCategory || course.category === activeCourseCategory;
+    // Direct match against DB category field
+    if (course.category === activeCourseCategory) return true;
+    // Legacy mappings for older DB values
+    const legacyMap: Record<string, string[]> = {
+      "دورات الأتمتة": ["الأتمتة", "أتمتة"],
+      "دورات صناعة المحتوى": ["صناعة المحتوى", "المحتوى"],
+      "دورات الذكاء الاصطناعي": ["الذكاء الاصطناعي", "AI"],
+      "دورات التسويق": ["التسويق", "marketing"],
+    };
+    const aliases = legacyMap[activeCourseCategory] || [];
+    return aliases.some(alias => course.category === alias || course.category?.toLowerCase().includes(alias.toLowerCase()));
   });
 
   const filteredProducts = products.filter((product) => {

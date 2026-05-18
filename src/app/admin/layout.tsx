@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import {
   LayoutDashboard, Package, ShoppingCart, Settings, LogOut,
   Search, Bell, Sparkles, Target, Star, BarChart3, ShieldAlert,
-  Flame, Globe, ShieldCheck, BookOpen, Video, Users, Award, Mail
+  Flame, Globe, ShieldCheck, BookOpen, Video, Users, Award, Mail, LayoutGrid
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { motion } from "framer-motion";
@@ -36,7 +36,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     {
       title: "نظام التعليم والمساقات",
       items: [
-        { name: "إدارة المساقات", href: "/admin/courses", icon: BookOpen },
+        { name: "إدارة الدورات", href: "/admin/courses", icon: BookOpen },
+        { name: "أقسام الدورات", href: "/admin/categories", icon: LayoutGrid },
         { name: "إدارة قائمة الطلاب", href: "/admin/courses/students", icon: Users },
         { name: "الشهادات المصدرة", href: "/admin/courses/certificates", icon: Award },
         { name: "مكتبة الوسائط", href: "/admin/media", icon: Video }

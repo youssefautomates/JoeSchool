@@ -7,12 +7,14 @@ import { Sparkles, BookOpen, Clock, Zap, ArrowLeft, Star, PlayCircle, Loader2 } 
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { getCoursesList, type LmsCourse } from "@/lib/coursesDb";
+import { supabaseClient } from "@/lib/supabaseClient";
 import { cn } from "@/lib/utils";
 
 export default function CoursesPage() {
   const [coursesList, setCoursesList] = useState<LmsCourse[]>([]);
   const [activeCategory, setActiveCategory] = useState("الكل");
   const [isLoading, setIsLoading] = useState(true);
+  const [dynamicCategories, setDynamicCategories] = useState<string[]>([]);
 
   useEffect(() => {
     getCoursesList().then((data) => {
@@ -20,24 +22,37 @@ export default function CoursesPage() {
       setCoursesList(data.filter(c => c.status === "published"));
       setIsLoading(false);
     });
+    // Load dynamic categories from Supabase
+    supabaseClient
+      .from("course_categories")
+      .select("name")
+      .order("order_index", { ascending: true })
+      .then(({ data }) => {
+        if (data && data.length > 0) {
+          setDynamicCategories(data.map((c: { name: string }) => c.name));
+        }
+      });
   }, []);
 
   const courseCategories = [
     "الكل",
-    "دورات الأتمتة",
-    "دورات صناعة المحتوى",
-    "الدورات المجانية"
+    ...(dynamicCategories.length > 0
+      ? dynamicCategories
+      : ["دورات الأتمتة", "دورات صناعة المحتوى", "الدورات المجانية"])
   ];
 
   const filteredCourses = coursesList.filter((course) => {
     if (activeCategory === "الكل") return true;
     if (activeCategory === "الدورات المجانية") return course.is_free || course.price === 0;
-    
-    let dbCategory = activeCategory;
-    if (activeCategory === "دورات الأتمتة") dbCategory = "الأتمتة";
-    if (activeCategory === "دورات صناعة المحتوى") dbCategory = "صناعة المحتوى";
-    
-    return course.category === dbCategory || course.category === activeCategory;
+    if (course.category === activeCategory) return true;
+    const legacyMap: Record<string, string[]> = {
+      "دورات الأتمتة": ["الأتمتة", "أتمتة"],
+      "دورات صناعة المحتوى": ["صناعة المحتوى", "المحتوى"],
+      "دورات الذكاء الاصطناعي": ["الذكاء الاصطناعي", "AI"],
+      "دورات التسويق": ["التسويق", "marketing"],
+    };
+    const aliases = legacyMap[activeCategory] || [];
+    return aliases.some(alias => course.category === alias || course.category?.toLowerCase().includes(alias.toLowerCase()));
   });
 
   return (
