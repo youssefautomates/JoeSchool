@@ -24,16 +24,20 @@ export default function CoursesPage() {
 
   const courseCategories = [
     "الكل",
-    "الأتمتة",
-    "الذكاء الاصطناعي",
-    "صناعة المحتوى",
+    "دورات الأتمتة",
+    "دورات صناعة المحتوى",
     "الدورات المجانية"
   ];
 
   const filteredCourses = coursesList.filter((course) => {
     if (activeCategory === "الكل") return true;
     if (activeCategory === "الدورات المجانية") return course.is_free || course.price === 0;
-    return course.category === activeCategory;
+    
+    let dbCategory = activeCategory;
+    if (activeCategory === "دورات الأتمتة") dbCategory = "الأتمتة";
+    if (activeCategory === "دورات صناعة المحتوى") dbCategory = "صناعة المحتوى";
+    
+    return course.category === dbCategory || course.category === activeCategory;
   });
 
   return (
@@ -67,7 +71,7 @@ export default function CoursesPage() {
             >
               انطلق نحو الاحتراف مع <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ff0f53] to-[#ff00b3]">
-                أرقى مساقات الأتمتة والذكاء الاصطناعي
+                أرقى دورات الأتمتة والذكاء الاصطناعي
               </span>
             </motion.h1>
 

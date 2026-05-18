@@ -92,10 +92,8 @@ export default function Home() {
   // Course categories filter list
   const courseCategories = [
     "الكل",
-    "الأتمتة",
-    "الذكاء الاصطناعي",
-    "صناعة المحتوى",
-    "التسويق",
+    "دورات الأتمتة",
+    "دورات صناعة المحتوى",
     "الدورات المجانية"
   ];
 
@@ -151,7 +149,12 @@ export default function Home() {
   const filteredCourses = coursesList.filter((course) => {
     if (activeCourseCategory === "الكل") return true;
     if (activeCourseCategory === "الدورات المجانية") return course.is_free || course.price === 0;
-    return course.category === activeCourseCategory;
+    
+    let dbCategory = activeCourseCategory;
+    if (activeCourseCategory === "دورات الأتمتة") dbCategory = "الأتمتة";
+    if (activeCourseCategory === "دورات صناعة المحتوى") dbCategory = "صناعة المحتوى";
+    
+    return course.category === dbCategory || course.category === activeCourseCategory;
   });
 
   const filteredProducts = products.filter((product) => {
@@ -306,7 +309,7 @@ export default function Home() {
                 <BookOpen className="w-3.5 h-3.5 md:w-4 md:h-4 text-rose-500" />
                 الأكاديمية التعليمية المتميزة
               </motion.div>
-              <h2 className="text-2xl md:text-5xl font-alexandria font-black text-white mb-4 md:mb-6 tracking-tight">مساقات الأتمتة والذكاء الاصطناعي</h2>
+              <h2 className="text-2xl md:text-5xl font-alexandria font-black text-white mb-4 md:mb-6 tracking-tight">دورات الأتمتة والذكاء الاصطناعي</h2>
               <p className="text-zinc-400 font-cairo text-sm md:text-lg max-w-2xl mx-auto leading-relaxed">
                 انتقل من المبتدئ إلى الاحتراف المطلق ببناء وكلاء ذكاء اصطناعي وتدفقات عمل متكاملة لحل مشاكل عملك وعملائك.
               </p>
