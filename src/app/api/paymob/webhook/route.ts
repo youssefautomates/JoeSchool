@@ -1,9 +1,7 @@
 import { NextResponse } from "next/server";
-import { Resend } from "resend";
 import { createClient } from "@supabase/supabase-js";
 import { verifyPaymobHmac } from "@/lib/paymob";
-
-const resend = new Resend(process.env.RESEND_API_KEY);
+import { sendOrderEmail } from "@/lib/email/sendOrderEmail";
 
 // Server-side admin client to bypass RLS for payment fulfillment
 const supabaseAdmin = createClient(
@@ -128,224 +126,110 @@ export async function POST(request: Request) {
     // ── 4. Process Status & Deliveries ────────────────────────────
     if (isSuccess) {
       if (orderToUpdate) {
-        // If order already marked completed, avoid redundant dispatches
-        if (orderToUpdate.status === "completed") {
-          console.log(`[PAYMOB_WEBHOOK][${requestId}] ⚠️ Order ${orderToUpdate.id} is already completed. Skipping delivery logic.`);
-          return NextResponse.json({ success: true, message: "Order already fulfilled" });
-        }
-
-        console.log(`[PAYMOB_WEBHOOK][${requestId}] 🔄 Completing order ${orderToUpdate.id} in database...`);
-        
-        const updateData: any = { 
-          status: "completed"
-        };
-        
-        // Keep database payment_id aligned with Paymob Order ID
-        if (!orderToUpdate.payment_id || orderToUpdate.payment_id === "PENDING" || orderToUpdate.payment_id.startsWith("pi_")) {
-          updateData.payment_id = paymobOrderId;
-        }
-
-        const { error: updErr } = await supabaseAdmin
-          .from("orders")
-          .update(updateData)
-          .eq("id", orderToUpdate.id);
-          
-        if (updErr) {
-          console.error(`[PAYMOB_WEBHOOK][${requestId}] ❌ Database update error:`, updErr);
-          throw updErr;
-        }
-        
-        console.log(`[PAYMOB_WEBHOOK][${requestId}] ✅ Order status updated successfully`);
-
-        // Fetch Product Info for exact Category and Sales increment
-        const { data: product } = await supabaseAdmin
-          .from("products")
-          .select("title, sales, category, file_url")
-          .eq("id", orderToUpdate.product_id)
-          .single();
-
-        if (product) {
-          // Increment sales count
-          await supabaseAdmin
-            .from("products")
-            .update({ sales: (product.sales || 0) + 1 })
-            .eq("id", orderToUpdate.product_id);
-          console.log(`[PAYMOB_WEBHOOK][${requestId}] 📈 Sales incremented for product: ${product.title}`);
-        }
-
-        // Determine if this is an LMS Course purchase
-        const isCourse = 
-          product?.category === "courses" || 
-          product?.category === "الدورات التعليمية" || 
-          product?.category === "الدورات التدريبية" ||
-          orderToUpdate.product_title?.includes("دورة") || 
-          orderToUpdate.product_title?.includes("كورس") || 
-          orderToUpdate.product_title?.includes("مساق");
-
+        // Resolve customer billing details
         const customerEmail = transaction.payment_key_claims?.billing_data?.email || orderToUpdate.customer_email;
         const customerName = transaction.payment_key_claims?.billing_data?.first_name || orderToUpdate.customer_name || "عميلنا العزيز";
-        const amountPaid = (transaction.amount_cents / 100).toFixed(2);
         const currency = transaction.currency || "EGP";
-        const productTitle = product?.title || orderToUpdate.product_title;
 
-        // ── 5. Dynamic Auto-Enrollment (LMS) ─────────────────────────
-        if (isCourse) {
-          console.log(`[PAYMOB_WEBHOOK][${requestId}] 🎓 Auto-enrolling student in LMS Course...`);
-          try {
-            const { getCoursesList, enrollUser } = await import("@/lib/coursesDb");
-            const coursesList = await getCoursesList();
-            
-            // Match course by title
-            const matchedCourse = coursesList.find(c => 
-              c.title.toLowerCase().includes(productTitle.toLowerCase()) || 
-              productTitle.toLowerCase().includes(c.title.toLowerCase())
-            ) || coursesList[0];
+        // Query all sibling orders sharing the same payment_id (Multi-item cart purchase support)
+        const { data: siblingOrders } = await supabaseAdmin
+          .from("orders")
+          .select("*")
+          .eq("payment_id", orderToUpdate.payment_id || paymobOrderId);
 
-            if (matchedCourse) {
-              let userId = orderToUpdate.customer_id;
-              if (!userId || userId === "anonymous") {
-                const { data: profile } = await supabaseAdmin
-                  .from("profiles")
-                  .select("id")
-                  .eq("email", customerEmail)
-                  .maybeSingle();
-                
-                userId = profile?.id || "usr-student-" + Math.random().toString(36).substring(2, 11);
+        const allOrders = siblingOrders && siblingOrders.length > 0 ? siblingOrders : [orderToUpdate];
+        console.log(`[PAYMOB_WEBHOOK][${requestId}] Found ${allOrders.length} orders associated with this transaction.`);
+
+        // Process status changes, LMS enrollments, and sales increments for all matching orders
+        for (const ord of allOrders) {
+          if (ord.status === "completed") {
+            console.log(`[PAYMOB_WEBHOOK][${requestId}] ⚠️ Order ${ord.id} is already completed. Skipping status update.`);
+            continue;
+          }
+
+          console.log(`[PAYMOB_WEBHOOK][${requestId}] 🔄 Completing order ${ord.id} in database...`);
+          const { error: updErr } = await supabaseAdmin
+            .from("orders")
+            .update({ status: "completed", payment_id: paymobOrderId })
+            .eq("id", ord.id);
+
+          if (updErr) {
+            console.error(`[PAYMOB_WEBHOOK][${requestId}] ❌ Database update error for ${ord.id}:`, updErr);
+            continue;
+          }
+
+          // Fetch product metadata for sales count increment and category checks
+          const { data: product } = await supabaseAdmin
+            .from("products")
+            .select("title, sales, category")
+            .eq("id", ord.product_id)
+            .single();
+
+          if (product) {
+            // Increment sales count
+            await supabaseAdmin
+              .from("products")
+              .update({ sales: (product.sales || 0) + 1 })
+              .eq("id", ord.product_id);
+            console.log(`[PAYMOB_WEBHOOK][${requestId}] 📈 Sales incremented for product: ${product.title}`);
+
+            // LMS Course Auto-Enrollment
+            const isCourse = 
+              product.category === "courses" || 
+              product.category === "الدورات التعليمية" || 
+              product.category === "الدورات التدريبية" ||
+              ord.product_title?.includes("دورة") || 
+              ord.product_title?.includes("كورس");
+
+            if (isCourse) {
+              console.log(`[PAYMOB_WEBHOOK][${requestId}] 🎓 Auto-enrolling student in LMS Course: ${product.title}...`);
+              try {
+                const { getCoursesList, enrollUser } = await import("@/lib/coursesDb");
+                const coursesList = await getCoursesList();
+                const matchedCourse = coursesList.find(c => 
+                  c.title.toLowerCase().includes(ord.product_title?.toLowerCase()) || 
+                  ord.product_title?.toLowerCase().includes(c.title.toLowerCase())
+                ) || coursesList[0];
+
+                if (matchedCourse) {
+                  let userId = ord.customer_id;
+                  if (!userId || userId === "anonymous") {
+                    const { data: profile } = await supabaseAdmin
+                      .from("profiles")
+                      .select("id")
+                      .eq("email", customerEmail)
+                      .maybeSingle();
+                    userId = profile?.id || "usr-student-" + Math.random().toString(36).substring(2, 11);
+                  }
+                  
+                  console.log(`[PAYMOB_WEBHOOK][${requestId}] 🎓 Enrolling user ${userId} in course: ${matchedCourse.title}`);
+                  await enrollUser(userId, matchedCourse.id, {
+                    email: customerEmail,
+                    name: customerName
+                  });
+                  console.log(`[PAYMOB_WEBHOOK][${requestId}] 🎓 Auto-enrollment successful`);
+                }
+              } catch (enrollErr) {
+                console.error(`[PAYMOB_WEBHOOK][${requestId}] ❌ Auto-enrollment error:`, enrollErr);
               }
-
-              console.log(`[PAYMOB_WEBHOOK][${requestId}] 🎓 Enrolling user ${userId} in course: ${matchedCourse.title}`);
-              await enrollUser(userId, matchedCourse.id, {
-                email: customerEmail,
-                name: customerName
-              });
-              console.log(`[PAYMOB_WEBHOOK][${requestId}] 🎓 Student successfully enrolled!`);
             }
-          } catch (enrollErr) {
-            console.error(`[PAYMOB_WEBHOOK][${requestId}] ❌ Auto-enrollment error:`, enrollErr);
           }
         }
 
-        // ── 6. Send Premium Email (Fulfillment) ──────────────────────
-        const downloadLink = `${process.env.NEXT_PUBLIC_APP_URL}/api/download?token=${orderToUpdate.id}`;
-        const dashboardLink = `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`;
-
-        let productBlock = "";
-        if (isCourse) {
-          productBlock = `
-          <tr>
-            <td style="padding: 12px 0;">
-              <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #1a1a2e; border-radius: 12px; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.05);">
-                <tr>
-                  <td style="padding: 24px;">
-                    <table width="100%" cellpadding="0" cellspacing="0">
-                      <tr>
-                        <td>
-                          <p style="margin: 0 0 4px 0; font-size: 11px; color: #ff1a6d; text-transform: uppercase; letter-spacing: 2px; font-weight: 700; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">دورة تدريبية معتمدة</p>
-                          <h3 style="margin: 0 0 16px 0; font-size: 18px; color: #ffffff; font-weight: 700; font-family: 'Segoe UI', sans-serif;">${productTitle}</h3>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <table cellpadding="0" cellspacing="0">
-                            <tr>
-                              <td style="background: linear-gradient(135deg, #D6004B, #ff1a6d); border-radius: 8px;">
-                                <a href="${dashboardLink}" style="display: inline-block; padding: 12px 32px; color: #ffffff; text-decoration: none; font-weight: 700; font-size: 14px; letter-spacing: 0.5px;">🚀 ابدأ التعلم الآن</a>
-                              </td>
-                            </tr>
-                          </table>
-                        </td>
-                      </tr>
-                    </table>
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-          `;
-        } else {
-          productBlock = `
-          <tr>
-            <td style="padding: 12px 0;">
-              <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #1a1a2e; border-radius: 12px; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.05);">
-                <tr>
-                  <td style="padding: 24px;">
-                    <table width="100%" cellpadding="0" cellspacing="0">
-                      <tr>
-                        <td>
-                          <p style="margin: 0 0 4px 0; font-size: 11px; color: #4ade80; text-transform: uppercase; letter-spacing: 2px; font-weight: 700; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">منتج رقمي للتحميل</p>
-                          <h3 style="margin: 0 0 16px 0; font-size: 18px; color: #ffffff; font-weight: 700; font-family: 'Segoe UI', sans-serif;">${productTitle}</h3>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <table cellpadding="0" cellspacing="0">
-                            <tr>
-                              <td style="background: linear-gradient(135deg, #10b981, #059669); border-radius: 8px;">
-                                <a href="${downloadLink}" style="display: inline-block; padding: 12px 32px; color: #ffffff; text-decoration: none; font-weight: 700; font-size: 14px; letter-spacing: 0.5px;">⬇ تحميل الملف الرقمي</a>
-                              </td>
-                            </tr>
-                          </table>
-                        </td>
-                      </tr>
-                    </table>
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-          `;
+        // ── 5. Safe Decoupled Email Trigger (Resend Service) ─────────
+        try {
+          console.log(`[PAYMOB_WEBHOOK][${requestId}] 📧 Calling centralized sendOrderEmail...`);
+          const emailResult = await sendOrderEmail(allOrders, customerEmail, customerName, currency);
+          
+          if (emailResult.success) {
+            console.log(`[PAYMOB_WEBHOOK][${requestId}] ✅ Order delivery email successfully sent`);
+          } else {
+            console.error(`[PAYMOB_WEBHOOK][${requestId}] ⚠️ Order delivery email failed:`, emailResult.error);
+          }
+        } catch (emailErr: any) {
+          console.error(`[PAYMOB_WEBHOOK][${requestId}] ❌ Safe catch: Exception during email delivery:`, emailErr.message);
         }
 
-        const emailHtml = `
-<!DOCTYPE html>
-<html dir="rtl" lang="ar">
-<head>
-  <meta charset="utf-8">
-  <title>تهانينا على عملية الشراء! 🎉</title>
-</head>
-<body style="margin:0;padding:0;background-color:#050508;direction:rtl;font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0">
-    <tr>
-      <td align="center" style="padding:40px 16px;">
-        <table width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background-color:#0b0b12;border-radius:24px;overflow:hidden;border: 1px solid rgba(255, 255, 255, 0.05);box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);">
-          <tr>
-            <td style="padding:40px 32px;text-align:center;background:linear-gradient(180deg,#16162e 0%,#0b0b12 100%);">
-              <h1 style="margin:0;color:#ffffff;font-size:24px;font-weight: 800;">أهلاً ${customerName}! 🎉</h1>
-              <p style="color:#a1a1aa;margin-top:10px;font-size:14px;">تم تأكيد دفعك بنجاح. ملفاتك وكورساتك أصبحت جاهزة لك فوراً.</p>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding:32px;">
-              <table width="100%" cellpadding="0" cellspacing="0">${productBlock}</table>
-              <div style="margin-top:32px;padding:20px;background-color:#141424;border-radius:12px;border: 1px solid rgba(255, 255, 255, 0.03);">
-                <p style="color:#71717a;font-size:12px;text-transform:uppercase;margin:0 0 8px 0;font-weight: bold;letter-spacing: 1px;">ملخص الطلب</p>
-                <p style="color:#ffffff;font-size:13px;margin:4px 0;">رقم المعاملة: #${txnId}</p>
-                <p style="color:#4ade80;font-size:13px;font-weight:700;margin:4px 0;">المبلغ المدفوع: ${amountPaid} ${currency}</p>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding:24px;text-align:center;background-color:#06060c;border-top: 1px solid rgba(255, 255, 255, 0.03);">
-              <p style="color:#52525b;font-size:11px;margin:0;">&copy; ${new Date().getFullYear()} Youssef Automates. جميع الحقوق محفوظة.</p>
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
-  </table>
-</body>
-</html>`.trim();
-
-        if (customerEmail) {
-          console.log(`[PAYMOB_WEBHOOK][${requestId}] 📧 Sending delivery email to ${customerEmail}...`);
-          await resend.emails.send({
-            from: "Youssef Automates <delivery@youssefautomates.com>",
-            to: customerEmail,
-            subject: `🎉 طلبك جاهز! ${productTitle} - Youssef Automates`,
-            html: emailHtml,
-          });
-          console.log(`[PAYMOB_WEBHOOK][${requestId}] 📧 Email successfully dispatched`);
-        }
       } else {
         console.warn(`[PAYMOB_WEBHOOK][${requestId}] ⚠️ Success transaction received but no matching order found in Supabase.`);
       }

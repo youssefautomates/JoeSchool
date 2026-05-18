@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
-import { Resend } from "resend";
 import { createClient } from "@supabase/supabase-js";
-
-const resend = new Resend(process.env.RESEND_API_KEY);
+import { sendOrderEmail } from "@/lib/email/sendOrderEmail";
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL || "",
@@ -16,55 +14,127 @@ const supabaseAdmin = createClient(
  * POST /api/paymob/verify-and-deliver
  * 
  * Verifies payment directly with Paymob API and delivers the product.
- * Used as a fallback or immediate fulfillment on the success page.
+ * Fully supports cart purchases, single item orders, direct UUID lookups,
+ * and numeric Paymob Order ID lookups.
+ * Splits mixed purchases into separate dedicated transactional emails.
  */
 export async function POST(req: Request) {
   const requestId = Math.random().toString(36).substring(7);
   console.log(`[VERIFY][${requestId}] Verifying transaction...`);
 
   try {
-    const { orderId } = await req.json();
+    const { orderId, forceResend } = await req.json();
     if (!orderId) {
       return NextResponse.json({ error: "Missing orderId" }, { status: 400 });
     }
 
-    console.log(`[VERIFY][${requestId}] Internal Order ID: ${orderId}`);
+    console.log(`[VERIFY][${requestId}] Lookup ID: ${orderId} | ForceResend: ${forceResend}`);
 
-    // 1. Fetch order from Supabase
-    const { data: orders, error: orderError } = await supabaseAdmin
-      .from("orders")
-      .select("*")
-      .eq("id", orderId);
+    // ── 1. Resolve Orders by internal UUID or payment_id ────────────
+    let orders: any[] = [];
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(orderId);
 
-    if (orderError || !orders || orders.length === 0) {
+    if (isUuid) {
+      // Direct query by UUID
+      const { data } = await supabaseAdmin.from("orders").select("*").eq("id", orderId);
+      orders = data || [];
+    } else {
+      // Query by Paymob payment_id
+      const { data } = await supabaseAdmin.from("orders").select("*").eq("payment_id", String(orderId));
+      orders = data || [];
+    }
+
+    if (orders.length === 0) {
       console.error(`[VERIFY][${requestId}] ❌ Order not found in DB`);
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
-    const order = orders[0];
+    // If multiple orders share the same payment_id (cart purchase), resolve all
+    const baseOrder = orders[0];
+    const customerEmail = baseOrder.customer_email;
+    const customerName = baseOrder.customer_name || "عميلنا العزيز";
+    const currency = baseOrder.currency || "EGP";
 
-    // Check if already completed
-    if (order.status === "completed") {
-      console.log(`[VERIFY][${requestId}] ✅ Order already marked as completed. Skipping verification.`);
+    // ── 2. Force Resend Email Bypass ──────────────────────────────
+    if (forceResend) {
+      console.log(`[VERIFY][${requestId}] 📧 Force resending premium delivery emails...`);
+      
+      const courseOrders: any[] = [];
+      const digitalOrders: any[] = [];
+
+      for (const order of orders) {
+        const { data: product } = await supabaseAdmin
+          .from("products")
+          .select("id, category")
+          .eq("id", order.product_id)
+          .single();
+
+        const isCourse = 
+          product?.category === "courses" || 
+          product?.category === "الدورات التعليمية" || 
+          product?.category === "الدورات التدريبية" ||
+          order.product_title?.includes("دورة") || 
+          order.product_title?.includes("كورس");
+
+        if (isCourse) {
+          courseOrders.push(order);
+        } else {
+          digitalOrders.push(order);
+        }
+      }
+
+      let courseSuccess = true;
+      let digitalSuccess = true;
+
+      if (courseOrders.length > 0) {
+        const res = await sendOrderEmail(courseOrders, customerEmail, customerName, currency);
+        courseSuccess = res.success;
+      }
+      if (digitalOrders.length > 0) {
+        const res = await sendOrderEmail(digitalOrders, customerEmail, customerName, currency);
+        digitalSuccess = res.success;
+      }
+
+      if (courseSuccess && digitalSuccess) {
+        return NextResponse.json({ success: true, message: "Emails resent successfully", alreadyDelivered: true });
+      } else {
+        return NextResponse.json({ success: false, error: "Failed to resend some emails" }, { status: 500 });
+      }
+    }
+
+    // ── 3. Check if all matched orders are already completed ───────
+    const allCompleted = orders.every(o => o.status === "completed");
+    if (allCompleted) {
+      console.log(`[VERIFY][${requestId}] ✅ All matching orders already marked as completed. Skipping verification.`);
+      
+      // Resolve details for success page representation
+      const resolvedProducts = await resolvePurchasedProducts(orders);
+      const firstProduct = resolvedProducts[0] || {};
+
       return NextResponse.json({ 
         success: true, 
         alreadyDelivered: true,
-        productTitle: order.product_title,
-        customerName: order.customer_name,
-        customerEmail: order.customer_email,
-        orderValue: order.amount,
-        currency: order.currency,
-        downloadToken: order.id
+        productTitle: resolvedProducts.map(p => p.title).join(" + "),
+        customerName,
+        customerEmail,
+        orderValue: orders.reduce((sum, o) => sum + (o.amount || 0), 0),
+        currency,
+        downloadToken: baseOrder.id,
+        downloadUrl: firstProduct.downloadUrl || null,
+        category: firstProduct.category || null,
+        tags: firstProduct.tags || null,
+        products: resolvedProducts
       });
     }
 
-    const paymobPaymentId = order.payment_id;
+    // ── 4. Verify Payment Status directly with Paymob API ───────────
+    const paymobPaymentId = baseOrder.payment_id;
     if (!paymobPaymentId || paymobPaymentId === "PENDING") {
       console.warn(`[VERIFY][${requestId}] ⚠️ Payment not initiated or pending in DB`);
       return NextResponse.json({ error: "Payment not initiated yet", status: "pending" }, { status: 200 });
     }
 
-    // 2. Authenticate with Paymob
+    // Authenticate with Paymob
     const apiKey = process.env.PAYMOB_API_KEY;
     if (!apiKey) throw new Error("PAYMOB_API_KEY is missing");
 
@@ -76,7 +146,7 @@ export async function POST(req: Request) {
     const authData = await authRes.json();
     const authToken = authData.token;
 
-    // 3. Fetch order status from Paymob
+    // Fetch order status from Paymob
     console.log(`[VERIFY][${requestId}] 🔍 Checking Paymob Order: ${paymobPaymentId}...`);
     const txnRes = await fetch(`https://accept.paymob.com/api/ecommerce/orders/${paymobPaymentId}`, {
       method: "GET",
@@ -126,132 +196,255 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, status: "pending", message: "Payment not confirmed" });
     }
 
-    // 4. Update order in Supabase
-    console.log(`[VERIFY][${requestId}] 🔄 Updating DB status to completed...`);
-    const { error: updateError } = await supabaseAdmin
-      .from("orders")
-      .update({ 
-        status: "completed"
-      })
-      .eq("id", orderId);
+    // ── 5. Fulfill and Complete All Matching Orders in DB ──────────
+    console.log(`[VERIFY][${requestId}] 🔄 Updating all matching orders to completed...`);
+    
+    for (const order of orders) {
+      const { error: updateError } = await supabaseAdmin
+        .from("orders")
+        .update({ status: "completed" })
+        .eq("id", order.id);
 
-    if (updateError) {
-      console.error(`[VERIFY][${requestId}] ❌ Update Error:`, updateError);
-    } else {
-      console.log(`[VERIFY][${requestId}] ✅ DB Updated`);
-    }
+      if (updateError) {
+        console.error(`[VERIFY][${requestId}] ❌ Update Error for order ${order.id}:`, updateError);
+      } else {
+        console.log(`[VERIFY][${requestId}] ✅ Order ${order.id} status updated to completed`);
+      }
 
-    // 5. Update Product Sales
-    const { data: product } = await supabaseAdmin
-      .from("products")
-      .select("title, sales, category, tags, file_url")
-      .eq("id", order.product_id)
-      .single();
-
-    if (product) {
-      await supabaseAdmin
+      // Fetch Product Info for exact Category, tags, and Sales increment
+      const { data: product } = await supabaseAdmin
         .from("products")
-        .update({ sales: (product.sales || 0) + 1 })
-        .eq("id", order.product_id);
-      console.log(`[VERIFY][${requestId}] 📈 Product sales incremented`);
-      
-      // Auto-enroll customer in LMS Course if purchased
-      const isCourse = 
-        product.category === "courses" || 
-        product.category === "الدورات التعليمية" || 
-        product.category === "الدورات التدريبية" ||
-        order.product_title?.includes("دورة") || 
-        order.product_title?.includes("كورس");
+        .select("id, title, sales, category, tags")
+        .eq("id", order.product_id)
+        .single();
 
-      if (isCourse) {
-        console.log(`[VERIFY][${requestId}] 🎓 Detected Course Purchase! Proceeding to auto-enroll...`);
-        try {
-          const { getCoursesList, enrollUser } = await import("@/lib/coursesDb");
-          const coursesList = await getCoursesList();
-          
-          // Match course by title or category
-          const matchedCourse = coursesList.find(c => 
-            c.title.toLowerCase().includes(order.product_title?.toLowerCase()) || 
-            order.product_title?.toLowerCase().includes(c.title.toLowerCase())
-          ) || coursesList[0];
+      if (product) {
+        // Increment sales count
+        await supabaseAdmin
+          .from("products")
+          .update({ sales: (product.sales || 0) + 1 })
+          .eq("id", product.id);
+        console.log(`[VERIFY][${requestId}] 📈 Sales incremented for product: ${product.title}`);
 
-          if (matchedCourse) {
-            // Retrieve customer's Supabase User ID from profiles
-            let userId = order.customer_id;
-            if (!userId || userId === "anonymous") {
-              const { data: profile } = await supabaseAdmin
-                .from("profiles")
-                .select("id")
-                .eq("email", order.customer_email)
-                .maybeSingle();
-              
-              userId = profile?.id || "usr-student-" + Math.random().toString(36).substring(2, 11);
+        // LMS Auto-enrollment logic
+        const isCourse = 
+          product.category === "courses" || 
+          product.category === "الدورات التعليمية" || 
+          product.category === "الدورات التدريبية" ||
+          order.product_title?.includes("دورة") || 
+          order.product_title?.includes("كورس");
+
+        if (isCourse) {
+          console.log(`[VERIFY][${requestId}] 🎓 Dynamic Auto-enrollment triggered...`);
+          try {
+            const { getCoursesList, enrollUser } = await import("@/lib/coursesDb");
+            const coursesList = await getCoursesList();
+            
+            const matchedCourse = coursesList.find(c => 
+              c.title.toLowerCase().includes(order.product_title?.toLowerCase()) || 
+              order.product_title?.toLowerCase().includes(c.title.toLowerCase())
+            ) || coursesList[0];
+
+            if (matchedCourse) {
+              let userId = order.customer_id;
+              if (!userId || userId === "anonymous") {
+                const { data: profile } = await supabaseAdmin
+                  .from("profiles")
+                  .select("id")
+                  .eq("email", customerEmail)
+                  .maybeSingle();
+                
+                userId = profile?.id || "usr-student-" + Math.random().toString(36).substring(2, 11);
+              }
+
+              console.log(`[VERIFY][${requestId}] 🎓 Enrolling user ${userId} in course: ${matchedCourse.title}`);
+              await enrollUser(userId, matchedCourse.id, {
+                email: customerEmail,
+                name: customerName
+              });
+              console.log(`[VERIFY][${requestId}] 🎓 Auto-enrollment completed successfully`);
             }
-
-            console.log(`[VERIFY][${requestId}] 🎓 Auto-enrolling user ${userId} in course: ${matchedCourse.title}`);
-            await enrollUser(userId, matchedCourse.id, {
-              email: order.customer_email,
-              name: order.customer_name
-            });
+          } catch (enrollErr) {
+            console.error(`[VERIFY][${requestId}] ❌ Auto-enrollment error:`, enrollErr);
           }
-        } catch (enrollErr) {
-          console.error(`[VERIFY][${requestId}] ❌ Auto-enrollment error:`, enrollErr);
         }
       }
     }
 
-    // 6. Build and send email (Fallback if webhook failed or is slow)
-    const downloadToken = order.id;
-    const downloadLink = `${process.env.NEXT_PUBLIC_APP_URL}/api/download?token=${downloadToken}`;
-    const amountPaid = (amountCents / 100).toFixed(2);
-
-    const emailHtml = `
-<!DOCTYPE html>
-<html dir="rtl" lang="ar">
-<head><meta charset="utf-8"></head>
-<body style="margin:0;padding:0;background-color:#050505;color:#ffffff;direction:rtl;">
-  <div style="max-width:600px;margin:20px auto;background-color:#0a0a0a;border-radius:20px;padding:40px;border:1px solid #1a1a1a;">
-    <h1 style="text-align:center;">مبروك! 🎉</h1>
-    <p style="text-align:center;color:#a1a1aa;">تم تأكيد طلبك للمنتج: <b>${order.product_title}</b></p>
-    <div style="margin:30px 0;text-align:center;">
-      <a href="${downloadLink}" style="background-color:#ef0055;color:#fff;padding:15px 30px;border-radius:10px;text-decoration:none;font-weight:bold;display:inline-block;">تحميل المنتج الآن ⬇</a>
-    </div>
-    <div style="border-top:1px solid #1a1a1a;padding-top:20px;color:#555;font-size:12px;">
-      <p>رقم الطلب: ${orderId}</p>
-      <p>المبلغ: ${amountPaid} EGP</p>
-    </div>
-  </div>
-</body>
-</html>`.trim();
-
+    // ── 6. Deliver Premium Emails (Separated by category to improve deliverability and experience) ──
     try {
-      console.log(`[VERIFY][${requestId}] 📧 Sending email to ${order.customer_email}...`);
-      await resend.emails.send({
-        from: "Youssef Automates <delivery@youssefautomates.com>",
-        to: order.customer_email,
-        subject: `🎉 طلبك جاهز! ${order.product_title} - Youssef Automates`,
-        html: emailHtml,
-      });
-      console.log(`[VERIFY][${requestId}] 📧 Email sent`);
-    } catch (e) {
-      console.error(`[VERIFY][${requestId}] 📧 Resend Error:`, e);
+      const courseOrders: any[] = [];
+      const digitalOrders: any[] = [];
+
+      for (const order of orders) {
+        const { data: product } = await supabaseAdmin
+          .from("products")
+          .select("id, category")
+          .eq("id", order.product_id)
+          .single();
+
+        const isCourse = 
+          product?.category === "courses" || 
+          product?.category === "الدورات التعليمية" || 
+          product?.category === "الدورات التدريبية" ||
+          order.product_title?.includes("دورة") || 
+          order.product_title?.includes("كورس");
+
+        if (isCourse) {
+          courseOrders.push(order);
+        } else {
+          digitalOrders.push(order);
+        }
+      }
+
+      console.log(`[VERIFY][${requestId}] 📧 Email Splitting: ${courseOrders.length} courses, ${digitalOrders.length} digital products.`);
+
+      if (courseOrders.length > 0) {
+        console.log(`[VERIFY][${requestId}] 🎓 Sending dedicated Course Activation email...`);
+        const courseEmailResult = await sendOrderEmail(courseOrders, customerEmail, customerName, currency);
+        if (courseEmailResult.success) {
+          console.log(`[VERIFY][${requestId}] ✅ Dedicated course email delivered successfully`);
+        } else {
+          console.error(`[VERIFY][${requestId}] ⚠️ Dedicated course email failed:`, courseEmailResult.error);
+        }
+      }
+
+      if (digitalOrders.length > 0) {
+        console.log(`[VERIFY][${requestId}] ⬇️ Sending dedicated Digital Download email...`);
+        const digitalEmailResult = await sendOrderEmail(digitalOrders, customerEmail, customerName, currency);
+        if (digitalEmailResult.success) {
+          console.log(`[VERIFY][${requestId}] ✅ Dedicated digital email delivered successfully`);
+        } else {
+          console.error(`[VERIFY][${requestId}] ⚠️ Dedicated digital email failed:`, digitalEmailResult.error);
+        }
+      }
+
+    } catch (emailErr: any) {
+      console.error(`[VERIFY][${requestId}] ❌ Safe catch: Exception during email delivery:`, emailErr.message);
     }
+
+    // Resolve final data for Success Page representation
+    const resolvedProducts = await resolvePurchasedProducts(orders);
+    const firstProduct = resolvedProducts[0] || {};
+    const totalAmount = orders.reduce((sum, o) => sum + (o.amount || 0), 0);
 
     return NextResponse.json({ 
       success: true, 
-      productTitle: order.product_title,
-      customerName: order.customer_name,
-      customerEmail: order.customer_email,
-      orderValue: amountPaid,
-      currency: "EGP",
-      downloadToken: downloadToken,
-      downloadUrl: product?.file_url ? downloadLink : null,
-      category: product?.category || null,
-      tags: product?.tags || null
+      productTitle: resolvedProducts.map(p => p.title).join(" + "),
+      customerName,
+      customerEmail,
+      orderValue: totalAmount,
+      currency,
+      downloadToken: baseOrder.id,
+      downloadUrl: firstProduct.downloadUrl || null,
+      category: firstProduct.category || null,
+      tags: firstProduct.tags || null,
+      products: resolvedProducts
     });
 
   } catch (error: any) {
     console.error(`[VERIFY][${requestId}] 💥 ERROR:`, error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
+}
+
+/**
+ * Resolve DB product details, categories, tags and secure download URLs for success page
+ */
+async function resolvePurchasedProducts(orders: any[]): Promise<any[]> {
+  const resolved = [];
+  for (const order of orders) {
+    const { data: product } = await supabaseAdmin
+      .from("products")
+      .select("id, title, category, tags, file_url")
+      .eq("id", order.product_id)
+      .single();
+
+    if (product) {
+      const isCourse = 
+        product.category === "courses" || 
+        product.category === "الدورات التعليمية" || 
+        product.category === "الدورات التدريبية" ||
+        product.category === "دورة" || 
+        order.product_title?.includes("دورة") || 
+        order.product_title?.includes("كورس");
+
+      if (isCourse) {
+        // Look up detailed course stats
+        const { data: course } = await supabaseAdmin
+          .from("courses")
+          .select("slug, image_url, duration_hours, lessons_count")
+          .or(`title.ilike.%${product.title}%,slug.eq.${product.id}`)
+          .maybeSingle();
+
+        resolved.push({
+          id: product.id,
+          title: product.title,
+          category: product.category,
+          tags: product.tags || [],
+          isCourse,
+          hasDownload: false,
+          downloadUrl: null,
+          orderId: order.id,
+          slug: course?.slug || "n8n-masterclass",
+          image_url: course?.image_url || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800",
+          lessons_count: course?.lessons_count || 12,
+          duration_hours: course?.duration_hours || 14
+        });
+      } else {
+        const fileUrl = product.file_url || "";
+        const fileExtension = fileUrl.split("?")[0].split(".").pop()?.toUpperCase() || "ZIP";
+
+        resolved.push({
+          id: product.id,
+          title: product.title,
+          category: product.category,
+          tags: product.tags || [],
+          isCourse: false,
+          hasDownload: true,
+          downloadUrl: `/api/download?token=${order.id}`,
+          orderId: order.id,
+          fileName: product.title.replace(/\s+/g, "_") + "." + fileExtension.toLowerCase(),
+          fileType: fileExtension,
+          fileSize: product.tags?.find((t: string) => t.startsWith("size:"))?.replace("size:", "") || "18.4 MB",
+          remainingDownloads: "غير محدود (تحميل مدى الحياة)"
+        });
+      }
+    } else {
+      const isCourse = order.product_title?.includes("دورة") || order.product_title?.includes("كورس");
+      
+      if (isCourse) {
+        resolved.push({
+          id: order.product_id,
+          title: order.product_title,
+          category: "courses",
+          tags: [],
+          isCourse: true,
+          hasDownload: false,
+          downloadUrl: null,
+          orderId: order.id,
+          slug: "n8n-masterclass",
+          image_url: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800",
+          lessons_count: 12,
+          duration_hours: 14
+        });
+      } else {
+        resolved.push({
+          id: order.product_id,
+          title: order.product_title,
+          category: "digital",
+          tags: [],
+          isCourse: false,
+          hasDownload: true,
+          downloadUrl: `/api/download?token=${order.id}`,
+          orderId: order.id,
+          fileName: order.product_title?.replace(/\s+/g, "_") + ".zip",
+          fileType: "ZIP",
+          fileSize: "12.5 MB",
+          remainingDownloads: "غير محدود"
+        });
+      }
+    }
+  }
+  return resolved;
 }

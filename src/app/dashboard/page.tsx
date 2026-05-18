@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { 
   User, BookOpen, Download, Award, Settings, LogOut, 
   Loader2, Sparkles, ShieldCheck, CheckCircle2, ChevronLeft, 
-  ExternalLink, PlayCircle, Clock, FileText, ArrowLeft, RefreshCw, X, Printer
+  ExternalLink, PlayCircle, Clock, FileText, ArrowLeft, RefreshCw, X, Printer, Send
 } from "lucide-react";
 import Link from "next/link";
 import { 
@@ -28,6 +28,7 @@ export default function DashboardPage() {
   const [enrolledCourses, setEnrolledCourses] = useState<(LmsCourse & { progress: number; completedCount: number; totalCount: number; firstLessonSlug: string; lastLessonSlug?: string })[]>([]);
   const [certificates, setCertificates] = useState<LmsCertificate[]>([]);
   const [digitalProducts, setDigitalProducts] = useState<any[]>([]);
+  const [invoices, setInvoices] = useState<any[]>([]);
   
   // Settings Form State
   const [fullName, setFullName] = useState("");
@@ -35,8 +36,10 @@ export default function DashboardPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
 
-  // Active Certificate Modal State
+  // Active Modals
   const [selectedCert, setSelectedCert] = useState<LmsCertificate | null>(null);
+  const [selectedInvoice, setSelectedInvoice] = useState<any | null>(null);
+  const [resendingOrderId, setResendingOrderId] = useState<string | null>(null);
 
   // Authenticated state loading and session validation
   useEffect(() => {
@@ -116,7 +119,7 @@ export default function DashboardPage() {
       const certsList = await getUserCertificates(activeUser.id);
       setCertificates(certsList);
 
-      // 5. Fetch purchased digital products from orders table
+      // 5. Fetch purchased products and map files dynamically from database
       const { data: orders, error } = await supabaseClient
         .from("orders")
         .select("*")
@@ -124,13 +127,36 @@ export default function DashboardPage() {
         .eq("status", "completed");
 
       if (!error && orders) {
+        setInvoices(orders);
+
         // Exclude products that are actually courses to keep things strictly separate
         const coursesTitles = allCourses.map(c => c.title.toLowerCase());
         const filteredProducts = orders.filter(order => {
           const titleLower = order.product_title.toLowerCase();
           return !coursesTitles.some(cTitle => cTitle.includes(titleLower) || titleLower.includes(cTitle));
         });
-        setDigitalProducts(filteredProducts);
+
+        const mappedProducts = [];
+        for (const order of filteredProducts) {
+          const { data: pData } = await supabaseClient
+            .from("products")
+            .select("tags, file_url")
+            .eq("id", order.product_id)
+            .maybeSingle();
+
+          const fileUrl = pData?.file_url || "";
+          const fileExtension = fileUrl.split("?")[0].split(".").pop()?.toUpperCase() || "ZIP";
+          const fileSize = pData?.tags?.find((t: string) => t.startsWith("size:"))?.replace("size:", "") || "18.4 MB";
+
+          mappedProducts.push({
+            ...order,
+            fileName: order.product_title.replace(/\s+/g, "_") + "." + fileExtension.toLowerCase(),
+            fileType: fileExtension,
+            fileSize: fileSize,
+            remainingDownloads: "غير محدود (تحميل مدى الحياة)"
+          });
+        }
+        setDigitalProducts(mappedProducts);
       }
     } catch (err) {
       console.error("Error loading student dashboard data:", err);
@@ -151,19 +177,52 @@ export default function DashboardPage() {
     }
   };
 
+  const handleResendEmailForOrder = async (orderId: string) => {
+    if (resendingOrderId) return;
+    setResendingOrderId(orderId);
+    
+    const resolvePromise = new Promise(async (resolve, reject) => {
+      try {
+        const res = await fetch("/api/paymob/verify-and-deliver", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ orderId, forceResend: true }),
+        });
+        const data = await res.json();
+        if (data.success) {
+          resolve("success");
+        } else {
+          reject(new Error(data.error || "Failed to resend"));
+        }
+      } catch (err) {
+        reject(err);
+      }
+    });
+
+    toast.promise(resolvePromise, {
+      loading: "جاري إعادة إرسال الفاتورة والبريد الإلكتروني...",
+      success: "تم إرسال روابط التحميل والفاتورة لبريدك بنجاح! 🎉",
+      error: "فشل الإرسال. يرجى محاولة التواصل مع الدعم الفني.",
+    });
+
+    try {
+      await resolvePromise;
+    } catch {} finally {
+      setResendingOrderId(null);
+    }
+  };
+
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsUpdatingProfile(true);
 
     try {
-      // 1. Update metadata (Full Name)
       const { error: metaError } = await supabaseClient.auth.updateUser({
         data: { full_name: fullName }
       });
 
       if (metaError) throw metaError;
 
-      // 2. Update password if requested
       if (newPassword) {
         if (newPassword !== confirmPassword) {
           toast.error("كلمات المرور الجديدة غير متطابقة");
@@ -208,9 +267,10 @@ export default function DashboardPage() {
   }
 
   const menuItems = [
-    { id: "courses", name: "دوراتي التدريبية", icon: BookOpen },
-    { id: "products", name: "الحزم والمنتجات المشتراة", icon: Download },
-    { id: "certificates", name: "الشهادات الممنوحة", icon: Award },
+    { id: "courses", name: "كورساتي", icon: BookOpen },
+    { id: "products", name: "ملفاتي الرقمية", icon: Download },
+    { id: "certificates", name: "الشهادات", icon: Award },
+    { id: "invoices", name: "الفواتير", icon: FileText },
     { id: "settings", name: "إعدادات الحساب", icon: Settings },
   ];
 
@@ -221,10 +281,9 @@ export default function DashboardPage() {
         <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-rose-600/5 rounded-full blur-[120px]" />
       </div>
 
-      {/* Desktop & Mobile Sidebar */}
+      {/* Sidebar */}
       <aside className="w-full lg:w-80 bg-[#0a0a0f] border-b lg:border-b-0 lg:border-l border-white/5 flex flex-col justify-between p-6 z-10 shrink-0 font-alexandria">
         <div className="space-y-8">
-          {/* Dashboard Branding & Logo */}
           <div className="flex items-center justify-between lg:justify-start gap-3 border-b border-white/5 pb-6">
             <Link href="/" className="flex items-center gap-3 group">
               <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
@@ -243,9 +302,8 @@ export default function DashboardPage() {
             </Link>
           </div>
 
-          {/* User Profile Info Card */}
           <div className="flex items-center gap-4 bg-white/[0.02] border border-white/5 rounded-2xl p-4">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-rose-600 to-orange-500 flex items-center justify-center font-alexandria font-bold text-white shadow-lg">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-rose-600 to-orange-500 flex items-center justify-center font-alexandria font-bold text-white shadow-lg shrink-0">
               {profileName.substring(0, 2).toUpperCase()}
             </div>
             <div className="flex-1 min-w-0">
@@ -254,7 +312,6 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Navigation Links */}
           <nav className="flex flex-row lg:flex-col gap-2 overflow-x-auto lg:overflow-x-visible pb-2 lg:pb-0 scrollbar-none">
             {menuItems.map((item) => {
               const isActive = activeTab === item.id;
@@ -268,7 +325,7 @@ export default function DashboardPage() {
                       : "text-zinc-400 hover:text-white hover:bg-white/5"
                   }`}
                 >
-                  <item.icon className="w-4 h-4" />
+                  <item.icon className="w-4 h-4 shrink-0" />
                   <span>{item.name}</span>
                   {isActive && (
                     <motion.div
@@ -282,7 +339,6 @@ export default function DashboardPage() {
           </nav>
         </div>
 
-        {/* Sidebar Footer Log out */}
         <div className="mt-8 pt-6 border-t border-white/5 hidden lg:block">
           <button 
             onClick={handleLogout}
@@ -296,7 +352,6 @@ export default function DashboardPage() {
 
       {/* Main Content Area */}
       <main className="flex-1 p-6 sm:p-10 lg:p-12 z-10 max-w-[1200px]">
-        {/* Welcome Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
           <div>
             <h1 className="text-2xl sm:text-3xl font-alexandria font-black text-white flex items-center gap-2">
@@ -324,25 +379,26 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Tab Contents with animations */}
+        {/* Tab Contents */}
         <AnimatePresence mode="wait">
+          
+          {/* TABS 1: COURSES */}
           {activeTab === "courses" && (
             <motion.div
               key="courses"
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -15 }}
-              transition={{ duration: 0.3 }}
+              transition={{ duration: 0.2 }}
               className="space-y-6"
             >
               <div className="flex justify-between items-center border-b border-white/5 pb-4">
-                <h2 className="text-lg font-alexandria font-bold text-white">المساقات المسجل بها</h2>
+                <h2 className="text-lg font-alexandria font-bold text-white">المساقات والشهادات المسجل بها</h2>
                 <span className="bg-rose-600/15 border border-rose-500/30 text-rose-400 text-[10px] px-2.5 py-1 rounded-full font-bold">
                   {enrolledCourses.length} دورات تدريبية
                 </span>
               </div>
 
-              {/* Enrolled Courses Grid */}
               {enrolledCourses.length === 0 ? (
                 <div className="text-center py-20 bg-white/[0.02] border border-white/5 rounded-3xl p-8">
                   <BookOpen className="w-16 h-16 text-zinc-700 mx-auto mb-4" />
@@ -371,8 +427,6 @@ export default function DashboardPage() {
                           className="absolute inset-0 w-full h-full object-cover opacity-30 group-hover:scale-105 transition-transform duration-500" 
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0f] to-transparent" />
-                        
-                        <div className="absolute w-24 h-24 bg-rose-600/20 rounded-full blur-2xl group-hover:scale-125 transition-transform duration-500" />
                         <PlayCircle className="w-12 h-12 text-rose-500 z-10 group-hover:scale-110 transition-transform duration-300 relative" />
                         
                         <span className="absolute bottom-4 right-4 bg-black/60 text-[9px] px-2.5 py-1 rounded-md font-bold z-10 border border-white/5 flex items-center gap-1.5">
@@ -395,7 +449,6 @@ export default function DashboardPage() {
                         </div>
 
                         <div className="mt-6 space-y-4">
-                          {/* Dynamic Progress Bar */}
                           <div>
                             <div className="flex justify-between items-center text-[10px] font-bold text-zinc-500 mb-1">
                               <span>نسبة الإنجاز</span>
@@ -414,7 +467,7 @@ export default function DashboardPage() {
                             className="w-full h-11 bg-white/5 border border-white/10 hover:bg-rose-600 hover:border-none text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all active:scale-98"
                           >
                             <span>{course.progress > 0 ? "متابعة المشاهدة" : "ابدأ التعلم الآن"}</span>
-                            <ChevronLeft className="w-4 h-4 rtl:rotate-180" />
+                            <ChevronLeft className="w-4 h-4" />
                           </Link>
                         </div>
                       </div>
@@ -425,57 +478,74 @@ export default function DashboardPage() {
             </motion.div>
           )}
 
+          {/* TABS 2: DIGITAL PRODUCTS */}
           {activeTab === "products" && (
             <motion.div
               key="products"
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -15 }}
-              transition={{ duration: 0.3 }}
+              transition={{ duration: 0.2 }}
               className="space-y-6"
             >
               <div className="flex justify-between items-center border-b border-white/5 pb-4">
-                <h2 className="text-lg font-alexandria font-bold text-white">المنتجات والحزم المشتراة</h2>
+                <h2 className="text-lg font-alexandria font-bold text-white">ملفاتي الرقمية وحزم الأتمتة</h2>
                 <span className="bg-emerald-600/15 border border-emerald-500/30 text-emerald-400 text-[10px] px-2.5 py-1 rounded-full font-bold">
-                  {digitalProducts.length} منتجات جاهزة
+                  {digitalProducts.length} ملفات جاهزة
                 </span>
               </div>
 
-              {/* Purchased Products List */}
               {digitalProducts.length === 0 ? (
                 <div className="text-center py-20 bg-white/[0.02] border border-white/5 rounded-3xl p-8">
                   <Download className="w-16 h-16 text-zinc-700 mx-auto mb-4" />
-                  <h3 className="font-alexandria font-bold text-white text-base">لا تتوفر مشتريات رقمية</h3>
+                  <h3 className="font-alexandria font-bold text-white text-base">لا تتوفر ملفات رقمية</h3>
                   <p className="text-zinc-500 text-xs sm:text-sm mt-1 max-w-sm mx-auto">
                     لم تقم باقتناء أي قوالب أتمتة أو حزم برمجية بعد. استكشف المنتجات الرقمية لتسريع أعمالك!
                   </p>
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {digitalProducts.map((order) => (
+                  {digitalProducts.map((p) => (
                     <div 
-                      key={order.id}
-                      className="bg-[#0a0a0f] border border-white/5 rounded-2xl p-5 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 group hover:border-emerald-500/20 transition-all duration-300"
+                      key={p.id}
+                      className="bg-[#0a0a0f] border border-white/5 rounded-2xl p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 group hover:border-emerald-500/20 transition-all duration-300"
                     >
-                      <div className="flex items-start sm:items-center gap-4">
-                        <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-emerald-400 group-hover:bg-emerald-500/10 group-hover:scale-105 transition-all">
+                      <div className="flex items-start gap-4">
+                        <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-emerald-400 shrink-0 group-hover:bg-emerald-500/10 group-hover:scale-105 transition-all">
                           <FileText className="w-6 h-6" />
                         </div>
                         <div>
-                          <h3 className="text-sm sm:text-base font-bold text-white">{order.product_title}</h3>
-                          <p className="text-[10px] sm:text-xs text-zinc-500 mt-1">
-                            تاريخ الشراء: {new Date(order.created_at).toLocaleDateString("ar-EG")} • السعر: ${order.amount}
-                          </p>
+                          <h3 className="text-sm sm:text-base font-bold text-white">{p.product_title}</h3>
+                          
+                          {/* File Details Grid */}
+                          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1.5 text-xs text-zinc-500 font-medium">
+                            <span>نوع الملف: <strong className="text-white">{p.fileType}</strong></span>
+                            <span>•</span>
+                            <span>الحجم: <strong className="text-white">{p.fileSize}</strong></span>
+                            <span>•</span>
+                            <span className="text-emerald-400/80">التحميل: {p.remainingDownloads}</span>
+                          </div>
                         </div>
                       </div>
 
-                      <a
-                        href={`/api/download?token=${order.id}`}
-                        className="w-full sm:w-auto h-11 px-6 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all active:scale-98"
-                      >
-                        <Download className="w-4 h-4" />
-                        <span>تحميل الملف الرقمي</span>
-                      </a>
+                      <div className="flex items-center gap-2 w-full sm:w-auto shrink-0">
+                        <a
+                          href={`/api/download?token=${p.id}`}
+                          className="flex-1 sm:flex-none h-11 px-5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all active:scale-98"
+                        >
+                          <Download className="w-4 h-4" />
+                          <span>تحميل الملف</span>
+                        </a>
+
+                        <button
+                          onClick={() => handleResendEmailForOrder(p.id)}
+                          className="h-11 px-4 bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                          title="إعادة إرسال البريد"
+                        >
+                          <Send className="w-4 h-4 text-zinc-400" />
+                          <span className="hidden sm:inline">إرسال بالبريد</span>
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -483,17 +553,18 @@ export default function DashboardPage() {
             </motion.div>
           )}
 
+          {/* TABS 3: CERTIFICATES */}
           {activeTab === "certificates" && (
             <motion.div
               key="certificates"
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -15 }}
-              transition={{ duration: 0.3 }}
+              transition={{ duration: 0.2 }}
               className="space-y-6"
             >
               <div className="flex justify-between items-center border-b border-white/5 pb-4">
-                <h2 className="text-lg font-alexandria font-bold text-white">الشهادات الممنوحة</h2>
+                <h2 className="text-lg font-alexandria font-bold text-white">الشهادات والاعتمادات</h2>
                 <span className="bg-rose-600/15 border border-rose-500/30 text-rose-400 text-[10px] px-2.5 py-1 rounded-full font-bold">
                   {certificates.length} شهادات موثقة
                 </span>
@@ -550,29 +621,101 @@ export default function DashboardPage() {
             </motion.div>
           )}
 
+          {/* TABS 4: INVOICES (Brand New Tab!) */}
+          {activeTab === "invoices" && (
+            <motion.div
+              key="invoices"
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
+              transition={{ duration: 0.2 }}
+              className="space-y-6"
+            >
+              <div className="flex justify-between items-center border-b border-white/5 pb-4">
+                <h2 className="text-lg font-alexandria font-bold text-white">فواتير ومعاملات الشراء</h2>
+                <span className="bg-sky-600/15 border border-sky-500/30 text-sky-400 text-[10px] px-2.5 py-1 rounded-full font-bold">
+                  {invoices.length} فواتير معتمدة
+                </span>
+              </div>
+
+              {invoices.length === 0 ? (
+                <div className="text-center py-20 bg-white/[0.02] border border-white/5 rounded-3xl p-8">
+                  <FileText className="w-16 h-16 text-zinc-700 mx-auto mb-4" />
+                  <h3 className="font-alexandria font-bold text-white text-base">لا توجد عمليات شراء سابقة</h3>
+                  <p className="text-zinc-500 text-xs sm:text-sm mt-1 max-w-sm mx-auto">
+                    لم نجد أي فواتير أو إيصالات شراء سابقة مربوطة بهذا البريد الإلكتروني.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {invoices.map((inv) => (
+                    <div 
+                      key={inv.id}
+                      className="bg-[#0a0a0f] border border-white/5 rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-white/10 transition-all duration-300"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-zinc-400 shrink-0">
+                          <FileText className="w-6 h-6" />
+                        </div>
+                        <div>
+                          <h3 className="text-sm sm:text-base font-bold text-white">{inv.product_title}</h3>
+                          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-zinc-500 mt-1">
+                            <span>الرقم المرجعي: <strong className="text-zinc-300 font-mono text-[10px]">#{inv.payment_id || inv.id}</strong></span>
+                            <span>•</span>
+                            <span>التاريخ: {new Date(inv.created_at).toLocaleDateString("ar-EG")}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 w-full sm:w-auto shrink-0 justify-end">
+                        <span className="text-emerald-400 font-alexandria font-black text-sm pr-4">
+                          ${inv.amount}
+                        </span>
+
+                        <button
+                          onClick={() => setSelectedInvoice(inv)}
+                          className="h-10 px-4 bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer"
+                        >
+                          <Printer className="w-3.5 h-3.5" />
+                          <span>تحميل الفاتورة (PDF)</span>
+                        </button>
+
+                        <button
+                          onClick={() => handleResendEmailForOrder(inv.id)}
+                          className="h-10 px-3.5 bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                          title="إعادة إرسال البريد"
+                        >
+                          <Send className="w-3.5 h-3.5 text-zinc-400" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </motion.div>
+          )}
+
+          {/* TABS 5: SETTINGS */}
           {activeTab === "settings" && (
             <motion.div
               key="settings"
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -15 }}
-              transition={{ duration: 0.3 }}
+              transition={{ duration: 0.2 }}
               className="space-y-6"
             >
               <div className="flex justify-between items-center border-b border-white/5 pb-4">
                 <h2 className="text-lg font-alexandria font-bold text-white">إعدادات الحساب</h2>
               </div>
 
-              {/* Settings Profile Form */}
               <div className="bg-[#0a0a0f] border border-white/5 rounded-3xl p-6 sm:p-10 shadow-2xl">
                 <form onSubmit={handleUpdateProfile} className="space-y-6 max-w-2xl">
-                  {/* Title */}
                   <div>
                     <h3 className="text-sm font-bold text-white">المعلومات الشخصية</h3>
                     <p className="text-zinc-500 text-xs mt-1">تحديث معلومات حساب الطالب وكلمة المرور الخاصة بك.</p>
                   </div>
 
-                  {/* Name field */}
                   <div className="space-y-2">
                     <label className="text-xs font-bold text-zinc-400 block pr-1">الاسم الكامل</label>
                     <div className="relative group">
@@ -587,7 +730,6 @@ export default function DashboardPage() {
                     </div>
                   </div>
 
-                  {/* Email field (readonly) */}
                   <div className="space-y-2">
                     <label className="text-xs font-bold text-zinc-400 block pr-1">البريد الإلكتروني (غير قابل للتعديل)</label>
                     <div className="relative opacity-65">
@@ -604,7 +746,6 @@ export default function DashboardPage() {
 
                   <div className="border-t border-white/5 my-6 pt-6" />
 
-                  {/* Password updates */}
                   <div>
                     <h3 className="text-sm font-bold text-white">تعديل كلمة المرور</h3>
                     <p className="text-zinc-500 text-xs mt-1">اترك هذه الحقول فارغة إذا كنت لا ترغب في تغيير كلمة المرور الحالية.</p>
@@ -636,7 +777,6 @@ export default function DashboardPage() {
                     </div>
                   </div>
 
-                  {/* Save button */}
                   <button
                     type="submit"
                     disabled={isUpdatingProfile}
@@ -660,7 +800,7 @@ export default function DashboardPage() {
         </AnimatePresence>
       </main>
 
-      {/* ── CERTIFICATE SHADED MODAL ─────────────────────────────────────────── */}
+      {/* ── MODAL 1: CERTIFICATES SHADED MODAL ────────────────────────────────── */}
       {selectedCert && (
         <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
           <div className="bg-[#0a0a0f] border border-white/10 rounded-3xl max-w-3xl w-full p-8 space-y-6 shadow-2xl relative">
@@ -671,7 +811,6 @@ export default function DashboardPage() {
               <X className="w-5 h-5" />
             </button>
 
-            {/* Customizable Certificate Live Template OR Gold Certificate Frame */}
             {selectedCert.certificate_bg_url ? (
               <div className="w-full aspect-[1.414/1] bg-[#0a0a0f] border border-amber-500/30 rounded-2xl overflow-hidden relative shadow-2xl">
                 <img src={selectedCert.certificate_bg_url} alt="Certificate Background" className="absolute inset-0 w-full h-full object-cover" />
@@ -689,7 +828,6 @@ export default function DashboardPage() {
               </div>
             ) : (
               <div className="border-4 border-double border-amber-500/50 p-6 sm:p-10 rounded-2xl bg-black/60 relative text-center space-y-6 overflow-hidden">
-                {/* Subtle background crest / glow */}
                 <div className="absolute w-64 h-64 bg-amber-500/5 rounded-full blur-[80px] -top-20 -right-20 pointer-events-none" />
                 <div className="absolute w-64 h-64 bg-yellow-500/5 rounded-full blur-[80px] -bottom-20 -left-20 pointer-events-none" />
 
@@ -739,7 +877,6 @@ export default function DashboardPage() {
               </div>
             )}
 
-            {/* Actions for Certificate */}
             <div className="flex items-center justify-end gap-3 pt-4 border-t border-white/5">
               <button
                 onClick={() => window.print()}
@@ -755,7 +892,109 @@ export default function DashboardPage() {
                 إغلاق
               </button>
             </div>
+          </div>
+        </div>
+      )}
 
+      {/* ── MODAL 2: PRINTABLE INVOICES SHADED MODAL ───────────────────────────── */}
+      {selectedInvoice && (
+        <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
+          <div className="bg-[#0a0a0f] border border-white/10 rounded-3xl max-w-2xl w-full p-8 space-y-6 shadow-2xl relative">
+            <button 
+              onClick={() => setSelectedInvoice(null)}
+              className="absolute top-4 left-4 p-2 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-colors cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {/* Printable Invoice Container */}
+            <div id="printable-invoice" className="border border-white/10 p-6 sm:p-8 rounded-2xl bg-black/40 space-y-6">
+              <div className="flex justify-between items-start gap-4">
+                <div>
+                  <h3 className="font-alexandria font-bold text-white text-lg">فاتورة شراء رقمية</h3>
+                  <span className="text-[10px] text-zinc-500 font-mono" dir="ltr">Invoice Ref: #{selectedInvoice.payment_id || selectedInvoice.id}</span>
+                </div>
+                <div className="text-left">
+                  <span className="font-alexandria font-bold text-sm text-rose-500 block">Youssef Automates</span>
+                  <span className="text-[9px] text-zinc-500 block">support@youssefautomates.com</span>
+                </div>
+              </div>
+
+              <div className="border-t border-b border-white/5 py-4 my-4 grid grid-cols-2 gap-4 text-xs">
+                <div>
+                  <span className="text-zinc-500 block">مُصدرة إلى:</span>
+                  <span className="text-white font-bold block">{selectedInvoice.customer_name || profileName}</span>
+                  <span className="text-zinc-400 font-mono block mt-0.5">{selectedInvoice.customer_email}</span>
+                </div>
+                <div>
+                  <span className="text-zinc-500 block">تفاصيل الفاتورة:</span>
+                  <span className="text-zinc-300 block">تاريخ الشراء: {new Date(selectedInvoice.created_at).toLocaleDateString("ar-EG")}</span>
+                  <span className="text-zinc-300 block">طريقة الدفع: Paymob (مدفوع بالكامل)</span>
+                </div>
+              </div>
+
+              {/* Items Table */}
+              <table className="w-full text-right text-xs">
+                <thead>
+                  <tr className="border-b border-white/5 text-zinc-500">
+                    <th className="pb-2 font-bold">المنتج</th>
+                    <th className="pb-2 text-left font-bold">السعر</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td className="py-3 text-white font-bold">{selectedInvoice.product_title}</td>
+                    <td className="py-3 text-left text-emerald-400 font-bold">${selectedInvoice.amount}</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <div className="border-t border-white/5 pt-4 flex justify-between items-center text-sm font-bold">
+                <span className="text-zinc-400">الإجمالي المدفوع:</span>
+                <span className="text-emerald-400 text-lg">${selectedInvoice.amount}</span>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-white/5">
+              <button
+                onClick={() => {
+                  const printContents = document.getElementById("printable-invoice")?.innerHTML;
+                  if (printContents) {
+                    const printWindow = window.open("", "_blank");
+                    printWindow?.document.write(`
+                      <html dir="rtl" lang="ar">
+                      <head>
+                        <title>فاتورة Youssef Automates</title>
+                        <style>
+                          body { font-family: system-ui; padding: 40px; background: white; color: black; }
+                          .text-rose-500 { color: #d6004b !important; }
+                          .text-emerald-400 { color: #10b981 !important; }
+                          table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                          th, td { padding: 10px; border-bottom: 1px solid #ddd; text-align: right; }
+                          .text-left { text-align: left; }
+                        </style>
+                      </head>
+                      <body>
+                        ${printContents}
+                        <script>window.print();</script>
+                      </body>
+                      </html>
+                    `);
+                    printWindow?.document.close();
+                  }
+                }}
+                className="h-11 px-5 bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-xl font-bold text-xs flex items-center gap-2 transition-all cursor-pointer"
+              >
+                <Printer className="w-4 h-4" />
+                <span>طباعة الفاتورة (PDF)</span>
+              </button>
+              <button
+                onClick={() => setSelectedInvoice(null)}
+                className="h-11 px-6 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-xs transition-all cursor-pointer"
+              >
+                إغلاق
+              </button>
+            </div>
           </div>
         </div>
       )}

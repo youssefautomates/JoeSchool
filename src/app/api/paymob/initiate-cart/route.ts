@@ -220,11 +220,11 @@ export async function POST(req: Request) {
       }
 
       if (payData.success) {
-        return NextResponse.json({ success: true, checkoutUrl: `/success?order_id=${dbOrders[0].id}` });
+        return NextResponse.json({ success: true, checkoutUrl: `/checkout/success?order_id=${dbOrders[0].id}` });
       }
 
       if (payData.pending) {
-        return NextResponse.json({ success: true, checkoutUrl: `/success?order_id=${dbOrders[0].id}&pending=true` });
+        return NextResponse.json({ success: true, checkoutUrl: `/checkout/success?order_id=${dbOrders[0].id}&pending=true` });
       }
 
       const declineReason = payData.data?.message 
