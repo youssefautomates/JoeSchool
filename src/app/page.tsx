@@ -88,25 +88,25 @@ export default function Home() {
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.5 }}
-                className="inline-flex items-center gap-2 bg-white/5 backdrop-blur-md border border-white/10 px-4 py-2 md:px-5 md:py-2.5 rounded-full mb-8 shadow-[0_0_30px_rgba(239,0,85,0.2)]"
+                className="inline-flex items-center gap-2 bg-white/5 backdrop-blur-md border border-white/10 px-3.5 py-1.5 md:px-5 md:py-2.5 rounded-full mb-6 md:mb-8 shadow-[0_0_30px_rgba(239,0,85,0.2)]"
               >
-                <span className="relative flex h-2 w-2 md:h-3 md:w-3">
+                <span className="relative flex h-1.5 w-1.5 md:h-3 md:w-3">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 md:h-3 md:w-3 bg-rose-500"></span>
+                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 md:h-3 md:w-3 bg-rose-500"></span>
                 </span>
-                <span className="font-cairo text-xs md:text-sm font-bold text-rose-300 tracking-wide">أدوات أتمتة حصرية جاهزة للعمل</span>
+                <span className="font-cairo text-[10px] md:text-sm font-bold text-rose-300 tracking-wide">أدوات أتمتة حصرية جاهزة للعمل</span>
               </motion.div>
 
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.1 }}
-                className="mb-8 md:mb-10 px-2"
+                className="mb-6 md:mb-10 px-2"
               >
-                <h1 className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-alexandria font-black text-white leading-tight md:leading-tight tracking-tighter block mb-2">
+                <h1 className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-alexandria font-black text-white leading-[1.3] md:leading-tight tracking-tighter block mb-1 md:mb-2">
                   ضاعف إنتاجيتك مع
                 </h1>
-                <h1 className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-alexandria font-black text-transparent bg-clip-text bg-gradient-to-r from-[#ff0f53] via-[#ff2d6b] to-[#ff00b3] leading-tight md:leading-tight tracking-tighter block pb-2">
+                <h1 className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-alexandria font-black text-transparent bg-clip-text bg-gradient-to-r from-[#ff0f53] via-[#ff2d6b] to-[#ff00b3] leading-[1.3] md:leading-tight tracking-tighter block pb-2">
                   حلول الأتمتة الذكية
                 </h1>
               </motion.div>
@@ -115,7 +115,7 @@ export default function Home() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.2 }}
-                className="text-base md:text-2xl text-zinc-400 font-cairo max-w-3xl mx-auto mb-10 md:mb-14 leading-relaxed"
+                className="text-sm md:text-2xl text-zinc-400 font-cairo max-w-3xl mx-auto mb-8 md:mb-14 leading-relaxed"
               >
                 احصل على تدفقات عمل <span className="text-white font-bold">n8n</span> وأنظمة ذكاء اصطناعي جاهزة للاستخدام الفوري. وفّر مئات الساعات وابدأ بالتركيز على نمو أعمالك الحقيقي.
               </motion.p>
@@ -124,30 +124,30 @@ export default function Home() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.3 }}
-                className="flex flex-col md:flex-row items-center justify-center gap-6"
+                className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-6"
               >
                 <Link
                   href="#products"
-                  className="group relative h-14 md:h-20 px-8 md:px-12 inline-flex items-center justify-center gap-3 bg-[#D6004B] hover:bg-[#b0003d] text-white rounded-2xl font-cairo text-lg md:text-xl font-bold shadow-[0_0_40px_rgba(214,0,75,0.4)] hover:shadow-[0_0_60px_rgba(214,0,75,0.6)] transition-all hover:-translate-y-1 active:scale-95 w-full md:w-auto"
+                  className="group relative h-12 md:h-20 px-6 md:px-12 inline-flex items-center justify-center gap-2 md:gap-3 bg-[#D6004B] hover:bg-[#b0003d] text-white rounded-[1.25rem] md:rounded-2xl font-cairo text-base md:text-xl font-bold shadow-[0_0_30px_rgba(214,0,75,0.3)] hover:shadow-[0_0_60px_rgba(214,0,75,0.6)] transition-all hover:-translate-y-1 active:scale-95 w-full md:w-auto"
                 >
                   <span className="relative z-10">تصفح الحزم الآن</span>
-                  <ArrowLeft className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover:-translate-x-2 transition-transform rtl:rotate-180" />
-                  <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl" />
+                  <ArrowLeft className="w-4 h-4 md:w-6 md:h-6 relative z-10 group-hover:-translate-x-2 transition-transform rtl:rotate-180" />
+                  <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-[1.25rem] md:rounded-2xl" />
                 </Link>
                 
-                <div className="flex items-center gap-4 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-3 md:p-4 pr-6 w-full md:w-auto">
-                  <div className="flex -space-x-2 md:-space-x-3 rtl:space-x-reverse">
+                <div className="flex items-center justify-between md:justify-start gap-4 bg-white/5 backdrop-blur-sm border border-white/10 rounded-[1.25rem] md:rounded-2xl p-2.5 md:p-4 md:pr-6 w-full md:w-auto">
+                  <div className="flex -space-x-2 md:-space-x-3 rtl:space-x-reverse ml-2 md:ml-0">
                     {["felix","sara","mia","alex"].map(seed => (
                       <div key={seed} className="w-8 h-8 md:w-10 md:h-10 rounded-full border-2 border-[#050505] bg-zinc-800 overflow-hidden">
                         <img src={`https://api.dicebear.com/9.x/adventurer/svg?seed=${seed}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc`} alt="customer" className="w-full h-full object-cover" />
                       </div>
                     ))}
                   </div>
-                  <div className="flex flex-col items-start border-r border-white/10 pr-4">
-                    <div className="flex text-yellow-400 mb-1">
+                  <div className="flex flex-col items-start border-r border-white/10 pr-3 md:pr-4 flex-1 md:flex-none">
+                    <div className="flex text-yellow-400 mb-0.5 md:mb-1">
                       {[1,2,3,4,5].map(i => <Star key={i} className="w-3 h-3 md:w-4 md:h-4 fill-current" />)}
                     </div>
-                    <span className="font-cairo text-[10px] md:text-xs text-zinc-400 font-bold">تقييم {stats.averageRating} من <span className="text-white">{stats.count}+ عميل</span></span>
+                    <span className="font-cairo text-[9px] md:text-xs text-zinc-400 font-bold">تقييم {stats.averageRating} من <span className="text-white">{stats.count}+ عميل</span></span>
                   </div>
                 </div>
               </motion.div>
@@ -156,13 +156,13 @@ export default function Home() {
         </section>
 
         {/* Value Props / Social Proof */}
-        <section className="border-y border-white/5 bg-gradient-to-b from-transparent via-white/[0.01] to-transparent py-16 md:py-24 relative overflow-hidden">
+        <section className="border-y border-white/5 bg-gradient-to-b from-transparent via-white/[0.01] to-transparent py-12 md:py-24 relative overflow-hidden">
           {/* Subtle Background Accent Glows */}
           <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-[250px] h-[250px] bg-[#D6004B]/5 rounded-full blur-[80px] pointer-events-none" />
           <div className="absolute top-1/2 right-1/4 -translate-y-1/2 w-[250px] h-[250px] bg-rose-500/5 rounded-full blur-[80px] pointer-events-none" />
 
-          <div className="container mx-auto px-6 max-w-7xl">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+          <div className="container mx-auto px-4 md:px-6 max-w-7xl">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
               {[
                 { number: "+2000", label: "تدفق عمل جاهز", subLabel: "أدوات أتمتة مبرمجة وجاهزة", icon: Zap },
                 { number: "100%", label: "تنزيل فوري", subLabel: "رابط تحميل مباشر بعد الدفع", icon: Download },
@@ -176,28 +176,28 @@ export default function Home() {
                   viewport={{ once: true, margin: "-50px" }}
                   transition={{ duration: 0.6, delay: i * 0.1, ease: "easeOut" }}
                   whileHover={{ y: -8, scale: 1.02, transition: { duration: 0.2, ease: "easeOut" } }}
-                  className="group relative flex flex-col items-center text-center p-8 rounded-3xl bg-white/[0.01] backdrop-blur-xl border border-white/5 hover:border-[#D6004B]/20 hover:bg-white/[0.02] shadow-[0_10px_40px_rgba(0,0,0,0.4)] hover:shadow-[0_20px_50px_rgba(214,0,75,0.08)] transition-colors duration-300 select-none cursor-default overflow-hidden"
+                  className="group relative flex flex-col items-center text-center p-5 md:p-8 rounded-2xl md:rounded-3xl bg-white/[0.01] backdrop-blur-xl border border-white/5 hover:border-[#D6004B]/20 hover:bg-white/[0.02] shadow-[0_10px_40px_rgba(0,0,0,0.4)] hover:shadow-[0_20px_50px_rgba(214,0,75,0.08)] transition-colors duration-300 select-none cursor-default overflow-hidden"
                 >
                   {/* Glowing background card element */}
-                  <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-[#D6004B]/10 to-transparent rounded-full blur-[30px] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <div className="absolute top-0 right-0 w-20 h-20 md:w-24 md:h-24 bg-gradient-to-br from-[#D6004B]/10 to-transparent rounded-full blur-[30px] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                   
                   {/* Icon with circular neon wrapper */}
-                  <div className="relative w-14 h-14 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-center text-zinc-400 group-hover:text-[#D6004B] group-hover:bg-[#D6004B]/10 group-hover:border-[#D6004B]/20 shadow-[0_0_20px_rgba(0,0,0,0.2)] group-hover:shadow-[0_0_30px_rgba(214,0,75,0.25)] transition-all duration-500 mb-6 group-hover:scale-110">
-                    <stat.icon className="w-6 h-6 transform transition-transform duration-500 group-hover:rotate-6" />
+                  <div className="relative w-10 h-10 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-white/5 border border-white/5 flex items-center justify-center text-zinc-400 group-hover:text-[#D6004B] group-hover:bg-[#D6004B]/10 group-hover:border-[#D6004B]/20 shadow-[0_0_20px_rgba(0,0,0,0.2)] group-hover:shadow-[0_0_30px_rgba(214,0,75,0.25)] transition-all duration-500 mb-3 md:mb-6 group-hover:scale-110">
+                    <stat.icon className="w-5 h-5 md:w-6 md:h-6 transform transition-transform duration-500 group-hover:rotate-6" />
                   </div>
                   
                   {/* Number / Main highlight */}
-                  <p className="text-3xl md:text-4xl font-alexandria font-black text-white tracking-tight mb-2 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-white group-hover:to-rose-200 transition-all duration-300">
+                  <p className="text-xl md:text-4xl font-alexandria font-black text-white tracking-tight mb-1 md:mb-2 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-white group-hover:to-rose-200 transition-all duration-300">
                     {stat.number}
                   </p>
                   
                   {/* Label */}
-                  <p className="text-white font-cairo text-base font-bold mb-1 transition-colors duration-300 group-hover:text-[#D6004B]">
+                  <p className="text-white font-cairo text-xs md:text-base font-bold mb-0.5 md:mb-1 transition-colors duration-300 group-hover:text-[#D6004B]">
                     {stat.label}
                   </p>
 
                   {/* SubLabel description */}
-                  <p className="text-zinc-500 font-cairo text-xs leading-relaxed group-hover:text-zinc-400 transition-colors duration-300">
+                  <p className="text-zinc-500 font-cairo text-[9px] md:text-xs leading-relaxed group-hover:text-zinc-400 transition-colors duration-300 hidden sm:block">
                     {stat.subLabel}
                   </p>
 
@@ -210,33 +210,33 @@ export default function Home() {
         </section>
 
         {/* Featured Products Showcase */}
-        <section id="products" className="py-24 md:py-32 relative">
+        <section id="products" className="py-16 md:py-32 relative">
           <div className="container mx-auto px-4">
-            <div className="text-center mb-16 md:mb-20">
+            <div className="text-center mb-10 md:mb-20">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                className="inline-flex items-center gap-2 bg-rose-500/10 text-rose-400 px-4 py-1.5 rounded-full font-cairo text-sm font-bold mb-6 border border-rose-500/20"
+                className="inline-flex items-center gap-2 bg-rose-500/10 text-rose-400 px-3 py-1 md:px-4 md:py-1.5 rounded-full font-cairo text-xs md:text-sm font-bold mb-4 md:mb-6 border border-rose-500/20"
               >
-                <Sparkles className="w-4 h-4" />
+                <Sparkles className="w-3.5 h-3.5 md:w-4 md:h-4" />
                 الأكثر مبيعاً
               </motion.div>
-              <h2 className="text-3xl md:text-5xl font-alexandria font-black text-white mb-6 tracking-tight">الحزم الجاهزة للأتمتة</h2>
-              <p className="text-zinc-400 font-cairo text-lg max-w-2xl mx-auto leading-relaxed">
+              <h2 className="text-2xl md:text-5xl font-alexandria font-black text-white mb-4 md:mb-6 tracking-tight">الحزم الجاهزة للأتمتة</h2>
+              <p className="text-zinc-400 font-cairo text-sm md:text-lg max-w-2xl mx-auto leading-relaxed">
                 استثمر في أدوات توفر لك مئات الساعات شهرياً. تم تصميم هذه الحزم لتعمل بكفاءة عالية وبدون تعقيدات برمجية.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-10">
               {isLoading ? (
                 Array.from({length: 3}).map((_, i) => (
-                  <div key={i} className="h-[500px] rounded-[2.5rem] bg-white/5 animate-pulse" />
+                  <div key={i} className="h-[400px] md:h-[500px] rounded-[2rem] md:rounded-[2.5rem] bg-white/5 animate-pulse" />
                 ))
               ) : products.length === 0 ? (
-                <div className="col-span-full text-center py-20">
-                  <Package className="w-16 h-16 text-zinc-700 mx-auto mb-4" />
-                  <p className="text-zinc-500 font-cairo text-xl">لا توجد منتجات حالياً.</p>
+                <div className="col-span-full text-center py-16 md:py-20">
+                  <Package className="w-12 h-12 md:w-16 md:h-16 text-zinc-700 mx-auto mb-4" />
+                  <p className="text-zinc-500 font-cairo text-lg md:text-xl">لا توجد منتجات حالياً.</p>
                 </div>
               ) : (
                 products.map((product: any, idx: number) => {
@@ -257,10 +257,10 @@ export default function Home() {
                         onClick={() => router.push(`/product/${product.slug}`)}
                         onMouseEnter={() => setHoveredId(product.id)}
                         onMouseLeave={() => setHoveredId(null)}
-                        className="block relative h-full flex flex-col bg-[#0a0a0f] border border-white/5 hover:border-rose-500/30 rounded-[2.5rem] overflow-hidden group-hover:-translate-y-2 transition-all duration-500 shadow-2xl hover:shadow-[0_20px_40px_rgba(239,0,85,0.1)] cursor-pointer"
+                        className="block relative h-full flex flex-col bg-[#0a0a0f] border border-white/5 hover:border-rose-500/30 rounded-[2rem] md:rounded-[2.5rem] overflow-hidden group-hover:-translate-y-2 transition-all duration-500 shadow-2xl hover:shadow-[0_20px_40px_rgba(239,0,85,0.1)] cursor-pointer"
                       >
                         {/* Media Area */}
-                        <div className="relative h-56 md:h-64 border-b border-white/5">
+                        <div className="relative h-48 md:h-64 border-b border-white/5">
                           <ProductMedia 
                             image_url={primaryImage}
                             video_url={primaryVideo}
@@ -271,40 +271,40 @@ export default function Home() {
                           />
                           
                           {/* Badges */}
-                          <div className="absolute top-6 left-6 flex flex-col gap-2 z-20">
+                          <div className="absolute top-4 left-4 md:top-6 md:left-6 flex flex-col gap-2 z-20">
                             {product.is_featured && (
-                              <Badge className="bg-rose-600 text-white border-none font-cairo text-[10px] py-1 px-2.5 shadow-lg rounded-lg">الأكثر مبيعاً</Badge>
+                              <Badge className="bg-rose-600 text-white border-none font-cairo text-[9px] md:text-[10px] py-0.5 px-2 md:py-1 md:px-2.5 shadow-lg rounded-md md:rounded-lg">الأكثر مبيعاً</Badge>
                             )}
                           </div>
                         </div>
 
                         {/* Content Area */}
-                        <div className="p-6 md:p-8 flex-1 flex flex-col relative z-10 -mt-8">
-                          <div className="flex items-center gap-2 mb-4">
-                            <div className="flex items-center gap-1.5 bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/10">
-                              <Zap className="w-3 h-3 text-rose-400" />
-                              <span className="text-[10px] font-bold text-white uppercase tracking-widest">تنزيل فوري</span>
+                        <div className="p-5 md:p-8 flex-1 flex flex-col relative z-10 -mt-6 md:-mt-8">
+                          <div className="flex items-center gap-2 mb-3 md:mb-4">
+                            <div className="flex items-center gap-1.5 bg-white/10 backdrop-blur-md px-2.5 py-1 md:px-3 md:py-1.5 rounded-md md:rounded-lg border border-white/10">
+                              <Zap className="w-2.5 h-2.5 md:w-3 md:h-3 text-rose-400" />
+                              <span className="text-[9px] md:text-[10px] font-bold text-white uppercase tracking-widest">تنزيل فوري</span>
                             </div>
                           </div>
 
-                          <h3 className="text-xl md:text-2xl font-alexandria font-bold text-white mb-3 leading-tight group-hover:text-rose-400 transition-colors line-clamp-2">
+                          <h3 className="text-lg md:text-2xl font-alexandria font-bold text-white mb-2 md:mb-3 leading-tight group-hover:text-rose-400 transition-colors line-clamp-2">
                             {product.title}
                           </h3>
                           
-                          <p className="text-zinc-400 font-cairo text-sm mb-8 leading-relaxed line-clamp-2">
+                          <p className="text-zinc-400 font-cairo text-xs md:text-sm mb-6 md:mb-8 leading-relaxed line-clamp-2">
                             {product.short_description || product.description || "أداة احترافية مصممة لزيادة إنتاجيتك بشكل فوري."}
                           </p>
 
                           <div className="mt-auto flex items-end justify-between">
                             <div className="flex flex-col">
                               {product.original_price && (
-                                <span className="text-xs font-cairo line-through text-zinc-500 mb-1">
+                                <span className="text-[10px] md:text-xs font-cairo line-through text-zinc-500 mb-0.5 md:mb-1">
                                   {product.original_price} ج.م
                                 </span>
                               )}
                               <div className="flex items-baseline gap-1">
-                                <span className="text-2xl md:text-3xl font-alexandria font-black text-white">{product.price}</span>
-                                <span className="text-xs md:sm font-cairo text-zinc-400">ج.م</span>
+                                <span className="text-xl md:text-3xl font-alexandria font-black text-white">{product.price}</span>
+                                <span className="text-[10px] md:text-sm font-cairo text-zinc-400">ج.م</span>
                               </div>
                             </div>
                             
@@ -315,11 +315,11 @@ export default function Home() {
                                   addToCart(product);
                                   toast.success("تمت الإضافة للسلة");
                                 }}
-                                className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-rose-600 transition-colors"
+                                className="w-9 h-9 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-rose-600 transition-colors"
                               >
                                 <ShoppingCart className="w-4 h-4 md:w-5 md:h-5" />
                               </button>
-                              <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-rose-600 flex items-center justify-center text-white shadow-lg shadow-rose-600/30 group-hover:scale-110 transition-transform">
+                              <div className="w-9 h-9 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-rose-600 flex items-center justify-center text-white shadow-lg shadow-rose-600/30 group-hover:scale-110 transition-transform">
                                 <ArrowLeft className="w-4 h-4 md:w-5 md:h-5" />
                               </div>
                             </div>
@@ -341,6 +341,18 @@ export default function Home() {
         <FAQSection />
 
       </main>
+
+      {/* Mobile Sticky Bar - Homepage specific */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-black/80 backdrop-blur-2xl border-t border-white/10 p-3 z-40 pb-safe shadow-[0_-20px_50px_rgba(0,0,0,0.8)] supports-[backdrop-filter]:bg-black/60">
+        <Link
+          href="#products"
+          className="w-full h-12 bg-[#D6004B] text-white font-alexandria font-black text-sm rounded-xl flex items-center justify-center gap-2 active:scale-95 shadow-[0_10px_30px_rgba(214,0,75,0.3)] transition-transform"
+        >
+          شراء الحزم الآن
+          <ArrowLeft className="w-4 h-4 rtl:rotate-180" />
+        </Link>
+      </div>
+
       <Footer />
     </div>
   );
