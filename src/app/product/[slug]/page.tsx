@@ -524,7 +524,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                  <div className="flex -space-x-3 rtl:space-x-reverse">
                    {["felix","sara","mia","alex"].map((seed) => (
                      <div key={seed} className="w-10 h-10 rounded-full border-2 border-[#050505] bg-zinc-800 overflow-hidden relative">
-                        <Image src={`https://api.dicebear.com/9.x/adventurer/svg?seed=${seed}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc`} alt="avatar" fill />
+                        <img src={`https://api.dicebear.com/9.x/adventurer/svg?seed=${seed}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc`} alt="avatar" className="w-full h-full object-cover" />
                      </div>
                    ))}
                  </div>
