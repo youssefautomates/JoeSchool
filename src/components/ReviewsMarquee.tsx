@@ -7,8 +7,7 @@ interface Review {
   title: string;
   text: string;
   stars: number;
-  initial: string;
-  gradient: string;
+  seed: string;
 }
 
 const reviews: Review[] = [
@@ -17,56 +16,49 @@ const reviews: Review[] = [
     title: "مشتري موثق · حزمة n8n للشركات",
     text: "قمت بشراء حزمة أتمتة n8n لربط متجري تلقائيًا وإرسال الفواتير للعملاء عبر الواتساب. استثمار جبار ووفر عليّ راتب موظف كامل!",
     stars: 5,
-    initial: "ع",
-    gradient: "from-rose-500 to-orange-500"
+    seed: "adnan"
   },
   {
     name: "شروق عبد العزيز",
     title: "مشتري موثق · بوت أتمتة التلغرام",
     text: "خدمة استثنائية! حصلت على حزم جاهزة لـ n8n والربط كان فوري، وتفاجأت أن الملفات المرسلة عبر البريد الإلكتروني مشفرة ومحمية بـ Tokens مخصصة.",
     stars: 5,
-    initial: "ش",
-    gradient: "from-blue-600 to-indigo-600"
+    seed: "sara"
   },
   {
     name: "أبو تميم - متجر تقني",
     title: "مشتري موثق · بوابة دفع Paymob",
     text: "الدعم ما بعد البيع فوق الخيال. واجهت مشكلة بسيطة في الربط مع بوابة Paymob وساعدني فريق العمل بشكل فوري ومجاني حتى أتممت أول عملية دفع.",
     stars: 5,
-    initial: "ت",
-    gradient: "from-emerald-500 to-teal-500"
+    seed: "tamim"
   },
   {
     name: "خالد الدوسري",
     title: "مشتري موثق · حزم أتمتة السحابة",
     text: "تطبيق فكرة Premium SaaS حقيقي. الواجهات وتدفقات الأتمتة خالية من الأخطاء، وكل التقييمات والأحداث تتزامن بشكل فوري. عمل متقن للغاية.",
     stars: 5,
-    initial: "خ",
-    gradient: "from-purple-600 to-pink-600"
+    seed: "khalid"
   },
   {
     name: "سارة العتيبي",
     title: "مشتري موثق · أتمتة الذكاء الاصطناعي",
     text: "من أفضل المتاجر الرقمية التي تعاملت معها. سهولة التحميل ووضوح الشرح لحزمة الذكاء الاصطناعي والأتمتة لا يعلى عليها.",
     stars: 5,
-    initial: "س",
-    gradient: "from-amber-500 to-yellow-500"
+    seed: "sarah"
   },
   {
     name: "د. فيصل القحطاني",
     title: "مشتري موثق · أتمتة تدفق الأعمال",
     text: "حزم الأتمتة والمنتجات الرقمية هنا ليست مجرد ملفات، بل هي حلول برمجية متكاملة تزيد من كفاءة العمل وتقلل المصاريف بشكل فوري.",
     stars: 5,
-    initial: "ف",
-    gradient: "from-cyan-500 to-blue-500"
+    seed: "faisal"
   },
   {
     name: "عبد الرحمن السديري",
     title: "مشتري موثق · حزمة بيكسل متكاملة",
     text: "كود نظيف، ترتيب رائع، وتكامل فريد مع بيكسل فيسبوك وتيك توك لتتبع المبيعات الحقيقية. أنصح كل صاحب متجر رقمي بالشراء دون تردد.",
     stars: 5,
-    initial: "ر",
-    gradient: "from-violet-500 to-purple-600"
+    seed: "abdul"
   }
 ];
 
@@ -125,8 +117,12 @@ export function ReviewsMarquee() {
                 
                 {/* User Info Header */}
                 <div className="flex items-center gap-4">
-                  <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${review.gradient} flex items-center justify-center text-white font-alexandria font-black text-lg shadow-lg border border-white/10 shrink-0`}>
-                    {review.initial}
+                  <div className="w-12 h-12 rounded-2xl bg-zinc-800 overflow-hidden shadow-lg border border-white/10 shrink-0 relative">
+                    <img 
+                      src={`https://api.dicebear.com/9.x/adventurer/svg?seed=${review.seed}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc`} 
+                      alt={review.name} 
+                      className="w-full h-full object-cover" 
+                    />
                   </div>
                   <div className="min-w-0 flex-1">
                     <h4 className="font-alexandria font-bold text-white text-sm truncate">

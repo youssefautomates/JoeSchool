@@ -53,11 +53,11 @@ export function ProductReviews({ productId }: { productId: string }) {
           >
             <div className="flex items-start justify-between mb-6">
               <div className="flex items-center gap-4">
-                <div className="w-14 h-14 bg-zinc-800 rounded-full overflow-hidden flex items-center justify-center shrink-0 border-2 border-white/5 group-hover:border-rose-500/50 transition-colors">
-                  {review.avatarUrl ? (
-                    <Image src={review.avatarUrl} alt={review.firstName} width={56} height={56} className="object-cover" />
+                <div className="w-14 h-14 bg-zinc-800 rounded-full overflow-hidden flex items-center justify-center shrink-0 border-2 border-white/5 group-hover:border-rose-500/50 transition-colors relative">
+                  {review.avatarUrl && !review.avatarUrl.includes("pravatar") ? (
+                    <img src={review.avatarUrl} alt={review.firstName} className="w-full h-full object-cover" />
                   ) : (
-                    <User className="w-6 h-6 text-zinc-500" />
+                    <img src={`https://api.dicebear.com/9.x/adventurer/svg?seed=${review.firstName}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc`} alt={review.firstName} className="w-full h-full object-cover" />
                   )}
                 </div>
                 <div>
