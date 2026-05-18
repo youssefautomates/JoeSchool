@@ -41,13 +41,6 @@ export async function createOrder(order: Order) {
 export async function updateOrderStatus(paymentId: string, status: OrderStatus, transaction?: any) {
   const updateData: any = { status };
   
-  if (status === "completed") {
-    updateData.completed_at = new Date().toISOString();
-    if (transaction?.id) {
-      updateData.transaction_id = String(transaction.id);
-    }
-  }
-
   console.log(`[ORDERS_LIB] Updating order ${paymentId} to ${status}`, updateData);
 
   const { data, error } = await supabase
