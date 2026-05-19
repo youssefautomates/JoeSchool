@@ -58,8 +58,7 @@ export default function CertificateVerificationPage({ params }: { params: Promis
               {cert.certificate_bg_url ? (
                 <div className="w-full aspect-[1.414/1] bg-[#0a0a0f] border border-amber-500/30 rounded-3xl overflow-hidden relative shadow-2xl print:m-0 print:border-none print:shadow-none">
                   <style dangerouslySetInnerHTML={{__html: `
-                    @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@700;800;900&family=Alexandria:wght@800;900&display=swap');
-                    @import url('https://fonts.cdnfonts.com/css/lovelo');
+                    @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@700;800;900&family=Alexandria:wght@800;900&family=Alike&display=swap');
                   `}} />
                   <img src={cert.certificate_bg_url} alt="Certificate Background" className="absolute inset-0 w-full h-full object-cover" />
                   <div className="absolute inset-0 z-10 font-bold" style={{ color: cert.certificate_text_color || "#000000" }}>
@@ -69,8 +68,8 @@ export default function CertificateVerificationPage({ params }: { params: Promis
                         left: `${cert.certificate_name_x || 50}%`, 
                         top: `${cert.certificate_name_y || 40}%`, 
                         transform: 'translate(-50%, -50%)',
-                        fontFamily: /[\u0600-\u06FF]/.test(cert.student_name) ? "'Cairo', 'Alexandria', sans-serif" : "'Lovelo', sans-serif",
-                        fontWeight: /[\u0600-\u06FF]/.test(cert.student_name) ? 900 : 'bold',
+                        fontFamily: /[\u0600-\u06FF]/.test(cert.student_name) ? "'Cairo', 'Alexandria', sans-serif" : "'Alike', serif",
+                        fontWeight: /[\u0600-\u06FF]/.test(cert.student_name) ? 900 : 'normal',
                       }}
                     >
                       {cert.student_name}

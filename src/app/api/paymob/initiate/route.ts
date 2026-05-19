@@ -70,6 +70,21 @@ export async function POST(req: Request) {
       }
     }
 
+    if (!dbItem) {
+      const { data: bundle } = await supabase
+        .from("bundles")
+        .select("title, price")
+        .eq("id", productId)
+        .maybeSingle();
+      if (bundle) {
+        dbItem = {
+          title: bundle.title,
+          price: bundle.price,
+          tags: ["bundle"]
+        };
+      }
+    }
+
     // Secondary fallback to courses
     if (!dbItem) {
       const { data: course } = await supabase

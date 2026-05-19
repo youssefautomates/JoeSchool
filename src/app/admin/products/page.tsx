@@ -312,7 +312,7 @@ function ProductFormDialog({ open, onClose, onSaved, initial }: { open: boolean;
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1.5">
-                          <Label className="text-sm font-bold" style={{ color: "#d4d4d8" }}>السعر الحالي (ج.م) *</Label>
+                          <Label className="text-sm font-bold" style={{ color: "#d4d4d8" }}>السعر الحالي ($) *</Label>
                           <Input type="number" value={form.price} onChange={e => setForm({...form, price: e.target.value})} className="h-12 rounded-xl text-white" style={{ background: "rgba(255,255,255,0.05)", border: "1.5px solid rgba(255,255,255,0.1)" }} />
                         </div>
                         <div className="space-y-1.5">
@@ -732,7 +732,7 @@ export default function AdminProductsPage() {
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell className="font-alexandria font-bold text-white">{p.price} ج.م</TableCell>
+                    <TableCell className="font-alexandria font-bold text-white">${p.price}</TableCell>
                     <TableCell className="text-zinc-400 font-bold">{p.sales || 0}</TableCell>
                     <TableCell>
                       <Badge className={cn(

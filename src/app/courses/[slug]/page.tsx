@@ -11,6 +11,7 @@ import {
 import Link from "next/link";
 import { getCourseBySlug, checkEnrollment, type LmsCourse, type LmsSection, type LmsLesson } from "@/lib/coursesDb";
 import { supabaseClient } from "@/lib/supabaseClient";
+import RelatedCarousel from "@/components/RelatedCarousel";
 
 export default function CourseDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
@@ -68,9 +69,9 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
           <div className="max-w-md mx-auto bg-[#0a0a0f] border border-white/5 rounded-3xl p-8 space-y-6">
             <BookOpen className="w-16 h-16 text-zinc-700 mx-auto" />
             <h1 className="text-xl font-alexandria font-bold">هذا الكورس غير متوفر حالياً</h1>
-            <p className="text-zinc-500 text-sm">تأكد من الرابط الصحيح أو تصفح الأكاديمية لمزيد من المساقات المميزة.</p>
+            <p className="text-zinc-500 text-sm">تأكد من الرابط الصحيح أو تصفح الأكاديمية لمزيد من الأقسام المميزة.</p>
             <Link href="/courses" className="inline-flex h-11 px-6 bg-[#D6004B] hover:bg-[#b0003d] text-white rounded-xl text-xs font-bold items-center gap-2">
-              العودة لقائمة المساقات
+              العودة لقائمة الأقسام
             </Link>
           </div>
         </main>
@@ -101,7 +102,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                   className="inline-flex items-center gap-2 text-xs font-bold text-zinc-400 hover:text-white transition-colors"
                 >
                   <ArrowLeft className="w-4 h-4 rtl:rotate-180" />
-                  <span>العودة لكافة المساقات</span>
+                  <span>العودة لكافة الأقسام</span>
                 </Link>
 
                 <h1 className="text-3xl sm:text-4xl lg:text-5xl font-alexandria font-black text-white leading-tight">
@@ -116,7 +117,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                 <div className="flex flex-wrap gap-4 text-xs font-bold text-zinc-400 pt-2">
                   <div className="bg-white/5 border border-white/10 px-3.5 py-2 rounded-xl flex items-center gap-2">
                     <Clock className="w-4 h-4 text-rose-500" />
-                    <span>مدة المساق: {course.duration_hours} ساعة تدريبية</span>
+                    <span>مدة القسم: {course.duration_hours} ساعة تدريبية</span>
                   </div>
                   <div className="bg-white/5 border border-white/10 px-3.5 py-2 rounded-xl flex items-center gap-2">
                     <BookOpen className="w-4 h-4 text-rose-500" />
@@ -208,7 +209,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
               منهج الدورة والمنهاج الدراسي
             </h2>
             <p className="text-zinc-400 text-sm">
-              يحتوي هذا المساق التدريبي على وحدات مهيكلة تأخذك خطوة بخطوة نحو التميز. اضغط على الوحدة لعرض قائمة الدروس المشمولة بها:
+              يحتوي هذا القسم التدريبي على وحدات مهيكلة تأخذك خطوة بخطوة نحو التميز. اضغط على الوحدة لعرض قائمة الدروس المشمولة بها:
             </p>
 
             <div className="space-y-4">
@@ -271,7 +272,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
           {/* Benefits Grid */}
           {course.what_will_learn && course.what_will_learn.length > 0 && (
             <div className="bg-[#0a0a0f]/40 border border-white/5 rounded-3xl p-8 sm:p-10 space-y-8">
-              <h3 className="text-xl font-alexandria font-bold text-white">ماذا ستتعلم في هذا المساق؟</h3>
+              <h3 className="text-xl font-alexandria font-bold text-white">ماذا ستتعلم في هذا القسم؟</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 {course.what_will_learn.map((feat, fIdx) => (
                   <div key={fIdx} className="flex items-start gap-3">
@@ -283,6 +284,11 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
             </div>
           )}
 
+        </section>
+
+        {/* Smart Related Recommendations */}
+        <section className="container mx-auto px-4 max-w-6xl mt-20 border-t border-white/5 pt-16">
+          <RelatedCarousel sourceType="course" sourceId={course.id} />
         </section>
       </main>
 

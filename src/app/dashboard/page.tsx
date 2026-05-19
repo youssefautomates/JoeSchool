@@ -8,14 +8,17 @@ import { toast } from "sonner";
 import { 
   User, BookOpen, Download, Award, Settings, LogOut, 
   Loader2, Sparkles, ShieldCheck, CheckCircle2, ChevronLeft, 
-  ExternalLink, PlayCircle, Clock, FileText, ArrowLeft, RefreshCw, X, Printer, Send
+  ExternalLink, PlayCircle, Clock, FileText, ArrowLeft, RefreshCw, X, Printer, Send, Heart, Trash2
 } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { 
   getCoursesList, getUserEnrollments, getCourseProgressPercent, 
-  getUserCertificates, getCourseBySlug, type LmsCourse, type LmsCertificate 
+  getUserCertificates, getCourseBySlug, getStudentStudyHours,
+  trackActiveSession, checkSessionIsValid, type LmsCourse, type LmsCertificate 
 } from "@/lib/coursesDb";
+import { fetchUserWishlist, removeFromWishlist } from "@/lib/wishlist";
+
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -30,6 +33,10 @@ export default function DashboardPage() {
   const [certificates, setCertificates] = useState<LmsCertificate[]>([]);
   const [digitalProducts, setDigitalProducts] = useState<any[]>([]);
   const [invoices, setInvoices] = useState<any[]>([]);
+  const [wishlistItems, setWishlistItems] = useState<any[]>([]);
+  const [isRemovingWishlistId, setIsRemovingWishlistId] = useState<string | null>(null);
+  const [studyStats, setStudyStats] = useState({ totalSeconds: 0, completedCount: 0, streak: 1 });
+
   
   // Settings Form State
   const [fullName, setFullName] = useState("");
@@ -57,10 +64,44 @@ export default function DashboardPage() {
       setProfileName(name);
       setFullName(name);
       
+      // Enforce Device Session Tracking & Max Active Sessions check
+      try {
+        let deviceId = localStorage.getItem("youssef_device_id");
+        if (!deviceId) {
+          deviceId = "dev_" + Math.random().toString(36).substring(2, 15);
+          localStorage.setItem("youssef_device_id", deviceId);
+        }
+
+        // Get user IP dynamically or fallback
+        let userIp = "127.0.0.1";
+        try {
+          const ipRes = await fetch("https://api.ipify.org?format=json");
+          const ipData = await ipRes.json();
+          if (ipData.ip) userIp = ipData.ip;
+        } catch (e) {}
+
+        const browserInfo = navigator.userAgent || "unknown_browser";
+        
+        // Track the current session (max 3 concurrent active devices)
+        await trackActiveSession(session.user.id, deviceId, userIp, browserInfo, "Browser", 3);
+        
+        // Verify if session is valid (old sessions might have been deactivated)
+        const isSessionValid = await checkSessionIsValid(session.user.id, deviceId);
+        if (!isSessionValid) {
+          toast.error("تم تسجيل خروجك بسبب تجاوز الحد الأقصى للأجهزة النشطة (3 أجهزة)");
+          await supabaseClient.auth.signOut();
+          router.push("/login?error=max_devices");
+          return;
+        }
+      } catch (e) {
+        console.error("Session tracking failure:", e);
+      }
+
       // Load user metrics and course enrollments
       await loadUserDashboardData(session.user);
       setIsLoading(false);
     };
+
 
     checkAuth();
 
@@ -159,6 +200,21 @@ export default function DashboardPage() {
         }
         setDigitalProducts(mappedProducts);
       }
+
+      // Fetch unified wishlist
+      const { items: wishlistData, error: wishlistErr } = await fetchUserWishlist(activeUser.id);
+      if (!wishlistErr && wishlistData) {
+        setWishlistItems(wishlistData);
+      }
+
+      // Fetch dynamic study statistics and gamification info
+      try {
+        const stats = await getStudentStudyHours(activeUser.id);
+        setStudyStats(stats);
+      } catch (e) {
+        console.error("Failed to load study stats:", e);
+      }
+
     } catch (err) {
       console.error("Error loading student dashboard data:", err);
     }
@@ -256,6 +312,30 @@ export default function DashboardPage() {
     }
   };
 
+  const handleRemoveFromWishlist = async (itemType: "course" | "digital_product" | "bundle", itemId: string) => {
+    if (isRemovingWishlistId) return;
+    setIsRemovingWishlistId(itemId);
+    try {
+      const { success, error } = await removeFromWishlist(itemType, itemId, user?.id);
+      if (success) {
+        setWishlistItems(prev => prev.filter(item => {
+          if (item.item_type !== itemType) return true;
+          if (itemType === "course") return item.course_id !== itemId;
+          if (itemType === "digital_product") return item.product_id !== itemId;
+          if (itemType === "bundle") return item.bundle_id !== itemId;
+          return true;
+        }));
+        toast.success("تمت الإزالة من المفضلة بنجاح");
+      } else {
+        toast.error(error || "فشل إزالة العنصر");
+      }
+    } catch (err: any) {
+      toast.error(err.message || "حدث خطأ ما");
+    } finally {
+      setIsRemovingWishlistId(null);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[#050505] flex items-center justify-center font-cairo text-white">
@@ -270,6 +350,7 @@ export default function DashboardPage() {
   const menuItems = [
     { id: "courses", name: "كورساتي", icon: BookOpen },
     { id: "products", name: "ملفاتي الرقمية", icon: Download },
+    { id: "wishlist", name: "المفضلة", icon: Heart },
     { id: "certificates", name: "الشهادات", icon: Award },
     { id: "invoices", name: "الفواتير", icon: FileText },
     { id: "settings", name: "إعدادات الحساب", icon: Settings },
@@ -380,8 +461,107 @@ export default function DashboardPage() {
           </div>
         </div>
 
+        {/* Dynamic Study Statistics Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          {/* Card 1: Hours */}
+          <div className="bg-[#0a0a0f] border border-white/5 rounded-2xl p-4 sm:p-5 flex items-center gap-3 sm:gap-4 shadow-xl">
+            <div className="w-10 sm:w-12 h-10 sm:h-12 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center shrink-0">
+              <Clock className="w-5 sm:w-6 h-5 sm:h-6" />
+            </div>
+            <div>
+              <span className="text-[10px] text-zinc-500 block font-bold">وقت التعلم</span>
+              <span className="text-sm sm:text-lg font-alexandria font-black text-white">{(studyStats.totalSeconds / 3600).toFixed(1)} <span className="text-[10px] font-normal text-zinc-400">ساعة</span></span>
+            </div>
+          </div>
+
+          {/* Card 2: Lessons Completed */}
+          <div className="bg-[#0a0a0f] border border-white/5 rounded-2xl p-4 sm:p-5 flex items-center gap-3 sm:gap-4 shadow-xl">
+            <div className="w-10 sm:w-12 h-10 sm:h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+              <CheckCircle2 className="w-5 sm:w-6 h-5 sm:h-6" />
+            </div>
+            <div>
+              <span className="text-[10px] text-zinc-500 block font-bold">الدروس المكتملة</span>
+              <span className="text-sm sm:text-lg font-alexandria font-black text-white">{studyStats.completedCount} <span className="text-[10px] font-normal text-zinc-400">دروس</span></span>
+            </div>
+          </div>
+
+          {/* Card 3: Streak */}
+          <div className="bg-[#0a0a0f] border border-white/5 rounded-2xl p-4 sm:p-5 flex items-center gap-3 sm:gap-4 shadow-xl">
+            <div className="w-10 sm:w-12 h-10 sm:h-12 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-500 flex items-center justify-center shrink-0">
+              <Sparkles className="w-5 sm:w-6 h-5 sm:h-6 animate-pulse" />
+            </div>
+            <div>
+              <span className="text-[10px] text-zinc-500 block font-bold">سلسلة التعلم</span>
+              <span className="text-sm sm:text-lg font-alexandria font-black text-white">{studyStats.streak} <span className="text-[10px] font-normal text-zinc-400">يوم 🔥</span></span>
+            </div>
+          </div>
+
+          {/* Card 4: Level */}
+          <div className="bg-[#0a0a0f] border border-white/5 rounded-2xl p-4 sm:p-5 flex items-center gap-3 sm:gap-4 shadow-xl">
+            <div className="w-10 sm:w-12 h-10 sm:h-12 rounded-xl bg-violet-500/10 border border-violet-500/20 text-violet-400 flex items-center justify-center shrink-0">
+              <Award className="w-5 sm:w-6 h-5 sm:h-6" />
+            </div>
+            <div className="min-w-0">
+              <span className="text-[10px] text-zinc-500 block font-bold">المستوى التعليمي</span>
+              <span className="text-[11px] sm:text-xs font-alexandria font-black text-white truncate block">
+                {studyStats.completedCount >= 10 ? "خبير الأتمتة 🎓" : studyStats.completedCount >= 4 ? "طالب مجتهد ⚡" : "مستكشف مبتدئ 🌱"}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Premium Resume Watching widget */}
+        {(() => {
+          const inProgress = enrolledCourses.filter(c => c.progress > 0 && c.progress < 100);
+          const courseToResume = inProgress.sort((a, b) => b.progress - a.progress)[0] || enrolledCourses.find(c => c.progress < 100);
+          
+          if (!courseToResume) return null;
+
+          return (
+            <div className="bg-gradient-to-r from-rose-950/20 via-[#0a0a0f] to-[#0a0a0f] border border-white/5 rounded-3xl p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6 mb-8 relative overflow-hidden shadow-2xl">
+              <div className="absolute top-0 right-0 w-[200px] h-[200px] bg-rose-600/5 rounded-full blur-[80px] pointer-events-none" />
+              
+              <div className="flex-1 space-y-4 text-right w-full">
+                <div className="flex items-center gap-2 text-rose-500 text-xs font-bold font-alexandria">
+                  <PlayCircle className="w-4 h-4" />
+                  <span>متابعة التعلم (واصل من حيث توقفت)</span>
+                </div>
+                <div>
+                  <h3 className="text-lg sm:text-xl font-alexandria font-black text-white leading-tight">{courseToResume.title}</h3>
+                  <p className="text-zinc-400 text-xs mt-1.5 font-cairo">أحسنت صنعاً! لقد أكملت {courseToResume.progress}% من هذا الكورس الرائد.</p>
+                </div>
+                
+                {/* Progress bar inside callout */}
+                <div className="max-w-md">
+                  <div className="flex justify-between items-center text-[10px] font-bold text-zinc-500 mb-1">
+                    <span>نسبة تقدمك الإجمالية</span>
+                    <span className="text-rose-400">{courseToResume.progress}%</span>
+                  </div>
+                  <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden border border-white/5">
+                    <div 
+                      className="h-full bg-gradient-to-r from-rose-600 to-orange-500 rounded-full transition-all duration-500" 
+                      style={{ width: `${courseToResume.progress}%` }} 
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-4 shrink-0 w-full md:w-auto">
+                <Link
+                  href={`/learn/${courseToResume.slug}/${courseToResume.lastLessonSlug || courseToResume.firstLessonSlug}`}
+                  className="w-full md:w-auto h-12 px-8 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all active:scale-95 shadow-[0_8px_20px_rgba(214,0,75,0.2)]"
+                >
+                  <span>تابع الدرس الآن</span>
+                  <ChevronLeft className="w-4 h-4" />
+                </Link>
+              </div>
+            </div>
+          );
+        })()}
+
         {/* Tab Contents */}
         <AnimatePresence mode="wait">
+
           
           {/* TABS 1: COURSES */}
           {activeTab === "courses" && (
@@ -394,7 +574,7 @@ export default function DashboardPage() {
               className="space-y-6"
             >
               <div className="flex justify-between items-center border-b border-white/5 pb-4">
-                <h2 className="text-lg font-alexandria font-bold text-white">المساقات والشهادات المسجل بها</h2>
+                <h2 className="text-lg font-alexandria font-bold text-white">الأقسام والشهادات المسجل بها</h2>
                 <span className="bg-rose-600/15 border border-rose-500/30 text-rose-400 text-[10px] px-2.5 py-1 rounded-full font-bold">
                   {enrolledCourses.length} دورات تدريبية
                 </span>
@@ -697,6 +877,146 @@ export default function DashboardPage() {
           )}
 
           {/* TABS 5: SETTINGS */}
+          {/* TABS: WISHLIST */}
+          {activeTab === "wishlist" && (
+            <motion.div
+              key="wishlist"
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
+              transition={{ duration: 0.2 }}
+              className="space-y-6"
+            >
+              <div className="flex justify-between items-center border-b border-white/5 pb-4">
+                <h2 className="text-lg font-alexandria font-bold text-white">المفضلة الخاصة بي</h2>
+                <span className="bg-rose-600/15 border border-rose-500/30 text-rose-400 text-[10px] px-2.5 py-1 rounded-full font-bold">
+                  {wishlistItems.length} عناصر محفوظة
+                </span>
+              </div>
+
+              {wishlistItems.length === 0 ? (
+                <div className="bg-[#0a0a0f] border border-white/5 rounded-3xl p-12 text-center flex flex-col items-center justify-center space-y-6">
+                  <div className="w-16 h-16 rounded-full bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-500">
+                    <Heart className="w-8 h-8 animate-pulse" />
+                  </div>
+                  <div className="space-y-2">
+                    <h3 className="text-base font-bold text-white">قائمة المفضلة فارغة حالياً</h3>
+                    <p className="text-zinc-500 text-xs max-w-sm leading-relaxed mx-auto">
+                      تصفح متجرنا الرقمي ومساراتنا الاحترافية وأضف ما ينال إعجابك إلى المفضلة للعودة إليه لاحقاً بسهولة!
+                    </p>
+                  </div>
+                  <Link
+                    href="/"
+                    className="inline-flex items-center justify-center px-6 py-2.5 bg-[#D6004B] hover:bg-[#b0003d] text-white rounded-xl text-xs font-bold transition-all shadow-lg shadow-rose-600/20"
+                  >
+                    تصفح المكتبة والمتجر
+                  </Link>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {wishlistItems.map((item) => {
+                    const id = item.course_id || item.product_id || item.bundle_id;
+                    const typeBadge =
+                      item.item_type === "course"
+                        ? "دورة تعليمية"
+                        : item.item_type === "bundle"
+                        ? "حزمة عروض"
+                        : "منتج رقمي";
+
+                    const badgeColor =
+                      item.item_type === "course"
+                        ? "bg-purple-500/10 text-purple-400 border-purple-500/20"
+                        : item.item_type === "bundle"
+                        ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
+                        : "bg-rose-500/10 text-rose-400 border-rose-500/20";
+
+                    const title =
+                      item.course?.title || item.product?.title || item.bundle?.title || "";
+                    const desc =
+                      item.course?.short_description ||
+                      item.product?.short_description ||
+                      item.bundle?.short_description ||
+                      item.course?.description ||
+                      item.product?.description ||
+                      item.bundle?.description ||
+                      "";
+                    const imageUrl =
+                      item.course?.image_url ||
+                      item.product?.image_url ||
+                      item.bundle?.image_url ||
+                      "";
+                    const slug =
+                      item.course?.slug || item.product?.slug || item.bundle?.slug || "";
+
+                    const price =
+                      item.course?.price || item.product?.price || item.bundle?.price || 0;
+
+                    const itemLink =
+                      item.item_type === "course"
+                        ? `/courses/${slug}`
+                        : item.item_type === "bundle"
+                        ? `/bundles/${slug}`
+                        : `/product/${slug}`;
+
+                    return (
+                      <motion.div
+                        key={item.id}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="bg-[#0a0a0f] border border-white/5 rounded-3xl p-5 flex gap-4 hover:border-white/10 transition-all duration-300 relative group overflow-hidden"
+                      >
+                        <div className="w-24 h-24 rounded-2xl overflow-hidden shrink-0 bg-neutral-900 border border-white/5 relative">
+                          {imageUrl ? (
+                            <img src={imageUrl} alt={title} className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-xs font-bold text-white/20">
+                              YA
+                            </div>
+                          )}
+                          <span className={`absolute bottom-1 left-1 px-1.5 py-0.5 rounded-full text-[8px] font-bold border backdrop-blur-sm ${badgeColor}`}>
+                            {typeBadge}
+                          </span>
+                        </div>
+
+                        <div className="flex-1 min-w-0 flex flex-col justify-between">
+                          <div>
+                            <h3 className="text-sm font-bold text-white truncate group-hover:text-rose-500 transition-colors">
+                              {title}
+                            </h3>
+                            <p className="text-zinc-500 text-xs line-clamp-2 mt-1 leading-relaxed">
+                              {desc}
+                            </p>
+                          </div>
+
+                          <div className="flex items-center justify-between mt-2 pt-2 border-t border-white/5">
+                            <span className="text-xs font-bold text-white font-mono">${price}</span>
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => handleRemoveFromWishlist(item.item_type, id)}
+                                disabled={isRemovingWishlistId === id}
+                                className="p-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 transition-all cursor-pointer disabled:opacity-50"
+                                title="إزالة من المفضلة"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                              <Link
+                                href={itemLink}
+                                className="px-3.5 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-[10px] font-bold transition-all shadow-md shadow-rose-600/10 flex items-center gap-1"
+                              >
+                                <span>عرض</span>
+                                <ChevronLeft className="w-3 h-3" />
+                              </Link>
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              )}
+            </motion.div>
+          )}
+
           {activeTab === "settings" && (
             <motion.div
               key="settings"
@@ -815,8 +1135,7 @@ export default function DashboardPage() {
             {selectedCert.certificate_bg_url ? (
               <div className="w-full aspect-[1.414/1] bg-[#0a0a0f] border border-amber-500/30 rounded-2xl overflow-hidden relative shadow-2xl">
                 <style dangerouslySetInnerHTML={{__html: `
-                  @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@700;800;900&family=Alexandria:wght@800;900&display=swap');
-                  @import url('https://fonts.cdnfonts.com/css/lovelo');
+                  @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@700;800;900&family=Alexandria:wght@800;900&family=Alike&display=swap');
                 `}} />
                 <img src={selectedCert.certificate_bg_url} alt="Certificate Background" className="absolute inset-0 w-full h-full object-cover" />
                 <div className="absolute inset-0 z-10 font-bold" style={{ color: selectedCert.certificate_text_color || "#000000" }}>
@@ -826,8 +1145,8 @@ export default function DashboardPage() {
                       left: `${selectedCert.certificate_name_x || 50}%`, 
                       top: `${selectedCert.certificate_name_y || 40}%`, 
                       transform: 'translate(-50%, -50%)',
-                      fontFamily: /[\u0600-\u06FF]/.test(selectedCert.student_name) ? "'Cairo', 'Alexandria', sans-serif" : "'Lovelo', sans-serif",
-                      fontWeight: /[\u0600-\u06FF]/.test(selectedCert.student_name) ? 900 : 'bold',
+                      fontFamily: /[\u0600-\u06FF]/.test(selectedCert.student_name) ? "'Cairo', 'Alexandria', sans-serif" : "'Alike', serif",
+                      fontWeight: /[\u0600-\u06FF]/.test(selectedCert.student_name) ? 900 : 'normal',
                     }}
                   >
                     {selectedCert.student_name}

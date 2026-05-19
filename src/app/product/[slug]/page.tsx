@@ -18,6 +18,7 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { ProductReviews } from "@/components/ProductReviews";
 import { WhatsAppPopup } from "@/components/WhatsAppPopup";
+import RelatedCarousel from "@/components/RelatedCarousel";
 
 import { supabase } from "@/lib/supabase";
 import { type Product, calcDiscount } from "@/lib/products";
@@ -541,6 +542,11 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
 
         {/* Reviews Section */}
         <ProductReviews productId={product.id} />
+
+        {/* Smart Related Recommendations */}
+        <div className="container mx-auto px-4 md:px-6 max-w-7xl mt-16 border-t border-white/5 pt-16">
+          <RelatedCarousel sourceType="digital_product" sourceId={product.id} />
+        </div>
 
         {/* Mobile Sticky Bar - Premium & Ultra-Compact */}
         <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-black/80 backdrop-blur-2xl border-t border-white/10 p-3 z-50 flex items-center justify-between gap-3 pb-safe shadow-[0_-20px_50px_rgba(0,0,0,0.8)] supports-[backdrop-filter]:bg-black/60">

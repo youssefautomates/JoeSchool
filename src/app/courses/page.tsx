@@ -126,14 +126,14 @@ export default function CoursesPage() {
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-20 gap-4">
               <Loader2 className="w-10 h-10 text-rose-500 animate-spin" />
-              <p className="text-zinc-400 text-sm font-medium">جاري تحميل المساقات الفنية...</p>
+              <p className="text-zinc-400 text-sm font-medium">جاري تحميل الأقسام التدريبية الفنية...</p>
             </div>
           ) : filteredCourses.length === 0 ? (
             <div className="text-center py-20 bg-white/[0.02] border border-white/5 rounded-3xl p-8 max-w-md mx-auto">
               <BookOpen className="w-12 h-12 text-zinc-700 mx-auto mb-4" />
-              <h3 className="font-alexandria font-bold text-white text-base">لا توجد مساقات متاحة حالياً</h3>
+              <h3 className="font-alexandria font-bold text-white text-base">لا توجد أقسام تدريبية متاحة حالياً</h3>
               <p className="text-zinc-500 text-xs sm:text-sm mt-1">
-                تتوفر مساقات جديدة قريباً جداً في هذا القسم. تابع قنواتنا للحصول على التحديثات!
+                تتوفر أقسام جديدة قريباً جداً في هذه الصفحة. تابع قنواتنا للحصول على التحديثات!
               </p>
             </div>
           ) : (
@@ -207,12 +207,12 @@ export default function CoursesPage() {
                         <div className="flex flex-col">
                           {course.original_price > 0 && (
                             <span className="text-[10px] sm:text-xs text-zinc-500 line-through mb-0.5">
-                              {course.original_price} ج.م
+                              ${course.original_price}
                             </span>
                           )}
                           <div className="flex items-baseline gap-1">
                             <span className="text-2xl sm:text-3xl font-alexandria font-black text-white">
-                              {course.price === 0 ? "مجاني" : `${course.price} ج.م`}
+                              {course.price === 0 ? "مجاني" : `$${course.price}`}
                             </span>
                           </div>
                         </div>
@@ -222,7 +222,7 @@ export default function CoursesPage() {
                           href={`/courses/${course.slug}`}
                           className="h-12 px-6 bg-[#D6004B] hover:bg-[#b0003d] text-white rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 shadow-[0_0_20px_rgba(214,0,75,0.25)] hover:scale-105 active:scale-98 transition-all shrink-0 cursor-pointer"
                         >
-                          <span>عرض تفاصيل المساق</span>
+                          <span>عرض تفاصيل القسم</span>
                           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform rtl:rotate-180" />
                         </Link>
                       </div>

@@ -14,9 +14,11 @@ import {
 import Link from "next/link";
 import { 
   getCourseBySlug, getLessonProgress, toggleLessonCompleted, 
-  getCourseProgressPercent, getUserCertificates, 
+  getCourseProgressPercent, getUserCertificates, checkSessionIsValid,
   type LmsCourse, type LmsSection, type LmsLesson, type LmsCertificate 
 } from "@/lib/coursesDb";
+import SecureVideoPlayer from "@/components/SecureVideoPlayer";
+
 
 interface QAComment {
   id: string;
@@ -68,16 +70,29 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ courseS
 
   // 1. Auth Protection Check & Session retrieval
   useEffect(() => {
-    supabaseClient.auth.getSession().then(({ data: { session } }) => {
+    supabaseClient.auth.getSession().then(async ({ data: { session } }) => {
       if (!session) {
         toast.error("يرجى تسجيل الدخول للوصول إلى مشغل الدروس");
         router.push(`/login?redirect=/learn/${courseSlug}/${lessonSlug}`);
       } else {
+        // Check active session validity for security
+        try {
+          const deviceId = localStorage.getItem("youssef_device_id") || "unknown_device";
+          const isValid = await checkSessionIsValid(session.user.id, deviceId);
+          if (!isValid) {
+            toast.error("تم تسجيل خروجك بسبب تجاوز الحد الأقصى للأجهزة النشطة (3 أجهزة)");
+            await supabaseClient.auth.signOut();
+            router.push("/login?error=max_devices");
+            return;
+          }
+        } catch (e) {}
+
         setUser(session.user);
         setCheckingAuth(false);
       }
     });
   }, [router, courseSlug, lessonSlug]);
+
 
   // 2. Fetch Course Curriculum and Progress dynamically
   useEffect(() => {
@@ -439,7 +454,7 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ courseS
               {/* Sidebar Header */}
               <div className="p-5 border-b border-white/5 flex justify-between items-center shrink-0">
                 <div>
-                  <span className="text-[10px] text-zinc-500 font-bold block">محتويات المساق</span>
+                  <span className="text-[10px] text-zinc-500 font-bold block">محتويات القسم</span>
                   <span className="text-xs font-bold text-white mt-1 block">تتبع تقدمك في حضور المحاضرات</span>
                 </div>
                 
@@ -546,26 +561,23 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ courseS
             <div className="absolute inset-0 bg-grid-lines mask-radial-faded opacity-20 pointer-events-none z-0"></div>
 
             {currentLesson.lecture_type === "video" && currentLesson.video_url ? (
-              isPlaying ? (
-                <iframe
-                  src={getEmbedUrl(currentLesson.video_url)}
-                  title={currentLesson.title}
-                  className="w-full h-full border-none z-10"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  allowFullScreen
+              <div className="w-full aspect-video z-10">
+                <SecureVideoPlayer
+                  lessonId={currentLesson.id}
+                  courseId={course.id}
+                  userId={user.id}
+                  onLessonComplete={() => {
+                    if (!completedLessons.includes(currentLesson.id)) {
+                      handleToggleComplete(currentLesson.id);
+                    }
+                  }}
+                  onNextLesson={nextLesson ? () => {
+                    router.push(`/learn/${courseSlug}/${nextLesson.slug}`);
+                    if (window.innerWidth < 1024) setSidebarOpen(false);
+                  } : undefined}
+                  nextLessonTitle={nextLesson?.title || null}
                 />
-              ) : (
-                <>
-                  <div className="absolute w-[200px] sm:w-[400px] h-[200px] sm:h-[400px] bg-rose-600/5 rounded-full blur-[80px] group-hover:scale-110 transition-transform duration-700 pointer-events-none z-0"></div>
-                  <button 
-                    onClick={() => setIsPlaying(true)}
-                    className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-rose-600 hover:bg-rose-700 flex items-center justify-center text-white shadow-xl shadow-rose-600/20 hover:scale-110 active:scale-95 transition-all duration-300 cursor-pointer z-10"
-                  >
-                    <PlayCircle className="w-8 h-8 sm:w-10 sm:h-10 ml-0.5" />
-                  </button>
-                  <span className="text-xs font-bold text-zinc-500 mt-4 select-none z-10">انقر لتشغيل المحاضرة</span>
-                </>
-              )
+              </div>
             ) : (
               // Non-video content states (PDF, Links, Downloads)
               <div className="text-center z-10 space-y-4 p-6">
@@ -737,7 +749,8 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ courseS
 
               {activeTab === "resources" && (
                 <div className="space-y-4">
-                  {currentLesson.attachment_url ? (
+                  {/* Single Legacy Attachment (if any) */}
+                  {currentLesson.attachment_url && (!currentLesson.attachments || currentLesson.attachments.length === 0) && (
                     <div className="bg-[#0a0a0f] border border-white/5 rounded-2xl p-4 flex items-center justify-between gap-4 hover:border-rose-500/20 transition-all">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-lg bg-rose-600/10 border border-rose-500/20 flex items-center justify-center text-rose-500">
@@ -749,7 +762,7 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ courseS
                         </div>
                       </div>
                       <a
-                        href={currentLesson.attachment_url}
+                        href={`/api/video/attachment?lessonId=${currentLesson.id}&url=${encodeURIComponent(currentLesson.attachment_url)}`}
                         target="_blank"
                         rel="noreferrer"
                         className="h-9 px-4 bg-white/5 hover:bg-white/10 text-white rounded-lg text-[10px] font-bold transition-all border border-white/10 flex items-center justify-center shrink-0"
@@ -757,8 +770,66 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ courseS
                         تحميل الآن
                       </a>
                     </div>
+                  )}
+
+                  {/* Multi-Attachments (Modern System) */}
+                  {currentLesson.attachments && currentLesson.attachments.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {currentLesson.attachments.map((file, idx) => {
+                        const getFileIcon = (type: string) => {
+                          const t = type.toLowerCase();
+                          if (t === 'pdf') return '📄';
+                          if (['zip', 'rar', '7z', 'tar', 'gz'].includes(t)) return '📦';
+                          if (['doc', 'docx'].includes(t)) return '📝';
+                          if (['xls', 'xlsx', 'csv'].includes(t)) return '📊';
+                          if (t === 'mp3') return '🎵';
+                          if (['png', 'jpg', 'jpeg', 'webp', 'gif', 'svg'].includes(t)) return '🖼️';
+                          if (['js', 'ts', 'jsx', 'tsx', 'html', 'css', 'py', 'json', 'go', 'rs', 'c', 'cpp'].includes(t)) return '💻';
+                          return '📁';
+                        };
+                        const formatBytes = (bytes: number): string => {
+                          if (bytes === 0) return '0 Bytes';
+                          const k = 1024;
+                          const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                          const i = Math.floor(Math.log(bytes) / Math.log(k));
+                          return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+                        };
+
+                        return (
+                          <div 
+                            key={file.url || idx} 
+                            className="bg-[#0a0a0f] border border-white/5 hover:border-emerald-500/30 rounded-2xl p-4 flex items-center justify-between gap-4 transition-all group hover:scale-[1.01]"
+                          >
+                            <div className="flex items-center gap-3 min-w-0">
+                              <div className="w-10 h-10 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-lg shrink-0">
+                                {getFileIcon(file.type)}
+                              </div>
+                              <div className="min-w-0 leading-tight">
+                                <h4 className="text-xs sm:text-sm font-bold text-white truncate max-w-[200px]" title={file.name}>
+                                  {file.name}
+                                </h4>
+                                <span className="text-[10px] text-zinc-500 mt-0.5 font-bold font-mono">
+                                  {formatBytes(file.size)}
+                                </span>
+                              </div>
+                            </div>
+                            <a
+                              href={`/api/video/attachment?lessonId=${currentLesson.id}&url=${encodeURIComponent(file.url)}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="h-9 px-4 bg-emerald-600/10 border border-emerald-500/20 hover:bg-emerald-600 text-emerald-400 hover:text-white rounded-xl text-[10px] font-bold transition-all flex items-center justify-center shrink-0 gap-1"
+                            >
+                              <Download className="w-3.5 h-3.5" />
+                              <span>تحميل</span>
+                            </a>
+                          </div>
+                        );
+                      })}
+                    </div>
                   ) : (
-                    <p className="text-zinc-500 text-xs text-center py-6">لا توجد ملفات مرفقة مخصصة لهذا الدرس.</p>
+                    (!currentLesson.attachment_url) && (
+                      <p className="text-zinc-500 text-xs text-center py-8">لا توجد ملفات مرفقة مخصصة لهذه المحاضرة حالياً.</p>
+                    )
                   )}
                 </div>
               )}
@@ -851,8 +922,7 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ courseS
 
               <div className="space-y-1">
                 <style dangerouslySetInnerHTML={{__html: `
-                  @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@700;800;900&family=Alexandria:wght@800;900&display=swap');
-                  @import url('https://fonts.cdnfonts.com/css/lovelo');
+                  @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@700;800;900&family=Alexandria:wght@800;900&family=Alike&display=swap');
                 `}} />
                 <h3 className="font-alexandria font-black text-white text-lg sm:text-2xl tracking-tighter uppercase text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-yellow-200 to-amber-500">
                   شهادة إكمال ومثابرة موثقة
@@ -867,8 +937,8 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ courseS
               <h4 
                 className="text-white text-2xl sm:text-4xl underline decoration-amber-500/50 underline-offset-8 transition-all"
                 style={{
-                  fontFamily: /[\u0600-\u06FF]/.test(activeCert.student_name) ? "'Cairo', 'Alexandria', sans-serif" : "'Lovelo', sans-serif",
-                  fontWeight: /[\u0600-\u06FF]/.test(activeCert.student_name) ? 900 : 'bold',
+                  fontFamily: /[\u0600-\u06FF]/.test(activeCert.student_name) ? "'Cairo', 'Alexandria', sans-serif" : "'Alike', serif",
+                  fontWeight: /[\u0600-\u06FF]/.test(activeCert.student_name) ? 900 : 'normal',
                 }}
               >
                 {activeCert.student_name}

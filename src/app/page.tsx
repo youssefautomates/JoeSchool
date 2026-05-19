@@ -22,6 +22,8 @@ import { FAQSection } from "@/components/FAQSection";
 import { ProductMedia } from "@/components/ProductMedia";
 import { getCoursesList, type LmsCourse } from "@/lib/coursesDb";
 import { supabaseClient } from "@/lib/supabaseClient";
+import WishlistButton from "@/components/WishlistButton";
+import { fetchActiveBundles, type HydratedBundle } from "@/lib/bundles";
 
 // ── Helper: Unpack Product Media Tags ───────────────────────────────────────────────
 function unpackProduct(p: any) {
@@ -52,6 +54,7 @@ export default function Home() {
   // State Management
   const [products, setProducts] = useState<Product[]>([]);
   const [coursesList, setCoursesList] = useState<LmsCourse[]>([]);
+  const [bundles, setBundles] = useState<HydratedBundle[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [stats, setStats] = useState({ count: 1200, averageRating: 5.0 });
   const [hoveredId, setHoveredId] = useState<string | null>(null);
@@ -62,6 +65,7 @@ export default function Home() {
   
   // Dynamic categories from Supabase
   const [dynamicCourseCategories, setDynamicCourseCategories] = useState<string[]>([]);
+  const [dynamicProductCategories, setDynamicProductCategories] = useState<string[]>([]);
 
   // Fetch initial data
   useEffect(() => {
@@ -72,6 +76,13 @@ export default function Home() {
       if (!cancelled) {
         setProducts(p);
         setIsLoading(false);
+      }
+    });
+
+    // Fetch bundles
+    fetchActiveBundles().then(({ bundles: b }) => {
+      if (!cancelled) {
+        setBundles(b);
       }
     });
 
@@ -101,6 +112,17 @@ export default function Home() {
         }
       });
 
+    // Fetch product categories from Supabase (dynamic)
+    supabaseClient
+      .from("product_categories")
+      .select("name")
+      .order("order_index", { ascending: true })
+      .then(({ data }) => {
+        if (!cancelled && data && data.length > 0) {
+          setDynamicProductCategories(data.map((c: {name: string}) => c.name));
+        }
+      });
+
     return () => { cancelled = true; };
   }, []);
 
@@ -115,15 +137,20 @@ export default function Home() {
   // Digital product categories filter list
   const productCategories = [
     "الكل",
-    "الأتمتة",
-    "الذكاء الاصطناعي",
-    "صناعة المحتوى"
+    ...(dynamicProductCategories.length > 0
+      ? dynamicProductCategories
+      : ["الأتمتة", "الذكاء الاصطناعي", "صناعة المحتوى"])
   ];
 
   // Smart product categorizer
   const getProductCategory = (product: Product) => {
     const categoryField = product.category || "";
     
+    // Prioritize exact match from dynamic categories fetched from DB
+    if (dynamicProductCategories.includes(categoryField)) {
+      return categoryField;
+    }
+
     if (categoryField === "الأتمتة" || categoryField === "الذكاء الاصطناعي" || categoryField === "صناعة المحتوى") {
       return categoryField;
     }
@@ -373,6 +400,11 @@ export default function Home() {
                         </Badge>
                       </div>
 
+                      {/* Wishlist Heart Button */}
+                      <div className="absolute top-4 right-4 z-30">
+                        <WishlistButton itemId={course.id} itemType="course" size={16} />
+                      </div>
+
                       <div className="absolute bottom-3 right-4 z-20">
                         <span className="text-[10px] font-bold bg-white/10 backdrop-blur-md border border-white/10 px-2 py-0.5 rounded text-rose-300">
                           {course.level}
@@ -433,6 +465,136 @@ export default function Home() {
             </AnimatePresence>
           </div>
         </section>
+
+        {/* ── 2.5. قسم حزم العروض المميزة (BUNDLES SECTION) ───────────────────────────── */}
+        {bundles.length > 0 && (
+          <section id="bundles" className="py-16 md:py-32 relative border-b border-white/5 bg-white/[0.01]">
+            <div className="absolute inset-0 pointer-events-none z-0">
+              <div className="absolute inset-0 bg-grid-lines mask-radial-faded opacity-20"></div>
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[250px] bg-purple-600/5 rounded-full blur-[80px]" />
+            </div>
+
+            <div className="container relative z-10 mx-auto px-4 max-w-7xl">
+              <div className="text-center mb-10 md:mb-16">
+                <motion.div
+                  initial={{ opacity: 0, y: 15 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  className="inline-flex items-center gap-2 bg-purple-500/10 text-purple-400 px-3 py-1 md:px-4 md:py-1.5 rounded-full font-cairo text-xs md:text-sm font-bold mb-4 border border-purple-500/20"
+                >
+                  <Layers className="w-3.5 h-3.5 md:w-4 md:h-4 text-purple-500" />
+                  عروض التوفير الكبرى والحلول المتكاملة
+                </motion.div>
+                <h2 className="text-2xl md:text-5xl font-alexandria font-black text-white mb-4 md:mb-6 tracking-tight">حزم العروض المميزة</h2>
+                <p className="text-zinc-400 font-cairo text-sm md:text-lg max-w-2xl mx-auto leading-relaxed">
+                  وفر أكثر من 60% مع حزم العروض الكبرى التي تجمع بين الأقسام التدريبية التطبيقية والأدوات الجاهزة للتثبيت المباشر.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+                {bundles.map((bundle) => {
+                  const coursesCount = bundle.items.filter(it => it.item_type === "course").length;
+                  const productsCount = bundle.items.filter(it => it.item_type === "digital_product").length;
+
+                  return (
+                    <motion.div
+                      key={bundle.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      className="group bg-[#0a0a0f] border border-white/5 hover:border-purple-500/30 rounded-[2rem] overflow-hidden shadow-2xl flex flex-col justify-between hover:-translate-y-1.5 transition-all duration-300 h-full relative cursor-pointer"
+                      onClick={() => router.push(`/bundles/${bundle.slug}`)}
+                    >
+                      {/* Visual header */}
+                      <div className="relative h-48 bg-zinc-900 overflow-hidden flex items-center justify-center border-b border-white/5">
+                        {bundle.banner_url || bundle.image_url ? (
+                          <img src={bundle.banner_url || bundle.image_url} alt={bundle.title} className="absolute inset-0 w-full h-full object-cover opacity-45 group-hover:scale-105 transition-transform duration-500" />
+                        ) : (
+                          <div className="absolute inset-0 bg-grid-lines mask-radial-faded opacity-35"></div>
+                        )}
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0f] to-transparent"></div>
+                        <div className="absolute w-24 h-24 bg-purple-600/10 rounded-full blur-xl group-hover:scale-125 transition-transform duration-500"></div>
+                        
+                        <div className="absolute top-4 left-4 z-20 flex flex-col gap-2">
+                          <Badge className="bg-purple-600 text-white border-none font-cairo text-[9px] py-0.5 px-2.5 rounded shadow-lg uppercase tracking-wider font-black">
+                            حزمة سوبر
+                          </Badge>
+                        </div>
+
+                        {/* Wishlist Heart Button */}
+                        <div className="absolute top-4 right-4 z-30">
+                          <WishlistButton itemId={bundle.id} itemType="bundle" size={16} />
+                        </div>
+
+                        {/* Save Discount Percentage Badge */}
+                        {bundle.discount_pct && bundle.discount_pct > 0 ? (
+                          <div className="absolute bottom-3 left-4 z-20">
+                            <span className="text-[9px] font-black bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded text-emerald-400">
+                              وفر {bundle.discount_pct}% بالكامل
+                            </span>
+                          </div>
+                        ) : null}
+                      </div>
+
+                      {/* Content area */}
+                      <div className="p-6 flex-1 flex flex-col justify-between">
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-3 text-[10px] text-zinc-500 font-bold">
+                            {coursesCount > 0 && (
+                              <span className="flex items-center gap-1">
+                                <BookOpen className="w-3.5 h-3.5 text-purple-400" />
+                                {coursesCount} دورات
+                              </span>
+                            )}
+                            {productsCount > 0 && (
+                              <span className="flex items-center gap-1">
+                                <Download className="w-3.5 h-3.5 text-rose-400" />
+                                {productsCount} أدوات رقمية
+                              </span>
+                            )}
+                            <span className="flex items-center gap-0.5 text-yellow-400">
+                              <Star className="w-3.5 h-3.5 fill-current" />
+                              <span>5.0</span>
+                            </span>
+                          </div>
+
+                          <h3 className="text-base sm:text-lg font-alexandria font-bold text-white leading-snug group-hover:text-purple-400 transition-colors line-clamp-2">
+                            {bundle.title}
+                          </h3>
+
+                          <p className="text-zinc-400 text-xs leading-relaxed line-clamp-3">
+                            {bundle.short_description || bundle.description}
+                          </p>
+                        </div>
+
+                        <div className="mt-6 pt-5 border-t border-white/5 flex items-center justify-between">
+                          <div className="flex flex-col">
+                            {bundle.original_price && bundle.original_price > 0 && (
+                              <span className="text-[9px] text-zinc-500 line-through mb-0.5 font-mono">
+                                ${bundle.original_price}
+                              </span>
+                            )}
+                            <div className="flex items-baseline gap-0.5">
+                              <span className="text-2xl font-alexandria font-black text-white font-mono">
+                                ${bundle.price}
+                              </span>
+                              <span className="text-[8px] text-zinc-500 uppercase tracking-widest font-black mr-1">USD</span>
+                            </div>
+                          </div>
+
+                          <div className="h-10 px-4 bg-white/5 hover:bg-purple-600 border border-white/5 hover:border-purple-600 text-white rounded-xl text-[11px] font-bold flex items-center gap-1.5 transition-all shrink-0">
+                            <span>عرض العرض</span>
+                            <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform rtl:rotate-180" />
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* ── 3. قسم المنتجات الرقمية (DIGITAL PRODUCTS SECTION) ────────────────────────── */}
         <section id="products" className="py-16 md:py-32 relative">
@@ -546,6 +708,11 @@ export default function Home() {
                               <span className="bg-[#D6004B]/15 text-[#D6004B] border border-[#D6004B]/30 font-cairo text-[9px] md:text-[10px] font-black py-1 px-3 rounded-full backdrop-blur-md shadow-[0_0_15px_rgba(214,0,75,0.2)] tracking-wide">
                                 {getProductCategory(product)}
                               </span>
+                            </div>
+
+                            {/* Wishlist Heart Button */}
+                            <div className="absolute bottom-4 left-4 z-20">
+                              <WishlistButton itemId={product.id} itemType="digital_product" size={16} />
                             </div>
                           </div>
 

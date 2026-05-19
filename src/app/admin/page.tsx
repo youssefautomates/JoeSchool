@@ -240,33 +240,62 @@ export default function AdminDashboard() {
 
   const smartInsights = useMemo(() => {
     const list = [];
-    if (orders.length === 0) {
-      list.push({
-        title: "بانتظار البيانات الحقيقية",
-        text: "لا توجد مبيعات أو زيارات مسجلة في قاعدة البيانات حتى الآن. سيتم توليد التحليلات التلقائية فور إتمام أول معاملة.",
-        type: "info"
-      });
-      return list;
-    }
-
-    if (Number(stats.refundRate) > 5) {
-      list.push({
-        title: "ارتفاع في معدل المعاملات الفاشلة",
-        text: `لقد تجاوز معدل فشل الدفع ${stats.refundRate}%. نوصي بفحص بوابة دفع Paymob.`,
-        type: "danger"
-      });
-    } else {
-      list.push({
-        title: "استقرار تام في الدفع",
-        text: "تسجل بوابات الدفع معدلات استجابة ممتازة بنسبة نجاح عالية.",
-        type: "success"
-      });
-    }
-
+    
+    // 1. Revenue Insight
+    const profitPotential = stats.totalRevenue * 0.15; // Upsell growth estimate
     list.push({
-      title: "أوقات الذروة الشرائية",
-      text: "تسجل الفترة المسائية أعلى وتيرة للمبيعات وفقاً لمعاملات الداتا المتوفرة.",
+      title: "توصية الإيرادات (Revenue Insight)",
+      text: stats.totalRevenue > 0 
+        ? `بناءً على إجمالي المبيعات الحالي، يمكنك زيادة إيراداتك بمعدل تقديري ${profitPotential.toFixed(0)} ج.م عبر إطلاق عرض باقة مخصصة (Bundle Offer) وربطها بكوبون تخفيض.`
+        : "لا توجد بيانات إيرادات كافية بعد. نوصي بإطلاق عرض افتتاح للمنصة لجمع أول مبيعات وتدشين الدورة التسويقية.",
+      type: "success"
+    });
+
+    // 2. Top Product Alert
+    list.push({
+      title: "المنتج الأكثر شعبية (Top Product Alert)",
+      text: stats.topProduct !== "لا توجد مبيعات"
+        ? `يسجل المنتج "${stats.topProduct}" أعلى وتيرة مبيعات حقيقية بالمنصة. نقترح زيادة الميزانية الإعلانية لإعلانات التيك توك الموجهة له.`
+        : "بانتظار تحديد المنتج البطل. نوصي بتنشيط منتج حزمة n8n بالصفحة الرئيسية للمتجر كعرض رئيسي لجذب العملاء.",
       type: "info"
+    });
+
+    // 3. Weakest Funnel
+    const abanRateVal = Number(stats.abandonmentRate || 0);
+    list.push({
+      title: "نقاط الضعف بالقمع (Weakest Funnel)",
+      text: abanRateVal > 15
+        ? `يسجل معدل التخلي عن سلة الشراء نسبة مرتفعة ${stats.abandonmentRate}%. ننصح بتفعيل رسائل بريد وتنبيهات تلقائية لاستعادة السلات المفقودة.`
+        : "معدلات التخلي عن سلة الدفع تقع ضمن النطاق الآمن. تجربة الدفع ممتازة وسلسة للمشترين.",
+      type: "warning"
+    });
+
+    // 4. Best Opportunity
+    list.push({
+      title: "أفضل فرصة نمو ربحي (Best Opportunity)",
+      text: stats.totalRevenue > 0
+        ? `نسبة تكرار العملاء حالياً ${stats.repeatPurchaseRate}% . إطلاق كورسات متقدمة في أتمتة الذكاء الاصطناعي هي الفرصة الذهبية لمضاعفة القيمة الإجمالية للعميل (LTV).`
+        : "تعد حزم الأتمتة الجاهزة هي الفرصة الأعلى لسرعة تحقيق الأرباح لقيمة منفعتها المباشرة للشركات والأفراد.",
+      type: "info"
+    });
+
+    // 5. Student Retention
+    list.push({
+      title: "معدل استبقاء وتفاعل الطلاب (Student Retention)",
+      text: orders.length > 0
+        ? "أظهرت التحليلات أن الطلاب يتفاعلون بشكل ممتاز في دروس الكورسات المسجلة. نوصي بإطلاق شهادات إكمال فورية لتشجيعهم على الإتمام."
+        : "بانتظار أول عمليات انضمام للطلاب لبدء تتبع سلوك المشاهدة وتفاعلهم مع المحاضرات والدروس.",
+      type: "success"
+    });
+
+    // 6. Conversion Alert
+    const failRateVal = Number(stats.refundRate || 0);
+    list.push({
+      title: "تنبيه معدلات التحويل (Conversion Alert)",
+      text: failRateVal > 8
+        ? `يسجل النظام زيادة بمعدل فشل الدفع ${stats.refundRate}%. نوصي بالتحقق من ربط الـ Callback لـ Paymob لضمان قيد الطلبات تلقائياً.`
+        : "بوابات الدفع الإلكتروني مستقرة بالكامل وتعمل بكفاءة فائقة ونسبة معاملات مكتملة ممتازة.",
+      type: failRateVal > 8 ? "danger" : "success"
     });
 
     return list;

@@ -38,7 +38,7 @@ export default function AdminCertificatesPage() {
       <div className="flex items-center justify-between border-b border-white/5 pb-6">
         <div>
           <h1 className="text-3xl font-alexandria font-black text-white">إدارة الشهادات المصدرة</h1>
-          <p className="text-zinc-400 text-sm mt-1">تصفح وتتبع شهادات الإكمال المصدرة تلقائياً للطلاب المتميزين الذين أكملوا 100% من المساق.</p>
+          <p className="text-zinc-400 text-sm mt-1">تصفح وتتبع شهادات الإكمال المصدرة تلقائياً للطلاب المتميزين الذين أكملوا 100% من القسم.</p>
         </div>
         <div className="w-12 h-12 rounded-xl bg-emerald-600/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
           <Award className="w-6 h-6" />
@@ -67,7 +67,7 @@ export default function AdminCertificatesPage() {
               <tr className="bg-white/[0.02] border-b border-white/5 text-[11px] font-black text-zinc-400 uppercase tracking-widest font-cairo">
                 <th className="p-5">كود التحقق الفريد</th>
                 <th className="p-5">اسم الطالب المكرّم</th>
-                <th className="p-5">المسار التدريبي المنجز</th>
+                <th className="p-5">القسم التدريبي المنجز</th>
                 <th className="p-5">تاريخ الإصدار</th>
                 <th className="p-5">حالة التوثيق</th>
               </tr>

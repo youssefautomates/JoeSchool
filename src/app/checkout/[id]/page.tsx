@@ -193,6 +193,18 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
         }
       }
 
+      // If still not loaded, query bundles table
+      if (!data) {
+        const { data: bundleData } = await supabaseClient
+          .from("bundles")
+          .select("*")
+          .eq("id", resolvedParams.id)
+          .maybeSingle();
+        if (bundleData) {
+          data = bundleData;
+        }
+      }
+
       if (!data) throw new Error("المحتوى المطلوب غير متوفر حالياً");
       
       setProduct(data as Product);

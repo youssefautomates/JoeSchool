@@ -12,7 +12,7 @@ import {
   getEnrollmentsForAdmin,
   type LmsCourse, type LmsSection, type LmsLesson, type LmsEnrollment
 } from "@/lib/coursesDb";
-import { uploadFile } from "@/lib/upload";
+import { uploadFile, uploadPrivateFile, deletePrivateFileFromUrl, uploadFileChunked } from "@/lib/upload";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { supabaseClient } from "@/lib/supabaseClient";
@@ -168,6 +168,239 @@ export default function AdminCoursesPage() {
   const [editingSectionDescription, setEditingSectionDescription] = useState("");
   const [editingSectionId, setEditingSectionId] = useState<string | null>(null);
   const [uploadingField, setUploadingField] = useState<string | null>(null);
+  
+  // Video direct secure upload states
+  const [videoUploadProgress, setVideoUploadProgress] = useState<number | null>(null);
+  const [videoFileSize, setVideoFileSize] = useState<string | null>(null);
+  const [videoFileName, setVideoFileName] = useState<string | null>(null);
+  const [autoThumbnailUrl, setAutoThumbnailUrl] = useState<string | null>(null);
+
+  // Attachment upload states
+  const [attachmentUploading, setAttachmentUploading] = useState(false);
+  const [attachmentProgress, setAttachmentProgress] = useState<number | null>(null);
+
+  // Clear upload states upon opening lesson modal
+  useEffect(() => {
+    if (showLessonModal) {
+      setVideoUploadProgress(null);
+      setVideoFileSize(null);
+      setVideoFileName(null);
+      setAutoThumbnailUrl(editingLesson?.attachment_url || null);
+      setAttachmentUploading(false);
+      setAttachmentProgress(null);
+    }
+  }, [showLessonModal]);
+
+  const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setVideoFileName(file.name);
+    const sizeInMB = (file.size / (1024 * 1024)).toFixed(1);
+    setVideoFileSize(`${sizeInMB} MB`);
+    setVideoUploadProgress(0);
+
+    try {
+      // 1. Auto read video duration in client-side JS
+      const tempVideo = document.createElement("video");
+      tempVideo.preload = "metadata";
+      tempVideo.src = URL.createObjectURL(file);
+      tempVideo.onloadedmetadata = () => {
+        const durationSec = Math.round(tempVideo.duration);
+        setEditingLesson(prev => ({
+          ...prev,
+          duration_seconds: durationSec
+        }));
+        URL.revokeObjectURL(tempVideo.src);
+      };
+
+      // 2. Auto extract video frame as thumbnail
+      const generateAutoThumbnail = (videoFile: File): Promise<Blob | null> => {
+        return new Promise((resolve) => {
+          const video = document.createElement("video");
+          video.preload = "metadata";
+          video.src = URL.createObjectURL(videoFile);
+          video.muted = true;
+          video.playsInline = true;
+          video.onloadedmetadata = () => {
+            video.currentTime = 1.0;
+          };
+          video.onseeked = () => {
+            try {
+              const canvas = document.createElement("canvas");
+              canvas.width = 640;
+              canvas.height = 360;
+              const ctx = canvas.getContext("2d");
+              if (ctx) {
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                canvas.toBlob((blob) => {
+                  URL.revokeObjectURL(video.src);
+                  resolve(blob);
+                }, "image/jpeg", 0.85);
+              } else {
+                URL.revokeObjectURL(video.src);
+                resolve(null);
+              }
+            } catch (e) {
+              URL.revokeObjectURL(video.src);
+              resolve(null);
+            }
+          };
+          video.onerror = () => {
+            URL.revokeObjectURL(video.src);
+            resolve(null);
+          };
+        });
+      };
+
+      const thumbBlob = await generateAutoThumbnail(file);
+      if (thumbBlob) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setAutoThumbnailUrl(reader.result as string);
+        };
+        reader.readAsDataURL(thumbBlob);
+
+        const thumbFile = new File([thumbBlob], `thumb_${Date.now()}.jpg`, { type: "image/jpeg" });
+        try {
+          const uploadedThumbUrl = await uploadPrivateFile(thumbFile, "lesson-thumbnails", "auto");
+          setEditingLesson(prev => ({
+            ...prev,
+            attachment_url: uploadedThumbUrl
+          }));
+        } catch (err) {}
+      }
+
+      // 3. Upload video file to private course-videos bucket
+      const folderPath = selectedCourse ? selectedCourse.slug : "general";
+      const uploadedVideoUrl = await uploadFileChunked(
+        file,
+        "course-videos",
+        folderPath,
+        (pct) => {
+          setVideoUploadProgress(pct);
+        }
+      );
+
+      setEditingLesson(prev => ({
+        ...prev,
+        video_url: uploadedVideoUrl
+      }));
+
+      toast.success("تم رفع الفيديو وتوليد لقطة الغلاف تلقائياً بنجاح! 🚀");
+    } catch (err: any) {
+      toast.error(err.message || "خطأ أثناء رفع الفيديو.");
+      setVideoUploadProgress(null);
+      setVideoFileName(null);
+      setVideoFileSize(null);
+    }
+  };
+
+  const handleVideoDelete = async () => {
+    if (!editingLesson?.video_url) return;
+    if (!confirm("هل أنت متأكد من حذف هذا الفيديو نهائياً من مساحة التخزين؟")) return;
+
+    try {
+      await deletePrivateFileFromUrl(editingLesson.video_url, "course-videos");
+      if (editingLesson.attachment_url && editingLesson.attachment_url.includes("lesson-thumbnails")) {
+        await deletePrivateFileFromUrl(editingLesson.attachment_url, "lesson-thumbnails");
+      }
+      
+      setEditingLesson(prev => ({
+        ...prev,
+        video_url: "",
+        attachment_url: ""
+      }));
+      setVideoUploadProgress(null);
+      setVideoFileName(null);
+      setVideoFileSize(null);
+      setAutoThumbnailUrl(null);
+      toast.success("تم حذف ملف الفيديو وصورة المعاينة بنجاح! 🗑️");
+    } catch (err: any) {
+      toast.error("فشل حذف الفيديو.");
+    }
+  };
+
+  // Attachment Upload Handler
+  const handleAttachmentUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    
+    setAttachmentUploading(true);
+    setAttachmentProgress(0);
+
+    const uploaded = [...(editingLesson?.attachments || [])];
+    const folderPath = selectedCourse ? selectedCourse.slug : "general";
+
+    try {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        
+        // 1. File size validation (Max 100MB)
+        if (file.size > 100 * 1024 * 1024) {
+          toast.error(`حجم الملف ${file.name} يتجاوز 100 ميجابايت.`);
+          continue;
+        }
+
+        // Upload using uploadPrivateFile
+        const url = await uploadPrivateFile(file, "lesson-assets", folderPath, (pct) => {
+          setAttachmentProgress(pct);
+        });
+
+        uploaded.push({
+          name: file.name,
+          url,
+          size: file.size,
+          type: file.name.split('.').pop() || "unknown"
+        });
+      }
+
+      setEditingLesson(prev => ({
+        ...prev,
+        attachments: uploaded
+      }));
+      toast.success("تم رفع المرفقات بنجاح! 📂");
+    } catch (err: any) {
+      toast.error(err.message || "خطأ أثناء رفع المرفقات.");
+    } finally {
+      setAttachmentUploading(false);
+      setAttachmentProgress(null);
+    }
+  };
+
+  const handleAttachmentDelete = async (url: string) => {
+    if (!confirm("هل أنت متأكد من حذف هذا الملف المرفق؟")) return;
+    try {
+      await deletePrivateFileFromUrl(url, "lesson-assets");
+      setEditingLesson(prev => ({
+        ...prev,
+        attachments: (prev?.attachments || []).filter(a => a.url !== url)
+      }));
+      toast.success("تم حذف المرفق بنجاح.");
+    } catch (e) {
+      toast.error("فشل حذف المرفق.");
+    }
+  };
+
+  const formatBytes = (bytes: number): string => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
+  const getFileIcon = (type: string) => {
+    const t = type.toLowerCase();
+    if (t === 'pdf') return '📄';
+    if (['zip', 'rar', '7z', 'tar', 'gz'].includes(t)) return '📦';
+    if (['doc', 'docx'].includes(t)) return '📝';
+    if (['xls', 'xlsx', 'csv'].includes(t)) return '📊';
+    if (t === 'mp3') return '🎵';
+    if (['png', 'jpg', 'jpeg', 'webp', 'gif', 'svg'].includes(t)) return '🖼️';
+    if (['js', 'ts', 'jsx', 'tsx', 'html', 'css', 'py', 'json', 'go', 'rs', 'c', 'cpp'].includes(t)) return '💻';
+    return '📁';
+  };
 
   // Analytics State
   const [studentsData, setStudentsData] = useState<LmsEnrollment[]>([]);
@@ -378,7 +611,7 @@ export default function AdminCoursesPage() {
       {/* HEADER */}
       <div className="flex items-center justify-between border-b border-white/5 pb-6">
         <div>
-          <h1 className="text-3xl font-alexandria font-black text-white">إدارة المساقات والكورسات</h1>
+          <h1 className="text-3xl font-alexandria font-black text-white">إدارة الأقسام والكورسات</h1>
           <p className="text-zinc-400 text-sm mt-1">أنشئ ونظم أكاديميتك ومحاضراتك التفاعلية وحضر منهجك بكل مرونة وسهولة.</p>
         </div>
         {view === "list" && (
@@ -761,8 +994,7 @@ export default function AdminCoursesPage() {
                 {/* Certificate Preview Box */}
                 <div className="relative w-full aspect-[1.414/1] bg-white/5 rounded-xl border border-white/10 overflow-hidden flex items-center justify-center">
                   <style dangerouslySetInnerHTML={{__html: `
-                    @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@700;800;900&family=Alexandria:wght@800;900&display=swap');
-                    @import url('https://fonts.cdnfonts.com/css/lovelo');
+                    @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@700;800;900&family=Alexandria:wght@800;900&family=Alike&display=swap');
                   `}} />
                   {courseForm.certificate_bg_url ? (
                     <>
@@ -775,8 +1007,8 @@ export default function AdminCoursesPage() {
                             left: `${courseForm.certificate_name_x}%`, 
                             top: `${courseForm.certificate_name_y}%`, 
                             transform: 'translate(-50%, -50%)',
-                            fontFamily: /[\u0600-\u06FF]/.test(testStudentName) ? "'Cairo', 'Alexandria', sans-serif" : "'Lovelo', sans-serif",
-                            fontWeight: /[\u0600-\u06FF]/.test(testStudentName) ? 900 : 'bold',
+                            fontFamily: /[\u0600-\u06FF]/.test(testStudentName) ? "'Cairo', 'Alexandria', sans-serif" : "'Alike', serif",
+                            fontWeight: /[\u0600-\u06FF]/.test(testStudentName) ? 900 : 'normal',
                           }}
                         >
                           {testStudentName || "[اسم الطالب هنا]"}
@@ -931,55 +1163,208 @@ export default function AdminCoursesPage() {
                 <input type="number" value={editingLesson.duration_seconds} onChange={e => setEditingLesson({ ...editingLesson, duration_seconds: Number(e.target.value) })} className="bg-white/5 border border-white/5 rounded-xl py-3 px-4 text-sm" />
               </div>
               
-              {/* Video URL with Live Preview */}
+              {/* Video URL with Live Preview & Direct Upload to Private Supabase Storage */}
               {editingLesson.lecture_type === "video" && (
-                <div className="flex flex-col gap-1.5 sm:col-span-2 space-y-2">
-                  <label className="text-xs text-zinc-400 font-bold">رابط الفيديو (YouTube/Vimeo/Bunny/Cloudflare)</label>
-                  <input type="text" value={editingLesson.video_url || ""} onChange={e => {
-                    const val = e.target.value;
-                    let duration = editingLesson.duration_seconds;
-                    if ((val.includes("youtube") || val.includes("youtu.be")) && (!duration || duration === 300)) {
-                      duration = 600; // Mock default
-                    }
-                    setEditingLesson({ ...editingLesson, video_url: val, duration_seconds: duration });
-                  }} placeholder="الصق الرابط هنا لمعاينة الفيديو فوراً..." className="bg-white/5 border border-white/5 rounded-xl py-3 px-4 text-sm w-full" />
-                  
-                  {editingLesson.video_url && (
-                    <div className="mt-2 rounded-xl overflow-hidden border border-white/10 bg-zinc-950 aspect-video relative">
-                      <span className="absolute top-2 right-2 bg-black/60 text-[9px] text-zinc-400 font-black px-2 py-0.5 rounded backdrop-blur z-20">Live Preview</span>
-                      <iframe
-                        src={
-                          editingLesson.video_url.includes("youtube.com/shorts/") 
-                            ? `https://www.youtube.com/embed/${editingLesson.video_url.split("/shorts/")[1]?.split("?")[0]}`
-                            : editingLesson.video_url.includes("watch?v=") 
-                            ? `https://www.youtube.com/embed/${editingLesson.video_url.split("v=")[1]?.split("&")[0]}` 
-                            : editingLesson.video_url.includes("youtu.be/") 
-                            ? `https://www.youtube.com/embed/${editingLesson.video_url.split("youtu.be/")[1]?.split("?")[0]}`
-                            : editingLesson.video_url.includes("vimeo.com/") 
-                            ? `https://player.vimeo.com/video/${editingLesson.video_url.split("vimeo.com/")[1]?.split("?")[0]?.split("/")[0]}`
-                            : editingLesson.video_url
-                        }
-                        title="Preview" className="w-full h-full border-none" allowFullScreen
+                <div className="flex flex-col gap-3 sm:col-span-2 space-y-2 bg-white/[0.01] border border-white/5 p-5 rounded-2xl">
+                  <div className="flex items-center justify-between border-b border-white/5 pb-2.5">
+                    <label className="text-xs text-rose-400 font-black font-alexandria flex items-center gap-1">
+                      <Video className="w-4 h-4" />
+                      <span>رفع واستضافة الفيديو الآمن (Private Streaming Host)</span>
+                    </label>
+                    <span className="text-[10px] text-zinc-500 font-bold">مدعوم بالكامل بواسطة Supabase Storage</span>
+                  </div>
+
+                  {/* Drag/Drop and File picker box */}
+                  {!editingLesson.video_url && (
+                    <div className="border-2 border-dashed border-white/10 hover:border-rose-500/40 rounded-xl p-8 text-center transition-all bg-black/25 relative group">
+                      <input 
+                        type="file" 
+                        accept="video/*" 
+                        onChange={handleVideoUpload}
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" 
+                        disabled={videoUploadProgress !== null}
                       />
+                      
+                      <div className="space-y-3">
+                        <div className="w-12 h-12 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center mx-auto group-hover:scale-110 transition-transform">
+                          <Download className="w-6 h-6 rotate-180" />
+                        </div>
+                        <div className="text-sm font-bold text-white">اسحب ملف الفيديو هنا أو اضغط للاستعراض</div>
+                        <p className="text-zinc-500 text-xs font-cairo">
+                          يدعم صيغ MP4, MKV, MOV, WebM حتى 5 جيجابايت
+                        </p>
+                      </div>
+
+                      {/* Progress Bar overlay */}
+                      {videoUploadProgress !== null && (
+                        <div className="absolute inset-0 bg-[#0a0a0f]/95 rounded-xl flex flex-col items-center justify-center p-6 space-y-3 z-20">
+                          <Loader2 className="w-8 h-8 text-[#D6004B] animate-spin" />
+                          <div className="w-full max-w-xs space-y-1">
+                            <div className="flex justify-between text-xs font-bold text-white">
+                              <span>جاري رفع واستشفاف الفيديو...</span>
+                              <span>{videoUploadProgress}%</span>
+                            </div>
+                            <div className="w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
+                              <div 
+                                className="bg-[#D6004B] h-full transition-all duration-300"
+                                style={{ width: `${videoUploadProgress}%` }}
+                              />
+                            </div>
+                            <p className="text-[10px] text-zinc-500 text-right">
+                              اسم الملف: {videoFileName} ({videoFileSize})
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Video URL Manual Backup and Edit */}
+                  <div className="flex flex-col gap-1.5">
+                    <span className="text-[10px] text-zinc-500 font-bold">مسار الفيديو الحالي في التخزين</span>
+                    <div className="flex gap-2">
+                      <input 
+                        type="text" 
+                        value={editingLesson.video_url || ""} 
+                        onChange={e => setEditingLesson({ ...editingLesson, video_url: e.target.value })} 
+                        placeholder="مسار الفيديو أو رابط مباشر..." 
+                        className="bg-white/5 border border-white/5 rounded-xl py-3 px-4 text-xs flex-1 font-mono text-zinc-300" 
+                      />
+                      {editingLesson.video_url && (
+                        <button 
+                          type="button"
+                          onClick={handleVideoDelete}
+                          className="h-[46px] px-4 bg-red-950/20 hover:bg-red-950/40 text-red-500 border border-red-900/10 rounded-xl text-xs font-bold font-alexandria flex items-center justify-center transition-all cursor-pointer"
+                        >
+                          🗑️ حذف الفيديو
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Generated Thumbnail preview & details */}
+                  {editingLesson.video_url && (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
+                      
+                      {/* Video Player Preview */}
+                      <div className="rounded-xl overflow-hidden border border-white/10 bg-zinc-950 aspect-video relative flex flex-col justify-center items-center">
+                        <span className="absolute top-2 right-2 bg-black/60 text-[9px] text-zinc-400 font-black px-2 py-0.5 rounded backdrop-blur z-20 font-alexandria uppercase tracking-wider">Video Stream Preview</span>
+                        {editingLesson.video_url.startsWith("http") ? (
+                          <video 
+                            src={editingLesson.video_url} 
+                            controls 
+                            className="w-full h-full object-contain"
+                            controlsList="nodownload"
+                          />
+                        ) : (
+                          <div className="text-center p-4">
+                            <Video className="w-8 h-8 text-zinc-600 mx-auto mb-2" />
+                            <p className="text-zinc-500 text-[11px] font-bold">الفيديو مسار محلي آمن في Supabase</p>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Auto-extracted Thumbnail Preview */}
+                      <div className="rounded-xl overflow-hidden border border-white/10 bg-zinc-950 aspect-video relative flex flex-col justify-center items-center">
+                        <span className="absolute top-2 right-2 bg-black/60 text-[9px] text-emerald-400 font-black px-2 py-0.5 rounded backdrop-blur z-20 font-alexandria uppercase tracking-wider flex items-center gap-1">
+                          <CheckCircle className="w-2.5 h-2.5" />
+                          Auto-Extracted Thumbnail
+                        </span>
+                        
+                        {autoThumbnailUrl ? (
+                          <img 
+                            src={autoThumbnailUrl} 
+                            alt="Extracted frame" 
+                            className="w-full h-full object-cover" 
+                          />
+                        ) : (
+                          <div className="text-center p-4">
+                            <ImageIcon className="w-8 h-8 text-zinc-600 mx-auto mb-2" />
+                            <p className="text-zinc-500 text-[11px] font-bold">لا توجد صورة مصغرة تلقائية بعد</p>
+                          </div>
+                        )}
+                      </div>
+
                     </div>
                   )}
                 </div>
               )}
 
-              {/* Upload Attachments */}
-              {(editingLesson.lecture_type === "pdf" || editingLesson.lecture_type === "download") && (
-                <div className="flex flex-col gap-1.5 sm:col-span-2">
-                  <label className="text-xs text-zinc-400 font-bold">الملف المرفق (PDF أو للتحميل)</label>
-                  <div className="flex gap-2">
-                    <input type="text" value={editingLesson.attachment_url || ""} onChange={e => setEditingLesson({ ...editingLesson, attachment_url: e.target.value })} placeholder="رابط الملف أو ارفع ملف..." className="bg-white/5 border border-white/5 rounded-xl py-3 px-4 text-sm flex-1 text-zinc-300" />
-                    <label className="h-[46px] px-4 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer">
-                      {uploadingField === "attachment_url" ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4 rotate-180" />}
-                      <span>رفع ملف</span>
-                      <input type="file" className="hidden" onChange={e => handleFileUpload(e, "attachment_url")} disabled={uploadingField !== null} />
-                    </label>
-                  </div>
+              {/* Lesson Attachments System */}
+              <div className="flex flex-col gap-3 sm:col-span-2 space-y-2 bg-white/[0.01] border border-white/5 p-5 rounded-2xl">
+                <div className="flex items-center justify-between border-b border-white/5 pb-2.5">
+                  <label className="text-xs text-emerald-400 font-black font-alexandria flex items-center gap-1">
+                    <FileText className="w-4 h-4" />
+                    <span>نظام الملفات المرفقة للمحاضرة (Lesson Attachments System)</span>
+                  </label>
+                  <span className="text-[10px] text-zinc-500 font-bold">رفع ملفات PDF، ZIP، أكواد، ومشاريع...</span>
                 </div>
-              )}
+
+                {/* Upload zone */}
+                <div className="border-2 border-dashed border-white/10 hover:border-emerald-500/40 rounded-xl p-6 text-center transition-all bg-black/25 relative group">
+                  <input 
+                    type="file" 
+                    multiple
+                    onChange={handleAttachmentUpload}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" 
+                    disabled={attachmentUploading}
+                  />
+                  <div className="space-y-2">
+                    <div className="w-10 h-10 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto group-hover:scale-110 transition-transform">
+                      <Plus className="w-5 h-5" />
+                    </div>
+                    <div className="text-xs font-bold text-white">اسحب الملفات هنا أو اضغط للاستعراض</div>
+                    <p className="text-zinc-500 text-[10px]">
+                      يدعم PDF, ZIP, DOCX, XLSX, MP3, صور وملفات أكواد حتى 100 ميجابايت للملف
+                    </p>
+                  </div>
+
+                  {attachmentUploading && (
+                    <div className="absolute inset-0 bg-[#0a0a0f]/95 rounded-xl flex flex-col items-center justify-center p-4 space-y-2 z-20">
+                      <Loader2 className="w-6 h-6 text-emerald-500 animate-spin" />
+                      <div className="w-full max-w-xs space-y-1">
+                        <div className="flex justify-between text-[10px] font-bold text-white">
+                          <span>جاري رفع المرفقات...</span>
+                          <span>{attachmentProgress !== null ? `${attachmentProgress}%` : ""}</span>
+                        </div>
+                        <div className="w-full bg-white/10 h-1 rounded-full overflow-hidden">
+                          <div 
+                            className="bg-emerald-500 h-full transition-all duration-300"
+                            style={{ width: `${attachmentProgress || 0}%` }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Attached Files List */}
+                {editingLesson.attachments && editingLesson.attachments.length > 0 && (
+                  <div className="space-y-2 pt-2">
+                    <span className="text-[10px] text-zinc-500 font-bold block">الملفات المرفقة حالياً ({editingLesson.attachments.length})</span>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {editingLesson.attachments.map((file, idx) => (
+                        <div key={file.url || idx} className="p-3 bg-white/5 border border-white/5 hover:border-white/10 rounded-xl flex items-center justify-between gap-3 group transition-all">
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <span className="text-lg shrink-0">{getFileIcon(file.type)}</span>
+                            <div className="min-w-0 leading-tight">
+                              <p className="text-xs font-bold text-white truncate max-w-[160px]">{file.name}</p>
+                              <span className="text-[9px] text-zinc-500 font-bold font-mono">{formatBytes(file.size)}</span>
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleAttachmentDelete(file.url)}
+                            className="p-1 rounded bg-red-950/20 text-red-500 hover:bg-red-500 hover:text-white transition-all cursor-pointer opacity-80 group-hover:opacity-100"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
 
               {editingLesson.lecture_type === "link" && (
                 <div className="flex flex-col gap-1.5 sm:col-span-2">
