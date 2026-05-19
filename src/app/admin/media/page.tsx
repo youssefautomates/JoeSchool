@@ -27,6 +27,7 @@ export default function AdminMediaLibraryPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [uploading, setUploading] = useState(false);
   const [copiedFile, setCopiedFile] = useState<string | null>(null);
+  const [totalStorageBytes, setTotalStorageBytes] = useState(0);
 
   useEffect(() => {
     loadFiles();
@@ -35,6 +36,7 @@ export default function AdminMediaLibraryPage() {
   const loadFiles = async () => {
     setLoading(true);
     try {
+      // 1. Fetch files for active bucket
       const { data, error } = await supabaseClient.storage.from(bucket).list("", {
         limit: 100,
         sortBy: { column: "created_at", order: "desc" }
@@ -45,9 +47,32 @@ export default function AdminMediaLibraryPage() {
       }
 
       setFiles((data as any[]) || []);
+
+      // 2. Fetch both buckets in parallel to calculate true unified storage usage
+      let unifiedBytes = 0;
+      try {
+        const [imagesRes, materialsRes] = await Promise.all([
+          supabaseClient.storage.from("course-images").list("", { limit: 1000 }),
+          supabaseClient.storage.from("course-materials").list("", { limit: 1000 })
+        ]);
+
+        if (imagesRes.data) {
+          imagesRes.data.forEach((f: any) => {
+            unifiedBytes += f.metadata?.size || 0;
+          });
+        }
+        if (materialsRes.data) {
+          materialsRes.data.forEach((f: any) => {
+            unifiedBytes += f.metadata?.size || 0;
+          });
+        }
+      } catch (sumErr) {
+        console.error("Failed to sum storage sizes:", sumErr);
+      }
+      setTotalStorageBytes(unifiedBytes);
+
     } catch (err: any) {
       console.error("Error loading files:", err.message);
-      // fallback mock list for standard safety if remote not initialized
       setFiles([]);
     } finally {
       setLoading(false);
@@ -90,11 +115,10 @@ export default function AdminMediaLibraryPage() {
     setTimeout(() => setCopiedFile(null), 2000);
   };
 
-  // Calculations for storage size
-  const totalSizeBytes = files.reduce((acc, f) => acc + (f.metadata?.size || 0), 0);
-  const totalSizeMB = Number((totalSizeBytes / (1024 * 1024)).toFixed(2));
-  const storageLimitMB = 100; // 100MB target logic for client view
-  const percentUsed = Math.min(100, Number(((totalSizeMB / storageLimitMB) * 100).toFixed(1)));
+  // Calculations for real storage size
+  const totalSizeMB = Number((totalStorageBytes / (1024 * 1024)).toFixed(2));
+  const storageLimitMB = 1024; // Real Supabase Free Tier Capacity limit: 1 GB
+  const percentUsed = Math.min(100, Number(((totalSizeMB / storageLimitMB) * 100).toFixed(2)));
 
   // Filter files
   const filteredFiles = files.filter(f => f.name.toLowerCase().includes(searchQuery.toLowerCase()));
