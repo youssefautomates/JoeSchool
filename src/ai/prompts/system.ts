@@ -24,7 +24,7 @@ export function getSystemPrompt(analytics: AnalyticsContext): string {
 - عدد العملاء الفريدين الحقيقيين: ${analytics.summary.totalCustomers} عميل
 - نسبة إعادة الشراء وتكرار العميل (Retention): ${analytics.summary.repeatPurchaseRate.toFixed(2)}%
 
-🎓 الأكاديمية والمساقات التعليمية (LMS):
+🎓 الأكاديمية والأقسام التعليمية (LMS):
 - إجمالي الكورسات التعليمية بالداتا: ${analytics.courses.total} كورس
 - إجمالي اشتراكات الطلاب بالكورسات: ${analytics.courses.totalEnrollments} اشتراك
 - متوسط تقييم الكورسات من الطلاب: ${analytics.courses.averageRating.toFixed(1)} / 5.0

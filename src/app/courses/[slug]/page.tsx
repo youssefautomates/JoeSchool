@@ -67,14 +67,7 @@ function ShowcaseVideoCard({ video, onClick }: ShowcaseVideoCardProps) {
         </div>
       </div>
 
-      {/* Info bottom text */}
-      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/95 via-black/50 to-transparent p-4 flex flex-col justify-end">
-        <h4 className="text-white font-alexandria font-bold text-xs line-clamp-1 group-hover:text-[#D6004B] transition-colors">{video.title || "تطبيق المشترك"}</h4>
-        <span className="text-[10px] text-zinc-400 mt-1 flex items-center gap-1 font-bold font-cairo">
-          <CheckCircle2 className="w-3.5 h-3.5 text-[#D6004B]" />
-          قصة نجاح وتطبيق عملي
-        </span>
-      </div>
+
     </div>
   );
 }
@@ -431,7 +424,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                     <div className="space-y-4">
                       <div className="flex items-center gap-2.5 text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-4 py-3 rounded-2xl text-xs font-bold justify-center font-cairo">
                         <CheckCircle2 className="w-5 h-5" />
-                        <span>حسابك مفعل ومسجل في المساق</span>
+                        <span>حسابك مفعل ومسجل في القسم</span>
                       </div>
                       <Link
                         href={`/learn/${course.slug}/${firstLessonSlug}`}
@@ -444,7 +437,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                   ) : (
                     <div className="space-y-5">
                       <div className="flex items-baseline justify-between">
-                        <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest font-alexandria">استثمار الانضمام للمساق</span>
+                        <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest font-alexandria">استثمار الانضمام للقسم</span>
                         {course.original_price > 0 && (
                           <span className="text-xs text-zinc-500 line-through font-alexandria">بدلاً من {course.original_price} ج.م</span>
                         )}
@@ -595,7 +588,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                             <div className="bg-[#0a0a0f] border border-white/5 rounded-3xl p-6 sm:p-8 space-y-4">
                               <h3 className="text-lg sm:text-xl font-alexandria font-bold text-white flex items-center gap-2">
                                 <AlertCircle className="w-5 h-5 text-rose-500" />
-                                متطلبات البدء في المساق
+                                متطلبات البدء في القسم
                               </h3>
                               <ul className="space-y-3.5 text-xs sm:text-sm text-zinc-400 list-disc pr-5">
                                 {course.requirements.map((req, rIdx) => (
@@ -610,7 +603,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                             <div className="bg-[#0a0a0f] border border-white/5 rounded-3xl p-6 sm:p-8 space-y-4">
                               <h3 className="text-lg sm:text-xl font-alexandria font-bold text-white flex items-center gap-2">
                                 <Users className="w-5 h-5 text-blue-500" />
-                                من هو الفرد المستهدف بهذا المساق؟
+                                من هو الفرد المستهدف بهذا القسم؟
                               </h3>
                               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 {course.who_is_for.map((aud, aIdx) => (
@@ -897,7 +890,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                   <div className="space-y-4 py-4">
                     <div className="flex items-center gap-2.5 text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-4 py-3.5 rounded-2xl text-xs font-bold justify-center font-cairo">
                       <CheckCircle2 className="w-5 h-5" />
-                      <span>حسابك مفعل ومسجل في المساق</span>
+                      <span>حسابك مفعل ومسجل في القسم</span>
                     </div>
 
                     <Link
@@ -1048,7 +1041,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                   href={course.price === 0 ? `/learn/${course.slug}/${firstLessonSlug}` : `/checkout/${course.id}`}
                   className="w-full h-12 bg-[#D6004B] hover:bg-[#b0003d] text-white rounded-2xl font-bold text-sm shadow-[0_10px_25px_rgba(214,0,75,0.3)] transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer font-cairo"
                 >
-                  <span>سجل في المساق الآن</span>
+                  <span>سجل في القسم الآن</span>
                   <ArrowLeft className="w-4 h-4 rtl:rotate-180" />
                 </Link>
               </div>
@@ -1101,12 +1094,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                               <BookOpen className="w-3.5 h-3.5 text-[#D6004B]" />
                               {item.lessons_count} محاضرة
                             </span>
-                            {item.level && (
-                              <span className="flex items-center gap-1 border-r border-white/10 pr-2">
-                                <Zap className="w-3.5 h-3.5 text-[#D6004B]" />
-                                {item.level}
-                              </span>
-                            )}
+
                           </div>
 
                           <h4 className="text-base font-alexandria font-bold text-white group-hover:text-[#D6004B] transition-colors line-clamp-1">
@@ -1477,7 +1465,7 @@ function MobileCourseView({
            <div className="space-y-3 text-center">
              <div className="flex items-center gap-2 text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-2 rounded-xl text-[10px] font-bold justify-center">
                <CheckCircle2 className="w-4 h-4" />
-               <span>حسابك مفعل ومسجل في المساق</span>
+               <span>حسابك مفعل ومسجل في القسم</span>
              </div>
              <Link
                href={`/learn/${course.slug}/${firstLessonSlug}`}
@@ -1601,7 +1589,7 @@ function MobileCourseView({
                    <div className="bg-[#050508] border border-white/5 rounded-2xl p-4 space-y-3">
                      <h3 className="text-xs font-alexandria font-bold text-white flex items-center gap-2">
                        <AlertCircle className="w-4 h-4 text-rose-500" />
-                       متطلبات البدء في المساق
+                       متطلبات البدء في القسم
                      </h3>
                      <ul className="space-y-2 text-xs text-zinc-400 list-disc pr-4">
                        {course.requirements.map((req, rIdx) => (

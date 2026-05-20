@@ -151,7 +151,6 @@ export function Navbar() {
                 <span className="font-alexandria font-bold text-lg md:text-xl tracking-tight text-white leading-tight" dir="ltr">
                   Youssef <span className="text-rose-500">Automates</span>
                 </span>
-                <span className="font-cairo text-[10px] text-zinc-400 font-medium tracking-wider uppercase">Premium Workflows</span>
               </div>
             </Link>
 

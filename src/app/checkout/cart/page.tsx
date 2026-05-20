@@ -431,7 +431,7 @@ export default function CartCheckoutPage() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 flex-col-reverse lg:flex-row">
             
             {/* Checkout Form (Right Side on Desktop, Bottom on Mobile) */}
-            <div className="lg:col-span-7 flex flex-col gap-6 order-2 lg:order-1">
+            <div className="lg:col-span-7 flex flex-col gap-6">
               <motion.div 
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -717,7 +717,7 @@ export default function CartCheckoutPage() {
             </div>
 
             {/* Order Summary (Left Side on Desktop, Top on Mobile) */}
-            <div className="lg:col-span-5 order-1 lg:order-2">
+            <div className="lg:col-span-5">
               <div className="sticky top-24 space-y-6">
                 <div className="bg-white/5 border border-white/5 rounded-[2rem] p-6 md:p-8 backdrop-blur-2xl">
                   <h3 className="font-alexandria font-bold text-white text-lg mb-5 flex items-center gap-2 border-b border-white/10 pb-4">

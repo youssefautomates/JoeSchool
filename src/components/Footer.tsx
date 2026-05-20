@@ -42,7 +42,7 @@ export function Footer() {
             <p className="text-zinc-500 text-sm leading-relaxed">
               منصتك المتكاملة لاحتراف أتمتة الأعمال n8n والذكاء الاصطناعي، وتحميل أرقى المنتجات الرقمية والدورات التعليمية المبتكرة.
             </p>
-            <div className="flex items-center gap-3">
+            <div className="hidden md:flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
                 <ShieldCheck className="w-4 h-4" />
               </div>
@@ -51,7 +51,7 @@ export function Footer() {
           </div>
 
           {/* Column 2: Quick Links */}
-          <div className="space-y-5">
+          <div className="space-y-5 hidden md:block">
             <h4 className="font-alexandria font-bold text-white text-xs tracking-wider uppercase">روابط سريعة</h4>
             <ul className="space-y-3 text-sm">
               {[

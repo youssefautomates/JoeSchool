@@ -510,7 +510,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 flex-col-reverse lg:flex-row">
             
             {/* Checkout Form (Right Side on Desktop, Bottom on Mobile) */}
-            <div className="lg:col-span-7 flex flex-col gap-6 order-2 lg:order-1">
+            <div className="lg:col-span-7 flex flex-col gap-6">
               <motion.div 
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -796,7 +796,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
             </div>
 
             {/* Order Summary (Left Side on Desktop, Top on Mobile) */}
-            <div className="lg:col-span-5 order-1 lg:order-2">
+            <div className="lg:col-span-5">
               <div className="sticky top-24 space-y-6">
                 <div className="bg-white/5 border border-white/5 rounded-[2rem] p-6 md:p-8 backdrop-blur-2xl">
                   <h3 className="font-alexandria font-bold text-white text-lg mb-5 flex items-center gap-2">
@@ -815,7 +815,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                       <div className="flex items-center gap-1.5 bg-rose-500/10 text-rose-400 px-2 py-1 rounded-md w-fit">
                         <Sparkles className="w-3 h-3" />
                         <span className="text-[10px] font-bold uppercase tracking-widest">
-                          {isCourse ? "انضمام فوري للمساق" : "تنزيل فوري"}
+                          {isCourse ? "انضمام فوري للقسم" : "تنزيل فوري"}
                         </span>
                       </div>
                     </div>

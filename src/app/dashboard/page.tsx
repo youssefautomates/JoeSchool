@@ -440,7 +440,7 @@ export default function DashboardPage() {
               <span>أهلاً بك، {profileName}</span>
               <Sparkles className="w-5 h-5 text-rose-500 animate-pulse" />
             </h1>
-            <p className="text-zinc-400 text-xs sm:text-sm mt-1">تصفح مساقاتك التعليمية وحزم الأتمتة التي قمت باقتنائها في مكان واحد.</p>
+            <p className="text-zinc-400 text-xs sm:text-sm mt-1">تصفح أقسامك التعليمية وحزم الأتمتة التي قمت باقتنائها في مكان واحد.</p>
           </div>
           
           <div className="flex items-center gap-3">
@@ -585,7 +585,7 @@ export default function DashboardPage() {
                   <BookOpen className="w-16 h-16 text-zinc-700 mx-auto mb-4" />
                   <h3 className="font-alexandria font-bold text-white text-base">لم تسجل في أي دورة بعد</h3>
                   <p className="text-zinc-500 text-xs sm:text-sm mt-1 max-w-sm mx-auto">
-                    ابدأ رحلتك التعليمية واشترك في أحد مساقاتنا القوية للأتمتة والذكاء الاصطناعي وصناعة المحتوى.
+                    ابدأ رحلتك التعليمية واشترك في أحد أقسامنا القوية للأتمتة والذكاء الاصطناعي وصناعة المحتوى.
                   </p>
                   <Link 
                     href="/courses"
@@ -618,9 +618,7 @@ export default function DashboardPage() {
 
                       <div className="p-6 flex-1 flex flex-col justify-between">
                         <div>
-                          <span className="text-[9px] bg-rose-600/10 text-rose-400 border border-rose-500/20 px-2 py-0.5 rounded font-bold uppercase tracking-wider">
-                            {course.level}
-                          </span>
+
                           <h3 className="text-base sm:text-lg font-alexandria font-bold text-white mt-2 leading-snug group-hover:text-rose-400 transition-colors line-clamp-2">
                             {course.title}
                           </h3>
@@ -759,13 +757,13 @@ export default function DashboardPage() {
                   </div>
                   <h3 className="text-lg font-alexandria font-bold text-white mb-2">لا تتوفر شهادات بعد</h3>
                   <p className="text-zinc-400 text-xs sm:text-sm max-w-md leading-relaxed mb-6">
-                    ستظهر شهادات التخرج الرقمية المعتمدة هنا فور إتمام أي مساق تدريبي بنجاح وحضور الدروس والتقييمات المخصصة لها.
+                    ستظهر شهادات التخرج الرقمية المعتمدة هنا فور إتمام أي قسم تدريبي بنجاح وحضور الدروس والتقييمات المخصصة لها.
                   </p>
                   <button
                     onClick={() => setActiveTab("courses")}
                     className="h-10 px-5 bg-white/5 border border-white/10 hover:bg-white/10 text-white rounded-lg text-xs font-bold transition-all cursor-pointer"
                   >
-                    تصفح مساقاتي للبدء
+                    تصفح أقسامي للبدء
                   </button>
                 </div>
               ) : (

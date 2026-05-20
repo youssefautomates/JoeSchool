@@ -192,12 +192,7 @@ export default function CoursesPage() {
                               <BookOpen className="w-4 h-4 text-[#D6004B]" />
                               <span>{course.lessons_count} محاضرة</span>
                             </div>
-                            {course.level && (
-                              <div className="flex items-center gap-1.5 border-r border-white/10 pr-3">
-                                <Zap className="w-4 h-4 text-[#D6004B]" />
-                                <span>{course.level}</span>
-                              </div>
-                            )}
+
                             {course.category && (
                               <div className="flex items-center gap-1.5 border-r border-white/10 pr-3">
                                 <Layers className="w-4 h-4 text-[#D6004B]" />

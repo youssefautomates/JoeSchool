@@ -431,7 +431,7 @@ export default function MarketingPage() {
                       >
                         <option value="all" className="bg-[#0a0a0f] text-white">كل المتجر (الكل)</option>
                         <option value="product" className="bg-[#0a0a0f] text-white">منتج رقمي محدد</option>
-                        <option value="course" className="bg-[#0a0a0f] text-white">كورس / مساق محدد</option>
+                        <option value="course" className="bg-[#0a0a0f] text-white">كورس / قسم محدد</option>
                       </select>
                     </div>
 

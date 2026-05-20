@@ -308,7 +308,7 @@ export default function Home() {
         </section>
 
         {/* ── Value Props / Social Proof ────────────────────────────────────────── */}
-        <section className="border-y border-white/5 bg-gradient-to-b from-transparent via-white/[0.01] to-transparent py-12 md:py-24 relative overflow-hidden">
+        <section className="hidden md:block border-y border-white/5 bg-gradient-to-b from-transparent via-white/[0.01] to-transparent py-12 md:py-24 relative overflow-hidden">
           <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-[250px] h-[250px] bg-[#D6004B]/5 rounded-full blur-[80px] pointer-events-none" />
           <div className="absolute top-1/2 right-1/4 -translate-y-1/2 w-[250px] h-[250px] bg-rose-500/5 rounded-full blur-[80px] pointer-events-none" />
 
@@ -427,12 +427,7 @@ export default function Home() {
                               <BookOpen className="w-3.5 h-3.5 text-[#D6004B]" />
                               <span>{course.lessons_count} محاضرة</span>
                             </div>
-                            {course.level && (
-                              <div className="flex items-center gap-1 border-r border-white/10 pr-2">
-                                <Zap className="w-3.5 h-3.5 text-[#D6004B]" />
-                                <span>{course.level}</span>
-                              </div>
-                            )}
+
                             {course.category && (
                               <div className="flex items-center gap-1 border-r border-white/10 pr-2">
                                 <Layers className="w-3.5 h-3.5 text-[#D6004B]" />
@@ -797,16 +792,7 @@ export default function Home() {
 
       </main>
 
-      {/* Mobile Sticky Bar - Homepage specific */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-black/80 backdrop-blur-2xl border-t border-white/10 p-3 z-40 pb-safe shadow-[0_-20px_50px_rgba(0,0,0,0.8)] supports-[backdrop-filter]:bg-black/60">
-        <Link
-          href="#products"
-          className="w-full h-12 bg-[#D6004B] text-white font-alexandria font-black text-sm rounded-xl flex items-center justify-center gap-2 active:scale-95 shadow-[0_10px_30px_rgba(214,0,75,0.3)] transition-transform"
-        >
-          شراء الحزم الآن
-          <ArrowLeft className="w-4 h-4 rtl:rotate-180" />
-        </Link>
-      </div>
+
 
       <Footer />
     </div>
