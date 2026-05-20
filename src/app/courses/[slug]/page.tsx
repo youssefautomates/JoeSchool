@@ -289,10 +289,12 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
   const getEmbedUrl = (url: string, playUnmuted: boolean) => {
     if (url.includes("youtube.com") || url.includes("youtu.be")) {
       const ytId = url.split('v=')[1]?.split('&')[0] || url.split('/').pop();
-      return `https://www.youtube.com/embed/${ytId}?autoplay=1&mute=${playUnmuted ? 0 : 1}&controls=1`;
+      const loopParam = playUnmuted ? "" : `&loop=1&playlist=${ytId}`;
+      return `https://www.youtube.com/embed/${ytId}?autoplay=1&mute=${playUnmuted ? 0 : 1}&controls=1${loopParam}`;
     }
     const delimiter = url.includes("?") ? "&" : "?";
-    return `${url}${delimiter}autoplay=true&muted=${playUnmuted ? "false" : "true"}`;
+    const loopParam = playUnmuted ? "" : "&loop=true";
+    return `${url}${delimiter}autoplay=true&muted=${playUnmuted ? "false" : "true"}${loopParam}`;
   };
 
   const handleUnmuteAndStart = () => {
@@ -401,6 +403,12 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                                preload="metadata"
                                controlsList="nodownload"
                                onContextMenu={(e) => e.preventDefault()}
+                               onEnded={() => {
+                                 if (!hasInteracted && videoRef.current) {
+                                   videoRef.current.currentTime = 0;
+                                   videoRef.current.play().catch(() => {});
+                                 }
+                               }}
                                className="w-full h-full object-cover"
                              />
                            )}
@@ -1455,6 +1463,12 @@ function MobileCourseView({
                     preload="metadata"
                     controlsList="nodownload"
                     onContextMenu={(e) => e.preventDefault()}
+                    onEnded={() => {
+                      if (!hasInteracted && mobileVideoRef.current) {
+                        mobileVideoRef.current.currentTime = 0;
+                        mobileVideoRef.current.play().catch(() => {});
+                      }
+                    }}
                     className="w-full h-full object-cover"
                   />
                 )}
