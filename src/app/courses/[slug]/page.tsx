@@ -720,7 +720,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                             <div className="space-y-2">
                               <h3 className="font-alexandria font-black text-white text-lg sm:text-xl">احصل على شهادتك المهنية المعتمدة</h3>
                               <p className="text-zinc-400 text-xs sm:text-sm leading-relaxed">
-                                بمجرد استكمالك لمشاهدة وتطبيق جميع دروس المساق بنسبة 100%، سيقوم النظام تلقائياً بإنشاء وإصدار شهادة تخرج رسمية مع رقم تحقق تسلسلي موثق بكود QR لإضافتها لسيرتك الذاتية وملفك على LinkedIn.
+                                بمجرد إنتهائك من سماعك جميع محاضرات الدورة ستحصل على شهادة احترافية بإسمك من "يوسف أوتوميتس"، بحيث تعزز من فرص قبولك في أفضل الوظائف.
                               </p>
                             </div>
 
@@ -1670,7 +1670,7 @@ function MobileCourseView({
                    <h3 className="text-xs font-alexandria font-bold text-white">الشهادة المهنية المعتمدة</h3>
                  </div>
                  <p className="text-zinc-400 text-xs leading-relaxed font-cairo">
-                   احصل على شهادة إكمال موثقة رقمياً ومزودة بكود QR متميز لتضمها لسيرتك الذاتية بعد إنهاء كافة الدروس التدريبية وتطبيق المهام.
+                   بمجرد إنتهائك من سماعك جميع محاضرات الدورة ستحصل على شهادة احترافية بإسمك من "يوسف أوتوميتس"، بحيث تعزز من فرص قبولك في أفضل الوظائف.
                  </p>
 
                  {course.certificate_bg_url ? (
