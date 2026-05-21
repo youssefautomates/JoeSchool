@@ -254,16 +254,18 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                               <div className="absolute inset-0 bg-gradient-to-tr from-[#D6004B]/20 to-[#ff1d6b]/5 opacity-30" />
                             </div>
                           )}
-                          <div className="absolute inset-0 bg-black/40 transition-colors duration-500 group-hover/play:bg-black/30" />
-                          
-                          <motion.div 
-                            whileHover={{ scale: 1.15, rotate: 5 }}
-                            whileTap={{ scale: 0.95 }}
-                            className="relative z-10 w-16 h-16 bg-white/10 backdrop-blur-2xl border border-white/20 rounded-full flex items-center justify-center shadow-2xl transition-all duration-300 group-hover/play:border-rose-500/50 group-hover/play:bg-rose-500/10 group-hover/play:shadow-rose-500/20"
-                          >
-                            <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-[#D6004B] to-[#ff1d6b] opacity-0 group-hover/play:opacity-20 transition-opacity duration-300 blur-[8px]" />
-                            <Play className="w-6 h-6 text-white transition-transform duration-300 group-hover/play:scale-110 ml-0.5 fill-white" />
-                          </motion.div>
+                          <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 backdrop-blur-[2px] transition-all group-hover/play:bg-black/20" style={{ zIndex: 20 }}>
+                            <motion.div 
+                              animate={{ scale: [1, 1.1, 1] }}
+                              transition={{ duration: 2, repeat: Infinity }}
+                              className="w-20 h-20 bg-[#D6004B]/90 backdrop-blur-2xl border border-white/20 rounded-full flex items-center justify-center mb-6 shadow-2xl animate-pulse"
+                            >
+                               <Play className="w-8 h-8 text-white fill-current ml-1" />
+                            </motion.div>
+                            <span className="font-alexandria font-black text-xl text-white tracking-widest bg-black/50 px-8 py-3 rounded-2xl border border-white/10 shadow-[0_15px_40px_rgba(0,0,0,0.4)]">
+                               تشغيل الفيديو
+                            </span>
+                          </div>
                         </div>
                       ) : activeMedia.url.includes('youtube.com') || activeMedia.url.includes('youtu.be') ? (
                         <iframe 
@@ -554,17 +556,19 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                                 <div className="absolute inset-0 bg-gradient-to-tr from-[#D6004B]/20 to-[#ff1d6b]/5 opacity-30" />
                               </div>
                             )}
-                            <div className="absolute inset-0 bg-black/40 transition-colors duration-500 group-hover/play:bg-black/30" />
-                            
+                          <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 backdrop-blur-[2px] transition-all group-hover/play:bg-black/20" style={{ zIndex: 20 }}>
                             <motion.div 
-                              whileHover={{ scale: 1.15, rotate: 5 }}
-                              whileTap={{ scale: 0.95 }}
-                              className="relative z-10 w-20 h-20 bg-white/10 backdrop-blur-2xl border border-white/20 rounded-full flex items-center justify-center shadow-2xl transition-all duration-300 group-hover/play:border-rose-500/50 group-hover/play:bg-rose-500/10 group-hover/play:shadow-rose-500/20"
+                              animate={{ scale: [1, 1.1, 1] }}
+                              transition={{ duration: 2, repeat: Infinity }}
+                              className="w-20 h-20 bg-[#D6004B]/90 backdrop-blur-2xl border border-white/20 rounded-full flex items-center justify-center mb-6 shadow-2xl animate-pulse"
                             >
-                              <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-[#D6004B] to-[#ff1d6b] opacity-0 group-hover/play:opacity-20 transition-opacity duration-300 blur-[8px]" />
-                              <Play className="w-8 h-8 text-white transition-transform duration-300 group-hover/play:scale-110 ml-1 fill-white" />
+                               <Play className="w-8 h-8 text-white fill-current ml-1" />
                             </motion.div>
+                            <span className="font-alexandria font-black text-xl text-white tracking-widest bg-black/50 px-8 py-3 rounded-2xl border border-white/10 shadow-[0_15px_40px_rgba(0,0,0,0.4)]">
+                               تشغيل الفيديو
+                            </span>
                           </div>
+                        </div>
                         ) : activeMedia.url.includes('youtube.com') || activeMedia.url.includes('youtu.be') ? (
                           <iframe 
                             src={`https://www.youtube.com/embed/${activeMedia.url.split('v=')[1]?.split('&')[0] || activeMedia.url.split('/').pop()}?autoplay=1&mute=0&controls=1`}

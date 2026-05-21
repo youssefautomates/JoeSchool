@@ -423,9 +423,28 @@ export default function Home() {
                           </div>
                         </div>
 
-                        <div className="h-10 px-4 bg-[#D6004B] hover:bg-[#b0003d] text-white rounded-xl text-[11px] font-bold flex items-center gap-1.5 transition-all shadow-[0_4px_12px_rgba(214,0,75,0.15)] group-hover:scale-[1.02] active:scale-98 shrink-0">
-                          <span>احصل على الكورس</span>
-                          <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform rtl:rotate-180" />
+                        <div className="flex gap-2 items-center">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              addToCart({
+                                id: course.id,
+                                title: course.title,
+                                price: course.price,
+                                original_price: course.original_price,
+                                image_url: course.image_url,
+                                category: course.category || "courses"
+                              } as any);
+                              toast.success("تم إضافة الكورس للسلة بنجاح");
+                            }}
+                            className="h-10 w-10 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 text-white hover:bg-[#D6004B]/10 hover:border-[#D6004B]/30 hover:text-[#D6004B] transition-all shrink-0 group/cart"
+                          >
+                            <ShoppingCart className="w-4 h-4 group-hover/cart:scale-110 transition-transform" />
+                          </button>
+                          <div className="h-10 px-4 bg-[#D6004B] hover:bg-[#b0003d] text-white rounded-xl text-[11px] font-bold flex items-center gap-1.5 transition-all shadow-[0_4px_12px_rgba(214,0,75,0.15)] group-hover:scale-[1.02] active:scale-98 shrink-0">
+                            <span>احصل على الكورس</span>
+                            <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform rtl:rotate-180" />
+                          </div>
                         </div>
                       </div>
                     </div>

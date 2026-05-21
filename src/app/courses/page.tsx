@@ -3,11 +3,13 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { Sparkles, BookOpen, Clock, Zap, ArrowLeft, Star, PlayCircle, Loader2, Layers } from "lucide-react";
+import { Sparkles, BookOpen, Clock, Zap, ArrowLeft, Star, PlayCircle, Loader2, Layers, ShoppingCart } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { getCoursesList, type LmsCourse } from "@/lib/coursesDb";
 import { supabaseClient } from "@/lib/supabaseClient";
+import { useCart } from "@/context/CartContext";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 function stripHtml(html: string) {
@@ -21,6 +23,7 @@ function stripHtml(html: string) {
 }
 
 export default function CoursesPage() {
+  const { addToCart } = useCart();
   const [coursesList, setCoursesList] = useState<LmsCourse[]>([]);
   const [activeCategory, setActiveCategory] = useState("الكل");
   const [isLoading, setIsLoading] = useState(true);
@@ -231,10 +234,30 @@ export default function CoursesPage() {
                           </div>
                         </div>
 
-                        {/* View curriculum button */}
-                        <div className="h-12 px-6 bg-[#D6004B] hover:bg-[#b0003d] text-white rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 shadow-[0_4px_15px_rgba(214,0,75,0.2)] group-hover:scale-[1.02] active:scale-98 transition-all shrink-0">
-                          <span>احصل على الكورس</span>
-                          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform rtl:rotate-180" />
+                        {/* Actions */}
+                        <div className="flex gap-2 items-center">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              addToCart({
+                                id: course.id,
+                                title: course.title,
+                                price: course.price,
+                                original_price: course.original_price,
+                                image_url: course.image_url,
+                                category: course.category || "courses"
+                              } as any);
+                              toast.success("تم إضافة الكورس للسلة بنجاح");
+                            }}
+                            className="h-12 w-12 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 text-white hover:bg-[#D6004B]/10 hover:border-[#D6004B]/30 hover:text-[#D6004B] transition-all shrink-0 group/cart"
+                          >
+                            <ShoppingCart className="w-5 h-5 group-hover/cart:scale-110 transition-transform" />
+                          </button>
+                          {/* View curriculum button */}
+                          <div className="h-12 px-6 bg-[#D6004B] hover:bg-[#b0003d] text-white rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 shadow-[0_4px_15px_rgba(214,0,75,0.2)] group-hover:scale-[1.02] active:scale-98 transition-all shrink-0">
+                            <span>احصل على الكورس</span>
+                            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform rtl:rotate-180" />
+                          </div>
                         </div>
                       </div>
                     </div>
