@@ -77,6 +77,10 @@ export function ReviewsMarquee() {
     );
   }
 
+  if (reviews.length === 0) {
+    return null;
+  }
+
   const defaultReviews: Review[] = [
     {
       name: "أحمد محمود",

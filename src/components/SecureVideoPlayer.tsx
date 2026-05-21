@@ -255,15 +255,6 @@ export default function SecureVideoPlayer({
       }
     };
 
-    const handleBlur = () => {
-      setIsBlurred(true);
-      postPlayerMessage("pause");
-    };
-
-    const handleFocus = () => {
-      setIsBlurred(false);
-    };
-
     const checkDevTools = () => {
       const threshold = 160;
       const widthDiff = window.outerWidth - window.innerWidth;
@@ -279,16 +270,12 @@ export default function SecureVideoPlayer({
     };
 
     window.addEventListener("visibilitychange", handleVisibility);
-    window.addEventListener("blur", handleBlur);
-    window.addEventListener("focus", handleFocus);
     window.addEventListener("resize", checkDevTools);
     
     const devToolsInterval = setInterval(checkDevTools, 2000);
 
     return () => {
       window.removeEventListener("visibilitychange", handleVisibility);
-      window.removeEventListener("blur", handleBlur);
-      window.removeEventListener("focus", handleFocus);
       window.removeEventListener("resize", checkDevTools);
       clearInterval(devToolsInterval);
     };

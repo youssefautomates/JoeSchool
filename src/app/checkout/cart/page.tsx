@@ -51,9 +51,14 @@ export default function CartCheckoutPage() {
   const [cardType, setCardType] = useState<"visa" | "mastercard" | "meeza" | null>(null);
   const [saveCard, setSaveCard] = useState(true);
   const cardNumberRef = useRef<HTMLInputElement>(null);
+  const isFirstRender = useRef(true);
 
   // Auto-focus card number when selected
   useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
     if (paymentMethod === "card" && cardNumberRef.current) {
       setTimeout(() => cardNumberRef.current?.focus(), 100);
     }
@@ -397,6 +402,7 @@ export default function CartCheckoutPage() {
                         placeholder="الاسم الثلاثي لتأكيد الملكية" 
                         className={cn("h-12 rounded-xl bg-white/5 border-white/5 text-white text-sm font-cairo hover:bg-white/[0.07] focus:bg-white/10 focus:border-white/20 focus:ring-1 focus:ring-white/20 transition-all", errors.fullName && "border-red-500/50 focus:ring-red-500")}
                         disabled={isLoading}
+                        autoFocus
                         {...register("fullName")}
                       />
                     </div>

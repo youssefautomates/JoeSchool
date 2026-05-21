@@ -616,7 +616,7 @@ export default function DashboardPage() {
                         <img 
                           src={course.image_url} 
                           alt={course.title}
-                          className="absolute inset-0 w-full h-full object-cover opacity-30 group-hover:scale-105 transition-transform duration-500" 
+                          className="absolute inset-0 w-full h-full object-cover opacity-100 group-hover:scale-105 transition-transform duration-500" 
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0f] to-transparent" />
                         <PlayCircle className="w-12 h-12 text-rose-500 z-10 group-hover:scale-110 transition-transform duration-300 relative" />
