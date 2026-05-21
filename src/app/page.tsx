@@ -306,7 +306,7 @@ export default function Home() {
                     <div className="flex text-yellow-400 mb-0.5 md:mb-1">
                       {[1,2,3,4,5].map(i => <Star key={i} className="w-3 h-3 md:w-4 md:h-4 fill-current" />)}
                     </div>
-                    <span className="font-cairo text-[9px] md:text-xs text-zinc-400 font-bold">تقييم {stats.averageRating} من <span className="text-white">{stats.count}+ عميل</span></span>
+                    <span className="font-cairo text-[9px] md:text-xs text-zinc-400 font-bold">تقييم 5 من <span className="text-white">500+ عميل</span></span>
                   </div>
                 </div>
               </motion.div>

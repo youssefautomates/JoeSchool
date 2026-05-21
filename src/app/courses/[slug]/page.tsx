@@ -1401,7 +1401,7 @@ function MobileCourseView({
   const coursePricing = resolveProductPrice(course as any, currency);
 
   return (
-    <div className="block md:hidden space-y-6 px-4 pb-12">
+    <div className="block md:hidden space-y-6 px-4 pb-0">
       <style dangerouslySetInnerHTML={{ __html: `
         @keyframes bounce-subtle {
           0%, 100% { transform: translateY(0); }
@@ -1990,7 +1990,7 @@ function MobileCourseView({
       )}
 
       {/* 8. Small Custom Footer */}
-      <footer className="border-t border-white/5 pt-6 pb-20 flex flex-col items-center gap-4 text-center text-zinc-500 text-[9px] w-full">
+      <footer className="border-t border-white/5 pt-6 pb-24 flex flex-col items-center gap-4 text-center text-zinc-500 text-[9px] w-full">
          <Link href="/" className="flex items-center gap-2 group">
            <img src="/logo.png" alt="Youssef Automates" className="w-5 h-5 object-contain" />
            <span className="font-alexandria font-bold text-xs tracking-tight text-white" dir="ltr">

@@ -371,12 +371,13 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-[#050505] text-white font-cairo flex flex-col lg:flex-row overflow-x-hidden relative">
       {/* Background decoration */}
       <div className="absolute inset-0 pointer-events-none z-0">
-        <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-rose-600/5 rounded-full blur-[120px]" />
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-rose-600/5 rounded-full blur-[150px]" />
+        <div className="absolute bottom-1/3 left-10 w-[400px] h-[400px] bg-purple-600/5 rounded-full blur-[120px]" />
       </div>
 
       {/* Sidebar */}
-      <aside className="w-full lg:w-80 bg-[#0a0a0f] border-b lg:border-b-0 lg:border-l border-white/5 flex flex-col justify-between p-6 z-10 shrink-0 font-alexandria">
-        <div className="space-y-8">
+      <aside className="w-full lg:w-80 bg-[#07070b]/90 backdrop-blur-xl border-b lg:border-b-0 lg:border-l border-white/5 flex flex-col justify-between p-4 lg:p-6 z-20 shrink-0 font-alexandria">
+        <div className="space-y-4 lg:space-y-8">
           <div className="flex items-center justify-between lg:justify-start gap-3 border-b border-white/5 pb-6">
             <Link href="/" className="flex items-center gap-3 group">
               <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
@@ -389,23 +390,26 @@ export default function DashboardPage() {
             </Link>
             <Link 
               href="/" 
-              className="lg:hidden text-xs text-rose-400 hover:text-rose-300 font-bold border border-rose-500/20 px-3 py-1.5 rounded-lg bg-rose-600/5 transition-colors"
+              className="lg:hidden text-xs text-rose-400 hover:text-rose-300 hover:border-rose-500/40 hover:bg-rose-500/10 transition-colors font-bold border border-rose-500/20 px-3 py-1.5 rounded-lg bg-rose-600/5"
             >
               العودة للمتجر
             </Link>
           </div>
 
-          <div className="flex items-center gap-4 bg-white/[0.02] border border-white/5 rounded-2xl p-4">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-rose-600 to-orange-500 flex items-center justify-center font-alexandria font-bold text-white shadow-lg shrink-0">
+          <div className="hidden lg:flex items-center gap-4 bg-white/[0.01] border border-white/5 rounded-2xl p-4 relative overflow-hidden group">
+            {/* Subtle glow on hover */}
+            <div className="absolute inset-0 bg-gradient-to-tr from-rose-600/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-rose-600 via-pink-600 to-orange-500 flex items-center justify-center font-alexandria font-black text-white shadow-lg shrink-0 group-hover:scale-105 transition-transform duration-300">
               {profileName.substring(0, 2).toUpperCase()}
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold text-white truncate leading-tight mb-1">{profileName}</p>
-              <p className="text-[10px] text-zinc-500 truncate leading-none" dir="ltr">{user?.email}</p>
+            <div className="flex-1 min-w-0 z-10 text-right">
+              <p className="text-sm font-alexandria font-bold text-white truncate leading-tight mb-1.5">{profileName}</p>
+              <p className="text-[9px] text-zinc-500 truncate leading-none" dir="ltr">{user?.email}</p>
             </div>
           </div>
 
-          <nav className="flex flex-row lg:flex-col gap-2 overflow-x-auto lg:overflow-x-visible pb-2 lg:pb-0 scrollbar-none">
+          <nav className="flex flex-row lg:flex-col gap-2 overflow-x-auto lg:overflow-x-visible pb-2 lg:pb-0 scrollbar-none relative">
             {menuItems.map((item) => {
               const isActive = activeTab === item.id;
               return (
@@ -414,18 +418,19 @@ export default function DashboardPage() {
                   onClick={() => setActiveTab(item.id)}
                   className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 font-bold text-xs shrink-0 lg:w-full relative cursor-pointer ${
                     isActive 
-                      ? "bg-rose-600 text-white shadow-lg shadow-rose-600/20" 
-                      : "text-zinc-400 hover:text-white hover:bg-white/5"
+                      ? "text-white" 
+                      : "text-zinc-400 hover:text-white hover:bg-white/[0.02]"
                   }`}
                 >
-                  <item.icon className="w-4 h-4 shrink-0" />
-                  <span>{item.name}</span>
                   {isActive && (
                     <motion.div
-                      layoutId="sidebar-accent"
-                      className="absolute right-0 top-1/4 bottom-1/4 w-1 bg-white rounded-l-full hidden lg:block"
+                      layoutId="active-tab-bg"
+                      className="absolute inset-0 bg-gradient-to-l from-rose-600 to-pink-600 rounded-xl -z-10 shadow-lg shadow-rose-600/15"
+                      transition={{ type: "spring", stiffness: 380, damping: 30 }}
                     />
                   )}
+                  <item.icon className={`w-4 h-4 shrink-0 transition-transform ${isActive ? "scale-110 text-white" : "text-zinc-500"}`} />
+                  <span>{item.name}</span>
                 </button>
               );
             })}
@@ -445,19 +450,19 @@ export default function DashboardPage() {
 
       {/* Main Content Area */}
       <main className="flex-1 p-6 sm:p-10 lg:p-12 z-10 max-w-[1200px]">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8 text-right">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-alexandria font-black text-white flex items-center gap-2">
+            <h1 className="text-2xl sm:text-3xl font-alexandria font-black text-white flex items-center justify-start gap-2">
               <span>أهلاً بك، {profileName}</span>
               <Sparkles className="w-5 h-5 text-rose-500 animate-pulse" />
             </h1>
-            <p className="text-zinc-400 text-xs sm:text-sm mt-1">تصفح أقسامك التعليمية وحزم الأتمتة التي قمت باقتنائها في مكان واحد.</p>
+            <p className="text-zinc-400 text-xs sm:text-sm mt-1.5 font-cairo">تصفح أقسامك التعليمية وحزم الأتمتة التي قمت باقتنائها في مكان واحد.</p>
           </div>
           
-          <div className="flex items-center gap-3">
+          <div className="flex items-center justify-start sm:justify-end gap-3">
             <Link 
               href="/" 
-              className="hidden lg:inline-flex items-center gap-2 text-xs font-bold text-zinc-400 hover:text-white border border-white/10 px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 transition-all"
+              className="hidden lg:inline-flex items-center gap-2 text-xs font-alexandria font-bold text-zinc-400 hover:text-white border border-white/10 px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 transition-all"
             >
               <span>العودة للمتجر الرئيسي</span>
               <ExternalLink className="w-3.5 h-3.5" />
@@ -473,52 +478,75 @@ export default function DashboardPage() {
         </div>
 
         {/* Dynamic Study Statistics Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          {/* Card 1: Hours */}
-          <div className="bg-[#0a0a0f] border border-white/5 rounded-2xl p-4 sm:p-5 flex items-center gap-3 sm:gap-4 shadow-xl">
-            <div className="w-10 sm:w-12 h-10 sm:h-12 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center shrink-0">
-              <Clock className="w-5 sm:w-6 h-5 sm:h-6" />
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 relative z-10">
+          {[
+            {
+              title: "وقت التعلم",
+              value: `${(studyStats.totalSeconds / 3600).toFixed(1)}`,
+              unit: "ساعة",
+              icon: Clock,
+              color: "from-rose-600 to-pink-600",
+              bgColor: "bg-rose-500/10",
+              borderColor: "border-rose-500/20",
+              iconColor: "text-rose-400",
+            },
+            {
+              title: "الدروس المكتملة",
+              value: studyStats.completedCount,
+              unit: "دروس",
+              icon: CheckCircle2,
+              color: "from-emerald-600 to-teal-500",
+              bgColor: "bg-emerald-500/10",
+              borderColor: "border-emerald-500/20",
+              iconColor: "text-emerald-400",
+            },
+            {
+              title: "سلسلة التعلم",
+              value: studyStats.streak,
+              unit: "يوم 🔥",
+              icon: Sparkles,
+              color: "from-orange-600 to-yellow-500",
+              bgColor: "bg-orange-500/10",
+              borderColor: "border-orange-500/20",
+              iconColor: "text-orange-400",
+              pulse: true,
+            },
+            {
+              title: "المستوى التعليمي",
+              value: studyStats.completedCount >= 10 ? "خبير الأتمتة 🎓" : studyStats.completedCount >= 4 ? "طالب مجتهد ⚡" : "مستكشف مبتدئ 🌱",
+              unit: "",
+              isLevel: true,
+              icon: Award,
+              color: "from-purple-600 to-indigo-600",
+              bgColor: "bg-purple-500/10",
+              borderColor: "border-purple-500/20",
+              iconColor: "text-purple-405",
+            }
+          ].map((stat, idx) => (
+            <div 
+              key={idx}
+              className="group relative bg-white/[0.02] border border-white/5 hover:border-white/10 rounded-2xl sm:rounded-3xl p-4 sm:p-6 flex items-center gap-3 sm:gap-4 shadow-2xl transition-all duration-300 hover:-translate-y-1 hover:bg-white/[0.04] text-right"
+            >
+              {/* Card glowing light effect on hover */}
+              <div className={`absolute inset-0 -z-10 rounded-2xl sm:rounded-3xl bg-gradient-to-tr ${stat.color} opacity-0 group-hover:opacity-5 blur-[20px] transition-opacity duration-300`} />
+              
+              <div className={`w-10 sm:w-14 h-10 sm:h-14 rounded-xl sm:rounded-2xl ${stat.bgColor} ${stat.borderColor} border ${stat.iconColor} flex items-center justify-center shrink-0 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+                <stat.icon className={`w-5 sm:w-7 h-5 sm:h-7 ${stat.pulse ? "animate-pulse" : ""}`} />
+              </div>
+              <div className="min-w-0">
+                <span className="text-[10px] sm:text-xs text-zinc-400 block font-alexandria font-bold tracking-wide">{stat.title}</span>
+                {stat.isLevel ? (
+                  <span className="text-xs sm:text-sm font-alexandria font-black text-white block mt-1 leading-none truncate">
+                    {stat.value}
+                  </span>
+                ) : (
+                  <span className="text-base sm:text-xl font-alexandria font-black text-white mt-1 block leading-none">
+                    {stat.value} <span className="text-[10px] sm:text-xs font-normal text-zinc-400">{stat.unit}</span>
+                  </span>
+                )}
+              </div>
             </div>
-            <div>
-              <span className="text-[10px] text-zinc-500 block font-bold">وقت التعلم</span>
-              <span className="text-sm sm:text-lg font-alexandria font-black text-white">{(studyStats.totalSeconds / 3600).toFixed(1)} <span className="text-[10px] font-normal text-zinc-400">ساعة</span></span>
-            </div>
-          </div>
-
-          {/* Card 2: Lessons Completed */}
-          <div className="bg-[#0a0a0f] border border-white/5 rounded-2xl p-4 sm:p-5 flex items-center gap-3 sm:gap-4 shadow-xl">
-            <div className="w-10 sm:w-12 h-10 sm:h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
-              <CheckCircle2 className="w-5 sm:w-6 h-5 sm:h-6" />
-            </div>
-            <div>
-              <span className="text-[10px] text-zinc-500 block font-bold">الدروس المكتملة</span>
-              <span className="text-sm sm:text-lg font-alexandria font-black text-white">{studyStats.completedCount} <span className="text-[10px] font-normal text-zinc-400">دروس</span></span>
-            </div>
-          </div>
-
-          {/* Card 3: Streak */}
-          <div className="bg-[#0a0a0f] border border-white/5 rounded-2xl p-4 sm:p-5 flex items-center gap-3 sm:gap-4 shadow-xl">
-            <div className="w-10 sm:w-12 h-10 sm:h-12 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-500 flex items-center justify-center shrink-0">
-              <Sparkles className="w-5 sm:w-6 h-5 sm:h-6 animate-pulse" />
-            </div>
-            <div>
-              <span className="text-[10px] text-zinc-500 block font-bold">سلسلة التعلم</span>
-              <span className="text-sm sm:text-lg font-alexandria font-black text-white">{studyStats.streak} <span className="text-[10px] font-normal text-zinc-400">يوم 🔥</span></span>
-            </div>
-          </div>
-
-          {/* Card 4: Level */}
-          <div className="bg-[#0a0a0f] border border-white/5 rounded-2xl p-4 sm:p-5 flex items-center gap-3 sm:gap-4 shadow-xl">
-            <div className="w-10 sm:w-12 h-10 sm:h-12 rounded-xl bg-violet-500/10 border border-violet-500/20 text-violet-400 flex items-center justify-center shrink-0">
-              <Award className="w-5 sm:w-6 h-5 sm:h-6" />
-            </div>
-            <div className="min-w-0">
-              <span className="text-[10px] text-zinc-500 block font-bold">المستوى التعليمي</span>
-              <span className="text-[11px] sm:text-xs font-alexandria font-black text-white truncate block">
-                {studyStats.completedCount >= 10 ? "خبير الأتمتة 🎓" : studyStats.completedCount >= 4 ? "طالب مجتهد ⚡" : "مستكشف مبتدئ 🌱"}
-              </span>
-            </div>
-          </div>
+          ))}
         </div>
 
         {/* Premium Resume Watching widget */}
@@ -529,41 +557,47 @@ export default function DashboardPage() {
           if (!courseToResume) return null;
 
           return (
-            <div className="bg-gradient-to-r from-rose-950/20 via-[#0a0a0f] to-[#0a0a0f] border border-white/5 rounded-3xl p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6 mb-8 relative overflow-hidden shadow-2xl">
-              <div className="absolute top-0 right-0 w-[200px] h-[200px] bg-rose-600/5 rounded-full blur-[80px] pointer-events-none" />
+            <div className="group relative bg-gradient-to-l from-rose-950/20 via-[#0a0a0f]/80 to-[#07070b]/90 border border-white/5 hover:border-rose-500/20 rounded-3xl p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6 mb-8 overflow-hidden shadow-2xl backdrop-blur-xl transition-all duration-300">
+              {/* Animated mesh gradient behind */}
+              <div className="absolute -right-20 -top-20 w-[300px] h-[300px] bg-rose-600/10 rounded-full blur-[100px] pointer-events-none group-hover:scale-110 transition-transform duration-500" />
+              <div className="absolute left-10 bottom-0 w-[150px] h-[150px] bg-pink-500/5 rounded-full blur-[80px] pointer-events-none" />
               
-              <div className="flex-1 space-y-4 text-right w-full">
-                <div className="flex items-center gap-2 text-rose-500 text-xs font-bold font-alexandria">
-                  <PlayCircle className="w-4 h-4" />
+              <div className="flex-1 space-y-4 text-right w-full relative z-10">
+                <div className="flex items-center gap-2 text-rose-400 text-xs font-alexandria font-bold tracking-wider">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
+                  </span>
                   <span>متابعة التعلم (واصل من حيث توقفت)</span>
                 </div>
                 <div>
-                  <h3 className="text-lg sm:text-xl font-alexandria font-black text-white leading-tight">{courseToResume.title}</h3>
-                  <p className="text-zinc-400 text-xs mt-1.5 font-cairo">أحسنت صنعاً! لقد أكملت {courseToResume.progress}% من هذا الكورس الرائد.</p>
+                  <h3 className="text-xl sm:text-2xl font-alexandria font-black text-white leading-tight tracking-tight group-hover:text-rose-400 transition-colors duration-300">{courseToResume.title}</h3>
+                  <p className="text-zinc-400 text-xs mt-2 font-cairo leading-relaxed">أحسنت صنعاً! لقد أكملت <span className="text-rose-400 font-bold">{courseToResume.progress}%</span> من هذا الكورس الرائد بنجاح.</p>
                 </div>
                 
                 {/* Progress bar inside callout */}
-                <div className="max-w-md">
-                  <div className="flex justify-between items-center text-[10px] font-bold text-zinc-500 mb-1">
+                <div className="max-w-md pt-2">
+                  <div className="flex justify-between items-center text-[10px] font-alexandria font-bold text-zinc-400 mb-1.5">
                     <span>نسبة تقدمك الإجمالية</span>
-                    <span className="text-rose-400">{courseToResume.progress}%</span>
+                    <span className="text-rose-400 font-mono">{courseToResume.progress}%</span>
                   </div>
-                  <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden border border-white/5">
+                  <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden border border-white/5 p-[1px]">
                     <div 
-                      className="h-full bg-gradient-to-r from-rose-600 to-orange-500 rounded-full transition-all duration-500" 
+                      className="h-full bg-gradient-to-r from-orange-500 to-rose-600 rounded-full transition-all duration-500 shadow-[0_0_8px_rgba(244,63,94,0.3)]" 
                       style={{ width: `${courseToResume.progress}%` }} 
                     />
                   </div>
                 </div>
               </div>
-
-              <div className="flex items-center gap-4 shrink-0 w-full md:w-auto">
+              
+              <div className="shrink-0 w-full md:w-auto relative z-10">
                 <Link
                   href={`/learn/${courseToResume.slug}/${courseToResume.lastLessonSlug || courseToResume.firstLessonSlug}`}
-                  className="w-full md:w-auto h-12 px-8 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all active:scale-95 shadow-[0_8px_20px_rgba(214,0,75,0.2)]"
+                  className="w-full md:w-auto h-14 px-8 bg-gradient-to-l from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 text-white rounded-2xl text-xs sm:text-sm font-alexandria font-black flex items-center justify-center gap-2.5 transition-all hover:scale-[1.02] active:scale-98 shadow-[0_12px_24px_rgba(214,0,75,0.3)] hover:shadow-[0_16px_32px_rgba(214,0,75,0.45)] group/btn"
                 >
+                  <PlayCircle className="w-5 h-5 group-hover/btn:rotate-12 transition-transform duration-300" />
                   <span>تابع الدرس الآن</span>
-                  <ChevronLeft className="w-4 h-4" />
+                  <ChevronLeft className="w-4 h-4 rtl:rotate-180 group-hover/btn:-translate-x-1 transition-transform" />
                 </Link>
               </div>
             </div>
@@ -572,7 +606,6 @@ export default function DashboardPage() {
 
         {/* Tab Contents */}
         <AnimatePresence mode="wait">
-
           
           {/* TABS 1: COURSES */}
           {activeTab === "courses" && (
@@ -582,25 +615,25 @@ export default function DashboardPage() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -15 }}
               transition={{ duration: 0.2 }}
-              className="space-y-6"
+              className="space-y-6 text-right"
             >
-              <div className="flex justify-between items-center border-b border-white/5 pb-4">
+              <div className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center gap-2.5 sm:gap-4 border-b border-white/5 pb-4">
                 <h2 className="text-lg font-alexandria font-bold text-white">الأقسام والشهادات المسجل بها</h2>
-                <span className="bg-rose-600/15 border border-rose-500/30 text-rose-400 text-[10px] px-2.5 py-1 rounded-full font-bold">
+                <span className="bg-rose-600/15 border border-rose-500/30 text-rose-400 text-[10px] px-3 py-1 rounded-full font-bold">
                   {enrolledCourses.length} دورات تدريبية
                 </span>
               </div>
 
               {enrolledCourses.length === 0 ? (
-                <div className="text-center py-20 bg-white/[0.02] border border-white/5 rounded-3xl p-8">
+                <div className="text-center py-20 bg-white/[0.01] border border-white/5 rounded-3xl p-8 shadow-xl">
                   <BookOpen className="w-16 h-16 text-zinc-700 mx-auto mb-4" />
                   <h3 className="font-alexandria font-bold text-white text-base">لم تسجل في أي دورة بعد</h3>
-                  <p className="text-zinc-500 text-xs sm:text-sm mt-1 max-w-sm mx-auto">
+                  <p className="text-zinc-500 text-xs sm:text-sm mt-1 max-w-sm mx-auto font-cairo">
                     ابدأ رحلتك التعليمية واشترك في أحد أقسامنا القوية للأتمتة والذكاء الاصطناعي وصناعة المحتوى.
                   </p>
                   <Link 
                     href="/courses"
-                    className="mt-6 inline-flex h-11 px-6 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold items-center gap-2"
+                    className="mt-6 inline-flex h-11 px-6 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold items-center gap-2 shadow-md transition-all active:scale-95"
                   >
                     تصفح الدورات التدريبية
                   </Link>
@@ -610,54 +643,63 @@ export default function DashboardPage() {
                   {enrolledCourses.map((course) => (
                     <div 
                       key={course.id}
-                      className="bg-[#0a0a0f] border border-white/5 hover:border-rose-500/20 rounded-2.5xl overflow-hidden group flex flex-col h-full shadow-2xl transition-all hover:-translate-y-1 duration-300"
+                      className="group relative bg-[#07070b]/60 border border-white/5 hover:border-rose-500/20 rounded-3xl overflow-hidden flex flex-col h-full shadow-2xl transition-all duration-500 hover:-translate-y-1.5 hover:shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
                     >
-                      <div className="relative h-40 bg-zinc-900 overflow-hidden border-b border-white/5 flex items-center justify-center">
+                      {/* Top Media Cover */}
+                      <div className="relative h-48 bg-zinc-950 overflow-hidden flex items-center justify-center">
                         <img 
                           src={course.image_url} 
                           alt={course.title}
-                          className="absolute inset-0 w-full h-full object-cover opacity-100 group-hover:scale-105 transition-transform duration-500" 
+                          className="absolute inset-0 w-full h-full object-cover opacity-100 group-hover:scale-105 transition-transform duration-700 ease-out" 
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0f] to-transparent" />
-                        <PlayCircle className="w-12 h-12 text-rose-500 z-10 group-hover:scale-110 transition-transform duration-300 relative" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#07070b] via-[#07070b]/40 to-transparent" />
                         
-                        <span className="absolute bottom-4 right-4 bg-black/60 text-[9px] px-2.5 py-1 rounded-md font-bold z-10 border border-white/5 flex items-center gap-1.5">
-                          <Clock className="w-3 h-3 text-rose-400" />
+                        {/* Glassmorphic Play button wrapper */}
+                        <div className="absolute inset-0 flex items-center justify-center z-10">
+                          <div className="w-14 h-14 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center group-hover:scale-110 group-hover:bg-rose-600/90 group-hover:border-rose-500/20 transition-all duration-300 shadow-2xl">
+                            <PlayCircle className="w-8 h-8 text-white" />
+                          </div>
+                        </div>
+                        
+                        <span className="absolute bottom-4 right-4 bg-[#0a0a0f]/85 backdrop-blur-md text-[9px] font-alexandria font-bold px-3 py-1.5 rounded-xl z-10 border border-white/5 flex items-center gap-1.5 text-zinc-300">
+                          <Clock className="w-3.5 h-3.5 text-rose-400" />
                           <span>{course.duration_hours} ساعة تدريبية</span>
                         </span>
                       </div>
 
-                      <div className="p-6 flex-1 flex flex-col justify-between">
-                        <div>
-
-                          <h3 className="text-base sm:text-lg font-alexandria font-bold text-white mt-2 leading-snug group-hover:text-rose-400 transition-colors line-clamp-2">
+                      {/* Card Content */}
+                      <div className="p-6 sm:p-7 flex-1 flex flex-col justify-between relative z-10">
+                        <div className="space-y-2">
+                          <h3 className="text-base sm:text-lg font-alexandria font-black text-white leading-snug group-hover:text-rose-400 transition-colors duration-300 line-clamp-2">
                             {course.title}
                           </h3>
-                          <p className="text-zinc-400 text-xs mt-1.5 line-clamp-2">
+                          <p className="text-zinc-400 font-cairo text-xs leading-relaxed line-clamp-2">
                             {course.short_description || "تعلم الأتمتة والتقنيات الحديثة خطوة بخطوة."}
                           </p>
                         </div>
 
-                        <div className="mt-6 space-y-4">
-                          <div>
-                            <div className="flex justify-between items-center text-[10px] font-bold text-zinc-500 mb-1">
+                        <div className="mt-6 space-y-5">
+                          {/* Progress display */}
+                          <div className="space-y-1.5">
+                            <div className="flex justify-between items-center text-[10px] font-alexandria font-bold text-zinc-400">
                               <span>نسبة الإنجاز</span>
-                              <span className="text-rose-400">{course.progress}%</span>
+                              <span className="text-rose-400 font-mono">{course.progress}%</span>
                             </div>
-                            <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden border border-white/5">
+                            <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden border border-white/5 p-[1px]">
                               <div 
-                                className="h-full bg-gradient-to-r from-rose-600 to-orange-500 rounded-full transition-all duration-500" 
+                                className="h-full bg-gradient-to-r from-orange-500 to-rose-600 rounded-full transition-all duration-500" 
                                 style={{ width: `${course.progress}%` }} 
                               />
                             </div>
                           </div>
 
+                          {/* Action Button */}
                           <Link
                             href={`/learn/${course.slug}/${course.lastLessonSlug || course.firstLessonSlug}`}
-                            className="w-full h-11 bg-white/5 border border-white/10 hover:bg-rose-600 hover:border-none text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all active:scale-98"
+                            className="w-full h-12 bg-white/5 border border-white/10 hover:bg-gradient-to-l hover:from-rose-600 hover:to-pink-600 hover:border-transparent text-white rounded-2xl text-xs font-alexandria font-bold flex items-center justify-center gap-2 transition-all duration-300 active:scale-98 shadow-md group-hover:shadow-[0_8px_20px_rgba(214,0,75,0.15)]"
                           >
                             <span>{course.progress > 0 ? "متابعة المشاهدة" : "ابدأ التعلم الآن"}</span>
-                            <ChevronLeft className="w-4 h-4" />
+                            <ChevronLeft className="w-4 h-4 rtl:rotate-180 group-hover:translate-x-[-2px] transition-transform" />
                           </Link>
                         </div>
                       </div>
@@ -676,20 +718,20 @@ export default function DashboardPage() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -15 }}
               transition={{ duration: 0.2 }}
-              className="space-y-6"
+              className="space-y-6 text-right"
             >
-              <div className="flex justify-between items-center border-b border-white/5 pb-4">
+              <div className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center gap-2.5 sm:gap-4 border-b border-white/5 pb-4">
                 <h2 className="text-lg font-alexandria font-bold text-white">ملفاتي الرقمية وحزم الأتمتة</h2>
-                <span className="bg-emerald-600/15 border border-emerald-500/30 text-emerald-400 text-[10px] px-2.5 py-1 rounded-full font-bold">
+                <span className="bg-emerald-600/15 border border-emerald-500/30 text-emerald-400 text-[10px] px-3 py-1 rounded-full font-bold">
                   {digitalProducts.length} ملفات جاهزة
                 </span>
               </div>
 
               {digitalProducts.length === 0 ? (
-                <div className="text-center py-20 bg-white/[0.02] border border-white/5 rounded-3xl p-8">
+                <div className="text-center py-20 bg-white/[0.01] border border-white/5 rounded-3xl p-8 shadow-xl">
                   <Download className="w-16 h-16 text-zinc-700 mx-auto mb-4" />
                   <h3 className="font-alexandria font-bold text-white text-base">لا تتوفر ملفات رقمية</h3>
-                  <p className="text-zinc-500 text-xs sm:text-sm mt-1 max-w-sm mx-auto">
+                  <p className="text-zinc-500 text-xs sm:text-sm mt-1 max-w-sm mx-auto font-cairo">
                     لم تقم باقتناء أي قوالب أتمتة أو حزم برمجية بعد. استكشف المنتجات الرقمية لتسريع أعمالك!
                   </p>
                 </div>
@@ -698,30 +740,30 @@ export default function DashboardPage() {
                   {digitalProducts.map((p) => (
                     <div 
                       key={p.id}
-                      className="bg-[#0a0a0f] border border-white/5 rounded-2xl p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 group hover:border-emerald-500/20 transition-all duration-300"
+                      className="group bg-[#07070b]/60 border border-white/5 hover:border-emerald-500/25 rounded-3xl p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xl transition-all duration-300 hover:bg-white/[0.03]"
                     >
-                      <div className="flex items-start gap-4">
-                        <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-emerald-400 shrink-0 group-hover:bg-emerald-500/10 group-hover:scale-105 transition-all">
+                      <div className="flex items-start gap-4 text-right">
+                        <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0 group-hover:scale-110 transition-transform duration-300">
                           <FileText className="w-6 h-6" />
                         </div>
                         <div>
-                          <h3 className="text-sm sm:text-base font-bold text-white">{p.product_title}</h3>
+                          <h3 className="text-sm sm:text-base font-alexandria font-bold text-white group-hover:text-emerald-400 transition-colors">{p.product_title}</h3>
                           
                           {/* File Details Grid */}
-                          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1.5 text-xs text-zinc-500 font-medium">
-                            <span>نوع الملف: <strong className="text-white">{p.fileType}</strong></span>
-                            <span>•</span>
-                            <span>الحجم: <strong className="text-white">{p.fileSize}</strong></span>
-                            <span>•</span>
-                            <span className="text-emerald-400/80">التحميل: {p.remainingDownloads}</span>
+                          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-xs text-zinc-500 font-medium font-cairo">
+                            <span>نوع الملف: <strong className="text-zinc-300 font-bold">{p.fileType}</strong></span>
+                            <span className="opacity-30">•</span>
+                            <span>الحجم: <strong className="text-zinc-300 font-bold">{p.fileSize}</strong></span>
+                            <span className="opacity-30">•</span>
+                            <span className="text-emerald-400/80 font-bold">التحميل: {p.remainingDownloads}</span>
                           </div>
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-2 w-full sm:w-auto shrink-0">
+                      <div className="flex items-center gap-3 w-full sm:w-auto shrink-0">
                         <a
                           href={`/api/download?token=${p.id}`}
-                          className="flex-1 sm:flex-none h-11 px-5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all active:scale-98"
+                          className="flex-1 sm:flex-none h-12 px-6 bg-gradient-to-l from-emerald-600 to-teal-600 hover:from-emerald-550 hover:to-teal-550 text-white rounded-2xl text-xs font-alexandria font-black flex items-center justify-center gap-2.5 transition-all hover:scale-[1.02] active:scale-98 shadow-[0_8px_20px_rgba(16,185,129,0.2)]"
                         >
                           <Download className="w-4 h-4" />
                           <span>تحميل الملف</span>
@@ -729,7 +771,7 @@ export default function DashboardPage() {
 
                         <button
                           onClick={() => handleResendEmailForOrder(p.id)}
-                          className="h-11 px-4 bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                          className="h-12 px-4 bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-2xl text-xs font-alexandria font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer"
                           title="إعادة إرسال البريد"
                         >
                           <Send className="w-4 h-4 text-zinc-400" />
@@ -751,23 +793,23 @@ export default function DashboardPage() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -15 }}
               transition={{ duration: 0.2 }}
-              className="space-y-6"
+              className="space-y-6 text-right"
             >
-              <div className="flex justify-between items-center border-b border-white/5 pb-4">
+              <div className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center gap-2.5 sm:gap-4 border-b border-white/5 pb-4">
                 <h2 className="text-lg font-alexandria font-bold text-white">الشهادات والاعتمادات</h2>
-                <span className="bg-rose-600/15 border border-rose-500/30 text-rose-400 text-[10px] px-2.5 py-1 rounded-full font-bold">
+                <span className="bg-rose-600/15 border border-rose-500/30 text-rose-400 text-[10px] px-3 py-1 rounded-full font-bold">
                   {certificates.length} شهادات موثقة
                 </span>
               </div>
 
               {certificates.length === 0 ? (
-                <div className="bg-[#0a0a0f] border border-white/5 rounded-3xl p-10 text-center flex flex-col items-center justify-center max-w-xl mx-auto shadow-2xl relative overflow-hidden">
+                <div className="bg-[#07070b]/60 border border-white/5 rounded-3xl p-10 text-center flex flex-col items-center justify-center max-w-xl mx-auto shadow-2xl relative overflow-hidden">
                   <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-rose-600 to-transparent" />
                   <div className="w-16 h-16 rounded-2xl bg-rose-600/10 border border-rose-500/20 flex items-center justify-center text-rose-500 mb-6 shadow-inner">
                     <Award className="w-8 h-8" />
                   </div>
                   <h3 className="text-lg font-alexandria font-bold text-white mb-2">لا تتوفر شهادات بعد</h3>
-                  <p className="text-zinc-400 text-xs sm:text-sm max-w-md leading-relaxed mb-6">
+                  <p className="text-zinc-400 text-xs sm:text-sm max-w-md leading-relaxed mb-6 font-cairo">
                     ستظهر شهادات التخرج الرقمية المعتمدة هنا فور إتمام أي قسم تدريبي بنجاح وحضور الدروس والتقييمات المخصصة لها.
                   </p>
                   <button
@@ -782,16 +824,19 @@ export default function DashboardPage() {
                   {certificates.map((cert) => (
                     <div 
                       key={cert.id}
-                      className="bg-[#0a0a0f] border border-white/5 hover:border-amber-500/20 rounded-2.5xl p-6 flex flex-col justify-between shadow-2xl transition-all duration-300"
+                      className="group bg-[#07070b]/60 border border-white/5 hover:border-amber-500/20 rounded-3xl p-6 sm:p-7 flex flex-col justify-between shadow-2xl transition-all duration-300 text-right relative overflow-hidden"
                     >
-                      <div className="space-y-4">
-                        <div className="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
+                      {/* Ambient light for active certificate */}
+                      <div className="absolute -left-10 -bottom-10 w-24 h-24 bg-amber-500/5 rounded-full blur-2xl group-hover:bg-amber-500/10 transition-colors pointer-events-none" />
+                      
+                      <div className="space-y-4 relative z-10">
+                        <div className="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 group-hover:scale-110 transition-transform duration-300">
                           <Award className="w-6 h-6" />
                         </div>
                         <div>
-                          <span className="text-[10px] text-amber-500 font-bold block uppercase tracking-wider font-mono">Verification ID: {cert.verification_id}</span>
-                          <h3 className="font-alexandria font-bold text-white text-base sm:text-lg mt-1">{cert.course_name}</h3>
-                          <p className="text-zinc-400 text-xs mt-1">تاريخ التخرج: {cert.issued_at}</p>
+                          <span className="text-[9px] text-amber-500 font-alexandria font-bold block uppercase tracking-wider">رقم التحقق: {cert.verification_id}</span>
+                          <h3 className="font-alexandria font-black text-white text-base sm:text-lg mt-1.5 group-hover:text-amber-400 transition-colors">{cert.course_name}</h3>
+                          <p className="text-zinc-500 font-cairo text-xs mt-1">تاريخ الإصدار: {cert.issued_at}</p>
                         </div>
                       </div>
 
@@ -799,7 +844,7 @@ export default function DashboardPage() {
                         onClick={() => {
                           setSelectedCert(cert);
                         }}
-                        className="mt-6 w-full h-11 bg-gradient-to-r from-amber-500 to-yellow-500 text-black font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 shadow-lg active:scale-95 transition-all cursor-pointer"
+                        className="mt-6 w-full h-12 bg-gradient-to-l from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-black font-alexandria font-black text-xs rounded-2xl flex items-center justify-center gap-2 shadow-[0_6px_20px_rgba(245,158,11,0.2)] hover:shadow-[0_8px_24px_rgba(245,158,11,0.35)] active:scale-98 transition-all cursor-pointer relative z-10"
                       >
                         <Award className="w-4 h-4" />
                         <span>عرض وطباعة الشهادة الموثقة</span>
@@ -811,7 +856,7 @@ export default function DashboardPage() {
             </motion.div>
           )}
 
-          {/* TABS 4: INVOICES (Brand New Tab!) */}
+          {/* TABS 4: INVOICES */}
           {activeTab === "invoices" && (
             <motion.div
               key="invoices"
@@ -819,20 +864,20 @@ export default function DashboardPage() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -15 }}
               transition={{ duration: 0.2 }}
-              className="space-y-6"
+              className="space-y-6 text-right"
             >
-              <div className="flex justify-between items-center border-b border-white/5 pb-4">
+              <div className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center gap-2.5 sm:gap-4 border-b border-white/5 pb-4">
                 <h2 className="text-lg font-alexandria font-bold text-white">فواتير ومعاملات الشراء</h2>
-                <span className="bg-sky-600/15 border border-sky-500/30 text-sky-400 text-[10px] px-2.5 py-1 rounded-full font-bold">
+                <span className="bg-sky-600/15 border border-sky-500/30 text-sky-400 text-[10px] px-3 py-1 rounded-full font-bold">
                   {invoices.length} فواتير معتمدة
                 </span>
               </div>
 
               {invoices.length === 0 ? (
-                <div className="text-center py-20 bg-white/[0.02] border border-white/5 rounded-3xl p-8">
+                <div className="text-center py-20 bg-white/[0.01] border border-white/5 rounded-3xl p-8 shadow-xl">
                   <FileText className="w-16 h-16 text-zinc-700 mx-auto mb-4" />
                   <h3 className="font-alexandria font-bold text-white text-base">لا توجد عمليات شراء سابقة</h3>
-                  <p className="text-zinc-500 text-xs sm:text-sm mt-1 max-w-sm mx-auto">
+                  <p className="text-zinc-500 text-xs sm:text-sm mt-1 max-w-sm mx-auto font-cairo">
                     لم نجد أي فواتير أو إيصالات شراء سابقة مربوطة بهذا البريد الإلكتروني.
                   </p>
                 </div>
@@ -841,42 +886,44 @@ export default function DashboardPage() {
                   {invoices.map((inv) => (
                     <div 
                       key={inv.id}
-                      className="bg-[#0a0a0f] border border-white/5 rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-white/10 transition-all duration-300"
+                      className="group bg-[#07070b]/60 border border-white/5 rounded-3xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-white/10 transition-all duration-300 text-right shadow-lg"
                     >
                       <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-zinc-400 shrink-0">
+                        <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-zinc-400 shrink-0 group-hover:scale-105 transition-transform duration-300">
                           <FileText className="w-6 h-6" />
                         </div>
                         <div>
-                          <h3 className="text-sm sm:text-base font-bold text-white">{inv.product_title}</h3>
-                          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-zinc-500 mt-1">
+                          <h3 className="text-sm sm:text-base font-alexandria font-bold text-white group-hover:text-rose-400 transition-colors">{inv.product_title}</h3>
+                          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-zinc-500 mt-1.5 font-cairo">
                             <span>الرقم المرجعي: <strong className="text-zinc-300 font-mono text-[10px]">#{inv.payment_id || inv.id}</strong></span>
-                            <span>•</span>
+                            <span className="opacity-30">•</span>
                             <span>التاريخ: {new Date(inv.created_at).toLocaleDateString("ar-EG")}</span>
                           </div>
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-2 w-full sm:w-auto shrink-0 justify-end">
-                        <span className="text-emerald-400 font-alexandria font-black text-sm pr-4">
+                      <div className="flex items-center gap-3 w-full sm:w-auto shrink-0 justify-between sm:justify-end">
+                        <span className="text-emerald-400 font-alexandria font-black text-base pr-2 sm:pr-4">
                           ${inv.amount}
                         </span>
 
-                        <button
-                          onClick={() => setSelectedInvoice(inv)}
-                          className="h-10 px-4 bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer"
-                        >
-                          <Printer className="w-3.5 h-3.5" />
-                          <span>تحميل الفاتورة (PDF)</span>
-                        </button>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => setSelectedInvoice(inv)}
+                            className="h-11 px-4 bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-2xl text-xs font-alexandria font-bold flex items-center justify-center gap-2 transition-all cursor-pointer"
+                          >
+                            <Printer className="w-4 h-4" />
+                            <span>عرض الفاتورة</span>
+                          </button>
 
-                        <button
-                          onClick={() => handleResendEmailForOrder(inv.id)}
-                          className="h-10 px-3.5 bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer"
-                          title="إعادة إرسال البريد"
-                        >
-                          <Send className="w-3.5 h-3.5 text-zinc-400" />
-                        </button>
+                          <button
+                            onClick={() => handleResendEmailForOrder(inv.id)}
+                            className="h-11 px-3.5 bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-2xl text-xs font-bold flex items-center justify-center transition-colors cursor-pointer"
+                            title="إعادة إرسال البريد"
+                          >
+                            <Send className="w-3.5 h-3.5 text-zinc-400 hover:text-white transition-colors" />
+                          </button>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -885,7 +932,6 @@ export default function DashboardPage() {
             </motion.div>
           )}
 
-          {/* TABS 5: SETTINGS */}
           {/* TABS: WISHLIST */}
           {activeTab === "wishlist" && (
             <motion.div
@@ -894,23 +940,23 @@ export default function DashboardPage() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -15 }}
               transition={{ duration: 0.2 }}
-              className="space-y-6"
+              className="space-y-6 text-right"
             >
-              <div className="flex justify-between items-center border-b border-white/5 pb-4">
+              <div className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center gap-2.5 sm:gap-4 border-b border-white/5 pb-4">
                 <h2 className="text-lg font-alexandria font-bold text-white">المفضلة الخاصة بي</h2>
-                <span className="bg-rose-600/15 border border-rose-500/30 text-rose-400 text-[10px] px-2.5 py-1 rounded-full font-bold">
+                <span className="bg-rose-600/15 border border-rose-500/30 text-rose-400 text-[10px] px-3 py-1 rounded-full font-bold">
                   {wishlistItems.length} عناصر محفوظة
                 </span>
               </div>
 
               {wishlistItems.length === 0 ? (
-                <div className="bg-[#0a0a0f] border border-white/5 rounded-3xl p-12 text-center flex flex-col items-center justify-center space-y-6">
+                <div className="bg-[#07070b]/60 border border-white/5 rounded-3xl p-12 text-center flex flex-col items-center justify-center space-y-6 shadow-xl">
                   <div className="w-16 h-16 rounded-full bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-500">
                     <Heart className="w-8 h-8 animate-pulse" />
                   </div>
                   <div className="space-y-2">
-                    <h3 className="text-base font-bold text-white">قائمة المفضلة فارغة حالياً</h3>
-                    <p className="text-zinc-500 text-xs max-w-sm leading-relaxed mx-auto">
+                    <h3 className="text-base font-bold text-white font-alexandria">قائمة المفضلة فارغة حالياً</h3>
+                    <p className="text-zinc-500 text-xs max-w-sm leading-relaxed mx-auto font-cairo">
                       تصفح متجرنا الرقمي ومساراتنا الاحترافية وأضف ما ينال إعجابك إلى المفضلة للعودة إليه لاحقاً بسهولة!
                     </p>
                   </div>
@@ -972,48 +1018,48 @@ export default function DashboardPage() {
                         key={item.id}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="bg-[#0a0a0f] border border-white/5 rounded-3xl p-5 flex gap-4 hover:border-white/10 transition-all duration-300 relative group overflow-hidden"
+                        className="bg-[#07070b]/60 border border-white/5 rounded-3xl p-5 flex gap-4 hover:border-white/10 hover:border-rose-500/10 transition-all duration-300 relative group overflow-hidden shadow-xl"
                       >
                         <div className="w-24 h-24 rounded-2xl overflow-hidden shrink-0 bg-neutral-900 border border-white/5 relative">
                           {imageUrl ? (
-                            <img src={imageUrl} alt={title} className="w-full h-full object-cover" />
+                            <img src={imageUrl} alt={title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                           ) : (
-                            <div className="w-full h-full flex items-center justify-center text-xs font-bold text-white/20">
+                            <div className="w-full h-full flex items-center justify-center text-xs font-alexandria font-bold text-white/20">
                               YA
                             </div>
                           )}
-                          <span className={`absolute bottom-1 left-1 px-1.5 py-0.5 rounded-full text-[8px] font-bold border backdrop-blur-sm ${badgeColor}`}>
+                          <span className={`absolute bottom-2 left-2 px-2 py-0.5 rounded-xl text-[8px] font-alexandria font-bold border backdrop-blur-md ${badgeColor}`}>
                             {typeBadge}
                           </span>
                         </div>
 
-                        <div className="flex-1 min-w-0 flex flex-col justify-between">
-                          <div>
-                            <h3 className="text-sm font-bold text-white truncate group-hover:text-rose-500 transition-colors">
+                        <div className="flex-1 min-w-0 flex flex-col justify-between text-right">
+                          <div className="space-y-1">
+                            <h3 className="text-sm sm:text-base font-alexandria font-bold text-white truncate group-hover:text-rose-400 transition-colors">
                               {title}
                             </h3>
-                            <p className="text-zinc-500 text-xs line-clamp-2 mt-1 leading-relaxed">
+                            <p className="text-zinc-400 font-cairo text-xs line-clamp-2 leading-relaxed">
                               {desc}
                             </p>
                           </div>
 
-                          <div className="flex items-center justify-between mt-2 pt-2 border-t border-white/5">
-                            <span className="text-xs font-bold text-white font-mono">${price}</span>
+                          <div className="flex items-center justify-between mt-3 pt-2 border-t border-white/5">
+                            <span className="text-xs sm:text-sm font-alexandria font-black text-rose-450">${price}</span>
                             <div className="flex items-center gap-2">
                               <button
                                 onClick={() => handleRemoveFromWishlist(item.item_type, id)}
                                 disabled={isRemovingWishlistId === id}
-                                className="p-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 transition-all cursor-pointer disabled:opacity-50"
+                                className="p-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 transition-all cursor-pointer disabled:opacity-50"
                                 title="إزالة من المفضلة"
                               >
-                                <Trash2 className="w-3.5 h-3.5" />
+                                <Trash2 className="w-4 h-4" />
                               </button>
                               <Link
                                 href={itemLink}
-                                className="px-3.5 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-[10px] font-bold transition-all shadow-md shadow-rose-600/10 flex items-center gap-1"
+                                className="px-4 py-2 bg-gradient-to-l from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 text-white rounded-xl text-[10px] sm:text-xs font-alexandria font-bold transition-all shadow-md shadow-rose-600/10 flex items-center gap-1.5"
                               >
                                 <span>عرض</span>
-                                <ChevronLeft className="w-3 h-3" />
+                                <ChevronLeft className="w-3.5 h-3.5 rtl:rotate-180" />
                               </Link>
                             </div>
                           </div>
@@ -1026,6 +1072,7 @@ export default function DashboardPage() {
             </motion.div>
           )}
 
+          {/* TABS 5: SETTINGS */}
           {activeTab === "settings" && (
             <motion.div
               key="settings"
@@ -1035,73 +1082,73 @@ export default function DashboardPage() {
               transition={{ duration: 0.2 }}
               className="space-y-6"
             >
-              <div className="flex justify-between items-center border-b border-white/5 pb-4">
+              <div className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center gap-2.5 sm:gap-4 border-b border-white/5 pb-4 text-right">
                 <h2 className="text-lg font-alexandria font-bold text-white">إعدادات الحساب</h2>
               </div>
 
-              <div className="bg-[#0a0a0f] border border-white/5 rounded-3xl p-6 sm:p-10 shadow-2xl">
-                <form onSubmit={handleUpdateProfile} className="space-y-6 max-w-2xl">
+              <div className="bg-[#07070b]/60 border border-white/5 rounded-3xl p-6 sm:p-10 shadow-2xl backdrop-blur-md">
+                <form onSubmit={handleUpdateProfile} className="space-y-6 max-w-2xl text-right">
                   <div>
-                    <h3 className="text-sm font-bold text-white">المعلومات الشخصية</h3>
-                    <p className="text-zinc-500 text-xs mt-1">تحديث معلومات حساب الطالب وكلمة المرور الخاصة بك.</p>
+                    <h3 className="text-base font-alexandria font-bold text-white">المعلومات الشخصية</h3>
+                    <p className="text-zinc-500 font-cairo text-xs mt-1">قم بتحديث معلومات حساب الطالب وكلمة المرور الخاصة بك في أي وقت.</p>
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-xs font-bold text-zinc-400 block pr-1">الاسم الكامل</label>
+                    <label className="text-xs font-alexandria font-bold text-zinc-400 block pr-1">الاسم الكامل</label>
                     <div className="relative group">
                       <User className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500 group-focus-within:text-rose-500 transition-colors" />
                       <input
                         type="text"
                         value={fullName}
                         onChange={(e) => setFullName(e.target.value)}
-                        className="w-full bg-white/5 border border-white/5 hover:border-white/10 rounded-2xl py-3.5 pr-12 pl-4 text-sm font-medium focus:outline-none focus:border-rose-500/50 focus:bg-white/10 transition-all text-white"
+                        className="w-full bg-white/5 border border-white/5 hover:border-white/10 rounded-2xl py-3.5 pr-12 pl-4 text-sm font-cairo font-medium focus:outline-none focus:border-rose-500/50 focus:bg-white/10 transition-all text-white"
                         required
                       />
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-xs font-bold text-zinc-400 block pr-1">البريد الإلكتروني (غير قابل للتعديل)</label>
-                    <div className="relative opacity-65">
-                      <User className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-600" />
+                    <label className="text-xs font-alexandria font-bold text-zinc-400 block pr-1">البريد الإلكتروني (غير قابل للتعديل)</label>
+                    <div className="relative opacity-60">
+                      <User className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-650" />
                       <input
                         type="email"
                         value={user?.email || ""}
-                        className="w-full bg-white/5 border border-white/5 rounded-2xl py-3.5 pr-12 pl-4 text-sm font-medium text-zinc-500 focus:outline-none cursor-not-allowed"
+                        className="w-full bg-white/5 border border-white/5 rounded-2xl py-3.5 pr-12 pl-4 text-sm font-cairo font-medium text-zinc-500 focus:outline-none cursor-not-allowed"
                         dir="ltr"
                         readOnly
                       />
                     </div>
                   </div>
 
-                  <div className="border-t border-white/5 my-6 pt-6" />
+                  <div className="border-t border-white/5 my-8 pt-8" />
 
                   <div>
-                    <h3 className="text-sm font-bold text-white">تعديل كلمة المرور</h3>
-                    <p className="text-zinc-500 text-xs mt-1">اترك هذه الحقول فارغة إذا كنت لا ترغب في تغيير كلمة المرور الحالية.</p>
+                    <h3 className="text-base font-alexandria font-bold text-white">تعديل كلمة المرور</h3>
+                    <p className="text-zinc-500 font-cairo text-xs mt-1">اترك هذه الحقول فارغة إذا كنت لا ترغب في تغيير كلمة المرور الحالية.</p>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <label className="text-xs font-bold text-zinc-400 block pr-1">كلمة المرور الجديدة</label>
+                      <label className="text-xs font-alexandria font-bold text-zinc-400 block pr-1">كلمة المرور الجديدة</label>
                       <input
                         type="password"
                         placeholder="•••••••• (6 أحرف كحد أدنى)"
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
-                        className="w-full bg-white/5 border border-white/5 hover:border-white/10 rounded-2xl py-3.5 px-4 text-sm font-medium focus:outline-none focus:border-rose-500/50 focus:bg-white/10 transition-all text-white"
+                        className="w-full bg-white/5 border border-white/5 hover:border-white/10 rounded-2xl py-3.5 px-4 text-sm font-cairo font-medium focus:outline-none focus:border-rose-500/50 focus:bg-white/10 transition-all text-white"
                         dir="ltr"
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <label className="text-xs font-bold text-zinc-400 block pr-1">تأكيد كلمة المرور الجديدة</label>
+                      <label className="text-xs font-alexandria font-bold text-zinc-400 block pr-1">تأكيد كلمة المرور الجديدة</label>
                       <input
                         type="password"
                         placeholder="••••••••"
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
-                        className="w-full bg-white/5 border border-white/5 hover:border-white/10 rounded-2xl py-3.5 px-4 text-sm font-medium focus:outline-none focus:border-rose-500/50 focus:bg-white/10 transition-all text-white"
+                        className="w-full bg-white/5 border border-white/5 hover:border-white/10 rounded-2xl py-3.5 px-4 text-sm font-cairo font-medium focus:outline-none focus:border-rose-500/50 focus:bg-white/10 transition-all text-white"
                         dir="ltr"
                       />
                     </div>
@@ -1110,7 +1157,7 @@ export default function DashboardPage() {
                   <button
                     type="submit"
                     disabled={isUpdatingProfile}
-                    className="h-12 px-6 bg-[#D6004B] hover:bg-[#b0003d] text-white rounded-xl font-bold text-xs shadow-lg shadow-rose-600/20 transition-all active:scale-98 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:pointer-events-none mt-4"
+                    className="h-12 px-8 bg-gradient-to-l from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 text-white rounded-2xl font-alexandria font-black text-xs shadow-lg shadow-rose-600/25 transition-all active:scale-98 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:pointer-events-none mt-6"
                   >
                     {isUpdatingProfile ? (
                       <>
@@ -1190,7 +1237,7 @@ export default function DashboardPage() {
                   <p className="text-[10px] text-amber-500 font-bold uppercase tracking-[0.2em] font-mono">Certificate of Course Completion</p>
                 </div>
 
-                <p className="text-zinc-400 text-xs sm:text-sm font-medium max-w-lg mx-auto leading-relaxed">
+                <p className="text-zinc-400 text-xs sm:text-sm font-medium max-w-lg mx-auto leading-relaxed font-cairo">
                   يُشهد فريق عمل أكاديمية <span className="font-bold text-white">Youssef Automates</span> الفنية بأن الطالب البارز:
                 </p>
 
@@ -1198,7 +1245,7 @@ export default function DashboardPage() {
                   {selectedCert.student_name}
                 </h4>
 
-                <p className="text-zinc-400 text-xs sm:text-sm font-medium max-w-lg mx-auto leading-relaxed">
+                <p className="text-zinc-400 text-xs sm:text-sm font-medium max-w-lg mx-auto leading-relaxed font-cairo">
                   قد أتم بنجاح ومثابرة كامل متطلبات ودروس المسار التدريبي الاحترافي:
                 </p>
 
@@ -1208,7 +1255,7 @@ export default function DashboardPage() {
 
                 <div className="flex flex-col sm:flex-row items-center justify-between border-t border-white/5 pt-6 gap-4 text-xs font-bold text-zinc-500">
                   <div>
-                    <span className="block text-[10px] text-zinc-600 font-medium">تاريخ إصدار الشهادة:</span>
+                    <span className="block text-[10px] text-zinc-400 font-medium">تاريخ إصدار الشهادة:</span>
                     <span className="text-zinc-300 font-mono mt-0.5 block">{selectedCert.issued_at}</span>
                   </div>
                   <div>
@@ -1218,7 +1265,7 @@ export default function DashboardPage() {
                     </div>
                   </div>
                   <div>
-                    <span className="block text-[10px] text-zinc-600 font-medium">رقم التوثيق المعتمد (Verification ID):</span>
+                    <span className="block text-[10px] text-zinc-400 font-medium">رقم التوثيق المعتمد (Verification ID):</span>
                     <span className="text-rose-400 font-mono mt-0.5 block">{selectedCert.verification_id}</span>
                   </div>
                 </div>
@@ -1268,7 +1315,7 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              <div className="border-t border-b border-white/5 py-4 my-4 grid grid-cols-2 gap-4 text-xs">
+              <div className="border-t border-b border-white/5 py-4 my-4 grid grid-cols-2 gap-4 text-xs text-right">
                 <div>
                   <span className="text-zinc-500 block">مُصدرة إلى:</span>
                   <span className="text-white font-bold block">{selectedInvoice.customer_name || profileName}</span>
@@ -1276,8 +1323,8 @@ export default function DashboardPage() {
                 </div>
                 <div>
                   <span className="text-zinc-500 block">تفاصيل الفاتورة:</span>
-                  <span className="text-zinc-300 block">تاريخ الشراء: {new Date(selectedInvoice.created_at).toLocaleDateString("ar-EG")}</span>
-                  <span className="text-zinc-300 block">طريقة الدفع: Paymob (مدفوع بالكامل)</span>
+                  <span className="text-zinc-350 block">تاريخ الشراء: {new Date(selectedInvoice.created_at).toLocaleDateString("ar-EG")}</span>
+                  <span className="text-zinc-350 block">طريقة الدفع: Paymob (مدفوع بالكامل)</span>
                 </div>
               </div>
 

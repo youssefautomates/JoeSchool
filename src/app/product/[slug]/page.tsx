@@ -488,7 +488,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                     <div className="flex text-yellow-400 gap-0.5 justify-end mb-0.5">
                        {[1,2,3,4,5].map(i => <Star key={i} className="w-3 h-3 fill-current" />)}
                     </div>
-                    <p className="text-white font-alexandria font-bold text-xs">تقييم 5 من 100+ عميل</p>
+                    <p className="text-white font-alexandria font-bold text-xs">تقييم 5 من +500 عميل</p>
                  </div>
               </div>
 
@@ -865,7 +865,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                       <div className="flex text-yellow-400 gap-0.5 justify-end mb-0.5 md:mb-1">
                          {[1,2,3,4,5].map(i => <Star key={i} className="w-3 h-3 md:w-3.5 md:h-3.5 fill-current" />)}
                       </div>
-                      <p className="text-white font-alexandria font-bold text-xs md:text-sm">تقييم 5 من 100+ عميل</p>
+                      <p className="text-white font-alexandria font-bold text-xs md:text-sm">تقييم 5 من +500 عميل</p>
                    </div>
                 </div>
               </div>
