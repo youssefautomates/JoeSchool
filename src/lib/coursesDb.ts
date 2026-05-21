@@ -609,10 +609,17 @@ export async function deleteSection(id: string): Promise<boolean> {
 
   if (hasSupabase) {
     try {
+      const { data: mod } = await supabaseClient.from("course_modules").select("course_id").eq("id", id).maybeSingle();
+      const courseIdToSync = mod?.course_id;
+
       const { error } = await supabaseClient.from("course_modules").delete().eq("id", id);
       if (error) {
         console.error("Supabase deleteSection error:", error);
         throw new Error(error.message || "Failed to delete section from database");
+      }
+
+      if (courseIdToSync) {
+        await syncCourseStatsInDb(courseIdToSync);
       }
       return true;
     } catch (e: any) {
@@ -629,6 +636,45 @@ export async function deleteSection(id: string): Promise<boolean> {
   const lessons = localDb.getLessons().filter(l => l.section_id !== id);
   localDb.saveLessons(lessons);
   return true;
+}
+
+// Helper to sync course stats (lessons count and duration) dynamically in Supabase
+export async function syncCourseStatsInDb(courseId: string): Promise<void> {
+  try {
+    const { data: modules, error: mError } = await supabaseClient
+      .from("course_modules")
+      .select("id")
+      .eq("course_id", courseId);
+    
+    if (mError || !modules) return;
+
+    let computedLessonsCount = 0;
+    let computedDurationHours = 0;
+
+    if (modules.length > 0) {
+      const moduleIds = modules.map(m => m.id);
+      const { data: lessons, error: lError } = await supabaseClient
+        .from("course_lessons")
+        .select("duration_seconds")
+        .in("module_id", moduleIds);
+
+      if (lessons && !lError) {
+        computedLessonsCount = lessons.length;
+        const totalSeconds = lessons.reduce((acc, l) => acc + (Number(l.duration_seconds) || 0), 0);
+        computedDurationHours = totalSeconds > 0 ? Number((totalSeconds / 3600).toFixed(1)) : 0;
+      }
+    }
+
+    await supabaseClient
+      .from("courses")
+      .update({
+        lessons_count: computedLessonsCount,
+        duration_hours: computedDurationHours
+      })
+      .eq("id", courseId);
+  } catch (e) {
+    console.error("[syncCourseStatsInDb] Error syncing course stats in DB:", e);
+  }
 }
 
 export async function upsertLesson(lesson: Partial<LmsLesson> & { section_id: string; title: string }): Promise<LmsLesson> {
@@ -683,6 +729,11 @@ export async function upsertLesson(lesson: Partial<LmsLesson> & { section_id: st
       }).select().single();
       
       if (!error && data) {
+        const { data: mod } = await supabaseClient.from("course_modules").select("course_id").eq("id", record.section_id).maybeSingle();
+        if (mod?.course_id) {
+          await syncCourseStatsInDb(mod.course_id);
+        }
+
         return {
           ...data,
           section_id: data.module_id
@@ -710,6 +761,11 @@ export async function upsertLesson(lesson: Partial<LmsLesson> & { section_id: st
           throw new Error(fallbackError.message || "Failed to upsert lesson in database");
         }
         if (fallbackData) {
+          const { data: mod } = await supabaseClient.from("course_modules").select("course_id").eq("id", record.section_id).maybeSingle();
+          if (mod?.course_id) {
+            await syncCourseStatsInDb(mod.course_id);
+          }
+
           return {
             ...fallbackData,
             section_id: fallbackData.module_id,
@@ -753,11 +809,23 @@ export async function deleteLesson(id: string): Promise<boolean> {
 
   if (hasSupabase) {
     try {
+      const { data: lessonData } = await supabaseClient.from("course_lessons").select("module_id").eq("id", id).maybeSingle();
+      let courseIdToSync = null;
+      if (lessonData?.module_id) {
+        const { data: mod } = await supabaseClient.from("course_modules").select("course_id").eq("id", lessonData.module_id).maybeSingle();
+        courseIdToSync = mod?.course_id;
+      }
+
       const { error } = await supabaseClient.from("course_lessons").delete().eq("id", id);
       if (error) {
         console.error("Supabase deleteLesson error:", error);
         throw new Error(error.message || "Failed to delete lesson from database");
       }
+
+      if (courseIdToSync) {
+        await syncCourseStatsInDb(courseIdToSync);
+      }
+
       return true;
     } catch (e: any) {
       console.error("Catch deleteLesson error:", e);

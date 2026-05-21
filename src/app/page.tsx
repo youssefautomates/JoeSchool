@@ -269,7 +269,7 @@ export default function Home() {
                 transition={{ duration: 0.8, delay: 0.2 }}
                 className="text-sm md:text-2xl text-zinc-400 font-cairo max-w-3xl mx-auto mb-8 md:mb-14 leading-relaxed"
               >
-                احصل على أرقى <span className="text-white font-bold">الدورات التدريبية</span>، وحزم تدفقات عمل <span className="text-white font-bold">n8n</span> المتكاملة، وتطبيقات الذكاء الاصطناعي لتوفير مئات الساعات في أعمالك.
+                أحصل على أفضل الدورات في <span className="text-white font-bold">الأتمتة وصناعة المحتوى بالذكاء الاصطناعي</span>، وأكتشف آخر <span className="text-white font-bold">منتجاتنا الرقمية</span>
               </motion.p>
               
               <motion.div
@@ -282,7 +282,7 @@ export default function Home() {
                   href="#courses"
                   className="group relative h-12 md:h-20 px-6 md:px-12 inline-flex items-center justify-center gap-2 md:gap-3 bg-[#D6004B] hover:bg-[#b0003d] text-white rounded-[1.25rem] md:rounded-2xl font-cairo text-base md:text-xl font-bold shadow-[0_0_30px_rgba(214,0,75,0.3)] hover:shadow-[0_0_60px_rgba(214,0,75,0.6)] transition-all hover:-translate-y-1 active:scale-95 w-full md:w-auto cursor-pointer"
                 >
-                  <span className="relative z-10">تصفح الأكاديمية والمنتجات</span>
+                  <span className="relative z-10">تصفح المنصة والمنتجات الرقمية</span>
                   <ArrowLeft className="w-4 h-4 md:w-6 md:h-6 relative z-10 group-hover:-translate-x-2 transition-transform rtl:rotate-180" />
                   <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-[1.25rem] md:rounded-2xl" />
                 </Link>
