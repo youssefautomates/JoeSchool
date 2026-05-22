@@ -374,7 +374,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                       <div className="relative w-full h-full bg-black">
                         {isEmbed ? (
                           <iframe 
-                            src={getEmbedUrl(previewVideoUrl, false)}
+                            src={getEmbedUrl(previewVideoUrl, hasInteracted)}
                             className="w-full h-full border-none"
                             allow="autoplay; encrypted-media"
                             allowFullScreen
@@ -385,11 +385,34 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                              ref={videoRef}
                              src={previewVideoUrl} 
                              playsInline
-                             controls
+                             autoPlay
+                             muted={isMuted}
+                             loop={!hasInteracted}
+                             controls={hasInteracted}
                              className="w-full h-full object-contain"
                            />
                         )}
                       </div>
+                      {/* Click-to-unmute overlay */}
+                      {!hasInteracted && (
+                        <div 
+                          onClick={handleUnmuteAndStart}
+                          className="absolute inset-0 z-20 flex flex-col items-center justify-center cursor-pointer group/unmute transition-all"
+                        >
+                          <div className="absolute inset-0 bg-black/30 group-hover/unmute:bg-black/15 transition-colors" />
+                          <motion.div 
+                            animate={{ scale: [1, 1.08, 1] }}
+                            transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+                            className="relative w-20 h-20 bg-[#D6004B]/90 backdrop-blur-xl border-2 border-white/20 rounded-full flex items-center justify-center mb-4 shadow-[0_0_40px_rgba(214,0,75,0.5)] group-hover/unmute:shadow-[0_0_60px_rgba(214,0,75,0.7)] transition-shadow"
+                          >
+                            <Play className="w-8 h-8 text-white fill-current ml-1" />
+                          </motion.div>
+                          <span className="relative text-xs font-cairo font-bold text-white/80 bg-black/50 backdrop-blur-md px-5 py-2 rounded-xl border border-white/10 group-hover/unmute:text-white group-hover/unmute:border-white/20 transition-all flex items-center gap-2">
+                            <VolumeX className="w-3.5 h-3.5" />
+                            اضغط لفتح الصوت
+                          </span>
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <>
@@ -1076,82 +1099,106 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
           </section>
         )}
 
-        {/* Smart Category Course Recommendations (Yellow Box improved with same fonts) */}
+        {/* Smart Category Course Recommendations — Premium Redesign */}
         {recommendedCourses.length > 0 && (
-          <section className="container mx-auto px-4 max-w-6xl mt-16 border-t border-white/5 pt-12">
-            <div className="space-y-6">
-              <div className="flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-[#D6004B] animate-pulse" />
-                <h3 className="text-xl sm:text-2xl font-alexandria font-black text-white">
-                  محتوى ذو صلة قد يعجبك
-                </h3>
-              </div>
+          <section className="container mx-auto px-4 max-w-6xl mt-20 mb-8">
+            <div className="relative bg-gradient-to-b from-white/[0.02] to-transparent border border-white/5 rounded-[2.5rem] p-8 sm:p-12 overflow-hidden">
+              {/* Background glow */}
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[400px] h-[200px] bg-[#D6004B]/5 rounded-full blur-[80px] pointer-events-none" />
               
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {recommendedCourses.map((item) => {
-                  const itemPricing = resolveProductPrice(item as any, currency);
-                  return (
-                    <Link
-                      key={item.id}
-                      href={`/courses/${item.slug}`}
-                      className="group bg-[#09090e] border border-white/5 hover:border-[#D6004B]/40 rounded-3xl overflow-hidden shadow-2xl flex flex-col justify-between hover:-translate-y-1 transition-all duration-300 cursor-pointer"
-                    >
-                      <div className="relative aspect-video bg-zinc-950 overflow-hidden border-b border-white/5">
-                        {item.image_url ? (
-                          <img 
-                            src={item.image_url} 
-                            alt={item.title} 
-                            className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500" 
-                          />
-                        ) : (
-                          <div className="absolute inset-0 bg-grid-lines mask-radial-faded opacity-35" />
-                        )}
-                        <span className="absolute bottom-3 right-3 bg-black/60 backdrop-blur-md border border-white/10 px-2.5 py-1 rounded-xl text-[10px] font-black text-[#D6004B] font-alexandria">
-                          {item.category}
-                        </span>
-                      </div>
-
-                      <div className="p-5 flex-grow flex flex-col justify-between space-y-4">
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between text-[10px] text-zinc-500 font-bold font-alexandria">
-                            <span className="flex items-center gap-1">
-                              <Clock className="w-3.5 h-3.5 text-[#FF7A00]" />
-                              {item.duration_hours} ساعة
-                            </span>
-                            <span className="flex items-center gap-1 border-r border-white/10 pr-2">
-                              <BookOpen className="w-3.5 h-3.5 text-[#D6004B]" />
-                              {item.lessons_count} محاضرة
-                            </span>
-
-                          </div>
-
-                          <h4 className="text-base font-alexandria font-bold text-white group-hover:text-[#D6004B] transition-colors line-clamp-1">
-                            {item.title}
-                          </h4>
-                          <p className="text-zinc-400 text-xs font-cairo line-clamp-2 leading-relaxed">
-                            {item.short_description || item.description}
-                          </p>
-                        </div>
-
-                        <div className="pt-3 border-t border-white/5 flex items-center justify-between">
-                          <div className="flex flex-col">
-                            {itemPricing.original_price > 0 && (
-                              <span className="text-[10px] text-zinc-500 line-through mb-0.5 font-alexandria">{formatPrice(itemPricing.original_price, currency)}</span>
-                            )}
-                            <span className="text-base font-alexandria font-black text-[#D6004B]">
-                              {itemPricing.price === 0 ? "مجاني" : formatPrice(itemPricing.price, currency)}
+              <div className="relative z-10 space-y-8">
+                <div className="text-center space-y-2">
+                  <span className="inline-flex items-center gap-1.5 bg-[#D6004B]/10 border border-[#D6004B]/20 text-[#D6004B] px-3.5 py-1.5 rounded-full text-[10px] font-bold font-alexandria">
+                    <Sparkles className="w-3.5 h-3.5 animate-pulse" />
+                    <span>أقسام مقترحة لك</span>
+                  </span>
+                  <h3 className="text-xl sm:text-2xl font-alexandria font-black text-white">
+                    محتوى ذو صلة قد يعجبك
+                  </h3>
+                  <p className="text-zinc-500 text-xs font-cairo max-w-md mx-auto">اكتشف المزيد من الأقسام التدريبية المميزة لتعزيز مهاراتك واحتراف مجالك</p>
+                </div>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {recommendedCourses.map((item) => {
+                    const itemPricing = resolveProductPrice(item as any, currency);
+                    return (
+                      <Link
+                        key={item.id}
+                        href={`/courses/${item.slug}`}
+                        className="group relative bg-[#09090e] border border-white/5 hover:border-[#D6004B]/30 rounded-2xl overflow-hidden shadow-2xl flex flex-col justify-between hover:-translate-y-2 transition-all duration-500 cursor-pointer"
+                      >
+                        {/* Image */}
+                        <div className="relative aspect-video bg-zinc-950 overflow-hidden">
+                          {item.image_url ? (
+                            <img 
+                              src={item.image_url} 
+                              alt={item.title} 
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
+                            />
+                          ) : (
+                            <div className="absolute inset-0 bg-gradient-to-br from-[#12121c] to-[#09090e] flex items-center justify-center">
+                              <BookOpen className="w-10 h-10 text-zinc-800" />
+                            </div>
+                          )}
+                          <div className="absolute inset-0 bg-gradient-to-t from-[#09090e] via-transparent to-transparent" />
+                          <div className="absolute top-3 right-3 flex gap-2">
+                            <span className="bg-black/60 backdrop-blur-md border border-white/10 px-2.5 py-1 rounded-lg text-[9px] font-black text-[#D6004B] font-alexandria">
+                              {item.category}
                             </span>
                           </div>
-                          
-                          <div className="h-9 px-4 bg-white/5 hover:bg-[#D6004B] border border-white/10 hover:border-transparent text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1 transition-all font-cairo">
-                            <span>عرض التفاصيل</span>
-                            <ArrowLeft className="w-3.5 h-3.5 rtl:rotate-180" />
+                          {/* Play icon overlay */}
+                          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <div className="w-14 h-14 bg-[#D6004B]/90 backdrop-blur-xl rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(214,0,75,0.4)] border border-white/20">
+                              <Play className="w-6 h-6 text-white fill-current ml-0.5" />
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </Link>
-                  );
-                })}
+
+                        {/* Content */}
+                        <div className="p-5 flex-grow flex flex-col justify-between space-y-4">
+                          <div className="space-y-3">
+                            <div className="flex items-center gap-3 text-[10px] text-zinc-500 font-bold font-alexandria">
+                              <span className="flex items-center gap-1">
+                                <Clock className="w-3.5 h-3.5 text-orange-500" />
+                                {item.duration_hours} ساعة
+                              </span>
+                              <span className="w-[1px] h-3 bg-white/10" />
+                              <span className="flex items-center gap-1">
+                                <BookOpen className="w-3.5 h-3.5 text-[#D6004B]" />
+                                {item.lessons_count} محاضرة
+                              </span>
+                              <span className="w-[1px] h-3 bg-white/10" />
+                              <span className="flex items-center gap-1">
+                                <Star className="w-3 h-3 text-yellow-400 fill-current" />
+                                5.0
+                              </span>
+                            </div>
+
+                            <h4 className="text-sm font-alexandria font-bold text-white group-hover:text-[#D6004B] transition-colors line-clamp-2 leading-snug">
+                              {item.title}
+                            </h4>
+                          </div>
+
+                          <div className="pt-3 border-t border-white/5 flex items-center justify-between">
+                            <div className="flex items-baseline gap-2">
+                              <span className="text-lg font-alexandria font-black text-white">
+                                {itemPricing.price === 0 ? "مجاني" : formatPrice(itemPricing.price, currency)}
+                              </span>
+                              {itemPricing.original_price > 0 && (
+                                <span className="text-[10px] text-zinc-500 line-through font-alexandria">{formatPrice(itemPricing.original_price, currency)}</span>
+                              )}
+                            </div>
+                            
+                            <div className="h-8 px-3.5 bg-[#D6004B]/10 hover:bg-[#D6004B] border border-[#D6004B]/20 hover:border-[#D6004B] text-[#D6004B] hover:text-white rounded-lg text-[10px] font-bold flex items-center justify-center gap-1 transition-all font-cairo">
+                              <span>عرض التفاصيل</span>
+                              <ArrowLeft className="w-3 h-3 rtl:rotate-180" />
+                            </div>
+                          </div>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
               </div>
             </div>
           </section>
@@ -1423,51 +1470,45 @@ function MobileCourseView({
       <div className="aspect-video bg-[#0a0a0f] border border-white/5 rounded-2xl overflow-hidden relative shadow-2xl group w-full">
         {previewVideoUrl ? (
           <div className="absolute inset-0 z-10 flex items-center justify-center bg-black">
-            {!hasInteracted ? (
-               <div 
-                 className="relative w-full h-full cursor-pointer group"
-                 onClick={handleUnmuteAndStart}
-               >
-                 {course.image_url ? (
-                   <img src={course.image_url} alt="Cover" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
-                 ) : (
-                   <div className="absolute inset-0 bg-grid-lines mask-radial-faded opacity-30 flex items-center justify-center">
-                     <BookOpen className="w-12 h-12 text-zinc-700" />
-                   </div>
-                 )}
-                 <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 backdrop-blur-[2px] transition-all group-hover:bg-black/20" style={{ zIndex: 20 }}>
-                    <motion.div 
-                      animate={{ scale: [1, 1.1, 1] }}
-                      transition={{ duration: 2, repeat: Infinity }}
-                      className="w-16 h-16 bg-[#D6004B]/90 backdrop-blur-2xl border border-white/20 rounded-full flex items-center justify-center mb-4 shadow-2xl animate-pulse"
-                    >
-                       <Play className="w-6 h-6 text-white fill-current ml-1" />
-                    </motion.div>
-                    <span className="font-alexandria font-black text-sm text-white tracking-widest bg-black/50 px-6 py-2 rounded-xl border border-white/10 shadow-[0_15px_40px_rgba(0,0,0,0.4)]">
-                       تشغيل الفيديو
-                    </span>
-                 </div>
-               </div>
-            ) : (
-              <div className="relative w-full h-full bg-black">
-                {isEmbed ? (
-                  <iframe 
-                    src={getEmbedUrl(previewVideoUrl, true)}
-                    className="w-full h-full border-none"
-                    allow="autoplay; encrypted-media"
-                    allowFullScreen
-                    referrerPolicy="origin"
-                  />
-                ) : (
-                   <video 
-                     ref={mobileVideoRef}
-                     src={previewVideoUrl} 
-                     autoPlay 
-                     playsInline
-                     controls
-                     className="w-full h-full object-contain"
-                   />
-                )}
+            <div className="relative w-full h-full bg-black">
+              {isEmbed ? (
+                <iframe 
+                  src={getEmbedUrl(previewVideoUrl, hasInteracted)}
+                  className="w-full h-full border-none"
+                  allow="autoplay; encrypted-media"
+                  allowFullScreen
+                  referrerPolicy="origin"
+                />
+              ) : (
+                <video 
+                  ref={mobileVideoRef}
+                  src={previewVideoUrl} 
+                  autoPlay 
+                  muted={isMuted}
+                  loop={!hasInteracted}
+                  playsInline
+                  controls={hasInteracted}
+                  className="w-full h-full object-contain"
+                />
+              )}
+            </div>
+            {!hasInteracted && (
+              <div 
+                onClick={handleUnmuteAndStart}
+                className="absolute inset-0 z-20 flex flex-col items-center justify-center cursor-pointer group/unmute transition-all"
+              >
+                <div className="absolute inset-0 bg-black/30 group-hover/unmute:bg-black/15 transition-colors" />
+                <motion.div 
+                  animate={{ scale: [1, 1.08, 1] }}
+                  transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+                  className="relative w-16 h-16 bg-[#D6004B]/90 backdrop-blur-xl border-2 border-white/20 rounded-full flex items-center justify-center mb-3 shadow-[0_0_30px_rgba(214,0,75,0.5)] group-hover/unmute:shadow-[0_0_50px_rgba(214,0,75,0.7)] transition-shadow"
+                >
+                  <Play className="w-6 h-6 text-white fill-current ml-1" />
+                </motion.div>
+                <span className="relative text-[11px] font-cairo font-bold text-white/80 bg-black/50 backdrop-blur-md px-4 py-1.5 rounded-lg border border-white/10 group-hover/unmute:text-white transition-all flex items-center gap-1.5">
+                  <VolumeX className="w-3 h-3" />
+                  اضغط لفتح الصوت
+                </span>
               </div>
             )}
           </div>

@@ -679,7 +679,7 @@ export async function syncCourseStatsInDb(courseId: string): Promise<void> {
 
 export async function upsertLesson(lesson: Partial<LmsLesson> & { section_id: string; title: string }): Promise<LmsLesson> {
   const id = lesson.id || `les-${Date.now()}`;
-  const slug = lesson.slug || lesson.title.toLowerCase().replace(/\s+/g, "-");
+  const slug = lesson.slug || (lesson.title.toLowerCase().replace(/\s+/g, "-") + "-" + Math.random().toString(36).substring(2, 8));
   const record: LmsLesson = {
     id,
     section_id: lesson.section_id,

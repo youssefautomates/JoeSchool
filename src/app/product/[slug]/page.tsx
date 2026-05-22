@@ -14,7 +14,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { ProductReviews } from "@/components/ProductReviews";
-import { WhatsAppPopup } from "@/components/WhatsAppPopup";
+
 import RelatedCarousel from "@/components/RelatedCarousel";
 
 import { supabase } from "@/lib/supabase";
@@ -912,7 +912,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
         </div>
       </main>
 
-      <WhatsAppPopup />
+
       <Footer />
     </div>
   );

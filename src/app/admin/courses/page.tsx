@@ -1179,7 +1179,9 @@ export default function AdminCoursesPage() {
         });
       });
 
-      setShowLessonModal(false); setEditingLesson(null);
+      setShowLessonModal(false); 
+      setEditingLesson(null);
+      cancelVideoUpload();
       toast.success("تم حفظ الدرس بنجاح");
 
       const { sections } = await getCourseBySlug(selectedCourse.slug);
