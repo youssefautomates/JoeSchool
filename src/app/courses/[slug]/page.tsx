@@ -1237,7 +1237,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
           .animate-marquee-ltr {
             display: flex;
             width: max-content;
-            animation: marquee-ltr 35s linear infinite;
+            animation: marquee-ltr 70s linear infinite;
           }
           .animate-marquee-ltr:hover {
             animation-play-state: paused;
