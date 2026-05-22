@@ -44,7 +44,13 @@ function FailedContent() {
                   <span className="font-cairo text-zinc-500 text-sm">رقم الطلب:</span>
                 </div>
                 <div className="flex justify-between items-center border-t border-white/5 pt-3">
-                  <span className="font-cairo text-red-400 font-bold text-sm">{reason}</span>
+                  <span className="font-cairo text-red-400 font-bold text-sm">
+                    {reason === "verification_timeout" ? "انتهت مهلة التحقق من البنك (البطاقة)" : 
+                     reason === "declined" ? "تم رفض العملية من البنك المصدر للبطاقة" : 
+                     reason === "insufficient_funds" ? "الرصيد غير كافٍ في البطاقة" : 
+                     reason === "expired_card" ? "البطاقة البنكية منتهية الصلاحية" : 
+                     reason}
+                  </span>
                   <span className="font-cairo text-zinc-500 text-sm">السبب:</span>
                 </div>
               </div>

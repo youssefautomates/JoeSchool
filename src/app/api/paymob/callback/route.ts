@@ -41,10 +41,13 @@ export async function GET(request: Request) {
 
   // 3. Always redirect to Youssef Automates Store pages
   // This guarantees store customers never see JoeSchool pages
-  if (success) {
+  const reason = searchParams.get("txn_response_code") || "declined";
+  
+  if (success || reason === "verification_timeout") {
+    // If verification_timeout, send to success page anyway so the robust
+    // verify-and-deliver API can check Paymob directly. Often it's a false negative.
     return NextResponse.redirect(new URL(`/checkout/success?order_id=${orderId}`, request.url));
   } else {
-    const reason = searchParams.get("txn_response_code") || "declined";
     return NextResponse.redirect(new URL(`/checkout/failed?order_id=${orderId}&reason=${reason}`, request.url));
   }
 }
