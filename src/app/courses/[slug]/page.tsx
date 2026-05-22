@@ -291,7 +291,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
   const promoVideoTag = course.tags?.find(t => t.startsWith("video:"))?.replace("video:", "");
   const firstPreviewLesson = sections
     .flatMap(sec => sec.lessons)
-    .find(les => les.lecture_type === 'video' && (les.playback_url || les.video_url));
+    .find(les => les.is_preview === true && les.lecture_type === 'video' && (les.playback_url || les.video_url));
   const previewVideoUrl = promoVideoSignedUrl || promoVideoTag || firstPreviewLesson?.playback_url || firstPreviewLesson?.video_url;
 
   const isEmbed = !!(previewVideoUrl?.includes("iframe.mediadelivery.net") || previewVideoUrl?.includes("youtube.com") || previewVideoUrl?.includes("youtu.be"));
