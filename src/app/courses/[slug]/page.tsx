@@ -427,14 +427,6 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                           <BookOpen className="w-16 h-16 text-zinc-700" />
                         </div>
                       )}
-                      <div className="absolute inset-0 bg-black/40 group-hover:bg-black/35 transition-colors flex items-center justify-center">
-                        <Link
-                          href={isEnrolled ? `/learn/${course.slug}/${firstLessonSlug}` : `/checkout/${course.id}`}
-                          className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-[#D6004B]/95 text-white flex items-center justify-center shadow-2xl border border-[#D6004B]/30 hover:scale-105 active:scale-95 transition-all cursor-pointer"
-                        >
-                          <Play className="w-6 h-6 sm:w-8 sm:h-8 fill-current ml-1" />
-                        </Link>
-                      </div>
                     </>
                   )}
                 </div>
@@ -1525,14 +1517,6 @@ function MobileCourseView({
                 <BookOpen className="w-10 h-10 text-zinc-700" />
               </div>
             )}
-            <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-              <Link
-                href={isEnrolled ? `/learn/${course.slug}/${firstLessonSlug}` : `/checkout/${course.id}`}
-                className="w-14 h-14 rounded-full bg-[#D6004B]/95 text-white flex items-center justify-center shadow-2xl border border-[#D6004B]/30 hover:scale-105 transition-all cursor-pointer"
-              >
-                <Play className="w-5 h-5 fill-current ml-1" />
-              </Link>
-            </div>
           </>
         )}
       </div>
