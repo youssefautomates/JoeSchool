@@ -186,11 +186,14 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
       }
       setCourse(c);
       setSections(s);
-
+      
       const firstSlug = s[0]?.lessons[0]?.slug || "introduction";
       setFirstLessonSlug(firstSlug);
+      
+      // Stop blocking the page load here so content appears fast
+      setIsLoading(false);
 
-      // Fetch all secondary page details in parallel to optimize load performance and prevent content flickering/delays
+      // Fetch all secondary page details in parallel
       const promoVideoPromise = c.promo_video_id
         ? fetch(`/api/video/showcase?videoId=${c.promo_video_id}`)
             .then(res => res.json())
@@ -234,8 +237,6 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
         reviewsPromise,
         recommendationsPromise
       ]);
-
-      setIsLoading(false);
     }
     loadData();
   }, [slug]);
@@ -292,7 +293,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
   const firstPreviewLesson = sections
     .flatMap(sec => sec.lessons)
     .find(les => les.is_preview === true && les.lecture_type === 'video' && (les.playback_url || les.video_url));
-  const previewVideoUrl = promoVideoSignedUrl || promoVideoTag || firstPreviewLesson?.playback_url || firstPreviewLesson?.video_url;
+  const previewVideoUrl = promoVideoSignedUrl || promoVideoTag;
 
   const isEmbed = !!(previewVideoUrl?.includes("iframe.mediadelivery.net") || previewVideoUrl?.includes("youtube.com") || previewVideoUrl?.includes("youtu.be"));
 
