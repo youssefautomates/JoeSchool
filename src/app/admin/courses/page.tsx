@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { 
   Plus, Edit, Trash2, BookOpen, Clock, 
   Video, Save, FileText, Link as LinkIcon, Download, 
-  AlertCircle, Loader2, GripVertical, ChevronDown, ChevronUp, Image as ImageIcon, CheckCircle, Users, Award, Play
+  AlertCircle, Loader2, GripVertical, ChevronDown, ChevronUp, Image as ImageIcon, CheckCircle, Users, Award, Play, X
 } from "lucide-react";
 import { 
   getCoursesList, upsertCourse, deleteCourse, getCourseBySlug, 
@@ -42,6 +42,21 @@ function SortableSection({ section, index, onEdit, onDelete, onAddLesson, lesson
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: section.id });
   const style = { transform: CSS.Transform.toString(transform), transition, zIndex: isDragging ? 10 : 1 };
 
+  const uploadStore = useUploadStore();
+  
+  const pendingUploads = Object.values(uploadStore.uploads)
+    .filter((u: any) => u.isNewLesson && u.sectionId === section.id && !(lessons || []).find((l: any) => l.id === u.lessonId))
+    .map((u: any) => ({
+      id: u.lessonId,
+      title: u.title,
+      section_id: u.sectionId,
+      lecture_type: "video",
+      is_preview: false,
+      duration_seconds: 0
+    }));
+
+  const allLessons = [...(lessons || []), ...pendingUploads];
+
   return (
     <div ref={setNodeRef} style={style} className={cn("border border-white/5 bg-[#0f0f15] rounded-2xl overflow-hidden mb-4", isDragging && "opacity-50 border-rose-500")}>
       <div className="p-4 bg-white/[0.02] border-b border-white/5 flex items-center justify-between gap-4">
@@ -55,7 +70,7 @@ function SortableSection({ section, index, onEdit, onDelete, onAddLesson, lesson
           <div className="text-right">
             <div className="flex items-center gap-2 flex-wrap">
               <h3 className="font-alexandria font-bold text-white text-sm md:text-base">{section.title}</h3>
-              <span className="text-[10px] text-zinc-500 font-bold">({lessons?.length || 0} محاضرة)</span>
+              <span className="text-[10px] text-zinc-500 font-bold">({allLessons.length} محاضرة)</span>
             </div>
             {section.description && (
               <p className="text-[11px] text-zinc-400 mt-0.5 max-w-lg leading-relaxed">{section.description}</p>
@@ -82,12 +97,12 @@ function SortableSection({ section, index, onEdit, onDelete, onAddLesson, lesson
       
       {expanded && (
         <div className="p-4 space-y-2 bg-black/30">
-          {!lessons || lessons.length === 0 ? (
+          {allLessons.length === 0 ? (
             <p className="text-zinc-600 text-xs py-4 text-center">لا توجد محاضرات في هذه الوحدة حتى الآن. اضغط إضافة درس للبدء.</p>
           ) : (
             <DndContext collisionDetection={closestCenter} onDragEnd={(e) => onLessonDragEnd(e, section.id)}>
-              <SortableContext items={lessons.map((l: any) => l.id)} strategy={verticalListSortingStrategy}>
-                {lessons.map((les: any) => (
+              <SortableContext items={allLessons.map((l: any) => l.id)} strategy={verticalListSortingStrategy}>
+                {allLessons.map((les: any) => (
                   <SortableLesson key={les.id} lesson={les} onEdit={() => onEditLesson(les)} onDelete={() => onDeleteLesson(les.id)} />
                 ))}
               </SortableContext>
@@ -106,9 +121,14 @@ function SortableLesson({ lesson, onEdit, onDelete }: any) {
   
   const uploadStore = useUploadStore();
   const uploadTask = uploadStore.uploads[lesson.id];
+  const isUploading = uploadTask?.status === 'Uploading' || uploadTask?.status === 'Encoding' || uploadTask?.status === 'Queued';
 
   return (
-    <div ref={setNodeRef} style={style} className={cn("p-3.5 rounded-xl bg-white/[0.01] hover:bg-white/[0.03] border border-white/5 hover:border-white/10 flex items-center justify-between gap-4 transition-all group flex-wrap", isDragging && "opacity-50 border-emerald-500")}>
+    <div ref={setNodeRef} style={style} className={cn(
+      "p-3.5 rounded-xl bg-white/[0.01] hover:bg-white/[0.03] border border-white/5 hover:border-white/10 flex items-center justify-between gap-4 transition-all group flex-wrap", 
+      isDragging && "opacity-50 border-emerald-500",
+      isUploading && "opacity-60 bg-black/50 border-dashed"
+    )}>
       <div className="flex items-center gap-3">
         <div {...attributes} {...listeners} className="cursor-grab hover:text-white text-zinc-600">
           <GripVertical className="w-4 h-4" />
@@ -339,21 +359,30 @@ export default function AdminCoursesPage() {
 
     try {
       // 1. Auto read video duration in client-side JS
-      const tempVideo = document.createElement("video");
-      tempVideo.preload = "metadata";
-      tempVideo.src = URL.createObjectURL(file);
-      tempVideo.onloadedmetadata = () => {
-        const durationSec = Math.round(tempVideo.duration);
-        setEditingLesson(prev => ({ ...prev, duration_seconds: durationSec }));
-        URL.revokeObjectURL(tempVideo.src);
-      };
+      const getDuration = () => new Promise<number>((resolve) => {
+        const tempVideo = document.createElement("video");
+        tempVideo.preload = "metadata";
+        tempVideo.src = URL.createObjectURL(file);
+        tempVideo.onloadedmetadata = () => {
+          resolve(Math.round(tempVideo.duration));
+          URL.revokeObjectURL(tempVideo.src);
+        };
+        tempVideo.onerror = () => {
+          resolve(0);
+          URL.revokeObjectURL(tempVideo.src);
+        };
+      });
+
+      const durationSec = await getDuration();
+      setEditingLesson(prev => prev ? { ...prev, duration_seconds: durationSec } : prev);
 
       // 2. Delegate to background store
       uploadStore.startBackgroundUpload(editingLesson.id, file, {
         courseId: selectedCourse?.id || "",
         sectionId: editingLesson.section_id || activeSectionForLesson || "",
         title: editingLesson.title || file.name,
-        isNewLesson: !!editingLesson.id?.startsWith("les-")
+        isNewLesson: !!editingLesson.id?.startsWith("les-"),
+        duration_seconds: durationSec
       });
       toast.success("بدأ رفع الفيديو في الخلفية. يمكنك حفظ المحاضرة والمتابعة.");
     } catch (err: any) {
@@ -924,16 +953,29 @@ export default function AdminCoursesPage() {
 
   const handleSaveLesson = async () => {
     if (!editingLesson?.title || !selectedCourse) return toast.error("يرجى إدخال عنوان الدرس");
-    const sectionId = editingLesson.section_id || activeSectionForLesson;
-    if (!sectionId) return;
+    const sectionId = editingLesson.section_id || (editingLesson as any).module_id || activeSectionForLesson;
+    if (!sectionId) return toast.error("فشل تحديد القسم، يرجى المحاولة مرة أخرى.");
     
-    // Retrieve active upload task to get the video ID if it's currently uploading
+    // Retrieve active upload task to get the video details if it's currently uploading or finished
     const uploadTask = editingLesson?.id ? uploadStore.uploads[editingLesson.id] : null;
     const finalVideoId = editingLesson.video_id || uploadTask?.videoId || "";
+    const finalVideoUrl = editingLesson.video_url || uploadTask?.playUrl || "";
+    const finalPlaybackUrl = editingLesson.playback_url || uploadTask?.playUrl || "";
+    const finalThumbUrl = editingLesson.thumbnail_url || uploadTask?.thumbUrl || "";
+    const finalDuration = editingLesson.duration_seconds || uploadTask?.duration_seconds || 0;
 
     setSavingLesson(true);
     try {
-      const savedLesson = await upsertLesson({ ...editingLesson, video_id: finalVideoId, section_id: sectionId, title: editingLesson.title } as any);
+      const savedLesson = await upsertLesson({
+        ...editingLesson,
+        video_id: finalVideoId,
+        video_url: finalVideoUrl,
+        playback_url: finalPlaybackUrl,
+        thumbnail_url: finalThumbUrl,
+        duration_seconds: finalDuration,
+        section_id: sectionId,
+        title: editingLesson.title
+      } as any);
       
       setCurriculumSections(prev => {
         return prev.map(sec => {
@@ -1676,9 +1718,23 @@ export default function AdminCoursesPage() {
       {showLessonModal && editingLesson && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] flex items-center justify-center p-4 overflow-y-auto py-10">
           <div className="bg-[#0a0a0f] border border-white/10 rounded-2xl max-w-2xl w-full p-6 md:p-8 space-y-6 shadow-2xl relative my-auto max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-rose-600/30">
-            <h3 className="font-alexandria font-bold text-white text-base md:text-lg border-b border-white/5 pb-3">
-              {editingLesson.id ? "تعديل تفاصيل المحاضرة" : "إضافة محاضرة/درس جديد"}
-            </h3>
+            <div className="flex items-center justify-between border-b border-white/5 pb-3">
+              <h3 className="font-alexandria font-bold text-white text-base md:text-lg">
+                {editingLesson.id ? "تعديل تفاصيل المحاضرة" : "إضافة محاضرة/درس جديد"}
+              </h3>
+              <button 
+                onClick={() => { 
+                  if (bunnyUploadStatus === 'Uploading' || bunnyUploadStatus === 'Encoding') {
+                    toast.success("يتم الرفع في الخلفية ✓");
+                  }
+                  setShowLessonModal(false); 
+                  setEditingLesson(null); 
+                }} 
+                className="text-zinc-500 hover:text-white transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="flex flex-col gap-1.5 sm:col-span-2">
                 <label className="text-xs text-zinc-400 font-bold">عنوان المحاضرة *</label>

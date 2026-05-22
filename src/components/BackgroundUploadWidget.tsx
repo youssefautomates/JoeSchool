@@ -29,7 +29,7 @@ function UploadRow({ upload, onRemove, onCancel }: { upload: UploadTask; onRemov
         <p className="text-xs font-bold text-white truncate pl-6">{upload.title}</p>
         {upload.status === 'Failed' ? (
            <button onClick={onRemove} className="text-zinc-500 hover:text-white transition-colors absolute left-2 top-2"><X className="w-4 h-4" /></button>
-        ) : upload.status === 'Uploading' || upload.status === 'Encoding' ? (
+        ) : upload.status === 'Uploading' || upload.status === 'Encoding' || upload.status === 'Queued' ? (
            <button onClick={onCancel} className="text-zinc-500 hover:text-rose-400 transition-colors absolute left-2 top-2"><X className="w-4 h-4" /></button>
         ) : (
            <button onClick={onRemove} className="text-emerald-500 hover:text-emerald-400 transition-colors absolute left-2 top-2"><CheckCircle className="w-4 h-4" /></button>
@@ -50,12 +50,20 @@ function UploadRow({ upload, onRemove, onCancel }: { upload: UploadTask; onRemov
         ) : (
           <div className="flex-1">
             <div className="flex justify-between text-[10px] mb-1 font-bold text-zinc-400">
-              <span>{upload.status === 'Uploading' ? 'جاري الرفع...' : 'جاري المعالجة...'}</span>
+              <span>{
+                upload.status === 'Queued' ? 'في الانتظار...' :
+                upload.status === 'Uploading' ? 'جاري الرفع...' : 
+                'جاري المعالجة...'
+              }</span>
               <span>{upload.progress}%</span>
             </div>
             <div className="h-1.5 bg-black/50 rounded-full overflow-hidden">
               <div 
-                className={`h-full rounded-full transition-all duration-300 ${upload.status === 'Encoding' ? 'bg-amber-500' : 'bg-rose-500'}`}
+                className={`h-full rounded-full transition-all duration-300 ${
+                  upload.status === 'Queued' ? 'bg-zinc-600' :
+                  upload.status === 'Encoding' ? 'bg-amber-500' : 
+                  'bg-rose-500'
+                }`}
                 style={{ width: `${upload.progress}%` }}
               />
             </div>
@@ -73,7 +81,7 @@ export function BackgroundUploadWidget() {
   const uploadEntries = Object.values(uploads);
   if (uploadEntries.length === 0) return null;
 
-  const activeUploads = uploadEntries.filter(u => u.status === 'Uploading' || u.status === 'Encoding').length;
+  const activeUploads = uploadEntries.filter(u => u.status === 'Uploading' || u.status === 'Encoding' || u.status === 'Queued').length;
 
   return (
     <div className="fixed bottom-4 left-4 z-[9999] w-80 shadow-2xl" dir="rtl">

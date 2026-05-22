@@ -15,89 +15,64 @@ export interface BunnyVideoStatus {
   hasMP4Fallback: boolean;
 }
 
-/**
- * Robust helper to send HTTPS requests directly to Bunny Stream API.
- * Includes automatic retry with exponential backoff to handle DNS choking/network drops
- * (e.g., when multiple parallel uploads saturate bandwidth and DNS lookups fail with ENOTFOUND).
- */
-function bunnyRequest(
+function asyncDelay(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function bunnyRequest(
   path: string,
   method: string,
   body?: any,
   retries = 3,
   delay = 1000
 ): Promise<any> {
-  return new Promise((resolve, reject) => {
-    const attempt = (remaining: number) => {
-      const bodyString = body ? JSON.stringify(body) : undefined;
-      const options = {
-        hostname: "video.bunnycdn.com",
-        path: path,
-        method: method,
-        timeout: 12000, // 12 seconds request timeout
+  const url = `https://video.bunnycdn.com${path}`;
+  
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000);
+
+      const res = await fetch(url, {
+        method,
         headers: {
           "AccessKey": apiKey,
           "Accept": "application/json",
-          ...(bodyString ? {
-            "Content-Type": "application/json",
-            "Content-Length": Buffer.byteLength(bodyString)
-          } : {}),
+          ...(body ? { "Content-Type": "application/json" } : {})
+        },
+        body: body ? JSON.stringify(body) : undefined,
+        signal: controller.signal
+      });
+
+      clearTimeout(timeoutId);
+
+      if (res.ok) {
+        const text = await res.text();
+        try {
+          return text ? JSON.parse(text) : {};
+        } catch {
+          return text;
         }
-      };
-
-      const req = https.request(options, (res) => {
-        let data = "";
-        res.on("data", (chunk) => {
-          data += chunk;
-        });
-        res.on("end", () => {
-          if (res.statusCode && res.statusCode >= 200 && res.statusCode < 300) {
-            try {
-              resolve(data ? JSON.parse(data) : {});
-            } catch (e) {
-              resolve(data);
-            }
-          } else {
-            // If it's a 5xx server-side error on Bunny, we can retry
-            if (res.statusCode && res.statusCode >= 500 && remaining > 0) {
-              console.warn(`[BUNNY_API_RETRY] Bunny returned status ${res.statusCode}. Retrying in ${delay}ms... (${remaining} retries left)`);
-              setTimeout(() => attempt(remaining - 1), delay);
-            } else {
-              reject(new Error(`Bunny API error: ${res.statusCode} - ${data}`));
-            }
-          }
-        });
-      });
-
-      req.on("timeout", () => {
-        req.destroy();
-      });
-
-      req.on("error", (err: any) => {
-        const isNetworkOrDnsError = 
-          err.code === "ENOTFOUND" || 
-          err.code === "ETIMEOUT" || 
-          err.code === "ECONNRESET" || 
-          err.code === "EADDRINUSE" || 
-          err.code === "ESOCKETTIMEDOUT";
-
-        if (isNetworkOrDnsError && remaining > 0) {
-          console.warn(`[BUNNY_API_RETRY] Network/DNS error (${err.code || err.message}). Retrying in ${delay}ms... (${remaining} retries left)`);
-          // Exponential backoff
-          setTimeout(() => attempt(remaining - 1), delay * 2);
-        } else {
-          reject(err);
-        }
-      });
-
-      if (bodyString) {
-        req.write(bodyString);
       }
-      req.end();
-    };
 
-    attempt(retries);
-  });
+      if (res.status >= 500 && attempt < retries) {
+        console.warn(`[BUNNY_API_RETRY] Bunny returned status ${res.status}. Retrying...`);
+        await asyncDelay(delay * attempt);
+        continue;
+      }
+
+      throw new Error(`Bunny API error: ${res.status} - ${await res.text()}`);
+    } catch (err: any) {
+      const isNetworkError = err.name === 'AbortError' || err.message.includes('fetch') || err.message.includes('network');
+      
+      if (isNetworkError && attempt < retries) {
+        console.warn(`[BUNNY_API_RETRY] Network error: ${err.message}. Retrying...`);
+        await asyncDelay(delay * attempt);
+        continue;
+      }
+      throw err;
+    }
+  }
 }
 
 /**

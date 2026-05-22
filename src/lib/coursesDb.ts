@@ -706,27 +706,38 @@ export async function upsertLesson(lesson: Partial<LmsLesson> & { section_id: st
 
   if (hasSupabase) {
     try {
-      const { data, error } = await supabaseClient.from("course_lessons").upsert({
-        id: record.id,
-        module_id: record.section_id,
-        title: record.title,
-        slug: record.slug,
-        video_url: record.video_url,
-        content: record.content,
-        duration_seconds: record.duration_seconds,
-        sort_order: record.sort_order,
-        is_preview: record.is_preview,
-        lecture_type: record.lecture_type,
-        attachment_url: record.attachment_url,
-        attachment_name: record.attachment_name,
-        external_link: record.external_link,
-        attachments: record.attachments,
-        video_processing_status: record.video_processing_status,
-        upload_progress: record.upload_progress,
-        video_id: record.video_id,
-        playback_url: record.playback_url,
-        thumbnail_url: record.thumbnail_url
-      }).select().single();
+      let data, error;
+      
+      // 3 retries for network drops
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        const res = await supabaseClient.from("course_lessons").upsert({
+          id: record.id,
+          module_id: record.section_id,
+          title: record.title,
+          slug: record.slug,
+          video_url: record.video_url,
+          content: record.content,
+          duration_seconds: record.duration_seconds,
+          sort_order: record.sort_order,
+          is_preview: record.is_preview,
+          lecture_type: record.lecture_type,
+          attachment_url: record.attachment_url,
+          attachment_name: record.attachment_name,
+          external_link: record.external_link,
+          attachments: record.attachments,
+          video_processing_status: record.video_processing_status,
+          upload_progress: record.upload_progress,
+          video_id: record.video_id,
+          playback_url: record.playback_url,
+          thumbnail_url: record.thumbnail_url
+        }).select().single();
+        
+        data = res.data;
+        error = res.error;
+        
+        if (!error || !error.message?.includes("fetch")) break;
+        if (attempt < 3) await new Promise(r => setTimeout(r, 2000 * attempt));
+      }
       
       if (!error && data) {
         const { data: mod } = await supabaseClient.from("course_modules").select("course_id").eq("id", record.section_id).maybeSingle();
@@ -739,7 +750,7 @@ export async function upsertLesson(lesson: Partial<LmsLesson> & { section_id: st
           section_id: data.module_id
         } as LmsLesson;
       } else if (error) {
-        console.warn("[upsertLesson] Supabase error with new columns, retrying without them:", error.message);
+        console.warn("[upsertLesson] Supabase error:", error.message);
         const { data: fallbackData, error: fallbackError } = await supabaseClient.from("course_lessons").upsert({
           id: record.id,
           module_id: record.section_id,
@@ -757,7 +768,7 @@ export async function upsertLesson(lesson: Partial<LmsLesson> & { section_id: st
         }).select().single();
         
         if (fallbackError) {
-          console.error("Supabase upsertLesson fallback error:", fallbackError);
+          console.warn("Supabase upsertLesson fallback error:", fallbackError.message);
           throw new Error(fallbackError.message || "Failed to upsert lesson in database");
         }
         if (fallbackData) {

@@ -3,7 +3,7 @@ import { toast } from 'sonner';
 import { supabaseClient } from '@/lib/supabaseClient';
 import { upsertLesson } from '@/lib/coursesDb';
 
-export type UploadStatus = 'Uploading' | 'Encoding' | 'Ready' | 'Failed';
+export type UploadStatus = 'Queued' | 'Uploading' | 'Encoding' | 'Ready' | 'Failed';
 
 export interface UploadTask {
   lessonId: string;
@@ -17,6 +17,11 @@ export interface UploadTask {
   sectionId?: string;
   isNewLesson?: boolean;
   savedToDb?: boolean;
+  file?: File;
+  meta?: any;
+  playUrl?: string;
+  thumbUrl?: string;
+  duration_seconds?: number;
 }
 
 interface UploadStore {
@@ -27,6 +32,8 @@ interface UploadStore {
   removeUpload: (lessonId: string) => void;
   cancelUpload: (lessonId: string) => void;
   startBackgroundUpload: (lessonId: string, file: File, meta?: { courseId: string; sectionId: string; title: string; isNewLesson: boolean }) => Promise<void>;
+  processQueue: () => void;
+  executeUpload: (lessonId: string) => Promise<void>;
 }
 
 export const useUploadStore = create<UploadStore>((set, get) => ({
@@ -72,16 +79,42 @@ export const useUploadStore = create<UploadStore>((set, get) => ({
   },
 
   startBackgroundUpload: async (lessonId, file, meta) => {
-    // 1. Initial State
+    // 1. Initial State - Add to queue
     get().addUpload(lessonId, {
       title: meta?.title || file.name,
-      status: 'Uploading',
+      status: 'Queued',
       progress: 0,
       courseId: meta?.courseId,
       sectionId: meta?.sectionId,
       isNewLesson: meta?.isNewLesson,
       savedToDb: false,
+      file,
+      meta,
     });
+    
+    get().processQueue();
+  },
+
+  processQueue: () => {
+    const state = get();
+    const uploads = Object.values(state.uploads);
+    const activeCount = uploads.filter(u => u.status === 'Uploading').length;
+    
+    // Limit to 1 active network upload at a time for maximum stability
+    if (activeCount < 1) {
+      const nextUpload = uploads.find(u => u.status === 'Queued');
+      if (nextUpload && nextUpload.file) {
+        state.executeUpload(nextUpload.lessonId);
+      }
+    }
+  },
+
+  executeUpload: async (lessonId) => {
+    const task = get().uploads[lessonId];
+    if (!task || !task.file) return;
+    
+    const { file, meta } = task;
+    get().updateStatus(lessonId, 'Uploading');
 
     try {
       // 2. Fetch configurations
@@ -91,22 +124,21 @@ export const useUploadStore = create<UploadStore>((set, get) => ({
       }
       const { libraryId, apiKey } = await configRes.json();
 
-      // 3. Create placeholder
-      const createRes = await fetch(`https://video.bunnycdn.com/library/${libraryId}/videos`, {
+      // 3. Create placeholder via Backend API to avoid CORS and hide API Key
+      const createRes = await fetch(`/api/admin/bunny/video`, {
         method: "POST",
         headers: {
-          "AccessKey": apiKey,
           "Accept": "application/json",
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ title: file.name })
+        body: JSON.stringify({ title: meta?.title || file.name })
       });
       if (!createRes.ok) {
-        const errText = await createRes.text();
-        throw new Error(`فشل إنشاء حاوية الفيديو في Bunny Stream (${createRes.status}): ${errText.slice(0,200)}`);
+        const errData = await createRes.json().catch(() => ({}));
+        throw new Error(`فشل إنشاء حاوية الفيديو: ${errData.error || createRes.statusText}`);
       }
       const createData = await createRes.json();
-      const videoId = createData.guid;
+      const videoId = createData.videoId;
 
       get().updateStatus(lessonId, 'Uploading', videoId);
 
@@ -150,12 +182,11 @@ export const useUploadStore = create<UploadStore>((set, get) => ({
       // 5. Start polling status
       get().updateStatus(lessonId, 'Encoding');
       get().updateProgress(lessonId, 0);
+      get().processQueue(); // Network upload is done, trigger next in queue!
 
       const interval = setInterval(async () => {
         try {
-          const res = await fetch(`https://video.bunnycdn.com/library/${libraryId}/videos/${videoId}`, {
-            headers: { "AccessKey": apiKey, "Accept": "application/json" }
-          });
+          const res = await fetch(`/api/admin/bunny/video?videoId=${videoId}`);
           if (!res.ok) return;
           const data = await res.json();
           
@@ -166,54 +197,38 @@ export const useUploadStore = create<UploadStore>((set, get) => ({
             
             const playUrl = `https://iframe.mediadelivery.net/play/${libraryId}/${videoId}/playlist.m3u8`;
             const thumbUrl = data.thumbnailUrl || `https://iframe.mediadelivery.net/play/${libraryId}/${videoId}/thumbnail.jpg`;
-            const duration_seconds = data.length || 0;
             
             const task = get().uploads[lessonId];
-            if (task?.isNewLesson && task.sectionId) {
-              await upsertLesson({
-                id: lessonId,
-                title: task.title,
-                section_id: task.sectionId,
-                video_id: videoId,
-                video_url: playUrl,
-                playback_url: playUrl,
-                thumbnail_url: thumbUrl,
-                duration_seconds,
-                video_processing_status: 'completed',
-                upload_progress: 100,
-                lecture_type: 'video',
-                is_preview: false
-              } as any);
-              
-              set((state) => ({
-                uploads: {
-                  ...state.uploads,
-                  [lessonId]: { ...state.uploads[lessonId], savedToDb: true }
+            const duration_seconds = data.length || task?.meta?.duration_seconds || 0;
+            
+            // Store final URLs in state so UI can grab them if user clicks "Save" AFTER upload finishes
+            set((state) => ({
+              uploads: {
+                ...state.uploads,
+                [lessonId]: {
+                  ...state.uploads[lessonId],
+                  playUrl,
+                  thumbUrl,
+                  duration_seconds,
+                  savedToDb: true
                 }
-              }));
-              
-              toast.success(`تم حفظ المحاضرة: ${task.title} ✓`);
-            } else {
-              // Save to database directly
-              await supabaseClient.from("course_lessons").update({
-                video_id: videoId,
-                video_url: playUrl,
-                playback_url: playUrl,
-                thumbnail_url: thumbUrl,
-                duration_seconds,
-                video_processing_status: 'completed',
-                upload_progress: 100
-              }).eq("id", lessonId);
-              
-              set((state) => ({
-                uploads: {
-                  ...state.uploads,
-                  [lessonId]: { ...state.uploads[lessonId], savedToDb: true }
-                }
-              }));
-              
-              toast.success(`اكتمل رفع ومعالجة الفيديو "${file.name}" بنجاح! 🚀`);
-            }
+              }
+            }));
+
+            // Always use update() to prevent wiping out user data like description or sort_order!
+            // If the user hasn't clicked "Save" yet, this update will do nothing (0 rows updated), 
+            // but the UI will grab the urls from the store when they DO click Save!
+            await supabaseClient.from("course_lessons").update({
+              video_id: videoId,
+              video_url: playUrl,
+              playback_url: playUrl,
+              thumbnail_url: thumbUrl,
+              duration_seconds,
+              video_processing_status: 'completed',
+              upload_progress: 100
+            }).eq("id", lessonId);
+            
+            toast.success(`اكتمل رفع ومعالجة الفيديو "${task?.title}" بنجاح! 🚀`);
           } else if (data.status === 5 || data.status === 8) {
             clearInterval(interval);
             get().updateStatus(lessonId, 'Failed');
@@ -221,8 +236,8 @@ export const useUploadStore = create<UploadStore>((set, get) => ({
           } else {
             get().updateProgress(lessonId, data.encodeProgress || 0);
           }
-        } catch (err) {
-          console.error("Error polling video status:", err);
+        } catch (err: any) {
+          console.warn("Error polling video status:", err.message || err);
         }
       }, 4000);
 
@@ -238,8 +253,9 @@ export const useUploadStore = create<UploadStore>((set, get) => ({
     } catch (err: any) {
       if (err.message !== "ABORTED") {
         get().updateStatus(lessonId, 'Failed');
-        toast.error(err.message || `خطأ أثناء رفع الفيديو "${file.name}".`);
+        toast.error(err.message || `خطأ أثناء رفع الفيديو "${task.file?.name}".`);
       }
+      get().processQueue(); // Advance queue on failure
     }
   }
 }));
