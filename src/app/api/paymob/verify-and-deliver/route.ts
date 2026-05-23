@@ -52,6 +52,95 @@ export async function POST(req: Request) {
       orders = data || [];
     }
 
+    // Fallback: if we still haven't found the order, and the lookup ID is numeric (not a UUID),
+    // fetch the Paymob order details from the Paymob API to resolve the merchant_order_id.
+    if (orders.length === 0 && !isUuid && /^\d+$/.test(String(orderId))) {
+      try {
+        const apiKey = process.env.PAYMOB_API_KEY;
+        if (apiKey) {
+          console.log(`[VERIFY][${requestId}] 🔍 Fetching Paymob Order from API to resolve Supabase UUID...`);
+          const authRes = await fetch("https://accept.paymob.com/api/auth/tokens", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ api_key: apiKey }),
+          });
+          if (authRes.ok) {
+            const authData = await authRes.json();
+            const authToken = authData.token;
+            
+            const orderRes = await fetch(`https://accept.paymob.com/api/ecommerce/orders/${orderId}`, {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${authToken}`
+              }
+            });
+            if (orderRes.ok) {
+              const paymobOrder = await orderRes.json();
+              if (paymobOrder) {
+                const apiMerchantOrderId = paymobOrder.merchant_order_id;
+                if (apiMerchantOrderId && apiMerchantOrderId.startsWith("store-")) {
+                  const resolvedUuid = apiMerchantOrderId.replace("store-", "");
+                  const isResolvedUuidValid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(resolvedUuid);
+                  if (isResolvedUuidValid) {
+                    console.log(`[VERIFY][${requestId}] ✅ Resolved Supabase UUID via Paymob Order API: ${resolvedUuid}`);
+                    const { data } = await supabaseAdmin.from("orders").select("*").eq("id", resolvedUuid);
+                    orders = data || [];
+                  }
+                }
+              }
+            }
+          }
+        }
+      } catch (paymobApiErr) {
+        console.error(`[VERIFY][${requestId}] ⚠️ Paymob Order API query failed during verification:`, paymobApiErr);
+      }
+    }
+
+    // Also try fallback with paymobOrderId if still empty and numeric
+    if (orders.length === 0 && paymobOrderId && paymobOrderId !== orderId && /^\d+$/.test(String(paymobOrderId))) {
+      try {
+        const apiKey = process.env.PAYMOB_API_KEY;
+        if (apiKey) {
+          console.log(`[VERIFY][${requestId}] 🔍 Fetching Paymob Order from API to resolve UUID via paymobOrderId: ${paymobOrderId}...`);
+          const authRes = await fetch("https://accept.paymob.com/api/auth/tokens", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ api_key: apiKey }),
+          });
+          if (authRes.ok) {
+            const authData = await authRes.json();
+            const authToken = authData.token;
+            
+            const orderRes = await fetch(`https://accept.paymob.com/api/ecommerce/orders/${paymobOrderId}`, {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${authToken}`
+              }
+            });
+            if (orderRes.ok) {
+              const paymobOrder = await orderRes.json();
+              if (paymobOrder) {
+                const apiMerchantOrderId = paymobOrder.merchant_order_id;
+                if (apiMerchantOrderId && apiMerchantOrderId.startsWith("store-")) {
+                  const resolvedUuid = apiMerchantOrderId.replace("store-", "");
+                  const isResolvedUuidValid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(resolvedUuid);
+                  if (isResolvedUuidValid) {
+                    console.log(`[VERIFY][${requestId}] ✅ Resolved Supabase UUID via Paymob Order API: ${resolvedUuid}`);
+                    const { data } = await supabaseAdmin.from("orders").select("*").eq("id", resolvedUuid);
+                    orders = data || [];
+                  }
+                }
+              }
+            }
+          }
+        }
+      } catch (paymobApiErr) {
+        console.error(`[VERIFY][${requestId}] ⚠️ Paymob Order API query failed during verification (paymobOrderId):`, paymobApiErr);
+      }
+    }
+
     if (orders.length === 0) {
       console.error(`[VERIFY][${requestId}] ❌ Order not found in DB for orderId=${orderId}, paymobOrderId=${paymobOrderId}`);
       return NextResponse.json({ error: "Order not found" }, { status: 404 });

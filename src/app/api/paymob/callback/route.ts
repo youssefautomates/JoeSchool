@@ -82,10 +82,52 @@ export async function GET(request: Request) {
           dbOrder = { id: merchantOrderId };
         }
       }
+
+      // Third try: if database queries returned nothing, call the Paymob Order API to fetch the merchant_order_id
+      if (!dbOrder && orderId) {
+        try {
+          const apiKey = process.env.PAYMOB_API_KEY;
+          if (apiKey) {
+            console.log(`[CALLBACK] 🔍 Fetching Paymob Order from API to resolve UUID for order ${orderId}...`);
+            const authRes = await fetch("https://accept.paymob.com/api/auth/tokens", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ api_key: apiKey }),
+            });
+            if (authRes.ok) {
+              const authData = await authRes.json();
+              const authToken = authData.token;
+              
+              const orderRes = await fetch(`https://accept.paymob.com/api/ecommerce/orders/${orderId}`, {
+                method: "GET",
+                headers: {
+                  "Content-Type": "application/json",
+                  "Authorization": `Bearer ${authToken}`
+                }
+              });
+              if (orderRes.ok) {
+                const paymobOrder = await orderRes.json();
+                console.log(`[CALLBACK] 📋 Paymob Order data retrieved:`, paymobOrder);
+                const apiMerchantOrderId = paymobOrder.merchant_order_id;
+                if (apiMerchantOrderId && apiMerchantOrderId.startsWith("store-")) {
+                  const resolvedUuid = apiMerchantOrderId.replace("store-", "");
+                  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(resolvedUuid);
+                  if (isUuid) {
+                    dbOrder = { id: resolvedUuid };
+                    console.log(`[CALLBACK] ✅ Successfully resolved Supabase UUID via Paymob Order API: ${resolvedUuid}`);
+                  }
+                }
+              }
+            }
+          }
+        } catch (paymobApiErr) {
+          console.error(`[CALLBACK] ⚠️ Paymob Order API query failed:`, paymobApiErr);
+        }
+      }
       
       if (dbOrder) {
         realOrderId = dbOrder.id;
-        console.log(`[CALLBACK] ✅ Resolved Supabase UUID from DB: ${realOrderId}`);
+        console.log(`[CALLBACK] ✅ Resolved Supabase UUID from DB/API: ${realOrderId}`);
       } else {
         console.warn(`[CALLBACK] ⚠️ Could not resolve Supabase UUID. Using Paymob Order ID: ${orderId}`);
       }
