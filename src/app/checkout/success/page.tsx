@@ -100,7 +100,7 @@ function SuccessContent() {
   
   // Dual-lookup: support either direct Supabase order_id OR Paymob order param
   const orderIdParam = searchParams.get("order_id");
-  const paymobOrderParam = searchParams.get("order");
+  const paymobOrderParam = searchParams.get("paymob_order_id") || searchParams.get("order");
   const orderId = orderIdParam || paymobOrderParam;
   
   const { clearCart } = useCart();

@@ -302,8 +302,24 @@ export async function POST(req: Request) {
       const authData = await authRes.json();
       const authToken = authData.token;
 
-      // Try the paymobOrderId from the callback first (this is the numeric Paymob order ID)
-      const classicOrderId = paymobOrderId || paymobPaymentId;
+      // Determine the correct numeric Paymob Order ID.
+      // If paymobOrderId is numeric, use it.
+      // If orderId is numeric, use it.
+      // If storedPaymentId contains both intention ID and order ID separated by | (from our API resolve update), extract it.
+      // Otherwise, fallback to paymobPaymentId.
+      let classicOrderId = "";
+      if (paymobOrderId && /^\d+$/.test(String(paymobOrderId))) {
+        classicOrderId = String(paymobOrderId);
+      } else if (orderId && /^\d+$/.test(String(orderId))) {
+        classicOrderId = String(orderId);
+      } else if (storedPaymentId && String(storedPaymentId).includes("|")) {
+        const parts = String(storedPaymentId).split("|");
+        classicOrderId = parts[1] || parts[0];
+      } else if (storedPaymentId && /^\d+$/.test(String(storedPaymentId))) {
+        classicOrderId = String(storedPaymentId);
+      } else {
+        classicOrderId = paymobPaymentId;
+      }
       
       console.log(`[VERIFY][${requestId}] 🔍 Checking Paymob Classic API Order: ${classicOrderId}...`);
       const txnRes = await fetch(`https://accept.paymob.com/api/ecommerce/orders/${classicOrderId}`, {
