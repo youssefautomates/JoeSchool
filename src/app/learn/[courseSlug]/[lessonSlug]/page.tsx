@@ -28,7 +28,6 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ courseS
   // Unified Database states
   const [course, setCourse] = useState<LmsCourse | null>(null);
   const [sections, setSections] = useState<(LmsSection & { lessons: LmsLesson[] })[]>([]);
-  const [currentLesson, setCurrentLesson] = useState<LmsLesson | null>(null);
   const [completedLessons, setCompletedLessons] = useState<string[]>([]);
   
   // Progress states
@@ -54,6 +53,30 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ courseS
   // Personal Notes States
   const [personalNote, setPersonalNote] = useState("");
   const [isSavingNote, setIsSavingNote] = useState(false);
+
+  // Performance Refs
+  const loadedCourseSlugRef = useRef<string | null>(null);
+
+  // Derive current lesson dynamically from URL params and loaded curriculum
+  const allLessonsFlat = sections.flatMap(s => s.lessons);
+  const currentLesson = allLessonsFlat.find(l => {
+    try {
+      return (
+        l.slug === lessonSlug ||
+        l.slug === decodeURIComponent(lessonSlug) ||
+        decodeURIComponent(l.slug) === decodeURIComponent(lessonSlug)
+      );
+    } catch (e) {
+      return l.slug === lessonSlug;
+    }
+  }) || allLessonsFlat[0] || null;
+
+  // Initialize sidebar state on mount based on screen width
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setSidebarOpen(window.innerWidth >= 1024);
+    }
+  }, []);
 
   // 1. Auth Protection Check & Session retrieval
   useEffect(() => {
@@ -81,11 +104,34 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ courseS
   }, [router, courseSlug, lessonSlug]);
 
 
-  // 2. Fetch Course Curriculum and Progress dynamically
+  // 2. Fetch Course Curriculum and Progress dynamically on initial mount or course change
   useEffect(() => {
     if (!user) return;
-    loadCurriculumAndProgress();
-  }, [user, courseSlug, lessonSlug]);
+    
+    if (loadedCourseSlugRef.current !== courseSlug) {
+      loadCurriculumAndProgress();
+    }
+  }, [user, courseSlug]);
+
+  // 3. Keep current section expanded when navigating lessons
+  useEffect(() => {
+    if (sections.length > 0 && lessonSlug) {
+      const activeSectionObj = sections.find(sec => sec.lessons.some(l => {
+        try {
+          return (
+            l.slug === lessonSlug ||
+            l.slug === decodeURIComponent(lessonSlug) ||
+            decodeURIComponent(l.slug) === decodeURIComponent(lessonSlug)
+          );
+        } catch (e) {
+          return l.slug === lessonSlug;
+        }
+      }));
+      if (activeSectionObj && !expandedSections.includes(activeSectionObj.id)) {
+        setExpandedSections(prev => [...new Set([...prev, activeSectionObj.id])]);
+      }
+    }
+  }, [lessonSlug, sections]);
 
   // 3. Track last viewed lesson to resume watching later
   useEffect(() => {
@@ -158,11 +204,7 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ courseS
 
     setCourse(c);
     setSections(s);
-
-    // Find current lesson based on slug
-    const allLessons = s.flatMap(sec => sec.lessons);
-    const found = allLessons.find(l => l.slug === lessonSlug) || allLessons[0] || null;
-    setCurrentLesson(found);
+    loadedCourseSlugRef.current = courseSlug;
 
     // Retrieve progress
     const progressList = await getLessonProgress(user.id);
@@ -175,7 +217,17 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ courseS
     setTotalCount(tCount);
 
     // Expand section containing current lesson by default
-    const activeSectionObj = s.find(sec => sec.lessons.some(l => l.slug === lessonSlug)) || s[0];
+    const activeSectionObj = s.find(sec => sec.lessons.some(l => {
+      try {
+        return (
+          l.slug === lessonSlug ||
+          l.slug === decodeURIComponent(lessonSlug) ||
+          decodeURIComponent(l.slug) === decodeURIComponent(lessonSlug)
+        );
+      } catch (e) {
+        return l.slug === lessonSlug;
+      }
+    })) || s[0];
     if (activeSectionObj && expandedSections.length === 0) {
       setExpandedSections([activeSectionObj.id]);
     }
@@ -357,7 +409,6 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ courseS
   }
 
   // Next and Previous lesson calculators
-  const allLessonsFlat = sections.flatMap(s => s.lessons);
   const currentIdx = allLessonsFlat.findIndex(l => l.id === currentLesson.id);
   const prevLesson = currentIdx > 0 ? allLessonsFlat[currentIdx - 1] : null;
   const nextLesson = currentIdx < allLessonsFlat.length - 1 ? allLessonsFlat[currentIdx + 1] : null;
@@ -368,10 +419,11 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ courseS
       {/* Upper Navigation Header */}
       <header className="h-16 bg-[#0a0a0f] border-b border-white/5 px-6 flex items-center justify-between shrink-0 z-30 font-alexandria">
         <div className="flex items-center gap-4">
-          {/* Mobile Sidebar Toggle */}
+          {/* Sidebar Toggle Button */}
           <button 
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="lg:hidden p-2 rounded-lg bg-white/5 border border-white/10 hover:text-rose-500 transition-colors cursor-pointer"
+            className="p-2 rounded-lg bg-white/5 border border-white/10 hover:text-rose-500 transition-colors cursor-pointer"
+            title="توسيع/طي قائمة المحاضرات"
           >
             {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
@@ -489,12 +541,12 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ courseS
                                   </button>
 
                                   {/* Nav link */}
-                                  <button
+                                  <Link
+                                    href={`/learn/${courseSlug}/${lesson.slug}`}
                                     onClick={() => {
-                                      router.push(`/learn/${courseSlug}/${lesson.slug}`);
                                       if (window.innerWidth < 1024) setSidebarOpen(false);
                                     }}
-                                    className="flex-1 text-right min-w-0 bg-transparent border-none p-0 cursor-pointer"
+                                    className="flex-1 text-right min-w-0 bg-transparent border-none p-0 cursor-pointer block"
                                   >
                                     <p className={`text-xs font-bold leading-snug truncate ${isCurrent ? "text-white" : ""}`}>{lesson.title}</p>
                                     <div className="flex items-center gap-2 text-[9px] text-zinc-500 mt-1 font-bold">
@@ -505,7 +557,7 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ courseS
                                         <span className="bg-emerald-950 text-emerald-400 px-1 py-0.5 rounded text-[8px] mr-auto border border-emerald-900/30">تجربة مجانية Preview</span>
                                       )}
                                     </div>
-                                  </button>
+                                  </Link>
                                 </div>
                               );
                             })}
@@ -526,14 +578,15 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ courseS
           {/* Main Cinematic Video Panel / Embed */}
           <div 
             ref={playerRef}
-            className="aspect-video w-full max-w-4xl mx-auto rounded-3xl bg-zinc-950 border border-white/5 overflow-hidden relative group flex flex-col items-center justify-center shadow-2xl"
+            className="aspect-video w-full max-w-4xl mx-auto rounded-xl bg-zinc-950 border border-white/5 overflow-hidden relative group flex flex-col items-center justify-center shadow-2xl shrink-0"
           >
             {/* Cinematic Overlay Grid */}
             <div className="absolute inset-0 bg-grid-lines mask-radial-faded opacity-20 pointer-events-none z-0"></div>
 
             {currentLesson.lecture_type === "video" && (currentLesson.video_url || currentLesson.video_id) ? (
-              <div className="w-full aspect-video z-10">
+              <div className="absolute inset-0 w-full h-full z-10">
                 <SecureVideoPlayer
+                  key={currentLesson.id}
                   lessonId={currentLesson.id}
                   courseId={course.id}
                   userId={user.id}
@@ -547,7 +600,20 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ courseS
                     if (window.innerWidth < 1024) setSidebarOpen(false);
                   } : undefined}
                   nextLessonTitle={nextLesson?.title || null}
+                  courseImage={course.image_url}
                 />
+              </div>
+            ) : currentLesson.lecture_type === "video" ? (
+              <div className="absolute inset-0 w-full h-full z-10 flex flex-col items-center justify-center gap-4 bg-[#0a0a0f] p-6 text-center select-none">
+                <div className="w-16 h-16 rounded-full bg-rose-600/10 border border-rose-500/20 flex items-center justify-center text-[#D6004B] shadow-[0_0_30px_rgba(214,0,75,0.15)] animate-pulse">
+                  <PlayCircle className="w-8 h-8" />
+                </div>
+                <div className="space-y-1 max-w-xs">
+                  <h4 className="font-alexandria font-bold text-white text-sm">المحاضرة قيد الإعداد 🎬</h4>
+                  <p className="text-zinc-500 text-xs font-cairo leading-relaxed">
+                    لم يتم رفع فيديو لهذه المحاضرة بعد. يرجى المتابعة وسيكون الفيديو متاحاً قريباً.
+                  </p>
+                </div>
               </div>
             ) : (
               // Non-video content states (PDF, Links, Downloads)
@@ -679,9 +745,14 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ courseS
             <div className="py-4">
               {activeTab === "overview" && (
                 <div className="space-y-4 text-xs sm:text-sm text-zinc-400 leading-relaxed">
-                  <p className="whitespace-pre-line bg-white/[0.01] border border-white/5 p-5 rounded-2xl">
-                    {currentLesson.content || "لا توجد ملاحظات تفصيلية مضافة لهذا الدرس حتى الآن."}
-                  </p>
+                  <div 
+                    className="bg-white/[0.01] border border-white/5 p-5 rounded-2xl space-y-3"
+                    dangerouslySetInnerHTML={{ 
+                      __html: currentLesson.content 
+                        ? currentLesson.content.replace(/\n/g, '<br/>') 
+                        : "لا توجد ملاحظات تفصيلية مضافة لهذا الدرس حتى الآن." 
+                    }}
+                  />
                 </div>
               )}
 

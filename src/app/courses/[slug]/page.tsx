@@ -602,15 +602,16 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
 
                           {/* Checklist: What You'll Learn */}
                           {course.what_will_learn && course.what_will_learn.length > 0 && (
-                            <div className="bg-[#0a0a0f] border border-white/5 rounded-3xl p-6 sm:p-8 space-y-6">
-                              <h3 className="text-lg sm:text-xl font-alexandria font-bold text-white flex items-center gap-2">
+                            <div className="bg-white/[0.02] backdrop-blur-md border border-white/10 rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl relative overflow-hidden">
+                              <div className="absolute -top-10 -right-10 w-32 h-32 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+                              <h3 className="text-lg sm:text-xl font-alexandria font-bold text-white flex items-center gap-2 relative z-10">
                                 <CheckCircle2 className="w-5 h-5 text-emerald-500" />
                                 ماذا ستتعلم وتنجز عملياً؟
                               </h3>
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 relative z-10">
                                 {course.what_will_learn.map((feat, fIdx) => (
-                                  <div key={fIdx} className="flex items-start gap-3 bg-white/[0.01] border border-white/[0.03] p-3 rounded-xl">
-                                    <Check className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
+                                  <div key={fIdx} className="flex items-start gap-3 bg-black/20 border border-white/5 p-3 rounded-xl hover:border-emerald-500/30 transition-colors group">
+                                    <Check className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5 group-hover:scale-110 transition-transform" />
                                     <span className="text-zinc-300 text-xs sm:text-sm leading-relaxed">{feat}</span>
                                   </div>
                                 ))}
@@ -635,15 +636,16 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
 
                           {/* Target Audience: Who is this for? */}
                           {course.who_is_for && course.who_is_for.length > 0 && (
-                            <div className="bg-[#0a0a0f] border border-white/5 rounded-3xl p-6 sm:p-8 space-y-4">
-                              <h3 className="text-lg sm:text-xl font-alexandria font-bold text-white flex items-center gap-2">
+                            <div className="bg-white/[0.02] backdrop-blur-md border border-white/10 rounded-3xl p-6 sm:p-8 space-y-4 shadow-2xl relative overflow-hidden">
+                              <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
+                              <h3 className="text-lg sm:text-xl font-alexandria font-bold text-white flex items-center gap-2 relative z-10">
                                 <Users className="w-5 h-5 text-blue-500" />
                                 من هو الفرد المستهدف بهذا القسم؟
                               </h3>
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 relative z-10">
                                 {course.who_is_for.map((aud, aIdx) => (
-                                  <div key={aIdx} className="flex items-center gap-2 bg-white/[0.01] border border-white/[0.03] p-3.5 rounded-xl">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0" />
+                                  <div key={aIdx} className="flex items-center gap-2 bg-black/20 border border-white/5 p-3.5 rounded-xl hover:border-blue-500/30 transition-colors group">
+                                    <div className="w-2 h-2 rounded-full bg-blue-500 shrink-0 group-hover:scale-125 transition-transform" />
                                     <span className="text-zinc-300 text-xs sm:text-sm">{aud}</span>
                                   </div>
                                 ))}
@@ -1674,12 +1676,13 @@ function MobileCourseView({
 
                  {/* Checklist: What You'll Learn */}
                  {course.what_will_learn && course.what_will_learn.length > 0 && (
-                   <div className="bg-[#050508] border border-white/5 rounded-2xl p-4 space-y-4">
-                     <h3 className="text-xs font-alexandria font-bold text-white flex items-center gap-2">
+                   <div className="bg-white/[0.02] backdrop-blur-md border border-white/10 rounded-2xl p-4 space-y-4 shadow-xl relative overflow-hidden">
+                     <div className="absolute -top-5 -right-5 w-20 h-20 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none" />
+                     <h3 className="text-xs font-alexandria font-bold text-white flex items-center gap-2 relative z-10">
                        <CheckCircle2 className="w-4 h-4 text-emerald-500" />
                        ماذا ستتعلم وتنجز عملياً؟
                      </h3>
-                     <div className="flex flex-col gap-2">
+                     <div className="flex flex-col gap-2 relative z-10">
                        {course.what_will_learn.map((feat, fIdx) => (
                          <div key={fIdx} className="flex items-start gap-2 bg-white/[0.01] border border-white/[0.03] p-2.5 rounded-xl">
                            <Check className="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" />
@@ -2015,6 +2018,32 @@ function MobileCourseView({
            جميع الحقوق محفوظة © {new Date().getFullYear()} Youssef Automates
          </div>
       </footer>
+
+      {/* Sticky Mobile CTA */}
+      {!isEnrolled && (
+        <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 p-4 bg-black/80 backdrop-blur-xl border-t border-white/10 shadow-[0_-10px_40px_rgba(0,0,0,0.5)] flex items-center justify-between gap-4 animate-fade-in">
+          <div className="flex flex-col">
+            <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest font-alexandria">السعر الحالي</span>
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-lg font-alexandria font-black text-white">
+                {coursePricing ? (coursePricing.price === 0 ? "مجاني" : formatPrice(coursePricing.price, currency)) : ""}
+              </span>
+              {coursePricing && coursePricing.original_price > 0 && (
+                <span className="text-[10px] text-zinc-500 line-through font-alexandria">
+                  {formatPrice(coursePricing.original_price, currency)}
+                </span>
+              )}
+            </div>
+          </div>
+          <Link
+            href={course.price === 0 ? `/learn/${course.slug}/${firstLessonSlug}` : `/checkout/${course.id}`}
+            className="flex-1 h-12 bg-gradient-to-r from-[#D6004B] via-[#ff1d6b] to-[#D6004B] text-white rounded-xl font-black text-sm shadow-[0_5px_15px_rgba(214,0,75,0.4)] transition-all flex items-center justify-center gap-2 active:scale-95 cursor-pointer font-cairo animate-pulse-glow"
+          >
+            <span>{course.price === 0 ? "مجاناً الان" : "اشترك الآن"}</span>
+            <ArrowLeft className="w-4 h-4 rtl:rotate-180" />
+          </Link>
+        </div>
+      )}
     </div>
   );
 }

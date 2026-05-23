@@ -3,7 +3,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { 
   Loader2, BookOpen, Trash2, Search, Plus, X, FileText, Shield, Award, 
-  ArrowLeft, Settings, Activity, Wifi, WifiOff, Maximize, Minimize
+  ArrowLeft, Settings, Activity, Wifi, WifiOff, Maximize, Minimize,
+  PlayCircle, Play
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
@@ -24,6 +25,7 @@ interface SecureVideoPlayerProps {
   onLessonComplete: () => void;
   onNextLesson?: () => void;
   nextLessonTitle?: string | null;
+  courseImage?: string;
 }
 
 export default function SecureVideoPlayer({
@@ -32,12 +34,16 @@ export default function SecureVideoPlayer({
   userId,
   onLessonComplete,
   onNextLesson,
-  nextLessonTitle
+  nextLessonTitle,
+  courseImage
 }: SecureVideoPlayerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Core Player States
   const [iframeSrc, setIframeSrc] = useState<string>("");
+  const [videoUrl, setVideoUrl] = useState<string>("");
+  const [plyrReady, setPlyrReady] = useState(false);
+  const [resumeTime, setResumeTime] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -45,6 +51,10 @@ export default function SecureVideoPlayer({
   const [duration, setDuration] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [showEndedOverlay, setShowEndedOverlay] = useState(false);
+  const [hasStarted, setHasStarted] = useState(false);
+
+  const plyrRef = useRef<any>(null);
+  const hlsRef = useRef<any>(null);
 
   // Smart Learning Experience States
   const [videoQuality, setVideoQuality] = useState<string>("auto");
@@ -89,7 +99,6 @@ export default function SecureVideoPlayer({
 
   // Security / Anti-Capture States
   const [isBlurred, setIsBlurred] = useState(false);
-  const [devToolsDetected, setDevToolsDetected] = useState(false);
 
   // Sync control refs to prevent redundant database writes
   const lastSyncTimeRef = useRef<number>(-1);
@@ -113,24 +122,38 @@ export default function SecureVideoPlayer({
     setHeatmapData(new Array(30).fill(0));
     setCountdown(5);
     setAutoPlayCancelled(false);
+    setVideoUrl("");
+    setPlyrReady(false);
+    setResumeTime(0);
 
     try {
+      const res = await fetch(`/api/video/stream/${lessonId}`);
+      if (!res.ok) {
+        if (res.status === 401 || res.status === 403) {
+          const data = await res.json().catch(() => ({}));
+          setError(data.error || "غير مصرح بمشاهدة هذا الفيديو");
+        } else {
+          setError("فشل الاتصال بخادم البث");
+        }
+        return;
+      }
+
+      const data = await res.json();
+      if (data.error) {
+        setError(data.error);
+        return;
+      }
+
+      setVideoUrl(data.url);
+      setIframeSrc(data.embedUrl);
+
       // Get the last saved position for Resume Watching
       const progress = await getVideoProgress(userId, lessonId);
-      const resumeTime = progress?.last_position || 0;
+      const rTime = progress?.last_position || 0;
+      setResumeTime(rTime);
 
-      // Construct embed source pointing to the secure proxy API route
-      const params = new URLSearchParams();
-      params.set("color", "D6004B"); // Match our luxury rose theme color
-      if (resumeTime > 0) {
-        params.set("time", resumeTime.toString());
-      }
-      
-      const embedUrl = `/api/video/embed/${lessonId}?${params.toString()}`;
-      setIframeSrc(embedUrl);
-
-      if (resumeTime > 0) {
-        toast.success(`تم استئناف الدرس من ثانية ${resumeTime} 🔄`);
+      if (rTime > 0) {
+        toast.success(`تم استئناف الدرس من ثانية ${rTime} 🔄`);
       }
     } catch (err: any) {
       setError("حدث خطأ أثناء تحميل مشغل الفيديو المؤمن");
@@ -150,6 +173,7 @@ export default function SecureVideoPlayer({
   useEffect(() => {
     initPlayer();
     fetchNotes();
+    setHasStarted(false);
   }, [lessonId]);
 
   // 3. Smart Recommendations Fetching
@@ -244,7 +268,7 @@ export default function SecureVideoPlayer({
     return () => window.removeEventListener("scroll", handleScroll);
   }, [isPlaying, isFullscreen]);
 
-  // 7. Security Checkers (DevTools & Tab/Page Blur Screen Protection)
+  // 7. Security Checkers (Tab/Page Blur Screen Protection)
   useEffect(() => {
     const handleVisibility = () => {
       if (document.visibilityState === "hidden") {
@@ -255,29 +279,10 @@ export default function SecureVideoPlayer({
       }
     };
 
-    const checkDevTools = () => {
-      const threshold = 160;
-      const widthDiff = window.outerWidth - window.innerWidth;
-      const heightDiff = window.outerHeight - window.innerHeight;
-      
-      if (widthDiff > threshold || heightDiff > threshold) {
-        setDevToolsDetected(true);
-        setIsBlurred(true);
-        postPlayerMessage("pause");
-      } else {
-        setDevToolsDetected(false);
-      }
-    };
-
     window.addEventListener("visibilitychange", handleVisibility);
-    window.addEventListener("resize", checkDevTools);
-    
-    const devToolsInterval = setInterval(checkDevTools, 2000);
 
     return () => {
       window.removeEventListener("visibilitychange", handleVisibility);
-      window.removeEventListener("resize", checkDevTools);
-      clearInterval(devToolsInterval);
     };
   }, []);
 
@@ -367,18 +372,17 @@ export default function SecureVideoPlayer({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isPlaying, playbackSpeed, currentTime, duration]);
 
-  // PostMessage helper to talk with Bunny CDN Embedded player
+  // Helper to talk with Plyr directly
   const postPlayerMessage = (event: string, value?: any) => {
-    const iframe = containerRef.current?.querySelector("iframe");
-    if (iframe?.contentWindow) {
-      try {
-        iframe.contentWindow.postMessage(
-          JSON.stringify({ event, value }),
-          "*"
-        );
-      } catch (e) {
-        console.error("Failed to post message to iframe:", e);
-      }
+    if (!plyrRef.current) return;
+    try {
+      if (event === "play") plyrRef.current.play();
+      if (event === "pause") plyrRef.current.pause();
+      if (event === "seek") plyrRef.current.currentTime = value;
+      if (event === "setPlaybackSpeed") plyrRef.current.speed = value;
+      // Quality change could be added here via hlsRef if needed
+    } catch (e) {
+      console.error("Failed to control player:", e);
     }
   };
 
@@ -452,64 +456,112 @@ export default function SecureVideoPlayer({
     }
   };
 
-  // 10. Listen for postMessage Event APIs from Bunny Stream Player
+  // 10. Load Scripts and Initialize Plyr + Hls.js natively
+  const loadScript = (src: string) => {
+    return new Promise((resolve, reject) => {
+      if (document.querySelector(`script[src="${src}"]`)) {
+        resolve(true);
+        return;
+      }
+      const script = document.createElement("script");
+      script.src = src;
+      script.onload = () => resolve(true);
+      script.onerror = reject;
+      document.body.appendChild(script);
+    });
+  };
+
+  const loadStyle = (href: string) => {
+    if (document.querySelector(`link[href="${href}"]`)) return;
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = href;
+    document.head.appendChild(link);
+  };
+
   useEffect(() => {
-    const handlePlayerMessage = async (e: MessageEvent) => {
-      if (!e.origin.includes("mediadelivery.net") && !e.origin.includes("bunnycdn.com")) return;
+    if (hasStarted && !plyrReady) {
+      loadStyle("https://cdn.plyr.io/3.7.8/plyr.css");
+      Promise.all([
+        loadScript("https://cdn.jsdelivr.net/npm/hls.js@1.4.12/dist/hls.min.js"),
+        loadScript("https://cdn.plyr.io/3.7.8/plyr.js")
+      ]).then(() => {
+        setPlyrReady(true);
+      }).catch(console.error);
+    }
+  }, [hasStarted, plyrReady]);
 
-      try {
-        let eventData = e.data;
-        if (typeof eventData === "string") {
-          eventData = JSON.parse(eventData);
-        }
+  useEffect(() => {
+    if (!plyrReady || !hasStarted || !videoUrl) return;
 
-        if (eventData && typeof eventData === "object") {
-          const eventName = eventData.event || eventData.eventName;
-          
-          if (eventName === "timeupdate" || eventName === "player:timeupdate") {
-            const time = Number(eventData.value || eventData.currentTime);
-            const dur = Number(eventData.duration || eventData.totalTime || duration);
-            if (!isNaN(time)) {
-              setCurrentTime(time);
-              recordWatchSecond(time);
-              if (!isNaN(dur) && dur > 0) {
-                setDuration(dur);
-              }
+    const videoElement = containerRef.current?.querySelector("#main-video") as HTMLVideoElement;
+    if (!videoElement) return;
 
-              // Auto-sync progress to database every 10 seconds
-              const sec = Math.floor(time);
-              if (sec % 10 === 0 && sec !== lastSyncTimeRef.current) {
-                syncProgress(time, dur || duration);
-              }
-            }
-          } else if (eventName === "durationchange" || eventName === "player:durationchange") {
-            const dur = Number(eventData.value || eventData.duration);
-            if (!isNaN(dur)) {
-              setDuration(dur);
-            }
-          } else if (eventName === "ended" || eventName === "player:ended") {
-            await handleVideoEnded();
-          } else if (eventName === "play" || eventName === "player:play") {
-            setIsPlaying(true);
-            if (duration > 0) {
-              await syncProgress(currentTime, duration);
-            }
-          } else if (eventName === "pause" || eventName === "player:pause") {
-            setIsPlaying(false);
-            setPauseCount(prev => prev + 1);
-            if (duration > 0) {
-              await syncProgress(currentTime, duration);
-            }
-          }
-        }
-      } catch (err) {}
-    };
+    const Hls = (window as any).Hls;
+    const Plyr = (window as any).Plyr;
 
-    window.addEventListener("message", handlePlayerMessage);
+    if (hlsRef.current) hlsRef.current.destroy();
+    if (plyrRef.current) plyrRef.current.destroy();
+
+    const isHls = videoUrl.includes(".m3u8");
+
+    const player = new Plyr(videoElement, {
+      autoplay: true,
+      muted: true,
+      controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'captions', 'settings', 'pip', 'airplay', 'fullscreen'],
+      settings: ['quality', 'speed']
+    });
+
+    plyrRef.current = player;
+
+    if (isHls && Hls.isSupported()) {
+      const hls = new Hls({ maxBufferLength: 30, enableWorker: true });
+      hlsRef.current = hls;
+      
+      hls.loadSource(videoUrl);
+      hls.attachMedia(videoElement);
+    } else {
+      videoElement.src = videoUrl;
+    }
+
+    player.on("ready", () => {
+      player.play();
+      if (resumeTime > 0) player.currentTime = resumeTime;
+    });
+
+    player.on("timeupdate", () => {
+      const time = player.currentTime;
+      const dur = player.duration;
+      setCurrentTime(time);
+      recordWatchSecond(time);
+      if (dur > 0) setDuration(dur);
+
+      const sec = Math.floor(time);
+      if (sec % 10 === 0 && sec !== lastSyncTimeRef.current) {
+        syncProgress(time, dur);
+      }
+    });
+
+    player.on("play", () => {
+      setIsPlaying(true);
+      if (player.duration > 0) syncProgress(player.currentTime, player.duration);
+    });
+
+    player.on("pause", () => {
+      setIsPlaying(false);
+      setPauseCount(prev => prev + 1);
+      if (player.duration > 0) syncProgress(player.currentTime, player.duration);
+    });
+
+    player.on("ended", () => {
+      handleVideoEnded();
+    });
+
     return () => {
-      window.removeEventListener("message", handlePlayerMessage);
+      if (hlsRef.current) hlsRef.current.destroy();
+      if (plyrRef.current) plyrRef.current.destroy();
     };
-  }, [currentTime, duration, lessonId, isPlaying]);
+  }, [plyrReady, hasStarted, videoUrl, lessonId]);
 
   const handleVideoEnded = async () => {
     setIsPlaying(false);
@@ -588,7 +640,7 @@ export default function SecureVideoPlayer({
   const completionPercentage = duration > 0 ? Math.min(100, Math.floor((totalWatchedSeconds / duration) * 100)) : 0;
 
   return (
-    <div className="relative w-full aspect-video">
+    <div className="relative w-full h-full">
       {/* Scroll PiP Placeholder Spacer */}
       {isFloating && (
         <div className="w-full h-full bg-zinc-950/20 border-2 border-dashed border-zinc-800 rounded-3xl flex flex-col items-center justify-center gap-2 p-6 animate-pulse">
@@ -619,22 +671,55 @@ export default function SecureVideoPlayer({
           </button>
         )}
 
-        {/* 1. Official Bunny Embed Iframe (Direct Integration) */}
-        {!loading && !error && iframeSrc && (
+        {/* 1. Official Native Plyr.js / Hls.js Video Element */}
+        {!loading && !error && hasStarted && (
           <div className={`absolute inset-0 w-full h-full transition-all duration-500 z-0 ${isBlurred ? "blur-[30px] scale-[1.02] pointer-events-none" : ""}`}>
-            <iframe
-              src={iframeSrc}
-              className="w-full h-full border-none absolute inset-0 z-10"
-              allow="autoplay; encrypted-media"
-              allowFullScreen
-              referrerPolicy="origin"
+            <video
+              id="main-video"
+              className="w-full h-full rounded-3xl"
+              playsInline
+              crossOrigin="anonymous"
             />
           </div>
         )}
 
-        {/* 2. Security Anti-Capture/DevTools Cover Overlay */}
+        {/* Custom Cover / Poster Overlay */}
+        {!loading && !error && !hasStarted && (
+          <div 
+            onClick={() => {
+              setHasStarted(true);
+              setIsPlaying(true);
+            }}
+            className="absolute inset-0 w-full h-full z-20 flex flex-col items-center justify-center cursor-pointer group/cover transition-all duration-500 overflow-hidden rounded-3xl"
+          >
+            {/* Background cover image */}
+            {courseImage ? (
+              <img 
+                src={courseImage} 
+                alt="Course Cover" 
+                className="absolute inset-0 w-full h-full object-cover group-hover/cover:scale-[1.03] transition-transform duration-700 brightness-[0.4]"
+              />
+            ) : (
+              <div className="absolute inset-0 w-full h-full bg-[#0a0a0f]" />
+            )}
+            {/* Dark gradient shadow */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/40 z-0" />
+            
+            {/* Glowing play button */}
+            <button 
+              className="relative z-10 w-20 h-20 bg-[#D6004B] hover:bg-[#ff005a] border-2 border-white/20 rounded-full flex items-center justify-center shadow-[0_0_40px_rgba(214,0,75,0.4)] hover:shadow-[0_0_60px_rgba(214,0,75,0.6)] group-hover/cover:scale-110 active:scale-95 transition-all duration-350 cursor-pointer"
+            >
+              <PlayCircle className="w-10 h-10 text-white fill-current" />
+            </button>
+            <span className="relative z-10 text-[10px] sm:text-xs font-bold text-zinc-300 font-alexandria mt-4 bg-black/40 backdrop-blur-md px-4 py-2 rounded-xl border border-white/5 group-hover/cover:text-white transition-colors">
+              اضغط لبدء تشغيل المحاضرة الفنية الفخمة
+            </span>
+          </div>
+        )}
+
+        {/* 2. Security Anti-Capture Cover Overlay */}
         <AnimatePresence>
-          {(isBlurred || devToolsDetected) && (
+          {isBlurred && (
             <motion.div 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -647,9 +732,7 @@ export default function SecureVideoPlayer({
               <div className="space-y-2 max-w-sm">
                 <h4 className="font-alexandria font-black text-white text-base">تم إيقاف الفيديو لدواعي الأمان 🔒</h4>
                 <p className="text-zinc-400 text-xs font-cairo leading-relaxed">
-                  {devToolsDetected 
-                    ? "تم اكتشاف محاولة فتح أدوات المطور (DevTools). يرجى إغلاق أدوات المطور للاستمرار في مشاهدة المحتوى بأمان."
-                    : "تم تعتيم الفيديو تلقائياً نظراً لعدم نشاط الصفحة أو محاولة تصوير شاشة العرض. يرجى التركيز في المحاضرة للاستمرار."}
+                  تم تعتيم الفيديو تلقائياً نظراً لعدم نشاط الصفحة أو محاولة تصوير شاشة العرض. يرجى التركيز في المحاضرة للاستمرار.
                 </p>
               </div>
             </motion.div>

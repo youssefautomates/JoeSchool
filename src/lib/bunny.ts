@@ -158,7 +158,7 @@ export function generateSignedEmbedUrl(videoId: string, expirationMinutes = 120)
     .update(tokenKey + videoId + expiration.toString())
     .digest("hex");
 
-  return `https://iframe.mediadelivery.net/embed/${libraryId}/${videoId}?token=${signature}&expires=${expiration}&preload=true&responsive=true&autoplay=false`;
+  return `https://iframe.mediadelivery.net/embed/${libraryId}/${videoId}?token=${signature}&expires=${expiration}&preload=true&responsive=false&autoplay=false`;
 }
 
 /**

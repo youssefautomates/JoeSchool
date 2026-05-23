@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { 
   Plus, Edit, Trash2, BookOpen, Clock, 
   Video, Save, FileText, Link as LinkIcon, Download, 
-  AlertCircle, Loader2, GripVertical, ChevronDown, ChevronUp, Image as ImageIcon, CheckCircle, Users, Award, Play, X
+  AlertCircle, Loader2, GripVertical, ChevronDown, ChevronUp, Image as ImageIcon, CheckCircle, Users, Award, Play, X, Sparkles
 } from "lucide-react";
 import { 
   getCoursesList, upsertCourse, deleteCourse, getCourseBySlug, 
@@ -336,6 +336,9 @@ export default function AdminCoursesPage() {
   // Attachment upload states
   const [attachmentUploading, setAttachmentUploading] = useState(false);
   const [attachmentProgress, setAttachmentProgress] = useState<number | null>(null);
+
+  // AI Enhancer State
+  const [isEnhancing, setIsEnhancing] = useState(false);
 
   const initializedLessonIdRef = useRef<string | null>(null);
 
@@ -829,6 +832,30 @@ export default function AdminCoursesPage() {
     } catch (err) { 
       console.error(err);
       toast.error("حدث خطأ أثناء حفظ الكورس"); 
+    }
+  };
+
+  const handleEnhanceDescription = async () => {
+    if (!courseForm.description || courseForm.description.trim() === "") {
+      return toast.error("يرجى إدخال وصف مبدئي ليتم تحسينه بالذكاء الاصطناعي");
+    }
+    setIsEnhancing(true);
+    try {
+      const res = await fetch("/api/admin/ai/enhance-description", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ description: courseForm.description }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "فشل التحسين");
+      }
+      setCourseForm(prev => ({ ...prev, description: data.enhancedDescription }));
+      toast.success("تم تحسين الوصف باحترافية بفضل الذكاء الاصطناعي! ✨");
+    } catch (err: any) {
+      toast.error(err.message || "حدث خطأ أثناء تحسين الوصف");
+    } finally {
+      setIsEnhancing(false);
     }
   };
 
@@ -1500,8 +1527,24 @@ export default function AdminCoursesPage() {
               </div>
               
               <div className="md:col-span-2">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-bold text-white">الوصف الشامل والاحترافي للكورس</span>
+                  <button
+                    type="button"
+                    onClick={handleEnhanceDescription}
+                    disabled={isEnhancing}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white rounded-lg text-xs font-bold font-alexandria transition-all shadow-lg hover:shadow-violet-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isEnhancing ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Sparkles className="w-4 h-4" />
+                    )}
+                    <span>تحسين بالذكاء الاصطناعي ✨</span>
+                  </button>
+                </div>
                 <RichTextEditor 
-                  label="الوصف الشامل والاحترافي للكورس"
+                  label=""
                   value={courseForm.description || ""}
                   onChange={val => setCourseForm({ ...courseForm, description: val })}
                   placeholder="اكتب هنا محتوى ووصف الكورس بشكل احترافي وجاذب للطلاب..."
