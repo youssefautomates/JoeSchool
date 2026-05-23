@@ -527,7 +527,7 @@ function SuccessContent() {
                         </span>
                         <span className="bg-black/60 border border-white/10 text-white text-[10px] px-3 py-1 rounded-md font-bold flex items-center gap-1.5">
                           <Clock className="w-3.5 h-3.5 text-orange-400" />
-                          <span>{c.duration_hours} ساعة معتمدة</span>
+                          <span>{c.duration_hours} ساعة متابعة</span>
                         </span>
                       </div>
                     </div>
@@ -649,12 +649,12 @@ function SuccessContent() {
                             <div className="flex items-center gap-3 text-xs text-zinc-500 mt-2 font-medium">
                               <span className="flex items-center gap-1">
                                 <BookOpen className="w-3.5 h-3.5 text-rose-400" />
-                                <span>{c.lessons_count} درس</span>
+                                <span>{c.lessons_count} درس تدريبي</span>
                               </span>
                               <span>•</span>
                               <span className="flex items-center gap-1">
                                 <Clock className="w-3.5 h-3.5 text-orange-400" />
-                                <span>{c.duration_hours} ساعة معتمدة</span>
+                                <span>{c.duration_hours} ساعة متابعة</span>
                               </span>
                             </div>
                           </div>

@@ -652,24 +652,47 @@ async function resolvePurchasedProducts(orders: any[]): Promise<any[]> {
         });
       }
     } else {
-      const isCourse = order.product_title?.includes("دورة") || order.product_title?.includes("كورس");
-      
-      if (isCourse) {
+      // 1. Check if it's a course in the courses table directly using order.product_id
+      const { data: dbCourse } = await supabaseAdmin
+        .from("courses")
+        .select("id, title, category, image_url, duration_hours, lessons_count, slug, tags")
+        .eq("id", order.product_id)
+        .maybeSingle();
+
+      if (dbCourse) {
         resolved.push({
-          id: order.product_id,
-          title: order.product_title,
-          category: "courses",
-          tags: [],
+          id: dbCourse.id,
+          title: dbCourse.title,
+          category: dbCourse.category || "courses",
+          tags: dbCourse.tags || [],
           isCourse: true,
           hasDownload: false,
           downloadUrl: null,
           orderId: order.id,
-          slug: "n8n-masterclass",
-          image_url: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800",
-          lessons_count: 12,
-          duration_hours: 14
+          slug: dbCourse.slug || "n8n-masterclass",
+          image_url: dbCourse.image_url || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800",
+          lessons_count: dbCourse.lessons_count || 12,
+          duration_hours: dbCourse.duration_hours || 14
         });
       } else {
+        const isCourse = order.product_title?.includes("دورة") || order.product_title?.includes("كورس");
+        
+        if (isCourse) {
+          resolved.push({
+            id: order.product_id,
+            title: order.product_title,
+            category: "courses",
+            tags: [],
+            isCourse: true,
+            hasDownload: false,
+            downloadUrl: null,
+            orderId: order.id,
+            slug: "n8n-masterclass",
+            image_url: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800",
+            lessons_count: 12,
+            duration_hours: 14
+          });
+        } else {
         resolved.push({
           id: order.product_id,
           title: order.product_title,
@@ -684,6 +707,7 @@ async function resolvePurchasedProducts(orders: any[]): Promise<any[]> {
           fileSize: "12.5 MB",
           remainingDownloads: "غير محدود"
         });
+      }
       }
     }
   }
