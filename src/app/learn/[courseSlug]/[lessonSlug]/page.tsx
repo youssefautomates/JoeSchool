@@ -39,6 +39,143 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ courseS
   const [certificates, setCertificates] = useState<LmsCertificate[]>([]);
   const [activeCert, setActiveCert] = useState<LmsCertificate | null>(null);
   const [showCertModal, setShowCertModal] = useState(false);
+  const [isDownloadingCert, setIsDownloadingCert] = useState(false);
+
+  const downloadCertificateAsImage = () => {
+    if (!activeCert) return;
+    setIsDownloadingCert(true);
+    toast.info("جاري تهيئة وتصميم الشهادة الرقمية بدقة عالية...");
+    
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+    if (!ctx) {
+      setIsDownloadingCert(false);
+      return;
+    }
+    
+    if (activeCert.certificate_bg_url) {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = () => {
+        canvas.width = img.naturalWidth || 2000;
+        canvas.height = img.naturalHeight || 1414;
+        
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        
+        ctx.fillStyle = activeCert.certificate_text_color || "#000000";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        
+        const nameSize = (activeCert.certificate_name_size || 24) * (canvas.width / 800);
+        const isArabic = /[\u0600-\u06FF]/.test(activeCert.student_name);
+        ctx.font = `bold ${nameSize}px Cairo, Alexandria, sans-serif`;
+        
+        const nameX = (activeCert.certificate_name_x || 50) * (canvas.width / 100);
+        const nameY = (activeCert.certificate_name_y || 40) * (canvas.height / 100);
+        ctx.fillText(activeCert.student_name, nameX, nameY);
+        
+        const dateSize = (activeCert.certificate_date_size || 14) * (canvas.width / 800);
+        ctx.font = `normal ${dateSize}px monospace`;
+        const dateX = (activeCert.certificate_date_x || 50) * (canvas.width / 100);
+        const dateY = (activeCert.certificate_date_y || 70) * (canvas.height / 100);
+        ctx.fillText(activeCert.issued_at, dateX, dateY);
+        
+        try {
+          const dataUrl = canvas.toDataURL("image/png");
+          const link = document.createElement("a");
+          link.download = `شهادة_${activeCert.course_name.replace(/\s+/g, "_")}_${activeCert.student_name.replace(/\s+/g, "_")}.png`;
+          link.href = dataUrl;
+          link.click();
+          toast.success("تم تحميل شهادتك المعتمدة بنجاح! 🎉🏆");
+        } catch (err) {
+          console.error("Canvas export failed:", err);
+          toast.error("فشل التنزيل المباشر كصورة، يمكنك استخدام زر الطباعة (PDF).");
+        } finally {
+          setIsDownloadingCert(false);
+        }
+      };
+      
+      img.onerror = () => {
+        toast.error("فشل تحميل قالب الشهادة المخصصة.");
+        setIsDownloadingCert(false);
+      };
+      
+      img.src = activeCert.certificate_bg_url;
+    } else {
+      canvas.width = 2000;
+      canvas.height = 1414;
+      
+      const grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+      grad.addColorStop(0, "#06060c");
+      grad.addColorStop(1, "#020205");
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      ctx.strokeStyle = "#d97706";
+      ctx.lineWidth = 16;
+      ctx.strokeRect(40, 40, canvas.width - 80, canvas.height - 80);
+      
+      ctx.strokeStyle = "#fbbf24";
+      ctx.lineWidth = 4;
+      ctx.strokeRect(60, 60, canvas.width - 120, canvas.height - 120);
+      
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      
+      ctx.fillStyle = "#fbbf24";
+      ctx.font = "bold 80px Cairo, sans-serif";
+      ctx.fillText("شهادة إكمال ومثابرة معتمدة", canvas.width / 2, 260);
+      
+      ctx.fillStyle = "#6b7280";
+      ctx.font = "bold 24px monospace";
+      ctx.fillText("VERIFIED DIGITAL CREDENTIAL OF COMPLETION", canvas.width / 2, 330);
+      
+      ctx.fillStyle = "#9ca3af";
+      ctx.font = "40px Cairo, sans-serif";
+      ctx.fillText("تشهد منصة وأكاديمية يوسف أوتوميتس بأن الطالب البارز:", canvas.width / 2, 480);
+      
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 90px Cairo, sans-serif";
+      ctx.fillText(activeCert.student_name, canvas.width / 2, 630);
+      
+      ctx.strokeStyle = "rgba(245, 158, 11, 0.3)";
+      ctx.lineWidth = 6;
+      ctx.beginPath();
+      ctx.moveTo(canvas.width / 2 - 400, 700);
+      ctx.lineTo(canvas.width / 2 + 400, 700);
+      ctx.stroke();
+      
+      ctx.fillStyle = "#9ca3af";
+      ctx.font = "40px Cairo, sans-serif";
+      ctx.fillText("قد أكمل بنجاح ومثابرة كامل متطلبات ودروس المسار التدريبي الفخم:", canvas.width / 2, 820);
+      
+      ctx.fillStyle = "#ec4899";
+      ctx.font = "bold 65px Cairo, sans-serif";
+      ctx.fillText(activeCert.course_name, canvas.width / 2, 940);
+      
+      ctx.fillStyle = "#4b5563";
+      ctx.font = "30px Cairo, sans-serif";
+      ctx.fillText(`تاريخ الصدور: ${activeCert.issued_at}`, canvas.width / 2 - 350, 1150);
+      ctx.fillText(`رقم التوثيق الرقمي: ${activeCert.verification_id}`, canvas.width / 2 + 350, 1150);
+      
+      ctx.fillStyle = "rgba(251, 191, 36, 0.03)";
+      ctx.font = "bold 130px Cairo, sans-serif";
+      ctx.fillText("YOUSSEF AUTOMATES", canvas.width / 2, canvas.height / 2 + 50);
+      
+      try {
+        const dataUrl = canvas.toDataURL("image/png");
+        const link = document.createElement("a");
+        link.download = `شهادة_${activeCert.course_name.replace(/\s+/g, "_")}_${activeCert.student_name.replace(/\s+/g, "_")}.png`;
+        link.href = dataUrl;
+        link.click();
+        toast.success("تم تحميل شهادتك المعتمدة بنجاح! 🎉🏆");
+      } catch (err) {
+        toast.error("فشل التصدير المباشر.");
+      } finally {
+        setIsDownloadingCert(false);
+      }
+    }
+  };
 
   // Layout states
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -289,12 +426,10 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ courseS
 
       if (completed) {
         toast.success("تهانينا! تم وضع علامة إكمال للدرس بنجاح 🎉");
-        // Autoplay next lesson logic
-        if (nextLesson) {
-          toast.info("جاري الانتقال التلقائي للمحاضرة التالية خلال لحظات...");
-          setTimeout(() => {
-            router.push(`/learn/${courseSlug}/${nextLesson.slug}`);
-          }, 1500);
+        // Autoplay next lesson logic (only if marking the CURRENT viewed lesson as complete)
+        if (lessonId === currentLesson?.id && nextLesson) {
+          toast.info("جاري الانتقال الفوري للمحاضرة التالية...");
+          router.push(`/learn/${courseSlug}/${nextLesson.slug}`);
         }
       } else {
         toast.info("تم إلغاء تحديد إكمال الدرس");
@@ -409,9 +544,9 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ courseS
   }
 
   // Next and Previous lesson calculators
-  const currentIdx = allLessonsFlat.findIndex(l => l.id === currentLesson.id);
+  const currentIdx = currentLesson ? allLessonsFlat.findIndex(l => l.id === currentLesson.id) : -1;
   const prevLesson = currentIdx > 0 ? allLessonsFlat[currentIdx - 1] : null;
-  const nextLesson = currentIdx < allLessonsFlat.length - 1 ? allLessonsFlat[currentIdx + 1] : null;
+  const nextLesson = currentIdx !== -1 && currentIdx < allLessonsFlat.length - 1 ? allLessonsFlat[currentIdx + 1] : null;
 
   return (
     <div className="min-h-screen bg-[#050505] text-white font-cairo flex flex-col h-screen overflow-hidden">
@@ -883,108 +1018,144 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ courseS
       </div>
 
       {/* ── 4. CERTIFICATE SHADED MODAL ─────────────────────────────────────────── */}
-      {showCertModal && activeCert && (
-        <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
-          <div className="bg-[#0a0a0f] border border-white/10 rounded-3xl max-w-3xl w-full p-8 space-y-6 shadow-2xl relative">
-            <button 
-              onClick={() => setShowCertModal(false)}
-              className="absolute top-4 left-4 p-2 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-colors cursor-pointer"
+      <AnimatePresence>
+        {showCertModal && activeCert && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/95 backdrop-blur-lg z-50 flex items-center justify-center p-4 overflow-y-auto"
+          >
+            <motion.div 
+              initial={{ scale: 0.95, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95, y: 20 }}
+              className="bg-[#08080c]/90 border border-amber-500/20 rounded-[2.5rem] max-w-3xl w-full p-6 sm:p-10 space-y-8 shadow-[0_0_80px_rgba(217,119,6,0.15)] relative overflow-hidden font-cairo"
             >
-              <X className="w-5 h-5" />
-            </button>
+              {/* Premium Background Ornaments */}
+              <div className="absolute top-0 right-0 w-80 h-80 bg-amber-500/5 rounded-full blur-[120px] -z-10 pointer-events-none" />
+              <div className="absolute bottom-0 left-0 w-80 h-80 bg-rose-500/5 rounded-full blur-[120px] -z-10 pointer-events-none" />
 
-            {/* Glowing Border certificate frame */}
-            <div className="border-4 border-double border-amber-500/50 p-6 sm:p-10 rounded-2xl bg-black/60 relative text-center space-y-6 overflow-hidden">
-              {/* Subtle background crest / glow */}
-              <div className="absolute w-64 h-64 bg-amber-500/5 rounded-full blur-[80px] -top-20 -right-20 pointer-events-none" />
-              <div className="absolute w-64 h-64 bg-yellow-500/5 rounded-full blur-[80px] -bottom-20 -left-20 pointer-events-none" />
-
-              <div className="mx-auto w-16 h-16 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
-                <Award className="w-8 h-8" />
-              </div>
-
-              <div className="space-y-1">
-                <style dangerouslySetInnerHTML={{__html: `
-                  @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@700;800;900&family=Alexandria:wght@800;900&family=Alike&display=swap');
-                `}} />
-                <h3 className="font-alexandria font-black text-white text-lg sm:text-2xl tracking-tighter uppercase text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-yellow-200 to-amber-500">
-                  شهادة إكمال ومثابرة موثقة
-                </h3>
-                <p className="text-[10px] text-amber-500 font-bold uppercase tracking-[0.2em] font-mono font-cairo">Certificate of Course Completion</p>
-              </div>
-
-              <p className="text-zinc-400 text-xs sm:text-sm font-medium max-w-lg mx-auto leading-relaxed">
-                يُشهد فريق عمل أكاديمية <span className="font-bold text-white">Youssef Automates</span> الفنية بأن الطالب البارز:
-              </p>
-
-              <h4 
-                className="text-white text-2xl sm:text-4xl underline decoration-amber-500/50 underline-offset-8 transition-all"
-                style={{
-                  fontFamily: /[\u0600-\u06FF]/.test(activeCert.student_name) ? "'Cairo', 'Alexandria', sans-serif" : "'Alike', serif",
-                  fontWeight: /[\u0600-\u06FF]/.test(activeCert.student_name) ? 900 : 'normal',
-                }}
+              <button 
+                onClick={() => setShowCertModal(false)}
+                className="absolute top-6 left-6 p-2.5 rounded-2xl bg-white/5 hover:bg-rose-500/20 text-zinc-400 hover:text-rose-400 border border-white/10 hover:border-rose-500/30 transition-all cursor-pointer z-10"
+                title="إغلاق"
               >
-                {activeCert.student_name}
-              </h4>
+                <X className="w-5 h-5" />
+              </button>
 
-              <p className="text-zinc-400 text-xs sm:text-sm font-medium max-w-lg mx-auto leading-relaxed">
-                قد أتم بنجاح ومثابرة كامل متطلبات ودروس المسار التدريبي الاحترافي:
-              </p>
+              {/* Celebration Header */}
+              <div className="text-center space-y-4 pt-4">
+                <div className="mx-auto w-24 h-24 rounded-full bg-gradient-to-tr from-amber-500 to-yellow-400 border-2 border-amber-400/30 flex items-center justify-center text-black shadow-[0_0_50px_rgba(245,158,11,0.35)] relative overflow-hidden group">
+                  <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
+                  <Award className="w-12 h-12 text-black shrink-0 relative z-10" />
+                </div>
+                
+                <div className="inline-flex items-center gap-2 bg-amber-500/10 text-amber-400 border border-amber-500/20 px-4 py-1.5 rounded-full font-bold text-xs">
+                  <Sparkles className="w-4 h-4 text-amber-400 animate-pulse" />
+                  <span>مبارك الإنجاز الاستثنائي العظيم! 🎉</span>
+                </div>
+                
+                <h2 className="font-alexandria font-black text-2xl sm:text-4xl text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-yellow-200 to-amber-500 tracking-tight leading-tight">
+                  تهانينا الحارة من يوسف أوتوميتس
+                </h2>
+                
+                <p className="text-zinc-400 text-xs sm:text-sm max-w-lg mx-auto leading-relaxed">
+                  بكل فخر واعتزاز، نُبارك لك إتمام كامل متطلبات ودروس هذا المسار التعليمي الفخم بنجاح باهر. هذا الإنجاز يعكس شغفك وعزيمتك نحو التميز الرقمي والاحتراف!
+                </p>
+              </div>
 
-              <h5 className="font-bold text-white text-base sm:text-lg text-rose-500">
-                {activeCert.course_name}
-              </h5>
+              {/* Certificate Preview Frame (Aesthetic live-preview) */}
+              <div className="border-2 border-double border-amber-500/30 p-4 sm:p-8 rounded-3xl bg-black/60 relative text-center space-y-6 overflow-hidden shadow-inner group/cert">
+                {/* Secure watermark seal */}
+                <div className="absolute top-4 left-4 w-12 h-12 border border-amber-500/10 rounded-full flex items-center justify-center text-[6px] text-amber-500/25 font-bold uppercase tracking-widest font-mono select-none">
+                  SECURE
+                </div>
 
-              <div className="flex flex-col sm:flex-row items-center justify-between border-t border-white/5 pt-6 gap-6 text-xs font-bold text-zinc-500">
-                <div className="text-right space-y-3 shrink-0">
-                  <div>
-                    <span className="block text-[10px] text-zinc-600 font-medium">تاريخ إصدار الشهادة:</span>
-                    <span className="text-zinc-300 font-mono mt-0.5 block">{activeCert.issued_at}</span>
-                  </div>
-                  <div>
-                    <span className="block text-[10px] text-zinc-600 font-medium">رقم التوثيق الرقمي (Verification ID):</span>
-                    <span className="text-rose-400 font-mono mt-0.5 block">{activeCert.verification_id}</span>
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-1.5 text-[10px] text-emerald-400 bg-emerald-950/40 border border-emerald-900/30 px-3 py-1 rounded w-fit">
-                      <ShieldCheck className="w-4 h-4" />
-                      <span>شهادة رقمية معتمدة وآمنة</span>
+                <div className="space-y-1">
+                  <span className="text-[10px] text-amber-500 font-bold uppercase tracking-[0.22em] font-mono leading-none">Verified Digital Credential</span>
+                </div>
+
+                <div className="space-y-4">
+                  <p className="text-zinc-500 text-xs font-medium">يُشهد فريق العمل الفني بالمنصة بأن الطالب المتميز:</p>
+                  <h3 
+                    className="text-white text-2xl sm:text-4xl underline decoration-amber-500/30 decoration-wavy underline-offset-8 transition-all font-black"
+                    style={{
+                      fontFamily: /[\u0600-\u06FF]/.test(activeCert.student_name) ? "'Cairo', 'Alexandria', sans-serif" : "'Alike', serif",
+                    }}
+                  >
+                    {activeCert.student_name}
+                  </h3>
+                  <p className="text-zinc-500 text-xs font-medium mt-4">قد اجتاز بتفوق كامل دروس المسار التدريبي الاحترافي:</p>
+                  <h4 className="font-alexandria font-bold text-lg sm:text-xl text-rose-400 bg-rose-500/5 border border-rose-500/10 rounded-xl py-3 px-6 inline-block">
+                    {activeCert.course_name}
+                  </h4>
+                </div>
+
+                {/* Metadata & Verification Block */}
+                <div className="flex flex-col sm:flex-row items-center justify-between border-t border-white/5 pt-6 gap-6 text-xs text-right sm:text-center text-zinc-500 font-bold leading-normal">
+                  <div className="space-y-2 text-right shrink-0">
+                    <div>
+                      <span className="block text-[9px] text-zinc-600 font-medium">تاريخ إصدار الشهادة:</span>
+                      <span className="text-zinc-300 font-mono mt-0.5 block">{activeCert.issued_at}</span>
+                    </div>
+                    <div>
+                      <span className="block text-[9px] text-zinc-600 font-medium">رقم التوثيق الرقمي المعتمد:</span>
+                      <span className="text-rose-400 font-mono mt-0.5 block">{activeCert.verification_id}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-[9px] text-emerald-400 bg-emerald-950/30 border border-emerald-900/20 px-2.5 py-1 rounded-lg w-fit">
+                      <ShieldCheck className="w-4.5 h-4.5 text-emerald-500" />
+                      <span>شهادة آمنة ومدرجة في حسابك للرجوع إليها دائماً</span>
                     </div>
                   </div>
-                </div>
 
-                {/* Real-time Dynamic Verification QR Code */}
-                <div className="flex flex-col items-center gap-2 bg-white/5 border border-white/5 p-3 rounded-2xl shrink-0">
-                  <img 
-                    src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&color=d97706&bgcolor=0a0a0f&data=${encodeURIComponent(`https://youssefautomates.com/certificates/verify?id=${activeCert.verification_id}`)}`}
-                    alt="Certificate QR Verification" 
-                    className="w-20 h-20 rounded-lg border border-amber-500/20"
-                  />
-                  <span className="text-[8px] text-amber-500/70 font-mono tracking-widest block uppercase">Scan to Verify</span>
+                  {/* QR Code */}
+                  <div className="flex flex-col items-center gap-1.5 bg-white/[0.02] border border-white/5 p-2 rounded-2xl shrink-0 group-hover/cert:scale-[1.03] transition-transform duration-350">
+                    <img 
+                      src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&color=d97706&bgcolor=0a0a0f&data=${encodeURIComponent(`https://youssefautomates.com/certificates/verify?id=${activeCert.verification_id}`)}`}
+                      alt="Certificate QR Verification" 
+                      className="w-18 h-18 rounded-lg border border-amber-500/10"
+                    />
+                    <span className="text-[7px] text-amber-500/60 font-mono tracking-widest block uppercase font-bold select-none">Scan to Verify</span>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* Actions for Certificate */}
-            <div className="flex items-center justify-end gap-3 pt-4 border-t border-white/5">
-              <button
-                onClick={() => window.print()}
-                className="h-11 px-5 bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-xl font-bold text-xs flex items-center gap-2 active:scale-95 transition-all cursor-pointer"
-              >
-                <Printer className="w-4 h-4" />
-                <span>طباعة الشهادة (PDF)</span>
-              </button>
-              <button
-                onClick={() => setShowCertModal(false)}
-                className="h-11 px-6 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-xs active:scale-95 transition-all cursor-pointer"
-              >
-                العودة لمشاهدة المنهج
-              </button>
-            </div>
+              {/* Actions Footer */}
+              <div className="flex flex-col sm:flex-row items-center justify-end gap-3 pt-4 border-t border-white/5">
+                <button
+                  onClick={downloadCertificateAsImage}
+                  disabled={isDownloadingCert}
+                  className="w-full sm:w-auto h-12 px-6 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-black rounded-2xl font-black text-xs flex items-center justify-center gap-2 active:scale-95 transition-all shadow-[0_4px_20px_rgba(245,158,11,0.25)] disabled:opacity-50 shrink-0 cursor-pointer"
+                >
+                  {isDownloadingCert ? (
+                    <Loader2 className="w-4.5 h-4.5 animate-spin" />
+                  ) : (
+                    <Download className="w-4.5 h-4.5" />
+                  )}
+                  <span>تنزيل الشهادة كصورة PNG عالية الدقة</span>
+                </button>
+                
+                <button
+                  onClick={() => window.print()}
+                  className="w-full sm:w-auto h-12 px-5 bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-2xl font-bold text-xs flex items-center justify-center gap-2 active:scale-95 transition-all shrink-0 cursor-pointer"
+                >
+                  <Printer className="w-4.5 h-4.5 text-zinc-400" />
+                  <span>طباعة الشهادة وحفظها كـ PDF</span>
+                </button>
+                
+                <button
+                  onClick={() => setShowCertModal(false)}
+                  className="w-full sm:w-auto h-12 px-6 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white rounded-2xl font-bold text-xs active:scale-95 transition-all shrink-0 cursor-pointer"
+                >
+                  العودة للمشاهدة
+                </button>
+              </div>
 
-          </div>
-        </div>
-      )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

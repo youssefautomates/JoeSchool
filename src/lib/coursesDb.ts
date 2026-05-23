@@ -418,11 +418,11 @@ export async function getCourseBySlug(slug: string): Promise<{ course: LmsCourse
   try {
     const { data: course, error } = await supabaseClient.from("courses").select("*").eq("slug", slug).maybeSingle();
     if (!error && course) {
-      const { data: sections } = await supabaseClient.from("course_modules").select("*").eq("course_id", course.id).order("sort_order", { ascending: true });
+      const { data: sections } = await supabaseClient.from("course_modules").select("*").eq("course_id", course.id).order("sort_order", { ascending: true }).order("id", { ascending: true });
       const populated: any[] = [];
       if (sections) {
         for (const sec of sections) {
-          const { data: lessons } = await supabaseClient.from("course_lessons").select("*").eq("module_id", sec.id).order("sort_order", { ascending: true });
+          const { data: lessons } = await supabaseClient.from("course_lessons").select("*").eq("module_id", sec.id).order("sort_order", { ascending: true }).order("id", { ascending: true });
           populated.push({ ...sec, lessons: lessons || [] });
         }
       }
@@ -449,11 +449,11 @@ export async function getCourseBySlug(slug: string): Promise<{ course: LmsCourse
   const found = courses.find(c => c.slug === slug) || null;
   if (!found) return { course: null, sections: [] };
 
-  const allSections = localDb.getSections().filter(s => s.course_id === found.id).sort((a, b) => a.sort_order - b.sort_order);
+  const allSections = localDb.getSections().filter(s => s.course_id === found.id).sort((a, b) => a.sort_order - b.sort_order || a.id.localeCompare(b.id));
   const allLessons = localDb.getLessons();
 
   const populated = allSections.map(sec => {
-    const lessons = allLessons.filter(l => l.section_id === sec.id).sort((a, b) => a.sort_order - b.sort_order);
+    const lessons = allLessons.filter(l => l.section_id === sec.id).sort((a, b) => a.sort_order - b.sort_order || a.id.localeCompare(b.id));
     return { ...sec, lessons };
   });
 

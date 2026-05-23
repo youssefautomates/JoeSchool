@@ -82,8 +82,16 @@ export default function DashboardPage() {
 
         const browserInfo = navigator.userAgent || "unknown_browser";
         
-        // Track the current session (max 3 concurrent active devices)
-        await trackActiveSession(session.user.id, deviceId, userIp, browserInfo, "Browser", 3);
+        const { data: userSettings } = await supabaseClient
+          .from("users")
+          .select("max_devices")
+          .eq("user_id", session.user.id)
+          .single();
+
+        const userMaxDevices = userSettings?.max_devices || 3;
+
+        // Track the current session with dynamic max limit
+        await trackActiveSession(session.user.id, deviceId, userIp, browserInfo, "Browser", userMaxDevices);
         
         // Verify if session is valid (old sessions might have been deactivated)
         const isSessionValid = await checkSessionIsValid(session.user.id, deviceId);
