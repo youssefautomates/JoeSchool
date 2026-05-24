@@ -100,6 +100,91 @@ async function run() {
       console.error("Intention fetch failed:", await intentionRes.text());
     }
 
+    console.log("\n=== 3. SELF-HEALING: RESYNCING PENDING ORDERS ===");
+    const { data: pendingOrders, error: pendingErr } = await supabase
+      .from("orders")
+      .select("*")
+      .eq("status", "pending");
+
+    if (pendingErr) {
+      console.error("Error fetching pending orders:", pendingErr);
+    } else {
+      console.log(`Found ${pendingOrders.length} pending orders to check.`);
+      for (const order of pendingOrders) {
+        console.log(`Checking pending order ${order.id} | Email: ${order.customer_email} | PaymentId: ${order.payment_id}...`);
+        
+        let isPaid = false;
+        
+        // Try Intention check
+        if (order.payment_id && order.payment_id.startsWith("pi_")) {
+          try {
+            const intRes = await fetch(`https://accept.paymob.com/v1/intention/${order.payment_id}/`, {
+              method: "GET",
+              headers: { "Authorization": `Token ${secretKey}` }
+            });
+            if (intRes.ok) {
+              const intData = await intRes.json();
+              if (intData.status === "PAID" || intData.confirmed === true) {
+                isPaid = true;
+                console.log(`  -> Intention confirms PAID!`);
+              } else if (intData.payment_methods) {
+                for (const pm of intData.payment_methods) {
+                  if (pm.status === "PAID" || pm.confirmed === true) {
+                    isPaid = true;
+                    console.log(`  -> Intention PM confirms PAID!`);
+                    break;
+                  }
+                }
+              }
+            }
+          } catch (e) {
+            console.warn(`  -> Intention check error:`, e.message);
+          }
+        }
+        
+        // If not matched, try to look up classic order using matching criteria
+        if (!isPaid && order.customer_email) {
+          try {
+            if (order.payment_id && /^\d+$/.test(order.payment_id)) {
+              const ordRes = await fetch(`https://accept.paymob.com/api/ecommerce/orders/${order.payment_id}`, {
+                method: "GET",
+                headers: { "Authorization": `Bearer ${authToken}` }
+              });
+              if (ordRes.ok) {
+                const ordData = await ordRes.json();
+                if (ordData.payment_status === "PAID" || ordData.paid_amount_cents > 0) {
+                  isPaid = true;
+                  console.log(`  -> Classic Order confirms PAID!`);
+                }
+              }
+            }
+            
+            // Special manual resolution for known student Boody X (abdo.ibraheem.plaer@gmail.com)
+            if (order.customer_email.toLowerCase().trim() === "abdo.ibraheem.plaer@gmail.com") {
+              isPaid = true;
+              console.log(`  -> Special match for Boody X!`);
+            }
+          } catch (e) {
+            console.warn(`  -> Classic check error:`, e.message);
+          }
+        }
+
+        if (isPaid) {
+          console.log(`  -> UPDATE: Marking order ${order.id} as completed in Supabase...`);
+          const { error: updErr } = await supabase
+            .from("orders")
+            .update({ status: "completed" })
+            .eq("id", order.id);
+          
+          if (updErr) {
+            console.error(`  -> Failed to update order ${order.id}:`, updErr);
+          } else {
+            console.log(`  -> Successfully updated order ${order.id} to completed!`);
+          }
+        }
+      }
+    }
+
   } catch (err) {
     console.error("Paymob API error:", err);
   }
