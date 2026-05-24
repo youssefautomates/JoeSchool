@@ -841,17 +841,10 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                       </div>
                     </div>
 
-                    {currency === "USD" && (
-                      <div className="mt-4 p-3 bg-rose-500/10 border border-rose-500/20 text-rose-400 rounded-xl text-xs font-cairo text-center leading-relaxed">
-                        Notice: Final payment will be processed in EGP based on the current exchange rate ($1 = {exchangeRate.toFixed(2)} EGP).
-                        <br />
-                        تنبيه: سيتم معالجة الدفع النهائي بالجنيه المصري (EGP) بناءً على سعر الصرف الحالي ($1 = {exchangeRate.toFixed(2)} ج.م).
-                      </div>
-                    )}
                   </div>
 
-                  <div className="bg-[#050505] rounded-2xl p-4 border border-white/5">
-                    <ul className="space-y-3">
+                  <div className="pt-6 border-t border-white/10 mt-6">
+                    <ul className="space-y-3.5">
                       {(isCourse ? [
                         "دخول كامل للمحاضرات والدروس مدى الحياة",
                         "ملفات ومواد الدورة التفاعلية جاهزة للتحميل",
@@ -862,9 +855,9 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                         "دعم فني وتحديثات مجانية مدى الحياة",
                         "إرسال تلقائي وفوري للبريد الإلكتروني"
                       ]).map((benefit, i) => (
-                        <li key={i} className="flex items-center gap-2 text-zinc-400 font-cairo text-sm">
-                          <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                          {benefit}
+                        <li key={i} className="flex items-center justify-start gap-2.5 text-zinc-400 font-cairo text-xs sm:text-sm">
+                          <CheckCircle2 className="w-4 h-4 text-emerald-500/80 shrink-0" />
+                          <span>{benefit}</span>
                         </li>
                       ))}
                     </ul>
