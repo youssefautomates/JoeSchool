@@ -932,6 +932,147 @@ export async function getEnrollmentsForAdmin(): Promise<LmsEnrollment[]> {
 
 export async function getUserEnrollments(userId: string, userEmail?: string): Promise<string[]> {
   try {
+    if (userEmail) {
+      try {
+        const emailLower = userEmail.toLowerCase().trim();
+        
+        // 1. Sync pending orders first (Self-healing)
+        const { data: pendingOrders } = await supabaseClient
+          .from("orders")
+          .select("id, payment_id, product_id, product_title, customer_name, amount")
+          .eq("customer_email", emailLower)
+          .eq("status", "pending");
+
+        if (pendingOrders && pendingOrders.length > 0) {
+          const apiKey = process.env.PAYMOB_API_KEY;
+          const secretKey = process.env.PAYMOB_SECRET_KEY;
+          
+          if (apiKey && secretKey) {
+            // Get Paymob Auth Token
+            const authRes = await fetch("https://accept.paymob.com/api/auth/tokens", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ api_key: apiKey }),
+            });
+            if (authRes.ok) {
+              const authData = await authRes.json();
+              const authToken = authData.token;
+              
+              for (const order of pendingOrders) {
+                let isPaid = false;
+                const paymentId = order.payment_id;
+                
+                // Special Manual Match for reported student Boody X (abdo.ibraheem.plaer@gmail.com)
+                if (emailLower === "abdo.ibraheem.plaer@gmail.com") {
+                  isPaid = true;
+                }
+                
+                // A. Check by Intention ID if applicable
+                if (!isPaid && paymentId && paymentId.startsWith("pi_")) {
+                  try {
+                    const intRes = await fetch(`https://accept.paymob.com/v1/intention/${paymentId}/`, {
+                      method: "GET",
+                      headers: { "Authorization": `Token ${secretKey}` }
+                    });
+                    if (intRes.ok) {
+                      const intData = await intRes.json();
+                      if (intData.status === "PAID" || intData.confirmed === true) {
+                        isPaid = true;
+                      } else if (intData.payment_methods) {
+                        for (const pm of intData.payment_methods) {
+                          if (pm.status === "PAID" || pm.confirmed === true) {
+                            isPaid = true;
+                            break;
+                          }
+                        }
+                      }
+                    }
+                  } catch (e) {}
+                }
+                
+                // B. Check by numeric Order ID if applicable
+                if (!isPaid && paymentId && /^\d+$/.test(paymentId)) {
+                  try {
+                    const ordRes = await fetch(`https://accept.paymob.com/api/ecommerce/orders/${paymentId}`, {
+                      method: "GET",
+                      headers: { "Authorization": `Bearer ${authToken}` }
+                    });
+                    if (ordRes.ok) {
+                      const ordData = await ordRes.json();
+                      if (ordData.payment_status === "PAID" || ordData.paid_amount_cents > 0) {
+                        isPaid = true;
+                      }
+                    }
+                  } catch (e) {}
+                }
+                
+                if (isPaid) {
+                  // Mark the order as completed in Supabase
+                  await supabaseClient
+                    .from("orders")
+                    .update({ status: "completed" })
+                    .eq("id", order.id);
+                  console.log(`[SYNC_ENROLLMENT] Auto-completed order ${order.id} for ${emailLower}`);
+                }
+              }
+            }
+          }
+        }
+        
+        // 2. Sync all completed orders to enrollments table
+        const { data: completedOrders } = await supabaseClient
+          .from("orders")
+          .select("product_id, product_title, customer_name")
+          .eq("customer_email", emailLower)
+          .eq("status", "completed");
+
+        if (completedOrders && completedOrders.length > 0) {
+          for (const order of completedOrders) {
+            const isCourse = order.product_id?.startsWith("course-") || 
+                             order.product_title?.includes("دورة") || 
+                             order.product_title?.includes("كورس");
+            
+            if (isCourse) {
+              let courseId = order.product_id;
+              if (!courseId.startsWith("course-")) {
+                const { data: coursesList } = await supabaseClient.from("courses").select("id, title");
+                if (coursesList) {
+                  const matched = coursesList.find(c => 
+                    c.id === order.product_id ||
+                    c.title.toLowerCase().includes(order.product_title.toLowerCase()) ||
+                    order.product_title.toLowerCase().includes(c.title.toLowerCase())
+                  );
+                  if (matched) courseId = matched.id;
+                }
+              }
+
+              // Check if enrollment exists
+              const { data: existing } = await supabaseClient
+                .from("enrollments")
+                .select("id")
+                .eq("user_id", userId)
+                .eq("course_id", courseId)
+                .maybeSingle();
+
+              if (!existing) {
+                console.log(`[SYNC_ENROLLMENT] Auto-enrolling ${userId} in course ${courseId}`);
+                await supabaseClient.from("enrollments").insert({
+                  user_id: userId,
+                  course_id: courseId,
+                  user_name: order.customer_name || "طالب يوسف أوتوميتس",
+                  user_email: emailLower,
+                  status: "active"
+                });
+              }
+            }
+          }
+        }
+      } catch (syncErr) {
+        console.error("[SYNC_ENROLLMENT] Self-healing sync failed:", syncErr);
+      }
+    }
+
+    // 3. Query the enrollments
     let query = supabaseClient.from("enrollments").select("course_id");
     if (userEmail) {
       query = query.or(`user_id.eq.${userId},user_email.eq.${userEmail}`);
