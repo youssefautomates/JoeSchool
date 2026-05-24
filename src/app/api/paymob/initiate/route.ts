@@ -255,139 +255,44 @@ export async function POST(req: Request) {
     }
 
     // ==========================================
-    // CARD FLOW: SERVER-TO-SERVER (CLASSIC API)
+    // CARD FLOW: USE INTENTION API & UNIFIED CHECKOUT REDIRECT (NO PORT 8445 BLOCKS)
     // ==========================================
     if (paymentMethod === "card") {
-      if (!apiKey) throw new Error("PAYMOB_API_KEY is missing for Card S2S Flow.");
-      if (!cardData) throw new Error("Card data is required for inline processing.");
+      if (!secretKey) throw new Error("PAYMOB_SECRET_KEY is missing for Card Intention API.");
+      console.log(`[CARD_INTEGRATION] Selected Card Integration: ${envCardIntegrationId}`);
       
-      console.log(`[CARD_INTEGRATION] Processing Inline Card S2S: ${envCardIntegrationId}`);
-
-      // 1. Auth
-      const authResponse = await fetch("https://accept.paymob.com/api/auth/tokens", {
+      const intentionResponse = await fetch("https://accept.paymob.com/v1/intention/", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ api_key: apiKey }),
-      });
-      if (!authResponse.ok) throw new Error(`Auth failed`);
-      const authToken = (await authResponse.json()).token;
-
-      // 2. Order
-      const orderResponse = await fetch("https://accept.paymob.com/api/ecommerce/orders", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Token ${secretKey}`
+        },
         body: JSON.stringify({
-          auth_token: authToken,
-          delivery_needed: "false",
-          amount_cents: amountCents.toString(),
+          amount: amountCents,
           currency: "EGP",
-          items: [],
+          payment_methods: [envCardIntegrationId],
           merchant_order_id: `store-${dbOrder.id}`,
+          items: [{ name: dbItem.title, amount: amountCents, description: "Digital Purchase", quantity: 1 }],
+          billing_data: billingData,
           extras: { 
-            source: "store", 
-            supabase_order_id: dbOrder.id,
+            supabase_order_id: dbOrder.id, 
+            source: "store",
             original_currency: userCurrency,
             original_amount: userCurrency === "USD" ? Number(originalPriceBase.toFixed(2)) : expectedPriceEGP,
             exchange_rate: userCurrency === "USD" ? exchangeRate : 1.0
           }
         }),
       });
-      if (!orderResponse.ok) throw new Error(`Order failed`);
-      const paymobOrderId = (await orderResponse.json()).id;
 
-      await supabase.from("orders").update({ payment_id: String(paymobOrderId) }).eq("id", dbOrder.id);
+      const intentionData = await intentionResponse.json();
+      if (!intentionResponse.ok) throw new Error(`Card Intention failed: ${JSON.stringify(intentionData)}`);
 
-      // 3. Payment Key
-      const paymentKeyResponse = await fetch("https://accept.paymob.com/api/acceptance/payment_keys", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          auth_token: authToken,
-          amount_cents: amountCents.toString(), 
-          expiration: 3600,
-          order_id: paymobOrderId.toString(),
-          billing_data: billingData,
-          currency: "EGP",
-          integration_id: envCardIntegrationId,
-        }),
+      await supabase.from("orders").update({ payment_id: intentionData.id?.toString() }).eq("id", dbOrder.id);
+      
+      return NextResponse.json({
+        checkoutUrl: `https://accept.paymob.com/unifiedcheckout/?publicKey=${publicKey}&clientSecret=${intentionData.client_secret}`,
+        orderId: dbOrder.id
       });
-      if (!paymentKeyResponse.ok) throw new Error(`Payment key failed`);
-      const paymentKey = (await paymentKeyResponse.json()).token;
-
-      // Paymob API expects "CARD" as the subtype for all credit/debit cards
-      const detectedSubtype = "CARD";
-      const cleanCard = cardData.cardNumber.replace(/\s/g, '');
-
-      const cardName = cardData.cardHolder?.trim() || `${firstName} ${lastName}`;
-      if (!cardName) {
-        throw new Error("No cardholder name provided from frontend");
-      }
-
-      const payPayload = {
-        source: {
-          identifier: cleanCard,
-          subtype: detectedSubtype,
-          cvn: cardData.cvv,
-          expiry_month: cardData.expiry.split("/")[0],
-          expiry_year: cardData.expiry.split("/")[1],
-          sourceholder_name: cardName
-        },
-        payment_token: paymentKey,
-        billing: billingData
-      };
-
-      console.log("[FINAL_PAYLOAD] cardName:", cardName, "| Submitting to Paymob:", JSON.stringify({ ...payPayload, source: { ...payPayload.source, identifier: "MASKED", cvn: "***" } }, null, 2));
-      
-      const payResponse = await fetch("https://accept.paymob.com/api/acceptance/payments/pay", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payPayload),
-      });
-      
-      const payData = await payResponse.json();
-      
-      // Full diagnostic logging
-      const redirectUrl = payData.redirection_url || payData.redirect_url || payData.iframe_redirection_url;
-      console.log("[CARD_INTEGRATION] FULL Pay Response:", JSON.stringify({
-        status: payResponse.status,
-        success: payData.success,
-        pending: payData.pending,
-        is_3d_secure: payData.is_3d_secure,
-        redirection_url: payData.redirection_url,
-        redirect_url: payData.redirect_url,
-        iframe_redirection_url: payData.iframe_redirection_url,
-        data_message: payData.data?.message,
-        txn_response_code: payData.data?.txn_response_code,
-        message: payData.message,
-        id: payData.id,
-      }, null, 2));
-
-      if (!payResponse.ok && !redirectUrl) {
-        throw new Error(`Payment processing failed: ${payData.message || JSON.stringify(payData)}`);
-      }
-
-      // If it requires 3DS OTP redirect
-      if (redirectUrl) {
-        return NextResponse.json({ checkoutUrl: redirectUrl, orderId: dbOrder.id });
-      }
-
-      // Direct Success
-      if (payData.success) {
-        return NextResponse.json({ success: true, checkoutUrl: `/checkout/success?order_id=${dbOrder.id}` });
-      }
-
-      // Pending transaction (some cards return pending=true before 3DS)
-      if (payData.pending) {
-        return NextResponse.json({ success: true, checkoutUrl: `/checkout/success?order_id=${dbOrder.id}&pending=true` });
-      }
-
-      // Extract the real decline reason
-      const declineReason = payData.data?.message 
-        || payData.data?.txn_response_code 
-        || payData.message 
-        || payData.detail 
-        || (payData.data ? JSON.stringify(payData.data) : 'Unknown error');
-      throw new Error(`Payment declined: ${declineReason}`);
     }
 
     throw new Error("Invalid Payment Method");

@@ -212,22 +212,6 @@ export default function CartCheckoutPage() {
   }, [setValue]);
 
   const validateCardFields = () => {
-    if (paymentMethod !== "card") return true;
-    let hasEmptyError = false;
-    const currentErrors = { ...cardErrors };
-    
-    if (!cardNumber) { currentErrors.number = "يرجى إدخال رقم البطاقة"; hasEmptyError = true; }
-    if (!expiryDate) { currentErrors.expiry = "مطلوب"; hasEmptyError = true; }
-    if (!cvv) { currentErrors.cvv = "مطلوب"; hasEmptyError = true; }
-    if (!cardHolder) { currentErrors.holder = "يرجى إدخال اسم حامل البطاقة"; hasEmptyError = true; }
-
-    if (hasEmptyError) {
-      setCardErrors(currentErrors);
-      return false;
-    }
-    if (cardErrors.number || cardErrors.expiry || cardErrors.cvv || cardErrors.holder) {
-      return false;
-    }
     return true;
   };
 
@@ -529,7 +513,7 @@ export default function CartCheckoutPage() {
                   {/* Inline Card Fields (Animated transition) */}
                   <div className={cn(
                     "transition-all duration-500 ease-in-out overflow-hidden border-t border-white/5",
-                    paymentMethod === "card" ? "max-h-[600px] opacity-100 pt-6 mt-6" : "max-h-0 opacity-0 pt-0 mt-0 border-transparent pointer-events-none"
+                    false ? "max-h-[600px] opacity-100 pt-6 mt-6" : "max-h-0 opacity-0 pt-0 mt-0 border-transparent pointer-events-none"
                   )}>
                     <div className="mb-4">
                       <h3 className="font-cairo font-bold text-white flex items-center gap-2 text-sm">
