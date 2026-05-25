@@ -78,7 +78,7 @@ export function resolveProductPrice(
  */
 export function formatPrice(price: number, currency: Currency): string {
   if (currency === "EGP") {
-    return `${price} ج.م`;
+    return `${price} L.E`;
   }
   return `$${price.toFixed(2)}`;
 }
