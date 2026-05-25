@@ -81,8 +81,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <div className="h-10 bg-white/5 rounded-xl animate-pulse" />
             </div>
           }>
+            <SidebarNav pathname={pathname} navGroups={navGroups} />
           </Suspense>
-          <SidebarNav pathname={pathname} navGroups={navGroups} />
         </nav>
 
         <div className="p-6 border-t border-white/5 space-y-4">
