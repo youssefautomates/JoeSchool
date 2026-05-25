@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import Script from "next/script";
+import { initSession, trackEvent } from "@/lib/analytics";
 
 declare global {
   interface Window {
@@ -31,10 +32,19 @@ export function PixelTracker({ initialSettings }: { initialSettings?: any }) {
     }
   }, [initialSettings]);
 
+  // 1. Initialize visitor session & parse UTM/referrer params on mount
   useEffect(() => {
+    initSession();
+  }, []);
+
+  // 2. Track global database PageView & pixel page views on route changes
+  useEffect(() => {
+    // Database Clickstream PageView Ingestion
+    trackEvent("page_view", null, null, { path: pathname });
+
     if (!settings) return;
 
-    // Track PageView on route change
+    // Track Meta & TikTok PageViews on route change
     if (settings.metaPixelEnabled && settings.metaPixelId && (window as any).fbq) {
       (window as any).fbq('track', 'PageView');
     }

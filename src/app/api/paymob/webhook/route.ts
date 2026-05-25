@@ -147,10 +147,18 @@ export async function POST(request: Request) {
             continue;
           }
 
-          console.log(`[PAYMOB_WEBHOOK][${requestId}] 🔄 Completing order ${ord.id} in database...`);
+          const billingCountry = transaction.payment_key_claims?.billing_data?.country || "EG";
+          const payMethod = transaction.source_data?.sub_type || transaction.source_data?.type || "Card";
+
+          console.log(`[PAYMOB_WEBHOOK][${requestId}] 🔄 Completing order ${ord.id} in database (Country: ${billingCountry}, Method: ${payMethod})...`);
           const { error: updErr } = await supabaseAdmin
             .from("orders")
-            .update({ status: "completed", payment_id: paymobOrderId })
+            .update({ 
+              status: "completed", 
+              payment_id: paymobOrderId,
+              country: billingCountry,
+              payment_method: payMethod
+            })
             .eq("id", ord.id);
 
           if (updErr) {
