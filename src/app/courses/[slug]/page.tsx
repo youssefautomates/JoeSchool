@@ -600,7 +600,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                         >
                           {/* Course Description with correct format styling */}
                           {course.description ? (
-                            <div className="text-zinc-300 font-cairo text-sm sm:text-base leading-[1.8] space-y-4" dangerouslySetInnerHTML={{ __html: course.description.replace(/\n/g, '<br/>') }} />
+                            <div className="text-zinc-300 font-cairo text-sm sm:text-base leading-[2.2] space-y-6 [&_p]:mb-6 [&_p]:leading-[2.2] [&_li]:mb-4 [&_li]:leading-[2.2] [&_h1]:mt-8 [&_h1]:mb-4 [&_h1]:text-lg [&_h2]:mt-6 [&_h2]:mb-3 [&_h2]:text-base [&_span]:leading-[2.2]" dangerouslySetInnerHTML={{ __html: course.description.replace(/\n/g, '<br/>') }} />
                           ) : (
                             <p className="text-zinc-400 font-cairo text-sm sm:text-base leading-[1.8]">هذا الكورس يحتوي على شرح تقني مفصل وتطبيقي شامل لربط البرمجيات وأتمتة المهام بأقوى الاستراتيجيات.</p>
                           )}
