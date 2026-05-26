@@ -539,7 +539,12 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
             <div className="flex flex-col lg:flex-row gap-6 md:gap-8 lg:gap-12 items-start">
               
               {/* Left Column: Visuals & Description */}
-              <div className="w-full lg:w-[62%] space-y-8">
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, ease: "easeOut" }}
+                className="w-full lg:w-[62%] space-y-8"
+              >
                 {/* Main Viewer */}
                 <div className="relative aspect-video bg-[#08080c] rounded-2xl md:rounded-[2.5rem] overflow-hidden shadow-2xl border border-white/5 flex items-center justify-center">
                   <AnimatePresence mode="wait">
@@ -768,7 +773,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                          className="flex items-center md:items-start gap-3 md:gap-4 p-4 md:p-5 rounded-[1.25rem] md:rounded-2xl bg-white/[0.01] border border-white/5 hover:border-rose-500/20 hover:bg-white/[0.03] transition-all duration-300 group"
                        >
                          <div className="w-10 h-10 md:w-11 md:h-11 rounded-lg md:rounded-xl bg-rose-500/10 text-rose-400 flex items-center justify-center shrink-0 border border-rose-500/10 transition-colors group-hover:bg-[#D6004B]/20 group-hover:text-[#D6004B] group-hover:border-[#D6004B]/20">
-                            <feature.icon className="w-4 h-4 md:w-5 md:h-5 transition-transform group-hover:scale-110" />
+                            <feature.icon className="w-4 h-4 md:w-5 md:h-5 transition-transform duration-300 ease-out group-hover:scale-115 group-hover:rotate-6" />
                          </div>
                          <div className="flex flex-col gap-0.5 md:gap-1">
                             <h4 className="text-sm md:text-[15px] font-alexandria font-bold text-white transition-colors group-hover:text-rose-400">{feature.title}</h4>
@@ -778,10 +783,15 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                      ))}
                   </div>
                 </div>
-              </div>
+              </motion.div>
 
               {/* Right Column: Pricing & Conversion */}
-              <div className="w-full lg:w-[38%] lg:sticky lg:top-32 space-y-6 md:space-y-8">
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, ease: "easeOut", delay: 0.15 }}
+                className="w-full lg:w-[38%] lg:sticky lg:top-32 space-y-6 md:space-y-8"
+              >
                 <div className="bg-[#0c0c12] p-5 sm:p-8 md:p-10 lg:p-12 rounded-3xl md:rounded-[2.5rem] lg:rounded-[3rem] border border-white/10 shadow-2xl relative overflow-hidden">
                   <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-br from-rose-600/5 to-transparent opacity-50" />
                   
@@ -868,7 +878,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                       <p className="text-white font-alexandria font-bold text-xs md:text-sm">تقييم 5 من +500 عميل</p>
                    </div>
                 </div>
-              </div>
+              </motion.div>
 
             </div>
           )}

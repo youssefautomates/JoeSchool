@@ -168,7 +168,7 @@ export default function CoursesPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {filteredCourses.map((course) => {
+              {filteredCourses.map((course, idx) => {
                 const coursePricing = resolveProductPrice(course as any, currency);
                 const courseReviews = allReviews.filter((r: any) => r.productId === course.id && !r.isHidden);
                 const reviewsCount = courseReviews.length;
@@ -176,8 +176,12 @@ export default function CoursesPage() {
                   ? (courseReviews.reduce((sum: number, r: any) => sum + Number(r.rating), 0) / reviewsCount).toFixed(1)
                   : "5.0";
                 return (
-                  <div
+                  <motion.div
                     key={course.slug}
+                    initial={{ opacity: 0, y: 25 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5, delay: idx * 0.05 }}
                     className="group bg-gradient-to-b from-[#0e0e16] to-[#07070c] border border-white/5 hover:border-[#D6004B]/30 rounded-3xl overflow-hidden shadow-2xl flex flex-col justify-between hover:-translate-y-1.5 transition-all duration-300 h-full relative cursor-pointer hover:shadow-[0_20px_40px_-12px_rgba(214,0,75,0.15)]"
                     onClick={() => window.location.href = `/courses/${course.slug}`}
                   >
@@ -281,7 +285,7 @@ export default function CoursesPage() {
                         </div>
                       </div>
                     </div>
-                  </div>
+                  </motion.div>
                 );
               })}
             </div>

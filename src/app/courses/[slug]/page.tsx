@@ -352,7 +352,12 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
               
               {/* Right Col: Course Title, Badges under Video, Tabbed details */}
-              <div className="lg:col-span-8 space-y-6">
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, ease: "easeOut" }}
+                className="lg:col-span-8 space-y-6"
+              >
                 <Link
                   href="/courses"
                   className="inline-flex items-center gap-2 text-xs font-bold text-zinc-400 hover:text-white transition-colors"
@@ -921,10 +926,15 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
 
                 </div>
 
-              </div>
+              </motion.div>
 
               {/* Left Col: Enroll CTA Card (Sticky Desktop, hidden lg:block) */}
-              <div className="lg:col-span-4 hidden lg:block bg-[#0a0a0f] border border-white/5 rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden lg:sticky lg:top-28">
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, ease: "easeOut", delay: 0.15 }}
+                className="lg:col-span-4 hidden lg:block bg-[#0a0a0f] border border-white/5 rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden lg:sticky lg:top-28"
+              >
                 <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-transparent via-[#D6004B] to-transparent animate-pulse" />
                 
                 <span className="text-[10px] text-zinc-500 font-bold block uppercase tracking-widest mb-2 font-alexandria">
@@ -997,7 +1007,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                     <span>شهادة إكمال رقمية بكود QR بعد الإنجاز</span>
                   </div>
                 </div>
-              </div>
+              </motion.div>
 
             </div>
           </div>

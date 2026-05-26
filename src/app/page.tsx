@@ -353,7 +353,7 @@ export default function Home() {
 
             {/* Courses Cards Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-              {filteredCourses.map((course) => {
+              {filteredCourses.map((course, idx) => {
                 const courseReviews = allReviews.filter((r: any) => r.productId === course.id && !r.isHidden);
                 const reviewsCount = courseReviews.length;
                 const averageRating = reviewsCount > 0 
@@ -363,8 +363,12 @@ export default function Home() {
                 const coursePricing = resolveProductPrice(course as any, currency);
 
                 return (
-                  <div
+                  <motion.div
                     key={course.slug}
+                    initial={{ opacity: 0, y: 25 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5, delay: idx * 0.05 }}
                     className="group bg-gradient-to-b from-[#0e0e16] to-[#07070c] border border-white/5 hover:border-[#D6004B]/30 rounded-3xl overflow-hidden shadow-2xl flex flex-col justify-between hover:-translate-y-1.5 transition-all duration-300 h-full relative cursor-pointer hover:shadow-[0_20px_40px_-12px_rgba(214,0,75,0.15)]"
                     onClick={() => router.push(`/courses/${course.slug}`)}
                   >
@@ -471,7 +475,7 @@ export default function Home() {
                         </div>
                       </div>
                     </div>
-                  </div>
+                  </motion.div>
                 );
               })}
             </div>
@@ -677,8 +681,12 @@ export default function Home() {
                   const isFree = productPricing.price === 0;
 
                   return (
-                    <div 
+                    <motion.div 
                       key={product.id}
+                      initial={{ opacity: 0, y: 25 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.5, delay: idx * 0.05 }}
                       className="group h-full"
                     >
                       <div 
@@ -780,7 +788,7 @@ export default function Home() {
                           </div>
                         </div>
                       </div>
-                    </div>
+                    </motion.div>
                   );
                 })
               )}
