@@ -23,14 +23,43 @@ const queuedEvents: Array<{ event: string; params?: any; eventId: string }> = []
 let activeSettings: any = null;
 let cachedEmail: string | null = null;
 
+export function initMetaPixel(settings: any) {
+  if (!settings) return;
+  activeSettings = settings;
+  if (typeof window !== "undefined") {
+    (window as any).metaTrackingSettings = settings;
+    console.log("[Meta Pixel] Configured with settings:", settings);
+    
+    // Immediately process queue if fbq is ready
+    if (window.fbq && typeof window.fbq === "function") {
+      while (queuedEvents.length > 0) {
+        const next = queuedEvents.shift();
+        if (next) {
+          console.log(`[Meta Pixel] Firing queued event: ${next.event} with ID: ${next.eventId}`);
+          window.fbq("track", next.event, next.params, { eventID: next.eventId });
+        }
+      }
+    }
+  }
+}
+
+export function getActiveSettings() {
+  if (activeSettings) return activeSettings;
+  if (typeof window !== "undefined" && (window as any).metaTrackingSettings) {
+    activeSettings = (window as any).metaTrackingSettings;
+    return activeSettings;
+  }
+  return null;
+}
+
 // Synchronously load settings and email in browser
 if (typeof window !== "undefined") {
-  // 1. Fetch settings once on load
+  // 1. Fetch settings once on load as fallback
   fetch("/api/admin/settings")
     .then(res => res.json())
     .then(data => {
       if (data && !data.error) {
-        activeSettings = data;
+        initMetaPixel(data);
       }
     })
     .catch(() => {});
@@ -130,8 +159,9 @@ export async function trackMetaEvent(event: string, params: any = {}, dedupeKey?
 
   // 3. Browser-side Pixel execution
   let browserStatus: "success" | "queued" | "disabled" | "failed" = "disabled";
-  const pixelIdActive = activeSettings?.metaPixelId || "";
-  const pixelEnabled = activeSettings ? !!activeSettings.metaPixelEnabled : true;
+  const currentSettings = getActiveSettings();
+  const pixelIdActive = currentSettings?.metaPixelId || "";
+  const pixelEnabled = currentSettings ? !!currentSettings.metaPixelEnabled : true;
 
   if (pixelEnabled) {
     if (window.fbq && typeof window.fbq === "function") {
@@ -153,13 +183,13 @@ export async function trackMetaEvent(event: string, params: any = {}, dedupeKey?
     eventId,
     timestamp: new Date().toISOString(),
     browserStatus,
-    capiStatus: activeSettings?.metaCapiEnabled ? "pending" : "disabled",
-    deduplicated: activeSettings?.metaCapiEnabled && pixelEnabled,
+    capiStatus: currentSettings?.metaCapiEnabled ? "pending" : "disabled",
+    deduplicated: currentSettings?.metaCapiEnabled && pixelEnabled,
     params: trackingParams
   });
 
   // 4. Server-side Conversion API (CAPI) proxy invocation
-  if (activeSettings?.metaCapiEnabled && activeSettings?.metaCapiToken) {
+  if (currentSettings?.metaCapiEnabled && currentSettings?.metaCapiToken) {
     try {
       const response = await fetch("/api/tracking/capi", {
         method: "POST",

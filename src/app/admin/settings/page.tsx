@@ -54,6 +54,7 @@ export default function AdminSettings() {
 
   // Diagnostics & Local Logs State
   const [logs, setLogs] = useState<any[]>([]);
+  const [activeTracking, setActiveTracking] = useState<any>(null);
 
   // Connection & Verification States
   const [testConnectionStatus, setTestConnectionStatus] = useState<"idle" | "testing" | "success" | "failed">("idle");
@@ -73,6 +74,11 @@ export default function AdminSettings() {
           setMetaCapiTestCode(data.metaCapiTestCode || "");
           setTiktokPixelId(data.tiktokPixelId || "");
           setTiktokPixelEnabled(!!data.tiktokPixelEnabled);
+
+          // Sync with active tracking layer
+          const { initMetaPixel } = await import("@/lib/metaPixel");
+          initMetaPixel(data);
+          setActiveTracking(data);
         }
       } catch (err) {
         console.error("Error loading settings:", err);
@@ -92,6 +98,7 @@ export default function AdminSettings() {
     try {
       const raw = localStorage.getItem("meta_pixel_events_log") || "[]";
       setLogs(JSON.parse(raw));
+      setActiveTracking((window as any).metaTrackingSettings || null);
     } catch(e) {}
   };
 
@@ -161,6 +168,22 @@ export default function AdminSettings() {
         toast.success("Meta Pixel settings saved successfully", {
           icon: <CheckCircle2 className="w-5 h-5 text-emerald-500" />
         });
+        
+        // Sync with active tracking layer
+        const payload = {
+          metaPixelId: finalPixelId,
+          metaPixelRawCode,
+          metaPixelEnabled,
+          metaCapiToken,
+          metaCapiEnabled,
+          metaCapiTestCode,
+          tiktokPixelId,
+          tiktokPixelEnabled
+        };
+        const { initMetaPixel } = await import("@/lib/metaPixel");
+        initMetaPixel(payload);
+        setActiveTracking(payload);
+
         return true;
       } else {
         toast.error(resData.error || "Failed to save settings");
@@ -606,30 +629,38 @@ export default function AdminSettings() {
                 </div>
 
                 {/* Summary status points */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4.5 rounded-2xl bg-white/[0.01] border border-white/5">
-                  <div className="space-y-1">
-                    <span className="text-[10px] text-zinc-500 font-bold block uppercase">Pixel status</span>
-                    <span className={cn("text-xs font-bold block leading-none", metaPixelId && metaPixelEnabled ? "text-emerald-400" : "text-zinc-500")}>
-                      {metaPixelId && metaPixelEnabled ? "Active & Initialized" : "Inactive"}
-                    </span>
-                  </div>
-                  <div className="space-y-1">
-                    <span className="text-[10px] text-zinc-500 font-bold block uppercase">CAPI status</span>
-                    <span className={cn("text-xs font-bold block leading-none", metaCapiToken && metaCapiEnabled ? "text-emerald-400 animate-pulse" : "text-zinc-500")}>
-                      {metaCapiToken && metaCapiEnabled ? "Active (Server Ready)" : "Inactive"}
-                    </span>
-                  </div>
-                  <div className="space-y-1">
-                    <span className="text-[10px] text-zinc-500 font-bold block uppercase">Active Pixel ID</span>
-                    <span className="text-xs font-mono font-bold text-white block leading-none truncate">{metaPixelId || "None"}</span>
-                  </div>
-                  <div className="space-y-1">
-                    <span className="text-[10px] text-zinc-500 font-bold block uppercase">Deduplication</span>
-                    <span className={cn("text-xs font-bold block leading-none", metaPixelEnabled && metaCapiEnabled ? "text-emerald-400" : "text-amber-500")}>
-                      {metaPixelEnabled && metaCapiEnabled ? "Dual Mode (Deduplicated)" : "Single Mode"}
-                    </span>
-                  </div>
-                </div>
+                {(() => {
+                  const realPixelId = activeTracking?.metaPixelId || "";
+                  const realPixelEnabled = !!activeTracking?.metaPixelEnabled;
+                  const realCapiToken = activeTracking?.metaCapiToken || "";
+                  const realCapiEnabled = !!activeTracking?.metaCapiEnabled;
+                  return (
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4.5 rounded-2xl bg-white/[0.01] border border-white/5">
+                      <div className="space-y-1">
+                        <span className="text-[10px] text-zinc-500 font-bold block uppercase">Pixel status</span>
+                        <span className={cn("text-xs font-bold block leading-none", realPixelId && realPixelEnabled ? "text-emerald-400" : "text-zinc-500")}>
+                          {realPixelId && realPixelEnabled ? "Active & Initialized" : "Inactive"}
+                        </span>
+                      </div>
+                      <div className="space-y-1">
+                        <span className="text-[10px] text-zinc-500 font-bold block uppercase">CAPI status</span>
+                        <span className={cn("text-xs font-bold block leading-none", realCapiToken && realCapiEnabled ? "text-emerald-400 animate-pulse" : "text-zinc-500")}>
+                          {realCapiToken && realCapiEnabled ? "Active (Server Ready)" : "Inactive"}
+                        </span>
+                      </div>
+                      <div className="space-y-1">
+                        <span className="text-[10px] text-zinc-500 font-bold block uppercase">Active Pixel ID</span>
+                        <span className="text-xs font-mono font-bold text-white block leading-none truncate">{realPixelId || "None"}</span>
+                      </div>
+                      <div className="space-y-1">
+                        <span className="text-[10px] text-zinc-500 font-bold block uppercase">Deduplication</span>
+                        <span className={cn("text-xs font-bold block leading-none", realPixelEnabled && realCapiEnabled ? "text-emerald-400" : "text-amber-500")}>
+                          {realPixelEnabled && realCapiEnabled ? "Dual Mode (Deduplicated)" : "Single Mode"}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })()}
 
                 {/* Diagnostics scroll feed */}
                 <div className="bg-[#050508] border border-white/5 rounded-2xl p-4.5 font-mono text-xs text-zinc-300 shadow-inner h-80 overflow-y-auto scrollbar-thin flex flex-col gap-2">

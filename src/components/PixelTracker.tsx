@@ -19,6 +19,20 @@ export function PixelTracker({ initialSettings }: { initialSettings?: any }) {
   const searchParams = useSearchParams();
   const [settings, setSettings] = useState<any>(initialSettings || null);
 
+  // Synchronously write settings to window for early/static loads
+  if (typeof window !== "undefined" && settings) {
+    (window as any).metaTrackingSettings = settings;
+  }
+
+  // Sync settings with metaPixel module reactive tracking layer
+  useEffect(() => {
+    if (settings) {
+      import("@/lib/metaPixel").then(mod => {
+        mod.initMetaPixel(settings);
+      });
+    }
+  }, [settings]);
+
   useEffect(() => {
     if (!initialSettings) {
       console.log("%c[PixelTracker] No initial settings, fetching...", "color: #ff0055; font-weight: bold;");
@@ -45,8 +59,8 @@ export function PixelTracker({ initialSettings }: { initialSettings?: any }) {
 
     if (!settings) return;
 
-    // Track Meta & TikTok PageViews on route change
-    if (settings.metaPixelEnabled && settings.metaPixelId && (window as any).fbq) {
+    // Track Meta & TikTok PageViews on route change (without window.fbq guard to let queue work)
+    if (settings.metaPixelEnabled && settings.metaPixelId) {
       trackMetaEvent("PageView");
     }
     if (settings.tiktokPixelEnabled && settings.tiktokPixelId && (window as any).ttq) {
@@ -198,10 +212,13 @@ export function PixelTracker({ initialSettings }: { initialSettings?: any }) {
 
   if (!settings) return null;
 
+  const cleanPixelId = settings.metaPixelId ? String(settings.metaPixelId).trim() : "";
+  const isPixelEnabled = settings.metaPixelEnabled && cleanPixelId && /^\d+$/.test(cleanPixelId);
+
   return (
     <>
       {/* Meta Pixel */}
-      {settings.metaPixelEnabled && settings.metaPixelId && /^\d+$/.test(settings.metaPixelId) && (
+      {isPixelEnabled && (
         <>
           <Script id="meta-pixel-base" strategy="afterInteractive">
             {`
@@ -213,7 +230,7 @@ export function PixelTracker({ initialSettings }: { initialSettings?: any }) {
               t.src=v;s=b.getElementsByTagName(e)[0];
               s.parentNode.insertBefore(t,s)}(window, document,'script',
               'https://connect.facebook.net/en_US/fbevents.js');
-              fbq('init', '${settings.metaPixelId}');
+              fbq('init', '${cleanPixelId}');
               fbq('track', 'PageView');
             `}
           </Script>
@@ -222,7 +239,7 @@ export function PixelTracker({ initialSettings }: { initialSettings?: any }) {
               height="1" 
               width="1" 
               style={{ display: 'none' }}
-              src={`https://www.facebook.com/tr?id=${settings.metaPixelId}&ev=PageView&noscript=1`}
+              src={`https://www.facebook.com/tr?id=${cleanPixelId}&ev=PageView&noscript=1`}
             />
           </noscript>
         </>
