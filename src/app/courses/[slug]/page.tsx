@@ -1583,7 +1583,7 @@ function MobileCourseView({
          <div className="bg-[#0b0b12]/50 border border-white/5 p-2 rounded-xl flex flex-col items-center justify-center text-center hover:border-[#D6004B]/30 hover:bg-[#0b0b12]/70 transition-all select-none">
             <Award className="w-4 h-4 text-emerald-500 mb-1 shrink-0" />
             <span className="text-[9px] text-zinc-400 font-bold leading-none mb-0.5">الشهادة</span>
-            <span className="text-[10px] text-emerald-400 font-black leading-none">معتمدة</span>
+            <span className="text-[10px] text-emerald-400 font-black leading-none">إحترافية</span>
          </div>
       </div>
 

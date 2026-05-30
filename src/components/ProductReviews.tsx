@@ -61,14 +61,12 @@ export function ProductReviews({ productId, initialReviews }: { productId: strin
   marqueeReviews = [...repeated, ...repeated];
 
   return (
-    <section className="mt-16 mb-8 overflow-hidden relative select-none">
-      <div className="container mx-auto px-4 mb-10">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-rose-600/10 rounded-2xl flex items-center justify-center">
-            <MessageSquareQuote className="w-6 h-6 text-rose-500" />
-          </div>
-          <h2 className="text-3xl font-alexandria font-black text-white tracking-tighter">آراء الطلاب</h2>
+    <section className="container mx-auto px-4 max-w-6xl mt-16 mb-8 overflow-hidden relative select-none">
+      <div className="flex items-center gap-2.5 mb-10">
+        <div className="w-10 h-10 md:w-12 md:h-12 bg-rose-600/10 rounded-xl md:rounded-2xl flex items-center justify-center">
+          <MessageSquareQuote className="w-5 h-5 md:w-6 md:h-6 text-rose-500" />
         </div>
+        <h2 className="text-xl sm:text-2xl font-alexandria font-black text-white tracking-tighter">آراء الطلاب</h2>
       </div>
 
       {/* Infinite Marquee */}
@@ -83,7 +81,7 @@ export function ProductReviews({ productId, initialReviews }: { productId: strin
           .animate-product-reviews-marquee-ltr {
             display: flex;
             width: max-content;
-            animation: product-reviews-marquee-ltr 70s linear infinite;
+            animation: product-reviews-marquee-ltr 160s linear infinite;
           }
           .animate-product-reviews-marquee-ltr:hover {
             animation-play-state: paused;
