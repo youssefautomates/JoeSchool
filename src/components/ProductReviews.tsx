@@ -52,13 +52,13 @@ export function ProductReviews({ productId, initialReviews }: { productId: strin
 
   if (loading || reviews.length === 0) return null;
 
-  // Duplicate reviews for seamless infinite marquee
-  const baseCount = reviews.length;
-  const repeatTimes = Math.max(3, Math.ceil(15 / (baseCount * 3)) * 3);
-  const duplicatedReviews: Review[] = [];
-  for (let i = 0; i < repeatTimes; i++) {
-    duplicatedReviews.push(...reviews);
+  // Build a long list of reviews for the marquee to prevent any empty space on wider screens
+  let marqueeReviews: Review[] = [];
+  let repeated = [...reviews];
+  while (repeated.length < 12) {
+    repeated = [...repeated, ...reviews];
   }
+  marqueeReviews = [...repeated, ...repeated];
 
   return (
     <section className="mt-16 mb-8 overflow-hidden relative select-none">
@@ -67,40 +67,35 @@ export function ProductReviews({ productId, initialReviews }: { productId: strin
           <div className="w-12 h-12 bg-rose-600/10 rounded-2xl flex items-center justify-center">
             <MessageSquareQuote className="w-6 h-6 text-rose-500" />
           </div>
-          <h2 className="text-3xl font-alexandria font-black text-white tracking-tighter">آراء العملاء</h2>
+          <h2 className="text-3xl font-alexandria font-black text-white tracking-tighter">آراء الطلاب</h2>
         </div>
       </div>
 
       {/* Infinite Marquee */}
       <div className="relative w-full overflow-hidden" dir="ltr">
         
-        {/* CSS Keyframes for seamless right-to-left scroll */}
+        {/* CSS Keyframes for seamless left-to-right scroll (matching showcase videos) */}
         <style jsx global>{`
-          @keyframes product-reviews-scroll {
-            0% {
-              transform: translate3d(-33.333%, 0, 0);
-            }
-            100% {
-              transform: translate3d(0, 0, 0);
-            }
+          @keyframes product-reviews-marquee-ltr {
+            0% { transform: translateX(-50%); }
+            100% { transform: translateX(0%); }
           }
-          .animate-product-reviews-marquee {
+          .animate-product-reviews-marquee-ltr {
             display: flex;
-            gap: 1.5rem;
             width: max-content;
-            animation: product-reviews-scroll 80s linear infinite;
+            animation: product-reviews-marquee-ltr 70s linear infinite;
           }
-          .animate-product-reviews-marquee:hover {
+          .animate-product-reviews-marquee-ltr:hover {
             animation-play-state: paused;
           }
         `}</style>
 
         {/* Fade edges */}
-        <div className="absolute left-0 top-0 bottom-0 w-20 md:w-32 bg-gradient-to-r from-[#050507] to-transparent z-10 pointer-events-none" />
-        <div className="absolute right-0 top-0 bottom-0 w-20 md:w-32 bg-gradient-to-l from-[#050507] to-transparent z-10 pointer-events-none" />
+        <div className="absolute left-0 top-0 bottom-0 w-12 md:w-16 bg-gradient-to-r from-[#050505] md:from-[#0a0a0f] to-transparent z-10 pointer-events-none" />
+        <div className="absolute right-0 top-0 bottom-0 w-12 md:w-16 bg-gradient-to-l from-[#050505] md:from-[#0a0a0f] to-transparent z-10 pointer-events-none" />
 
-        <div className="animate-product-reviews-marquee">
-          {duplicatedReviews.map((review, idx) => {
+        <div className="flex gap-4 md:gap-6 animate-product-reviews-marquee-ltr py-2">
+          {marqueeReviews.map((review, idx) => {
             const avatarSrc = review.avatarUrl && !review.avatarUrl.includes("pravatar")
               ? review.avatarUrl
               : getAvatarUrl(review.firstName, review.gender);

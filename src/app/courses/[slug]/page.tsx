@@ -596,15 +596,6 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                       )}
                     </button>
                     <button
-                      onClick={() => setActiveTab('reviews')}
-                      className={`px-5 py-3 font-alexandria text-xs sm:text-sm font-bold transition-all relative shrink-0 select-none cursor-pointer ${activeTab === 'reviews' ? 'text-[#D6004B]' : 'text-zinc-400 hover:text-white'}`}
-                    >
-                      <span>آراء الطلاب</span>
-                      {activeTab === 'reviews' && (
-                        <motion.div layoutId="activeTabIndicator" className="absolute bottom-0 inset-x-0 h-[2px] bg-[#D6004B]" />
-                      )}
-                    </button>
-                    <button
                       onClick={() => setActiveTab('faq')}
                       className={`px-5 py-3 font-alexandria text-xs sm:text-sm font-bold transition-all relative shrink-0 select-none cursor-pointer ${activeTab === 'faq' ? 'text-[#D6004B]' : 'text-zinc-400 hover:text-white'}`}
                     >
@@ -876,49 +867,6 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                         </motion.div>
                       )}
 
-                      {activeTab === 'reviews' && (
-                        <motion.div
-                          key="reviews"
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -10 }}
-                          className="space-y-8"
-                        >
-                          {/* Reviews Aggregate Metrics */}
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 bg-[#0a0a0f] border border-white/5 rounded-3xl p-6 sm:p-8 items-center">
-                            <div className="text-center space-y-1">
-                              <div className="text-5xl font-alexandria font-black text-white">{averageRating}</div>
-                              <div className="flex items-center justify-center gap-1 text-yellow-400 py-1">
-                                <Star className="w-5 h-5 fill-current" />
-                                <Star className="w-5 h-5 fill-current" />
-                                <Star className="w-5 h-5 fill-current" />
-                                <Star className="w-5 h-5 fill-current" />
-                                <Star className="w-5 h-5 fill-current" />
-                              </div>
-                              <p className="text-zinc-500 text-xs font-bold">استناداً إلى {reviewsCount} مراجعة حقيقية</p>
-                            </div>
-
-                            <div className="md:col-span-2 space-y-2 border-r border-white/5 pr-0 md:pr-8">
-                              {ratingCounts.map((count, index) => {
-                                const stars = 5 - index;
-                                const percent = reviewsCount > 0 ? Math.round((count / reviewsCount) * 100) : 0;
-                                return (
-                                  <div key={index} className="flex items-center gap-3 text-xs">
-                                    <span className="w-12 text-zinc-400 font-bold text-left">{stars} نجوم</span>
-                                    <div className="flex-1 h-2 bg-white/5 rounded-full overflow-hidden">
-                                      <div className="h-full bg-yellow-400 transition-all" style={{ width: `${percent}%` }} />
-                                    </div>
-                                    <span className="w-8 text-zinc-500 font-bold">{percent}%</span>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          </div>
-
-                          {/* Render verified product reviews component */}
-                          <ProductReviews productId={course.id} initialReviews={allReviews} />
-                        </motion.div>
-                      )}
 
                       {activeTab === 'faq' && (
                         <motion.div
@@ -1068,6 +1016,9 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
             </div>
           </section>
         )}
+
+        {/* Student Reviews Section (Marquee matching showcase videos) */}
+        <ProductReviews productId={course.id} initialReviews={allReviews} />
 
         {/* Smart Call-To-Action Banner (Yellow Box / New Premium Section) */}
         {!isEnrolled && (
@@ -1695,7 +1646,6 @@ function MobileCourseView({
              { id: 'overview', label: 'الوصف' },
              { id: 'curriculum', label: 'المنهاج' },
              { id: 'certificate', label: 'الشهادة' },
-             { id: 'reviews', label: `التقييمات (${reviewsCount})` },
              { id: 'faq', label: 'الأسئلة' }
            ].map((tab) => (
              <button
@@ -1950,25 +1900,7 @@ function MobileCourseView({
                </motion.div>
              )}
 
-             {activeTab === 'reviews' && (
-               <motion.div
-                 key="reviews-mobile"
-                 initial={{ opacity: 0, y: 10 }}
-                 animate={{ opacity: 1, y: 0 }}
-                 exit={{ opacity: 0, y: -10 }}
-                 className="space-y-4"
-               >
-                 <div className="flex items-center justify-between border-b border-white/5 pb-2">
-                    <h3 className="text-xs font-alexandria font-bold text-white">آراء الطلاب</h3>
-                   <div className="flex items-center gap-1 text-xs">
-                     <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                     <span className="text-white font-bold">{averageRating} / 5.0</span>
-                   </div>
-                 </div>
-
-                 <ProductReviews productId={course.id} initialReviews={allReviews} />
-               </motion.div>
-             )}
+             
 
              {activeTab === 'faq' && (
                <motion.div
@@ -2025,6 +1957,9 @@ function MobileCourseView({
            </div>
         </div>
       )}
+
+      {/* Student Reviews Section (Marquee matching showcase videos) */}
+      <ProductReviews productId={course.id} initialReviews={allReviews} />
 
       {/* 7. Final Urgency CTA Reminder */}
       {!isEnrolled && (
