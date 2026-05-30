@@ -66,19 +66,35 @@ export default function AdminSettings() {
         const res = await fetch("/api/admin/settings");
         const data = await res.json();
         if (data && !data.error) {
-          setMetaPixelId(data.metaPixelId || "");
-          setMetaPixelRawCode(data.metaPixelRawCode || data.metaPixelId || "");
-          setMetaPixelEnabled(!!data.metaPixelEnabled);
-          setMetaCapiEnabled(!!data.metaCapiEnabled);
-          setMetaCapiToken(data.metaCapiToken || "");
-          setMetaCapiTestCode(data.metaCapiTestCode || "");
+          const pId = data.metaPixelId && data.metaPixelId !== "1234567890" ? data.metaPixelId : "2851098458597955";
+          const pEnabled = data.metaPixelId ? !!data.metaPixelEnabled : true;
+          const cEnabled = data.metaCapiToken ? !!data.metaCapiEnabled : true;
+          const cToken = data.metaCapiToken && data.metaCapiToken !== "placeholder" ? data.metaCapiToken : "EAAgiivlidyEBRqMvMvILkEBvy9cThPMxUpekZBGDChtShYfKLljTXwURIgZAnRUBl4XhGufblytzz9QZB1LWFYh88kcfmskovy1hwcD3ksILWA02M9D2Kq4ucTx2XgRgv4XfhhGapa1kTLSRyuq8DfSan84SLUCSt7mQoK9E3qaIvC5sF9SttSTkfgtZB9lapQZDZD";
+          
+          setMetaPixelId(pId);
+          setMetaPixelRawCode(data.metaPixelRawCode || pId);
+          setMetaPixelEnabled(pEnabled);
+          setMetaCapiEnabled(cEnabled);
+          setMetaCapiToken(cToken);
+          setMetaCapiTestCode(data.metaCapiTestCode || "TEST4319");
           setTiktokPixelId(data.tiktokPixelId || "");
           setTiktokPixelEnabled(!!data.tiktokPixelEnabled);
 
+          const syncedData = {
+            metaPixelId: pId,
+            metaPixelRawCode: data.metaPixelRawCode || pId,
+            metaPixelEnabled: pEnabled,
+            metaCapiEnabled: cEnabled,
+            metaCapiToken: cToken,
+            metaCapiTestCode: data.metaCapiTestCode || "TEST4319",
+            tiktokPixelId: data.tiktokPixelId || "",
+            tiktokPixelEnabled: !!data.tiktokPixelEnabled
+          };
+
           // Sync with active tracking layer
           const { initMetaPixel } = await import("@/lib/metaPixel");
-          initMetaPixel(data);
-          setActiveTracking(data);
+          initMetaPixel(syncedData);
+          setActiveTracking(syncedData);
         }
       } catch (err) {
         console.error("Error loading settings:", err);
@@ -677,51 +693,59 @@ export default function AdminSettings() {
                     logs.map((log: any, idx: number) => {
                       const timeStr = log.timestamp ? new Date(log.timestamp).toLocaleTimeString() : "";
                       return (
-                        <div key={log.eventId || idx} className="p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.03] transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-left">
-                          <div className="space-y-1">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <span className="text-[10px] text-rose-500 font-bold bg-rose-500/10 px-1.5 py-0.5 rounded uppercase font-sans">{log.event}</span>
-                              <span className="text-[9px] text-zinc-500 font-sans">ID: {log.eventId}</span>
+                        <div key={log.eventId || idx} className="p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.03] transition-all flex flex-col gap-3 text-left">
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="text-[10px] text-rose-500 font-bold bg-rose-500/10 px-1.5 py-0.5 rounded uppercase font-sans">{log.event}</span>
+                                <span className="text-[9px] text-zinc-500 font-sans">ID: {log.eventId}</span>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-3 self-end sm:self-auto flex-wrap">
+                              <span className="text-[10px] text-zinc-500 font-sans">{timeStr}</span>
+                              <div className="flex items-center gap-2">
+                                {/* Browser status indicator */}
+                                <span className={cn(
+                                  "text-[9px] font-bold px-1.5 py-0.5 rounded font-sans uppercase",
+                                  log.browserStatus === "success" && "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20",
+                                  log.browserStatus === "queued" && "bg-amber-500/10 text-amber-400 border border-amber-500/20",
+                                  log.browserStatus === "disabled" && "bg-zinc-500/10 text-zinc-400 border border-white/5",
+                                  log.browserStatus === "failed" && "bg-red-500/10 text-red-400 border border-red-500/20"
+                                )}>
+                                  Pixel: {log.browserStatus === "success" ? "sent" : log.browserStatus}
+                                </span>
+
+                                {/* CAPI status indicator */}
+                                <span className={cn(
+                                  "text-[9px] font-bold px-1.5 py-0.5 rounded font-sans uppercase",
+                                  log.capiStatus === "success" && "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20",
+                                  log.capiStatus === "pending" && "bg-amber-500/10 text-amber-400 border border-amber-500/20 animate-pulse",
+                                  log.capiStatus === "disabled" && "bg-zinc-500/10 text-zinc-400 border border-white/5",
+                                  log.capiStatus === "failed" && "bg-red-500/10 text-red-400 border border-red-500/20"
+                                )}>
+                                  CAPI: {log.capiStatus === "success" ? "sent" : log.capiStatus}
+                                </span>
+
+                                {/* Deduplication validation check */}
+                                {log.deduplicated ? (
+                                  <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[9px] font-bold px-1.5 py-0.5 rounded font-sans flex items-center gap-1 uppercase">
+                                    <span className="w-1 h-1 rounded-full bg-emerald-400" />
+                                    Deduplicated
+                                  </span>
+                                ) : (
+                                  <span className="bg-zinc-500/10 text-zinc-500 border border-white/5 text-[9px] font-bold px-1.5 py-0.5 rounded font-sans uppercase">
+                                    Single
+                                  </span>
+                                )}
+                              </div>
                             </div>
                           </div>
-                          <div className="flex items-center gap-3 self-end sm:self-auto flex-wrap">
-                            <span className="text-[10px] text-zinc-500 font-sans">{timeStr}</span>
-                            <div className="flex items-center gap-2">
-                              {/* Browser status indicator */}
-                              <span className={cn(
-                                "text-[9px] font-bold px-1.5 py-0.5 rounded font-sans uppercase",
-                                log.browserStatus === "success" && "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20",
-                                log.browserStatus === "queued" && "bg-amber-500/10 text-amber-400 border border-amber-500/20",
-                                log.browserStatus === "disabled" && "bg-zinc-500/10 text-zinc-400 border border-white/5",
-                                log.browserStatus === "failed" && "bg-red-500/10 text-red-400 border border-red-500/20"
-                              )}>
-                                Pixel: {log.browserStatus}
-                              </span>
-
-                              {/* CAPI status indicator */}
-                              <span className={cn(
-                                "text-[9px] font-bold px-1.5 py-0.5 rounded font-sans uppercase",
-                                log.capiStatus === "success" && "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20",
-                                log.capiStatus === "pending" && "bg-amber-500/10 text-amber-400 border border-amber-500/20 animate-pulse",
-                                log.capiStatus === "disabled" && "bg-zinc-500/10 text-zinc-400 border border-white/5",
-                                log.capiStatus === "failed" && "bg-red-500/10 text-red-400 border border-red-500/20"
-                              )}>
-                                CAPI: {log.capiStatus}
-                              </span>
-
-                              {/* Deduplication validation check */}
-                              {log.deduplicated ? (
-                                <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[9px] font-bold px-1.5 py-0.5 rounded font-sans flex items-center gap-1 uppercase">
-                                  <span className="w-1 h-1 rounded-full bg-emerald-400" />
-                                  Deduplicated
-                                </span>
-                              ) : (
-                                <span className="bg-zinc-500/10 text-zinc-500 border border-white/5 text-[9px] font-bold px-1.5 py-0.5 rounded font-sans uppercase">
-                                  Single
-                                </span>
-                              )}
+                          {log.metaCapiResponse && (
+                            <div className="text-[9px] text-zinc-500 bg-white/[0.01] p-2.5 rounded border border-white/5 max-h-36 overflow-y-auto w-full">
+                              <span className="font-bold text-zinc-400 block mb-1">Meta API Response Body:</span>
+                              <pre className="whitespace-pre-wrap font-mono text-left" dir="ltr">{JSON.stringify(log.metaCapiResponse, null, 2)}</pre>
                             </div>
-                          </div>
+                          )}
                         </div>
                       );
                     })

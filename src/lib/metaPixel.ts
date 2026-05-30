@@ -80,6 +80,29 @@ if (typeof window !== "undefined") {
         if (next) {
           console.log(`[Meta Pixel] Firing queued event: ${next.event} with ID: ${next.eventId}`);
           window.fbq("track", next.event, next.params, { eventID: next.eventId });
+          
+          let existingCapiStatus: "success" | "disabled" | "failed" | "pending" = "pending";
+          let existingMetaCapiResponse: any = undefined;
+          try {
+            const rawLogs = localStorage.getItem("meta_pixel_events_log") || "[]";
+            const logs = JSON.parse(rawLogs);
+            const found = logs.find((l: any) => l.eventId === next.eventId);
+            if (found) {
+              existingCapiStatus = found.capiStatus;
+              existingMetaCapiResponse = found.metaCapiResponse;
+            }
+          } catch (e) {}
+
+          logEventToDiagnostics({
+            event: next.event,
+            eventId: next.eventId,
+            timestamp: new Date().toISOString(),
+            browserStatus: "success",
+            capiStatus: existingCapiStatus,
+            deduplicated: existingCapiStatus === "success",
+            params: next.params,
+            metaCapiResponse: existingMetaCapiResponse
+          } as any);
         }
       }
       clearInterval(interval);
@@ -201,7 +224,11 @@ export async function trackMetaEvent(event: string, params: any = {}, dedupeKey?
           eventId,
           eventTime: Math.floor(Date.now() / 1000),
           eventSourceUrl: window.location.href,
-          params: trackingParams
+          params: trackingParams,
+          metaPixelId: currentSettings.metaPixelId,
+          metaCapiToken: currentSettings.metaCapiToken,
+          metaCapiTestCode: currentSettings.metaCapiTestCode,
+          metaCapiEnabled: currentSettings.metaCapiEnabled
         })
       });
 
@@ -214,9 +241,10 @@ export async function trackMetaEvent(event: string, params: any = {}, dedupeKey?
         browserStatus,
         capiStatus: capiResult.success ? "success" : "failed",
         deduplicated: capiResult.success && browserStatus === "success",
-        params: trackingParams
-      });
-    } catch (capiErr) {
+        params: trackingParams,
+        metaCapiResponse: capiResult.raw_response
+      } as any);
+    } catch (capiErr: any) {
       logEventToDiagnostics({
         event,
         eventId,
@@ -224,8 +252,9 @@ export async function trackMetaEvent(event: string, params: any = {}, dedupeKey?
         browserStatus,
         capiStatus: "failed",
         deduplicated: false,
-        params: trackingParams
-      });
+        params: trackingParams,
+        metaCapiResponse: { error: capiErr.message }
+      } as any);
     }
   }
 }

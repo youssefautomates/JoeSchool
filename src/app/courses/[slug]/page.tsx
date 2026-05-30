@@ -1546,61 +1546,44 @@ function MobileCourseView({
       </div>
 
       {/* 3. Small Stats Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="grid grid-cols-4 gap-2">
          {/* Card 1: Duration */}
-         <div className="bg-[#0b0b12]/60 border border-white/5 p-4 rounded-2xl flex flex-col items-center justify-center text-center min-h-[120px] hover:border-[#D6004B]/30 hover:bg-[#0b0b12]/80 transition-all shadow-lg select-none">
-           <Clock className="w-5 h-5 text-rose-500 mb-1.5 shrink-0" />
-           <span className="text-[10px] text-zinc-400 font-bold mb-0.5 font-cairo">المدة</span>
-           <span className="text-sm text-white font-alexandria font-black mb-0.5 leading-none">
-             {course.duration_hours >= 1
-               ? `${course.duration_hours} س`
-               : course.duration_hours > 0
-               ? `${Math.round(course.duration_hours * 60)} د`
-               : (totalLessons > 0 ? '—' : '0 س')
-             }
-           </span>
-           <span className="text-[9px] text-zinc-500 font-medium font-cairo">إجمالي الوقت</span>
+         <div className="bg-[#0b0b12]/50 border border-white/5 p-2 rounded-xl flex flex-col items-center justify-center text-center hover:border-[#D6004B]/30 hover:bg-[#0b0b12]/70 transition-all select-none">
+            <Clock className="w-4 h-4 text-rose-500 mb-1 shrink-0" />
+            <span className="text-[9px] text-zinc-400 font-bold leading-none mb-0.5">المدة</span>
+            <span className="text-xs text-white font-alexandria font-bold leading-none">
+              {course.duration_hours >= 1
+                ? `${course.duration_hours} س`
+                : course.duration_hours > 0
+                ? `${Math.round(course.duration_hours * 60)} د`
+                : (totalLessons > 0 ? '—' : '0 س')
+              }
+            </span>
          </div>
 
          {/* Card 2: Lectures */}
-         <div className="bg-[#0b0b12]/60 border border-white/5 p-4 rounded-2xl flex flex-col items-center justify-center text-center min-h-[120px] hover:border-[#D6004B]/30 hover:bg-[#0b0b12]/80 transition-all shadow-lg select-none">
-           <BookOpen className="w-5 h-5 text-rose-500 mb-1.5 shrink-0" />
-           <span className="text-[10px] text-zinc-400 font-bold mb-0.5 font-cairo">المحاضرات</span>
-           <span className="text-sm text-white font-alexandria font-black mb-0.5 leading-none">
-             {totalLessons > 0 ? totalLessons : course.lessons_count}
-           </span>
-           <span className="text-[9px] text-zinc-500 font-medium font-cairo">دروس مسجلة</span>
+         <div className="bg-[#0b0b12]/50 border border-white/5 p-2 rounded-xl flex flex-col items-center justify-center text-center hover:border-[#D6004B]/30 hover:bg-[#0b0b12]/70 transition-all select-none">
+            <BookOpen className="w-4 h-4 text-rose-500 mb-1 shrink-0" />
+            <span className="text-[9px] text-zinc-400 font-bold leading-none mb-0.5">المحاضرات</span>
+            <span className="text-xs text-white font-alexandria font-bold leading-none">
+              {totalLessons > 0 ? totalLessons : course.lessons_count}
+            </span>
          </div>
 
          {/* Card 3: Rating */}
-         <div className="bg-[#0b0b12]/60 border border-white/5 p-4 rounded-2xl flex flex-col items-center justify-center text-center min-h-[120px] hover:border-[#D6004B]/30 hover:bg-[#0b0b12]/80 transition-all shadow-lg select-none">
-           <Star className="w-5 h-5 text-yellow-400 fill-current mb-1.5 shrink-0 animate-pulse" />
-           <span className="text-[10px] text-zinc-400 font-bold mb-0.5 font-cairo">التقييم</span>
-           <span className="text-sm text-white font-alexandria font-black mb-0.5 leading-none">
-             {averageRating}
-           </span>
-           <div className="flex items-center justify-center gap-0.5 mt-0.5">
-             {Array.from({ length: 5 }).map((_, i) => {
-               const starValue = i + 1;
-               const isFilled = starValue <= Math.round(Number(averageRating));
-               return (
-                 <Star 
-                   key={i} 
-                   className={cn(
-                     "w-2.5 h-2.5 shrink-0",
-                     isFilled ? "text-yellow-400 fill-current" : "text-zinc-700"
-                   )} 
-                 />
-               );
-             })}
-           </div>
+         <div className="bg-[#0b0b12]/50 border border-white/5 p-2 rounded-xl flex flex-col items-center justify-center text-center hover:border-[#D6004B]/30 hover:bg-[#0b0b12]/70 transition-all select-none">
+            <Star className="w-4 h-4 text-yellow-400 fill-current mb-1 shrink-0" />
+            <span className="text-[9px] text-zinc-400 font-bold leading-none mb-0.5">التقييم</span>
+            <span className="text-xs text-white font-alexandria font-bold leading-none">
+              {averageRating}
+            </span>
          </div>
 
          {/* Card 4: Certificate */}
-         <div className="bg-[#0b0b12]/60 border border-white/5 p-4 rounded-2xl flex flex-col items-center justify-center text-center min-h-[120px] hover:border-[#D6004B]/30 hover:bg-[#0b0b12]/80 transition-all shadow-lg select-none">
-           <Award className="w-5 h-5 text-emerald-500 mb-1.5 shrink-0" />
-           <span className="text-xs text-white font-alexandria font-black mb-1 leading-none">شهادة الأتمام</span>
-           <span className="text-[9px] text-zinc-500 font-medium font-cairo">بعد إكمال الكورس</span>
+         <div className="bg-[#0b0b12]/50 border border-white/5 p-2 rounded-xl flex flex-col items-center justify-center text-center hover:border-[#D6004B]/30 hover:bg-[#0b0b12]/70 transition-all select-none">
+            <Award className="w-4 h-4 text-emerald-500 mb-1 shrink-0" />
+            <span className="text-[9px] text-zinc-400 font-bold leading-none mb-0.5">الشهادة</span>
+            <span className="text-[10px] text-emerald-400 font-black leading-none">معتمدة</span>
          </div>
       </div>
 
