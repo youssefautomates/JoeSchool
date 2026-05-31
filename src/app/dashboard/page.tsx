@@ -454,7 +454,7 @@ export default function DashboardPage() {
       
       ctx.fillStyle = "#9ca3af";
       ctx.font = "40px Cairo, sans-serif";
-      ctx.fillText("تشهد منصة وأكاديمية يوسف أوتوميتس بأن الطالب البارز:", canvas.width / 2, 480);
+      ctx.fillText("تشهد منصة وأكاديمية جو سكول بأن الطالب البارز:", canvas.width / 2, 480);
       
       ctx.fillStyle = "#ffffff";
       ctx.font = "bold 90px Cairo, sans-serif";
@@ -482,7 +482,7 @@ export default function DashboardPage() {
       
       ctx.fillStyle = "rgba(251, 191, 36, 0.03)";
       ctx.font = "bold 130px Cairo, sans-serif";
-      ctx.fillText("YOUSSEF AUTOMATES", canvas.width / 2, canvas.height / 2 + 50);
+      ctx.fillText("JOESCHOOL", canvas.width / 2, canvas.height / 2 + 50);
       
       const dataUrl = canvas.toDataURL("image/png");
       finalizeDownload(dataUrl, canvas.width, canvas.height);
@@ -540,12 +540,12 @@ export default function DashboardPage() {
     
     // Logo text
     ctx.font = "bold 42px sans-serif";
-    ctx.fillText("يوسف أوتوميتس", 1100, 100);
+    ctx.fillText("جو سكول", 1100, 100);
     
     ctx.font = "normal 18px sans-serif";
     ctx.fillStyle = "#a1a1aa";
     ctx.fillText("المنصة الرائدة لتعليم هندسة البرمجيات والذكاء الاصطناعي", 1100, 140);
-    ctx.fillText("support@youssefautomates.com", 1100, 170);
+    ctx.fillText("joeschool.ai@gmail.com", 1100, 170);
 
     // Document Title (LTL Alignment for metadata)
     ctx.textAlign = "left";
@@ -587,7 +587,7 @@ export default function DashboardPage() {
 
     ctx.fillStyle = "#ffffff";
     ctx.font = "bold 24px sans-serif";
-    ctx.fillText("أكاديمية Youssef Automates", 100, 320);
+    ctx.fillText("أكاديمية JoeSchool", 100, 320);
 
     ctx.font = "normal 20px sans-serif";
     ctx.fillStyle = "#d4d4d8";
@@ -699,7 +699,7 @@ export default function DashboardPage() {
     ctx.fillText("هذه الفاتورة مستند رسمي ومعتمد لعملية الشراء ولا تحتاج لتوقيع.", 600, 1200);
     ctx.font = "normal 14px monospace";
     ctx.fillStyle = "#71717a";
-    ctx.fillText("Youssef Automates © 2026. All rights reserved.", 600, 1240);
+    ctx.fillText("JoeSchool © 2026. All rights reserved.", 600, 1240);
 
     // Finalize image export
     const dataUrl = canvas.toDataURL("image/png");
@@ -835,7 +835,7 @@ export default function DashboardPage() {
                 <img src="/logo.png" alt="Logo" className="w-full h-full object-contain" />
               </div>
               <div>
-                <span className="font-alexandria font-bold text-base block text-white">يوسف أوتوميتس</span>
+                <span className="font-alexandria font-bold text-base block text-white">جو سكول</span>
                 <span className="text-[10px] text-zinc-400 block -mt-1 font-medium tracking-wide">STUDENT PORTAL</span>
               </div>
             </Link>
@@ -1721,7 +1721,7 @@ export default function DashboardPage() {
                 </div>
 
                 <p className="text-zinc-400 text-xs sm:text-sm font-medium max-w-lg mx-auto leading-relaxed font-cairo">
-                  يُشهد فريق عمل أكاديمية <span className="font-bold text-white">Youssef Automates</span> الفنية بأن الطالب البارز:
+                  يُشهد فريق عمل أكاديمية <span className="font-bold text-white">JoeSchool</span> الفنية بأن الطالب البارز:
                 </p>
 
                 <h4 className="font-alexandria font-black text-white text-2xl sm:text-4xl underline decoration-amber-500/50 underline-offset-8">
@@ -1873,8 +1873,8 @@ export default function DashboardPage() {
                   <span className="text-[10px] text-zinc-500 font-mono" dir="ltr">Invoice Ref: #{selectedInvoice.payment_id || selectedInvoice.id}</span>
                 </div>
                 <div className="text-left">
-                  <span className="font-alexandria font-bold text-sm text-rose-500 block">Youssef Automates</span>
-                  <span className="text-[9px] text-zinc-500 block">support@youssefautomates.com</span>
+                  <span className="font-alexandria font-bold text-sm text-rose-500 block">JoeSchool</span>
+                  <span className="text-[9px] text-zinc-500 block">joeschool.ai@gmail.com</span>
                 </div>
               </div>
 
@@ -1961,7 +1961,7 @@ export default function DashboardPage() {
                     printWindow?.document.write(`
                       <html dir="rtl" lang="ar">
                       <head>
-                        <title>فاتورة Youssef Automates</title>
+                        <title>فاتورة JoeSchool</title>
                         <style>
                           body { font-family: system-ui; padding: 40px; background: white; color: black; }
                           .text-rose-500 { color: #d6004b !important; }

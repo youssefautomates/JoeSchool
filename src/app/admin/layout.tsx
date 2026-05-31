@@ -68,7 +68,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
           <div>
             <span className="text-xl font-sans font-black tracking-tighter block uppercase">ADMIN PRO</span>
-            <span className="text-[10px] text-rose-500 font-bold tracking-[0.2em] uppercase">Youssef Automates</span>
+            <span className="text-[10px] text-rose-500 font-bold tracking-[0.2em] uppercase">JoeSchool</span>
           </div>
         </div>
 

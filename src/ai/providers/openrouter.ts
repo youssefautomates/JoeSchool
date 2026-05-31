@@ -1,5 +1,5 @@
 /**
- * 🤖 Youssef Automates - French Mistral AI Provider
+ * 🤖 JoeSchool - French Mistral AI Provider
  * Handles API calls, retry policies, rate limit backoffs, and completions.
  */
 

@@ -20,25 +20,26 @@ const alexandria = Alexandria({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://joeschool.com"),
   title: {
-    default: "Youssef Automates | حلول الأتمتة والمنتجات الرقمية الفاخرة",
-    template: "%s | Youssef Automates"
+    default: "JoeSchool | منصة وتطبيقات جو سكول للتعليم الرقمي",
+    template: "%s | JoeSchool"
   },
-  description: "انطلق نحو المستقبل مع يوسف أوتميتس. نوفر لك أرقى حلول أتمتة الأعمال n8n والمنتجات الرقمية التي تضاعف إنتاجيتك.",
-  keywords: ["أتمتة", "n8n", "منتجات رقمية", "ذكاء اصطناعي", "تسويق رقمي", "يوسف أوتميتس"],
+  description: "انطلق نحو المستقبل مع جو سكول. نوفر لك أرقى حلول أتمتة الأعمال n8n والمنتجات الرقمية التي تضاعف إنتاجيتك.",
+  keywords: ["أتمتة", "n8n", "منتجات رقمية", "ذكاء اصطناعي", "تسويق رقمي", "جو سكول"],
   authors: [{ name: "Youssef Ahmed" }],
   icons: {
-    icon: "/logo.png",
-    shortcut: "/logo.png",
-    apple: "/logo.png",
+    icon: "/icon.png",
+    shortcut: "/icon.png",
+    apple: "/apple-icon.png",
   },
   openGraph: {
     type: "website",
     locale: "ar_EG",
-    url: "https://youssefautomates.com",
-    title: "Youssef Automates | الحل الأمثل للأتمتة الذكية",
+    url: "https://joeschool.com",
+    title: "JoeSchool | الحل الأمثل للأتمتة الذكية",
     description: "ضاعف إنتاجيتك الآن مع أرقى حلول الأتمتة n8n.",
-    siteName: "Youssef Automates",
+    siteName: "JoeSchool",
   },
 };
 

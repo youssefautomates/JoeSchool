@@ -266,7 +266,7 @@ export default function Home() {
                   ضاعف إنتاجيتك مع
                 </h1>
                 <h1 className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-alexandria font-black text-transparent bg-clip-text bg-gradient-to-r from-[#ff0f53] via-[#ff2d6b] to-[#ff00b3] leading-[1.3] md:leading-tight tracking-tighter block pb-2">
-                  يوسف أوتوميتس
+                  جو سكول
                 </h1>
               </motion.div>
               

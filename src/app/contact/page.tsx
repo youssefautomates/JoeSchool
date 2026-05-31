@@ -76,7 +76,7 @@ export default function ContactPage() {
               transition={{ duration: 0.6, delay: 0.2 }}
               className="text-zinc-400 text-sm sm:text-base leading-relaxed"
             >
-              في حال وجود أي استفسار أو مشكلة أو طلب دعم، يمكن التواصل مع منصة Youssef Automates من خلال قنوات التواصل المباشرة أو عن طريق إرسال رسالة بريد إلكتروني، وسيتم الرد عليك في أقرب وقت ممكن.
+              في حال وجود أي استفسار أو مشكلة أو طلب دعم، يمكن التواصل مع منصة JoeSchool من خلال قنوات التواصل المباشرة أو عن طريق إرسال رسالة بريد إلكتروني، وسيتم الرد عليك في أقرب وقت ممكن.
             </motion.p>
           </div>
 
@@ -114,7 +114,7 @@ export default function ContactPage() {
 
               {/* Email Card */}
               <motion.a
-                href="mailto:youssefautomates@gmail.com"
+                href="mailto:joeschool.ai@gmail.com"
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.4, delay: 0.1 }}
@@ -126,7 +126,7 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <span className="text-[10px] text-zinc-500 block font-bold">راسلنا عبر البريد الإلكتروني</span>
-                    <span className="text-base font-bold text-white block mt-0.5 font-mono" dir="ltr">youssefautomates@gmail.com</span>
+                    <span className="text-base font-bold text-white block mt-0.5 font-mono" dir="ltr">joeschool.ai@gmail.com</span>
                   </div>
                 </div>
                 <div className="mt-4 flex items-center justify-end text-xs text-[#D6004B] font-bold gap-1">
@@ -161,7 +161,7 @@ export default function ContactPage() {
                     <div className="space-y-2">
                       <h3 className="text-2xl font-bold text-white font-cairo">تم إرسال رسالتك بنجاح!</h3>
                       <p className="text-zinc-400 text-sm max-w-sm leading-relaxed">
-                        شكراً لتواصلك معنا. لقد استلمنا رسالتك الفنية وسيقوم فريق الدعم الفني بمنصة Youssef Automates بالرد عليك على بريدك الإلكتروني في أقرب وقت.
+                        شكراً لتواصلك معنا. لقد استلمنا رسالتك الفنية وسيقوم فريق الدعم الفني بمنصة JoeSchool بالرد عليك على بريدك الإلكتروني في أقرب وقت.
                       </p>
                     </div>
                     <button

@@ -46,7 +46,7 @@ export async function triggerServerCapiEvent(options: CapiEventOptions) {
       event_time: Math.floor(Date.now() / 1000),
       event_id: options.eventId,
       action_source: "website",
-      event_source_url: options.eventSourceUrl || "https://youssefautomates.com",
+      event_source_url: options.eventSourceUrl || "https://joeschool.com",
       user_data: {
         client_ip_address: options.clientIp || "127.0.0.1",
         client_user_agent: options.clientUserAgent || "Server Side Trigger"

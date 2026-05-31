@@ -46,8 +46,8 @@ export async function GET(request: Request) {
 
   console.log(`[CALLBACK] Success: ${success} | Order: ${orderId} | MerchantOrder: ${merchantOrderId}`);
 
-  // 3. Always redirect to Youssef Automates Store pages
-  // This guarantees store customers never see JoeSchool pages
+  // 3. Always redirect to JoeSchool Store pages
+  // This guarantees store customers never see any incorrect pages
   const reason = searchParams.get("txn_response_code") || "declined";
   
   // Extract real Supabase UUID — try multiple resolution strategies

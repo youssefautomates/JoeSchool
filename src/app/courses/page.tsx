@@ -105,7 +105,7 @@ export default function CoursesPage() {
               className="inline-flex items-center gap-2 bg-rose-500/10 text-rose-400 border border-rose-500/20 px-4 py-1.5 rounded-full mb-6 font-bold text-xs md:text-sm"
             >
               <Sparkles className="w-4 h-4 animate-pulse" />
-              <span>أكاديمية Youssef Automates للتعليم الرقمي</span>
+              <span>أكاديمية JoeSchool للتعليم الرقمي</span>
             </motion.div>
 
             <motion.h1

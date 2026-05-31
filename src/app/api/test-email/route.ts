@@ -5,7 +5,7 @@ import { Resend } from "resend";
  * GET /api/test-email
  * 
  * Strict diagnostic endpoint to verify Resend API connection, custom domain verification list,
- * and dispatch real emails exclusively from delivery@youssefautomates.com.
+ * and dispatch real emails exclusively from delivery@joeschool.com.
  */
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -23,7 +23,7 @@ export async function GET(req: Request) {
   }
 
   const resend = new Resend(apiKey);
-  const sender = "Youssef Automates <delivery@youssefautomates.com>";
+  const sender = "JoeSchool <delivery@joeschool.com>";
   
   const diagnostics: any = {
     apiKeyLength: apiKey.length,
@@ -75,7 +75,7 @@ export async function GET(req: Request) {
     const emailResult = await resend.emails.send({
       from: sender,
       to: targetEmail,
-      subject: "🧪 Youssef Automates - Custom Domain Verified Test Email",
+      subject: "🧪 JoeSchool - Custom Domain Verified Test Email",
       html: `
         <div style="direction: rtl; font-family: sans-serif; padding: 20px; background-color: #f9f9fc; border-radius: 12px; border: 1px solid rgba(0,0,0,0.05);">
           <h2 style="color: #D6004B;">🧪 اختبار بريد النطاق المخصص</h2>

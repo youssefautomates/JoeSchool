@@ -24,13 +24,13 @@ interface DiagnosticReport {
 }
 
 export default function EmailSystemDiagnosticsPage() {
-  const [domain, setDomain] = useState("youssefautomates.com");
+  const [domain, setDomain] = useState("joeschool.com");
   const [report, setReport] = useState<DiagnosticReport | null>(null);
   const [loading, setLoading] = useState(false);
   
   // Test email state
   const [testEmail, setTestEmail] = useState("youssefmostafabusiness@gmail.com");
-  const [testSubject, setTestSubject] = useState("🧪 Email Delivery Test | Youssef Automates");
+  const [testSubject, setTestSubject] = useState("🧪 Email Delivery Test | JoeSchool");
   const [sendingTest, setSendingTest] = useState(false);
   const [dispatchLogs, setDispatchLogs] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<"dns" | "spam" | "send" | "logs">("dns");
@@ -48,8 +48,8 @@ export default function EmailSystemDiagnosticsPage() {
 
   // Outbound Header Checklist
   const mandatoryHeaders = [
-    { name: "Message-ID", desc: "Unique message identifier prevents spoofing", status: "Compliant", value: "diag-[id]@youssefautomates.com" },
-    { name: "List-Unsubscribe", desc: "Automatic list unsubscribe header for Gmail/Outlook", status: "Compliant", value: "<mailto:unsubscribe@youssefautomates.com>" },
+    { name: "Message-ID", desc: "Unique message identifier prevents spoofing", status: "Compliant", value: "diag-[id]@joeschool.com" },
+    { name: "List-Unsubscribe", desc: "Automatic list unsubscribe header for Gmail/Outlook", status: "Compliant", value: "<mailto:unsubscribe@joeschool.com>" },
     { name: "Auto-Submitted", desc: "Identifies automated emails to suppress auto-replies", status: "Compliant", value: "auto-generated" },
     { name: "Precedence", desc: "Declares bulk precedence classification to receiving servers", status: "Compliant", value: "bulk" },
     { name: "MIME-Version", desc: "Multipurpose Internet Mail Extensions standard version", status: "Compliant", value: "1.0" },
@@ -84,7 +84,7 @@ export default function EmailSystemDiagnosticsPage() {
     
     const logs = [
       `[${new Date().toLocaleTimeString()}] 📡 Initializing connection to Resend Relay Secure SMTP gateway...`,
-      `[${new Date().toLocaleTimeString()}] 🔍 Verifying sending authorization for domain: delivery@youssefautomates.com`,
+      `[${new Date().toLocaleTimeString()}] 🔍 Verifying sending authorization for domain: delivery@joeschool.com`,
     ];
     setDispatchLogs([...logs]);
 
@@ -386,7 +386,7 @@ export default function EmailSystemDiagnosticsPage() {
               <div className="bg-[#0a0a0f] border border-white/5 rounded-3xl p-6 md:p-8 shadow-2xl space-y-6">
                 <div>
                   <h2 className="text-base font-bold text-white">Smart Outbound Delivery Headers</h2>
-                  <p className="text-zinc-500 text-xs mt-1">Anti-spam indicators automatically embedded in the Youssef Automates outbound relay to decrease spam score.</p>
+                  <p className="text-zinc-500 text-xs mt-1">Anti-spam indicators automatically embedded in the JoeSchool outbound relay to decrease spam score.</p>
                 </div>
 
                 <div className="overflow-x-auto">

@@ -97,11 +97,11 @@ export default function ResetPasswordPage() {
         <div className="text-center mb-8">
           <Link href="/" className="flex flex-col items-center gap-3 group">
             <div className="w-16 h-16 relative flex items-center justify-center p-2 rounded-2xl bg-white/5 border border-white/10 group-hover:scale-105 transition-transform duration-300 shadow-[0_0_30px_rgba(214,0,75,0.2)]">
-              <img src="/logo.png" alt="Youssef Automates Logo" className="w-full h-full object-contain" />
+              <img src="/logo.png" alt="JoeSchool Logo" className="w-full h-full object-contain" />
             </div>
             <div>
               <h1 className="font-alexandria font-black text-2xl tracking-tight text-white mt-2">
-                Youssef <span className="text-rose-500">Automates</span>
+                Joe <span className="text-rose-500">School</span>
               </h1>
               <span className="text-xs text-zinc-500 font-bold tracking-widest uppercase block mt-1">المنصة التعليمية الفاخرة</span>
             </div>
