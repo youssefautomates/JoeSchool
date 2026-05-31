@@ -138,10 +138,10 @@ export interface LmsReview {
 const DEFAULT_COURSES: LmsCourse[] = [
   {
     id: "course-n8n-masterclass",
-    title: "دورة الأتمتة المتقدمة n8n Masterclass",
+    title: "دورة صناعة المحتوى بالذكاء الاصطناعي",
     slug: "n8n-masterclass",
-    description: "احترف بناء أنظمة الأتمتة المتكاملة وربط الخدمات والذكاء الاصطناعي دون الحاجة لكتابة كود. وفر آلاف الساعات لعملك وعملائك.",
-    short_description: "احترف الأتمتة المتقدمة وربط مختلف الخدمات ونماذج الذكاء الاصطناعي كلياً بدون شفرات برمجية.",
+    description: "احترف توليد الفيديوهات والتصميمات الرقمية وبناء القصص البصرية الجذابة باستخدام أقوى أدوات الذكاء الاصطناعي التوليدي في دقائق.",
+    short_description: "احترف صناعة المحتوى البصري وتوليد الفيديوهات والصور والقصص بنقرة واحدة باستخدام الذكاء الاصطناعي.",
     image_url: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop&q=60",
     banner_url: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1600&auto=format&fit=crop&q=60",
     price: 149,
@@ -152,16 +152,16 @@ const DEFAULT_COURSES: LmsCourse[] = [
     duration_hours: 14,
     lessons_count: 12,
     level: "متقدم",
-    category: "الأتمتة",
-    tags: ["n8n", "الأتمتة", "بدون كود"],
-    requirements: ["فهم أساسيات الويب", "حساب مجاني على n8n cloud أو تشغيل محلي"],
+    category: "صناعة المحتوى",
+    tags: ["الذكاء الاصطناعي التوليدي", "صناعة المحتوى", "الفيديو الرقمي"],
+    requirements: ["معرفة أساسية بمتصفحات الويب", "حسابات تجريبية على أدوات توليد الصور والفيديو"],
     what_will_learn: [
-      "فهم وتثبيت خادم n8n والتعامل مع العقد المختلفة.",
-      "ربط Google Sheets وبناء قواعد بيانات ذكية مدمجة.",
-      "دمج نماذج الذكاء الاصطناعي OpenAI و Anthropic كلياً.",
-      "إدارة الويب هوكس واستقبال البيانات الفورية."
+      "كتابة السيناريو البصري وتوليد الأفكار بالذكاء الاصطناعي.",
+      "توليد الشخصيات الكرتونية والقصصية بتطابق كامل.",
+      "تحريك الشخصيات وتوليد مقاطع الفيديو بجودة عالية.",
+      "تركيب الصوت والمونتاج الإبداعي للإنتاج النهائي."
     ],
-    who_is_for: ["أصحاب الأعمال لزيادة الكفاءة", "المطورون الراغبون بتوفير وقت البرمجة", "المستقلون لبيع خدمات الأتمتة"],
+    who_is_for: ["منشئو المحتوى الرقمي واليوتيوبرز", "المسوقون وأصحاب المشاريع الإبداعية", "المستقلون الراغبون بتقديم خدمات صناعة الفيديو"],
     created_at: new Date().toISOString()
   },
   {
@@ -182,7 +182,7 @@ const DEFAULT_COURSES: LmsCourse[] = [
     level: "متوسط",
     category: "الذكاء الاصطناعي",
     tags: ["AI", "وكلاء الذكاء الاصطناعي", "LangChain"],
-    requirements: ["معرفة أولية بـ ChatGPT", "الرغبة في أتمتة المهام المعقدة"],
+    requirements: ["معرفة أولية بـ ChatGPT", "الرغبة في إنتاج محتوى إبداعي"],
     what_will_learn: [
       "الفرق بين شات بوت العادي ووكلاء الذكاء الاصطناعي.",
       "بناء فريق عمل مستقل من الوكلاء المستقلين.",
@@ -195,8 +195,8 @@ const DEFAULT_COURSES: LmsCourse[] = [
 ];
 
 const DEFAULT_SECTIONS: LmsSection[] = [
-  { id: "sec-1", course_id: "course-n8n-masterclass", title: "الوحدة الأولى: أساسيات المنصة والتهيئة الأولية", sort_order: 1 },
-  { id: "sec-2", course_id: "course-n8n-masterclass", title: "الوحدة الثانية: التعامل مع البيانات وهياكلها", sort_order: 2 },
+  { id: "sec-1", course_id: "course-n8n-masterclass", title: "الوحدة الأولى: أساسيات صناعة المحتوى وتوليد الأفكار", sort_order: 1 },
+  { id: "sec-2", course_id: "course-n8n-masterclass", title: "الوحدة الثانية: تحريك الصور وتوليد مقاطع الفيديو", sort_order: 2 },
   { id: "sec-3", course_id: "course-ai-agents", title: "الوحدة الأولى: المفاهيم الأساسية للوكلاء المستقلين", sort_order: 1 }
 ];
 
@@ -208,7 +208,7 @@ const DEFAULT_LESSONS: LmsLesson[] = [
     title: "مقدمة الدورة وخارطة الطريق نحو الاحتراف",
     slug: "n8n-intro",
     video_url: "https://www.youtube.com/embed/dQw4w9WgXcQ", // Preview link
-    content: "مرحباً بكم في الدورة! في هذا الدرس سنتعرف على خارطة الطريق الكاملة لنصبح محترفي أتمتة، والفرص التي يوفرها n8n في السوق العالمي والمحلي.",
+    content: "مرحباً بكم في الدورة! في هذا الدرس سنتعرف على خارطة الطريق الكاملة لنصبح محترفي صناعة محتوى بالذكاء الاصطناعي، والفرص الكبيرة المتاحة في السوق.",
     duration_seconds: 420,
     sort_order: 1,
     is_preview: true,
@@ -217,10 +217,10 @@ const DEFAULT_LESSONS: LmsLesson[] = [
   {
     id: "les-n8n-2",
     section_id: "sec-1",
-    title: "شرح واجهة مستخدم n8n وكيفية عمل العقد (Nodes)",
+    title: "شرح واجهة أدوات التوليد وتحريك الصور والوجوه",
     slug: "n8n-ui-nodes",
     video_url: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-    content: "جولة سريعة داخل واجهة مستخدم n8n السحابية والمحلية، وطريقة تثبيت وإعداد العقد لتأدية المهام المختلفة وربط المدخلات بالمخرجات.",
+    content: "جولة سريعة داخل واجهات أدوات توليد وتحريك الصور، وكيفية إعداد الشخصيات والوجوه لتبدو ناطقة ومتحركة بمرونة عالية.",
     duration_seconds: 780,
     sort_order: 2,
     is_preview: false,
@@ -229,7 +229,7 @@ const DEFAULT_LESSONS: LmsLesson[] = [
   {
     id: "les-n8n-3",
     section_id: "sec-1",
-    title: "تحميل الملف المرفق لكتاب خارطة طريق الأتمتة",
+    title: "تحميل الملف المرفق لكتاب خارطة طريق صناعة المحتوى",
     slug: "n8n-roadmap-pdf",
     video_url: "",
     content: "دليل دراسي شامل بصيغة PDF يلخص لك جميع مفاهيم الدورة ويساعدك في متابعة تطبيق الدروس العملي بنجاح.",
@@ -238,15 +238,15 @@ const DEFAULT_LESSONS: LmsLesson[] = [
     is_preview: true,
     lecture_type: "pdf",
     attachment_url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
-    attachment_name: "خارطة_طريق_الأتمتة.pdf"
+    attachment_name: "خارطة_طريق_صناعة_المحتوى.pdf"
   },
   {
     id: "les-n8n-4",
     section_id: "sec-2",
-    title: "شرح مفهوم الـ JSON وكيفية معالجة البيانات بنجاح",
+    title: "شرح مفهوم السيناريو البصري وتنسيق المشاهد",
     slug: "n8n-json-basics",
     video_url: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-    content: "تعلّم كيفية قراءة هيكلية الـ JSON والتعامل مع المفاتيح والقيم واستخراج المصفوفات لمعالجتها داخل العقد بمرونة.",
+    content: "تعلّم كيفية صياغة السيناريو البصري وتنسيق المشاهد وتوليد الأصول المترابطة لتبدو القصة متناسقة تماماً.",
     duration_seconds: 900,
     sort_order: 1,
     is_preview: false,

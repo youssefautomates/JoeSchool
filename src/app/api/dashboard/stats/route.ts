@@ -99,7 +99,7 @@ export async function GET(req: NextRequest) {
     let level = "البرونزي (مستكشف مبتدئ) 🥉";
     const hoursNum = parseFloat(studyHours);
     if (hoursNum >= 40) {
-      level = "البلاتيني (خبير الأتمتة) 💎";
+      level = "البلاتيني (خبير صناعة المحتوى البصري) 💎";
     } else if (hoursNum >= 15) {
       level = "الذهبي (محترف متقدم) 🥇";
     } else if (hoursNum >= 5) {

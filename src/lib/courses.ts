@@ -9,24 +9,23 @@ export interface Course {
   originalPrice: number;
   isFeatured: boolean;
   tag: string;
-  category: "الأتمتة" | "الذكاء الاصطناعي" | "صناعة المحتوى" | "التسويق" | "الدورات المجانية";
+  category: "صناعة المحتوى" | "الرسوم المتحركة" | "الذكاء الاصطناعي التوليدي" | "الدورات المجانية";
   level: "مبتدئ" | "متوسط" | "متقدم" | "Beginner" | "Intermediate" | "Advanced";
 }
 
 export const COURSE_CATEGORIES = [
   "الكل",
   "صناعة المحتوى",
-  "الأتمتة",
-  "الذكاء الاصطناعي",
-  "التسويق",
+  "الرسوم المتحركة",
+  "الذكاء الاصطناعي التوليدي",
   "الدورات المجانية"
 ] as const;
 
 export const COURSES_DATA: Course[] = [
   {
-    title: "دورة الأتمتة المتقدمة n8n Masterclass",
+    title: "دورة صناعة المحتوى بالذكاء الاصطناعي",
     slug: "n8n-masterclass",
-    description: "احترف بناء أنظمة الأتمتة المتكاملة وربط الخدمات والذكاء الاصطناعي دون الحاجة لكتابة كود. وفر آلاف الساعات لعملك وعملائك.",
+    description: "احترف توليد الفيديوهات والتصميمات الرقمية وبناء القصص البصرية الجذابة باستخدام أقوى أدوات الذكاء الاصطناعي التوليدي في دقائق.",
     duration: "14 ساعة تدريبية",
     lessonsCount: "35 درساً مفصلاً",
     rating: 5.0,
@@ -34,7 +33,7 @@ export const COURSES_DATA: Course[] = [
     originalPrice: 299,
     isFeatured: true,
     tag: "الأكثر طلباً",
-    category: "الأتمتة",
+    category: "صناعة المحتوى",
     level: "متقدم"
   },
   {
@@ -48,7 +47,7 @@ export const COURSES_DATA: Course[] = [
     originalPrice: 199,
     isFeatured: false,
     tag: "جديد بالكامل",
-    category: "الذكاء الاصطناعي",
+    category: "الذكاء الاصطناعي التوليدي",
     level: "متوسط"
   },
   {
@@ -76,13 +75,13 @@ export const COURSES_DATA: Course[] = [
     originalPrice: 239,
     isFeatured: false,
     tag: "موصى به",
-    category: "التسويق",
+    category: "صناعة المحتوى",
     level: "متوسط"
   },
   {
-    title: "المدخل الأساسي للأتمتة بدون كود",
+    title: "المدخل الأساسي لإنتاج الفيديو الرقمي",
     slug: "nocode-basics",
-    description: "دورة تمهيدية مجانية تفتح لك آفاق بناء الأنظمة وربط التطبيقات الأساسية باستخدام Make وZapier وn8n للمبتدئين.",
+    description: "دورة تمهيدية مجانية تفتح لك آفاق صناعة المحتوى البصري وقواعد المونتاج وتوليد الأصول الرقمية للمبتدئين.",
     duration: "3 ساعات تدريبية",
     lessonsCount: "10 دروس مفصلة",
     rating: 4.7,

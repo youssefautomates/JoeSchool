@@ -13,7 +13,7 @@ export function Footer() {
   const handleSubscribe = (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
-    toast.success("تم الاشتراك بنجاح في النشرة البريدية للأتمتة! 🚀");
+    toast.success("تم الاشتراك بنجاح في النشرة البريدية لصناع المحتوى! 🚀");
     setEmail("");
   };
 
@@ -40,7 +40,7 @@ export function Footer() {
               </span>
             </Link>
             <p className="text-zinc-500 text-sm leading-relaxed">
-              منصتك المتكاملة لاحتراف أتمتة الأعمال n8n والذكاء الاصطناعي، وتحميل أرقى المنتجات الرقمية والدورات التعليمية المبتكرة.
+              أكاديميتك الاحترافية لتعلم صناعة المحتوى البصري، الرسوم المتحركة، وإنتاج الفيديو الإبداعي بالذكاء الاصطناعي.
             </p>
             <div className="hidden md:flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
@@ -97,9 +97,9 @@ export function Footer() {
 
           {/* Column 4: Newsletter & Socials */}
           <div className="space-y-5">
-            <h4 className="font-alexandria font-bold text-white text-xs tracking-wider uppercase">النشرة البريدية للأتمتة</h4>
+            <h4 className="font-alexandria font-bold text-white text-xs tracking-wider uppercase">النشرة البريدية للإبداع</h4>
             <p className="text-zinc-500 text-xs leading-relaxed">
-              اشترك للحصول على آخر تدفقات عمل n8n الحصرية، التحديثات المجانية، ومقالات التطوير البرمجي.
+              اشترك لتلقي أحدث تقنيات صناعة المحتوى بالذكاء الاصطناعي، أدوات الإنتاج الإبداعي، وأصول المبدعين الحصرية مجاناً.
             </p>
             <form onSubmit={handleSubscribe} className="flex gap-2 w-full">
               <input 
@@ -133,7 +133,7 @@ export function Footer() {
             <span className="font-alexandria font-bold text-zinc-400">JoeSchool</span>
             <span>· صنع بكل</span>
             <Heart className="w-3 h-3 text-[#D6004B] fill-[#D6004B]" />
-            <span>لتطوير أعمالك</span>
+            <span>لدعم مسيرتك الإبداعية</span>
           </div>
         </div>
 

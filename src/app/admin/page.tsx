@@ -103,7 +103,7 @@ export default function AdminDashboard() {
         const demoProducts = [
           {
             id: "prod-n8n-mastery",
-            title: "n8n Automation Mastery Suite",
+            title: "AI Creative Content Production Mastery Suite",
             price: 450,
             sales: 12,
             status: "نشط",
@@ -174,11 +174,11 @@ export default function AdminDashboard() {
           const payId = `pay_mb_${Math.floor(10000000 + Math.random() * 90000000)}`;
           const targetItemId = allItemIds[Math.floor(Math.random() * allItemIds.length)];
           
-          let title = "n8n Automation Mastery Suite";
+          let title = "AI Creative Content Production Mastery Suite";
           let price = 450;
           
           if (targetItemId === "prod-n8n-mastery") {
-            title = "n8n Automation Mastery Suite";
+            title = "AI Creative Content Production Mastery Suite";
             price = 450;
           } else if (targetItemId === "prod-ai-content") {
             title = "AI Content Generator Pro & Prompts Pack";

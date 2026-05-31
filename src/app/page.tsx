@@ -159,7 +159,7 @@ export default function Home() {
     "الكل",
     ...(dynamicCourseCategories.length > 0
       ? dynamicCourseCategories
-      : ["دورات الأتمتة", "دورات صناعة المحتوى", "الدورات المجانية"])
+      : ["دورات صناعة المحتوى", "دورات الرسوم المتحركة", "الدورات المجانية"])
   ];
 
   // Digital product categories filter list
@@ -167,7 +167,7 @@ export default function Home() {
     "الكل",
     ...(dynamicProductCategories.length > 0
       ? dynamicProductCategories
-      : ["الأتمتة", "الذكاء الاصطناعي", "صناعة المحتوى"])
+      : ["صناعة المحتوى البصري", "الذكاء الاصطناعي التوليدي", "الرسوم المتحركة"])
   ];
 
   // Smart product categorizer
@@ -179,7 +179,7 @@ export default function Home() {
       return categoryField;
     }
 
-    if (categoryField === "الأتمتة" || categoryField === "الذكاء الاصطناعي" || categoryField === "صناعة المحتوى") {
+    if (categoryField === "صناعة المحتوى البصري" || categoryField === "الذكاء الاصطناعي التوليدي" || categoryField === "الرسوم المتحركة") {
       return categoryField;
     }
     
@@ -188,8 +188,8 @@ export default function Home() {
     const desc = (product.description || "").toLowerCase();
     const tags = (product.tags || []).map(t => t.toLowerCase());
     
-    if (categoryField.includes("n8n") || tags.includes("n8n") || title.includes("n8n") || desc.includes("n8n") || categoryField.includes("أتمتة") || categoryField.includes("productivity") || categoryField.includes("إنتاجية")) {
-      return "الأتمتة";
+    if (categoryField.includes("n8n") || tags.includes("n8n") || title.includes("n8n") || desc.includes("n8n") || categoryField.includes("أتمتة") || categoryField.includes("productivity") || categoryField.includes("إنتاجية") || categoryField.includes("automation") || categoryField.includes("فيديو") || categoryField.includes("video") || title.includes("فيديو")) {
+      return "صناعة المحتوى البصري";
     }
     if (categoryField.includes("ai") || categoryField.includes("ذكاء") || tags.includes("ai") || tags.includes("ذكاء") || title.includes("ai") || title.includes("ذكاء") || desc.includes("ai") || desc.includes("ذكاء")) {
       return "الذكاء الاصطناعي";
@@ -198,7 +198,7 @@ export default function Home() {
       return "صناعة المحتوى";
     }
     
-    return "الأتمتة"; // Default fallback
+    return "صناعة المحتوى البصري"; // Default fallback
   };
 
   // Filter computations
@@ -209,10 +209,9 @@ export default function Home() {
     if (course.category === activeCourseCategory) return true;
     // Legacy mappings for older DB values
     const legacyMap: Record<string, string[]> = {
-      "دورات الأتمتة": ["الأتمتة", "أتمتة"],
-      "دورات صناعة المحتوى": ["صناعة المحتوى", "المحتوى"],
-      "دورات الذكاء الاصطناعي": ["الذكاء الاصطناعي", "AI"],
-      "دورات التسويق": ["التسويق", "marketing"],
+      "دورات صناعة المحتوى": ["صناعة المحتوى", "المحتوى", "الأتمتة", "أتمتة"],
+      "دورات الرسوم المتحركة": ["الرسوم المتحركة", "تحريك", "الذكاء الاصطناعي", "AI"],
+      "الذكاء الاصطناعي التوليدي": ["الذكاء الاصطناعي التوليدي", "الذكاء الاصطناعي", "AI"],
     };
     const aliases = legacyMap[activeCourseCategory] || [];
     return aliases.some(alias => course.category === alias || course.category?.toLowerCase().includes(alias.toLowerCase()));
@@ -253,7 +252,7 @@ export default function Home() {
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-1.5 w-1.5 md:h-3 md:w-3 bg-rose-500"></span>
                 </span>
-                <span className="font-cairo text-[10px] md:text-sm font-bold text-rose-300 tracking-wide">أكاديمية ودورات وحلول أتمتة حصرية جاهزة للعمل</span>
+                <span className="font-cairo text-[10px] md:text-sm font-bold text-rose-300 tracking-wide">أكاديمية احتراف صناعة المحتوى البصري والرسوم المتحركة بالذكاء الاصطناعي</span>
               </motion.div>
 
               <motion.div
@@ -263,10 +262,8 @@ export default function Home() {
                 className="mb-6 md:mb-10 px-2"
               >
                 <h1 className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-alexandria font-black text-white leading-[1.3] md:leading-tight tracking-tighter block mb-1 md:mb-2">
-                  ضاعف إنتاجيتك مع
-                </h1>
-                <h1 className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-alexandria font-black text-transparent bg-clip-text bg-gradient-to-r from-[#ff0f53] via-[#ff2d6b] to-[#ff00b3] leading-[1.3] md:leading-tight tracking-tighter block pb-2">
-                  جو سكول
+                  احترف الذكاء الاصطناعي مع <br className="sm:hidden" />
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ff0f53] via-[#ff2d6b] to-[#ff00b3]">جو سكول</span>
                 </h1>
               </motion.div>
               
@@ -276,7 +273,7 @@ export default function Home() {
                 transition={{ duration: 0.8, delay: 0.2 }}
                 className="text-sm md:text-2xl text-zinc-400 font-cairo max-w-3xl mx-auto mb-8 md:mb-14 leading-relaxed"
               >
-                أحصل على أفضل الدورات في <span className="text-white font-bold">الأتمتة وصناعة المحتوى بالذكاء الاصطناعي</span>، وأكتشف آخر <span className="text-white font-bold">منتجاتنا الرقمية</span>
+                أحصل على أفضل الدورات في <span className="text-white font-bold">توليد الفيديو وصناعة المحتوى بالذكاء الاصطناعي</span>، وأكتشف أحدث <span className="text-white font-bold">أصولنا ومصادرنا للمبدعين</span>
               </motion.p>
               
               <motion.div
@@ -327,9 +324,9 @@ export default function Home() {
                 <BookOpen className="w-3.5 h-3.5 md:w-4 md:h-4 text-rose-500" />
                 الأكاديمية التعليمية المتميزة
               </motion.div>
-              <h2 className="text-2xl md:text-5xl font-alexandria font-black text-white mb-4 md:mb-6 tracking-tight">دورات الأتمتة والذكاء الاصطناعي</h2>
+              <h2 className="text-2xl md:text-5xl font-alexandria font-black text-white mb-4 md:mb-6 tracking-tight">دورات صناعة المحتوى والذكاء الاصطناعي</h2>
               <p className="text-zinc-400 font-cairo text-sm md:text-lg max-w-2xl mx-auto leading-relaxed">
-                انتقل من المبتدئ إلى الاحتراف المطلق ببناء وكلاء ذكاء اصطناعي وتدفقات عمل متكاملة لحل مشاكل عملك وعملائك.
+                انطلق نحو الاحتراف بإنتاج الفيديو، الرسوم المتحركة، وسرد قصص جذابة باستخدام أقوى أدوات الذكاء الاصطناعي التوليدي.
               </p>
             </div>
 

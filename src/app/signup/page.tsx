@@ -177,7 +177,7 @@ export default function SignupPage() {
 
           <div className="mb-8">
             <h2 className="text-xl sm:text-2xl font-alexandria font-bold text-white mb-2">إنشاء حساب طالب جديد</h2>
-            <p className="text-zinc-400 text-xs sm:text-sm">انضم إلينا اليوم! ابدأ بالتعلم والتحميل الفوري لمنتجات الأتمتة والذكاء الاصطناعي.</p>
+            <p className="text-zinc-400 text-xs sm:text-sm">انضم إلينا اليوم! ابدأ بالتعلم والتحميل الفوري لمنتجات وأصول صناعة المحتوى بالذكاء الاصطناعي التوليدي.</p>
           </div>
 
           <form onSubmit={handleSignup} className="space-y-5">

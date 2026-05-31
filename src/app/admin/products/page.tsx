@@ -739,7 +739,7 @@ export default function AdminProductsPage() {
                   onChange={e => setForm({ ...form, category: e.target.value })} 
                   className="bg-[#0f0f15] border border-white/5 rounded-xl py-3.5 px-4 text-sm text-white outline-none cursor-pointer"
                 >
-                  {(categories.length > 0 ? categories : ["Automation", "Artificial Intelligence", "Content Creation"]).map((cat) => (
+                  {(categories.length > 0 ? categories : ["AI Content Creation", "AI Animation", "Creative Video Production", "Digital Storytelling"]).map((cat) => (
                     <option key={cat} value={cat} className="bg-[#0f0f15]">{cat}</option>
                   ))}
                 </select>

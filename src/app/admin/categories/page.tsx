@@ -72,9 +72,10 @@ function CourseCategoriesAdminPageContent() {
         if (activeTable === "product_categories") {
           console.warn("product_categories table not found. Using static categories fallback.");
           setCategories([
-            { id: "1", name: "Automation", slug: "automation", order_index: 1 },
-            { id: "2", name: "Artificial Intelligence", slug: "artificial-intelligence", order_index: 2 },
-            { id: "3", name: "Content Creation", slug: "content-creation", order_index: 3 }
+            { id: "1", name: "AI Content Creation", slug: "ai-content-creation", order_index: 1 },
+            { id: "2", name: "AI Animation", slug: "ai-animation", order_index: 2 },
+            { id: "3", name: "Creative Video Production", slug: "creative-video-production", order_index: 3 },
+            { id: "4", name: "Digital Storytelling", slug: "digital-storytelling", order_index: 4 }
           ]);
         } else {
           throw catError;
@@ -133,17 +134,17 @@ function CourseCategoriesAdminPageContent() {
     // 2. Fallback heuristic rules (sync with storefront homepage)
     const title = (prod.title || "").toLowerCase();
     
-    if (title.includes("n8n") || title.includes("أتمتة") || categoryField.includes("أتمتة") || categoryField.includes("automation")) {
-      return "Automation";
+    if (title.includes("animation") || title.includes("تحريك") || title.includes("رسوم") || categoryField.includes("animation") || categoryField.includes("رسوم")) {
+      return "AI Animation";
     }
-    if (title.includes("ai") || title.includes("ذكاء") || categoryField.includes("ذكاء") || categoryField.includes("ai")) {
-      return "Artificial Intelligence";
+    if (title.includes("story") || title.includes("قصص") || title.includes("سرد") || categoryField.includes("storytelling") || categoryField.includes("قصص")) {
+      return "Digital Storytelling";
     }
-    if (title.includes("content") || title.includes("صناعة") || categoryField.includes("صناعة") || categoryField.includes("content")) {
-      return "Content Creation";
+    if (title.includes("video") || title.includes("فيديو") || title.includes("إنتاج") || categoryField.includes("video") || categoryField.includes("إنتاج")) {
+      return "Creative Video Production";
     }
     
-    return "Automation"; // Default fallback
+    return "AI Content Creation"; // Default fallback
   };
  
   const handleSave = async (e?: React.FormEvent) => {

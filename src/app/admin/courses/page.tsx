@@ -721,7 +721,7 @@ export default function AdminCoursesPage() {
     title: "", slug: "", short_description: "", description: "",
     image_url: "", banner_url: "", price: 0, original_price: 0,
     price_egp: 0, original_price_egp: 0, price_usd: 0, original_price_usd: 0,
-    is_free: false, is_featured: false, status: "draft", level: "Beginner", category: "Automation",
+    is_free: false, is_featured: false, status: "draft", level: "Beginner", category: "AI Content Creation",
     tags: [], requirements: [], what_will_learn: [], who_is_for: [],
     certificate_bg_url: "", certificate_text_color: "#000000",
     certificate_name_x: 50, certificate_name_y: 40, certificate_name_size: 24,
@@ -768,7 +768,7 @@ export default function AdminCoursesPage() {
       banner_url: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1600",
       price: 0, original_price: 0,
       price_egp: 0, original_price_egp: 0, price_usd: 0, original_price_usd: 0,
-      is_free: false, is_featured: false, status: "draft", level: "Beginner", category: "Automation",
+      is_free: false, is_featured: false, status: "draft", level: "Beginner", category: "AI Content Creation",
       tags: [], requirements: [], what_will_learn: [], who_is_for: [],
       certificate_bg_url: "", certificate_text_color: "#000000",
       certificate_name_x: 50, certificate_name_y: 40, certificate_name_size: 24, certificate_course_x: 50, certificate_course_y: 55, certificate_date_x: 50, certificate_date_y: 70, certificate_date_size: 14,
@@ -1432,7 +1432,7 @@ export default function AdminCoursesPage() {
               <div className="flex flex-col gap-2">
                 <label className="text-xs font-bold text-zinc-400">Course Category</label>
                 <select value={courseForm.category} onChange={e => setCourseForm({ ...courseForm, category: e.target.value })} className="bg-[#0f0f15] border border-white/5 rounded-xl py-3 px-4 text-sm">
-                  {(categories.length > 0 ? categories : ["Automation", "Content Creation", "Free Courses"]).map((cat) => (
+                  {(categories.length > 0 ? categories : ["AI Content Creation", "AI Animation", "Creative Video Production", "Digital Storytelling", "Free Courses"]).map((cat) => (
                     <option key={cat} value={cat}>{cat}</option>
                   ))}
                 </select>

@@ -635,7 +635,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                           {course.description ? (
                             <div className="text-zinc-300 font-cairo text-sm sm:text-base leading-[2.2] space-y-6 [&_p]:mb-6 [&_p]:leading-[2.2] [&_li]:mb-4 [&_li]:leading-[2.2] [&_h1]:mt-8 [&_h1]:mb-4 [&_h1]:text-lg [&_h2]:mt-6 [&_h2]:mb-3 [&_h2]:text-base [&_span]:leading-[2.2]" dangerouslySetInnerHTML={{ __html: course.description.replace(/\n/g, '<br/>') }} />
                           ) : (
-                            <p className="text-zinc-400 font-cairo text-sm sm:text-base leading-[1.8]">هذا الكورس يحتوي على شرح تقني مفصل وتطبيقي شامل لربط البرمجيات وأتمتة المهام بأقوى الاستراتيجيات.</p>
+                            <p className="text-zinc-400 font-cairo text-sm sm:text-base leading-[1.8]">هذا المسار يحتوي على شرح مفصل وتطبيق شامل لمهارات صناعة المحتوى بالذكاء الاصطناعي وإنتاج الفيديو الإبداعي بأقوى الأدوات الرقمية.</p>
                           )}
 
                           {/* Checklist: What You'll Learn */}
@@ -1053,7 +1053,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                 </h3>
                 
                 <p className="text-zinc-400 text-xs sm:text-sm font-cairo leading-relaxed">
-                  انضم اليوم إلى مئات الطلاب الذين غيروا مسارهم المهني وبدأوا ببناء مشاريع حقيقية باستخدام أقوى التقنيات والأتمتة العملية.
+                  انضم اليوم إلى مئات المبدعين الذين غيروا مسارهم المهني وبدأوا بإنتاج قصص ومحتوى احترافي باستخدام أقوى تقنيات الذكاء الاصطناعي التوليدي.
                 </p>
 
                 <div className="flex flex-wrap gap-4 pt-2 text-xs text-zinc-300 font-bold font-cairo">
@@ -1713,7 +1713,7 @@ function MobileCourseView({
                  {course.description ? (
                    <div className="text-zinc-300 font-cairo text-xs leading-[1.8] space-y-4" dangerouslySetInnerHTML={{ __html: course.description.replace(/\n/g, '<br/>') }} />
                  ) : (
-                   <p className="text-zinc-400 font-cairo text-xs leading-[1.8]">هذا الكورس يحتوي على شرح تقني مفصل وتطبيقي شامل لربط البرمجيات وأتمتة المهام بأقوى الاستراتيجيات.</p>
+                   <p className="text-zinc-400 font-cairo text-xs leading-[1.8]">هذا المسار يحتوي على شرح مفصل وتطبيق شامل لمهارات صناعة المحتوى بالذكاء الاصطناعي وإنتاج الفيديو الإبداعي بأقوى الأدوات الرقمية.</p>
                  )}
 
                  {/* Checklist: What You'll Learn */}
@@ -2013,7 +2013,7 @@ function MobileCourseView({
            </h3>
            
            <p className="text-zinc-400 text-[10px] font-cairo leading-relaxed">
-             ابدأ اليوم واستفد من هذا الاستثمار المميز لاحتراف أتمتة الأعمال والذكاء الاصطناعي وبناء مستقبلك المهني.
+             ابدأ اليوم واستفد من هذا الاستثمار المميز لاحتراف صناعة المحتوى والذكاء الاصطناعي وبناء مستقبلك الإبداعي والمهني.
            </p>
            
            <Link

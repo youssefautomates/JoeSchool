@@ -921,7 +921,7 @@ export default function DashboardPage() {
               <span>أهلاً بك، {profileName}</span>
               <Sparkles className="w-5 h-5 text-rose-500 animate-pulse" />
             </h1>
-            <p className="text-zinc-400 text-xs sm:text-sm mt-1.5 font-cairo">تصفح أقسامك التعليمية وحزم الأتمتة التي قمت باقتنائها في مكان واحد.</p>
+            <p className="text-zinc-400 text-xs sm:text-sm mt-1.5 font-cairo">تصفح مساراتك التعليمية والحزم الإبداعية التي قمت باقتنائها في مكان واحد.</p>
           </div>
           
           <div className="flex items-center justify-start sm:justify-end gap-3">
@@ -1094,7 +1094,7 @@ export default function DashboardPage() {
                   <BookOpen className="w-16 h-16 text-zinc-700 mx-auto mb-4" />
                   <h3 className="font-alexandria font-bold text-white text-base">لم تسجل في أي دورة بعد</h3>
                   <p className="text-zinc-500 text-xs sm:text-sm mt-1 max-w-sm mx-auto font-cairo">
-                    ابدأ رحلتك التعليمية واشترك في أحد أقسامنا القوية للأتمتة والذكاء الاصطناعي وصناعة المحتوى.
+                    ابدأ رحلتك التعليمية واشترك في أحد مساراتنا القوية لصناعة المحتوى والرسوم المتحركة بالذكاء الاصطناعي.
                   </p>
                   <Link 
                     href="/courses"
@@ -1144,7 +1144,7 @@ export default function DashboardPage() {
                             </Link>
                           </h3>
                           <p className="text-zinc-400 font-cairo text-xs leading-relaxed line-clamp-2">
-                            {course.short_description || "تعلم الأتمتة والتقنيات الحديثة خطوة بخطوة."}
+                            {course.short_description || "تعلم صناعة المحتوى بالذكاء الاصطناعي خطوة بخطوة."}
                           </p>
                         </div>
 
@@ -1191,7 +1191,7 @@ export default function DashboardPage() {
               className="space-y-6 text-right"
             >
               <div className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center gap-2.5 sm:gap-4 border-b border-white/5 pb-4">
-                <h2 className="text-lg font-alexandria font-bold text-white">ملفاتي الرقمية وحزم الأتمتة</h2>
+                <h2 className="text-lg font-alexandria font-bold text-white">ملفاتي الرقمية والحزم الإبداعية</h2>
                 <span className="bg-emerald-600/15 border border-emerald-500/30 text-emerald-400 text-[10px] px-3 py-1 rounded-full font-bold">
                   {digitalProducts.length} ملفات جاهزة
                 </span>
@@ -1202,7 +1202,7 @@ export default function DashboardPage() {
                   <Download className="w-16 h-16 text-zinc-700 mx-auto mb-4" />
                   <h3 className="font-alexandria font-bold text-white text-base">لا تتوفر ملفات رقمية</h3>
                   <p className="text-zinc-500 text-xs sm:text-sm mt-1 max-w-sm mx-auto font-cairo">
-                    لم تقم باقتناء أي قوالب أتمتة أو حزم برمجية بعد. استكشف المنتجات الرقمية لتسريع أعمالك!
+                    لم تقم باقتناء أي حزم إبداعية أو قوالب فيديو بعد. استكشف المنتجات الرقمية لدعم إبداعك!
                   </p>
                 </div>
               ) : (

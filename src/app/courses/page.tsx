@@ -68,7 +68,7 @@ export default function CoursesPage() {
     "الكل",
     ...(dynamicCategories.length > 0
       ? dynamicCategories
-      : ["دورات الأتمتة", "دورات صناعة المحتوى", "الدورات المجانية"])
+      : ["دورات صناعة المحتوى", "دورات الرسوم المتحركة", "الدورات المجانية"])
   ];
 
   const filteredCourses = coursesList.filter((course) => {
@@ -76,10 +76,9 @@ export default function CoursesPage() {
     if (activeCategory === "الدورات المجانية") return course.is_free || course.price === 0;
     if (course.category === activeCategory) return true;
     const legacyMap: Record<string, string[]> = {
-      "دورات الأتمتة": ["الأتمتة", "أتمتة"],
-      "دورات صناعة المحتوى": ["صناعة المحتوى", "المحتوى"],
-      "دورات الذكاء الاصطناعي": ["الذكاء الاصطناعي", "AI"],
-      "دورات التسويق": ["التسويق", "marketing"],
+      "دورات صناعة المحتوى": ["صناعة المحتوى", "المحتوى", "الأتمتة", "أتمتة"],
+      "دورات الرسوم المتحركة": ["الرسوم المتحركة", "تحريك", "الذكاء الاصطناعي", "AI"],
+      "الذكاء الاصطناعي التوليدي": ["الذكاء الاصطناعي التوليدي", "الذكاء الاصطناعي", "AI"],
     };
     const aliases = legacyMap[activeCategory] || [];
     return aliases.some(alias => course.category === alias || course.category?.toLowerCase().includes(alias.toLowerCase()));
@@ -116,7 +115,7 @@ export default function CoursesPage() {
             >
               انطلق نحو الاحتراف مع <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ff0f53] to-[#ff00b3]">
-                أرقى دورات الأتمتة والذكاء الاصطناعي
+                أرقى دورات صناعة المحتوى بالذكاء الاصطناعي والسرد الرقمي
               </span>
             </motion.h1>
 
@@ -126,7 +125,7 @@ export default function CoursesPage() {
               transition={{ duration: 0.6, delay: 0.2 }}
               className="text-zinc-400 text-sm sm:text-lg max-w-2xl mx-auto leading-relaxed"
             >
-              اختر مسارك التعليمي من بين حزم الدروس الاحترافية المصممة بعناية فائقة لتأهيلك لبناء وكلاء ومشاريع الأتمتة والذكاء الاصطناعي وتطوير مهاراتك التقنية.
+              اختر مسارك الإبداعي من بين حزم الدروس الاحترافية المصممة لتأهيلك لإنتاج الفيديو، الرسوم المتحركة، وصناعة المحتوى البصري المتقدم بالذكاء الاصطناعي.
             </motion.p>
           </div>
         </section>
@@ -156,7 +155,7 @@ export default function CoursesPage() {
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-20 gap-4">
               <Loader2 className="w-10 h-10 text-rose-500 animate-spin" />
-              <p className="text-zinc-400 text-sm font-medium">جاري تحميل الأقسام التدريبية الفنية...</p>
+              <p className="text-zinc-400 text-sm font-medium">جاري تحميل المسارات التعليمية الإبداعية...</p>
             </div>
           ) : filteredCourses.length === 0 ? (
             <div className="text-center py-20 bg-white/[0.02] border border-white/5 rounded-3xl p-8 max-w-md mx-auto">
