@@ -6,8 +6,7 @@ import { ReviewCard } from "./ReviewCard";
 import { uploadFile } from "@/lib/upload";
 import { toast } from "sonner";
 
-const MALE_SEEDS = ["Felix", "Oliver", "Charlie", "Jack", "Liam", "Noah", "James", "Ethan"];
-const FEMALE_SEEDS = ["Mia", "Lily", "Emma", "Sara", "Luna", "Aria", "Zoe", "Chloe"];
+
 
 interface DisplayProduct {
   id: string;
@@ -29,8 +28,6 @@ export function ReviewEditor({ review, products, onSave, onClose }: ReviewEditor
     lastName: "",
     rating: 5,
     text: "",
-    avatarUrl: "https://api.dicebear.com/9.x/adventurer/svg?seed=Felix&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc",
-    gender: "male",
     isVerified: true,
     status: "visible",
     isFeatured: false,
@@ -76,8 +73,6 @@ export function ReviewEditor({ review, products, onSave, onClose }: ReviewEditor
         lastName: "",
         rating: 5,
         text: "",
-        avatarUrl: "https://api.dicebear.com/9.x/adventurer/svg?seed=Felix&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc",
-        gender: "male",
         isVerified: true,
         status: "visible",
         isFeatured: false,
@@ -153,21 +148,7 @@ export function ReviewEditor({ review, products, onSave, onClose }: ReviewEditor
     });
   };
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
 
-    setIsUploading(true);
-    try {
-      const publicUrl = await uploadFile(file, "course-images", "reviews");
-      handleChange("avatarUrl", publicUrl);
-      toast.success("تم رفع الصورة الشخصية بنجاح 🖼️");
-    } catch (err: any) {
-      toast.error(err.message || "فشل رفع الصورة");
-    } finally {
-      setIsUploading(false);
-    }
-  };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -215,8 +196,6 @@ export function ReviewEditor({ review, products, onSave, onClose }: ReviewEditor
     lastName: formData.lastName || "",
     rating: formData.rating || 5,
     text: formData.text || "اكتب هنا نص التقييم الذي أدلى به العميل ليظهر في المعاينة الحية مباشرة...",
-    avatarUrl: formData.avatarUrl || "https://api.dicebear.com/9.x/adventurer/svg?seed=Felix&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc",
-    gender: formData.gender || "male",
     isVerified: formData.isVerified !== false,
     isHidden: formData.status === "hidden",
     createdAt: formData.createdAt || new Date().toISOString(),
@@ -340,75 +319,6 @@ export function ReviewEditor({ review, products, onSave, onClose }: ReviewEditor
                 onChange={(rating) => handleChange("rating", rating)} 
               />
             </div>
-
-            {/* 4. Avatar Uploader and Cartoon Library Picker */}
-            <div className="space-y-4 bg-white/[0.01] border border-white/5 p-5 rounded-2xl">
-              <div className="flex justify-between items-center flex-wrap gap-2">
-                <label className="text-xs text-zinc-300 font-bold font-cairo">الصورة الشخصية للعميل</label>
-                <span className="text-[9px] text-rose-500 font-bold tracking-widest uppercase font-cairo">
-                  {formData.gender === "female" ? "👩 صورة كرتونية - إناث" : "🧔 صورة كرتونية - ذكور"}
-                </span>
-              </div>
-              
-              <div className="grid grid-cols-4 sm:grid-cols-8 gap-2.5">
-                {[
-                  ...MALE_SEEDS.map(s => ({ seed: s, gender: "male" })),
-                  ...FEMALE_SEEDS.map(s => ({ seed: s, gender: "female" }))
-                ].map((avatar) => {
-                  const url = `https://api.dicebear.com/9.x/adventurer/svg?seed=${avatar.seed}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc`;
-                  const isSelected = formData.avatarUrl === url;
-                  return (
-                    <button
-                      key={avatar.seed}
-                      type="button"
-                      onClick={() => setFormData({ ...formData, avatarUrl: url, gender: avatar.gender })}
-                      className={`relative aspect-square rounded-xl overflow-hidden border-2 transition-all hover:scale-105 active:scale-95 bg-zinc-900 shrink-0 ${
-                        isSelected 
-                          ? 'border-rose-500 scale-105 shadow-[0_0_10px_rgba(214,0,75,0.4)]' 
-                          : 'border-transparent opacity-60 hover:opacity-100'
-                      }`}
-                    >
-                      <img src={url} alt={avatar.seed} className="w-full h-full object-cover" />
-                      {isSelected && (
-                        <div className="absolute inset-0 bg-rose-500/20 flex items-center justify-center">
-                          <Check className="w-4 h-4 text-white filter drop-shadow-[0_1.5px_3px_rgba(0,0,0,0.5)]" />
-                        </div>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Upload custom avatar */}
-              <div className="pt-2 flex flex-col sm:flex-row items-center gap-4">
-                <div className="relative flex-1 w-full">
-                  <input
-                    type="text"
-                    value={formData.avatarUrl?.startsWith("https://api.dicebear.com") ? "" : formData.avatarUrl}
-                    onChange={(e) => handleChange("avatarUrl", e.target.value)}
-                    placeholder="أو ضع رابط صورة مخصص هنا..."
-                    className="w-full h-11 pr-4 pl-4 rounded-xl bg-white/5 border border-white/10 text-zinc-300 text-xs outline-none focus:border-rose-500/50 text-left dir-ltr"
-                  />
-                </div>
-                
-                <label className="w-full sm:w-auto h-11 px-5 rounded-xl bg-[#D6004B]/10 hover:bg-[#D6004B]/20 text-rose-500 hover:text-rose-400 border border-rose-500/20 text-xs font-bold font-cairo flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-95 shrink-0">
-                  {isUploading ? (
-                    <div className="w-4 h-4 border-2 border-rose-500 border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <Upload className="w-4 h-4" />
-                  )}
-                  <span>رفع صورة مخصصة</span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    disabled={isUploading}
-                    onChange={handleFileUpload}
-                    className="hidden"
-                  />
-                </label>
-              </div>
-            </div>
-
             {/* 5. Review Testimonial Text */}
             <div className="flex flex-col gap-1.5">
               <label className="text-xs text-zinc-300 font-bold font-cairo">نص التقييم والمراجعة</label>

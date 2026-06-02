@@ -9,8 +9,8 @@ interface Review {
   title: string;
   text: string;
   stars: number;
-  avatarUrl: string;
-  gender: "male" | "female";
+  avatarUrl?: string;
+  gender?: "male" | "female";
   isCourse?: boolean;
   courseTitle?: string;
   isFeatured?: boolean;
@@ -18,18 +18,6 @@ interface Review {
   createdAt?: string;
 }
 
-const MALE_SEEDS = ["Felix", "Oliver", "Charlie", "Jack", "Liam", "Noah", "James", "Ethan"];
-const FEMALE_SEEDS = ["Mia", "Lily", "Emma", "Sara", "Luna", "Aria", "Zoe", "Chloe"];
-
-function getAvatarUrl(seed: string, gender: "male" | "female"): string {
-  const seeds = gender === "female" ? FEMALE_SEEDS : MALE_SEEDS;
-  let hash = 0;
-  for (let i = 0; i < seed.length; i++) {
-    hash = seed.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  const chosen = seeds[Math.abs(hash) % seeds.length];
-  return `https://api.dicebear.com/9.x/adventurer/svg?seed=${chosen}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc`;
-}
 
 interface StarSVGProps {
   fillPercent: number;
@@ -91,17 +79,13 @@ export function ReviewsMarquee() {
       name: "أحمد محمود",
       title: "مشتري موثق · حزمة أدوات منشئي المحتوى المتكاملة",
       text: "الحزم وفرت علي الكثير من الجهد والبحث. جودة القوالب وسهولة الاستخدام ممتازة وأنصح بها كل منشئ محتوى يريد توفير وقته.",
-      stars: 5,
-      avatarUrl: "https://api.dicebear.com/9.x/adventurer/svg?seed=Jack&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc",
-      gender: "male"
+      stars: 5
     },
     {
       name: "سارة عبد الرحمن",
       title: "مشتري موثق · كورس صناعة المحتوى بالذكاء الاصطناعي",
       text: "شرح مبسط وعملي للغاية. تمكنت من إنتاج أول قصة مصورة بالذكاء الاصطناعي بجودة فائقة وحصلت على تفاعل ضخم في حساباتي.",
       stars: 5,
-      avatarUrl: "https://api.dicebear.com/9.x/adventurer/svg?seed=Sara&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc",
-      gender: "female",
       isCourse: true,
       courseTitle: "كورس صناعة المحتوى بالذكاء الاصطناعي"
     },
@@ -109,17 +93,13 @@ export function ReviewsMarquee() {
       name: "خالد توفيق",
       title: "مشتري موثق · حزمة بوتات الواتساب الذكية",
       text: "الدعم الفني متميز جداً ومساعد لأبعد الحدود. البوت يعمل بسلاسة تامة ومعدل التحويل في متجرنا زاد بنسبة كبيرة.",
-      stars: 5,
-      avatarUrl: "https://api.dicebear.com/9.x/adventurer/svg?seed=Liam&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc",
-      gender: "male"
+      stars: 5
     },
     {
       name: "يوسف أحمد",
       title: "مشتري موثق · كورس الرسوم المتحركة وصناعة الشخصيات بالذكاء الاصطناعي",
       text: "أفضل استثمار استثمرته في عملي الإبداعي هذا العام. المحتوى غني بالتطبيقات الحقيقية والتقنيات الحديثة للتطبيق الفوري.",
       stars: 5,
-      avatarUrl: "https://api.dicebear.com/9.x/adventurer/svg?seed=Felix&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc",
-      gender: "male",
       isCourse: true,
       courseTitle: "كورس الرسوم المتحركة وصناعة الشخصيات بالذكاء الاصطناعي"
     }
@@ -164,18 +144,11 @@ export function ReviewsMarquee() {
             const isCourse = !!course;
             const itemTitle = course ? course.title : product ? product.title : bundle ? bundle.title : "تم تأكيد الشراء";
             
-            let finalAvatar = r.avatarUrl;
-            if (!finalAvatar || finalAvatar.trim() === "") {
-              finalAvatar = getAvatarUrl(r.firstName, r.gender || "male");
-            }
-
             return {
               name: `${r.firstName} ${r.lastName ? r.lastName.trim().charAt(0) + "." : ""}`,
               title: `مشتري موثق · ${itemTitle}`,
               text: r.text,
               stars: r.rating || 5,
-              avatarUrl: finalAvatar,
-              gender: r.gender || "male",
               isCourse,
               courseTitle: course ? course.title : undefined,
               isFeatured: r.isFeatured === true,

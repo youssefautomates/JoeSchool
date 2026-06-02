@@ -1,4 +1,4 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { createClient } from "@supabase/supabase-js";
 
@@ -23,7 +23,7 @@ export interface Review {
   lastName: string;
   rating: number;
   text: string;
-  avatarUrl: string;
+  avatarUrl?: string;
   gender?: string;
   isVerified: boolean;
   isHidden: boolean;

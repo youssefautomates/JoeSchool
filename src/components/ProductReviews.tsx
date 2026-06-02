@@ -10,7 +10,7 @@ interface Review {
   lastName: string;
   rating: number;
   text: string;
-  avatarUrl: string;
+  avatarUrl?: string;
   gender?: string;
   isVerified: boolean;
   isHidden: boolean;
@@ -20,18 +20,6 @@ interface Review {
   createdAt: string;
 }
 
-const MALE_SEEDS = ["Felix", "Oliver", "Charlie", "Jack", "Liam", "Noah", "James", "Ethan"];
-const FEMALE_SEEDS = ["Mia", "Lily", "Emma", "Sara", "Luna", "Aria", "Zoe", "Chloe"];
-
-const getAvatarUrl = (firstName: string, gender?: string) => {
-  const seeds = gender === "female" ? FEMALE_SEEDS : MALE_SEEDS;
-  let hash = 0;
-  for (let i = 0; i < firstName.length; i++) {
-    hash = firstName.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  const chosen = seeds[Math.abs(hash) % seeds.length];
-  return `https://api.dicebear.com/9.x/adventurer/svg?seed=${chosen}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc`;
-};
 
 interface StarSVGProps {
   fillPercent: number;
@@ -217,9 +205,7 @@ export function ProductReviews({ productId, initialReviews, courseTitle, title }
           onMouseLeave={() => setIsInteractionPaused(false)}
         >
           {marqueeReviews.map((review, idx) => {
-            const avatarSrc = review.avatarUrl && !review.avatarUrl.includes("pravatar")
-              ? review.avatarUrl
-              : getAvatarUrl(review.firstName, review.gender);
+
 
             return (
               <div
@@ -231,13 +217,6 @@ export function ProductReviews({ productId, initialReviews, courseTitle, title }
                   {/* User Info Header */}
                   <div className="flex items-center justify-between gap-2.5">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-zinc-800 overflow-hidden shadow-lg border border-white/10 shrink-0 relative">
-                        <img 
-                          src={avatarSrc} 
-                          alt={review.firstName} 
-                          className="w-full h-full object-cover" 
-                        />
-                      </div>
                       <div className="min-w-0">
                         <h4 className="font-alexandria font-bold text-white text-xs md:text-sm truncate">
                           {review.firstName} {review.lastName ? review.lastName.charAt(0) + "." : ""}

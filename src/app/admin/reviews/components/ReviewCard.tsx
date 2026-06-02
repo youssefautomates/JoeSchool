@@ -123,9 +123,7 @@ export function ReviewCard({ review, productName, onEdit, onDelete, onStatusChan
         {/* Header section */}
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 bg-zinc-800 rounded-2xl overflow-hidden shrink-0 border border-white/10 relative">
-              <img src={review.avatarUrl} alt={review.firstName} className="w-full h-full object-cover" />
-            </div>
+
             <div>
               <h4 className="text-white font-bold text-xs font-alexandria">
                 {review.firstName} {review.lastName ? review.lastName.charAt(0) + "." : ""}
