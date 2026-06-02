@@ -1032,7 +1032,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
         )}
 
         {/* Student Reviews Section (Marquee matching showcase videos) */}
-        <ProductReviews productId={course.id} initialReviews={allReviews} />
+        <ProductReviews productId={course.id} initialReviews={allReviews} courseTitle={course.title} />
 
         {/* Smart Call-To-Action Banner (Yellow Box / New Premium Section) */}
         {!isEnrolled && (
@@ -1996,7 +1996,7 @@ function MobileCourseView({
       )}
 
       {/* Student Reviews Section (Marquee matching showcase videos) */}
-      <ProductReviews productId={course.id} initialReviews={allReviews} />
+      <ProductReviews productId={course.id} initialReviews={allReviews} courseTitle={course.title} />
 
       {/* 7. Final Urgency CTA Reminder */}
       {!isEnrolled && (

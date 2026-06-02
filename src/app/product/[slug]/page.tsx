@@ -804,10 +804,30 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                         </div>
 
                         {/* Stars */}
-                        <div className="flex text-yellow-500 gap-0.5">
-                          {[1,2,3,4,5].map(i => (
-                            <Star key={i} className={`w-3 h-3 ${i <= rev.rating ? 'fill-current' : 'text-zinc-800 fill-transparent'}`} />
-                          ))}
+                        <div className="flex text-yellow-500 gap-0.5" dir="ltr">
+                          {Array.from({ length: 5 }).map((_, i) => {
+                            const starVal = i + 1;
+                            const isFilled = starVal <= Math.floor(rev.rating);
+                            const isHalf = !isFilled && starVal - 0.5 <= rev.rating;
+                            const fillPercent = isHalf ? (rev.rating - (starVal - 1)) * 100 : 0;
+
+                            return (
+                              <div key={i} className="relative w-3 h-3">
+                                <Star className="w-3 h-3 text-zinc-800 fill-transparent absolute inset-0" />
+                                {isFilled && <Star className="w-3 h-3 fill-current text-yellow-500 absolute inset-0" />}
+                                {isHalf && (
+                                  <div 
+                                    className="absolute inset-0 overflow-hidden text-yellow-500"
+                                    style={{ width: `${fillPercent}%` }}
+                                  >
+                                    <div className="w-3 h-3">
+                                      <Star className="w-3 h-3 fill-current text-yellow-500" />
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
                         </div>
 
                         {/* Description (Concise testimonial) */}
