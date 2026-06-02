@@ -1,23 +1,13 @@
 import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
-import { Cairo, Alexandria } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import { Providers } from "@/components/Providers";
 import { PixelTracker } from "@/components/PixelTracker";
 import { getKV } from "@/lib/kv";
 import "./globals.css";
 
-const cairo = Cairo({
-  subsets: ["arabic"],
-  variable: "--font-cairo",
-  display: 'swap',
-});
-
-const alexandria = Alexandria({
-  subsets: ["arabic"],
-  variable: "--font-alexandria",
-  display: 'swap',
-});
+const cairo = { variable: "font-cairo" };
+const alexandria = { variable: "font-alexandria" };
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://youssefautomates.com"),
