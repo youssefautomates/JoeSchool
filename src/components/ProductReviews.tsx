@@ -86,15 +86,17 @@ interface ProductReviewsProps {
   productId: string;
   initialReviews?: Review[];
   courseTitle?: string;
+  title?: string;
 }
 
-export function ProductReviews({ productId, initialReviews, courseTitle }: ProductReviewsProps) {
+export function ProductReviews({ productId, initialReviews, courseTitle, title }: ProductReviewsProps) {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(initialReviews === undefined);
   
   // Lazy Hydration & Viewport visibility states
   const [isIntersecting, setIsIntersecting] = useState(false);
   const [isCurrentlyVisible, setIsCurrentlyVisible] = useState(false);
+  const [isInteractionPaused, setIsInteractionPaused] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // 1. Intersection Observer for Lazy Hydration & Animation Pausing
@@ -175,7 +177,7 @@ export function ProductReviews({ productId, initialReviews, courseTitle }: Produ
         <div className="w-10 h-10 md:w-12 md:h-12 bg-rose-600/10 rounded-xl md:rounded-2xl flex items-center justify-center">
           <MessageSquareQuote className="w-5 h-5 md:w-6 md:h-6 text-rose-500" />
         </div>
-        <h2 className="text-xl sm:text-2xl font-alexandria font-black text-white tracking-tighter">آراء الطلاب</h2>
+        <h2 className="text-xl sm:text-2xl font-alexandria font-black text-white tracking-tighter">{title || "آراء الطلاب"}</h2>
       </div>
 
       {/* Infinite Marquee */}
@@ -206,7 +208,14 @@ export function ProductReviews({ productId, initialReviews, courseTitle }: Produ
         <div className="absolute left-0 top-0 bottom-0 w-12 md:w-16 bg-gradient-to-r from-[#050505] md:from-[#0a0a0f] to-transparent z-10 pointer-events-none" />
         <div className="absolute right-0 top-0 bottom-0 w-12 md:w-16 bg-gradient-to-l from-[#050505] md:from-[#0a0a0f] to-transparent z-10 pointer-events-none" />
 
-        <div className="flex gap-4 md:gap-6 animate-product-reviews-marquee-ltr py-2" style={{ animationPlayState: isCurrentlyVisible ? undefined : "paused" }}>
+        <div 
+          className="flex gap-4 md:gap-6 animate-product-reviews-marquee-ltr py-2 cursor-grab active:cursor-grabbing select-none" 
+          style={{ animationPlayState: (isCurrentlyVisible && !isInteractionPaused) ? undefined : "paused" }}
+          onTouchStart={() => setIsInteractionPaused(true)}
+          onTouchEnd={() => setIsInteractionPaused(false)}
+          onMouseEnter={() => setIsInteractionPaused(true)}
+          onMouseLeave={() => setIsInteractionPaused(false)}
+        >
           {marqueeReviews.map((review, idx) => {
             const avatarSrc = review.avatarUrl && !review.avatarUrl.includes("pravatar")
               ? review.avatarUrl

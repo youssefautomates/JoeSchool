@@ -17,42 +17,42 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const navGroups = [
     {
-      title: "Analytics & Metrics",
+      title: "التحليلات",
       items: [
-        { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
-        { name: "AI Smart Assistant", href: "/admin/ai", icon: Sparkles },
-        { name: "Detailed Analytics", href: "/admin/analytics", icon: BarChart3 }
+        { name: "الرئيسية", href: "/admin", icon: LayoutDashboard },
+        { name: "المساعد الذكي", href: "/admin/ai", icon: Sparkles },
+        { name: "تقارير الأداء", href: "/admin/analytics", icon: BarChart3 }
       ]
     },
     {
-      title: "Digital Products Store",
+      title: "المتجر الرقمي",
       items: [
-        { name: "Manage Products", href: "/admin/products", icon: Package },
-        { name: "Product Categories", href: "/admin/categories?tab=products", icon: LayoutGrid },
-        { name: "Coupons & Marketing", href: "/admin/marketing", icon: Target },
-        { name: "Manage Orders", href: "/admin/orders", icon: ShoppingCart },
-        { name: "Live Orders Feed", href: "/admin/orders/live", icon: Flame }
+        { name: "المنتجات", href: "/admin/products", icon: Package },
+        { name: "تصنيفات المتجر", href: "/admin/categories?tab=products", icon: LayoutGrid },
+        { name: "التسويق والكوبونات", href: "/admin/marketing", icon: Target },
+        { name: "إدارة الطلبات", href: "/admin/orders", icon: ShoppingCart },
+        { name: "الطلبات المباشرة", href: "/admin/orders/live", icon: Flame }
       ]
     },
     {
-      title: "LMS Academy",
+      title: "الأكاديمية",
       items: [
-        { name: "Manage Courses", href: "/admin/courses", icon: BookOpen },
-        { name: "Course Categories", href: "/admin/categories?tab=courses", icon: LayoutGrid },
-        { name: "Students List", href: "/admin/courses/students", icon: Users },
-        { name: "Issued Certificates", href: "/admin/courses/certificates", icon: Award }
+        { name: "الكورسات", href: "/admin/courses", icon: BookOpen },
+        { name: "تصنيفات الكورسات", href: "/admin/categories?tab=courses", icon: LayoutGrid },
+        { name: "قائمة الطلاب", href: "/admin/courses/students", icon: Users },
+        { name: "الشهادات", href: "/admin/courses/certificates", icon: Award }
       ]
     },
     {
-      title: "Security & Admin",
+      title: "الإدارة",
       items: [
         { name: "صندوق الوارد", href: "/admin/inbox", icon: Mail },
-        { name: "Email System", href: "/admin/email-system", icon: Mail },
-        { name: "Student Reviews", href: "/admin/reviews", icon: Star },
-        { name: "Facebook Pixel", href: "/admin/analytics/facebook-pixel", icon: Target },
-        { name: "TikTok Pixel", href: "/admin/analytics/tiktok-pixel", icon: Globe },
-        { name: "General Settings", href: "/admin/settings", icon: Settings },
-        { name: "System Security", href: "/admin/settings/security", icon: ShieldCheck }
+        { name: "نظام البريد", href: "/admin/email-system", icon: Mail },
+        { name: "التقييمات", href: "/admin/reviews", icon: Star },
+        { name: "فيسبوك بيكسل", href: "/admin/analytics/facebook-pixel", icon: Target },
+        { name: "تيك توك بيكسل", href: "/admin/analytics/tiktok-pixel", icon: Globe },
+        { name: "الإعدادات العامة", href: "/admin/settings", icon: Settings },
+        { name: "أمن النظام", href: "/admin/settings/security", icon: ShieldCheck }
       ]
     }
   ];
@@ -61,15 +61,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <div className="min-h-screen bg-[#050505] text-white selection:bg-rose-500/30" dir="ltr">
-      {/* Sidebar - Positioned on Left for LTR */}
-      <aside className="fixed left-0 top-0 h-screen w-80 bg-[#09090b] border-r border-white/5 z-50 hidden lg:flex flex-col shadow-2xl">
+      {/* Sidebar - Positioned on Right for RTL */}
+      <aside className="fixed right-0 top-0 h-screen w-80 bg-[#09090b] border-l border-white/5 z-50 hidden lg:flex flex-col shadow-2xl" dir="rtl">
         <div className="p-8 flex items-center gap-4 border-b border-white/5">
           <div className="w-10 h-10 flex items-center justify-center">
             <img src="/logo.png" alt="Admin Logo" className="w-full h-full object-contain drop-shadow-[0_0_15px_rgba(214,0,75,0.5)]" />
           </div>
           <div>
-            <span className="text-xl font-sans font-black tracking-tighter block uppercase">ADMIN PRO</span>
-            <span className="text-[10px] text-rose-500 font-bold tracking-[0.2em] uppercase">Youssef Automates</span>
+            <span className="text-xl font-sans font-black tracking-tighter block uppercase">لوحة الإدارة برو</span>
+            <span className="text-[10px] text-rose-500 font-bold tracking-[0.2em] uppercase">أتمتة يوسف</span>
           </div>
         </div>
 
@@ -94,22 +94,22 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             className="w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl text-red-400 hover:bg-red-500/10 transition-all font-sans font-bold group"
           >
             <LogOut className="w-5 h-5 group-hover:rotate-12 transition-transform" />
-            <span className="text-xs">Logout</span>
+            <span className="text-xs">تسجيل الخروج</span>
           </button>
         </div>
       </aside>
 
-      {/* Main Content - Padded on Left for Sidebar */}
-      <main className="lg:pl-80 min-h-screen transition-all">
+      {/* Main Content - Padded on Right for RTL Sidebar */}
+      <main className="lg:pr-80 min-h-screen transition-all" dir="rtl">
         {/* Header */}
         <header className="sticky top-0 h-24 border-b border-white/5 bg-[#050505]/80 backdrop-blur-2xl z-40 px-8 flex items-center justify-between">
           <div className="flex items-center gap-8 flex-1">
             <div className="relative w-full max-w-md hidden md:block group">
-              <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-rose-500 transition-colors" />
+              <Search className="w-5 h-5 absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-rose-500 transition-colors" />
               <input 
                 type="text" 
-                placeholder="Search for anything..." 
-                className="w-full bg-white/5 border border-white/5 rounded-2xl py-3.5 pl-12 pr-4 text-sm font-sans focus:outline-none focus:border-rose-500/50 focus:bg-white/10 transition-all text-zinc-200"
+                placeholder="البحث عن أي شيء..." 
+                className="w-full bg-white/5 border border-white/5 rounded-2xl py-3.5 pr-12 pl-4 text-sm font-sans focus:outline-none focus:border-rose-500/50 focus:bg-white/10 transition-all text-zinc-200"
               />
             </div>
           </div>
@@ -120,10 +120,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <span className="absolute top-3 right-3 w-2 h-2 bg-rose-600 rounded-full border-2 border-[#050505]" />
             </button>
 
-            <div className="flex items-center gap-4 pr-4 border-r border-white/5 h-10">
+            <div className="flex items-center gap-4 pl-4 border-l border-white/5 h-10">
               <div className="text-right hidden sm:block">
-                <p className="text-sm font-bold text-white font-sans leading-none mb-1">Youssef Mostafa</p>
-                <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest leading-none">Super Admin</p>
+                <p className="text-sm font-bold text-white font-sans leading-none mb-1">يوسف مصطفى</p>
+                <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest leading-none">المسؤول العام</p>
               </div>
               <div className="relative group cursor-pointer">
                 <Avatar className="w-12 h-12 rounded-xl border-2 border-white/5 group-hover:border-rose-600/50 transition-all shadow-xl">
@@ -197,7 +197,7 @@ function SidebarNav({ pathname, navGroups }: { pathname: string, navGroups: any[
                 {isActive && (
                   <motion.div 
                     layoutId="sidebar-active"
-                    className="absolute left-0 w-1.5 h-7 bg-white rounded-r-full"
+                    className="absolute right-0 w-1.5 h-7 bg-white rounded-l-full"
                     transition={{ type: "spring", stiffness: 300, damping: 30 }}
                   />
                 )}
@@ -207,7 +207,7 @@ function SidebarNav({ pathname, navGroups }: { pathname: string, navGroups: any[
                 )} />
                 <span className="font-bold text-[13px] tracking-wide font-sans transition-colors duration-300">{item.name}</span>
                 {item.href === "/admin/inbox" && unreadCount > 0 && (
-                  <span className="ml-auto text-[10px] px-2 py-0.5 rounded-full bg-[#D6004B] text-white font-bold leading-none min-w-[20px] text-center shadow-[0_0_10px_rgba(214,0,75,0.4)]">
+                  <span className="mr-auto text-[10px] px-2 py-0.5 rounded-full bg-[#D6004B] text-white font-bold leading-none min-w-[20px] text-center shadow-[0_0_10px_rgba(214,0,75,0.4)]">
                     {unreadCount}
                   </span>
                 )}

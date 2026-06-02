@@ -1,11 +1,9 @@
 import { NextResponse } from "next/server";
-import { getKV, setKV } from "@/lib/kv";
 import { cookies } from "next/headers";
+import { createClient } from "@supabase/supabase-js";
 
 // Force this route to be fully dynamic (never cached by Next.js browser cache)
 export const dynamic = "force-dynamic";
-
-const REVIEWS_KEY = "product_reviews";
 
 export const CURRENT_REVIEW_SCHEMA_VERSION = 1;
 export const MIN_SUPPORTED_REVIEW_SCHEMA_VERSION = 1;
@@ -47,10 +45,16 @@ export interface Review {
   moderationAction?: ModerationAction;
 }
 
+// Supabase Admin client to bypass RLS for moderation/admin actions
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL || "",
+  process.env.SUPABASE_SERVICE_ROLE_KEY || ""
+);
+
 // In-Memory Cache variables
 let cachedReviews: Review[] | null = null;
 let lastCacheFetch = 0;
-const CACHE_TTL = 30000; // 30 seconds
+const CACHE_TTL = 10000; // 10 seconds cache to optimize performance
 
 // Normalization function to guarantee backward compatibility & schema versioning
 function normalizeReview(r: any): Review {
@@ -123,25 +127,40 @@ function sanitizeAndValidateReview(payload: any): { error?: string; text?: strin
 }
 
 async function fetchAndCacheReviews(): Promise<Review[]> {
-  const now = Date.now();
-  if (cachedReviews && now - lastCacheFetch < CACHE_TTL) {
-    return cachedReviews;
+  try {
+    const now = Date.now();
+    if (cachedReviews && now - lastCacheFetch < CACHE_TTL) {
+      return cachedReviews;
+    }
+
+    const { data, error } = await supabaseAdmin
+      .from("product_reviews")
+      .select("*");
+    
+    if (error) {
+      console.error("Error fetching product_reviews from Supabase:", error.message);
+      // Fallback empty state instead of crashing in case table is not created yet
+      return [];
+    }
+
+    const allReviews = data || [];
+    
+    // Normalize and filter out invalid/seeded ones
+    const normalized = allReviews
+      .filter(r => {
+        if (!r || !r.id) return false;
+        const idStr = String(r.id);
+        return !idStr.startsWith("seed-") && !idStr.startsWith("seeded-");
+      })
+      .map(normalizeReview);
+
+    cachedReviews = normalized;
+    lastCacheFetch = now;
+    return normalized;
+  } catch (err) {
+    console.error("fetchAndCacheReviews Exception:", err);
+    return [];
   }
-
-  const allReviews: any[] = await getKV(REVIEWS_KEY) || [];
-  
-  // Normalize and filter out invalid/seeded ones
-  const normalized = allReviews
-    .filter(r => {
-      if (!r || !r.id) return false;
-      const idStr = String(r.id);
-      return !idStr.startsWith("seed-") && !idStr.startsWith("seeded-");
-    })
-    .map(normalizeReview);
-
-  cachedReviews = normalized;
-  lastCacheFetch = now;
-  return normalized;
 }
 
 function invalidateCache() {
@@ -220,16 +239,17 @@ export async function POST(req: Request) {
       moderationAction: "created"
     });
     
-    const reviews: any[] = await getKV(REVIEWS_KEY) || [];
-    reviews.push(newReview);
-    
-    const success = await setKV(REVIEWS_KEY, reviews);
-    if (success) {
-      invalidateCache();
-      return NextResponse.json({ success: true, review: newReview });
+    const { error: insertError } = await supabaseAdmin
+      .from("product_reviews")
+      .insert([newReview]);
+
+    if (insertError) {
+      console.error("Error inserting review into Supabase:", insertError.message);
+      return NextResponse.json({ error: "فشل حفظ التقييم في قاعدة البيانات" }, { status: 500 });
     }
     
-    return NextResponse.json({ error: "فشل حفظ التقييم" }, { status: 500 });
+    invalidateCache();
+    return NextResponse.json({ success: true, review: newReview });
   } catch (err: any) {
     console.error("[Reviews API] POST Exception:", err);
     return NextResponse.json({ error: err.message }, { status: 500 });
@@ -255,72 +275,61 @@ export async function PUT(req: Request) {
         return NextResponse.json({ error: "الحد الأقصى للعمليات الجماعية هو 500 تقييم" }, { status: 400 });
       }
       
-      const allReviews: any[] = await getKV(REVIEWS_KEY) || [];
-      let updatedCount = 0;
       const now = new Date().toISOString();
-      
-      let nextReviews = allReviews.map(r => {
-        if (ids.includes(String(r.id))) {
-          updatedCount++;
-          const norm = normalizeReview(r);
-          norm.schemaVersion = CURRENT_REVIEW_SCHEMA_VERSION;
-          norm.editedAt = now;
-          norm.editedBy = adminEmail;
-          
-          let bulkAction: ModerationAction = "edited";
-          if (action === "approve") {
-            bulkAction = "approved";
-            norm.status = "visible";
-            norm.isHidden = false;
-          } else if (action === "hide") {
-            bulkAction = "hidden";
-            norm.status = "hidden";
-            norm.isHidden = true;
-          } else if (action === "mark_featured") {
-            norm.isFeatured = true;
-            if (params?.featuredPosition !== undefined) {
-              norm.featuredPosition = Number(params.featuredPosition);
-            }
-          } else if (action === "unfeature") {
-            norm.isFeatured = false;
-          } else if (action === "status" && params?.status) {
-            const oldStatus = norm.status;
-            norm.status = params.status;
-            norm.isHidden = params.status === "hidden" || params.status === "archived";
-            
-            if (params.status === "visible") bulkAction = "approved";
-            else if (params.status === "hidden") bulkAction = "hidden";
-            else if (params.status === "archived") {
-              bulkAction = "archived";
-              if (params?.archiveReason) norm.archiveReason = params.archiveReason;
-            } else if (params.status === "pending") {
-              if (oldStatus === "archived") {
-                bulkAction = "restored";
-              } else {
-                bulkAction = "edited";
-              }
-            }
-          } else if (action === "delete") {
-            bulkAction = "archived";
-            norm.status = "archived";
-            norm.isHidden = true;
-            if (params?.archiveReason) {
-              norm.archiveReason = params.archiveReason;
-            }
-          }
-          
-          norm.moderationAction = bulkAction;
-          return norm;
+      let updatePayload: any = {
+        "schemaVersion": CURRENT_REVIEW_SCHEMA_VERSION,
+        "editedAt": now,
+        "editedBy": adminEmail,
+      };
+
+      if (action === "approve") {
+        updatePayload.status = "visible";
+        updatePayload.isHidden = false;
+        updatePayload.moderationAction = "approved";
+      } else if (action === "hide") {
+        updatePayload.status = "hidden";
+        updatePayload.isHidden = true;
+        updatePayload.moderationAction = "hidden";
+      } else if (action === "mark_featured") {
+        updatePayload.isFeatured = true;
+        if (params?.featuredPosition !== undefined) {
+          updatePayload.featuredPosition = Number(params.featuredPosition);
         }
-        return r;
-      });
-      
-      const success = await setKV(REVIEWS_KEY, nextReviews);
-      if (success) {
-        invalidateCache();
-        return NextResponse.json({ success: true, updatedCount });
+      } else if (action === "unfeature") {
+        updatePayload.isFeatured = false;
+      } else if (action === "status" && params?.status) {
+        updatePayload.status = params.status;
+        updatePayload.isHidden = params.status === "hidden" || params.status === "archived";
+        
+        if (params.status === "visible") updatePayload.moderationAction = "approved";
+        else if (params.status === "hidden") updatePayload.moderationAction = "hidden";
+        else if (params.status === "archived") {
+          updatePayload.moderationAction = "archived";
+          if (params?.archiveReason) updatePayload.archiveReason = params.archiveReason;
+        } else if (params.status === "pending") {
+          updatePayload.moderationAction = "restored";
+        }
+      } else if (action === "delete") {
+        updatePayload.status = "archived";
+        updatePayload.isHidden = true;
+        updatePayload.moderationAction = "archived";
+        if (params?.archiveReason) {
+          updatePayload.archiveReason = params.archiveReason;
+        }
       }
-      return NextResponse.json({ error: "فشل تنفيذ العملية الجماعية" }, { status: 500 });
+
+      const { error: updateError } = await supabaseAdmin
+        .from("product_reviews")
+        .update(updatePayload)
+        .in("id", ids);
+
+      if (updateError) {
+        console.error("Error bulk updating reviews:", updateError.message);
+        return NextResponse.json({ error: "فشل تنفيذ العملية الجماعية في قاعدة البيانات" }, { status: 500 });
+      }
+
+      invalidateCache();
+      return NextResponse.json({ success: true, updatedCount: ids.length });
     }
     
     // Single update
@@ -332,10 +341,10 @@ export async function PUT(req: Request) {
       return NextResponse.json({ error: validation.error }, { status: 400 });
     }
 
-    const allReviews: any[] = await getKV(REVIEWS_KEY) || [];
-    const index = allReviews.findIndex(r => String(r.id) === String(updatedReview.id));
+    const oldReviews = await fetchAndCacheReviews();
+    const existing = oldReviews.find(r => String(r.id) === String(updatedReview.id));
     
-    if (index === -1) {
+    if (!existing) {
       return NextResponse.json({ error: "التقييم غير موجود" }, { status: 404 });
     }
 
@@ -346,7 +355,7 @@ export async function PUT(req: Request) {
       text: validation.text !== undefined ? validation.text : updatedReview.text,
     };
     
-    const oldStatus = allReviews[index].status;
+    const oldStatus = existing.status;
     let singleAction: ModerationAction = "edited";
     if (cleanedUpdate.status !== undefined) {
       if (cleanedUpdate.status === "visible") singleAction = "approved";
@@ -362,7 +371,7 @@ export async function PUT(req: Request) {
     }
     
     const merged = normalizeReview({
-      ...allReviews[index],
+      ...existing,
       ...cleanedUpdate,
       schemaVersion: CURRENT_REVIEW_SCHEMA_VERSION,
       editedAt: new Date().toISOString(),
@@ -370,13 +379,18 @@ export async function PUT(req: Request) {
       moderationAction: cleanedUpdate.moderationAction || singleAction
     });
     
-    allReviews[index] = merged;
-    const success = await setKV(REVIEWS_KEY, allReviews);
-    if (success) {
-      invalidateCache();
-      return NextResponse.json({ success: true, review: merged });
+    const { error: updateError } = await supabaseAdmin
+      .from("product_reviews")
+      .update(merged)
+      .eq("id", merged.id);
+
+    if (updateError) {
+      console.error("Error updating review:", updateError.message);
+      return NextResponse.json({ error: "فشل تحديث التقييم في قاعدة البيانات" }, { status: 500 });
     }
-    return NextResponse.json({ error: "فشل تحديث التقييم" }, { status: 500 });
+
+    invalidateCache();
+    return NextResponse.json({ success: true, review: merged });
   } catch (err: any) {
     console.error("[Reviews API] PUT Exception:", err);
     return NextResponse.json({ error: err.message }, { status: 500 });
@@ -396,32 +410,51 @@ export async function DELETE(req: Request) {
     const archiveReason = url.searchParams.get("archiveReason") || undefined;
     if (!id) return NextResponse.json({ error: "ID مطلوب" }, { status: 400 });
 
-    const allReviews: any[] = await getKV(REVIEWS_KEY) || [];
-    const index = allReviews.findIndex(r => String(r.id) === String(id));
+    const oldReviews = await fetchAndCacheReviews();
+    const existing = oldReviews.find(r => String(r.id) === String(id));
     
-    if (index === -1) {
+    if (!existing) {
       return NextResponse.json({ error: "التقييم غير موجود" }, { status: 404 });
     }
     
-    const adminEmail = process.env.ADMIN_EMAIL || "admin@youssefautomates.com";
-    const merged = normalizeReview({
-      ...allReviews[index],
-      status: "archived",
-      isHidden: true,
-      archiveReason,
-      schemaVersion: CURRENT_REVIEW_SCHEMA_VERSION,
-      editedAt: new Date().toISOString(),
-      editedBy: adminEmail,
-      moderationAction: "archived"
-    });
-    
-    allReviews[index] = merged;
-    const success = await setKV(REVIEWS_KEY, allReviews);
-    if (success) {
-      invalidateCache();
-      return NextResponse.json({ success: true });
+    if (existing.status === "archived") {
+      // Permanent delete if already archived
+      const { error: deleteError } = await supabaseAdmin
+        .from("product_reviews")
+        .delete()
+        .eq("id", id);
+
+      if (deleteError) {
+        console.error("Error permanently deleting review:", deleteError.message);
+        return NextResponse.json({ error: "فشل حذف التقييم نهائياً" }, { status: 500 });
+      }
+    } else {
+      // Soft delete: set status to archived
+      const adminEmail = process.env.ADMIN_EMAIL || "admin@youssefautomates.com";
+      const merged = normalizeReview({
+        ...existing,
+        status: "archived",
+        isHidden: true,
+        archiveReason,
+        schemaVersion: CURRENT_REVIEW_SCHEMA_VERSION,
+        editedAt: new Date().toISOString(),
+        editedBy: adminEmail,
+        moderationAction: "archived"
+      });
+      
+      const { error: updateError } = await supabaseAdmin
+        .from("product_reviews")
+        .update(merged)
+        .eq("id", id);
+
+      if (updateError) {
+        console.error("Error soft deleting review:", updateError.message);
+        return NextResponse.json({ error: "فشل أرشفة التقييم في قاعدة البيانات" }, { status: 500 });
+      }
     }
-    return NextResponse.json({ error: "فشل أرشفة التقييم" }, { status: 500 });
+    
+    invalidateCache();
+    return NextResponse.json({ success: true });
   } catch (err: any) {
     console.error("[Reviews API] DELETE Exception:", err);
     return NextResponse.json({ error: err.message }, { status: 500 });

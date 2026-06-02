@@ -2,10 +2,12 @@
 
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { Badge } from "@/components/ui/badge";
+import { SocialLinks } from "@/components/SocialLinks";
 import { 
   Zap, Lock, Star, ShieldCheck, Target, 
-  MonitorPlay, ArrowLeft, ShoppingCart, Play, CheckCircle2, ChevronLeft
+  MonitorPlay, ArrowLeft, ShoppingCart, Play, CheckCircle2, ChevronLeft,
+  Clock, Award, PlayCircle, HelpCircle, AlertCircle, Users, VolumeX, MessageSquareQuote,
+  Check, Sparkles
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -18,6 +20,7 @@ import { supabase, type Product, calcDiscount, fetchActiveProducts } from "@/lib
 import { useCart } from "@/context/CartContext";
 import { resolveUserCurrency, resolveProductPrice, formatPrice, type Currency } from "@/lib/pricing";
 import { trackViewContent, trackAddToCart, trackInitiateCheckout } from "@/lib/metaPixel";
+import { ProductReviews } from "@/components/ProductReviews";
 
 // ── Helper: Unpack Media and Tags ──────────────────────────────────────
 function unpackProduct(p: Product) {
@@ -63,13 +66,22 @@ const getAvatarUrl = (firstName: string, gender?: string) => {
   return `https://api.dicebear.com/9.x/adventurer/svg?seed=${chosen}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc`;
 };
 
-// Fallback reviews to maintain conversion and trust
-const FALLBACK_REVIEWS = [
-  { id: "rev-1", firstName: "أنس", lastName: "م.", rating: 5, text: "حزمة المؤثرات الإبداعية خرافية وتضيف طابعاً سينمائياً للفيديو مباشرة.", isVerified: true, gender: "male" },
-  { id: "rev-2", firstName: "سارة", lastName: "ع.", rating: 5, text: "الدليل مفصل للغاية، صياغة الأفكار بالذكاء الاصطناعي اختصرت علي أياماً من البحث.", isVerified: true, gender: "female" },
-  { id: "rev-3", firstName: "كريم", lastName: "ح.", rating: 5, text: "قوالب الرسوم المتحركة ممتازة وسهلة الاستخدام، أضافت حيوية لحساباتي.", isVerified: true, gender: "male" },
-  { id: "rev-4", firstName: "ياسمين", lastName: "س.", rating: 5, text: "أفضل استثمار إبداعي قمت به لتطوير وتعديل فيديوهاتي الفيرالية.", isVerified: true, gender: "female" }
-];
+// Client-side HTML sanitizer to prevent XSS
+function sanitizeHtml(html: string): string {
+  if (!html) return "";
+  return html
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
+    .replace(/on\w+\s*=\s*(?:'[^']*'|"[^"]*"|[^\s>]+(?=\s|>))/gi, "");
+}
+
+// Deterministic pseudo-random sales count generator based on product ID
+function getPseudoRandomSalesCount(id: string): number {
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) {
+    hash = id.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return 50 + (Math.abs(hash) % 25);
+}
 
 export default function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
   const resolvedParams = use(params);
@@ -85,9 +97,35 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
   
   const { addToCart } = useCart();
 
+  // Floating CTA visibility scroll states
+  const [showFloatingBar, setShowFloatingBar] = useState(true);
+  const lastScrollY = useRef(0);
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      if (currentScrollY > lastScrollY.current && currentScrollY > 100) {
+        setShowFloatingBar(false);
+      } else {
+        setShowFloatingBar(true);
+      }
+      lastScrollY.current = currentScrollY;
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // Swipe gesture coords
+  const touchStartX = useRef<number | null>(null);
+  const touchEndX = useRef<number | null>(null);
+
   // Reviews list states
   const [reviews, setReviews] = useState<any[]>([]);
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
+
+  // Conversion animations and countdown states
+  const [timeLeft, setTimeLeft] = useState<string>("");
+  const [salesCount, setSalesCount] = useState(0);
+  const [ratingVal, setRatingVal] = useState(0.0);
 
   useEffect(() => {
     resolveUserCurrency().then(setCurrency);
@@ -95,6 +133,75 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
 
   const productPricing = product ? resolveProductPrice(product as any, currency) : null;
   const discountPct = productPricing ? calcDiscount(productPricing.price, productPricing.original_price) : null;
+
+  const reviewsCount = reviews.length;
+  const averageRating = reviewsCount > 0 
+    ? (reviews.reduce((sum, r) => sum + Number(r.rating || 0), 0) / reviewsCount).toFixed(1)
+    : "5.0";
+
+  // Pseudo-session 30m countdown timer
+  useEffect(() => {
+    if (discountPct && discountPct > 0) {
+      let targetTime = Number(sessionStorage.getItem("product-urgency-timer"));
+      if (!targetTime || isNaN(targetTime)) {
+        targetTime = Date.now() + 30 * 60 * 1000;
+        sessionStorage.setItem("product-urgency-timer", String(targetTime));
+      }
+
+      const updateTimer = () => {
+        const now = Date.now();
+        const diff = targetTime - now;
+        if (diff <= 0) {
+          const nextTarget = Date.now() + 30 * 60 * 1000;
+          sessionStorage.setItem("product-urgency-timer", String(nextTarget));
+          setTimeLeft("30:00");
+        } else {
+          const mins = Math.floor(diff / 60000);
+          const secs = Math.floor((diff % 60000) / 1000);
+          setTimeLeft(`${mins}:${secs < 10 ? "0" : ""}${secs}`);
+        }
+      };
+
+      updateTimer();
+      const interval = setInterval(updateTimer, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [discountPct]);
+
+  // Dynamic animated sales & rating count-up logic
+  useEffect(() => {
+    if (!product) return;
+    const targetSales = getPseudoRandomSalesCount(product.id);
+    const targetRating = Number(averageRating);
+
+    let salesStart = 0;
+    const salesStep = Math.max(Math.floor(targetSales / 30), 1);
+    const salesInterval = setInterval(() => {
+      salesStart += salesStep;
+      if (salesStart >= targetSales) {
+        setSalesCount(targetSales);
+        clearInterval(salesInterval);
+      } else {
+        setSalesCount(salesStart);
+      }
+    }, 20);
+
+    let ratingStart = 0.0;
+    const ratingInterval = setInterval(() => {
+      ratingStart += 0.2;
+      if (ratingStart >= targetRating) {
+        setRatingVal(targetRating);
+        clearInterval(ratingInterval);
+      } else {
+        setRatingVal(Number(ratingStart.toFixed(1)));
+      }
+    }, 30);
+
+    return () => {
+      clearInterval(salesInterval);
+      clearInterval(ratingInterval);
+    };
+  }, [product, averageRating]);
 
   // 1. Fetch Product Data
   const fetchProduct = useCallback(async () => {
@@ -170,14 +277,15 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
     fetch(`/api/admin/reviews?productId=${product.id}&_t=${Date.now()}`, { cache: "no-store" })
       .then(res => res.json())
       .then(data => {
-        if (Array.isArray(data) && data.length > 0) {
-          setReviews(data.slice(0, 6)); // Keep reviews concise
+        if (Array.isArray(data)) {
+          setReviews(data);
         } else {
-          setReviews(FALLBACK_REVIEWS);
+          setReviews([]);
         }
       })
-      .catch(() => {
-        setReviews(FALLBACK_REVIEWS);
+      .catch((err) => {
+        console.error("Failed to fetch product reviews:", err);
+        setReviews([]);
       });
   }, [product]);
 
@@ -222,6 +330,40 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
         videoRef.current.play().catch(() => {});
       }
     }, 50);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.targetTouches[0].clientX;
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    touchEndX.current = e.targetTouches[0].clientX;
+  };
+
+  const handleTouchEnd = (slidesList: any[]) => {
+    if (!touchStartX.current || !touchEndX.current || slidesList.length === 0) return;
+    const diffX = touchStartX.current - touchEndX.current;
+    const swipeThreshold = 50;
+    
+    if (Math.abs(diffX) > swipeThreshold) {
+      const currentIndex = slidesList.findIndex(s => s.url === activeMedia?.url);
+      if (currentIndex !== -1) {
+        if (diffX > 0) {
+          const nextIndex = (currentIndex + 1) % slidesList.length;
+          setActiveMedia(slidesList[nextIndex]);
+          setHasInteracted(false);
+        } else {
+          const prevIndex = (currentIndex - 1 + slidesList.length) % slidesList.length;
+          setActiveMedia(slidesList[prevIndex]);
+          setHasInteracted(false);
+        }
+      } else if (slidesList.length > 0) {
+        setActiveMedia(slidesList[0]);
+        setHasInteracted(false);
+      }
+    }
+    touchStartX.current = null;
+    touchEndX.current = null;
   };
 
   if (isLoading) {
@@ -576,414 +718,558 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
               MOBILE HANDCRAFTED LAYOUT (lg:hidden)
               ========================================================================= */}
           <div className="lg:hidden flex flex-col gap-6">
-            
-            {/* A. Product Title & Pricing */}
-            <div className="space-y-3 text-right">
-              {discountPct && (
-                <Badge className="bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 font-alexandria px-2 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-wider">
-                  🔥 عرض خاص لفترة محدودة
-                </Badge>
-              )}
+            <style dangerouslySetInnerHTML={{ __html: `
+              @keyframes bounce-subtle {
+                0%, 100% { transform: translateY(0); }
+                50% { transform: translateY(-3px); }
+              }
+              .animate-bounce-subtle {
+                animation: bounce-subtle 3s ease-in-out infinite;
+              }
+              @keyframes pulse-glow {
+                0%, 100% { box-shadow: 0 0 15px rgba(214, 0, 75, 0.4); }
+                50% { box-shadow: 0 0 30px rgba(214, 0, 75, 0.7); }
+              }
+              .animate-pulse-glow {
+                animation: pulse-glow 2s infinite;
+              }
+              @keyframes shimmer-sweep {
+                0% { background-position: -200% 0; }
+                100% { background-position: 200% 0; }
+              }
+              .animate-shimmer-sweep {
+                background: linear-gradient(90deg, rgba(214,0,75,0.15) 25%, rgba(214,0,75,0.35) 50%, rgba(214,0,75,0.15) 75%);
+                background-size: 200% 100%;
+                animation: shimmer-sweep 2.5s infinite linear;
+              }
+              @keyframes border-pulse {
+                0%, 100% { border-color: rgba(255, 255, 255, 0.1); }
+                50% { border-color: rgba(214, 0, 75, 0.45); }
+              }
+              .animate-border-pulse {
+                animation: border-pulse 3s infinite ease-in-out;
+              }
+              @keyframes fade-in-up {
+                0% { opacity: 0; transform: translateY(10px); }
+                100% { opacity: 1; transform: translateY(0); }
+              }
+              .animate-fade-in-up {
+                animation: fade-in-up 0.5s ease-out forwards;
+              }
+              @media (prefers-reduced-motion: reduce) {
+                .animate-bounce-subtle, .animate-pulse-glow, .animate-shimmer-sweep, .animate-border-pulse, .animate-fade-in-up {
+                  animation: none !important;
+                  transition: none !important;
+                }
+              }
+            `}} />
+
+            {/* Urgency / Discount Banner */}
+            {discountPct && discountPct > 0 && (
+              <div className="animate-shimmer-sweep border border-[#D6004B]/35 rounded-2xl p-3 flex items-center justify-between text-right text-xs text-white gap-2 shadow-[0_0_25px_rgba(214,0,75,0.2)] mt-2 animate-bounce-subtle">
+                <div className="flex items-center gap-2">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                  </span>
+                  <span className="font-bold text-[10px] sm:text-xs">
+                    عرض لفترة محدودة: خصم {discountPct}% مفعل حالياً! ({timeLeft})
+                  </span>
+                </div>
+                <div className="bg-[#D6004B] text-[9px] font-black px-2.5 py-1 rounded-lg uppercase tracking-wider animate-pulse shrink-0">
+                  سارع بالاقتناء
+                </div>
+              </div>
+            )}
+
+            {/* Title Section & Badges */}
+            <div className="text-center pt-2 space-y-3">
               <h1 className="text-xl sm:text-2xl font-alexandria font-black text-white leading-tight">
                 {product.title}
               </h1>
               {product.arabic_title && (
-                <p className="text-xs sm:text-sm text-zinc-400 font-bold font-cairo" dir="rtl">
+                <p className="text-xs sm:text-sm text-zinc-400 font-bold font-cairo">
                   {product.arabic_title}
                 </p>
               )}
-              
-              {/* Price display row */}
-              <div className="flex items-center gap-2 justify-start pt-1">
-                <span className="text-2xl font-alexandria font-black text-rose-500">
-                  {productPricing ? (productPricing.price === 0 ? "مجاني" : formatPrice(productPricing.price, currency)) : ""}
+              <div className="flex items-center justify-center gap-1.5 flex-wrap">
+                <span className="bg-[#D6004B]/10 border border-[#D6004B]/20 text-[#D6004B] text-[9px] font-black px-2 py-0.5 rounded-full font-cairo">الأكثر مبيعاً 🔥</span>
+                <span className="bg-white/5 border border-white/10 text-zinc-300 text-[9px] font-black px-2 py-0.5 rounded-full font-cairo">تفعيل تلقائي وفوري ⚡</span>
+                <span className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[9px] font-black px-2 py-0.5 rounded-full font-cairo">منتج موثوق ✅</span>
+              </div>
+
+              {/* Social Proof Bar */}
+              <div className="flex items-center justify-center gap-3 text-[10.5px] text-zinc-400 pt-1 font-cairo select-none font-bold">
+                <span className="flex items-center gap-1">
+                  🔥 <span className="text-rose-500 font-alexandria">{salesCount || getPseudoRandomSalesCount(product.id)}+</span> عميل اقتنى هذا المنتج
                 </span>
-                {productPricing && productPricing.original_price > 0 && (
-                  <span className="text-xs text-zinc-550 line-through">
-                    {formatPrice(productPricing.original_price, currency)}
-                  </span>
+                {reviews.length > 0 && (
+                  <>
+                    <span className="text-zinc-700">•</span>
+                    <span className="flex items-center gap-1">
+                      ⭐ <span className="text-yellow-500 font-alexandria">{ratingVal.toFixed(1)}</span> تقييم متوسط
+                    </span>
+                  </>
                 )}
               </div>
             </div>
 
-            {/* B. Main Media Preview Viewer (16:9 ratio) */}
-            <div className="relative aspect-video bg-[#08080c] rounded-2xl overflow-hidden shadow-2xl border border-white/5 flex items-center justify-center">
-              <AnimatePresence mode="wait">
-                {activeMedia?.type === 'video' ? (
-                  <motion.div 
-                    key="video"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="absolute inset-0 z-10 flex items-center justify-center bg-black"
+            {/* Main Media Preview Viewer (16:9 ratio) */}
+            {(() => {
+              const slides = (() => {
+                if (product.slides && product.slides.length > 0) return product.slides;
+                if (process.env.NODE_ENV === "development") {
+                  return [
+                    { type: 'image' as const, url: 'placeholder-slide-1' },
+                    { type: 'image' as const, url: 'placeholder-slide-2' },
+                    { type: 'image' as const, url: 'placeholder-slide-3' }
+                  ];
+                }
+                return [];
+              })();
+
+              return (
+                <>
+                  <div 
+                    onTouchStart={handleTouchStart}
+                    onTouchMove={handleTouchMove}
+                    onTouchEnd={() => handleTouchEnd(slides)}
+                    className="relative aspect-video bg-[#08080c] rounded-2xl overflow-hidden shadow-2xl border border-white/5 flex items-center justify-center group w-full"
                   >
-                    {!hasInteracted ? (
-                      <div 
-                        onClick={handleUnmuteAndStart}
-                        className="absolute inset-0 flex flex-col items-center justify-center cursor-pointer"
-                        style={{ zIndex: 25 }}
-                      >
-                        {product.image_url ? (
-                          <Image 
-                            src={product.image_url} 
-                            alt={product.title}
-                            fill
-                            className="object-cover"
-                            priority
-                          />
-                        ) : (
-                          <div className="absolute inset-0 bg-[#0a0a0f] flex items-center justify-center" />
-                        )}
-                        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 backdrop-blur-[2px] z-20">
-                          <motion.div 
-                            animate={{ scale: [1, 1.08, 1] }}
-                            transition={{ duration: 2, repeat: Infinity }}
-                            className="w-14 h-14 bg-[#D6004B] border border-white/20 rounded-full flex items-center justify-center mb-3 shadow-2xl"
+                    {activeMedia?.url === 'placeholder-slide-1' ? (
+                      <div className="w-full h-full bg-gradient-to-br from-indigo-950 via-purple-900 to-rose-950 flex items-center justify-center p-6 text-center">
+                        <span className="text-white text-sm sm:text-base font-alexandria font-black drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)]">{product.title}</span>
+                      </div>
+                    ) : activeMedia?.url === 'placeholder-slide-2' ? (
+                      <div className="w-full h-full bg-gradient-to-br from-zinc-950 via-stone-900 to-zinc-900 flex items-center justify-center p-6 text-center">
+                        <span className="text-rose-400 text-sm sm:text-base font-alexandria font-black drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)]">محتوى حصري 💎</span>
+                      </div>
+                    ) : activeMedia?.url === 'placeholder-slide-3' ? (
+                      <div className="w-full h-full bg-gradient-to-br from-[#D6004B]/60 via-[#ff1d6b]/40 to-indigo-950 flex items-center justify-center p-6 text-center">
+                        <span className="text-white text-sm sm:text-base font-alexandria font-black drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)]">أصول إبداعية ⚡</span>
+                      </div>
+                    ) : activeMedia?.type === 'video' ? (
+                      <div className="absolute inset-0 z-10 flex items-center justify-center bg-black">
+                        {!hasInteracted ? (
+                          <div 
+                            onClick={handleUnmuteAndStart}
+                            className="absolute inset-0 flex flex-col items-center justify-center cursor-pointer bg-black/45 backdrop-blur-[2px] z-20"
                           >
-                             <Play className="w-5 h-5 text-white fill-current ml-0.5" />
-                          </motion.div>
-                          <span className="font-alexandria font-black text-xs text-white tracking-widest bg-black/55 px-4 py-2 rounded-xl border border-white/10">
-                             تشغيل العرض الترويجي
-                          </span>
-                        </div>
+                            {product.image_url ? (
+                              <Image 
+                                src={product.image_url} 
+                                alt={product.title}
+                                fill
+                                className="object-cover opacity-60 pointer-events-none"
+                              />
+                            ) : (
+                              <div className="absolute inset-0 bg-[#0a0a0f] opacity-60" />
+                            )}
+                            <motion.div 
+                              animate={{ scale: [1, 1.06, 1] }}
+                              transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+                              className="relative w-14 h-14 bg-[#D6004B]/95 border border-white/20 rounded-full flex items-center justify-center mb-3 shadow-[0_0_20px_rgba(214,0,75,0.4)]"
+                            >
+                              <Play className="w-5 h-5 text-white fill-current ml-0.5" />
+                            </motion.div>
+                            <span className="relative text-[10px] font-cairo font-bold text-white/95 bg-black/60 backdrop-blur-md px-3.5 py-1.5 rounded-lg border border-white/10 flex items-center gap-1.5">
+                              <VolumeX className="w-3 h-3" />
+                              اضغط لتشغيل الصوت
+                            </span>
+                          </div>
+                        ) : (
+                          renderVideoPlayer(activeMedia.url)
+                        )}
+                      </div>
+                    ) : activeMedia?.url ? (
+                      <div className="relative w-full h-full">
+                        <Image 
+                          src={activeMedia.url} 
+                          alt={product.title} 
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                    ) : product.image_url ? (
+                      <div className="relative w-full h-full">
+                        <Image 
+                          src={product.image_url} 
+                          alt={product.title} 
+                          fill
+                          className="object-cover"
+                        />
                       </div>
                     ) : (
-                      renderVideoPlayer(activeMedia.url)
+                      <div className="absolute inset-0 bg-[#050508] flex items-center justify-center">
+                        <MonitorPlay className="w-10 h-10 text-zinc-700" />
+                      </div>
                     )}
-                  </motion.div>
-                ) : activeMedia?.url ? (
-                  <motion.div
-                    key={activeMedia.url}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="absolute inset-0"
-                  >
-                    <Image 
-                      src={activeMedia.url} 
-                      alt={product.title} 
-                      fill
-                      className="object-cover"
-                      priority
-                    />
-                  </motion.div>
-                ) : (
-                  <div className="flex flex-col items-center justify-center text-zinc-800">
-                    <MonitorPlay className="w-14 h-14 opacity-20" />
                   </div>
-                )}
-              </AnimatePresence>
-            </div>
 
-            {/* C. Horizontal Media Thumbnails Slider (Slightly sharp corners rounded-xl) */}
-            {product.slides.length > 1 && (
-              <div className="w-full select-none -mt-2">
-                <div className="flex gap-2.5 snap-x overflow-x-auto custom-scrollbar-premium pb-2">
-                  {product.slides.map((slide, i) => {
-                    const isYT = slide.type === 'video' && (slide.url.includes('youtube.com') || slide.url.includes('youtu.be'));
-                    const ytId = isYT ? (slide.url.split('v=')[1]?.split('&')[0] || slide.url.split('/').pop()) : null;
-                    const isActive = activeMedia?.url === slide.url;
+                  {/* Horizontal Media Thumbnails Slider */}
+                  {slides.length >= 2 && (
+                    <div className="w-full select-none -mt-2">
+                      <div className="flex gap-2.5 snap-x overflow-x-auto custom-scrollbar-premium pb-2" dir="rtl">
+                        {slides.map((slide, i) => {
+                          const isYT = slide.type === 'video' && (slide.url.includes('youtube.com') || slide.url.includes('youtu.be'));
+                          const ytId = isYT ? (slide.url.split('v=')[1]?.split('&')[0] || slide.url.split('/').pop()) : null;
+                          const isActive = activeMedia?.url === slide.url;
 
-                    return (
-                      <button 
-                        key={i}
-                        onClick={() => { setActiveMedia(slide); setHasInteracted(false); }}
-                        className={cn(
-                          "relative aspect-video w-[26%] rounded-xl overflow-hidden shrink-0 snap-center border-2 bg-white/[0.02] transition-all",
-                          isActive 
-                            ? "border-[#D6004B] shadow-[0_0_10px_rgba(214,0,75,0.3)] scale-102" 
-                            : "border-white/5 opacity-60"
-                        )}
-                      >
-                         <div className="absolute inset-0 bg-zinc-950 flex items-center justify-center">
-                            {slide.type === 'video' ? (
-                              <>
-                                {isYT ? (
-                                  <Image 
-                                    src={`https://img.youtube.com/vi/${ytId}/hqdefault.jpg`} 
-                                    alt="video thumb" 
-                                    fill 
-                                    className="object-cover" 
-                                  />
-                                ) : (
-                                  <video 
-                                    src={`${slide.url}#t=0.1`} 
-                                    className="w-full h-full object-cover" 
-                                    muted 
-                                    playsInline 
-                                  />
-                                )}
-                                <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                                  <Play className="w-4 h-4 text-white fill-current" />
-                                </div>
-                              </>
-                            ) : (
-                              <Image src={slide.url} alt={`Gallery ${i}`} fill className="object-cover" />
-                            )}
-                         </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* D. Description Container (Glass card, premium RTL typographies) */}
-            <div className="bg-[#0b0b10]/60 backdrop-blur-xl rounded-2xl p-5 border border-white/5 shadow-2xl space-y-4">
-              <div className="flex items-center gap-2.5 border-b border-white/5 pb-3">
-                <Target className="w-4.5 h-4.5 text-rose-500" />
-                <h2 className="text-sm font-alexandria font-black text-white leading-tight">تفاصيل وأصول المنتج</h2>
-              </div>
-              
-              <div className="prose prose-invert prose-rose max-w-none text-zinc-300 leading-[1.9] text-xs font-cairo">
-                {product.description ? (
-                  <div className="text-zinc-300 font-cairo text-sm sm:text-base leading-[2.2] space-y-6 [&_p]:mb-6 [&_p]:leading-[2.2] [&_li]:mb-4 [&_li]:leading-[2.2] [&_h1]:mt-8 [&_h1]:mb-4 [&_h1]:text-lg [&_h2]:mt-6 [&_h2]:mb-3 [&_h2]:text-base [&_span]:leading-[2.2]" dangerouslySetInnerHTML={{ __html: product.description.replace(/\n/g, '<br/>') }} />
-                ) : (
-                  <p>هذا المنتج الرقمي مصمم لمساعدتك في تسريع صناعة المحتوى ورفع جودة إنتاجك الإبداعي بالذكاء الاصطناعي.</p>
-                )}
-              </div>
-
-              {/* Mobile benefits check list */}
-              <div className="grid grid-cols-1 gap-2.5 pt-3 border-t border-white/5">
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4.5 h-4.5 text-emerald-500 shrink-0" />
-                  <span className="text-[10px] text-zinc-400 font-bold">وصول آمن وتحميل فوري للحقيبة بالكامل</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4.5 h-4.5 text-emerald-500 shrink-0" />
-                  <span className="text-[10px] text-zinc-400 font-bold">تحديثات حصرية مجانية للعملاء مدى الحياة</span>
-                </div>
-              </div>
-            </div>
-
-          </div>
-
-          {/* =========================================================================
-              E. CUSTOM CUSTOMER REVIEWS SECTION (Verified purchase tags, concise text)
-              ========================================================================= */}
-          <div className="mt-16 border-t border-white/5 pt-12 space-y-8 select-none">
-            <div className="flex items-center gap-2.5 justify-start mb-6">
-              <div className="w-9 h-9 rounded-lg bg-rose-600/10 border border-rose-500/20 flex items-center justify-center text-rose-500">
-                <Star className="w-4.5 h-4.5 fill-current" />
-              </div>
-              <h2 className="text-lg sm:text-xl font-alexandria font-black text-white tracking-tighter">آراء وتقييمات المبدعين</h2>
-            </div>
-
-            {reviews.length === 0 ? (
-              <div className="text-center py-8 text-zinc-600 font-bold text-xs">لا توجد تقييمات مسجلة حالياً.</div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {reviews.slice(0, 4).map((rev, idx) => {
-                  const avatar = rev.avatarUrl && !rev.avatarUrl.includes("pravatar")
-                    ? rev.avatarUrl
-                    : getAvatarUrl(rev.firstName, rev.gender);
-
-                  return (
-                    <div 
-                      key={rev.id || idx}
-                      className="bg-[#08080c]/60 border border-white/5 hover:border-rose-500/20 p-5 rounded-2xl flex flex-col justify-between h-[150px] relative transition-all group overflow-hidden"
-                    >
-                      <div className="space-y-2.5">
-                        
-                        {/* Header card info */}
-                        <div className="flex items-center justify-between gap-2.5">
-                          <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 rounded-full bg-zinc-800 border border-white/10 overflow-hidden relative shrink-0">
-                              <img src={avatar} alt="avatar" className="w-full h-full object-cover" />
-                            </div>
-                            <h4 className="font-alexandria font-bold text-white text-[11px] truncate">
-                              {rev.firstName} {rev.lastName ? rev.lastName.charAt(0) + "." : ""}
-                            </h4>
-                          </div>
-
-                          {rev.isVerified !== false && (
-                            <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-full text-[8px] font-black font-cairo shrink-0">
-                              شراء موثق
-                            </span>
-                          )}
-                        </div>
-
-                        {/* Stars */}
-                        <div className="flex text-yellow-500 gap-0.5" dir="ltr">
-                          {Array.from({ length: 5 }).map((_, i) => {
-                            const starVal = i + 1;
-                            const isFilled = starVal <= Math.floor(rev.rating);
-                            const isHalf = !isFilled && starVal - 0.5 <= rev.rating;
-                            const fillPercent = isHalf ? (rev.rating - (starVal - 1)) * 100 : 0;
-
-                            return (
-                              <div key={i} className="relative w-3 h-3">
-                                <Star className="w-3 h-3 text-zinc-800 fill-transparent absolute inset-0" />
-                                {isFilled && <Star className="w-3 h-3 fill-current text-yellow-500 absolute inset-0" />}
-                                {isHalf && (
-                                  <div 
-                                    className="absolute inset-0 overflow-hidden text-yellow-500"
-                                    style={{ width: `${fillPercent}%` }}
-                                  >
-                                    <div className="w-3 h-3">
-                                      <Star className="w-3 h-3 fill-current text-yellow-500" />
-                                    </div>
+                          return (
+                            <button 
+                              key={i}
+                              onClick={() => { setActiveMedia(slide); setHasInteracted(false); }}
+                              className={cn(
+                                "relative aspect-video w-[28%] rounded-xl overflow-hidden shrink-0 snap-center border-2 bg-white/[0.02] transition-all duration-300",
+                                isActive 
+                                  ? "border-[#D6004B] shadow-[0_0_12px_rgba(214,0,75,0.45)] scale-102" 
+                                  : "border-white/5 opacity-60"
+                              )}
+                            >
+                              <div className="absolute inset-0 bg-zinc-950 flex items-center justify-center">
+                                {slide.url === 'placeholder-slide-1' ? (
+                                  <div className="w-full h-full bg-gradient-to-br from-indigo-950 to-rose-950 flex items-center justify-center text-[7px] text-white p-1 text-center font-bold font-alexandria leading-tight">
+                                    {product.title.slice(0, 15)}..
                                   </div>
+                                ) : slide.url === 'placeholder-slide-2' ? (
+                                  <div className="w-full h-full bg-gradient-to-br from-zinc-900 to-zinc-950 flex items-center justify-center text-[7px] text-rose-400 p-1 text-center font-bold font-alexandria leading-tight">
+                                    محتوى حصري
+                                  </div>
+                                ) : slide.url === 'placeholder-slide-3' ? (
+                                  <div className="w-full h-full bg-gradient-to-br from-[#D6004B]/60 to-indigo-950 flex items-center justify-center text-[7px] text-white p-1 text-center font-bold font-alexandria leading-tight">
+                                    أصول إبداعية
+                                  </div>
+                                ) : slide.type === 'video' ? (
+                                  <>
+                                    {isYT ? (
+                                      <Image 
+                                        src={`https://img.youtube.com/vi/${ytId}/hqdefault.jpg`} 
+                                        alt="video thumb" 
+                                        fill 
+                                        loading="lazy"
+                                        className="object-cover" 
+                                      />
+                                    ) : (
+                                      <video 
+                                        src={`${slide.url}#t=0.1`} 
+                                        className="w-full h-full object-cover" 
+                                        muted 
+                                        playsInline 
+                                        preload="metadata"
+                                      />
+                                    )}
+                                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                                      <Play className="w-3.5 h-3.5 text-white fill-current" />
+                                    </div>
+                                  </>
+                                ) : (
+                                  <Image src={slide.url} alt={`Gallery ${i}`} fill loading="lazy" className="object-cover" />
                                 )}
                               </div>
-                            );
-                          })}
-                        </div>
-
-                        {/* Description (Concise testimonial) */}
-                        <p className="text-zinc-400 font-cairo text-[11px] sm:text-xs leading-relaxed line-clamp-2">
-                          &ldquo;{rev.text}&rdquo;
-                        </p>
-
+                            </button>
+                          );
+                        })}
                       </div>
-
-                      {/* Ambient hover gradient */}
-                      <div className="absolute inset-0 bg-gradient-to-br from-rose-500/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl pointer-events-none" />
                     </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
+                  )}
+                </>
+              );
+            })()}
 
-          {/* =========================================================================
-              F. ADDITIONAL URGENCY CTA SECTION (Value proposition, premium button)
-              ========================================================================= */}
-          <div className="mt-16">
-            <div className="relative bg-gradient-to-br from-zinc-900 via-[#0a0a0f] to-zinc-950 border border-white/10 rounded-3xl md:rounded-[2.5rem] p-8 sm:p-12 overflow-hidden shadow-2xl flex flex-col md:flex-row items-center justify-between gap-6">
+            {/* Price Card Container */}
+            <div className="bg-gradient-to-br from-[#0e0e1a] to-[#07070d] border border-white/10 rounded-2xl p-5 shadow-[0_15px_50px_rgba(0,0,0,0.5)] relative overflow-hidden animate-border-pulse">
+              <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-transparent via-[#D6004B] to-transparent animate-pulse" />
               
-              {/* Background blurs */}
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[200px] bg-[#D6004B]/10 rounded-full blur-[80px] pointer-events-none" />
-              
-              <div className="space-y-3 max-w-xl text-right z-10">
-                <span className="bg-[#D6004B]/15 border border-[#D6004B]/20 text-[#D6004B] px-3 py-1 rounded-full text-[10px] font-black font-alexandria uppercase tracking-wider inline-block">
-                  🔥 فرصة اقتناء الأصول الفنية
-                </span>
-                <h3 className="text-xl sm:text-2xl font-alexandria font-black text-white leading-tight">
-                  ابدأ بإنتاج محتوى بصري احترافي فوراً اليوم!
-                </h3>
-                <p className="text-zinc-400 text-xs font-cairo leading-relaxed">
-                  احصل على الحزمة والملفات الإبداعية الكاملة الآن ووفر مئات الساعات من البحث والتصميم اليدوي. روابط التحميل تسلم فورا.
-                </p>
-              </div>
-
-              <div className="z-10 shrink-0 w-full md:w-auto flex flex-col items-center justify-center bg-white/[0.01] border border-white/5 rounded-2xl p-6 text-center min-w-[240px]">
-                {productPricing && productPricing.original_price > 0 && (
-                  <span className="text-[10px] text-zinc-500 line-through mb-0.5 font-alexandria">
-                    {formatPrice(productPricing.original_price, currency)}
-                  </span>
-                )}
-                <span className="text-2xl font-alexandria font-black text-white mb-4">
-                  {productPricing ? (productPricing.price === 0 ? "مجاني" : formatPrice(productPricing.price, currency)) : ""}
-                </span>
+              <div className="space-y-5">
+                <div className="flex items-center justify-between font-cairo">
+                  <span className="text-[10px] text-zinc-400 font-bold font-alexandria uppercase tracking-wider">سعر الاستثمار الحالي</span>
+                  {productPricing && productPricing.original_price > productPricing.price && (
+                    <span className="text-xs text-zinc-550 line-through font-alexandria">بدلاً من {formatPrice(productPricing.original_price, currency)}</span>
+                  )}
+                </div>
                 
+                <div className="flex items-baseline justify-between gap-2">
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-2xl sm:text-3xl font-alexandria font-black text-white">
+                      {productPricing ? (productPricing.price === 0 ? "مجاني" : formatPrice(productPricing.price, currency)) : ""}
+                    </span>
+                    {productPricing && productPricing.original_price > productPricing.price && (
+                      <span className="text-[10px] text-emerald-400 font-bold bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-md animate-pulse font-alexandria">
+                        وفر {discountPct}%
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-[8.5px] text-zinc-400 font-cairo">تحميل وتنزيل فوري</span>
+                </div>
+
+                {/* Scarcity Indicator */}
+                <div className="text-[10.5px] font-bold font-cairo text-right animate-pulse transition-all">
+                  {discountPct && discountPct > 0 ? (
+                    <span className="text-amber-400">⏰ هذا السعر المخفض لن يستمر طويلاً — اقتنِه الآن بخصم {discountPct}%</span>
+                  ) : (
+                    <span className="text-emerald-400">✅ منتج رقمي — وصول فوري بعد الشراء مباشرة</span>
+                  )}
+                </div>
+
+                {/* Compact Micro Trust Row */}
+                <div className="flex justify-around py-1.5 border-y border-white/5 text-[9px] text-zinc-400 font-bold font-cairo bg-white/[0.01] rounded-lg">
+                  <span className="flex items-center gap-1">🔒 دفع آمن</span>
+                  <span className="flex items-center gap-1">⚡ تسليم فوري</span>
+                  <span className="flex items-center gap-1">🔄 وصول مدى الحياة</span>
+                </div>
+
+                {/* CTA Buy Buttons */}
                 <Link
                   href={`/checkout/${product.id}`}
                   onClick={() => trackInitiateCheckout(product.id, product.title, productPricing?.price ?? product.price, currency, "product")}
-                  className="h-12 px-6 bg-[#D6004B] hover:bg-[#ff0059] text-white rounded-xl font-bold text-xs transition-all w-full flex items-center justify-center gap-1.5 shadow-lg active:scale-95 cursor-pointer font-alexandria"
+                  className="w-full h-14 bg-gradient-to-r from-[#D6004B] via-[#ff1d6b] to-[#D6004B] text-white rounded-xl font-black text-sm sm:text-base shadow-[0_10px_30px_rgba(214,0,75,0.4)] transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer font-cairo animate-pulse-glow"
                 >
-                  <span>شراء وتنزيل فوري</span>
+                  <span>{discountPct && discountPct > 0 ? `اقتنِه الآن ← خصم ${discountPct}%` : "اقتنِه الآن ←"}</span>
                   <ArrowLeft className="w-4 h-4 rtl:rotate-180" />
                 </Link>
-              </div>
 
+                <button
+                  onClick={() => {
+                    const price = productPricing?.price ?? product.price;
+                    addToCart({
+                      ...product,
+                      price: price,
+                      original_price: productPricing?.original_price ?? product.original_price,
+                    } as any);
+                    trackAddToCart(product.id, product.title, price, currency, "product");
+                  }}
+                  className="w-full h-11 bg-white/5 hover:bg-white/10 text-white rounded-xl font-bold text-xs border border-white/10 transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer font-cairo"
+                >
+                  <span>أضف إلى السلة 🛒</span>
+                </button>
+
+                {/* Trust Signals */}
+                <div className="flex flex-col gap-2 pt-2 border-t border-white/5 text-[9.5px] text-zinc-400 font-bold font-cairo">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-[#D6004B] shrink-0" />
+                    <span>⚡ تسليم فوري بعد الدفع مباشرة</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-[#D6004B] shrink-0" />
+                    <span>🔄 تحديثات حرة ومجانية مدى الحياة</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-[#D6004B] shrink-0" />
+                    <span>✅ منتج موثوق ومدعوم من Youssef Automates</span>
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
 
-          {/* =========================================================================
-              G. NICHE-PRIORITIZED RELATED DIGITAL PRODUCTS (Only products)
-              ========================================================================= */}
-          {relatedProducts.length > 0 && (
-            <div className="mt-16 border-t border-white/5 pt-12 space-y-6">
-              <div className="flex flex-col gap-1 text-right">
-                <span className="text-[10px] text-rose-500 font-bold uppercase tracking-wider font-alexandria">أصول رقمية مقترحة</span>
-                <h3 className="text-lg sm:text-xl font-alexandria font-black text-white">منتجات رقمية قد تثير اهتمامك</h3>
+            {/* Description Section — No Tabs */}
+            <div className="bg-[#09090e] border border-white/5 rounded-2xl p-5 space-y-4">
+              <div className="flex items-center gap-2 border-b border-white/5 pb-2">
+                <Target className="w-4 h-4 text-[#D6004B]" />
+                <h3 className="text-xs font-alexandria font-bold text-white">تفاصيل وأصول المنتج</h3>
               </div>
+              
+              {product.description ? (
+                <div 
+                  className="text-zinc-300 font-cairo text-xs leading-[1.8] space-y-4 prose prose-invert prose-rose max-w-none [&_p]:mb-4 [&_p]:leading-[1.8]" 
+                  dangerouslySetInnerHTML={{ __html: sanitizeHtml(product.description.replace(/\n/g, '<br/>')) }} 
+                />
+              ) : (
+                <p className="text-zinc-400 font-cairo text-xs leading-[1.8]">هذا المنتج الرقمي مصمم لمساعدتك في تسريع صناعة المحتوى ورفع جودة إنتاجك الإبداعي بالذكاء الاصطناعي.</p>
+              )}
 
-              {/* Horizontal scroll container on mobile, grid on desktop */}
-              <div className="flex gap-4 overflow-x-auto snap-x lg:grid lg:grid-cols-4 lg:overflow-x-visible pb-4 custom-scrollbar-premium">
-                {relatedProducts.map((item) => {
-                  const pricing = resolveProductPrice(item, currency);
-                  const discount = calcDiscount(pricing.price, pricing.original_price);
+              {/* Benefits Checklist with emerald checkmarks */}
+              <div className="bg-white/[0.02] backdrop-blur-md border border-white/10 rounded-xl p-4 space-y-3 mt-4 relative overflow-hidden font-cairo">
+                <div className="absolute -top-5 -right-5 w-20 h-20 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none" />
+                <h4 className="text-[11px] font-alexandria font-bold text-white flex items-center gap-2 relative z-10">
+                  <CheckCircle2 className="w-4.5 h-4.5 text-emerald-500" />
+                  أبرز مزايا الاقتناء المباشر:
+                </h4>
+                <div className="flex flex-col gap-2.5 relative z-10 text-[10px] text-zinc-300">
+                  <div className="flex items-start gap-2 bg-white/[0.01] border border-white/[0.03] p-2.5 rounded-xl">
+                    <Check className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                    <span>وصول آمن وتحميل فوري للحقيبة بالكامل بعد الدفع مباشرة</span>
+                  </div>
+                  <div className="flex items-start gap-2 bg-white/[0.01] border border-white/[0.03] p-2.5 rounded-xl">
+                    <Check className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                    <span>تحديثات حصرية مجانية للعملاء مدى الحياة في حسابك</span>
+                  </div>
+                  <div className="flex items-start gap-2 bg-white/[0.01] border border-white/[0.03] p-2.5 rounded-xl">
+                    <Check className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                    <span>أصول وتصاميم بجودة عالية جاهزة للمشاريع التجارية والخاصة</span>
+                  </div>
+                </div>
+              </div>
+            </div>
 
-                  return (
-                    <div
-                      key={item.id}
-                      onClick={() => router.push(`/product/${item.slug}`)}
-                      className="w-[260px] lg:w-full shrink-0 snap-center bg-[#09090e] border border-white/5 hover:border-rose-500/30 rounded-2xl p-4 flex flex-col justify-between hover:shadow-[0_0_15px_rgba(214,0,75,0.15)] transition-all duration-300 cursor-pointer group"
-                    >
-                      <div className="space-y-3">
-                        
-                        {/* Thumbnail aspect-video */}
-                        <div className="relative aspect-video w-full rounded-xl overflow-hidden bg-black/40">
-                          {item.image_url ? (
-                            <Image
-                              src={item.image_url}
-                              alt={item.title}
-                              fill
-                              className="object-cover group-hover:scale-102 transition-transform duration-500"
-                            />
-                          ) : (
-                            <div className="w-full h-full bg-zinc-900 flex items-center justify-center font-bold text-[10px] text-zinc-500">
-                              Youssef Automates
+            {/* Product Reviews Marquee */}
+            {reviews.length > 0 ? (
+              <div className="space-y-2 select-none">
+                <ProductReviews productId={product.id} initialReviews={reviews} title="آراء عملائنا ⭐" />
+              </div>
+            ) : (
+              <div className="mt-16 mb-8 text-center bg-[#08080c]/60 border border-white/5 p-8 rounded-3xl max-w-xl mx-auto backdrop-blur-xl relative group overflow-hidden select-none">
+                <div className="absolute inset-0 bg-gradient-to-br from-rose-500/[0.02] to-transparent opacity-100 rounded-3xl pointer-events-none" />
+                <span className="text-3xl block mb-3">⭐</span>
+                <h3 className="text-sm font-bold text-white font-alexandria mb-1">لا توجد تقييمات بعد</h3>
+                <p className="text-zinc-500 text-xs font-cairo mb-4 leading-relaxed">كن أول من يشارك تجربته ويقيم هذا المنتج المتميز!</p>
+              </div>
+            )}
+
+            {/* Related Products Section */}
+            {(() => {
+              const defaultRelated = process.env.NODE_ENV === "development" ? [
+                {
+                  id: "seeded-product-1",
+                  title: "حزمة قوالب الذكاء الاصطناعي",
+                  slug: "seeded-product-1",
+                  category: "قوالب وأدوات",
+                  short_description: "حزمة شاملة جاهزة للاستخدام لتسريع كتابة وإنجاز المحتوى بالذكاء الاصطناعي.",
+                  description: "حزمة شاملة جاهزة للاستخدام لتسريع كتابة وإنجاز المحتوى بالذكاء الاصطناعي.",
+                  price: 199,
+                  original_price: 299,
+                  image_url: "",
+                  features: []
+                },
+                {
+                  id: "seeded-product-2",
+                  title: "دليل أتمتة المحتوى",
+                  slug: "seeded-product-2",
+                  category: "كتب رقمية",
+                  short_description: "دليل شامل خطوة بخطوة لأتمتة صناعة المحتوى على منصات التواصل الاجتماعي.",
+                  description: "دليل شامل خطوة بخطوة لأتمتة صناعة المحتوى على منصات التواصل الاجتماعي.",
+                  price: 149,
+                  original_price: 199,
+                  image_url: "",
+                  features: []
+                }
+              ] : [];
+
+              const relatedList = relatedProducts.length > 0 ? relatedProducts : defaultRelated;
+
+              return relatedList.length > 0 ? (
+                <div className="space-y-4 overflow-hidden py-4 font-cairo">
+                  <h3 className="text-base font-alexandria font-black text-center text-white flex items-center gap-2 justify-center">
+                    منتجات قد تعجبك 🔥
+                  </h3>
+                  
+                  <div className="w-full overflow-hidden relative">
+                    <div className="absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-[#050505] to-transparent z-20 pointer-events-none" />
+                    <div className="absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-[#050505] to-transparent z-20 pointer-events-none" />
+                    
+                    <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-4 custom-scrollbar-premium" dir="rtl">
+                      {relatedList.map((item) => {
+                        const pricing = resolveProductPrice(item as any, currency);
+                        const discount = calcDiscount(pricing.price, pricing.original_price);
+
+                        return (
+                          <div
+                            key={item.id}
+                            onClick={() => router.push(`/product/${item.slug}`)}
+                            className="w-[240px] shrink-0 snap-center bg-[#09090e] border border-white/5 hover:border-rose-500/30 rounded-2xl p-4 flex flex-col justify-between hover:shadow-[0_0_15px_rgba(214,0,75,0.15)] transition-all duration-300 cursor-pointer group active:scale-98"
+                          >
+                            <div className="space-y-3">
+                              <div className="relative aspect-video w-full rounded-xl overflow-hidden bg-gradient-to-br from-zinc-900 to-[#12080c] border border-white/5 flex items-center justify-center">
+                                {item.image_url ? (
+                                  <Image
+                                    src={item.image_url}
+                                    alt={item.title}
+                                    fill
+                                    className="object-cover group-hover:scale-102 transition-transform duration-500"
+                                  />
+                                ) : (
+                                  <div className="w-full h-full bg-gradient-to-br from-zinc-900 to-indigo-950/40 flex items-center justify-center font-alexandria font-bold text-[8px] text-zinc-500 p-2 text-center">
+                                    {item.title}
+                                  </div>
+                                )}
+                                {discount && discount > 0 && (
+                                  <span className="absolute top-2 left-2 px-2 py-0.5 rounded bg-rose-600 text-white font-alexandria font-black text-[9px]">
+                                    -{discount}%
+                                  </span>
+                                )}
+                              </div>
+
+                              <span className="text-[9px] text-rose-500 font-bold font-alexandria block uppercase tracking-wider">
+                                {item.category || "حزم وأصول المبدعين"}
+                              </span>
+
+                              <h4 className="text-white text-xs font-alexandria font-black line-clamp-1 group-hover:text-rose-400 transition-colors text-right">
+                                {item.title}
+                              </h4>
+
+                              <p className="text-zinc-500 font-cairo text-[10px] leading-relaxed line-clamp-2 h-9 text-right">
+                                {item.short_description || item.description}
+                              </p>
                             </div>
-                          )}
-                          {discount && (
-                            <span className="absolute top-2 left-2 px-2 py-0.5 rounded bg-rose-600 text-white font-alexandria font-black text-[9px]">
-                              -{discount}%
-                            </span>
-                          )}
-                        </div>
 
-                        {/* Meta Category */}
-                        <span className="text-[9px] text-rose-500 font-bold font-alexandria block uppercase tracking-wider">
-                          {item.category || "حزم وأصول المبدعين"}
-                        </span>
+                            <div className="flex items-center justify-between border-t border-white/5 pt-3 mt-4" dir="rtl">
+                              <div className="flex flex-col text-right">
+                                <span className="text-xs font-alexandria font-black text-rose-500 leading-none">
+                                  {pricing.price === 0 ? "مجاني" : formatPrice(pricing.price, currency)}
+                                </span>
+                                {pricing.original_price && pricing.original_price > pricing.price && (
+                                  <span className="text-[10px] text-zinc-650 line-through mt-0.5 font-sans">
+                                    {formatPrice(pricing.original_price, currency)}
+                                  </span>
+                                )}
+                              </div>
 
-                        {/* Title */}
-                        <h4 className="text-white text-xs sm:text-sm font-alexandria font-black line-clamp-1 group-hover:text-rose-400 transition-colors">
-                          {item.title}
-                        </h4>
-
-                        {/* Description */}
-                        <p className="text-zinc-500 font-cairo text-[10px] leading-relaxed line-clamp-2 h-9">
-                          {item.short_description || item.description}
-                        </p>
-
-                      </div>
-
-                      {/* Pricing Footer */}
-                      <div className="flex items-center justify-between border-t border-white/5 pt-3 mt-4">
-                        <div className="flex flex-col">
-                          <span className="text-xs sm:text-sm font-alexandria font-black text-rose-500 leading-none">
-                            {pricing.price === 0 ? "مجاني" : formatPrice(pricing.price, currency)}
-                          </span>
-                          {pricing.original_price && pricing.original_price > pricing.price && (
-                            <span className="text-[10px] text-zinc-650 line-through mt-0.5">
-                              {formatPrice(pricing.original_price, currency)}
-                            </span>
-                          )}
-                        </div>
-
-                        <span className="w-7 h-7 bg-white/5 border border-white/10 hover:bg-[#D6004B] hover:border-rose-500 text-white rounded-lg flex items-center justify-center transition-colors shrink-0">
-                          <ChevronLeft className="w-4 h-4 rtl:rotate-180" />
-                        </span>
-                      </div>
-
+                              <span className="h-8 px-3 bg-white/5 border border-white/10 hover:bg-[#D6004B] hover:border-rose-500 text-white rounded-xl flex items-center justify-center text-[10px] font-bold transition-all shrink-0">
+                                <span>اقتنِه الآن</span>
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
-                  );
-                })}
+                  </div>
+                </div>
+              ) : null;
+            })()}
+
+            {/* Custom Footer */}
+            <footer className="border-t border-white/5 pt-6 pb-24 flex flex-col items-center gap-4 text-center text-zinc-500 text-[9px] w-full">
+              <Link href="/" className="flex items-center gap-2 group">
+                <img src="/logo.png" alt="Youssef Automates" className="w-5 h-5 object-contain" />
+                <span className="font-alexandria font-bold text-xs tracking-tight text-white" dir="ltr">
+                  Joe <span className="text-[#D6004B]">School</span>
+                </span>
+              </Link>
+              
+              <div className="flex flex-wrap justify-center gap-3 font-bold font-cairo">
+                <Link href="/privacy" className="hover:text-white transition-colors">سياسة الخصوصية</Link>
+                <span>·</span>
+                <Link href="/privacy" className="hover:text-white transition-colors">سياسة الإسترجاع</Link>
+                <span>·</span>
+                <Link href="/privacy" className="hover:text-white transition-colors">الشروط والاستخدام</Link>
+                <span>·</span>
+                <a href="mailto:admin@youssefautomates.com" className="hover:text-white transition-colors">الدعم الفني</a>
               </div>
-            </div>
-          )}
+
+              <div className="flex justify-center scale-90">
+                <SocialLinks />
+              </div>
+
+              <div className="text-zinc-600 font-cairo">
+                جميع الحقوق محفوظة © {new Date().getFullYear()} Youssef Automates
+              </div>
+            </footer>
+          </div>
 
         </section>
 
-        {/* =========================================================================
-            MINIMAL STICKY MOBILE ACTIONS BAR (price, cart icon, buy now button)
-            ========================================================================= */}
-        <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-black/60 backdrop-blur-xl border-t border-white/10 p-3 z-50 flex items-center justify-between gap-3 pb-safe shadow-[0_-15px_40px_rgba(0,0,0,0.7)]">
-          <div className="flex flex-col pl-2 shrink-0 justify-center">
+        {/* Floating Bottom CTA Bar */}
+        <div 
+          style={{ 
+            paddingBottom: 'calc(env(safe-area-inset-bottom) + 12px)',
+            backdropFilter: 'blur(24px)',
+            WebkitBackdropFilter: 'blur(24px)'
+          }}
+          className={cn(
+            "lg:hidden fixed bottom-0 left-0 right-0 bg-black/85 backdrop-blur-xl border-t border-white/10 p-3 z-50 flex items-center justify-between gap-3 shadow-[0_-15px_40px_rgba(0,0,0,0.85)] transition-transform duration-300 ease-in-out will-change-transform",
+            showFloatingBar ? "translate-y-0" : "translate-y-full"
+          )}
+        >
+          <div className="flex flex-col pl-2 shrink-0 justify-center text-right">
             <span className="text-base font-alexandria font-black text-white leading-none tracking-tight">
               {productPricing ? (productPricing.price === 0 ? "مجاني" : formatPrice(productPricing.price, currency)) : ""}
             </span>
@@ -1010,9 +1296,9 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
             <Link
               href={`/checkout/${product.id}`}
               onClick={() => trackInitiateCheckout(product.id, product.title, productPricing?.price ?? product.price, currency, "product")}
-              className="h-10 px-5 bg-[#D6004B] text-white font-alexandria font-black text-xs rounded-xl flex items-center justify-center gap-1.5 active:scale-95 shadow-[0_8px_20px_rgba(214,0,75,0.3)] shrink-0"
+              className="h-10 px-5 bg-[#D6004B] text-white font-alexandria font-black text-xs rounded-xl flex items-center justify-center gap-1.5 active:scale-95 shadow-[0_8px_20px_rgba(214,0,75,0.3)] shrink-0 animate-pulse-glow"
             >
-              <span>شراء الآن</span>
+              <span>{discountPct && discountPct > 0 ? `اقتنِه الآن ← خصم ${discountPct}%` : "اقتنِه الآن ←"}</span>
               <ArrowLeft className="w-3.5 h-3.5 rtl:rotate-180" />
             </Link>
           </div>

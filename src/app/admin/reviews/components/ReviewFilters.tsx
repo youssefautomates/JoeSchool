@@ -169,7 +169,7 @@ export function ReviewFilters({ filters, onChange, onReset }: ReviewFiltersProps
           onChange={() => {}} // Controlled by parent div click
           className="rounded border-zinc-700 bg-white/5 text-rose-600 focus:ring-rose-500 cursor-pointer"
         />
-        <label className="text-xs text-zinc-300 font-bold font-cairo cursor-pointer">التقييمات المميزة فقط (Featured)</label>
+        <label className="text-xs text-zinc-300 font-bold font-cairo cursor-pointer">التقييمات المميزة فقط</label>
       </div>
 
       {/* Reset Button */}

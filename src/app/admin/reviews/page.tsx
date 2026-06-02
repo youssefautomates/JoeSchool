@@ -164,10 +164,10 @@ export default function ReviewsAdminPage() {
         const { data: prodCats, error } = await supabase.from("product_categories").select("id, name, slug").order("order_index");
         if (error || !prodCats || prodCats.length === 0) {
           setCategories([
-            { id: "1", name: "AI Content Creation", slug: "ai-content-creation" },
-            { id: "2", name: "AI Animation", slug: "ai-animation" },
-            { id: "3", name: "Creative Video Production", slug: "creative-video-production" },
-            { id: "4", name: "Digital Storytelling", slug: "digital-storytelling" }
+            { id: "1", name: "صناعة المحتوى بالذكاء الاصطناعي", slug: "ai-content-creation" },
+            { id: "2", name: "صناعة الأنيميشن بالذكاء الاصطناعي", slug: "ai-animation" },
+            { id: "3", name: "إنتاج الفيديو الإبداعي", slug: "creative-video-production" },
+            { id: "4", name: "السرد القصصي الرقمي", slug: "digital-storytelling" }
           ]);
         } else {
           setCategories(prodCats);
@@ -184,10 +184,10 @@ export default function ReviewsAdminPage() {
       const getProductCategory = (p: any) => {
         if (p.category) return p.category;
         const title = (p.title || "").toLowerCase();
-        if (title.includes("animation") || title.includes("تحريك") || title.includes("رسوم")) return "AI Animation";
-        if (title.includes("story") || title.includes("قصص") || title.includes("سرد")) return "Digital Storytelling";
-        if (title.includes("video") || title.includes("فيديو") || title.includes("إنتاج")) return "Creative Video Production";
-        return "AI Content Creation";
+        if (title.includes("animation") || title.includes("تحريك") || title.includes("رسوم")) return "صناعة الأنيميشن بالذكاء الاصطناعي";
+        if (title.includes("story") || title.includes("قصص") || title.includes("سرد")) return "السرد القصصي الرقمي";
+        if (title.includes("video") || title.includes("فيديو") || title.includes("إنتاج")) return "إنتاج الفيديو الإبداعي";
+        return "صناعة المحتوى بالذكاء الاصطناعي";
       };
 
       const mapped: DisplayItem[] = [

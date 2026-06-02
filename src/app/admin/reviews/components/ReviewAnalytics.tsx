@@ -148,7 +148,7 @@ export function ReviewAnalytics({ reviews, items }: ReviewAnalyticsProps) {
             </div>
 
             <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5">
-              <span className="text-[10px] text-zinc-500 font-bold block mb-1 font-cairo">المميزة (Featured)</span>
+              <span className="text-[10px] text-zinc-500 font-bold block mb-1 font-cairo">المميزة</span>
               <div className="flex items-center gap-1.5">
                 <span className="text-2xl font-black text-rose-500 font-mono">{featured}</span>
                 <Sparkles className="w-3.5 h-3.5 text-rose-500 fill-current" />
