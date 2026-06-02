@@ -25,7 +25,7 @@ export function SocialLinks() {
   const links = [
     {
       name: "Facebook",
-      url: "https://www.facebook.com/profile.php?id=61579261893006",
+      url: "https://www.facebook.com/profile.php?id=61590601377462",
       label: "صفحة فيسبوك الرسمية",
       hoverClass: "hover:text-blue-500 hover:bg-blue-600/10 hover:border-blue-500/30 hover:shadow-[0_0_25px_rgba(59,130,246,0.35)]",
       icon: (
@@ -36,7 +36,7 @@ export function SocialLinks() {
     },
     {
       name: "Instagram",
-      url: "https://www.instagram.com/joeschool/",
+      url: "https://www.instagram.com/joeschool.ai/",
       label: "حساب إنستغرام الرسمي",
       hoverClass: "hover:text-pink-500 hover:bg-gradient-to-tr hover:from-pink-500/10 hover:to-violet-500/10 hover:border-pink-500/30 hover:shadow-[0_0_25px_rgba(236,72,153,0.35)]",
       icon: (
@@ -46,19 +46,8 @@ export function SocialLinks() {
       )
     },
     {
-      name: "TikTok",
-      url: "https://tiktok.com/@joeschool",
-      label: "حساب تيك توك الرسمي",
-      hoverClass: "hover:text-[#00f2fe] hover:bg-[#00f2fe]/5 hover:border-cyan-500/30 hover:shadow-[0_0_25px_rgba(0,242,254,0.35)]",
-      icon: (
-        <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 448 512" className="w-4.5 h-4.5 transition-transform duration-300 group-hover:scale-110">
-          <path d="M448 209.91a210.06 210.06 0 0 1-122.77-39.25v178.72A162.55 162.55 0 1 1 185 188.31v89.89a72.69 72.69 0 1 0 52.23 69.89V0h89.89a109.28 109.28 0 0 0 109.32 109.32v89.89a107.5 107.5 0 0 1-11.44 10.7z" />
-        </svg>
-      )
-    },
-    {
       name: "WhatsApp",
-      url: "https://wa.me/+201107099196",
+      url: "https://wa.me/201107099196",
       label: "تواصل معنا عبر واتساب",
       hoverClass: "hover:text-[#25D366] hover:bg-[#25D366]/5 hover:border-emerald-500/30 hover:shadow-[0_0_25px_rgba(37,211,102,0.35)]",
       icon: (

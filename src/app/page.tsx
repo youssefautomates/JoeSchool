@@ -58,6 +58,55 @@ function stripHtml(html: string) {
     .replace(/&gt;/g, ">");
 }
 
+// ── Helper: Match Product to Course Category ───────────────────────────────────────
+function isProductMatchingCourseCategory(product: any, courseCategory: string): boolean {
+  if (!courseCategory || courseCategory === "الكل" || courseCategory === "الدورات المجانية") {
+    return false;
+  }
+  
+  const courseCatLower = courseCategory.toLowerCase();
+  const productCat = (product.category || "").toLowerCase();
+  const productTitle = (product.title || "").toLowerCase();
+  const productDesc = (product.description || "").toLowerCase();
+  const productTags = (product.tags || []).map((t: string) => t.toLowerCase());
+
+  // 1. Direct match or substring match on product category
+  if (productCat === courseCatLower) return true;
+  if (courseCatLower.includes(productCat) || productCat.includes(courseCatLower)) return true;
+
+  // 2. Keyword-based matching
+  const hasKeyword = (keywords: string[]) => {
+    return keywords.some(kw => 
+      productCat.includes(kw) || 
+      productTitle.includes(kw) || 
+      productDesc.includes(kw) || 
+      productTags.some((t: string) => t.includes(kw))
+    );
+  };
+
+  // Case A: AI / الذكاء الاصطناعي
+  if (courseCatLower.includes("ذكاء") || courseCatLower.includes("ai")) {
+    return hasKeyword(["ذكاء", "ai", "artificial", "tpt", "توليدي", "generation"]);
+  }
+
+  // Case B: Automation / الأتمتة
+  if (courseCatLower.includes("أتمتة") || courseCatLower.includes("automation") || courseCatLower.includes("n8n")) {
+    return hasKeyword(["أتمتة", "automation", "n8n", "productivity", "إنتاجية", "سير العمل"]);
+  }
+
+  // Case C: Animation / الرسوم المتحركة
+  if (courseCatLower.includes("رسوم") || courseCatLower.includes("متحركة") || courseCatLower.includes("animation")) {
+    return hasKeyword(["رسوم", "متحركة", "تحريك", "animation", "motion"]);
+  }
+
+  // Case D: Content Creation / صناعة المحتوى
+  if (courseCatLower.includes("محتوى") || courseCatLower.includes("content") || courseCatLower.includes("فيديو") || courseCatLower.includes("video")) {
+    return hasKeyword(["محتوى", "content", "سوشيال", "فيديو", "video", "صناعة"]);
+  }
+
+  return false;
+}
+
 export default function Home() {
   const router = useRouter();
   const { addToCart } = useCart();
@@ -223,6 +272,14 @@ export default function Home() {
     return cat === activeProductCategory;
   });
 
+  // Combined displayed items in the courses section (courses + matching products)
+  const displayedCoursesAndProducts = [
+    ...filteredCourses.map(course => ({ ...course, type: "course" as const })),
+    ...products
+      .filter(product => isProductMatchingCourseCategory(product, activeCourseCategory))
+      .map(product => ({ ...product, type: "product" as const }))
+  ];
+
   return (
     <div className="min-h-screen bg-[#050505] text-white selection:bg-rose-500/30 font-cairo overflow-x-hidden">
       <Navbar />
@@ -350,132 +407,255 @@ export default function Home() {
 
             {/* Courses Cards Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-              {filteredCourses.map((course, idx) => {
-                const courseReviews = allReviews.filter((r: any) => r.productId === course.id && !r.isHidden);
-                const reviewsCount = courseReviews.length;
-                const averageRating = reviewsCount > 0 
-                  ? (courseReviews.reduce((sum: number, r: any) => sum + Number(r.rating), 0) / reviewsCount).toFixed(1)
-                  : "5.0";
-                
-                const coursePricing = resolveProductPrice(course as any, currency);
+              {displayedCoursesAndProducts.map((item, idx) => {
+                if (item.type === "course") {
+                  const course = item;
+                  const courseReviews = allReviews.filter((r: any) => r.productId === course.id && !r.isHidden);
+                  const reviewsCount = courseReviews.length;
+                  const averageRating = reviewsCount > 0 
+                    ? (courseReviews.reduce((sum: number, r: any) => sum + Number(r.rating), 0) / reviewsCount).toFixed(1)
+                    : "5.0";
+                  
+                  const coursePricing = resolveProductPrice(course as any, currency);
 
-                return (
-                  <motion.div
-                    key={course.slug}
-                    initial={{ opacity: 0, y: 40 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, margin: "-60px" }}
-                    transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: idx * 0.05 }}
-                    className="group bg-gradient-to-b from-[#0e0e16] to-[#07070c] border border-white/5 hover:border-[#D6004B]/50 rounded-3xl overflow-hidden shadow-2xl flex flex-col justify-between hover:-translate-y-3 transition-all duration-300 h-full relative cursor-pointer hover:shadow-[0_30px_60px_-15px_rgba(214,0,75,0.25)]"
-                    onClick={() => router.push(`/courses/${course.slug}`)}
-                  >
-                    {/* Glow Light Sweep Shimmer Effect */}
-                    <div className="absolute inset-0 w-[50%] h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12 -translate-x-[200%] group-hover:translate-x-[350%] transition-transform duration-1000 ease-out pointer-events-none z-10" />
-                    {/* Course Card Top Banner */}
-                    <div className="relative h-48 bg-zinc-950 overflow-hidden border-b border-white/5">
-                      {course.image_url && (
-                        <img 
-                          src={course.image_url} 
-                          alt={course.title} 
-                          className="absolute inset-0 w-full h-full object-cover group-hover:scale-112 transition-transform duration-700 ease-out"
-                        />
-                      )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-[#07070c] via-transparent to-black/30" />
-                      
-                      {/* Left Badge (Category) */}
-                      <div className="absolute top-4 left-4 z-20">
-                        <span className="bg-black/50 backdrop-blur-md text-white border border-white/10 font-cairo text-[9px] font-bold py-1 px-3 rounded-lg shadow-lg">
-                          {course.category}
-                        </span>
-                      </div>
-
-                      {/* Discount Badge on Image */}
-                      {coursePricing && coursePricing.original_price > coursePricing.price && (
-                        <div className="absolute bottom-3 right-3 z-20">
-                          <span className="bg-emerald-500 text-white font-black text-[9px] font-alexandria py-1 px-2.5 rounded-lg shadow-md animate-pulse">
-                            وفر {coursePricing.discount_pct}%
+                  return (
+                    <motion.div
+                      key={course.slug}
+                      initial={{ opacity: 0, y: 40 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true, margin: "-60px" }}
+                      transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: idx * 0.05 }}
+                      className="group bg-gradient-to-b from-[#0e0e16] to-[#07070c] border border-white/5 hover:border-[#D6004B]/50 rounded-3xl overflow-hidden shadow-2xl flex flex-col justify-between hover:-translate-y-3 transition-all duration-300 h-full relative cursor-pointer hover:shadow-[0_30px_60px_-15px_rgba(214,0,75,0.25)]"
+                      onClick={() => router.push(`/courses/${course.slug}`)}
+                    >
+                      {/* Glow Light Sweep Shimmer Effect */}
+                      <div className="absolute inset-0 w-[50%] h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12 -translate-x-[200%] group-hover:translate-x-[350%] transition-transform duration-1000 ease-out pointer-events-none z-10" />
+                      {/* Course Card Top Banner */}
+                      <div className="relative h-48 bg-zinc-950 overflow-hidden border-b border-white/5">
+                        {course.image_url && (
+                          <img 
+                            src={course.image_url} 
+                            alt={course.title} 
+                            className="absolute inset-0 w-full h-full object-cover group-hover:scale-112 transition-transform duration-700 ease-out"
+                          />
+                        )}
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#07070c] via-transparent to-black/30" />
+                        
+                        {/* Left Badge (Category) */}
+                        <div className="absolute top-4 left-4 z-20">
+                          <span className="bg-black/50 backdrop-blur-md text-white border border-white/10 font-cairo text-[9px] font-bold py-1 px-3 rounded-lg shadow-lg">
+                            {course.category}
                           </span>
                         </div>
-                      )}
 
-                      {/* Right Wishlist Button */}
-                      <div className="absolute top-4 right-4 z-30 bg-black/40 backdrop-blur-md rounded-lg p-1.5 border border-white/10 hover:bg-black/60 transition-colors">
-                        <WishlistButton itemId={course.id} itemType="course" size={16} />
-                      </div>
-                    </div>
-
-                    {/* Course Card Body */}
-                    <div className="p-6 flex-1 flex flex-col justify-between">
-                      <div className="space-y-4">
-                        {/* Info Bar */}
-                        <div className="flex items-center justify-between text-[10px] text-zinc-400 font-bold bg-white/[0.02] border border-white/5 rounded-xl px-3 py-2">
-                          <div className="flex items-center gap-3">
-                            <span className="flex items-center gap-1">
-                              <BookOpen className="w-3.5 h-3.5 text-[#D6004B] transition-transform duration-300 ease-out group-hover/item:scale-120 group-hover/item:-rotate-6" />
-                              {course.lessons_count || 0} دروس
-                            </span>
-                            <span className="flex items-center gap-1 border-r border-white/10 pr-3">
-                              <Clock className="w-3.5 h-3.5 text-amber-500 transition-transform duration-300 ease-out group-hover/item:scale-120 group-hover/item:rotate-6" />
-                              {course.duration_hours || 0} ساعة
+                        {/* Discount Badge on Image */}
+                        {coursePricing && coursePricing.original_price > coursePricing.price && (
+                          <div className="absolute bottom-3 right-3 z-20">
+                            <span className="bg-emerald-500 text-white font-black text-[9px] font-alexandria py-1 px-2.5 rounded-lg shadow-md animate-pulse">
+                              وفر {coursePricing.discount_pct}%
                             </span>
                           </div>
-                          <div className="flex items-center gap-1 text-yellow-400">
-                            <Star className="w-3.5 h-3.5 fill-current transition-transform duration-300 ease-out group-hover:scale-120 group-hover:rotate-12" />
-                            <span className="text-white text-xs">{averageRating}</span>
-                            <span className="text-zinc-500 font-normal text-[9px]">({reviewsCount})</span>
+                        )}
+
+                        {/* Right Wishlist Button */}
+                        <div className="absolute top-4 right-4 z-30 bg-black/40 backdrop-blur-md rounded-lg p-1.5 border border-white/10 hover:bg-black/60 transition-colors">
+                          <WishlistButton itemId={course.id} itemType="course" size={16} />
+                        </div>
+                      </div>
+
+                      {/* Course Card Body */}
+                      <div className="p-6 flex-1 flex flex-col justify-between">
+                        <div className="space-y-4">
+                          {/* Info Bar */}
+                          <div className="flex items-center justify-between text-[10px] text-zinc-400 font-bold bg-white/[0.02] border border-white/5 rounded-xl px-3 py-2">
+                            <div className="flex items-center gap-3">
+                              <span className="flex items-center gap-1">
+                                <BookOpen className="w-3.5 h-3.5 text-[#D6004B] transition-transform duration-300 ease-out group-hover/item:scale-120 group-hover/item:-rotate-6" />
+                                {course.lessons_count || 0} دروس
+                              </span>
+                              <span className="flex items-center gap-1 border-r border-white/10 pr-3">
+                                <Clock className="w-3.5 h-3.5 text-amber-500 transition-transform duration-300 ease-out group-hover/item:scale-120 group-hover/item:rotate-6" />
+                                {course.duration_hours || 0} ساعة
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1 text-yellow-400">
+                              <Star className="w-3.5 h-3.5 fill-current transition-transform duration-300 ease-out group-hover:scale-120 group-hover:rotate-12" />
+                              <span className="text-white text-xs">{averageRating}</span>
+                              <span className="text-zinc-500 font-normal text-[9px]">({reviewsCount})</span>
+                            </div>
+                          </div>
+
+                          <h3 className="text-base sm:text-lg font-alexandria font-bold text-white leading-snug group-hover:text-[#D6004B] transition-colors line-clamp-2">
+                            {course.title}
+                          </h3>
+
+                          <p className="text-zinc-400 text-xs leading-relaxed line-clamp-2">
+                            {stripHtml(course.short_description || course.description)}
+                          </p>
+                        </div>
+
+                        <div className="mt-6 pt-4 border-t border-white/5 flex items-center justify-between">
+                          {/* Price Display */}
+                          <div className="flex flex-col">
+                            {coursePricing.original_price > coursePricing.price && (
+                              <span className="text-[10px] text-zinc-500 line-through mb-0.5 font-alexandria">
+                                {formatPrice(coursePricing.original_price, currency)}
+                              </span>
+                            )}
+                            <div className="flex items-baseline gap-0.5">
+                              <span className="text-lg sm:text-xl font-alexandria font-black text-white">
+                                {coursePricing.price === 0 ? "مجاني" : formatPrice(coursePricing.price, currency)}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Actions */}
+                          <div className="flex gap-2 items-center">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                addToCart({
+                                  ...course,
+                                  price: coursePricing.price,
+                                  original_price: coursePricing.original_price,
+                                  category: course.category || "courses"
+                                } as any);
+                                toast.success("تم إضافة الكورس للسلة بنجاح");
+                              }}
+                              className="h-10 w-10 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 text-white hover:bg-[#D6004B] hover:border-[#D6004B] hover:shadow-[0_0_15px_rgba(214,0,75,0.4)] transition-all shrink-0 group/cart duration-300"
+                            >
+                              <ShoppingCart className="w-4 h-4 group-hover/cart:scale-110 transition-transform" />
+                            </button>
+                            <div className="h-10 px-4 bg-[#D6004B] hover:bg-[#b0003d] text-white rounded-xl text-[11px] font-bold flex items-center gap-1.5 transition-all shadow-[0_4px_12px_rgba(214,0,75,0.15)] group-hover:scale-[1.02] group-hover:shadow-[0_0_20px_rgba(214,0,75,0.4)] active:scale-98 shrink-0 duration-300">
+                              <span>احصل على الكورس</span>
+                              <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform rtl:rotate-180" />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  );
+                } else {
+                  const product = item;
+                  const unpacked = unpackProduct(product);
+                  const primaryVideo = unpacked.slides.find((s: any) => s.type === 'video')?.url;
+                  const primaryImage = unpacked.slides.find((s: any) => s.type === 'image')?.url || product.image_url;
+                  const productPricing = resolveProductPrice(product, currency);
+                  const isFree = productPricing.price === 0;
+
+                  return (
+                    <motion.div 
+                      key={product.id}
+                      initial={{ opacity: 0, y: 40 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true, margin: "-60px" }}
+                      transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: idx * 0.05 }}
+                      className="group h-full"
+                    >
+                      <div 
+                        onClick={() => router.push(`/product/${product.slug}`)}
+                        onMouseEnter={() => setHoveredId(product.id)}
+                        onMouseLeave={() => setHoveredId(null)}
+                        className="block relative h-full flex flex-col bg-[#09090e] border border-[#1b1b24]/60 hover:border-[#D6004B]/50 rounded-[2rem] overflow-hidden group-hover:-translate-y-3 transition-all duration-300 shadow-2xl hover:shadow-[0_30px_60px_-15px_rgba(214,0,75,0.25)] cursor-pointer"
+                      >
+                        {/* Glow Light Sweep Shimmer Effect */}
+                        <div className="absolute inset-0 w-[50%] h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12 -translate-x-[200%] group-hover:translate-x-[350%] transition-transform duration-1000 ease-out pointer-events-none z-10" />
+                        {/* Media Area */}
+                        <div className="relative w-full aspect-video overflow-hidden border-b border-white/5">
+                          <ProductMedia 
+                            image_url={primaryImage}
+                            video_url={primaryVideo}
+                            title={product.title}
+                            isHovered={hoveredId === product.id}
+                            className="w-full h-full"
+                            staticOnly={true}
+                            priority={false}
+                          />
+                          
+                          {/* Badges */}
+                          <div className="absolute top-4 left-4 md:top-6 md:left-6 flex flex-col gap-2 z-20">
+                            {isFree ? (
+                              <Badge className="bg-emerald-600 text-white border-none font-cairo text-[9px] md:text-[10px] py-0.5 px-2.5 shadow-lg rounded-md font-bold">هدية مجانية</Badge>
+                            ) : product.is_featured ? (
+                              <Badge className="bg-[#D6004B] text-white border-none font-cairo text-[9px] md:text-[10px] py-0.5 px-2.5 shadow-lg rounded-md font-bold">الأكثر مبيعاً</Badge>
+                            ) : null}
+                          </div>
+
+                          {/* Category Badge */}
+                          <div className="absolute top-4 right-4 md:top-6 md:right-6 z-20">
+                            <span className="bg-[#D6004B]/15 text-[#D6004B] border border-[#D6004B]/30 font-cairo text-[9px] md:text-[10px] font-black py-1 px-3 rounded-full backdrop-blur-md shadow-[0_0_15px_rgba(214,0,75,0.2)] tracking-wide">
+                              {getProductCategory(product)}
+                            </span>
+                          </div>
+
+                          {/* Wishlist Heart Button */}
+                          <div className="absolute bottom-4 left-4 z-20">
+                            <WishlistButton itemId={product.id} itemType="digital_product" size={16} />
                           </div>
                         </div>
 
-                        <h3 className="text-base sm:text-lg font-alexandria font-bold text-white leading-snug group-hover:text-[#D6004B] transition-colors line-clamp-2">
-                          {course.title}
-                        </h3>
+                        {/* Content Area */}
+                        <div className="p-6 flex-1 flex flex-col relative z-10">
+                          <div className="flex items-center gap-2 mb-3 md:mb-4">
+                            <div className="flex items-center gap-1.5 bg-white/10 backdrop-blur-md px-2.5 py-1 rounded-md border border-white/10">
+                              <Zap className="w-2.5 h-2.5 text-rose-400" />
+                              <span className="text-[9px] font-bold text-white uppercase tracking-widest">تنزيل فوري</span>
+                            </div>
+                          </div>
 
-                        <p className="text-zinc-400 text-xs leading-relaxed line-clamp-2">
-                          {stripHtml(course.short_description || course.description)}
-                        </p>
-                      </div>
+                          <h3 className="text-base sm:text-lg font-alexandria font-bold text-white mb-2 leading-snug group-hover:text-[#D6004B] transition-colors line-clamp-2">
+                            {product.title}
+                          </h3>
+                          
+                          <p className="text-zinc-400 font-cairo text-xs mb-6 leading-relaxed line-clamp-2">
+                            {product.short_description || product.description || "أداة احترافية مصممة لزيادة إنتاجيتك بشكل فوري."}
+                          </p>
 
-                      <div className="mt-6 pt-4 border-t border-white/5 flex items-center justify-between">
-                        {/* Price Display */}
-                        <div className="flex flex-col">
-                          {coursePricing.original_price > coursePricing.price && (
-                            <span className="text-[10px] text-zinc-500 line-through mb-0.5 font-alexandria">
-                              {formatPrice(coursePricing.original_price, currency)}
-                            </span>
-                          )}
-                          <div className="flex items-baseline gap-0.5">
-                            <span className="text-lg sm:text-xl font-alexandria font-black text-white">
-                              {coursePricing.price === 0 ? "مجاني" : formatPrice(coursePricing.price, currency)}
-                            </span>
+                          <div className="mt-auto flex items-end justify-between">
+                            <div className="flex flex-col">
+                              {productPricing.original_price && productPricing.original_price > 0 ? (
+                                <span className="text-[9px] font-cairo line-through text-zinc-500 mb-0.5">
+                                  {formatPrice(productPricing.original_price, currency)}
+                                </span>
+                              ) : null}
+                              <div className="flex items-baseline gap-0.5">
+                                {isFree ? (
+                                  <span className="text-2xl font-alexandria font-black text-emerald-400">مجاني</span>
+                                ) : (
+                                  <span className="text-2xl font-alexandria font-black text-white">
+                                    {formatPrice(productPricing.price, currency)}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            
+                            <div className="flex gap-2">
+                              <button 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  addToCart({
+                                    ...product,
+                                    price: productPricing.price,
+                                    original_price: productPricing.original_price
+                                  });
+                                  toast.success("تمت الإضافة للسلة");
+                                }}
+                                className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-[#D6004B] hover:border-[#D6004B] hover:shadow-[0_0_15px_rgba(214,0,75,0.4)] transition-all duration-300"
+                                title="إضافة إلى السلة"
+                              >
+                                <ShoppingCart className="w-4 h-4" />
+                              </button>
+                              <div className="h-10 px-4 rounded-xl bg-[#D6004B] flex items-center justify-center text-white font-bold text-xs gap-1.5 shadow-lg shadow-rose-600/30 group-hover:bg-rose-600 group-hover:shadow-[0_0_20px_rgba(214,0,75,0.5)] transition-all duration-300">
+                                <span>شراء الآن</span>
+                                <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform rtl:rotate-180" />
+                              </div>
+                            </div>
                           </div>
                         </div>
-
-                        {/* Actions */}
-                        <div className="flex gap-2 items-center">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              addToCart({
-                                ...course,
-                                price: coursePricing.price,
-                                original_price: coursePricing.original_price,
-                                category: course.category || "courses"
-                              } as any);
-                              toast.success("تم إضافة الكورس للسلة بنجاح");
-                            }}
-                            className="h-10 w-10 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 text-white hover:bg-[#D6004B] hover:border-[#D6004B] hover:shadow-[0_0_15px_rgba(214,0,75,0.4)] transition-all shrink-0 group/cart duration-300"
-                          >
-                            <ShoppingCart className="w-4 h-4 group-hover/cart:scale-110 transition-transform" />
-                          </button>
-                          <div className="h-10 px-4 bg-[#D6004B] hover:bg-[#b0003d] text-white rounded-xl text-[11px] font-bold flex items-center gap-1.5 transition-all shadow-[0_4px_12px_rgba(214,0,75,0.15)] group-hover:scale-[1.02] group-hover:shadow-[0_0_20px_rgba(214,0,75,0.4)] active:scale-98 shrink-0 duration-300">
-                            <span>احصل على الكورس</span>
-                            <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform rtl:rotate-180" />
-                          </div>
-                        </div>
                       </div>
-                    </div>
-                  </motion.div>
-                );
+                    </motion.div>
+                  );
+                }
               })}
             </div>
           </div>

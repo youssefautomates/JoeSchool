@@ -80,7 +80,7 @@ export function Footer() {
               {[
                 { label: "سياسة الخصوصية والاستخدام", href: "/privacy" },
                 { label: "شروط الدفع والاسترجاع", href: "/privacy" },
-                { label: "تواصل مع الدعم الفني", href: "mailto:support@joeschool.com" }
+                { label: "الدعم الفني: support@joeschool.com", href: "mailto:support@joeschool.com" }
               ].map((link, i) => (
                 <li key={i}>
                   <Link 

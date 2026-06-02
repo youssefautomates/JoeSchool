@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { X, Save, Upload, ShieldCheck, Sparkles, AlertCircle, Check } from "lucide-react";
+import { X, Save, Upload, ShieldCheck, Sparkles, AlertCircle } from "lucide-react";
 import { Review } from "@/app/api/admin/reviews/route";
 import { RatingPicker } from "./RatingPicker";
 import { ReviewCard } from "./ReviewCard";
@@ -196,6 +196,7 @@ export function ReviewEditor({ review, products, onSave, onClose }: ReviewEditor
     lastName: formData.lastName || "",
     rating: formData.rating || 5,
     text: formData.text || "اكتب هنا نص التقييم الذي أدلى به العميل ليظهر في المعاينة الحية مباشرة...",
+    avatarUrl: formData.avatarUrl,
     isVerified: formData.isVerified !== false,
     isHidden: formData.status === "hidden",
     createdAt: formData.createdAt || new Date().toISOString(),
@@ -319,6 +320,8 @@ export function ReviewEditor({ review, products, onSave, onClose }: ReviewEditor
                 onChange={(rating) => handleChange("rating", rating)} 
               />
             </div>
+
+
             {/* 5. Review Testimonial Text */}
             <div className="flex flex-col gap-1.5">
               <label className="text-xs text-zinc-300 font-bold font-cairo">نص التقييم والمراجعة</label>

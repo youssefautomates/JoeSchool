@@ -1,4 +1,4 @@
-﻿import { supabaseClient } from "./supabaseClient";
+import { supabaseClient } from "./supabaseClient";
 
 // ────────────────────────────────────────────────────────────────────────────
 // Types
@@ -376,29 +376,7 @@ export async function getCoursesList(opts: { category?: string; status?: string 
     
     const { data, error } = await query;
     if (!error && data) {
-      // ── Auto-compute real stats from actual curriculum for each course ──
-      const enriched = await Promise.all((data as LmsCourse[]).map(async (course) => {
-        try {
-          const { data: modules } = await supabaseClient.from("course_modules").select("id").eq("course_id", course.id);
-          if (modules && modules.length > 0) {
-            const moduleIds = modules.map(m => m.id);
-            const { data: lessons } = await supabaseClient.from("course_lessons").select("id, duration_seconds").in("module_id", moduleIds);
-            if (lessons) {
-              const computedLessonsCount = lessons.length;
-              const totalSeconds = lessons.reduce((acc, l) => acc + (Number(l.duration_seconds) || 0), 0);
-              const computedDurationHours = totalSeconds > 0 ? Number((totalSeconds / 3600).toFixed(1)) : (course.duration_hours || 0);
-              return {
-                ...course,
-                lessons_count: computedLessonsCount || course.lessons_count || 0,
-                duration_hours: computedDurationHours,
-              };
-            }
-          }
-        } catch (e) {}
-        return course;
-      }));
-      return enriched;
-      // ────────────────────────────────────────────────────────────────────
+      return data as LmsCourse[];
     }
   } catch (e) {}
 

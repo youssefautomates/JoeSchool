@@ -123,7 +123,6 @@ export function ReviewCard({ review, productName, onEdit, onDelete, onStatusChan
         {/* Header section */}
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">
-
             <div>
               <h4 className="text-white font-bold text-xs font-alexandria">
                 {review.firstName} {review.lastName ? review.lastName.charAt(0) + "." : ""}
@@ -147,9 +146,6 @@ export function ReviewCard({ review, productName, onEdit, onDelete, onStatusChan
           </div>
           <div className="flex flex-col items-end gap-1.5 shrink-0">
             {getStatusBadge(review.status)}
-            <div className="font-mono text-zinc-600 text-[9px]">
-              {new Date(review.createdAt).toLocaleDateString("ar-EG", { year: "numeric", month: "short", day: "numeric" })}
-            </div>
           </div>
         </div>
 

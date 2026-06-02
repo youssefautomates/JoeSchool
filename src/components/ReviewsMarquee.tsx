@@ -74,36 +74,6 @@ export function ReviewsMarquee() {
   const [isIntersecting, setIsIntersecting] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const defaultReviews: Review[] = [
-    {
-      name: "أحمد محمود",
-      title: "مشتري موثق · حزمة أدوات منشئي المحتوى المتكاملة",
-      text: "الحزم وفرت علي الكثير من الجهد والبحث. جودة القوالب وسهولة الاستخدام ممتازة وأنصح بها كل منشئ محتوى يريد توفير وقته.",
-      stars: 5
-    },
-    {
-      name: "سارة عبد الرحمن",
-      title: "مشتري موثق · كورس صناعة المحتوى بالذكاء الاصطناعي",
-      text: "شرح مبسط وعملي للغاية. تمكنت من إنتاج أول قصة مصورة بالذكاء الاصطناعي بجودة فائقة وحصلت على تفاعل ضخم في حساباتي.",
-      stars: 5,
-      isCourse: true,
-      courseTitle: "كورس صناعة المحتوى بالذكاء الاصطناعي"
-    },
-    {
-      name: "خالد توفيق",
-      title: "مشتري موثق · حزمة بوتات الواتساب الذكية",
-      text: "الدعم الفني متميز جداً ومساعد لأبعد الحدود. البوت يعمل بسلاسة تامة ومعدل التحويل في متجرنا زاد بنسبة كبيرة.",
-      stars: 5
-    },
-    {
-      name: "يوسف أحمد",
-      title: "مشتري موثق · كورس الرسوم المتحركة وصناعة الشخصيات بالذكاء الاصطناعي",
-      text: "أفضل استثمار استثمرته في عملي الإبداعي هذا العام. المحتوى غني بالتطبيقات الحقيقية والتقنيات الحديثة للتطبيق الفوري.",
-      stars: 5,
-      isCourse: true,
-      courseTitle: "كورس الرسوم المتحركة وصناعة الشخصيات بالذكاء الاصطناعي"
-    }
-  ];
 
   // Intersection Observer to pause animation when out of viewport
   useEffect(() => {
@@ -149,6 +119,7 @@ export function ReviewsMarquee() {
               title: `مشتري موثق · ${itemTitle}`,
               text: r.text,
               stars: r.rating || 5,
+              avatarUrl: r.avatarUrl,
               isCourse,
               courseTitle: course ? course.title : undefined,
               isFeatured: r.isFeatured === true,
@@ -190,7 +161,11 @@ export function ReviewsMarquee() {
     );
   }
 
-  const finalReviews = reviews.length > 0 ? reviews : defaultReviews;
+  if (reviews.length === 0) {
+    return null;
+  }
+
+  const finalReviews = reviews;
 
   // Split reviews array between Row 1 and Row 2 for double alternating looping marquee rows
   const halfLength = Math.ceil(finalReviews.length / 2);
@@ -200,7 +175,6 @@ export function ReviewsMarquee() {
   // Helper to ensure each row has at least 8 elements for perfect, seamless loop animation transitions
   const duplicateRowReviews = (items: Review[]) => {
     let list = [...items];
-    if (list.length === 0) list = defaultReviews;
     while (list.length < 8) {
       list = [...list, ...list];
     }
@@ -278,13 +252,6 @@ export function ReviewsMarquee() {
                 
                 {/* User Info Header */}
                 <div className="flex items-center gap-3 md:gap-4">
-                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-zinc-800 overflow-hidden shadow-lg border border-white/10 shrink-0 relative">
-                    <img 
-                      src={review.avatarUrl} 
-                      alt={review.name} 
-                      className="w-full h-full object-cover" 
-                    />
-                  </div>
                   <div className="min-w-0 flex-1">
                     <h4 className="font-alexandria font-bold text-white text-xs md:text-sm truncate">
                       {review.name}
@@ -343,13 +310,6 @@ export function ReviewsMarquee() {
                 
                 {/* User Info Header */}
                 <div className="flex items-center gap-3 md:gap-4">
-                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-zinc-800 overflow-hidden shadow-lg border border-white/10 shrink-0 relative">
-                    <img 
-                      src={review.avatarUrl} 
-                      alt={review.name} 
-                      className="w-full h-full object-cover" 
-                    />
-                  </div>
                   <div className="min-w-0 flex-1">
                     <h4 className="font-alexandria font-bold text-white text-xs md:text-sm truncate">
                       {review.name}

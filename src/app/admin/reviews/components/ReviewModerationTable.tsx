@@ -240,9 +240,6 @@ export function ReviewModerationTable({
                     {/* Customer */}
                     <td className="p-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 bg-zinc-800 rounded-xl overflow-hidden shrink-0 border border-white/10">
-                          <img src={r.avatarUrl} alt={r.firstName} className="w-full h-full object-cover" />
-                        </div>
                         <div>
                           <span className="font-bold text-white block">
                             {r.firstName} {r.lastName ? r.lastName.charAt(0) + "." : ""}
