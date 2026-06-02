@@ -33,14 +33,14 @@ export function Footer() {
           <div className="space-y-6">
             <Link href="/" className="flex items-center gap-2.5 group w-fit">
               <div className="w-9 h-9 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
-                <img src="/logo.png" alt="Youssef Automates" className="w-full h-full object-contain drop-shadow-[0_0_15px_rgba(214,0,75,0.4)]" />
+                <img src="/logo.png" alt="JoeSchool" className="w-full h-full object-contain drop-shadow-[0_0_15px_rgba(214,0,75,0.4)]" />
               </div>
               <span className="font-alexandria font-bold text-lg tracking-tight text-white" dir="ltr">
-                Youssef <span className="text-[#D6004B]">Automates</span>
+                Joe<span className="text-[#D6004B]">School</span>
               </span>
             </Link>
             <p className="text-zinc-500 text-sm leading-relaxed">
-              أكاديميتك الاحترافية لتعلم أتمتة الأعمال، أنظمة الذكاء الاصطناعي، وإنتاج المحتوى الإبداعي وسير العمل الذكي.
+              أكاديميتك الاحترافية لإنتاج المحتوى الإبداعي بالذكاء الاصطناعي، الفيديوهات السينمائية، والأدوات الإبداعية للمبدعين والصانعين.
             </p>
             <div className="hidden md:flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
@@ -80,7 +80,7 @@ export function Footer() {
               {[
                 { label: "سياسة الخصوصية والاستخدام", href: "/privacy" },
                 { label: "شروط الدفع والاسترجاع", href: "/privacy" },
-                { label: "تواصل مع الدعم الفني", href: "mailto:admin@youssefautomates.com" }
+                { label: "تواصل مع الدعم الفني", href: "mailto:support@joeschool.com" }
               ].map((link, i) => (
                 <li key={i}>
                   <Link 
@@ -130,7 +130,7 @@ export function Footer() {
         <div className="pt-8 border-t border-white/5 flex items-center justify-center text-center">
           <div className="text-zinc-500 text-xs flex items-center justify-center gap-1.5 flex-wrap">
             <span>جميع الحقوق محفوظة © {new Date().getFullYear()}</span>
-            <span className="font-alexandria font-bold text-zinc-400">Youssef Automates</span>
+            <span className="font-alexandria font-bold text-zinc-400">JoeSchool</span>
             <span>· صنع بكل</span>
             <Heart className="w-3 h-3 text-[#D6004B] fill-[#D6004B]" />
             <span>لدعم مسيرتك الإبداعية</span>

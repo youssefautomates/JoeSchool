@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { createClient } from "@supabase/supabase-js";
 
@@ -224,7 +224,7 @@ export async function POST(req: Request) {
 
     const id = Date.now().toString();
     const createdAt = new Date().toISOString();
-    const adminEmail = process.env.ADMIN_EMAIL || "admin@youssefautomates.com";
+    const adminEmail = process.env.ADMIN_EMAIL || "admin@joeschool.com";
     
     const newReview = normalizeReview({
       ...payload,
@@ -265,7 +265,7 @@ export async function PUT(req: Request) {
     }
 
     const payload = await req.json();
-    const adminEmail = process.env.ADMIN_EMAIL || "admin@youssefautomates.com";
+    const adminEmail = process.env.ADMIN_EMAIL || "admin@joeschool.com";
     
     // Check if bulk action
     if (payload.ids && Array.isArray(payload.ids)) {
@@ -430,7 +430,7 @@ export async function DELETE(req: Request) {
       }
     } else {
       // Soft delete: set status to archived
-      const adminEmail = process.env.ADMIN_EMAIL || "admin@youssefautomates.com";
+      const adminEmail = process.env.ADMIN_EMAIL || "admin@joeschool.com";
       const merged = normalizeReview({
         ...existing,
         status: "archived",

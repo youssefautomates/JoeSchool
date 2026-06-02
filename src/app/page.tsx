@@ -252,7 +252,7 @@ export default function Home() {
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-1.5 w-1.5 md:h-3 md:w-3 bg-rose-500"></span>
                 </span>
-                <span className="font-cairo text-[10px] md:text-sm font-bold text-rose-300 tracking-wide">مرحباً بك في أكاديمية يوسف أوتوميتس</span>
+                <span className="font-cairo text-[10px] md:text-sm font-bold text-rose-300 tracking-wide">مرحباً بك في أكاديمية جو سكول</span>
               </motion.div>
 
               <motion.div
@@ -263,7 +263,7 @@ export default function Home() {
               >
                 <h1 className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-alexandria font-black text-white leading-[1.3] md:leading-tight tracking-tighter block mb-1 md:mb-2">
                   ضاعف إنتاجيتك مع <br />
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ff0f53] via-[#ff2d6b] to-[#ff00b3]">يوسف أوتوميتس</span>
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ff0f53] via-[#ff2d6b] to-[#ff00b3]">جو سكول</span>
                 </h1>
               </motion.div>
               

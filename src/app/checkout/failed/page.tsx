@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { motion } from "framer-motion";
 import { XCircle, ArrowRight, RefreshCcw, ShieldAlert, MessageCircle, Home } from "lucide-react";
@@ -88,7 +88,7 @@ function FailedContent() {
       </main>
 
       <div className="fixed bottom-0 w-full py-6 text-center opacity-40">
-        <p className="text-zinc-600 text-xs font-cairo">© {new Date().getFullYear()} Youssef Automates — Premium Digital Experiences</p>
+        <p className="text-zinc-600 text-xs font-cairo">© {new Date().getFullYear()} JoeSchool — Premium Digital Experiences</p>
       </div>
     </div>
   );

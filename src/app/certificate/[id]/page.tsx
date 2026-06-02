@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { use, useState, useEffect } from "react";
 import { Navbar } from "@/components/Navbar";
@@ -121,7 +121,7 @@ export default function CertificateVerificationPage({ params }: { params: Promis
                   </div>
 
                   <p className="text-zinc-400 text-sm max-w-md mx-auto leading-relaxed">
-                    تؤكد منصة وأكاديمية <span className="text-white font-bold">Youssef Automates</span> رسمياً صحة ومصداقية الشهادة الرقمية الممنوحة للطالب:
+                    تؤكد منصة وأكاديمية <span className="text-white font-bold">JoeSchool</span> رسمياً صحة ومصداقية الشهادة الرقمية الممنوحة للطالب:
                   </p>
 
                   {/* Student Name */}

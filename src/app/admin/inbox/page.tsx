@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
@@ -121,7 +121,7 @@ export default function InboxPage() {
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-white/5">
         <div>
           <h1 className="text-2xl font-black text-white mb-2">صندوق الوارد 📬</h1>
-          <p className="text-zinc-500 text-xs">عرض وإدارة الرسائل الواردة لـ support@youssefautomates.com مباشرة من لوحة التحكم.</p>
+          <p className="text-zinc-500 text-xs">عرض وإدارة الرسائل الواردة لـ support@joeschool.com مباشرة من لوحة التحكم.</p>
         </div>
         <button
           onClick={fetchEmails}
@@ -299,7 +299,7 @@ export default function InboxPage() {
                 {/* Meta details */}
                 <div className="bg-white/[0.01] border border-white/5 rounded-2xl p-4 text-xs text-zinc-400 space-y-2 text-right">
                   <div><strong>من:</strong> <span className="text-zinc-200 font-sans">{selectedEmail.from}</span></div>
-                  <div><strong>إلى:</strong> <span className="text-zinc-200 font-sans">support@youssefautomates.com</span></div>
+                  <div><strong>إلى:</strong> <span className="text-zinc-200 font-sans">support@joeschool.com</span></div>
                   <div><strong>التاريخ:</strong> <span className="text-zinc-200 font-sans">{new Date(selectedEmail.date).toLocaleString("ar-EG")}</span></div>
                 </div>
 

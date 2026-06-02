@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { ShieldCheck, Lock, Clock, Activity, Ban } from "lucide-react";
@@ -30,7 +30,7 @@ export default function SecuritySettings() {
             <ShieldCheck className="w-6 h-6 text-rose-500" />
           </h1>
           <p className="text-zinc-500 text-xs mt-1">
-            Monitor active sessions, administrator audit logs, and secure access configurations for Youssef Automates.
+            Monitor active sessions, administrator audit logs, and secure access configurations for JoeSchool.
           </p>
         </div>
       </div>

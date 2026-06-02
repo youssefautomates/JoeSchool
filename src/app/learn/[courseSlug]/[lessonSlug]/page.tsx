@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { use, useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
@@ -191,7 +191,7 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ courseS
       
       ctx.fillStyle = "#9ca3af";
       ctx.font = "40px Cairo, sans-serif";
-      ctx.fillText("تشهد منصة وأكاديمية يوسف أوتوميتس بأن الطالب البارز:", canvas.width / 2, 480);
+      ctx.fillText("تشهد منصة وأكاديمية جو سكول بأن الطالب البارز:", canvas.width / 2, 480);
       
       ctx.fillStyle = "#ffffff";
       ctx.font = "bold 90px Cairo, sans-serif";
@@ -219,7 +219,7 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ courseS
       
       ctx.fillStyle = "rgba(251, 191, 36, 0.03)";
       ctx.font = "bold 130px Cairo, sans-serif";
-      ctx.fillText("YOUSSEF AUTOMATES", canvas.width / 2, canvas.height / 2 + 50);
+      ctx.fillText("JOESCHOOL", canvas.width / 2, canvas.height / 2 + 50);
       
       const dataUrl = canvas.toDataURL("image/png");
       finalizeDownload(dataUrl, canvas.width, canvas.height);
@@ -437,7 +437,7 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ courseS
     if (!user || !course) return;
 
     try {
-      const studentName = user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split("@")[0] || "طالب يوسف أوتوميتس";
+      const studentName = user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split("@")[0] || "طالب جو سكول";
       const { completed, percent, certIssued } = await toggleLessonCompleted(
         user.id,
         lessonId,
@@ -832,7 +832,7 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ courseS
             {/* Sticky Player Controls bar */}
             <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-black/80 to-transparent px-4 flex items-center justify-between text-[10px] text-zinc-400 select-none pointer-events-none">
               <span>HD 1080p • تشغيل آمن وموثق</span>
-              <span>Youssef Automates LMS</span>
+              <span>JoeSchool LMS</span>
             </div>
           </div>
 
@@ -1089,7 +1089,7 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ courseS
                 </div>
                 
                 <h2 className="font-alexandria font-black text-2xl sm:text-4xl text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-yellow-200 to-amber-500 tracking-tight leading-tight">
-                  تهانينا الحارة من يوسف أوتوميتس
+                  تهانينا الحارة من جو سكول
                 </h2>
                 
                 <p className="text-zinc-400 text-xs sm:text-sm max-w-lg mx-auto leading-relaxed">
@@ -1188,7 +1188,7 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ courseS
                     {/* QR Code */}
                     <div className="flex flex-col items-center gap-1.5 bg-white/[0.02] border border-white/5 p-2 rounded-2xl shrink-0 group-hover/cert:scale-[1.03] transition-transform duration-350">
                       <img 
-                        src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&color=d97706&bgcolor=0a0a0f&data=${encodeURIComponent(`https://youssefautomates.com/certificates/verify?id=${activeCert.verification_id}`)}`}
+                        src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&color=d97706&bgcolor=0a0a0f&data=${encodeURIComponent(`https://joeschool.com/certificates/verify?id=${activeCert.verification_id}`)}`}
                         alt="Certificate QR Verification" 
                         className="w-18 h-18 rounded-lg border border-amber-500/10"
                       />

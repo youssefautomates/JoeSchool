@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { use, useState, useEffect, useRef } from "react";
 import { Navbar } from "@/components/Navbar";
@@ -801,7 +801,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                             <div className="space-y-2">
                               <h3 className="font-alexandria font-black text-white text-lg sm:text-xl">احصل على شهادتك المهنية المعتمدة</h3>
                               <p className="text-zinc-400 text-xs sm:text-sm leading-relaxed">
-                                بمجرد إنتهائك من سماعك جميع محاضرات الدورة ستحصل على شهادة احترافية بإسمك من "يوسف أوتوميتس"، بحيث تعزز من فرص قبولك في أفضل الوظائف.
+                                بمجرد إنتهائك من سماعك جميع محاضرات الدورة ستحصل على شهادة احترافية بإسمك من "جو سكول"، بحيث تعزز من فرص قبولك في أفضل الوظائف.
                               </p>
                             </div>
 
@@ -854,7 +854,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                                   
                                   <div className="flex justify-between items-start z-10">
                                     <div className="w-6 h-6 border-t-2 border-r-2 border-rose-500/20" />
-                                    <span className="text-[8px] font-black text-rose-500/50 uppercase tracking-widest font-alexandria">Youssef Automates Academy</span>
+                                    <span className="text-[8px] font-black text-rose-500/50 uppercase tracking-widest font-alexandria">JoeSchool Academy</span>
                                     <div className="w-6 h-6 border-t-2 border-l-2 border-rose-500/20" />
                                   </div>
 
@@ -1885,7 +1885,7 @@ function MobileCourseView({
                    <h3 className="text-xs font-alexandria font-bold text-white">الشهادة المهنية المعتمدة</h3>
                  </div>
                  <p className="text-zinc-400 text-xs leading-relaxed font-cairo">
-                   بمجرد إنتهائك من سماعك جميع محاضرات الدورة ستحصل على شهادة احترافية بإسمك من "يوسف أوتوميتس"، بحيث تعزز من فرص قبولك في أفضل الوظائف.
+                   بمجرد إنتهائك من سماعك جميع محاضرات الدورة ستحصل على شهادة احترافية بإسمك من "جو سكول"، بحيث تعزز من فرص قبولك في أفضل الوظائف.
                  </p>
 
                  {course.certificate_bg_url ? (
@@ -2029,7 +2029,7 @@ function MobileCourseView({
       {/* 8. Small Custom Footer */}
       <footer className="border-t border-white/5 pt-6 pb-24 flex flex-col items-center gap-4 text-center text-zinc-500 text-[9px] w-full">
          <Link href="/" className="flex items-center gap-2 group">
-           <img src="/logo.png" alt="Youssef Automates" className="w-5 h-5 object-contain" />
+           <img src="/logo.png" alt="JoeSchool" className="w-5 h-5 object-contain" />
            <span className="font-alexandria font-bold text-xs tracking-tight text-white" dir="ltr">
              Joe <span className="text-[#D6004B]">School</span>
            </span>
@@ -2042,7 +2042,7 @@ function MobileCourseView({
            <span>·</span>
            <Link href="/privacy" className="hover:text-white transition-colors">الشروط والاستخدام</Link>
            <span>·</span>
-           <a href="mailto:admin@youssefautomates.com" className="hover:text-white transition-colors">الدعم الفني</a>
+           <a href="mailto:support@joeschool.com" className="hover:text-white transition-colors">الدعم الفني</a>
          </div>
 
          <div className="flex justify-center scale-90">
@@ -2050,7 +2050,7 @@ function MobileCourseView({
          </div>
 
          <div className="text-zinc-600">
-           جميع الحقوق محفوظة © {new Date().getFullYear()} Youssef Automates
+           جميع الحقوق محفوظة © {new Date().getFullYear()} JoeSchool
          </div>
       </footer>
 

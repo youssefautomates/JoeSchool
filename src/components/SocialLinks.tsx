@@ -36,7 +36,7 @@ export function SocialLinks() {
     },
     {
       name: "Instagram",
-      url: "https://www.instagram.com/youssefautomates/",
+      url: "https://www.instagram.com/joeschool/",
       label: "حساب إنستغرام الرسمي",
       hoverClass: "hover:text-pink-500 hover:bg-gradient-to-tr hover:from-pink-500/10 hover:to-violet-500/10 hover:border-pink-500/30 hover:shadow-[0_0_25px_rgba(236,72,153,0.35)]",
       icon: (
@@ -47,7 +47,7 @@ export function SocialLinks() {
     },
     {
       name: "TikTok",
-      url: "https://tiktok.com/@youssef.automates",
+      url: "https://tiktok.com/@joeschool",
       label: "حساب تيك توك الرسمي",
       hoverClass: "hover:text-[#00f2fe] hover:bg-[#00f2fe]/5 hover:border-cyan-500/30 hover:shadow-[0_0_25px_rgba(0,242,254,0.35)]",
       icon: (

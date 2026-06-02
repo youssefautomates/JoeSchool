@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -48,7 +48,7 @@ export default function PrivacyPage() {
               className="inline-flex items-center gap-2 bg-rose-500/10 text-rose-400 border border-rose-500/20 px-4 py-1.5 rounded-full mb-6 font-bold text-xs md:text-sm"
             >
               <Sparkles className="w-4 h-4 animate-pulse" />
-              <span>المركز القانوني لمنصة Youssef Automates</span>
+              <span>المركز القانوني لمنصة JoeSchool</span>
             </motion.div>
 
             <motion.h1
@@ -101,11 +101,11 @@ export default function PrivacyPage() {
                 >
                   <div className="flex items-center gap-3 border-b border-white/5 pb-4">
                     <Lock className="w-6 h-6 text-rose-500" />
-                    <h2 className="text-xl sm:text-2xl font-alexandria font-bold text-white">سياسة الخصوصية لمنصة Youssef Automates</h2>
+                    <h2 className="text-xl sm:text-2xl font-alexandria font-bold text-white">سياسة الخصوصية لمنصة JoeSchool</h2>
                   </div>
 
                   <p>
-                    نحن في منصة <strong>Youssef Automates</strong> نحترم خصوصية المستخدمين ونلتزم بحماية جميع البيانات والمعلومات الشخصية التي يتم جمعها أثناء استخدام المنصة أو شراء الدورات والخدمات والمنتجات الرقمية المتعلقة بأتمتة الأعمال والذكاء الاصطناعي وسير العمل الذكي وإنتاج المحتوى الإبداعي.
+                    نحن في منصة <strong>JoeSchool</strong> نحترم خصوصية المستخدمين ونلتزم بحماية جميع البيانات والمعلومات الشخصية التي يتم جمعها أثناء استخدام المنصة أو شراء الدورات والخدمات والمنتجات الرقمية المتعلقة بأتمتة الأعمال والذكاء الاصطناعي وسير العمل الذكي وإنتاج المحتوى الإبداعي.
                   </p>
                   <p>
                     تهدف هذه السياسة إلى توضيح كيفية جمع المعلومات واستخدامها وحمايتها عند استخدام خدمات المنصة.
@@ -144,7 +144,7 @@ export default function PrivacyPage() {
 
                   <h3 className="text-base sm:text-lg font-alexandria font-bold text-white mt-8 mb-3">تعديل الخدمات والشروط</h3>
                   <p>
-                    يحق لإدارة منصة Youssef Automates تعديل أو تحديث أو إيقاف أي جزء من الخدمات أو الشروط والأحكام في أي وقت دون إشعار مسبق، ويُعد استمرار استخدام المنصة موافقة على التعديلات الجديدة.
+                    يحق لإدارة منصة JoeSchool تعديل أو تحديث أو إيقاف أي جزء من الخدمات أو الشروط والأحكام في أي وقت دون إشعار مسبق، ويُعد استمرار استخدام المنصة موافقة على التعديلات الجديدة.
                   </p>
 
                   <h3 className="text-base sm:text-lg font-alexandria font-bold text-white mt-8 mb-3">إنهاء الاستخدام</h3>
@@ -154,7 +154,7 @@ export default function PrivacyPage() {
 
                   <h3 className="text-base sm:text-lg font-alexandria font-bold text-white mt-8 mb-3">الموافقة على الشروط والسياسات</h3>
                   <p>
-                    استخدام منصة Youssef Automates أو شراء أي دورة أو منتج رقمي أو خدمة عبرها يعني موافقة المستخدم الكاملة على جميع الشروط والأحكام والسياسات الخاصة بالمنصة.
+                    استخدام منصة JoeSchool أو شراء أي دورة أو منتج رقمي أو خدمة عبرها يعني موافقة المستخدم الكاملة على جميع الشروط والأحكام والسياسات الخاصة بالمنصة.
                   </p>
                 </motion.div>
               )}
@@ -174,7 +174,7 @@ export default function PrivacyPage() {
                   </div>
 
                   <p>
-                    مرحباً بكم في منصة <strong>Youssef Automates</strong>. يرجى قراءة شروط الاستخدام هذه بعناية قبل التصفح أو التسجيل أو الشراء.
+                    مرحباً بكم في منصة <strong>JoeSchool</strong>. يرجى قراءة شروط الاستخدام هذه بعناية قبل التصفح أو التسجيل أو الشراء.
                   </p>
 
                   <h3 className="text-base sm:text-lg font-alexandria font-bold text-white mt-8 mb-3">1. شروط الحساب والتسجيل</h3>
@@ -186,7 +186,7 @@ export default function PrivacyPage() {
 
                   <h3 className="text-base sm:text-lg font-alexandria font-bold text-white mt-8 mb-3">2. حقوق الملكية الفكرية وحماية المحتوى</h3>
                   <p>
-                    جميع المحتويات المقدمة في منصة Youssef Automates من دورات تدريبية، فيديوهات، قوالب ومؤثرات ومواد إبداعية، وتصميمات هي ملكية فكرية حصرية للمنصة ويحميه القانون الدولي والمحلي لحقوق النشر.
+                    جميع المحتويات المقدمة في منصة JoeSchool من دورات تدريبية، فيديوهات، قوالب ومؤثرات ومواد إبداعية، وتصميمات هي ملكية فكرية حصرية للمنصة ويحميه القانون الدولي والمحلي لحقوق النشر.
                   </p>
                   <ul className="list-disc list-inside space-y-2 pr-4 text-zinc-400">
                     <li>• يُرخص للمستخدم مشاهدة المحتوى واستخدام الملفات للاستخدام الشخصي أو المهني الخاص به فقط.</li>
@@ -196,7 +196,7 @@ export default function PrivacyPage() {
 
                   <h3 className="text-base sm:text-lg font-alexandria font-bold text-white mt-8 mb-3">3. تعديل الخدمات وتغيير الأسعار</h3>
                   <p>
-                    تحتفظ منصة Youssef Automates بالحق في تعديل الأسعار، سحب أو تعديل أي كورس أو منتج، أو إيقاف بعض الخدمات مؤقتاً أو نهائياً في أي وقت دون إشعار مسبق.
+                    تحتفظ منصة JoeSchool بالحق في تعديل الأسعار، سحب أو تعديل أي كورس أو منتج، أو إيقاف بعض الخدمات مؤقتاً أو نهائياً في أي وقت دون إشعار مسبق.
                   </p>
 
                   <h3 className="text-base sm:text-lg font-alexandria font-bold text-white mt-8 mb-3">4. إخلاء المسؤولية</h3>
@@ -238,7 +238,7 @@ export default function PrivacyPage() {
 
                   <h3 className="text-base sm:text-lg font-alexandria font-bold text-white mt-8 mb-3">3. آلية وخطوات معالجة الاسترداد</h3>
                   <p>
-                    في حال قبول طلب الاسترجاع واستيفاء الشروط أعلاه، يتم التواصل مع الدعم الفني عبر البريد الإلكتروني <span className="text-rose-400">admin@youssefautomates.com</span> أو الواتساب، ويتم تحويل المبلغ المسترد بنفس طريقة الدفع الأصلية خلال مدة تتراوح بين 7 إلى 14 يوم عمل عملياً حسب متطلبات البنك المعني وبوابات الدفع المستخدمة.
+                    في حال قبول طلب الاسترجاع واستيفاء الشروط أعلاه، يتم التواصل مع الدعم الفني عبر البريد الإلكتروني <span className="text-rose-400">support@joeschool.com</span> أو الواتساب، ويتم تحويل المبلغ المسترد بنفس طريقة الدفع الأصلية خلال مدة تتراوح بين 7 إلى 14 يوم عمل عملياً حسب متطلبات البنك المعني وبوابات الدفع المستخدمة.
                   </p>
                 </motion.div>
               )}

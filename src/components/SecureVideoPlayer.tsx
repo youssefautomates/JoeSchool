@@ -817,7 +817,7 @@ export default function SecureVideoPlayer({
             <Loader2 className="w-12 h-12 text-[#D6004B] animate-spin" />
             <div className="text-center space-y-1">
               <h4 className="font-alexandria font-bold text-white text-sm">تحميل آمن للمحاضرة</h4>
-              <p className="text-zinc-500 text-xs font-cairo">يتم تحضير مشغل البث المؤمن الموفر من يوسف أوتوميتس...</p>
+              <p className="text-zinc-500 text-xs font-cairo">يتم تحضير مشغل البث المؤمن الموفر من جو سكول...</p>
             </div>
           </div>
         )}

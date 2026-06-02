@@ -10,14 +10,14 @@ const cairo = { variable: "font-cairo" };
 const alexandria = { variable: "font-alexandria" };
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://youssefautomates.com"),
+  metadataBase: new URL("https://joeschool.com"),
   title: {
-    default: "Youssef Automates | منصة يوسف أوتوميتس لتعليم الأتمتة والذكاء الاصطناعي",
-    template: "%s | Youssef Automates"
+    default: "JoeSchool | أكاديمية جو سكول لإنتاج المحتوى بالذكاء الاصطناعي",
+    template: "%s | JoeSchool"
   },
-  description: "أكاديمية يوسف أوتوميتس لتعلم أتمتة الأعمال، أنظمة الذكاء الاصطناعي، إنتاج المحتوى وسير العمل الذكي لزيادة الإنتاجية.",
-  keywords: ["ذكاء اصطناعي", "أتمتة الأعمال", "يوسف أوتوميتس", "Youssef Automates", "سير العمل بدون كود", "أنظمة الأتمتة", "أدوات الذكاء الاصطناعي", "صناعة المحتوى", "زيادة الإنتاجية"],
-  authors: [{ name: "Youssef Ahmed" }],
+  description: "أكاديمية جو سكول المتخصصة في تعليم إنتاج المحتوى الاحترافي بالذكاء الاصطناعي، صناعة الفيديوهات الاحترافية، المحتوى السينمائي، والأدوات الإبداعية للمبدعين.",
+  keywords: ["ذكاء اصطناعي", "إنتاج المحتوى", "جو سكول", "JoeSchool", "محتوى سينمائي", "فيديو بالذكاء الاصطناعي", "أدوات الإبداع", "صناعة المحتوى", "تعليم رقمي"],
+  authors: [{ name: "Youssef Mostafa" }],
   icons: {
     icon: "/icon.png",
     shortcut: "/icon.png",
@@ -26,10 +26,10 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "ar_EG",
-    url: "https://youssefautomates.com",
-    title: "Youssef Automates | منصة احتراف الأتمتة وأنظمة الذكاء الاصطناعي",
-    description: "تعلم أتمتة العمليات، أدوات الذكاء الاصطناعي، ورفع الإنتاجية مع منصة يوسف أوتوميتس.",
-    siteName: "Youssef Automates",
+    url: "https://joeschool.com",
+    title: "JoeSchool | أكاديمية إنتاج المحتوى الاحترافي بالذكاء الاصطناعي",
+    description: "تعلم إنتاج المحتوى الاحترافي، الفيديوهات السينمائية، والأدوات الإبداعية مع أكاديمية جو سكول.",
+    siteName: "JoeSchool",
   },
 };
 

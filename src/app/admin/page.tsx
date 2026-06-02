@@ -517,7 +517,7 @@ export default function AdminDashboard() {
         else if (utm.includes("instagram") || utm.includes("ig")) src = "Instagram";
         else if (utm.includes("email") || utm.includes("newsletter")) src = "Email Campaign";
         else if (ref.includes("google") || ref.includes("bing") || ref.includes("yahoo") || ref.includes("duckduckgo")) src = "Organic Search";
-        else if (ref && ref !== "direct" && !ref.includes("localhost") && !ref.includes("youssefautomates")) src = "Referral Link";
+        else if (ref && ref !== "direct" && !ref.includes("localhost") && !ref.includes("joeschool")) src = "Referral Link";
 
         sessionSources[e.session_id] = src;
         if (sources[src]) sources[src].visits += 1;
@@ -716,7 +716,7 @@ export default function AdminDashboard() {
   // High-Fidelity Multi-Worksheet Microsoft Excel XML Generator
   const downloadExcelReport = () => {
     const dateStr = new Date().toISOString().split('T')[0];
-    const filename = `Youssef Automates_Commerce_Analytics_${dateStr}.xls`;
+    const filename = `JoeSchool_Commerce_Analytics_${dateStr}.xls`;
 
     let xml = `<?xml version="1.0"?>
 <?mso-application progid="Excel.Sheet"?>
@@ -777,7 +777,7 @@ export default function AdminDashboard() {
    <Column ss:Width="120"/>
    <Column ss:Width="150"/>
    <Row ss:Height="30" ss:StyleID="TitleHeader">
-    <Cell ss:MergeAcross="7"><Data ss:Type="String">Youssef Automates - Store Digital Products Analytics</Data></Cell>
+    <Cell ss:MergeAcross="7"><Data ss:Type="String">JoeSchool - Store Digital Products Analytics</Data></Cell>
    </Row>
    <Row ss:Height="20" ss:StyleID="ColHeader">
     <Cell><Data ss:Type="String">Product ID</Data></Cell>
@@ -825,7 +825,7 @@ export default function AdminDashboard() {
    <Column ss:Width="120"/>
    <Column ss:Width="150"/>
    <Row ss:Height="30" ss:StyleID="TitleHeader">
-    <Cell ss:MergeAcross="11"><Data ss:Type="String">Youssef Automates - LMS Course Academy Telemetry</Data></Cell>
+    <Cell ss:MergeAcross="11"><Data ss:Type="String">JoeSchool - LMS Course Academy Telemetry</Data></Cell>
    </Row>
    <Row ss:Height="20" ss:StyleID="ColHeader">
     <Cell><Data ss:Type="String">Course ID</Data></Cell>
@@ -1156,7 +1156,7 @@ export default function AdminDashboard() {
 
                   <div className="pt-4 border-t border-white/5 flex items-center justify-between text-[9px] text-zinc-600 font-bold">
                     <span>Showing top 15 records</span>
-                    <span className="text-rose-500 uppercase tracking-widest">Youssef Automates Engine</span>
+                    <span className="text-rose-500 uppercase tracking-widest">JoeSchool Engine</span>
                   </div>
                 </div>
 

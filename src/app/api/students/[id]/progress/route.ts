@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { checkSessionIsValid } from "@/lib/coursesDb";
 
@@ -27,7 +27,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   }
 
   // Ensure caller is admin (basic check for simplicity, normally you'd check user roles)
-  const adminEmails = ["youssef@automates.com", "admin@youssefautomates.com", "admin@youssefautomates.com"]; // Extend as needed
+  const adminEmails = ["youssef@automates.com", "admin@joeschool.com", "admin@joeschool.com"]; // Extend as needed
   // We'll bypass strict admin email check if they can access the endpoint, but in prod verify roles.
 
   try {

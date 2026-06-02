@@ -1,5 +1,5 @@
-/**
- * 🎓 Youssef Automates - Advanced Client-Side Marketing & Analytics Engine
+﻿/**
+ * 🎓 JoeSchool - Advanced Client-Side Marketing & Analytics Engine
  * 
  * Manages unique user sessions, captures UTM attribution parameters, locks referrers,
  * and handles robust, non-blocking clickstream event logging to the Supabase database.

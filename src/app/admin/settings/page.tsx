@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
@@ -34,8 +34,8 @@ export default function AdminSettings() {
   const [activeSubTab, setActiveSubTab] = useState("general");
 
   // Store Settings State
-  const [storeName, setStoreName] = useState("Youssef Automates");
-  const [storeEmail, setStoreEmail] = useState("admin@youssefautomates.com");
+  const [storeName, setStoreName] = useState("JoeSchool");
+  const [storeEmail, setStoreEmail] = useState("admin@joeschool.com");
   
   // Paymob Settings State
   const [paymobApiKey, setPaymobApiKey] = useState("••••••••••••••••••••••••");
@@ -431,7 +431,7 @@ export default function AdminSettings() {
                   <div className="space-y-3">
                     <Label className="text-zinc-400 font-semibold text-xs">Sender Display Name</Label>
                     <Input 
-                      value="Youssef Automates Academy" 
+                      value="JoeSchool Academy" 
                       disabled
                       className="h-12 bg-white/5 border-white/10 rounded-xl text-xs" 
                     />

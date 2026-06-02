@@ -1,4 +1,4 @@
-import { Resend } from "resend";
+﻿import { Resend } from "resend";
 import { createClient } from "@supabase/supabase-js";
 
 // Initialize Supabase Admin inside the email service to allow self-contained database queries
@@ -77,7 +77,7 @@ export async function sendOrderEmail(
           tags: product.tags || [],
           isCourse,
           hasDownload: !!product.file_url,
-          downloadUrl: product.file_url ? `${process.env.NEXT_PUBLIC_APP_URL || "https://www.youssefautomates.com"}/api/download?token=${order.id}` : null,
+          downloadUrl: product.file_url ? `${process.env.NEXT_PUBLIC_APP_URL || "https://www.joeschool.com"}/api/download?token=${order.id}` : null,
           orderId: order.id
         });
       } else {
@@ -98,11 +98,11 @@ export async function sendOrderEmail(
     const containsDigital = resolvedProducts.some(p => p.hasDownload);
 
     // 2. Set dynamic transactional subject line based on product types
-    let subjectLine = "تم تسليم طلبك | Youssef Automates";
+    let subjectLine = "تم تسليم طلبك | JoeSchool";
     if (containsCourses && !containsDigital) {
-      subjectLine = "تم تفعيل دورتك التعليمية | Youssef Automates";
+      subjectLine = "تم تفعيل دورتك التعليمية | JoeSchool";
     } else if (containsDigital && !containsCourses) {
-      subjectLine = "روابط تحميل ملفاتك الرقمية | Youssef Automates";
+      subjectLine = "روابط تحميل ملفاتك الرقمية | JoeSchool";
     }
 
     // 3. Build bulletproof Plain Text Version (Crucial for Anti-Spam scores)
@@ -113,7 +113,7 @@ export async function sendOrderEmail(
     for (const product of resolvedProducts) {
       emailText += `- ${product.title} (${product.isCourse ? 'دورة تدريبية' : 'منتج رقمي للتحميل'})\n`;
       if (product.isCourse) {
-        emailText += `  رابط بدء التعلم: ${process.env.NEXT_PUBLIC_APP_URL || "https://www.youssefautomates.com"}/dashboard\n`;
+        emailText += `  رابط بدء التعلم: ${process.env.NEXT_PUBLIC_APP_URL || "https://www.joeschool.com"}/dashboard\n`;
       } else if (product.downloadUrl) {
         emailText += `  رابط التحميل المباشر: ${product.downloadUrl}\n`;
       }
@@ -132,15 +132,15 @@ export async function sendOrderEmail(
     }
     emailText += `\n`;
     emailText += `--------------------------------------------------\n`;
-    emailText += `استلمت هذا البريد لأنك قمت بشراء منتج من Youssef Automates.\n`;
-    emailText += `الدعم الفني: admin@youssefautomates.com\n`;
-    emailText += `رابط الدعم: ${process.env.NEXT_PUBLIC_APP_URL || "https://www.youssefautomates.com"}/contact\n`;
+    emailText += `استلمت هذا البريد لأنك قمت بشراء منتج من JoeSchool.\n`;
+    emailText += `الدعم الفني: support@joeschool.com\n`;
+    emailText += `رابط الدعم: ${process.env.NEXT_PUBLIC_APP_URL || "https://www.joeschool.com"}/contact\n`;
 
     // 4. Build Clean, Anti-Spam Compliant HTML Version (No heavy shadows/glows/complex CSS)
     let productsBlock = "";
     for (const product of resolvedProducts) {
       const downloadLink = product.downloadUrl;
-      const dashboardLink = `${process.env.NEXT_PUBLIC_APP_URL || "https://www.youssefautomates.com"}/dashboard`;
+      const dashboardLink = `${process.env.NEXT_PUBLIC_APP_URL || "https://www.joeschool.com"}/dashboard`;
 
       if (product.isCourse) {
         productsBlock += `
@@ -232,10 +232,10 @@ export async function sendOrderEmail(
           <tr>
             <td style="padding:24px;text-align:center;background-color:#f8fafc;border-top: 1px solid #e2e8f0;">
               <p style="color:#475569;font-size:12px;margin:0 0 8px 0;line-height: 1.5;font-family: 'Segoe UI', Arial, sans-serif;">
-                استلمت هذا البريد لأنك قمت بشراء منتج من Youssef Automates.<br/>
-                لديك استفسار؟ <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://www.youssefautomates.com'}/contact" style="color:#b91c1c;text-decoration:underline;font-weight:bold;">اتصل بالدعم الفني</a>
+                استلمت هذا البريد لأنك قمت بشراء منتج من JoeSchool.<br/>
+                لديك استفسار؟ <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://www.joeschool.com'}/contact" style="color:#b91c1c;text-decoration:underline;font-weight:bold;">اتصل بالدعم الفني</a>
               </p>
-              <p style="color:#94a3b8;font-size:10px;margin:12px 0 0 0;font-family: 'Segoe UI', Arial, sans-serif;">&copy; ${new Date().getFullYear()} Youssef Automates. جميع الحقوق محفوظة.</p>
+              <p style="color:#94a3b8;font-size:10px;margin:12px 0 0 0;font-family: 'Segoe UI', Arial, sans-serif;">&copy; ${new Date().getFullYear()} JoeSchool. جميع الحقوق محفوظة.</p>
             </td>
           </tr>
         </table>
@@ -246,7 +246,7 @@ export async function sendOrderEmail(
 </html>`.trim();
 
     // 5. Dispatch strictly via the custom domain sender using precise headers
-    const sender = "Youssef Automates <delivery@youssefautomates.com>";
+    const sender = "JoeSchool <delivery@joeschool.com>";
     console.log(`[EMAIL_SERVICE][${requestId}] 🚀 Dispatching transactional via: "${sender}" to: "${customerEmail}"`);
 
     const emailResult = await resend.emails.send({
@@ -255,10 +255,10 @@ export async function sendOrderEmail(
       subject: subjectLine,
       html: emailHtml,
       text: emailText, // Bulletproof Plain Text fallback
-      replyTo: "admin@youssefautomates.com",
+      replyTo: "support@joeschool.com",
       headers: {
-        "Message-ID": `<${transactionId}-${Date.now()}@youssefautomates.com>`,
-        "List-Unsubscribe": `<mailto:unsubscribe@youssefautomates.com?subject=unsubscribe>`,
+        "Message-ID": `<${transactionId}-${Date.now()}@joeschool.com>`,
+        "List-Unsubscribe": `<mailto:unsubscribe@joeschool.com?subject=unsubscribe>`,
         "MIME-Version": "1.0",
         "Auto-Submitted": "auto-generated"
       }

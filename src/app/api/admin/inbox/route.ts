@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { getZohoAccessToken } from "@/lib/zoho";
 
@@ -33,7 +33,7 @@ const MOCK_EMAILS = [
     folderId: "mock-inbox",
     content: `
       <div dir="rtl" style="font-family: sans-serif; line-height: 1.6; color: #f3f4f6; background-color: #18181b; padding: 20px; border-radius: 12px;">
-        <p>مرحباً فريق يوسف أوتوميتس،</p>
+        <p>مرحباً فريق جو سكول،</p>
         <p>نحن معجبون جداً بالمحتوى الذي تقدمونه على تيك توك وإنستغرام.</p>
         <p>نحن فريق صناعة محتوى إبداعي مكون من 5 أشخاص في شركتنا، ونريد شراء الدخول الكامل لجميع الكورسات والمنتجات الرقمية لجميع أعضاء الفريق.</p>
         <p>هل توجد باقة خصم خاصة بالمجموعات أو الشركات؟ وكيف يمكننا الدفع والحصول على الفواتير الضريبية؟</p>

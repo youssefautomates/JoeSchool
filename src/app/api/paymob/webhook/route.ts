@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { verifyPaymobHmac } from "@/lib/paymob";
 import { sendOrderEmail } from "@/lib/email/sendOrderEmail";
@@ -57,10 +57,10 @@ export async function POST(request: Request) {
     const source = detectSource(transaction);
     console.log(`[PAYMOB_WEBHOOK][${requestId}] Source: ${source} | Order: ${paymobOrderId} | Success: ${isSuccess} | Txn: ${txnId}`);
 
-    // Route other merchant profiles if needed (e.g., Youssef Automates passthrough)
+    // Route other merchant profiles if needed (e.g., JoeSchool passthrough)
     if (source === "youssefautomates") {
-      console.log(`[PAYMOB_WEBHOOK][${requestId}] 🎓 Youssef Automates payment — passing through`);
-      return NextResponse.json({ success: true, source: "youssefautomates", message: "Handled by Youssef Automates" });
+      console.log(`[PAYMOB_WEBHOOK][${requestId}] 🎓 JoeSchool payment — passing through`);
+      return NextResponse.json({ success: true, source: "youssefautomates", message: "Handled by JoeSchool" });
     }
 
     // ── 3. Find Matching Supabase Order ───────────────────────────

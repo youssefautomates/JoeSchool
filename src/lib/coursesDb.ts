@@ -1,4 +1,4 @@
-import { supabaseClient } from "./supabaseClient";
+﻿import { supabaseClient } from "./supabaseClient";
 
 // ────────────────────────────────────────────────────────────────────────────
 // Types
@@ -891,8 +891,8 @@ export async function enrollUser(userId: string, courseId: string, details?: { e
   const record: LmsEnrollment = {
     id: `enroll-${Date.now()}`,
     user_id: userId,
-    user_email: details?.email || "student@youssefautomates.com",
-    user_name: details?.name || "طالب يوسف أوتوميتس",
+    user_email: details?.email || "student@joeschool.com",
+    user_name: details?.name || "طالب جو سكول",
     course_id: courseId,
     enrolled_at: new Date().toISOString(),
     status: "active"
@@ -902,8 +902,8 @@ export async function enrollUser(userId: string, courseId: string, details?: { e
     const { data, error } = await supabaseClient.from("enrollments").insert({
       user_id: userId,
       course_id: courseId,
-      user_name: details?.name || "طالب يوسف أوتوميتس",
-      user_email: details?.email || "student@youssefautomates.com",
+      user_name: details?.name || "طالب جو سكول",
+      user_email: details?.email || "student@joeschool.com",
       status: "active"
     }).select().single();
     if (!error && data) return data as LmsEnrollment;
@@ -1059,7 +1059,7 @@ export async function getUserEnrollments(userId: string, userEmail?: string): Pr
                 await supabaseClient.from("enrollments").insert({
                   user_id: userId,
                   course_id: courseId,
-                  user_name: order.customer_name || "طالب يوسف أوتوميتس",
+                  user_name: order.customer_name || "طالب جو سكول",
                   user_email: emailLower,
                   status: "active"
                 });
@@ -1133,7 +1133,7 @@ export async function toggleLessonCompleted(userId: string, lessonId: string, co
   // Automate certificate generation on 100% completion
   let certIssued: LmsCertificate | undefined;
   if (isFinished) {
-    const name = studentName || "طالب يوسف أوتوميتس";
+    const name = studentName || "طالب جو سكول";
     certIssued = await issueCertificate(userId, courseId, name);
   }
 
@@ -1285,7 +1285,7 @@ export async function getUserCertificates(userId: string): Promise<LmsCertificat
           certificate_date_size: c?.certificate_date_size || 14,
           issued_at: new Date(d.created_at || d.issued_at || Date.now()).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }),
           verification_id: d.certificate_url || d.id,
-          student_name: enroll?.user_name || "طالب يوسف أوتوميتس"
+          student_name: enroll?.user_name || "طالب جو سكول"
         });
       }
       return populated as LmsCertificate[];
@@ -1312,7 +1312,7 @@ export async function getUserCertificates(userId: string): Promise<LmsCertificat
       certificate_date_y: course?.certificate_date_y || 70,
       certificate_date_size: course?.certificate_date_size || 14,
       verification_id: c.verification_id || c.certificate_url || c.id,
-      student_name: enroll?.user_name || c.student_name || "طالب يوسف أوتوميتس"
+      student_name: enroll?.user_name || c.student_name || "طالب جو سكول"
     };
   });
 }
@@ -1355,7 +1355,7 @@ export async function getCertificateByVerificationId(id: string): Promise<LmsCer
         certificate_date_size: course?.certificate_date_size || 14,
         issued_at: new Date(data.created_at || data.issued_at || Date.now()).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }),
         verification_id: data.certificate_url || id,
-        student_name: enroll?.user_name || "طالب يوسف أوتوميتس"
+        student_name: enroll?.user_name || "طالب جو سكول"
       } as LmsCertificate;
     }
   } catch (e) {}
@@ -1380,7 +1380,7 @@ export async function getCertificateByVerificationId(id: string): Promise<LmsCer
       certificate_date_y: course?.certificate_date_y || 70,
       certificate_date_size: course?.certificate_date_size || 14,
       verification_id: found.verification_id || found.certificate_url || id,
-      student_name: enroll?.user_name || found.student_name || "طالب يوسف أوتوميتس"
+      student_name: enroll?.user_name || found.student_name || "طالب جو سكول"
     } as LmsCertificate;
   }
   return null;

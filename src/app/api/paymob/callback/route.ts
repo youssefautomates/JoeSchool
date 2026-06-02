@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import { verifyPaymobHmac } from "@/lib/paymob";
 import { createClient } from "@supabase/supabase-js";
 
@@ -14,7 +14,7 @@ const supabaseAdmin = createClient(
  * This is the redirect URL Paymob sends the customer to after 3DS/OTP verification.
  * We verify the HMAC, then redirect to our own success or failed page.
  * 
- * This ensures Store customers NEVER get redirected to Youssef Automates or any external page.
+ * This ensures Store customers NEVER get redirected to JoeSchool or any external page.
  */
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -46,7 +46,7 @@ export async function GET(request: Request) {
 
   console.log(`[CALLBACK] Success: ${success} | Order: ${orderId} | MerchantOrder: ${merchantOrderId}`);
 
-  // 3. Always redirect to Youssef Automates Store pages
+  // 3. Always redirect to JoeSchool Store pages
   // This guarantees store customers never see any incorrect pages
   const reason = searchParams.get("txn_response_code") || "declined";
   

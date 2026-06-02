@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { motion, AnimatePresence } from "framer-motion";
 import { Navbar } from "@/components/Navbar";
@@ -32,7 +32,7 @@ export default function CoursesPage() {
   }, []);
 
   const [coursesList, setCoursesList] = useState<LmsCourse[]>([]);
-  const [activeCategory, setActiveCategory] = useState("الكل");
+  const [activeCategory, setActiveCategory] = useState("Ø§Ù„ÙƒÙ„");
   const [isLoading, setIsLoading] = useState(true);
   const [dynamicCategories, setDynamicCategories] = useState<string[]>([]);
   const [allReviews, setAllReviews] = useState<any[]>([]);
@@ -65,20 +65,20 @@ export default function CoursesPage() {
   }, []);
 
   const courseCategories = [
-    "الكل",
+    "Ø§Ù„ÙƒÙ„",
     ...(dynamicCategories.length > 0
       ? dynamicCategories
-      : ["أتمتة الأعمال", "الذكاء الاصطناعي", "صناعة المحتوى", "الدورات المجانية"])
+      : ["Ø£ØªÙ…ØªØ© Ø§Ù„Ø£Ø¹Ù…Ø§Ù„", "Ø§Ù„Ø°ÙƒØ§Ø¡ Ø§Ù„Ø§ØµØ·Ù†Ø§Ø¹ÙŠ", "ØµÙ†Ø§Ø¹Ø© Ø§Ù„Ù…Ø­ØªÙˆÙ‰", "Ø§Ù„Ø¯ÙˆØ±Ø§Øª Ø§Ù„Ù…Ø¬Ø§Ù†ÙŠØ©"])
   ];
 
   const filteredCourses = coursesList.filter((course) => {
-    if (activeCategory === "الكل") return true;
-    if (activeCategory === "الدورات المجانية") return course.is_free || course.price === 0;
+    if (activeCategory === "Ø§Ù„ÙƒÙ„") return true;
+    if (activeCategory === "Ø§Ù„Ø¯ÙˆØ±Ø§Øª Ø§Ù„Ù…Ø¬Ø§Ù†ÙŠØ©") return course.is_free || course.price === 0;
     if (course.category === activeCategory) return true;
     const legacyMap: Record<string, string[]> = {
-      "دورات صناعة المحتوى": ["صناعة المحتوى", "المحتوى", "الأتمتة", "أتمتة"],
-      "دورات الرسوم المتحركة": ["الرسوم المتحركة", "تحريك", "الذكاء الاصطناعي", "AI"],
-      "الذكاء الاصطناعي التوليدي": ["الذكاء الاصطناعي التوليدي", "الذكاء الاصطناعي", "AI"],
+      "Ø¯ÙˆØ±Ø§Øª ØµÙ†Ø§Ø¹Ø© Ø§Ù„Ù…Ø­ØªÙˆÙ‰": ["ØµÙ†Ø§Ø¹Ø© Ø§Ù„Ù…Ø­ØªÙˆÙ‰", "Ø§Ù„Ù…Ø­ØªÙˆÙ‰", "Ø§Ù„Ø£ØªÙ…ØªØ©", "Ø£ØªÙ…ØªØ©"],
+      "Ø¯ÙˆØ±Ø§Øª Ø§Ù„Ø±Ø³ÙˆÙ… Ø§Ù„Ù…ØªØ­Ø±ÙƒØ©": ["Ø§Ù„Ø±Ø³ÙˆÙ… Ø§Ù„Ù…ØªØ­Ø±ÙƒØ©", "ØªØ­Ø±ÙŠÙƒ", "Ø§Ù„Ø°ÙƒØ§Ø¡ Ø§Ù„Ø§ØµØ·Ù†Ø§Ø¹ÙŠ", "AI"],
+      "Ø§Ù„Ø°ÙƒØ§Ø¡ Ø§Ù„Ø§ØµØ·Ù†Ø§Ø¹ÙŠ Ø§Ù„ØªÙˆÙ„ÙŠØ¯ÙŠ": ["Ø§Ù„Ø°ÙƒØ§Ø¡ Ø§Ù„Ø§ØµØ·Ù†Ø§Ø¹ÙŠ Ø§Ù„ØªÙˆÙ„ÙŠØ¯ÙŠ", "Ø§Ù„Ø°ÙƒØ§Ø¡ Ø§Ù„Ø§ØµØ·Ù†Ø§Ø¹ÙŠ", "AI"],
     };
     const aliases = legacyMap[activeCategory] || [];
     return aliases.some(alias => course.category === alias || course.category?.toLowerCase().includes(alias.toLowerCase()));
@@ -104,7 +104,7 @@ export default function CoursesPage() {
               className="inline-flex items-center gap-2 bg-rose-500/10 text-rose-400 border border-rose-500/20 px-4 py-1.5 rounded-full mb-6 font-bold text-xs md:text-sm"
             >
               <Sparkles className="w-4 h-4 animate-pulse" />
-              <span>أكاديمية يوسف أوتوميتس للتعليم الرقمي</span>
+              <span>Ø£ÙƒØ§Ø¯ÙŠÙ…ÙŠØ© ÙŠÙˆØ³Ù Ø£ÙˆØªÙˆÙ…ÙŠØªØ³ Ù„Ù„ØªØ¹Ù„ÙŠÙ… Ø§Ù„Ø±Ù‚Ù…ÙŠ</span>
             </motion.div>
 
             <motion.h1
@@ -113,9 +113,9 @@ export default function CoursesPage() {
               transition={{ duration: 0.6, delay: 0.1 }}
               className="text-3xl sm:text-5xl md:text-6xl font-alexandria font-black leading-tight tracking-tight text-white mb-6"
             >
-              انطلق نحو الاحتراف مع <br />
+              Ø§Ù†Ø·Ù„Ù‚ Ù†Ø­Ùˆ Ø§Ù„Ø§Ø­ØªØ±Ø§Ù Ù…Ø¹ <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ff0f53] to-[#ff00b3]">
-                أرقى دورات أتمتة الأعمال والذكاء الاصطناعي وصناعة المحتوى
+                Ø£Ø±Ù‚Ù‰ Ø¯ÙˆØ±Ø§Øª Ø£ØªÙ…ØªØ© Ø§Ù„Ø£Ø¹Ù…Ø§Ù„ ÙˆØ§Ù„Ø°ÙƒØ§Ø¡ Ø§Ù„Ø§ØµØ·Ù†Ø§Ø¹ÙŠ ÙˆØµÙ†Ø§Ø¹Ø© Ø§Ù„Ù…Ø­ØªÙˆÙ‰
               </span>
             </motion.h1>
 
@@ -125,7 +125,7 @@ export default function CoursesPage() {
               transition={{ duration: 0.6, delay: 0.2 }}
               className="text-zinc-400 text-sm sm:text-lg max-w-2xl mx-auto leading-relaxed"
             >
-              اختر مسارك الاحترافي من بين حزم الدروس المصممة لتأهيلك لبناء أنظمة الأتمتة، تطبيقات الذكاء الاصطناعي، وإنتاج المحتوى الإبداعي المتميز.
+              Ø§Ø®ØªØ± Ù…Ø³Ø§Ø±Ùƒ Ø§Ù„Ø§Ø­ØªØ±Ø§ÙÙŠ Ù…Ù† Ø¨ÙŠÙ† Ø­Ø²Ù… Ø§Ù„Ø¯Ø±ÙˆØ³ Ø§Ù„Ù…ØµÙ…Ù…Ø© Ù„ØªØ£Ù‡ÙŠÙ„Ùƒ Ù„Ø¨Ù†Ø§Ø¡ Ø£Ù†Ø¸Ù…Ø© Ø§Ù„Ø£ØªÙ…ØªØ©ØŒ ØªØ·Ø¨ÙŠÙ‚Ø§Øª Ø§Ù„Ø°ÙƒØ§Ø¡ Ø§Ù„Ø§ØµØ·Ù†Ø§Ø¹ÙŠØŒ ÙˆØ¥Ù†ØªØ§Ø¬ Ø§Ù„Ù…Ø­ØªÙˆÙ‰ Ø§Ù„Ø¥Ø¨Ø¯Ø§Ø¹ÙŠ Ø§Ù„Ù…ØªÙ…ÙŠØ².
             </motion.p>
           </div>
         </section>
@@ -155,14 +155,14 @@ export default function CoursesPage() {
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-20 gap-4">
               <Loader2 className="w-10 h-10 text-rose-500 animate-spin" />
-              <p className="text-zinc-400 text-sm font-medium">جاري تحميل المسارات التعليمية الاحترافية...</p>
+              <p className="text-zinc-400 text-sm font-medium">Ø¬Ø§Ø±ÙŠ ØªØ­Ù…ÙŠÙ„ Ø§Ù„Ù…Ø³Ø§Ø±Ø§Øª Ø§Ù„ØªØ¹Ù„ÙŠÙ…ÙŠØ© Ø§Ù„Ø§Ø­ØªØ±Ø§ÙÙŠØ©...</p>
             </div>
           ) : filteredCourses.length === 0 ? (
             <div className="text-center py-20 bg-white/[0.02] border border-white/5 rounded-3xl p-8 max-w-md mx-auto">
               <BookOpen className="w-12 h-12 text-zinc-700 mx-auto mb-4" />
-              <h3 className="font-alexandria font-bold text-white text-base">لا توجد أقسام تدريبية متاحة حالياً</h3>
+              <h3 className="font-alexandria font-bold text-white text-base">Ù„Ø§ ØªÙˆØ¬Ø¯ Ø£Ù‚Ø³Ø§Ù… ØªØ¯Ø±ÙŠØ¨ÙŠØ© Ù…ØªØ§Ø­Ø© Ø­Ø§Ù„ÙŠØ§Ù‹</h3>
               <p className="text-zinc-500 text-xs sm:text-sm mt-1">
-                تتوفر أقسام جديدة قريباً جداً في هذه الصفحة. تابع قنواتنا للحصول على التحديثات!
+                ØªØªÙˆÙØ± Ø£Ù‚Ø³Ø§Ù… Ø¬Ø¯ÙŠØ¯Ø© Ù‚Ø±ÙŠØ¨Ø§Ù‹ Ø¬Ø¯Ø§Ù‹ ÙÙŠ Ù‡Ø°Ù‡ Ø§Ù„ØµÙØ­Ø©. ØªØ§Ø¨Ø¹ Ù‚Ù†ÙˆØ§ØªÙ†Ø§ Ù„Ù„Ø­ØµÙˆÙ„ Ø¹Ù„Ù‰ Ø§Ù„ØªØ­Ø¯ÙŠØ«Ø§Øª!
               </p>
             </div>
           ) : (
@@ -208,7 +208,7 @@ export default function CoursesPage() {
                       {coursePricing && coursePricing.original_price > coursePricing.price && (
                         <div className="absolute bottom-3 right-3 z-20">
                           <span className="bg-emerald-500 text-white font-black text-[9px] font-alexandria py-1 px-2.5 rounded-lg shadow-md animate-pulse">
-                            وفر {coursePricing.discount_pct}%
+                            ÙˆÙØ± {coursePricing.discount_pct}%
                           </span>
                         </div>
                       )}
@@ -222,11 +222,11 @@ export default function CoursesPage() {
                           <div className="flex items-center gap-3">
                             <div className="flex items-center gap-1.5">
                               <BookOpen className="w-4 h-4 text-[#D6004B] transition-transform duration-300 ease-out group-hover/item:scale-120 group-hover/item:-rotate-6" />
-                              <span>{course.lessons_count} محاضرة</span>
+                              <span>{course.lessons_count} Ù…Ø­Ø§Ø¶Ø±Ø©</span>
                             </div>
                             <div className="flex items-center gap-1.5 border-r border-white/10 pr-3">
                               <Clock className="w-4 h-4 text-[#FF7A00] transition-transform duration-300 ease-out group-hover/item:scale-120 group-hover/item:rotate-6" />
-                              <span>{course.duration_hours} ساعة</span>
+                              <span>{course.duration_hours} Ø³Ø§Ø¹Ø©</span>
                             </div>
                           </div>
                           <div className="flex items-center gap-1 text-yellow-400">
@@ -255,7 +255,7 @@ export default function CoursesPage() {
                           )}
                           <div className="flex items-baseline gap-1">
                             <span className="text-xl sm:text-2xl font-alexandria font-black text-white">
-                              {coursePricing.price === 0 ? "مجاني" : formatPrice(coursePricing.price, currency)}
+                              {coursePricing.price === 0 ? "Ù…Ø¬Ø§Ù†ÙŠ" : formatPrice(coursePricing.price, currency)}
                             </span>
                           </div>
                         </div>
@@ -273,14 +273,14 @@ export default function CoursesPage() {
                                 image_url: course.image_url,
                                 category: course.category || "courses"
                               } as any);
-                              toast.success("تم إضافة الكورس للسلة بنجاح");
+                              toast.success("ØªÙ… Ø¥Ø¶Ø§ÙØ© Ø§Ù„ÙƒÙˆØ±Ø³ Ù„Ù„Ø³Ù„Ø© Ø¨Ù†Ø¬Ø§Ø­");
                             }}
                             className="h-12 w-12 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 text-white hover:bg-[#D6004B] hover:border-[#D6004B] hover:shadow-[0_0_15px_rgba(214,0,75,0.4)] transition-all shrink-0 group/cart duration-300"
                           >
                             <ShoppingCart className="w-5 h-5 group-hover/cart:scale-110 transition-transform" />
                           </button>
                           <div className="h-12 px-6 bg-[#D6004B] hover:bg-[#b0003d] text-white rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 shadow-[0_4px_15px_rgba(214,0,75,0.2)] group-hover:scale-[1.02] group-hover:shadow-[0_0_20px_rgba(214,0,75,0.4)] active:scale-98 transition-all shrink-0 duration-300">
-                            <span>احصل على الكورس</span>
+                            <span>Ø§Ø­ØµÙ„ Ø¹Ù„Ù‰ Ø§Ù„ÙƒÙˆØ±Ø³</span>
                             <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform rtl:rotate-180" />
                           </div>
                         </div>
@@ -298,3 +298,4 @@ export default function CoursesPage() {
     </div>
   );
 }
+

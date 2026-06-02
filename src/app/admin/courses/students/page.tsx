@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState, useEffect } from "react";
 import { 
@@ -399,7 +399,7 @@ export default function AdminStudentsPage() {
                     {/* Student Identity */}
                     <td className="p-5">
                       <div className="flex flex-col">
-                        <span className="font-bold text-white text-sm">{row.user_name || "Youssef Automates Student"}</span>
+                        <span className="font-bold text-white text-sm">{row.user_name || "JoeSchool Student"}</span>
                         <span className="text-[10px] text-zinc-500 font-mono mt-0.5">{row.user_email}</span>
                       </div>
                     </td>

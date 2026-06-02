@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import dns from "dns";
 
@@ -19,7 +19,7 @@ async function queryDnsWithTimeout<T>(promise: Promise<T>): Promise<T | null> {
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
-    const domain = searchParams.get("domain") || "youssefautomates.com";
+    const domain = searchParams.get("domain") || "joeschool.com";
 
     const report: any = {
       domain,
@@ -122,7 +122,7 @@ export async function GET(req: Request) {
     report.blacklist.list = blacklists;
 
     // ── 6. Compute Spam Score & Placement Indicators ──
-    const customSenderWeight = 1.5; // Custom delivery@youssefautomates.com is verified
+    const customSenderWeight = 1.5; // Custom delivery@joeschool.com is verified
     const baseScore = report.spf.score + report.dkim.score + report.dmarc.score + report.mx.score + customSenderWeight;
     report.spamScore = Number(baseScore.toFixed(1));
 
@@ -165,13 +165,13 @@ export async function POST(req: Request) {
     }
 
     const resend = new Resend(apiKey);
-    const sender = "Youssef Automates <delivery@youssefautomates.com>";
-    const textBody = `Youssef Automates Test Email\n\nThis is a real-time transactional deliverability diagnostics message.\n\nSent to: ${targetEmail}\nTime: ${new Date().toLocaleString()}`;
+    const sender = "JoeSchool <delivery@joeschool.com>";
+    const textBody = `JoeSchool Test Email\n\nThis is a real-time transactional deliverability diagnostics message.\n\nSent to: ${targetEmail}\nTime: ${new Date().toLocaleString()}`;
 
     const headers = {
       "X-Entity-Ref-ID": Math.random().toString(36).substring(2, 11),
-      "List-Unsubscribe": `<mailto:unsubscribe@youssefautomates.com?subject=unsubscribe>, <https://youssefautomates.com/unsubscribe>`,
-      "Message-ID": `<diag-${Math.random().toString(36).substring(2, 15)}@youssefautomates.com>`,
+      "List-Unsubscribe": `<mailto:unsubscribe@joeschool.com?subject=unsubscribe>, <https://joeschool.com/unsubscribe>`,
+      "Message-ID": `<diag-${Math.random().toString(36).substring(2, 15)}@joeschool.com>`,
       "Precedence": "bulk",
       "Auto-Submitted": "auto-generated"
     };
@@ -181,7 +181,7 @@ export async function POST(req: Request) {
     const emailResult = await resend.emails.send({
       from: sender,
       to: targetEmail,
-      subject: subject || "🧪 Deliverability Diagnostics Test | Youssef Automates",
+      subject: subject || "🧪 Deliverability Diagnostics Test | JoeSchool",
       html: bodyContent || `
         <div style="direction: rtl; font-family: sans-serif; padding: 30px; background-color: #0a0a0f; color: #ffffff; border-radius: 20px; border: 1px solid rgba(255,255,255,0.05); max-w: 600px; margin: 0 auto;">
           <div style="text-align: center; margin-bottom: 20px;">
@@ -200,7 +200,7 @@ export async function POST(req: Request) {
           <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.05); margin: 25px 0;"/>
           <div style="font-size: 11px; color: #71717a; text-align: center;">
             <p>المرسل الفعلي: ${sender}</p>
-            <p>© ${new Date().getFullYear()} Youssef Automates. جميع الحقوق محفوظة.</p>
+            <p>© ${new Date().getFullYear()} JoeSchool. جميع الحقوق محفوظة.</p>
           </div>
         </div>
       `,
@@ -218,7 +218,7 @@ export async function POST(req: Request) {
       logs: {
         sentAt: new Date().toISOString(),
         gateway: "Resend Secure API Router",
-        senderDomain: "youssefautomates.com",
+        senderDomain: "joeschool.com",
         status: "Delivered to Gateway",
         trackingEnabled: {
           opens: true,

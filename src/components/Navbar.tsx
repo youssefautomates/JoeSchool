@@ -150,12 +150,12 @@ export function Navbar() {
             <Link href="/" onClick={handleHomeClick} className="flex items-center gap-2.5 group">
               <div className="relative">
                 <div className="w-10 h-10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                  <img src="/logo.png" alt="Youssef Automates" className="w-full h-full object-contain drop-shadow-[0_0_15px_rgba(214,0,75,0.5)]" />
+                  <img src="/logo.png" alt="JoeSchool" className="w-full h-full object-contain drop-shadow-[0_0_15px_rgba(214,0,75,0.5)]" />
                 </div>
               </div>
               <div className="hidden md:flex flex-col">
                 <span className="font-alexandria font-bold text-lg md:text-xl tracking-tight text-white leading-tight" dir="ltr">
-                  Youssef <span className="text-rose-500">Automates</span>
+                  Joe<span className="text-rose-500">School</span>
                 </span>
               </div>
             </Link>
