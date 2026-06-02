@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import {
@@ -46,6 +46,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     {
       title: "Security & Admin",
       items: [
+        { name: "صندوق الوارد", href: "/admin/inbox", icon: Mail },
         { name: "Email System", href: "/admin/email-system", icon: Mail },
         { name: "Student Reviews", href: "/admin/reviews", icon: Star },
         { name: "Facebook Pixel", href: "/admin/analytics/facebook-pixel", icon: Target },
@@ -147,6 +148,30 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 function SidebarNav({ pathname, navGroups }: { pathname: string, navGroups: any[] }) {
   const searchParams = useSearchParams();
   const activeTab = searchParams.get("tab");
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    const fetchUnread = async () => {
+      try {
+        const res = await fetch("/api/admin/inbox");
+        if (res.ok) {
+          const data = await res.json();
+          const count = Array.isArray(data) ? data.filter((e: any) => !e.isRead).length : 0;
+          setUnreadCount(count);
+        }
+      } catch (err) {
+        console.error("Error fetching sidebar unread count:", err);
+      }
+    };
+
+    fetchUnread();
+
+    const handleUpdate = () => {
+      fetchUnread();
+    };
+    window.addEventListener("inbox-updated", handleUpdate);
+    return () => window.removeEventListener("inbox-updated", handleUpdate);
+  }, []);
 
   return (
     <>
@@ -181,6 +206,11 @@ function SidebarNav({ pathname, navGroups }: { pathname: string, navGroups: any[
                   isActive ? "text-white scale-110 drop-shadow-[0_0_8px_rgba(255,255,255,0.4)]" : "text-zinc-500 group-hover:text-[#D6004B] group-hover:scale-110"
                 )} />
                 <span className="font-bold text-[13px] tracking-wide font-sans transition-colors duration-300">{item.name}</span>
+                {item.href === "/admin/inbox" && unreadCount > 0 && (
+                  <span className="ml-auto text-[10px] px-2 py-0.5 rounded-full bg-[#D6004B] text-white font-bold leading-none min-w-[20px] text-center shadow-[0_0_10px_rgba(214,0,75,0.4)]">
+                    {unreadCount}
+                  </span>
+                )}
               </Link>
             );
           })}
