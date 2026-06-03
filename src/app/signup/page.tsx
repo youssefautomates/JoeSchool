@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -74,8 +74,8 @@ export default function SignupPage() {
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!fullName || !email || !phoneNumber || !password || !confirmPassword) {
-      toast.error("يرجى ملء جميع الحقول المطلوبة بما في ذلك رقم الهاتف");
+    if (!fullName || !email || !password || !confirmPassword) {
+      toast.error("يرجى ملء جميع الحقول المطلوبة");
       return;
     }
 
@@ -91,14 +91,12 @@ export default function SignupPage() {
 
     setIsLoading(true);
     try {
-      const fullPhone = `${countryCode}${phoneNumber}`;
       const { data, error } = await supabaseClient.auth.signUp({
         email,
         password,
         options: {
           data: {
             full_name: fullName,
-            phone: fullPhone,
           },
         },
       });
@@ -152,14 +150,13 @@ export default function SignupPage() {
             className="inline-block"
           >
             <Link href="/" className="flex flex-col items-center gap-3 group">
-              <div className="w-16 h-16 relative flex items-center justify-center p-2 rounded-2xl bg-white/5 border border-white/10 group-hover:scale-105 transition-transform duration-300 shadow-[0_0_30px_rgba(214,0,75,0.2)]">
+              <div className="w-16 h-16 relative flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
                 <img src="/logo.png" alt="JoeSchool Logo" className="w-full h-full object-contain" />
               </div>
               <div>
                 <h1 className="font-alexandria font-black text-2xl tracking-tight text-white mt-2">
-                  Youssef <span className="text-rose-500">Automates</span>
+                  Joe <span className="text-rose-500">School</span>
                 </h1>
-                <span className="text-xs text-zinc-500 font-bold tracking-widest uppercase block mt-1">المنصة التعليمية الفاخرة</span>
               </div>
             </Link>
           </motion.div>
@@ -188,7 +185,7 @@ export default function SignupPage() {
                 <User className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500 group-focus-within:text-rose-500 transition-colors" />
                 <input
                   type="text"
-                  placeholder="محمد أحمد"
+                  placeholder="نادر محمد"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   className="w-full bg-white/5 border border-white/5 hover:border-white/10 rounded-2xl py-3.5 pr-12 pl-4 text-sm font-medium focus:outline-none focus:border-rose-500/50 focus:bg-white/10 transition-all text-white placeholder-zinc-600"
@@ -214,42 +211,7 @@ export default function SignupPage() {
               </div>
             </div>
 
-            {/* WhatsApp Phone Number Field */}
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-zinc-400 block pr-1">رقم الهاتف (الواتساب) <span className="text-rose-500">*</span></label>
-              <div className="flex gap-2 relative group" dir="ltr">
-                {/* Country Code Select Dropdown */}
-                <select
-                  value={countryCode}
-                  onChange={(e) => setCountryCode(e.target.value)}
-                  className="bg-white/5 border border-white/5 hover:border-white/10 rounded-2xl py-3.5 px-3 text-sm font-medium focus:outline-none focus:border-rose-500/50 focus:bg-white/10 transition-all text-white max-w-[110px] appearance-none cursor-pointer text-center select-none"
-                >
-                  {COUNTRY_CODES.map((c) => (
-                    <option key={c.code} value={c.code} className="bg-[#0a0a0f] text-white">
-                      {c.flag} {c.code}
-                    </option>
-                  ))}
-                  {!COUNTRY_CODES.some(c => c.code === countryCode) && (
-                    <option value={countryCode} className="bg-[#0a0a0f] text-white">
-                      🌐 {countryCode}
-                    </option>
-                  )}
-                </select>
 
-                {/* Actual Phone Input */}
-                <div className="relative flex-1 group">
-                  <input
-                    type="tel"
-                    placeholder="100000000"
-                    value={phoneNumber}
-                    onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ""))}
-                    className="w-full bg-white/5 border border-white/5 hover:border-white/10 rounded-2xl py-3.5 pr-4 pl-4 text-sm font-medium focus:outline-none focus:border-rose-500/50 focus:bg-white/10 transition-all text-white placeholder-zinc-600 tracking-wider text-left"
-                    dir="ltr"
-                    required
-                  />
-                </div>
-              </div>
-            </div>
 
             {/* Password Field */}
             <div className="space-y-1">

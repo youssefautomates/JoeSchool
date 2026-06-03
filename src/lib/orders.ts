@@ -20,6 +20,24 @@ export interface Order {
   original_amount_usd?: number | null;
   charged_amount_egp?: number | null;
   exchange_rate?: number | null;
+  gateway_fee_amount?: number;
+  gateway_fee_enabled?: boolean;
+  subtotal_price?: number;
+  final_price?: number;
+  gateway_fee_percentage?: number;
+  country?: string;
+  city?: string;
+  timezone?: string;
+  ip_address?: string;
+  payment_provider?: string;
+  payment_method?: string;
+  device_type?: string;
+  browser?: string;
+  os?: string;
+  language?: string;
+  country_code?: string;
+  country_name?: string;
+  invoice_id?: string;
 }
 
 export async function createOrder(order: Order) {

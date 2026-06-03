@@ -1,7 +1,8 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { verifyPaymobHmac } from "@/lib/paymob";
 import { sendOrderEmail } from "@/lib/email/sendOrderEmail";
+import { getOrCreateUser } from "@/lib/authHelpers";
 
 // Server-side admin client to bypass RLS for payment fulfillment
 const supabaseAdmin = createClient(
@@ -18,6 +19,27 @@ const supabaseAdmin = createClient(
  * Supports both digital store products and LMS courses with full auto-delivery,
  * auto-enrollment, email notifications, and HMAC signature verification.
  */
+function getCountryNameByCode(code: string | null): string {
+  if (!code || code === "Unknown") return "Unknown";
+  const codeMap: Record<string, string> = {
+    "EG": "Egypt",
+    "US": "United States",
+    "SA": "Saudi Arabia",
+    "AE": "United Arab Emirates",
+    "KW": "Kuwait",
+    "QA": "Qatar",
+    "OM": "Oman",
+    "BH": "Bahrain",
+    "JO": "Jordan",
+    "LB": "Lebanon",
+    "GB": "United Kingdom",
+    "CA": "Canada",
+    "DE": "Germany",
+    "FR": "France"
+  };
+  return codeMap[code.toUpperCase()] || code.toUpperCase();
+}
+
 export async function POST(request: Request) {
   const requestId = Math.random().toString(36).substring(7);
   console.log(`[PAYMOB_WEBHOOK][${requestId}] ===== Received new Paymob webhook =====`);
@@ -140,6 +162,65 @@ export async function POST(request: Request) {
         const allOrders = siblingOrders && siblingOrders.length > 0 ? siblingOrders : [orderToUpdate];
         console.log(`[PAYMOB_WEBHOOK][${requestId}] Found ${allOrders.length} orders associated with this transaction.`);
 
+        // Resolve student account credentials if courses are present in the batch
+        let containsCourses = false;
+        let explicitPassword = "";
+
+        for (const ord of allOrders) {
+          if (ord.checkout_password) {
+            explicitPassword = ord.checkout_password;
+          }
+          // Fetch category to check if it's a course
+          let isCourse = ord.product_id?.startsWith("course-") || false;
+          try {
+            if (!isCourse) {
+              const { data: prodItem } = await supabaseAdmin
+                .from("products")
+                .select("category")
+                .eq("id", ord.product_id)
+                .maybeSingle();
+              if (prodItem) {
+                isCourse = 
+                  prodItem.category === "courses" || 
+                  prodItem.category === "الدورات التعليمية" || 
+                  prodItem.category === "الدورات التدريبية" ||
+                  ord.product_title?.includes("دورة") || 
+                  ord.product_title?.includes("كورس");
+              } else {
+                const { data: courseItem } = await supabaseAdmin
+                  .from("courses")
+                  .select("category")
+                  .eq("id", ord.product_id)
+                  .maybeSingle();
+                if (courseItem) isCourse = true;
+              }
+            }
+          } catch (e) {}
+          if (isCourse) containsCourses = true;
+        }
+
+        let resolvedUserId: string | null = null;
+        let resolvedCredentials: { email: string; password?: string } | undefined;
+
+        if (containsCourses) {
+          console.log(`[PAYMOB_WEBHOOK][${requestId}] Course detected. Resolving user account...`);
+          try {
+            const userAccount = await getOrCreateUser(customerEmail, customerName, explicitPassword || undefined);
+            resolvedUserId = userAccount.userId;
+            if (userAccount.isNew && explicitPassword) {
+              resolvedCredentials = {
+                email: customerEmail,
+                password: explicitPassword
+              };
+              console.log(`[PAYMOB_WEBHOOK][${requestId}] New student account created. Credentials set.`);
+            } else {
+              console.log(`[PAYMOB_WEBHOOK][${requestId}] Existing student account resolved. No credentials.`);
+            }
+          } catch (err: any) {
+            console.error(`[PAYMOB_WEBHOOK][${requestId}] ❌ Error in getOrCreateUser:`, err.message || err);
+          }
+        }
+
         // Process status changes, LMS enrollments, and sales increments for all matching orders
         for (const ord of allOrders) {
           if (ord.status === "completed") {
@@ -147,18 +228,26 @@ export async function POST(request: Request) {
             continue;
           }
 
-          const billingCountry = transaction.payment_key_claims?.billing_data?.country || "EG";
+          const billingCountry = transaction.payment_key_claims?.billing_data?.country || "Unknown";
           const payMethod = transaction.source_data?.sub_type || transaction.source_data?.type || "Card";
 
           console.log(`[PAYMOB_WEBHOOK][${requestId}] 🔄 Completing order ${ord.id} in database (Country: ${billingCountry}, Method: ${payMethod})...`);
+          
+          const updatePayload: any = { 
+            status: "completed", 
+            payment_id: paymobOrderId,
+            country: billingCountry,
+            country_code: billingCountry,
+            country_name: getCountryNameByCode(billingCountry),
+            payment_method: payMethod
+          };
+          if (resolvedUserId) {
+            updatePayload.customer_id = resolvedUserId;
+          }
+
           const { error: updErr } = await supabaseAdmin
             .from("orders")
-            .update({ 
-              status: "completed", 
-              payment_id: paymobOrderId,
-              country: billingCountry,
-              payment_method: payMethod
-            })
+            .update(updatePayload)
             .eq("id", ord.id);
 
           if (updErr) {
@@ -279,15 +368,7 @@ export async function POST(request: Request) {
               ) || coursesList[0];
 
               if (matchedCourse) {
-                let userId = ord.customer_id;
-                if (!userId || userId === "anonymous") {
-                  const { data: profile } = await supabaseAdmin
-                    .from("profiles")
-                    .select("id")
-                    .eq("email", customerEmail)
-                    .maybeSingle();
-                  userId = profile?.id || "usr-student-" + Math.random().toString(36).substring(2, 11);
-                }
+                const userId = resolvedUserId || ord.customer_id || "usr-student-" + Math.random().toString(36).substring(2, 11);
                 
                 console.log(`[PAYMOB_WEBHOOK][${requestId}] 🎓 Enrolling user ${userId} in course: ${matchedCourse.title}`);
                 await enrollUser(userId, matchedCourse.id, {
@@ -305,7 +386,7 @@ export async function POST(request: Request) {
         // ── 5. Safe Decoupled Email Trigger (Resend Service) ─────────
         try {
           console.log(`[PAYMOB_WEBHOOK][${requestId}] 📧 Calling centralized sendOrderEmail...`);
-          const emailResult = await sendOrderEmail(allOrders, customerEmail, customerName, currency);
+          const emailResult = await sendOrderEmail(allOrders, customerEmail, customerName, currency, resolvedCredentials);
           
           if (emailResult.success) {
             console.log(`[PAYMOB_WEBHOOK][${requestId}] ✅ Order delivery email successfully sent`);

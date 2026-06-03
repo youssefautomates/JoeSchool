@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { sendOrderEmail } from "@/lib/email/sendOrderEmail";
+import { getOrCreateUser } from "@/lib/authHelpers";
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL || "",
@@ -426,12 +427,61 @@ export async function POST(req: Request) {
     }
 
     // ── 5. Fulfill and Complete All Matching Orders in DB ──────────
+    // Resolve student account credentials if courses are present in the batch
+    let containsCourses = false;
+    let explicitPassword = "";
+
+    for (const order of orders) {
+      if (order.checkout_password) {
+        explicitPassword = order.checkout_password;
+      }
+      const { data: product } = await supabaseAdmin
+        .from("products")
+        .select("id, category")
+        .eq("id", order.product_id)
+        .single();
+      const isCourse = 
+        product?.category === "courses" || 
+        product?.category === "الدورات التعليمية" || 
+        product?.category === "الدورات التدريبية" ||
+        order.product_title?.includes("دورة") || 
+        order.product_title?.includes("كورس");
+      if (isCourse) containsCourses = true;
+    }
+
+    let resolvedUserId: string | null = null;
+    let resolvedCredentials: { email: string; password?: string } | undefined;
+
+    if (containsCourses) {
+      console.log(`[VERIFY][${requestId}] Course detected in purchase batch. Resolving user account...`);
+      try {
+        const userAccount = await getOrCreateUser(customerEmail, customerName, explicitPassword || undefined);
+        resolvedUserId = userAccount.userId;
+        if (userAccount.isNew && explicitPassword) {
+          resolvedCredentials = {
+            email: customerEmail,
+            password: explicitPassword
+          };
+          console.log(`[VERIFY][${requestId}] New student account created. Credentials set successfully.`);
+        } else {
+          console.log(`[VERIFY][${requestId}] Existing student account resolved. No credentials sent.`);
+        }
+      } catch (err: any) {
+        console.error(`[VERIFY][${requestId}] ❌ Error in getOrCreateUser:`, err.message || err);
+      }
+    }
+
     console.log(`[VERIFY][${requestId}] 🔄 Updating all matching orders to completed...`);
     
     for (const order of orders) {
+      const updatePayload: any = { status: "completed" };
+      if (resolvedUserId) {
+        updatePayload.customer_id = resolvedUserId;
+      }
+
       const { error: updateError } = await supabaseAdmin
         .from("orders")
-        .update({ status: "completed" })
+        .update(updatePayload)
         .eq("id", order.id);
 
       if (updateError) {
@@ -495,16 +545,7 @@ export async function POST(req: Request) {
             ) || coursesList[0];
 
             if (matchedCourse) {
-              let userId = order.customer_id;
-              if (!userId || userId === "anonymous") {
-                const { data: profile } = await supabaseAdmin
-                  .from("profiles")
-                  .select("id")
-                  .eq("email", customerEmail)
-                  .maybeSingle();
-                
-                userId = profile?.id || "usr-student-" + Math.random().toString(36).substring(2, 11);
-              }
+              const userId = resolvedUserId || order.customer_id || "usr-student-" + Math.random().toString(36).substring(2, 11);
 
               console.log(`[VERIFY][${requestId}] 🎓 Enrolling user ${userId} in course: ${matchedCourse.title}`);
               await enrollUser(userId, matchedCourse.id, {
@@ -550,7 +591,7 @@ export async function POST(req: Request) {
 
       if (courseOrders.length > 0) {
         console.log(`[VERIFY][${requestId}] 🎓 Sending dedicated Course Activation email...`);
-        const courseEmailResult = await sendOrderEmail(courseOrders, customerEmail, customerName, currency);
+        const courseEmailResult = await sendOrderEmail(courseOrders, customerEmail, customerName, currency, resolvedCredentials);
         if (courseEmailResult.success) {
           console.log(`[VERIFY][${requestId}] ✅ Dedicated course email delivered successfully`);
         } else {

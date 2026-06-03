@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 import { createOrder } from "@/lib/orders";
 import { createClient } from "@supabase/supabase-js";
+import { getKV } from "@/lib/kv";
+import { getOrCreateUser } from "@/lib/authHelpers";
+
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -11,16 +14,69 @@ const supabaseAdmin = createClient(
 import { headers } from "next/headers";
 import { resolveUserCurrency, resolveProductPrice, getUSDtoEGPExchangeRate } from "@/lib/pricing";
 
+function getCountryNameByCode(code: string | null): string {
+  if (!code || code === "Unknown") return "Unknown";
+  const codeMap: Record<string, string> = {
+    "EG": "Egypt",
+    "US": "United States",
+    "SA": "Saudi Arabia",
+    "AE": "United Arab Emirates",
+    "KW": "Kuwait",
+    "QA": "Qatar",
+    "OM": "Oman",
+    "BH": "Bahrain",
+    "JO": "Jordan",
+    "LB": "Lebanon",
+    "GB": "United Kingdom",
+    "CA": "Canada",
+    "DE": "Germany",
+    "FR": "France"
+  };
+  return codeMap[code.toUpperCase()] || code.toUpperCase();
+}
+
 export async function POST(req: Request) {
   try {
     const body = await req.json();
     console.log("[BACKEND_REQUEST_BODY] Received:", JSON.stringify(body, null, 2));
-    const { amount, email, firstName, lastName, phone, productId, paymentMethod, cardData, couponCode } = body;
+    const { amount, email, firstName, lastName, phone, productId, paymentMethod, cardData, couponCode, password } = body;
 
-    // --- Geolocation Currency Resolver ---
+    // --- Geolocation Currency Resolver & Tracking ---
     const headersList = await headers();
     const userCurrency = await resolveUserCurrency(headersList);
     console.log(`[PAYMOB_INITIATE] Server Resolved Currency: ${userCurrency}`);
+
+    const country = headersList.get("x-vercel-ip-country") || headersList.get("cf-ipcountry") || "Unknown";
+    const city = headersList.get("x-vercel-ip-city") || headersList.get("cf-ipcity") || "Unknown";
+    const timezone = headersList.get("x-vercel-ip-timezone") || headersList.get("cf-timezone") || "UTC";
+    const ipAddress = headersList.get("x-real-ip") || headersList.get("x-forwarded-for")?.split(",")[0]?.trim() || "Unknown";
+    const language = headersList.get("accept-language")?.split(",")[0]?.split(";")[0] || "Unknown";
+
+    const userAgent = headersList.get("user-agent") || "";
+    let deviceType = "Desktop";
+    let os = "Unknown";
+    let browser = "Unknown";
+
+    if (userAgent) {
+      const ua = userAgent.toLowerCase();
+      if (ua.includes("tablet") || ua.includes("ipad") || (ua.includes("android") && !ua.includes("mobile"))) {
+        deviceType = "Tablet";
+      } else if (ua.includes("mobile") || ua.includes("iphone") || ua.includes("android")) {
+        deviceType = "Mobile";
+      }
+
+      if (ua.includes("windows")) os = "Windows";
+      else if (ua.includes("macintosh") || ua.includes("mac os") || ua.includes("os x")) os = "MacOS";
+      else if (ua.includes("iphone") || ua.includes("ipad") || ua.includes("ipod")) os = "iOS";
+      else if (ua.includes("android")) os = "Android";
+      else if (ua.includes("linux")) os = "Linux";
+
+      if (ua.includes("edg/")) browser = "Edge";
+      else if (ua.includes("chrome") || ua.includes("crios")) browser = "Chrome";
+      else if (ua.includes("firefox") || ua.includes("fxios")) browser = "Firefox";
+      else if (ua.includes("safari") && !ua.includes("chrome") && !ua.includes("chromium")) browser = "Safari";
+      else if (ua.includes("opera") || ua.includes("opr/")) browser = "Opera";
+    }
 
     // --- Env Validation ---
     const secretKey = process.env.PAYMOB_SECRET_KEY;
@@ -165,33 +221,73 @@ export async function POST(req: Request) {
       console.log(`[PAYMOB_INITIATE] Applied coupon: ${upperCode} (-${dbCoupon.discount_percent}%) | Discounted expectedPriceEGP: ${expectedPriceEGP}`);
     }
 
+    // Fetch global fee settings
+    const MARKETING_KEY = "marketing_settings";
+    const defaultSettings = {
+      globalGatewayFeeEnabled: true,
+      globalGatewayFeePercentage: 3.00
+    };
+    const savedSettings: any = await getKV(MARKETING_KEY);
+    const settings = savedSettings ? { ...defaultSettings, ...savedSettings } : defaultSettings;
+    const globalFeeEnabled = settings.globalGatewayFeeEnabled !== false;
+    const globalFeePercentage = typeof settings.globalGatewayFeePercentage === "number" ? settings.globalGatewayFeePercentage : 3.00;
+
+    const isFeeActive = userCurrency === "EGP" && globalFeeEnabled && (dbItem.enable_gateway_fee !== false) && expectedPriceEGP > 0;
+    const gatewayFeeEGP = isFeeActive ? Math.ceil(expectedPriceEGP * (globalFeePercentage / 100)) : 0;
+    const finalPriceEGP = expectedPriceEGP + gatewayFeeEGP;
+
+    const gatewayFeeUSD = isFeeActive ? Number((originalPriceBase * (globalFeePercentage / 100)).toFixed(2)) : 0;
+    const finalPriceUSD = originalPriceBase + gatewayFeeUSD;
+
     // Prevent price spoofing from the client side
     const clientAmount = parseFloat(amount);
-    if (Math.abs(clientAmount - expectedPriceEGP) > 5) { // 5 EGP threshold for rounding safety
-      throw new Error(`محاولة تلاعب بالسعر! السعر الفعلي هو ${expectedPriceEGP} EGP`);
+    if (Math.abs(clientAmount - finalPriceEGP) > 5) { // 5 EGP threshold for rounding safety
+      throw new Error(`محاولة تلاعب بالسعر! السعر الفعلي هو ${finalPriceEGP} EGP`);
     }
 
-    const amountCents = Math.round(expectedPriceEGP * 100);
+    const amountCents = Math.round(finalPriceEGP * 100);
 
     const cleanPhoneDigits = (phone || "").replace(/\D/g, "");
     const safePhone = (cleanPhoneDigits.length < 8) ? "+201000000000" : (phone.startsWith("+") ? phone : `+${phone}`);
 
-    // 3. Create Order in Supabase locally first (Logging immutable snapshot details)
+    const year = new Date().getFullYear();
+    const uniqueSuffix = Math.random().toString(36).substring(2, 8).toUpperCase();
+    const invoiceId = `JS-${year}-${uniqueSuffix}`;
+
     const dbOrder = await createOrder({
       customer_name: `${firstName} ${lastName}`,
       customer_email: email,
       customer_phone: safePhone,
       product_id: productId,
       product_title: dbItem.title,
-      amount: userCurrency === "USD" ? Number(originalPriceBase.toFixed(2)) : expectedPriceEGP,
+      amount: userCurrency === "USD" ? Number(finalPriceUSD.toFixed(2)) : finalPriceEGP,
       currency: userCurrency,
       status: "pending",
       payment_id: "PENDING", 
       coupon_code: couponCode ? couponCode.trim().toUpperCase() : undefined,
-      original_amount_usd: userCurrency === "USD" ? Number(originalPriceBase.toFixed(2)) : null,
-      charged_amount_egp: expectedPriceEGP,
-      exchange_rate: userCurrency === "USD" ? exchangeRate : null
-    });
+      original_amount_usd: userCurrency === "USD" ? Number(finalPriceUSD.toFixed(2)) : null,
+      charged_amount_egp: finalPriceEGP,
+      exchange_rate: userCurrency === "USD" ? exchangeRate : null,
+      gateway_fee_amount: userCurrency === "USD" ? gatewayFeeUSD : gatewayFeeEGP,
+      gateway_fee_enabled: isFeeActive,
+      subtotal_price: userCurrency === "USD" ? Number(originalPriceBase.toFixed(2)) : expectedPriceEGP,
+      final_price: userCurrency === "USD" ? Number(finalPriceUSD.toFixed(2)) : finalPriceEGP,
+      gateway_fee_percentage: isFeeActive ? globalFeePercentage : 0,
+      country,
+      country_code: country,
+      country_name: getCountryNameByCode(country),
+      invoice_id: invoiceId,
+      city,
+      timezone,
+      ip_address: ipAddress,
+      payment_provider: paymentMethod === "card" ? "paymob" : "paymob",
+      device_type: deviceType,
+      browser,
+      os,
+      language,
+      checkout_password: password || null
+    } as any);
+
 
     if (expectedPriceEGP === 0) {
       // 100% Free Promo Code Flow!
@@ -226,7 +322,31 @@ export async function POST(req: Request) {
       console.log(`[PAYMOB_INITIATE] 📈 Sales incremented for product: ${dbItem.title}`);
 
       // LMS Auto-enrollment logic if it's a course
+      let resolvedUserId: string | null = null;
+      let resolvedCredentials: { email: string; password?: string } | undefined;
+
       if (isCourseItem) {
+        console.log(`[PAYMOB_INITIATE] Course detected in free batch. Resolving user account...`);
+        try {
+          const userAccount = await getOrCreateUser(email, `${firstName} ${lastName}`, password || undefined);
+          resolvedUserId = userAccount.userId;
+          
+          // Update the order row in the database with the resolved customer_id
+          await supabaseAdmin
+            .from("orders")
+            .update({ customer_id: resolvedUserId })
+            .eq("id", dbOrder.id);
+
+          if (userAccount.isNew && password) {
+            resolvedCredentials = {
+              email: email,
+              password: password
+            };
+          }
+        } catch (err: any) {
+          console.error(`[PAYMOB_INITIATE] ❌ Error in getOrCreateUser:`, err.message || err);
+        }
+
         console.log(`[PAYMOB_INITIATE] 🎓 Dynamic Auto-enrollment triggered...`);
         try {
           const { getCoursesList, enrollUser } = await import("@/lib/coursesDb");
@@ -238,16 +358,7 @@ export async function POST(req: Request) {
           ) || coursesList[0];
 
           if (matchedCourse) {
-            let userId = dbOrder.customer_id;
-            if (!userId || userId === "anonymous") {
-              const { data: profile } = await supabaseAdmin
-                .from("profiles")
-                .select("id")
-                .eq("email", email)
-                .maybeSingle();
-              
-              userId = profile?.id || "usr-student-" + Math.random().toString(36).substring(2, 11);
-            }
+            const userId = resolvedUserId || dbOrder.customer_id || "usr-student-" + Math.random().toString(36).substring(2, 11);
 
             console.log(`[PAYMOB_INITIATE] 🎓 Enrolling user ${userId} in course: ${matchedCourse.title}`);
             await enrollUser(userId, matchedCourse.id, {
@@ -270,7 +381,7 @@ export async function POST(req: Request) {
           payment_id: "FREE_COUPON"
         };
         console.log(`[PAYMOB_INITIATE] 📧 Sending FREE order activation email to: ${email}`);
-        await sendOrderEmail([orderForEmail], email, `${firstName} ${lastName}`, userCurrency);
+        await sendOrderEmail([orderForEmail], email, `${firstName} ${lastName}`, userCurrency, resolvedCredentials);
       } catch (emailErr: any) {
         console.error(`[PAYMOB_INITIATE] ❌ Exception during FREE email delivery:`, emailErr.message);
       }
@@ -325,7 +436,7 @@ export async function POST(req: Request) {
             supabase_order_id: dbOrder.id, 
             source: "store",
             original_currency: userCurrency,
-            original_amount: userCurrency === "USD" ? Number(originalPriceBase.toFixed(2)) : expectedPriceEGP,
+            original_amount: userCurrency === "USD" ? Number(finalPriceUSD.toFixed(2)) : finalPriceEGP,
             exchange_rate: userCurrency === "USD" ? exchangeRate : 1.0
           }
         }),
@@ -375,7 +486,7 @@ export async function POST(req: Request) {
             source: "store", 
             supabase_order_id: dbOrder.id,
             original_currency: userCurrency,
-            original_amount: userCurrency === "USD" ? Number(originalPriceBase.toFixed(2)) : expectedPriceEGP,
+            original_amount: userCurrency === "USD" ? Number(finalPriceUSD.toFixed(2)) : finalPriceEGP,
             exchange_rate: userCurrency === "USD" ? exchangeRate : 1.0
           }
         }),

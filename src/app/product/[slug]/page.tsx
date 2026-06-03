@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -649,6 +649,12 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                       </div>
                     )}
                   </div>
+                  {product.price > 0 && product.enable_gateway_fee !== false && (
+                    <p className="text-[10px] text-zinc-500 text-right leading-relaxed font-cairo -mt-3">
+                      * قد يتم إضافة رسوم معالجة دفع بسيطة أثناء إتمام الطلب.
+                    </p>
+                  )}
+
 
                   {/* Actions CTA buttons */}
                   <div className="space-y-3 pt-2">
@@ -1001,6 +1007,11 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                   </div>
                   <span className="text-[8.5px] text-zinc-400 font-cairo">تحميل وتنزيل فوري</span>
                 </div>
+                {product.price > 0 && product.enable_gateway_fee !== false && (
+                  <p className="text-[10px] text-zinc-500 text-right leading-relaxed font-cairo -mt-2">
+                    * قد يتم إضافة رسوم معالجة دفع بسيطة أثناء إتمام الطلب.
+                  </p>
+                )}
 
                 {/* Scarcity Indicator */}
                 <div className="text-[10.5px] font-bold font-cairo text-right animate-pulse transition-all">
@@ -1236,11 +1247,11 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
               </Link>
               
               <div className="flex flex-wrap justify-center gap-3 font-bold font-cairo">
-                <Link href="/privacy" className="hover:text-white transition-colors">سياسة الخصوصية</Link>
+                <Link href="/privacy?tab=privacy" className="hover:text-white transition-colors">سياسة الخصوصية</Link>
                 <span>·</span>
-                <Link href="/privacy" className="hover:text-white transition-colors">سياسة الإسترجاع</Link>
+                <Link href="/privacy?tab=refund" className="hover:text-white transition-colors">سياسة الإسترجاع</Link>
                 <span>·</span>
-                <Link href="/privacy" className="hover:text-white transition-colors">الشروط والاستخدام</Link>
+                <Link href="/privacy?tab=terms" className="hover:text-white transition-colors">الشروط والاستخدام</Link>
                 <span>·</span>
                 <a href="mailto:support@joeschool.com" className="hover:text-white transition-colors">الدعم الفني</a>
               </div>

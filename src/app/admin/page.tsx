@@ -15,7 +15,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { formatPrice as formatPriceRaw } from "@/lib/pricing";
 const formatPrice = (price: number, currency: any) => formatPriceRaw(price, currency).replace("ج.م", "L.E");
 import {
-  ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip
+  ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip,
+  BarChart, Bar, Cell, PieChart, Pie, Legend
 } from "recharts";
 
 // Interfaces mapped to database schemas
@@ -397,11 +398,34 @@ export default function AdminDashboard() {
   const stats = useMemo(() => {
     const completed = filteredOrders.filter(o => o.status === "completed");
     const totalOrders = filteredOrders.length;
-    const grossRevenue = completed.reduce((sum, o) => sum + Number(o.amount || 0), 0);
     
-    // Subtract standard processor fees (e.g. 3.0% standard Paymob gateway charge) & refunds
-    const gatewayFees = grossRevenue * 0.03;
-    const netRevenue = grossRevenue - gatewayFees;
+    // EGP Revenue: sum of completed EGP orders
+    const egpRevenue = completed
+      .filter(o => o.currency !== "USD")
+      .reduce((sum, o) => sum + Number(o.amount || 0), 0);
+
+    // USD Revenue: sum of completed USD orders
+    const usdRevenue = completed
+      .filter(o => o.currency === "USD")
+      .reduce((sum, o) => sum + Number(o.amount || 0), 0);
+
+    // Processing Fees Recovered: sum of gateway_fee_amount
+    const processingFees = completed.reduce((sum, o) => sum + Number((o as any).gateway_fee_amount || 0), 0);
+
+    // International Customers: country is set and not EG/Unknown, or currency is USD
+    const internationalCustomers = completed.filter(o => {
+      const isUsd = o.currency === "USD";
+      const hasIntlCountry = o.country && o.country !== "EG" && o.country !== "Unknown";
+      return isUsd || hasIntlCountry;
+    }).length;
+
+    // Gross Revenue (EGP equivalent using a flat 50 rate for analytics consistency)
+    const exchangeRate = 50.0;
+    const grossRevenue = egpRevenue + (usdRevenue * exchangeRate);
+    
+    // Subtract standard processor fees
+    const gatewayFees = egpRevenue * 0.03;
+    const netRevenue = (egpRevenue - gatewayFees) + (usdRevenue * exchangeRate);
 
     // AOV (Average Order Value)
     const aov = completed.length > 0 ? grossRevenue / completed.length : 0;
@@ -427,12 +451,20 @@ export default function AdminDashboard() {
 
     // Historical Period Comparison Trends
     const prevCompleted = previousPeriodOrders.filter(o => o.status === "completed");
-    const prevRevenue = prevCompleted.reduce((sum, o) => sum + Number(o.amount || 0), 0);
+    const prevEgp = prevCompleted.filter(o => o.currency !== "USD").reduce((sum, o) => sum + Number(o.amount || 0), 0);
+    const prevUsd = prevCompleted.filter(o => o.currency === "USD").reduce((sum, o) => sum + Number(o.amount || 0), 0);
+    const prevRevenue = prevEgp + (prevUsd * exchangeRate);
     const revenueGrowth = prevRevenue > 0 ? ((grossRevenue - prevRevenue) / prevRevenue) * 100 : 0;
 
     return {
       grossRevenue,
       netRevenue,
+      egpGrossRevenue: egpRevenue,
+      egpNetRevenue: egpRevenue - processingFees,
+      usdGrossRevenue: usdRevenue,
+      usdNetRevenue: usdRevenue, // USD Net === USD Gross
+      processingFees,
+      internationalCustomers,
       totalOrders,
       successfulOrders: completed.length,
       conversionRate,
@@ -442,6 +474,41 @@ export default function AdminDashboard() {
       revenueGrowth
     };
   }, [filteredOrders, previousPeriodOrders, analyticsEvents, dateCutoff]);
+
+  // International Revenue Visualization Memos
+  const topCountriesData = useMemo(() => {
+    const counts: Record<string, number> = {};
+    filteredOrders.filter(o => o.status === "completed").forEach(o => {
+      const c = o.country || "Unknown";
+      counts[c] = (counts[c] || 0) + 1;
+    });
+    return Object.entries(counts)
+      .map(([country, count]) => {
+        let flag = "🌐";
+        if (country !== "Unknown" && country.length === 2) {
+          const codePoints = country.toUpperCase().split('').map(char => 127397 + char.charCodeAt(0));
+          try {
+            flag = String.fromCodePoint(...codePoints);
+          } catch (e) {}
+        }
+        return { name: `${flag} ${country}`, count };
+      })
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5);
+  }, [filteredOrders]);
+
+  const currencyDistributionData = useMemo(() => {
+    const egpSum = filteredOrders
+      .filter(o => o.status === "completed" && o.currency !== "USD")
+      .reduce((sum, o) => sum + Number(o.amount || 0), 0);
+    const usdSum = filteredOrders
+      .filter(o => o.status === "completed" && o.currency === "USD")
+      .reduce((sum, o) => sum + Number(o.amount || 0), 0);
+    return [
+      { name: "EGP Revenue", value: egpSum },
+      { name: "USD Revenue (EGP Equiv)", value: usdSum * 50 }
+    ];
+  }, [filteredOrders]);
 
   // Daily Chart Area Data Ingestion
   const revenueChartData = useMemo(() => {
@@ -1012,12 +1079,12 @@ export default function AdminDashboard() {
               {/* Premium Minimal KPI Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-5">
                 {[
-                  { label: "Total Revenue", value: formatPrice(stats.grossRevenue, "EGP"), desc: "Realized Sales", icon: DollarSign, trend: stats.revenueGrowth >= 0 ? `+${stats.revenueGrowth.toFixed(1)}%` : `${stats.revenueGrowth.toFixed(1)}%`, trendUp: stats.revenueGrowth >= 0 },
-                  { label: "Net Revenue", value: formatPrice(Math.round(stats.netRevenue), "EGP"), desc: "Gross minus fees", icon: ShieldCheck, trend: "Gateway subtracted", trendUp: true },
-                  { label: "Successful Orders", value: stats.successfulOrders.toString(), desc: `Out of ${stats.totalOrders} total attempts`, icon: ShoppingCart, trend: `${((stats.successfulOrders / Math.max(1, stats.totalOrders)) * 100).toFixed(0)}% completion`, trendUp: true },
-                  { label: "Conversion Rate", value: `${stats.conversionRate.toFixed(2)}%`, desc: "Sessions to purchase", icon: Activity, trend: `${stats.sessions} total sessions`, trendUp: stats.conversionRate > 2.5 },
-                  { label: "Average Order (AOV)", value: formatPrice(Math.round(stats.aov), "EGP"), desc: "Per completed checkout", icon: Percent, trend: "Locked dynamic baseline", trendUp: true },
-                  { label: "Cart Abandonment", value: `${stats.abandonmentRate.toFixed(1)}%`, desc: "Exit on payment gate", icon: Clock, trend: `${(100 - stats.abandonmentRate).toFixed(0)}% pipeline checkout`, trendUp: stats.abandonmentRate < 50 }
+                  { label: "EGP Gross Revenue", value: formatPrice(stats.egpGrossRevenue, "EGP"), desc: "Gross Egyptian Pounds", icon: DollarSign, trend: stats.revenueGrowth >= 0 ? `+${stats.revenueGrowth.toFixed(1)}%` : `${stats.revenueGrowth.toFixed(1)}%`, trendUp: stats.revenueGrowth >= 0 },
+                  { label: "EGP Net Revenue", value: formatPrice(stats.egpNetRevenue, "EGP"), desc: "Net (Excludes Fees)", icon: Activity, trend: "Surcharge removed", trendUp: true },
+                  { label: "USD Revenue (Net & Gross)", value: formatPrice(stats.usdNetRevenue, "USD"), desc: "Gross === Net", icon: Globe, trend: "USD checkouts", trendUp: true },
+                  { label: "Processing Fees", value: formatPrice(stats.processingFees, "EGP"), desc: "Recovered from Paymob", icon: ShieldCheck, trend: "3% EGP transactions", trendUp: true },
+                  { label: "Orders Count", value: stats.successfulOrders.toString(), desc: `Out of ${stats.totalOrders} total attempts`, icon: ShoppingCart, trend: `${((stats.successfulOrders / Math.max(1, stats.totalOrders)) * 100).toFixed(0)}% completion`, trendUp: true },
+                  { label: "Conversion Rate", value: `${stats.conversionRate.toFixed(2)}%`, desc: "Sessions to purchase", icon: Activity, trend: `${stats.sessions} total sessions`, trendUp: stats.conversionRate > 2.5 }
                 ].map((card) => {
                   const Icon = card.icon;
                   return (
@@ -1162,8 +1229,91 @@ export default function AdminDashboard() {
 
               </div>
 
+              {/* International Commerce & Growth Visualizations */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                
+                {/* Top Countries BarChart */}
+                <div className="rounded-3xl bg-[#09090e]/80 border border-white/5 p-6 shadow-2xl">
+                  <div className="flex items-center justify-between mb-6 pb-4 border-b border-white/5">
+                    <div>
+                      <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">Top Purchasing Countries</h3>
+                      <p className="text-[10px] text-zinc-500">Completed order counts grouped by customer country</p>
+                    </div>
+                    <Globe className="w-4 h-4 text-zinc-500" />
+                  </div>
+                  <div className="w-full h-64">
+                    {topCountriesData.length === 0 ? (
+                      <div className="w-full h-full flex flex-col items-center justify-center border border-dashed border-white/5 rounded-2xl p-6 text-center text-zinc-500 text-xs">
+                        No country data available.
+                      </div>
+                    ) : (
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={topCountriesData} layout="vertical" margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
+                          <XAxis type="number" stroke="#3f3f46" fontSize={9} tickLine={false} />
+                          <YAxis dataKey="name" type="category" stroke="#3f3f46" fontSize={10} tickLine={false} width={80} />
+                          <Tooltip
+                            contentStyle={{ backgroundColor: "#060608", borderColor: "rgba(255,255,255,0.06)", borderRadius: "12px" }}
+                            labelStyle={{ color: "#ffffff", fontWeight: "bold", fontSize: "10px" }}
+                            itemStyle={{ fontSize: "10px" }}
+                          />
+                          <Bar dataKey="count" fill="#D6004B" radius={[0, 4, 4, 0]}>
+                            {topCountriesData.map((entry: any, index: number) => (
+                              <Cell key={`cell-${index}`} fill={index === 0 ? "#D6004B" : "#10b981"} />
+                            ))}
+                          </Bar>
+                        </BarChart>
+                      </ResponsiveContainer>
+                    )}
+                  </div>
+                </div>
+
+                {/* EGP vs USD distribution */}
+                <div className="rounded-3xl bg-[#09090e]/80 border border-white/5 p-6 shadow-2xl">
+                  <div className="flex items-center justify-between mb-6 pb-4 border-b border-white/5">
+                    <div>
+                      <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">EGP vs USD Revenue Distribution</h3>
+                      <p className="text-[10px] text-zinc-500">Proportional comparison of EGP and USD revenues</p>
+                    </div>
+                    <CreditCard className="w-4 h-4 text-zinc-500" />
+                  </div>
+                  <div className="w-full h-64 flex items-center justify-center">
+                    {currencyDistributionData.reduce((sum, item) => sum + item.value, 0) === 0 ? (
+                      <div className="w-full h-full flex flex-col items-center justify-center border border-dashed border-white/5 rounded-2xl p-6 text-center text-zinc-500 text-xs">
+                        No revenue recorded in this period.
+                      </div>
+                    ) : (
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie
+                            data={currencyDistributionData}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={60}
+                            outerRadius={80}
+                            paddingAngle={5}
+                            dataKey="value"
+                          >
+                            <Cell fill="#D6004B" />
+                            <Cell fill="#10b981" />
+                          </Pie>
+                          <Tooltip
+                            formatter={(value: any, name: any) => {
+                              if (name === "EGP Revenue") return [`${value} EGP`, name];
+                              return [`$${value / 50} USD (equiv. ${value} EGP)`, name];
+                            }}
+                            contentStyle={{ backgroundColor: "#060608", borderColor: "rgba(255,255,255,0.06)", borderRadius: "12px" }}
+                            itemStyle={{ fontSize: "10px" }}
+                          />
+                          <Legend verticalAlign="bottom" height={36} formatter={(value) => <span className="text-[10px] text-zinc-400">{value}</span>} />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    )}
+                  </div>
+                </div>
+              </div>
+
               {/* Bottom Rows: Marketing Funnel, Traffic Sources */}
-              <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+              <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 font-sans">
                 
                 {/* Premium Horizontal Sales Conversion Funnel */}
                 <div className="xl:col-span-2 rounded-3xl bg-[#09090e]/80 border border-white/5 p-6 shadow-2xl flex flex-col justify-between">

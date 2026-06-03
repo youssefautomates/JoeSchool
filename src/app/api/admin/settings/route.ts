@@ -12,7 +12,9 @@ export async function GET() {
     metaCapiEnabled: false,
     metaCapiTestCode: "",
     tiktokPixelId: "",
-    tiktokPixelEnabled: false
+    tiktokPixelEnabled: false,
+    globalGatewayFeeEnabled: true,
+    globalGatewayFeePercentage: 3.00
   };
   const saved = await getKV(MARKETING_KEY);
   const settings = saved ? { ...defaultSettings, ...saved } : defaultSettings;

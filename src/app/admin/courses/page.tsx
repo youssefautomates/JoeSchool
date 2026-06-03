@@ -721,7 +721,7 @@ export default function AdminCoursesPage() {
     title: "", slug: "", short_description: "", description: "",
     image_url: "", banner_url: "", price: 0, original_price: 0,
     price_egp: 0, original_price_egp: 0, price_usd: 0, original_price_usd: 0,
-    is_free: false, is_featured: false, status: "draft", level: "Beginner", category: "AI Content Creation",
+    is_free: false, is_featured: false, enable_gateway_fee: true, status: "draft", level: "Beginner", category: "AI Content Creation",
     tags: [], requirements: [], what_will_learn: [], who_is_for: [],
     certificate_bg_url: "", certificate_text_color: "#000000",
     certificate_name_x: 50, certificate_name_y: 40, certificate_name_size: 24,
@@ -768,7 +768,7 @@ export default function AdminCoursesPage() {
       banner_url: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1600",
       price: 0, original_price: 0,
       price_egp: 0, original_price_egp: 0, price_usd: 0, original_price_usd: 0,
-      is_free: false, is_featured: false, status: "draft", level: "Beginner", category: "AI Content Creation",
+      is_free: false, is_featured: false, enable_gateway_fee: true, status: "draft", level: "Beginner", category: "AI Content Creation",
       tags: [], requirements: [], what_will_learn: [], who_is_for: [],
       certificate_bg_url: "", certificate_text_color: "#000000",
       certificate_name_x: 50, certificate_name_y: 40, certificate_name_size: 24, certificate_course_x: 50, certificate_course_y: 55, certificate_date_x: 50, certificate_date_y: 70, certificate_date_size: 14,
@@ -785,6 +785,7 @@ export default function AdminCoursesPage() {
       original_price_egp: course.original_price_egp !== undefined && course.original_price_egp !== null ? Number(course.original_price_egp) : Number(course.original_price) || 0,
       price_usd: course.price_usd !== undefined && course.price_usd !== null ? Number(course.price_usd) : 0,
       original_price_usd: course.original_price_usd !== undefined && course.original_price_usd !== null ? Number(course.original_price_usd) : 0,
+      enable_gateway_fee: course.enable_gateway_fee !== false,
       tags: course.tags || [], requirements: course.requirements || [],
       what_will_learn: course.what_will_learn || [], who_is_for: course.who_is_for || [],
       certificate_bg_url: course.certificate_bg_url || "",
@@ -1513,6 +1514,23 @@ export default function AdminCoursesPage() {
                   <label htmlFor="isFeaturedCheckbox" className="text-xs font-bold text-zinc-300 cursor-pointer">
                     Featured course
                   </label>
+                </div>
+                <div className="flex flex-col gap-1 bg-white/[0.01] border border-white/5 rounded-xl p-3 select-none">
+                  <div className="flex items-center gap-3">
+                    <input 
+                      type="checkbox" 
+                      id="courseEnableGatewayFeeCheckbox" 
+                      checked={courseForm.enable_gateway_fee !== false} 
+                      onChange={e => setCourseForm({ ...courseForm, enable_gateway_fee: e.target.checked })} 
+                      className="w-4 h-4 rounded accent-rose-600 cursor-pointer" 
+                    />
+                    <label htmlFor="courseEnableGatewayFeeCheckbox" className="text-xs font-bold text-zinc-300 cursor-pointer">
+                      Enable Payment Processing Fee Recovery (3%)
+                    </label>
+                  </div>
+                  <p className="text-[10px] text-zinc-500 pl-7 leading-relaxed">
+                    Adds a small processing fee during checkout to help cover secure payment gateway transaction costs.
+                  </p>
                 </div>
               </div>
 

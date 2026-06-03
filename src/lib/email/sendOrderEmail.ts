@@ -1,4 +1,4 @@
-﻿import { Resend } from "resend";
+import { Resend } from "resend";
 import { createClient } from "@supabase/supabase-js";
 
 // Initialize Supabase Admin inside the email service to allow self-contained database queries
@@ -30,7 +30,8 @@ export async function sendOrderEmail(
   orders: any[],
   customerEmail: string,
   customerName: string,
-  currency: string
+  currency: string,
+  credentials?: { email: string; password?: string }
 ): Promise<{ success: boolean; error?: string; details?: any }> {
   const requestId = Math.random().toString(36).substring(7);
   console.log(`[EMAIL_SERVICE][${requestId}] starting transactional email dispatch for: ${customerEmail}`);
@@ -108,6 +109,14 @@ export async function sendOrderEmail(
     // 3. Build bulletproof Plain Text Version (Crucial for Anti-Spam scores)
     let emailText = `أهلاً ${customerName}!\n\n`;
     emailText += `تم تأكيد وتفعيل طلبك بنجاح. جميع ملفاتك ودوراتك جاهزة لك الآن.\n\n`;
+    
+    if (credentials && credentials.password) {
+      emailText += `تفاصيل حسابك للمنصة:\n`;
+      emailText += `البريد الإلكتروني: ${credentials.email}\n`;
+      emailText += `كلمة المرور: ${credentials.password}\n`;
+      emailText += `رابط تسجيل الدخول: ${process.env.NEXT_PUBLIC_APP_URL || "https://www.joeschool.com"}/login\n\n`;
+    }
+
     emailText += `تفاصيل المنتجات المشتراة:\n`;
     
     for (const product of resolvedProducts) {
@@ -119,7 +128,7 @@ export async function sendOrderEmail(
       }
     }
 
-    emailText += `\nملخص المعاملة المعتمدة:\n`;
+    emailText += `\nملخص الفاتورة المعتمدة:\n`;
     emailText += `رقم المعاملة: #${transactionId}\n`;
     if (isUSDOrder) {
       emailText += `المبلغ الإجمالي: $${totalOriginalUsd.toFixed(2)} USD\n`;
@@ -146,7 +155,7 @@ export async function sendOrderEmail(
         productsBlock += `
         <tr>
           <td style="padding: 10px 0;">
-            <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0;">
+            <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0; direction: rtl;">
               <tr>
                 <td style="padding: 20px; text-align: right;">
                   <span style="font-size: 11px; color: #b91c1c; font-weight: bold; font-family: 'Segoe UI', Arial, sans-serif; display: block; margin-bottom: 4px;">🎓 دورة تعليمية معتمدة</span>
@@ -168,7 +177,7 @@ export async function sendOrderEmail(
         productsBlock += `
         <tr>
           <td style="padding: 10px 0;">
-            <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0;">
+            <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0; direction: rtl;">
               <tr>
                 <td style="padding: 20px; text-align: right;">
                   <span style="font-size: 11px; color: #15803d; font-weight: bold; font-family: 'Segoe UI', Arial, sans-serif; display: block; margin-bottom: 4px;">⬇️ منتج رقمي جاهز للتحميل</span>
@@ -187,6 +196,39 @@ export async function sendOrderEmail(
         </tr>
         `;
       }
+    }
+
+    let credentialsBlock = "";
+    if (credentials && credentials.password) {
+      credentialsBlock = `
+      <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8fafc; border-radius: 12px; border: 1px solid #cbd5e1; direction: rtl; text-align: right; margin-bottom: 20px;">
+        <tr>
+          <td style="padding: 20px;">
+            <h3 style="margin: 0 0 10px 0; font-size: 15px; color: #0f172a; font-weight: bold; font-family: 'Segoe UI', Arial, sans-serif;">🔑 تفاصيل حسابك على المنصة</h3>
+            <p style="margin: 0 0 14px 0; font-size: 12px; color: #475569; font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.5;">تم إنشاء حساب جديد لك لتتمكن من تسجيل الدخول والدراسة مباشرة:</p>
+            
+            <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 16px;">
+              <tr>
+                <td style="padding: 10px 14px; border-bottom: 1px solid #f1f5f9; font-size: 12px; color: #475569; font-family: 'Segoe UI', Arial, sans-serif;"><strong>البريد الإلكتروني:</strong></td>
+                <td style="padding: 10px 14px; border-bottom: 1px solid #f1f5f9; font-size: 12px; color: #0f172a; font-family: 'Segoe UI', Arial, sans-serif; text-align: left; font-weight: bold; font-mono: true;">${credentials.email}</td>
+              </tr>
+              <tr>
+                <td style="padding: 10px 14px; font-size: 12px; color: #475569; font-family: 'Segoe UI', Arial, sans-serif;"><strong>كلمة المرور:</strong></td>
+                <td style="padding: 10px 14px; font-size: 12px; color: #0f172a; font-family: 'Segoe UI', Arial, sans-serif; text-align: left; font-weight: bold; font-mono: true;">${credentials.password}</td>
+              </tr>
+            </table>
+            
+            <table cellpadding="0" cellspacing="0" style="margin: 0 auto;">
+              <tr>
+                <td style="background-color: #b91c1c; border-radius: 6px;">
+                  <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://www.joeschool.com'}/login" style="display: inline-block; padding: 10px 24px; color: #ffffff; text-decoration: none; font-weight: bold; font-size: 13px; font-family: 'Segoe UI', Arial, sans-serif;">🔑 تسجيل الدخول إلى حسابك</a>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+      `;
     }
 
     const emailHtml = `
@@ -209,21 +251,23 @@ export async function sendOrderEmail(
               <p style="color:#94a3b8;margin:8px 0 0 0;font-size:13px;font-family: 'Segoe UI', Arial, sans-serif;">تم تأكيد وتفعيل طلبك بنجاح. منتجاتك جاهزة لك الآن.</p>
             </td>
           </tr>
-          <!-- Products Block -->
+          <!-- Products & Credentials Block -->
           <tr>
             <td style="padding:24px;">
+              ${credentialsBlock}
               <table width="100%" cellpadding="0" cellspacing="0">${productsBlock}</table>
               
-              <!-- Transaction Summary -->
-              <div style="margin-top:24px;padding:16px;background-color:#f8fafc;border-radius:8px;border: 1px solid #e2e8f0;text-align: right;">
-                <p style="color:#64748b;font-size:11px;text-transform:uppercase;margin:0 0 8px 0;font-weight: bold;font-family: 'Segoe UI', Arial, sans-serif;">تفاصيل المعاملة المعتمدة</p>
-                <p style="color:#334155;font-size:13px;margin:4px 0;font-family: 'Segoe UI', Arial, sans-serif;">رقم المعاملة: #${transactionId}</p>
+              <!-- Transaction Summary / Invoice -->
+              <div style="margin-top:24px;padding:16px;background-color:#f8fafc;border-radius:8px;border: 1px solid #e2e8f0;text-align: right; direction: rtl;">
+                <p style="color:#64748b;font-size:11px;text-transform:uppercase;margin:0 0 8px 0;font-weight: bold;font-family: 'Segoe UI', Arial, sans-serif;">🧾 تفاصيل الفاتورة المعتمدة</p>
+                <p style="color:#334155;font-size:13px;margin:4px 0;font-family: 'Segoe UI', Arial, sans-serif;"><strong>رقم الفاتورة:</strong> #${transactionId}</p>
+                <p style="color:#334155;font-size:13px;margin:4px 0;font-family: 'Segoe UI', Arial, sans-serif;"><strong>التاريخ:</strong> ${new Date().toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
                 ${isUSDOrder ? `
-                  <p style="color:#16a34a;font-size:14px;font-weight:bold;margin:4px 0;font-family: 'Segoe UI', Arial, sans-serif;">المبلغ الإجمالي: $${totalOriginalUsd.toFixed(2)} USD</p>
-                  <p style="color:#475569;font-size:12px;margin:4px 0;font-family: 'Segoe UI', Arial, sans-serif;">المبلغ المخصوم فعلياً: ${totalChargedEgp.toFixed(2)} ج.م</p>
+                  <p style="color:#16a34a;font-size:14px;font-weight:bold;margin:4px 0;font-family: 'Segoe UI', Arial, sans-serif;"><strong>المبلغ الإجمالي:</strong> $${totalOriginalUsd.toFixed(2)} USD</p>
+                  <p style="color:#475569;font-size:12px;margin:4px 0;font-family: 'Segoe UI', Arial, sans-serif;"><strong>المبلغ المخصوم فعلياً:</strong> ${totalChargedEgp.toFixed(2)} ج.م</p>
                   ${firstExchangeRate ? `<p style="color:#64748b;font-size:10px;margin:4px 0;font-family: 'Segoe UI', Arial, sans-serif;">سعر الصرف المثبت: 1 USD = ${firstExchangeRate.toFixed(4)} ج.م</p>` : ''}
                 ` : `
-                  <p style="color:#16a34a;font-size:13px;font-weight:bold;margin:4px 0;font-family: 'Segoe UI', Arial, sans-serif;">المبلغ الإجمالي: ${totalAmount.toFixed(2)} ج.م</p>
+                  <p style="color:#16a34a;font-size:13px;font-weight:bold;margin:4px 0;font-family: 'Segoe UI', Arial, sans-serif;"><strong>المبلغ الإجمالي:</strong> ${totalAmount.toFixed(2)} ج.م</p>
                 `}
               </div>
             </td>

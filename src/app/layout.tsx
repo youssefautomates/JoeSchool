@@ -12,7 +12,7 @@ const alexandria = { variable: "font-alexandria" };
 export const metadata: Metadata = {
   metadataBase: new URL("https://joeschool.com"),
   title: {
-    default: "JoeSchool | أكاديمية جو سكول لإنتاج المحتوى بالذكاء الاصطناعي",
+    default: "JoeSchool | Learn AI Content Creation",
     template: "%s | JoeSchool"
   },
   description: "أكاديمية جو سكول المتخصصة في تعليم إنتاج المحتوى الاحترافي بالذكاء الاصطناعي، صناعة الفيديوهات الاحترافية، المحتوى السينمائي، والأدوات الإبداعية للمبدعين.",

@@ -3,17 +3,72 @@ import { supabase } from "@/lib/supabase";
 import { createOrder } from "@/lib/orders";
 import { headers } from "next/headers";
 import { resolveUserCurrency, resolveProductPrice, getUSDtoEGPExchangeRate } from "@/lib/pricing";
+import { getKV } from "@/lib/kv";
+
+
+function getCountryNameByCode(code: string | null): string {
+  if (!code || code === "Unknown") return "Unknown";
+  const codeMap: Record<string, string> = {
+    "EG": "Egypt",
+    "US": "United States",
+    "SA": "Saudi Arabia",
+    "AE": "United Arab Emirates",
+    "KW": "Kuwait",
+    "QA": "Qatar",
+    "OM": "Oman",
+    "BH": "Bahrain",
+    "JO": "Jordan",
+    "LB": "Lebanon",
+    "GB": "United Kingdom",
+    "CA": "Canada",
+    "DE": "Germany",
+    "FR": "France"
+  };
+  return codeMap[code.toUpperCase()] || code.toUpperCase();
+}
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
     console.log("[CART_BACKEND_REQUEST_BODY] Received:", JSON.stringify(body, null, 2));
-    const { amount, email, firstName, lastName, phone, items, paymentMethod, cardData } = body;
+    const { amount, email, firstName, lastName, phone, items, paymentMethod, cardData, password } = body;
 
-    // --- Geolocation Currency Resolver ---
+    // --- Geolocation Currency Resolver & Tracking ---
     const headersList = await headers();
     const userCurrency = await resolveUserCurrency(headersList);
     console.log(`[PAYMOB_CART_INITIATE] Server Resolved Currency: ${userCurrency}`);
+
+    const country = headersList.get("x-vercel-ip-country") || headersList.get("cf-ipcountry") || "Unknown";
+    const city = headersList.get("x-vercel-ip-city") || headersList.get("cf-ipcity") || "Unknown";
+    const timezone = headersList.get("x-vercel-ip-timezone") || headersList.get("cf-timezone") || "UTC";
+    const ipAddress = headersList.get("x-real-ip") || headersList.get("x-forwarded-for")?.split(",")[0]?.trim() || "Unknown";
+    const language = headersList.get("accept-language")?.split(",")[0]?.split(";")[0] || "Unknown";
+
+    const userAgent = headersList.get("user-agent") || "";
+    let deviceType = "Desktop";
+    let os = "Unknown";
+    let browser = "Unknown";
+
+    if (userAgent) {
+      const ua = userAgent.toLowerCase();
+      if (ua.includes("tablet") || ua.includes("ipad") || (ua.includes("android") && !ua.includes("mobile"))) {
+        deviceType = "Tablet";
+      } else if (ua.includes("mobile") || ua.includes("iphone") || ua.includes("android")) {
+        deviceType = "Mobile";
+      }
+
+      if (ua.includes("windows")) os = "Windows";
+      else if (ua.includes("macintosh") || ua.includes("mac os") || ua.includes("os x")) os = "MacOS";
+      else if (ua.includes("iphone") || ua.includes("ipad") || ua.includes("ipod")) os = "iOS";
+      else if (ua.includes("android")) os = "Android";
+      else if (ua.includes("linux")) os = "Linux";
+
+      if (ua.includes("edg/")) browser = "Edge";
+      else if (ua.includes("chrome") || ua.includes("crios")) browser = "Chrome";
+      else if (ua.includes("firefox") || ua.includes("fxios")) browser = "Firefox";
+      else if (ua.includes("safari") && !ua.includes("chrome") && !ua.includes("chromium")) browser = "Safari";
+      else if (ua.includes("opera") || ua.includes("opr/")) browser = "Opera";
+    }
 
     // --- Env Validation ---
     const secretKey = process.env.PAYMOB_SECRET_KEY;
@@ -41,7 +96,17 @@ export async function POST(req: Request) {
       throw new Error("Cart is empty");
     }
 
-    // 1. Dual Pricing Secure Resolver Layer for Multi-Item Cart
+    // Fetch global settings
+    const MARKETING_KEY = "marketing_settings";
+    const defaultSettings = {
+      globalGatewayFeeEnabled: true,
+      globalGatewayFeePercentage: 3.00
+    };
+    const savedSettings: any = await getKV(MARKETING_KEY);
+    const settings = savedSettings ? { ...defaultSettings, ...savedSettings } : defaultSettings;
+    const globalFeeEnabled = settings.globalGatewayFeeEnabled !== false;
+    const globalFeePercentage = typeof settings.globalGatewayFeePercentage === "number" ? settings.globalGatewayFeePercentage : 3.00;
+
     let totalExpectedEGP = 0;
     const verifiedItems: any[] = [];
     const exchangeRate = await getUSDtoEGPExchangeRate();
@@ -100,12 +165,25 @@ export async function POST(req: Request) {
         ? Math.round(resolvedPrice.price * exchangeRate)
         : resolvedPrice.price;
 
-      totalExpectedEGP += itemEGPPrice;
+      // Surcharge gateway fee recovery calculation
+      const isFeeActive = userCurrency === "EGP" && globalFeeEnabled && (dbItem.enable_gateway_fee !== false) && itemEGPPrice > 0;
+      const gatewayFeeEGP = isFeeActive ? Math.ceil(itemEGPPrice * (globalFeePercentage / 100)) : 0;
+      const itemFinalEGPPrice = itemEGPPrice + gatewayFeeEGP;
+
+      const itemFeeUSD = isFeeActive ? Number((resolvedPrice.price * (globalFeePercentage / 100)).toFixed(2)) : 0;
+      const itemFinalUSDPrice = resolvedPrice.price + itemFeeUSD;
+
+      totalExpectedEGP += itemFinalEGPPrice;
       verifiedItems.push({
         id: item.id,
         title: dbItem.title,
         priceUSD: itemPriceUSD,
-        priceEGP: itemEGPPrice
+        priceEGP: itemEGPPrice,
+        gatewayFeeEGP,
+        gatewayFeeUSD: itemFeeUSD,
+        gatewayFeeEnabled: isFeeActive,
+        finalUSDPrice: itemFinalUSDPrice,
+        finalEGPPrice: itemFinalEGPPrice
       });
     }
 
@@ -122,6 +200,10 @@ export async function POST(req: Request) {
     const cleanPhoneDigits = (phone || "").replace(/\D/g, "");
     const safePhone = (cleanPhoneDigits.length < 8) ? "+201000000000" : (phone.startsWith("+") ? phone : `+${phone}`);
 
+    const year = new Date().getFullYear();
+    const uniqueSuffix = Math.random().toString(36).substring(2, 8).toUpperCase();
+    const invoiceId = `JS-${year}-${uniqueSuffix}`;
+
     // 2. Create Orders in Supabase locally first (One per item - Logging snapshots)
     const dbOrders = [];
     for (const item of verifiedItems) {
@@ -131,16 +213,35 @@ export async function POST(req: Request) {
         customer_phone: safePhone,
         product_id: item.id,
         product_title: item.title,
-        amount: userCurrency === "USD" ? (item.priceUSD || 0) : item.priceEGP,
+        amount: userCurrency === "USD" ? item.finalUSDPrice : item.finalEGPPrice,
         currency: userCurrency,
         status: "pending",
         payment_id: "PENDING", 
-        original_amount_usd: userCurrency === "USD" ? item.priceUSD : null,
-        charged_amount_egp: item.priceEGP,
-        exchange_rate: userCurrency === "USD" ? exchangeRate : null
-      });
+        original_amount_usd: userCurrency === "USD" ? item.finalUSDPrice : null,
+        charged_amount_egp: item.finalEGPPrice,
+        exchange_rate: userCurrency === "USD" ? exchangeRate : null,
+        gateway_fee_amount: userCurrency === "USD" ? item.gatewayFeeUSD : item.gatewayFeeEGP,
+        gateway_fee_enabled: item.gatewayFeeEnabled,
+        subtotal_price: userCurrency === "USD" ? item.priceUSD : item.priceEGP,
+        final_price: userCurrency === "USD" ? item.finalUSDPrice : item.finalEGPPrice,
+        gateway_fee_percentage: item.gatewayFeeEnabled ? globalFeePercentage : 0,
+        country,
+        country_code: country,
+        country_name: getCountryNameByCode(country),
+        invoice_id: invoiceId,
+        city,
+        timezone,
+        ip_address: ipAddress,
+        payment_provider: paymentMethod === "card" ? "paymob" : "paymob",
+        device_type: deviceType,
+        browser,
+        os,
+        language,
+        checkout_password: password || null
+      } as any);
       dbOrders.push(order);
     }
+
 
     const safeFirstName = (firstName || "Test").replace(/[^a-zA-Z\u0600-\u06FF]/g, "");
     const safeLastName = (lastName || "User").replace(/[^a-zA-Z\u0600-\u06FF]/g, "");
@@ -187,7 +288,7 @@ export async function POST(req: Request) {
             supabase_order_id: dbOrders[0].id,
             source: "store",
             original_currency: userCurrency,
-            original_amount: userCurrency === "USD" ? verifiedItems.reduce((sum, i) => sum + (i.priceUSD || 0), 0) : totalExpectedEGP,
+            original_amount: userCurrency === "USD" ? verifiedItems.reduce((sum: number, i: any) => sum + (i.finalUSDPrice || 0), 0) : totalExpectedEGP,
             exchange_rate: userCurrency === "USD" ? exchangeRate : 1.0
           }
         }),
@@ -238,7 +339,7 @@ export async function POST(req: Request) {
             source: "store", 
             supabase_order_id: dbOrders[0].id,
             original_currency: userCurrency,
-            original_amount: userCurrency === "USD" ? verifiedItems.reduce((sum, i) => sum + (i.priceUSD || 0), 0) : totalExpectedEGP,
+            original_amount: userCurrency === "USD" ? verifiedItems.reduce((sum: number, i: any) => sum + (i.finalUSDPrice || 0), 0) : totalExpectedEGP,
             exchange_rate: userCurrency === "USD" ? exchangeRate : 1.0
           }
         }),

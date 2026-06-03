@@ -153,10 +153,8 @@ export function Navbar() {
                   <img src="/logo.png" alt="JoeSchool" className="w-full h-full object-contain drop-shadow-[0_0_15px_rgba(214,0,75,0.5)]" />
                 </div>
               </div>
-              <div className="hidden md:flex flex-col">
-                <span className="font-alexandria font-bold text-lg md:text-xl tracking-tight text-white leading-tight" dir="ltr">
-                  Joe<span className="text-rose-500">School</span>
-                </span>
+              <div className="hidden md:flex items-center">
+                <img src="/logo-text.png" alt="JoeSchool" className="h-16 md:h-20 object-contain" />
               </div>
             </Link>
 

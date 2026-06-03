@@ -43,8 +43,13 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
   const [couponInput, setCouponInput] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; percent: number } | null>(null);
   const [couponError, setCouponError] = useState("");
+  const [isValidatingCoupon, setIsValidatingCoupon] = useState(false);
   const [currency, setCurrency] = useState<Currency>("EGP");
   const [exchangeRate, setExchangeRate] = useState<number>(50.0);
+  
+  // Global gateway fee settings state
+  const [globalFeeEnabled, setGlobalFeeEnabled] = useState(true);
+  const [globalFeePercentage, setGlobalFeePercentage] = useState(3.00);
   
   // Card Fields State
   const [cardNumber, setCardNumber] = useState("");
@@ -53,7 +58,6 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
   const [cardHolder, setCardHolder] = useState("");
   const [cardErrors, setCardErrors] = useState({ number: "", expiry: "", cvv: "", holder: "" });
   const [cardType, setCardType] = useState<"visa" | "mastercard" | "meeza" | null>(null);
-  const [saveCard, setSaveCard] = useState(true);
   const cardNumberRef = useRef<HTMLInputElement>(null);
   const isFirstRender = useRef(true);
 
@@ -151,6 +155,17 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
       }
       fetchProduct(detectedCurrency);
     });
+
+    // Fetch global settings
+    fetch("/api/admin/settings")
+      .then(res => res.json())
+      .then(data => {
+        if (data && !data.error) {
+          setGlobalFeeEnabled(data.globalGatewayFeeEnabled !== false);
+          setGlobalFeePercentage(typeof data.globalGatewayFeePercentage === "number" ? data.globalGatewayFeePercentage : 3.00);
+        }
+      })
+      .catch(e => console.error("Error fetching settings:", e));
   }, [resolvedParams.id]); // eslint-disable-line
 
   async function fetchProduct(resolvedCurrency: Currency) {
@@ -301,6 +316,39 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
     }
   };
 
+  const handleApplyCoupon = async () => {
+    if (!couponInput.trim()) return;
+    setIsValidatingCoupon(true);
+    setCouponError("");
+    try {
+      const res = await fetch(`/api/coupons/validate?code=${encodeURIComponent(couponInput.trim().toUpperCase())}&itemId=${resolvedParams.id}`);
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setAppliedCoupon({
+          code: data.code,
+          percent: data.discount_percent
+        });
+        setCouponError("");
+        toast.success(`تم تطبيق الكوبون بنجاح بخصم ${data.discount_percent}%`);
+      } else {
+        setCouponError(data.error || "كود الخصم غير صالح");
+        setAppliedCoupon(null);
+      }
+    } catch (err) {
+      console.error(err);
+      setCouponError("فشل التحقق من الكوبون");
+      setAppliedCoupon(null);
+    } finally {
+      setIsValidatingCoupon(false);
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponInput("");
+    setCouponError("");
+  };
+
   async function onSubmit(data: CheckoutValues) {
     if (!product) return;
 
@@ -368,9 +416,13 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
         ? Math.round(product.price * (1 - appliedCoupon.percent / 100)) 
         : product.price;
 
-      const finalPriceEGP = currency === "USD"
+      const subtotalEGP = currency === "USD"
         ? Math.round(baseFinalPrice * exchangeRate)
         : baseFinalPrice;
+
+      const isFeeActive = currency === "EGP" && globalFeeEnabled && (product.enable_gateway_fee !== false) && baseFinalPrice > 0;
+      const gatewayFeeAmount = isFeeActive ? Math.ceil(subtotalEGP * (globalFeePercentage / 100)) : 0;
+      const finalPriceEGP = subtotalEGP + gatewayFeeAmount;
 
       const payloadBody = {
         amount: finalPriceEGP,
@@ -386,7 +438,12 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
           expiry: expiryDate,
           cvv,
           cardHolder
-        } : undefined
+        } : undefined,
+        gatewayFeeEnabled: isFeeActive,
+        gatewayFeeAmount,
+        subtotalPrice: subtotalEGP,
+        gatewayFeePercentage: isFeeActive ? globalFeePercentage : 0,
+        password: data.password || undefined
       };
 
       console.log("[FORM_SUBMIT_DATA] Request body before fetch:", JSON.stringify(payloadBody, null, 2));
@@ -442,6 +499,22 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
   const discountPct = calcDiscount(product.price, product.original_price);
   const savings = product.original_price ? product.original_price - product.price : 0;
 
+  const basePriceAfterCoupon = appliedCoupon 
+    ? Math.round(product.price * (1 - appliedCoupon.percent / 100)) 
+    : product.price;
+
+  const showFeeRecover = currency === "EGP" && globalFeeEnabled && (product.enable_gateway_fee !== false) && basePriceAfterCoupon > 0;
+  const subtotalForFeeEGP = currency === "USD" ? Math.round(basePriceAfterCoupon * exchangeRate) : basePriceAfterCoupon;
+  const feeAmountEGP = showFeeRecover ? Math.ceil(subtotalForFeeEGP * (globalFeePercentage / 100)) : 0;
+
+  const isCheapItem = subtotalForFeeEGP < 100;
+  const showFeeRowSeparately = showFeeRecover && !isCheapItem;
+
+  const feeAmountFormatted = currency === "USD" ? Number((basePriceAfterCoupon * (globalFeePercentage / 100)).toFixed(2)) : feeAmountEGP;
+  const finalPriceFormatted = currency === "USD" 
+    ? Number((basePriceAfterCoupon + feeAmountFormatted).toFixed(2))
+    : (basePriceAfterCoupon + feeAmountEGP);
+
   return (
     <div className="min-h-screen bg-[#050505] text-white font-cairo">
       <Navbar />
@@ -463,13 +536,13 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 flex-col-reverse lg:flex-row">
+          <div className="max-w-3xl mx-auto w-full">
             
-            {/* Checkout Form (Right Side on Desktop, Bottom on Mobile) */}
-            <div className="lg:col-span-7 flex flex-col gap-6">
+            {/* Checkout Form */}
+            <div className="flex flex-col gap-6">
               <motion.div 
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
                 className="bg-[#0a0a0f]/80 backdrop-blur-2xl rounded-[2rem] p-6 md:p-8 border border-white/5 shadow-2xl relative overflow-hidden"
               >
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#ff0f53] to-[#ff00b3]" />
@@ -477,6 +550,127 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                 <h2 className="text-xl font-alexandria font-bold text-white mb-6">معلومات الاستلام</h2>
                 
                 <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="space-y-4">
+
+                  {/* Compact Order Summary Box */}
+                  <div className="bg-[#050505]/40 border border-white/5 rounded-2xl p-4 mb-6 space-y-4">
+                    {/* Row 1: Product Image + Title & Coupon Code */}
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                      {/* Product details */}
+                      <div className="flex items-center gap-3">
+                        {product.image_url ? (
+                          <div className="relative w-12 h-12 rounded-xl overflow-hidden border border-white/10 shrink-0">
+                            <Image
+                              src={product.image_url}
+                              alt={product.title}
+                              fill
+                              className="object-cover"
+                            />
+                          </div>
+                        ) : (
+                          <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center border border-white/10 shrink-0">
+                            <Package className="w-6 h-6 text-zinc-500" />
+                          </div>
+                        )}
+                        <div>
+                          <h3 className="text-sm font-alexandria font-bold text-white leading-tight">
+                            {product.title}
+                          </h3>
+                          {isCourse && (
+                            <span className="inline-flex items-center gap-1 text-[10px] text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-full mt-1 font-bold">
+                              <Sparkles className="w-2.5 h-2.5 animate-pulse" />
+                              انضمام فوري للقسم
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Coupon */}
+                      <div className="flex items-center gap-2 max-w-xs w-full md:w-auto">
+                        {appliedCoupon ? (
+                          <div className="flex items-center justify-between bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-xl w-full">
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-xs font-mono font-bold text-emerald-400">{appliedCoupon.code}</span>
+                              <span className="text-[10px] text-emerald-500 bg-emerald-500/15 px-1.5 py-0.5 rounded-full font-bold font-mono">-{appliedCoupon.percent}%</span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={handleRemoveCoupon}
+                              className="text-[11px] text-zinc-500 hover:text-white transition-colors mr-2 cursor-pointer font-bold font-cairo"
+                            >
+                              إلغاء
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="relative flex items-center w-full">
+                            <input
+                              type="text"
+                              placeholder="أدخل كوبون الخصم..."
+                              value={couponInput}
+                              onChange={(e) => setCouponInput(e.target.value)}
+                              disabled={isValidatingCoupon}
+                              className="w-full h-9 rounded-xl bg-white/5 border border-white/5 text-white text-xs font-cairo px-3 pl-16 hover:bg-white/[0.07] focus:bg-white/10 focus:border-white/20 focus:ring-0 outline-none transition-all text-right"
+                              dir="rtl"
+                            />
+                            <button
+                              type="button"
+                              onClick={handleApplyCoupon}
+                              disabled={isValidatingCoupon || !couponInput.trim()}
+                              className="absolute left-1 h-7 px-3 text-xs bg-[#D6004B] hover:bg-[#b0003d] text-white rounded-lg transition-all font-bold cursor-pointer disabled:opacity-50 font-cairo"
+                            >
+                              {isValidatingCoupon ? "..." : "تطبيق"}
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    {couponError && <p className="text-[11px] text-red-400 font-cairo mt-1 text-right" dir="rtl">{couponError}</p>}
+
+                    {/* Row 2: Horizontal Price Breakdown */}
+                    <div className="flex flex-wrap items-center justify-between md:justify-start gap-x-6 gap-y-2 pt-3 border-t border-white/5 text-sm font-cairo">
+                      <div className="flex items-center gap-2">
+                        <span className="text-zinc-500 text-xs">السعر الأصلي:</span>
+                        <span className="text-zinc-400 font-bold line-through">
+                          {formatPrice(product.original_price || product.price, currency)}
+                        </span>
+                      </div>
+
+                      {discountPct !== null && discountPct > 0 && (
+                        <div className="flex items-center gap-2">
+                          <span className="text-emerald-400 text-xs">خصم الدورة ({discountPct}%):</span>
+                          <span className="text-emerald-400 font-bold" dir="ltr">
+                            -{formatPrice(savings, currency)}
+                          </span>
+                        </div>
+                      )}
+
+                      {appliedCoupon && (
+                        <div className="flex items-center gap-2">
+                          <span className="text-emerald-400 text-xs">خصم الكوبون ({appliedCoupon.percent}%):</span>
+                          <span className="text-emerald-400 font-bold" dir="ltr">
+                            -{formatPrice(Math.round(product.price * (appliedCoupon.percent / 100)), currency)}
+                          </span>
+                        </div>
+                      )}
+
+                      {showFeeRowSeparately && (
+                        <div className="flex items-center gap-2">
+                          <span className="text-zinc-500 text-xs">رسوم الدفع:</span>
+                          <span className="text-zinc-400 font-bold">
+                            {formatPrice(feeAmountFormatted, currency)}
+                          </span>
+                        </div>
+                      )}
+
+                      <div className="md:mr-auto flex items-center gap-2 bg-rose-500/10 px-3 py-1 rounded-xl border border-rose-500/20">
+                        <span className="text-rose-400 font-bold text-xs">الإجمالي:</span>
+                        <span className="text-base text-white font-alexandria font-black">
+                          {formatPrice(finalPriceFormatted, currency)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Name field */}
                   <div className="space-y-2">
                     <Label className="font-cairo font-bold text-zinc-400 text-sm">الاسم الكامل</Label>
                     <div className="relative">
@@ -618,7 +812,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
 
                       <div className="space-y-3">
                         <div className="space-y-1.5">
-                          <Label className="font-cairo text-xs text-zinc-400">رقم البطاقة</Label>
+                          <Label className="font-cairo text-xs text-zinc-400 text-right block">رقم البطاقة</Label>
                           <div className="relative">
                             <Input 
                               ref={cardNumberRef}
@@ -631,16 +825,16 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                               className={cn("h-14 rounded-xl bg-white/5 border-white/5 text-white font-mono text-lg tracking-widest hover:bg-white/[0.07] focus:bg-white/10 focus:border-white/20 focus:ring-1 focus:ring-white/20 transition-all", 
                                 cardErrors.number ? "border-red-500/50 focus:ring-red-500" : (cardNumber.length === 19 ? "border-emerald-500/50 focus:ring-emerald-500" : "")
                               )}
-                                disabled={isLoading}
-                              />
-                              {cardNumber.length === 19 && !cardErrors.number && <CheckCircle2 className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-emerald-500" />}
-                            </div>
-                            {cardErrors.number && <p className="text-xs text-red-400 font-cairo flex items-center gap-1 mt-1"><ShieldAlert className="w-3 h-3" /> {cardErrors.number}</p>}
+                              disabled={isLoading}
+                            />
+                            {cardNumber.length === 19 && !cardErrors.number && <CheckCircle2 className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-emerald-500" />}
                           </div>
+                          {cardErrors.number && <p className="text-xs text-red-400 font-cairo flex items-center gap-1 mt-1 text-right" dir="rtl"><ShieldAlert className="w-3 h-3 inline ml-1" /> {cardErrors.number}</p>}
+                        </div>
 
                         <div className="grid grid-cols-2 gap-3">
                           <div className="space-y-1.5">
-                            <Label className="font-cairo text-xs text-zinc-400">تاريخ الانتهاء</Label>
+                            <Label className="font-cairo text-xs text-zinc-400 text-right block">تاريخ الانتهاء</Label>
                             <Input 
                               value={expiryDate}
                               onChange={handleExpiryChange}
@@ -653,10 +847,10 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                               )}
                               disabled={isLoading}
                             />
-                            {cardErrors.expiry && <p className="text-[10px] text-red-400 font-cairo flex items-center gap-1 mt-1"><ShieldAlert className="w-3 h-3" /> {cardErrors.expiry}</p>}
+                            {cardErrors.expiry && <p className="text-[10px] text-red-400 font-cairo flex items-center gap-1 mt-1 text-right" dir="rtl"><ShieldAlert className="w-3 h-3 inline ml-1" /> {cardErrors.expiry}</p>}
                           </div>
                           <div className="space-y-1.5">
-                            <Label className="font-cairo text-xs text-zinc-400">رمز الأمان (CVV)</Label>
+                            <Label className="font-cairo text-xs text-zinc-400 text-right block">رمز الأمان (CVV)</Label>
                             <Input 
                               value={cvv}
                               onChange={handleCvvChange}
@@ -668,32 +862,27 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                               className={cn("h-12 rounded-xl bg-white/5 border-white/5 text-white font-mono text-base text-center hover:bg-white/[0.07] focus:bg-white/10 focus:border-white/20 focus:ring-1 focus:ring-white/20 transition-all", 
                                 cardErrors.cvv ? "border-red-500/50 focus:ring-red-500" : (cvv.length === 3 ? "border-emerald-500/50 focus:ring-emerald-500" : "")
                               )}
-                                disabled={isLoading}
-                              />
-                              {cardErrors.cvv && <p className="text-xs text-red-400 font-cairo flex items-center gap-1 mt-1"><ShieldAlert className="w-3 h-3" /> {cardErrors.cvv}</p>}
-                            </div>
+                              disabled={isLoading}
+                            />
+                            {cardErrors.cvv && <p className="text-xs text-red-400 font-cairo flex items-center gap-1 mt-1 text-right" dir="rtl"><ShieldAlert className="w-3 h-3 inline ml-1" /> {cardErrors.cvv}</p>}
                           </div>
+                        </div>
 
+                        {/* Card Holder Input */}
                         <div className="space-y-1.5">
-                          <Label className="font-cairo text-xs text-zinc-400">اسم حامل البطاقة</Label>
+                          <Label className="font-cairo text-xs text-zinc-400 text-right block">اسم حامل البطاقة</Label>
                           <Input 
                             value={cardHolder}
                             onChange={handleCardHolderChange}
                             placeholder="الاسم كما هو مكتوب على البطاقة" 
-                            className={cn("h-12 rounded-xl bg-white/5 border-white/5 text-white text-sm font-cairo hover:bg-white/[0.07] focus:bg-white/10 focus:border-white/20 focus:ring-1 focus:ring-white/20 transition-all", 
+                            className={cn("h-12 rounded-xl bg-white/5 border-white/5 text-white text-sm font-cairo hover:bg-white/[0.07] focus:bg-white/10 focus:border-white/20 focus:ring-1 focus:ring-white/20 transition-all text-right", 
                               cardErrors.holder ? "border-red-500/50 focus:ring-red-500" : (cardHolder.length >= 3 ? "border-emerald-500/50 focus:ring-emerald-500" : "")
                             )}
                             disabled={isLoading}
                           />
-                          {cardErrors.holder && <p className="text-[10px] text-red-400 font-cairo flex items-center gap-1 mt-1"><ShieldAlert className="w-3 h-3" /> {cardErrors.holder}</p>}
+                          {cardErrors.holder && <p className="text-[10px] text-red-400 font-cairo flex items-center gap-1 mt-1 text-right" dir="rtl"><ShieldAlert className="w-3 h-3 inline ml-1" /> {cardErrors.holder}</p>}
                         </div>
 
-                        <div className="flex items-center gap-2 pt-2 cursor-pointer" onClick={() => setSaveCard(!saveCard)}>
-                          <div className={cn("w-4 h-4 rounded border flex items-center justify-center transition-all", saveCard ? "bg-rose-600 border-rose-600" : "border-white/20 bg-transparent")}>
-                            {saveCard && <CheckCircle2 className="w-3 h-3 text-white" />}
-                          </div>
-                          <Label className="font-cairo text-xs text-zinc-400 cursor-pointer select-none">حفظ بيانات البطاقة للمدفوعات القادمة بأمان</Label>
-                        </div>
                       </div>
                     </div>
                   )}
@@ -701,19 +890,11 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                   <div className="pt-6 border-t border-white/5 mt-8">
                     {!(appliedCoupon && appliedCoupon.percent === 100) ? (
                       <>
-                        <div className="flex flex-wrap items-center justify-center gap-4 md:gap-6 mb-6 opacity-50 hover:opacity-80 transition-opacity">
-                          <div className="flex items-center gap-1.5"><Lock className="w-3.5 h-3.5"/><span className="text-[10px] uppercase tracking-widest font-bold">SSL Secure</span></div>
-                          <div className="w-1 h-1 rounded-full bg-white/20 hidden md:block" />
-                          <div className="flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5"/><span className="text-[10px] uppercase tracking-widest font-bold">Paymob Protected</span></div>
-                          <div className="w-1 h-1 rounded-full bg-white/20 hidden md:block" />
-                          <div className="flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5"/><span className="text-[10px] uppercase tracking-widest font-bold">Instant Delivery</span></div>
-                        </div>
-
                         <Button 
                           type="submit" 
                           disabled={isLoading}
                           className={cn(
-                            "w-full h-14 text-white font-alexandria text-lg font-bold rounded-xl transition-all active:scale-[0.98]",
+                            "w-full h-14 text-white font-alexandria text-lg font-bold rounded-xl transition-all active:scale-[0.98] cursor-pointer",
                             paymentMethod === "card" 
                               ? "bg-[#D6004B] hover:bg-[#b0003d] shadow-[0_4px_14px_0_rgba(214,0,75,0.39)] hover:shadow-[0_6px_20px_rgba(214,0,75,0.23)] hover:-translate-y-0.5" 
                               : "bg-emerald-600 hover:bg-emerald-500 shadow-[0_4px_14px_0_rgba(16,185,129,0.39)] hover:shadow-[0_6px_20px_rgba(16,185,129,0.23)] hover:-translate-y-0.5"
@@ -735,17 +916,11 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                       </>
                     ) : (
                       <>
-                        <div className="flex flex-wrap items-center justify-center gap-4 md:gap-6 mb-6 opacity-50 hover:opacity-80 transition-opacity">
-                          <div className="flex items-center gap-1.5"><Lock className="w-3.5 h-3.5"/><span className="text-[10px] uppercase tracking-widest font-bold">SSL Secure</span></div>
-                          <div className="w-1 h-1 rounded-full bg-white/20 hidden md:block" />
-                          <div className="flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5"/><span className="text-[10px] uppercase tracking-widest font-bold">Instant Delivery</span></div>
-                        </div>
-
                         <Button 
                           type="submit" 
                           disabled={isLoading}
                           className={cn(
-                            "w-full h-14 text-white font-alexandria text-lg font-bold rounded-xl transition-all active:scale-[0.98]",
+                            "w-full h-14 text-white font-alexandria text-lg font-bold rounded-xl transition-all active:scale-[0.98] cursor-pointer",
                             "bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 shadow-[0_4px_14px_0_rgba(16,185,129,0.39)] hover:shadow-[0_6px_20px_rgba(16,185,129,0.23)] hover:-translate-y-0.5"
                           )}
                         >
@@ -764,138 +939,6 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                         </Button>
                       </>
                     )}
-                  </div>
-                </form>
-              </motion.div>
-            </div>
-
-            {/* Order Summary (Left Side on Desktop, Top on Mobile) */}
-            <div className="lg:col-span-5">
-              <div className="sticky top-24 space-y-6">
-                <div className="bg-white/5 border border-white/5 rounded-[2rem] p-6 md:p-8 backdrop-blur-2xl">
-                  <h3 className="font-alexandria font-bold text-white text-lg mb-5 flex items-center gap-2">
-                    <Package className="w-5 h-5 text-rose-500" />
-                    ملخص الطلب
-                  </h3>
-                  
-                  <div className="flex gap-4 items-start pb-6 border-b border-white/10">
-                    <div className="w-24 h-24 rounded-2xl bg-zinc-900 border border-white/10 relative overflow-hidden shrink-0">
-                      {product.image_url && (
-                        <Image src={product.image_url} alt={product.title} fill className="object-cover" />
-                      )}
-                    </div>
-                    <div>
-                      <h4 className="font-cairo font-bold text-white text-lg leading-tight mb-2 line-clamp-2">{product.title}</h4>
-                      <div className="flex items-center gap-1.5 bg-rose-500/10 text-rose-400 px-2 py-1 rounded-md w-fit">
-                        <Sparkles className="w-3 h-3" />
-                        <span className="text-[10px] font-bold uppercase tracking-widest">
-                          {isCourse ? "انضمام فوري للقسم" : "تنزيل فوري"}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Coupon Code Input Block */}
-                  <div className="py-4 border-b border-white/10 space-y-2">
-                    <Label className="font-cairo text-xs text-zinc-400 font-bold block">كود الخصم (Coupon)</Label>
-                    <div className="flex gap-2">
-                      <Input 
-                        value={couponInput}
-                        onChange={e => {
-                          setCouponInput(e.target.value);
-                          setCouponError("");
-                        }}
-                        placeholder="أدخل كوبون الخصم هنا..." 
-                        className="h-10 rounded-xl bg-white/5 border-white/5 text-white text-xs font-cairo"
-                        disabled={isLoading || !!appliedCoupon}
-                      />
-                      {appliedCoupon ? (
-                        <Button 
-                          type="button" 
-                          onClick={() => {
-                            setAppliedCoupon(null);
-                            setCouponInput("");
-                          }}
-                          className="h-10 px-4 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-xl font-bold text-xs"
-                        >
-                          إلغاء
-                        </Button>
-                      ) : (
-                        <Button 
-                          type="button" 
-                          onClick={async () => {
-                            const code = couponInput.trim().toUpperCase();
-                            if (!code) return;
-                            
-                            setIsLoading(true);
-                            setCouponError("");
-                            try {
-                              const res = await fetch(`/api/coupons/validate?code=${encodeURIComponent(code)}&itemId=${encodeURIComponent(product.id)}`);
-                              const data = await res.json();
-                              
-                              if (!res.ok || !data.success) {
-                                throw new Error(data.error || "كود الخصم غير صالح");
-                              }
-                              
-                              setAppliedCoupon({ code: data.code, percent: data.discount_percent });
-                              toast.success(`تم تطبيق الكوبون ${data.code} بنجاح! خصم ${data.discount_percent}%`);
-                            } catch (err: any) {
-                              setCouponError(err.message || "كود الخصم غير صالح لهذا المنتج.");
-                              toast.error(err.message || "كود الخصم غير صالح.");
-                            } finally {
-                              setIsLoading(false);
-                            }
-                          }}
-                          className="h-10 px-4 bg-[#D6004B] hover:bg-[#b0003d] text-white border-none rounded-xl font-bold text-xs"
-                          disabled={isLoading}
-                        >
-                          تطبيق
-                        </Button>
-                      )}
-                    </div>
-                    {couponError && <p className="text-[10px] text-red-400 font-cairo">{couponError}</p>}
-                    {appliedCoupon && (
-                      <div className="flex items-center gap-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-2 py-1 rounded-lg text-[10px] font-bold font-mono w-fit">
-                        <span>الكوبون {appliedCoupon.code} نشط (-{appliedCoupon.percent}%)</span>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="py-6 space-y-4">
-                    {product.original_price ? (
-                      <div className="flex justify-between items-center text-zinc-400 font-cairo">
-                        <span>السعر الأصلي</span>
-                        <span className="line-through">{formatPrice(product.original_price, currency)}</span>
-                      </div>
-                    ) : null}
-                    
-                    {discountPct ? (
-                      <div className="flex justify-between items-center text-emerald-400 font-cairo font-bold">
-                        <span>خصم الدورة ({discountPct}%)</span>
-                        <span>- {formatPrice(savings, currency)}</span>
-                      </div>
-                    ) : null}
-
-                    {appliedCoupon ? (
-                      <div className="flex justify-between items-center text-emerald-400 font-cairo font-bold bg-emerald-500/5 p-2.5 rounded-xl border border-emerald-500/10">
-                        <span>خصم الكوبون ({appliedCoupon.percent}%)</span>
-                        <span>- {formatPrice(Math.round(product.price * (appliedCoupon.percent / 100)), currency)}</span>
-                      </div>
-                    ) : null}
-
-                    <div className="flex justify-between items-center pt-4 border-t border-white/10">
-                      <span className="font-alexandria font-bold text-white text-xl">الإجمالي</span>
-                      <div className="flex items-baseline gap-1 text-white">
-                        <span className="text-3xl font-alexandria font-black">
-                          {formatPrice(
-                            appliedCoupon 
-                              ? Math.round(product.price * (1 - appliedCoupon.percent / 100)) 
-                              : product.price, 
-                            currency
-                          )}
-                        </span>
-                      </div>
-                    </div>
 
                     {currency === "USD" && (
                       <div className="mt-4 p-3 bg-rose-500/10 border border-rose-500/20 text-rose-400 rounded-xl text-xs font-cairo text-center leading-relaxed">
@@ -904,31 +947,11 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                         تنبيه: سيتم معالجة الدفع النهائي بالجنيه المصري (EGP) بناءً على سعر الصرف الحالي ($1 = {exchangeRate.toFixed(2)} ج.م).
                       </div>
                     )}
+
+
                   </div>
-
-                  <div className="bg-[#050505] rounded-2xl p-4 border border-white/5">
-                    <ul className="space-y-3">
-                      {(isCourse ? [
-                        "دخول كامل للمحاضرات والدروس مدى الحياة",
-                        "ملفات ومواد الدورة التفاعلية جاهزة للتحميل",
-                        "شهادة إتمام معتمدة قابلة للتحقق التلقائي",
-                        "دعم فني واستشارات حقيقية مع يوسف"
-                      ] : [
-                        "ملفات المنتج الأصلية والكاملة",
-                        "دعم فني وتحديثات مجانية مدى الحياة",
-                        "إرسال تلقائي وفوري للبريد الإلكتروني"
-                      ]).map((benefit, i) => (
-                        <li key={i} className="flex items-center gap-2 text-zinc-400 font-cairo text-sm">
-                          <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                          {benefit}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-
-
-              </div>
+                </form>
+              </motion.div>
             </div>
           </div>
         </div>
@@ -959,12 +982,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
               <div className="bg-purple-500/10 border border-purple-500/20 rounded-2xl p-4">
                 <p className="text-sm text-purple-300 font-cairo mb-1">المبلغ المطلوب تحويله</p>
                 <p className="text-3xl font-alexandria font-black text-white">
-                  {formatPrice(
-                    appliedCoupon 
-                      ? Math.round(product!.price * (1 - appliedCoupon.percent / 100)) 
-                      : product?.price || 0, 
-                    currency
-                  )}
+                  {formatPrice(finalPriceFormatted, currency)}
                 </p>
               </div>
 

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { use, useState, useEffect, useRef } from "react";
 import { Navbar } from "@/components/Navbar";
@@ -503,6 +503,12 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                           </span>
                         )}
                       </div>
+                      {course.price > 0 && course.enable_gateway_fee !== false && (
+                        <p className="text-[10px] text-zinc-500 text-right leading-relaxed font-cairo">
+                          * قد يتم إضافة رسوم معالجة دفع بسيطة أثناء إتمام الطلب.
+                        </p>
+                      )}
+
 
                       <Link
                         href={course.price === 0 ? `/learn/${course.slug}/${firstLessonSlug}` : `/checkout/${course.id}`}
@@ -964,6 +970,11 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                           </span>
                         </div>
                       )}
+                      {course.price > 0 && course.enable_gateway_fee !== false && (
+                        <p className="text-[10px] text-zinc-500 text-center leading-relaxed font-cairo mt-1">
+                          * قد يتم إضافة رسوم معالجة دفع بسيطة أثناء إتمام الطلب.
+                        </p>
+                      )}
                     </div>
 
                     <div className="space-y-4">
@@ -1091,7 +1102,11 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                     </span>
                   )}
                 </div>
-
+                {course.price > 0 && course.enable_gateway_fee !== false && (
+                  <p className="text-[10px] text-zinc-500 text-center leading-relaxed font-cairo mb-3 -mt-1">
+                    * قد يتم إضافة رسوم معالجة دفع بسيطة أثناء إتمام الطلب.
+                  </p>
+                )}
                 <p className="text-[10px] text-zinc-500 font-medium font-cairo mb-6">احصل على السعر المخفض فوراً اليوم</p>
 
                 <Link
@@ -2036,11 +2051,11 @@ function MobileCourseView({
          </Link>
          
          <div className="flex flex-wrap justify-center gap-3 font-bold">
-           <Link href="/privacy" className="hover:text-white transition-colors">سياسة الخصوصية</Link>
+           <Link href="/privacy?tab=privacy" className="hover:text-white transition-colors">سياسة الخصوصية</Link>
            <span>·</span>
-           <Link href="/privacy" className="hover:text-white transition-colors">سياسة الإسترجاع</Link>
+           <Link href="/privacy?tab=refund" className="hover:text-white transition-colors">سياسة الإسترجاع</Link>
            <span>·</span>
-           <Link href="/privacy" className="hover:text-white transition-colors">الشروط والاستخدام</Link>
+           <Link href="/privacy?tab=terms" className="hover:text-white transition-colors">الشروط والاستخدام</Link>
            <span>·</span>
            <a href="mailto:support@joeschool.com" className="hover:text-white transition-colors">الدعم الفني</a>
          </div>

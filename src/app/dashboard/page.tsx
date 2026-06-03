@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -69,6 +69,12 @@ export default function DashboardPage() {
         return;
       }
       
+      if (session.user.user_metadata?.requires_password_change === true) {
+        toast.error("يرجى تعيين كلمة مرور جديدة للمتابعة.");
+        router.push("/reset-password?temp=true");
+        return;
+      }
+
       setUser(session.user);
       setImgError(false);
       const name = session.user.user_metadata?.full_name || session.user.user_metadata?.name || session.user.email?.split("@")[0] || "طالب مميز";

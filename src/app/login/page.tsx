@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -19,11 +19,15 @@ function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [checkingSession, setCheckingSession] = useState(true);
 
-  // Check if user is already logged in, redirect them immediately to dashboard
+  // Check if user is already logged in, redirect them immediately to dashboard or password reset
   useEffect(() => {
     supabaseClient.auth.getSession().then(({ data: { session } }) => {
       if (session) {
-        router.push(redirectPath);
+        if (session.user?.user_metadata?.requires_password_change === true) {
+          router.push("/reset-password?temp=true");
+        } else {
+          router.push(redirectPath);
+        }
       } else {
         setCheckingSession(false);
       }
@@ -48,8 +52,13 @@ function LoginForm() {
         console.error("Login error:", error);
         toast.error(error.message || "فشل تسجيل الدخول. يرجى التحقق من بيانات الاعتماد الخاصة بك.");
       } else if (data?.session) {
-        toast.success("تم تسجيل الدخول بنجاح! مرحباً بك.");
-        router.push(redirectPath);
+        if (data.user?.user_metadata?.requires_password_change === true) {
+          toast.success("يرجى تغيير كلمة المرور المؤقتة للاستمرار.");
+          router.push("/reset-password?temp=true");
+        } else {
+          toast.success("تم تسجيل الدخول بنجاح! مرحباً بك.");
+          router.push(redirectPath);
+        }
         router.refresh();
       }
     } catch (err: any) {
@@ -88,14 +97,13 @@ function LoginForm() {
             className="inline-block"
           >
             <Link href="/" className="flex flex-col items-center gap-3 group">
-              <div className="w-16 h-16 relative flex items-center justify-center p-2 rounded-2xl bg-white/5 border border-white/10 group-hover:scale-105 transition-transform duration-300 shadow-[0_0_30px_rgba(214,0,75,0.2)]">
+              <div className="w-16 h-16 relative flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
                 <img src="/logo.png" alt="JoeSchool Logo" className="w-full h-full object-contain" />
               </div>
               <div>
                 <h1 className="font-alexandria font-black text-2xl tracking-tight text-white mt-2">
-                  Youssef <span className="text-rose-500">Automates</span>
+                  Joe <span className="text-rose-500">School</span>
                 </h1>
-                <span className="text-xs text-zinc-500 font-bold tracking-widest uppercase block mt-1">المنصة التعليمية الفاخرة</span>
               </div>
             </Link>
           </motion.div>

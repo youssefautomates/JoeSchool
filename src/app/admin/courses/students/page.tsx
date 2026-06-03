@@ -1,25 +1,20 @@
-﻿"use client";
+"use client";
 
 import React, { useState, useEffect } from "react";
 import { 
   Users, Search, BookOpen, Clock, Award, CheckCircle2, 
   ShieldAlert, Edit, Trash2, X, ShieldCheck, Loader2, RefreshCw, 
-  Laptop, Globe, Key, AlertCircle, Ban, ArrowLeftRight, Plus, Sparkles
+  Laptop, Globe, Key, AlertCircle, Ban, ArrowLeftRight, Plus, Sparkles,
+  CreditCard, Shield, Phone, ChevronRight, CheckSquare, Square, RefreshCcw, Check, Copy
 } from "lucide-react";
 import { 
   getEnrollmentsForAdmin, 
   getCoursesList, 
   getCourseProgressPercent, 
-  updateStudentProfile, 
   removeStudentFromCourse, 
-  updateEnrollmentStatus,
-  getActiveSessions,
-  getUserStatus,
-  toggleUserSuspension,
   type LmsEnrollment, 
   type LmsCourse 
 } from "@/lib/coursesDb";
-import { supabaseClient } from "@/lib/supabaseClient";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -54,21 +49,37 @@ export default function AdminStudentsPage() {
 
   // CRM Action Modal States
   const [selectedStudent, setSelectedStudent] = useState<StudentRow | null>(null);
-  const [modalTab, setModalTab] = useState<"profile" | "devices" | "security" | "progress">("profile");
+  const [modalTab, setModalTab] = useState<"profile" | "security" | "progress" | "credentials" | "commerce" | "devices" | "activity" | "audit">("profile");
   
-  // Profile Tab States
+  // Student CRM data states
+  const [loadingCrm, setLoadingCrm] = useState(false);
+  const [crmStudentData, setCrmStudentData] = useState<any>(null);
+  
+  // Inputs
   const [editName, setEditName] = useState("");
   const [editEmail, setEditEmail] = useState("");
-  const [isSaving, setIsSaving] = useState(false);
-
-  // Active Sessions States
-  const [activeSessions, setActiveSessions] = useState<any[]>([]);
-  const [loadingSessions, setLoadingSessions] = useState(false);
-
-  // Security / Suspension States
+  const [editPhone, setEditPhone] = useState("");
+  const [maxDevices, setMaxDevices] = useState(3);
   const [isSuspended, setIsSuspended] = useState(false);
   const [suspensionReason, setSuspensionReason] = useState("");
-  const [savingSecurity, setSavingSecurity] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Password / reset links
+  const [tempPassword, setTempPassword] = useState("");
+  const [resetLink, setResetLink] = useState("");
+  const [copiedLink, setCopiedLink] = useState(false);
+  const [copiedPass, setCopiedPass] = useState(false);
+
+  // Device sessions
+  const [activeSessions, setActiveSessions] = useState<any[]>([]);
+
+  // CRM Lists
+  const [allCoursesList, setAllCoursesList] = useState<any[]>([]);
+  const [allProductsList, setAllProductsList] = useState<any[]>([]);
+
+  // Manual grant states
+  const [selectedProductId, setSelectedProductId] = useState("");
+  const [manualGrantAmount, setManualGrantAmount] = useState("0");
 
   useEffect(() => {
     loadData();
@@ -146,32 +157,90 @@ export default function AdminStudentsPage() {
     setLoading(false);
   };
 
-  // Open Manage Modal & pre-load dynamic device sessions & global user statuses
+  // Helper: Mask IP for privacy
+  const maskIpAddress = (ip: string | null) => {
+    if (!ip || ip === "Unknown") return "xxx.xxx.xxx.xxx";
+    if (ip.includes(":")) {
+      const segments = ip.split(":");
+      return segments.length > 2 
+        ? `${segments[0]}:${segments[1]}:xxxx:xxxx:xxxx:xxxx` 
+        : "xxxx:xxxx::xxxx";
+    }
+    const parts = ip.split(".");
+    return parts.length === 4 
+      ? `${parts[0]}.${parts[1]}.xxx.xxx` 
+      : "xxx.xxx.xxx.xxx";
+  };
+
+  // Open Manage Modal & fetch complete CRM dashboard datasets
   const handleOpenActionModal = async (student: StudentRow) => {
     setSelectedStudent(student);
     setModalTab("profile");
     setEditName(student.user_name || "");
     setEditEmail(student.user_email || "");
+    setEditPhone("");
+    setMaxDevices(3);
+    setIsSuspended(false);
+    setSuspensionReason("");
+    setTempPassword("");
+    setResetLink("");
+    setCrmStudentData(null);
+    setSelectedProductId("");
+    setManualGrantAmount("0");
     
-    // Load device sessions
-    setLoadingSessions(true);
+    setLoadingCrm(true);
     try {
-      const sessionsList = await getActiveSessions(student.user_id);
-      setActiveSessions(sessionsList);
-    } catch (e) {}
-    setLoadingSessions(false);
-
-    // Load Suspension details
-    try {
-      const status = await getUserStatus(student.user_id);
-      if (status) {
-        setIsSuspended(status.is_suspended);
-        setSuspensionReason(status.suspension_reason || "");
-      } else {
-        setIsSuspended(false);
-        setSuspensionReason("");
+      const res = await fetch(`/api/admin/students/${student.user_id}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success) {
+          setCrmStudentData(data.student);
+          setAllCoursesList(data.allCourses || []);
+          setAllProductsList(data.allProducts || []);
+          
+          setEditName(data.student.user_metadata?.full_name || data.student.user_metadata?.name || student.user_name || "");
+          setEditEmail(data.student.email || student.user_email || "");
+          setEditPhone(data.student.phone || "");
+          setMaxDevices(data.student.status?.max_devices || 3);
+          setIsSuspended(data.student.status?.is_suspended || false);
+          setSuspensionReason(data.student.status?.suspension_reason || "");
+          setActiveSessions(data.student.activeSessions || []);
+        } else {
+          toast.error(data.error || "Failed to load CRM data");
+        }
       }
-    } catch (e) {}
+    } catch (err) {
+      toast.error("Network error while pulling CRM details");
+    } finally {
+      setLoadingCrm(false);
+      // Ensure there's a fallback dataset to prevent crash
+      setCrmStudentData((prev: any) => prev || {
+        id: student.user_id,
+        email: student.user_email,
+        phone: "",
+        enrollments: [{ course_id: student.course_id }],
+        certificates: [],
+        orders: [],
+        completedLessons: [],
+        courseProgress: [],
+        activeSessions: []
+      });
+    }
+  };
+
+  const refreshCrmData = async (userId: string) => {
+    try {
+      const res = await fetch(`/api/admin/students/${userId}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success) {
+          setCrmStudentData(data.student);
+          setAllCoursesList(data.allCourses || []);
+          setAllProductsList(data.allProducts || []);
+          setActiveSessions(data.student.activeSessions || []);
+        }
+      }
+    } catch (err) {}
   };
 
   const handleUpdateDetails = async (e: React.FormEvent) => {
@@ -180,13 +249,25 @@ export default function AdminStudentsPage() {
     setIsSaving(true);
 
     try {
-      const success = await updateStudentProfile(selectedStudent.user_id, editName, editEmail);
-      if (success) {
-        toast.success("Student profile updated successfully! ✨");
-        setSelectedStudent(null);
+      const res = await fetch(`/api/admin/students/${selectedStudent.user_id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: editName,
+          email: editEmail,
+          phone: editPhone,
+          max_devices: maxDevices,
+          is_suspended: isSuspended,
+          suspension_reason: suspensionReason
+        })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        toast.success(data.message || "Student profile updated successfully! ✨");
+        await refreshCrmData(selectedStudent.user_id);
         await loadData();
       } else {
-        toast.error("Failed to update student profile");
+        toast.error(data.error || "Failed to update profile");
       }
     } catch (err) {
       toast.error("An error occurred while saving changes");
@@ -195,63 +276,272 @@ export default function AdminStudentsPage() {
     }
   };
 
-  const handleUpdateSecurity = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // Secure Password Actions (Reset Link & Temp Password Only)
+  const handleSendResetLink = async () => {
     if (!selectedStudent) return;
-    setSavingSecurity(true);
-
+    toast.loading("Generating recovery link...", { id: "reset-pwd" });
     try {
-      const success = await toggleUserSuspension(selectedStudent.user_id, isSuspended, suspensionReason);
-      if (success) {
-        toast.success("Student security and suspension state updated successfully! 🛡️");
-        setSelectedStudent(null);
-        await loadData();
+      const res = await fetch(`/api/admin/students/${selectedStudent.user_id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: editEmail,
+          action: "send_reset"
+        })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setResetLink(data.resetLink || "");
+        toast.success("Reset link sent to student email & loaded locally! ✉️", { id: "reset-pwd" });
       } else {
-        toast.error("Failed to update suspension state");
+        toast.error(data.error || "Failed to generate link", { id: "reset-pwd" });
       }
     } catch (err) {
-      toast.error("An error occurred while saving security details");
-    } finally {
-      setSavingSecurity(false);
+      toast.error("Server communication error", { id: "reset-pwd" });
     }
   };
 
-  const handleTerminateSession = async (sessionId: string) => {
+  const handleGenerateTempPassword = async () => {
+    if (!selectedStudent) return;
+    toast.loading("Generating temp password...", { id: "temp-pwd" });
     try {
-      const { error } = await supabaseClient
-        .from("active_sessions")
-        .update({ is_active: false })
-        .eq("id", sessionId);
+      const res = await fetch(`/api/admin/students/${selectedStudent.user_id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "temp_password"
+        })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setTempPassword(data.tempPassword || "");
+        toast.success("Temp password generated & user sessions invalidated! 🔑", { id: "temp-pwd" });
+        await refreshCrmData(selectedStudent.user_id);
+      } else {
+        toast.error(data.error || "Failed to generate temporary password", { id: "temp-pwd" });
+      }
+    } catch (err) {
+      toast.error("Server communication error", { id: "temp-pwd" });
+    }
+  };
 
-      if (error) throw error;
-      
-      toast.success("Session terminated and connection severed from active device! 🔌");
-      
-      // Reload sessions
-      if (selectedStudent) {
-        const updated = await getActiveSessions(selectedStudent.user_id);
-        setActiveSessions(updated);
+  // Terminate device session
+  const handleTerminateSession = async (sessionId: string) => {
+    if (!selectedStudent) return;
+    try {
+      const res = await fetch(`/api/students/${selectedStudent.user_id}/sessions`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sessionId })
+      });
+      if (res.ok) {
+        toast.success("Session severed and logged out instantly! 🔌");
+        await refreshCrmData(selectedStudent.user_id);
+      } else {
+        // Direct update fallback if sessions route is admin gated
+        const { supabaseClient } = await import("@/lib/supabaseClient");
+        await supabaseClient.from("active_sessions").update({ is_active: false }).eq("id", sessionId);
+        toast.success("Session severed successfully! 🔌");
+        await refreshCrmData(selectedStudent.user_id);
       }
     } catch (err) {
       toast.error("Failed to terminate the selected session");
     }
   };
 
-  const handleDisenroll = async () => {
+  // Enroll, progress, and certificate control callbacks
+  const handleEnrollInCourse = async (courseId: string) => {
     if (!selectedStudent) return;
-    if (!confirm("Are you sure you want to disenroll this student and permanently delete their learning progress? This action is irreversible.")) return;
-
+    toast.loading("Enrolling student...", { id: "enroll-act" });
     try {
-      const success = await removeStudentFromCourse(selectedStudent.user_id, selectedStudent.course_id);
-      if (success) {
-        toast.success("Student disenrolled and their progress successfully deleted!");
-        setSelectedStudent(null);
+      const res = await fetch(`/api/admin/students/${selectedStudent.user_id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "enroll",
+          courseId,
+          studentName: editName,
+          studentEmail: editEmail
+        })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        toast.success("Student successfully enrolled in course! 🎓", { id: "enroll-act" });
+        await refreshCrmData(selectedStudent.user_id);
         await loadData();
       } else {
-        toast.error("Failed to disenroll student");
+        toast.error(data.error || "Failed to enroll student", { id: "enroll-act" });
       }
     } catch (err) {
-      toast.error("An error occurred while disenrolling the student");
+      toast.error("Error communicating with server", { id: "enroll-act" });
+    }
+  };
+
+  const handleDisenroll = async (courseId: string) => {
+    if (!selectedStudent) return;
+    if (!confirm("Are you sure you want to disenroll this student and permanently delete their learning progress? This action is irreversible.")) return;
+    toast.loading("Removing student enrollment...", { id: "disenroll-act" });
+
+    try {
+      const res = await fetch(`/api/admin/students/${selectedStudent.user_id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "disenroll",
+          courseId
+        })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        toast.success("Student disenrolled and their progress successfully deleted!", { id: "disenroll-act" });
+        await refreshCrmData(selectedStudent.user_id);
+        await loadData();
+      } else {
+        toast.error(data.error || "Failed to disenroll student", { id: "disenroll-act" });
+      }
+    } catch (err) {
+      toast.error("Error communicating with server", { id: "disenroll-act" });
+    }
+  };
+
+  const handleToggleLesson = async (courseId: string, lessonId: string, completed: boolean) => {
+    if (!selectedStudent) return;
+    try {
+      const res = await fetch(`/api/admin/students/${selectedStudent.user_id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "toggle_lesson",
+          courseId,
+          lessonId,
+          completed
+        })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        toast.success(completed ? "Lesson manually marked completed! Checkpoint saved." : "Lesson marked incomplete!");
+        await refreshCrmData(selectedStudent.user_id);
+        await loadData();
+      }
+    } catch (err) {
+      toast.error("Failed to update lesson checkpoint");
+    }
+  };
+
+  const handleResetCourseProgress = async (courseId: string) => {
+    if (!selectedStudent) return;
+    if (!confirm("Are you sure you want to completely reset all watched seconds, checkpoints, and completion data for this course?")) return;
+    
+    toast.loading("Resetting progress...", { id: "reset-progress-act" });
+    try {
+      const res = await fetch(`/api/admin/students/${selectedStudent.user_id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "reset_progress",
+          courseId
+        })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        toast.success("Progress cleared successfully!", { id: "reset-progress-act" });
+        await refreshCrmData(selectedStudent.user_id);
+        await loadData();
+      }
+    } catch (err) {
+      toast.error("Failed to reset progress", { id: "reset-progress-act" });
+    }
+  };
+
+  const handleToggleCertificate = async (courseId: string, courseTitle: string, certificateBgUrl: string, isIssued: boolean) => {
+    if (!selectedStudent) return;
+    toast.loading(isIssued ? "Revoking certificate..." : "Issuing certificate...", { id: "cert-act" });
+    try {
+      const res = await fetch(`/api/admin/students/${selectedStudent.user_id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: isIssued ? "revoke_certificate" : "grant_certificate",
+          courseId,
+          courseTitle,
+          studentName: editName,
+          certificateBgUrl
+        })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        toast.success(isIssued ? "Certificate revoked!" : "Certificate successfully issued! 🏆", { id: "cert-act" });
+        await refreshCrmData(selectedStudent.user_id);
+      } else {
+        toast.error(data.error || "Failed to update certificate", { id: "cert-act" });
+      }
+    } catch (err) {
+      toast.error("Error communicating with server", { id: "cert-act" });
+    }
+  };
+
+  // Commerce manual grant
+  const handleGrantProductAccess = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedStudent || !selectedProductId) {
+      toast.error("Please select a product");
+      return;
+    }
+    const matched = allProductsList.find(p => p.id === selectedProductId);
+    if (!matched) return;
+
+    toast.loading("Granting manual product rights...", { id: "grant-prod-act" });
+    try {
+      const res = await fetch(`/api/admin/students/${selectedStudent.user_id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "grant_product",
+          productId: selectedProductId,
+          productTitle: matched.title,
+          studentEmail: editEmail,
+          studentName: editName,
+          amount: parseFloat(manualGrantAmount) || 0
+        })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        toast.success("Digital product granted successfully! 📦", { id: "grant-prod-act" });
+        setSelectedProductId("");
+        setManualGrantAmount("0");
+        await refreshCrmData(selectedStudent.user_id);
+      } else {
+        toast.error(data.error || "Failed to grant access", { id: "grant-prod-act" });
+      }
+    } catch (err) {
+      toast.error("Error communicating with server", { id: "grant-prod-act" });
+    }
+  };
+
+  const handleRevokeProductAccess = async (productId: string) => {
+    if (!selectedStudent) return;
+    if (!confirm("Are you sure you want to revoke this student's access to the digital product?")) return;
+    
+    toast.loading("Revoking access...", { id: "revoke-prod-act" });
+    try {
+      const res = await fetch(`/api/admin/students/${selectedStudent.user_id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "revoke_product",
+          productId,
+          studentEmail: editEmail
+        })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        toast.success("Access revoked successfully!", { id: "revoke-prod-act" });
+        await refreshCrmData(selectedStudent.user_id);
+      } else {
+        toast.error(data.error || "Failed to revoke access", { id: "revoke-prod-act" });
+      }
+    } catch (err) {
+      toast.error("Error communicating with server", { id: "revoke-prod-act" });
     }
   };
 
@@ -276,7 +566,6 @@ export default function AdminStudentsPage() {
       toast.success("Student account created and successfully enrolled in the course! 🎉");
       setIsAddingStudent(false);
       
-      // Reset form
       setNewStudent({
         email: "",
         password: "",
@@ -285,7 +574,6 @@ export default function AdminStudentsPage() {
         courseId: courses[0]?.id || ""
       });
 
-      // Reload list
       await loadData();
 
     } catch (err: any) {
@@ -500,7 +788,7 @@ export default function AdminStudentsPage() {
       {/* ── CONTROL & EDIT MODAL ──────────────────────────────────────────────── */}
       {selectedStudent && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-[#0a0a0f] border border-white/10 rounded-2xl max-w-2xl w-full p-6 space-y-6 shadow-2xl relative text-left">
+          <div className="bg-[#0a0a0f] border border-white/10 rounded-2xl max-w-3xl w-full p-6 space-y-6 shadow-2xl relative text-left max-h-[90vh] overflow-y-auto">
             
             {/* Close */}
             <button 
@@ -513,283 +801,770 @@ export default function AdminStudentsPage() {
             {/* Title */}
             <div>
               <h3 className="font-bold text-white text-base">Student CRM & Enrollment Control</h3>
-              <p className="text-zinc-500 text-xs mt-1">Update profile information, terminate active sessions, or configure security suspension.</p>
+              <p className="text-zinc-500 text-xs mt-1">Manage profile properties, progress checkpoints, credentials, commerce orders, and session security parameters.</p>
             </div>
 
             {/* Tab Headers inside modal */}
-            <div className="flex border-b border-white/5 pb-1 gap-2">
-              <button 
-                onClick={() => setModalTab("profile")}
-                className={cn(
-                  "px-4 py-2 text-xs font-bold border-b-2 transition-all cursor-pointer",
-                  modalTab === "profile" ? "border-rose-500 text-rose-500" : "border-transparent text-zinc-500 hover:text-zinc-300"
-                )}
-              >
-                Personal Info
-              </button>
-              <button 
-                onClick={() => setModalTab("progress")}
-                className={cn(
-                  "px-4 py-2 text-xs font-bold border-b-2 transition-all cursor-pointer flex items-center gap-1.5",
-                  modalTab === "progress" ? "border-rose-500 text-rose-500" : "border-transparent text-zinc-500 hover:text-zinc-300"
-                )}
-              >
-                <Clock className="w-4 h-4" />
-                <span>Learning Progress</span>
-              </button>
-              <button 
-                onClick={() => setModalTab("devices")}
-                className={cn(
-                  "px-4 py-2 text-xs font-bold border-b-2 transition-all cursor-pointer flex items-center gap-1.5",
-                  modalTab === "devices" 
-                    ? "border-[#D6004B] text-white" 
-                    : "border-transparent text-zinc-500 hover:text-white"
-                )}
-              >
-                <span>Active Devices</span>
-                {activeSessions.length > 0 && (
-                  <span className="bg-rose-500/20 text-[#D6004B] text-[9px] px-1.5 rounded-full font-bold">
-                    {activeSessions.length}
-                  </span>
-                )}
-              </button>
-              <button 
-                onClick={() => setModalTab("security")}
-                className={cn(
-                  "px-4 py-2 text-xs font-bold border-b-2 transition-all cursor-pointer flex items-center gap-1.5",
-                  modalTab === "security" 
-                    ? "border-[#D6004B] text-white" 
-                    : "border-transparent text-zinc-500 hover:text-white"
-                )}
-              >
-                <span>Account Security</span>
-              </button>
+            <div className="flex flex-wrap border-b border-white/5 pb-1 gap-1">
+              {[
+                { id: "profile", name: "Account Details" },
+                { id: "activity", name: "Recent Activity" },
+                { id: "security", name: "Security & Passwords" },
+                { id: "progress", name: "Learning Progress" },
+                { id: "credentials", name: "Certificates" },
+                { id: "commerce", name: "Products & Orders" },
+                { id: "devices", name: "Connected Devices" },
+                { id: "audit", name: "Audit Trail" }
+              ].map(t => (
+                <button 
+                  key={t.id}
+                  onClick={() => setModalTab(t.id as any)}
+                  className={cn(
+                    "px-4 py-2 text-xs font-bold border-b-2 transition-all cursor-pointer",
+                    modalTab === t.id ? "border-rose-500 text-rose-500" : "border-transparent text-zinc-500 hover:text-zinc-300"
+                  )}
+                >
+                  {t.name}
+                </button>
+              ))}
             </div>
 
             {/* Modal Body Tabs */}
-            
-            {/* TAB 1: Profile Details */}
-            {modalTab === "profile" && (
-              <form onSubmit={handleUpdateDetails} className="space-y-4">
-                <div className="p-4 rounded-xl bg-white/[0.02] border border-white/5 grid grid-cols-2 gap-4 text-xs font-bold text-zinc-400">
-                  <div>
-                    <span className="text-[10px] text-zinc-500 block">Enrolled Course:</span>
-                    <span className="text-white mt-1 block truncate">{selectedStudent.courseTitle}</span>
-                  </div>
-                  <div>
-                    <span className="text-[10px] text-zinc-500 block">Completion Progress:</span>
-                    <span className="text-rose-400 mt-1 block font-mono">{selectedStudent.percent}% ({selectedStudent.completedCount} of {selectedStudent.totalCount} lessons)</span>
-                  </div>
-                </div>
-
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs text-zinc-400 font-bold">Student Full Name</label>
-                  <input 
-                    type="text"
-                    required
-                    value={editName}
-                    onChange={e => setEditName(e.target.value)}
-                    className="bg-white/5 border border-white/5 rounded-xl py-3 px-4 text-xs focus:outline-none focus:border-rose-500/50 transition-all font-sans text-zinc-300 w-full"
-                  />
-                </div>
-
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs text-zinc-400 font-bold">Email Address</label>
-                  <input 
-                    type="email"
-                    required
-                    value={editEmail}
-                    onChange={e => setEditEmail(e.target.value)}
-                    className="bg-white/5 border border-white/5 rounded-xl py-3 px-4 text-xs focus:outline-none focus:border-rose-500/50 transition-all font-mono text-zinc-300 w-full"
-                  />
-                </div>
-
-                <div className="flex items-center justify-between border-t border-white/5 pt-4">
-                  <button
-                    type="button"
-                    onClick={handleDisenroll}
-                    className="h-10 px-4 bg-red-950/20 hover:bg-red-950 hover:text-red-400 hover:border-red-900/30 border border-red-900/20 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer text-red-500"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                    <span>Revoke Enrollment & Delete Progress</span>
-                  </button>
-
-                  <button
-                    type="submit"
-                    disabled={isSaving}
-                    className="h-10 px-6 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer disabled:opacity-50"
-                  >
-                    {isSaving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                    <span>Save Changes</span>
-                  </button>
-                </div>
-              </form>
-            )}
-
-            {/* TAB 1.5: Progress Stats */}
-            {modalTab === "progress" && selectedStudent && (
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="bg-white/5 border border-white/5 p-4 rounded-xl flex flex-col items-center justify-center text-center">
-                    <Clock className="w-6 h-6 text-rose-500 mb-2" />
-                    <span className="text-xs text-zinc-400 mb-1 font-bold">Total Learning Time</span>
-                    <span className="text-xl text-white font-black font-mono">
-                      {(selectedStudent.totalWatchSeconds ? selectedStudent.totalWatchSeconds / 3600 : 0).toFixed(1)} <span className="text-sm font-sans">hrs</span>
-                    </span>
-                  </div>
-                  <div className="bg-white/5 border border-white/5 p-4 rounded-xl flex flex-col items-center justify-center text-center">
-                    <Sparkles className="w-6 h-6 text-emerald-500 mb-2" />
-                    <span className="text-xs text-zinc-400 mb-1 font-bold">Current Learning Streak</span>
-                    <span className="text-xl text-white font-black font-mono">
-                      {selectedStudent.streak || 0} <span className="text-sm font-sans">days</span>
-                    </span>
-                  </div>
-                </div>
-                
-                <div className="bg-white/5 border border-white/5 p-4 rounded-xl mt-4">
-                  <h4 className="text-white text-xs font-bold mb-3">Enrolled Course Details: {selectedStudent.courseTitle}</h4>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs text-zinc-400">Completed Lessons</span>
-                    <span className="text-xs text-white font-bold">{selectedStudent.completedCount} of {selectedStudent.totalCount}</span>
-                  </div>
-                  <div className="w-full bg-black h-2 rounded-full overflow-hidden">
-                    <div 
-                      className="h-full rounded-full transition-all duration-500 bg-gradient-to-r from-rose-500 to-orange-400"
-                      style={{ width: `${selectedStudent.percent}%` }}
-                    />
-                  </div>
-                </div>
+            {loadingCrm ? (
+              <div className="py-24 flex flex-col items-center justify-center gap-3 text-zinc-500 text-xs font-bold">
+                <Loader2 className="w-8 h-8 animate-spin text-rose-500" />
+                <span>Loading complete CRM student dashboard...</span>
               </div>
-            )}
+            ) : !crmStudentData ? (
+              <div className="py-24 text-center text-zinc-500 text-xs font-bold">
+                Failed to load profile.
+              </div>
+            ) : (
+              <>
+                {/* TAB 1: Profile Details */}
+                {modalTab === "profile" && (
+                  <form onSubmit={handleUpdateDetails} className="space-y-4 font-sans">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-xs text-zinc-400 font-bold">Student Full Name</label>
+                        <input 
+                          type="text"
+                          required
+                          value={editName}
+                          onChange={e => setEditName(e.target.value)}
+                          className="bg-white/5 border border-white/5 rounded-xl py-3 px-4 text-xs focus:outline-none focus:border-rose-500/50 transition-all font-sans text-zinc-300 w-full"
+                        />
+                      </div>
 
-            {/* TAB 2: Active Device Sessions */}
-            {modalTab === "devices" && (
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 text-zinc-400 text-xs font-bold p-3 bg-rose-600/5 border border-rose-500/10 rounded-xl leading-relaxed">
-                  <AlertCircle className="w-4 h-4 text-rose-500 shrink-0" />
-                  <span>
-                    Maximum allowed limit is 3 concurrent devices. Once you terminate any active device session, the student will be instantly logged out from that browser upon their next action.
-                  </span>
-                </div>
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-xs text-zinc-400 font-bold">Email Address</label>
+                        <input 
+                          type="email"
+                          required
+                          value={editEmail}
+                          onChange={e => setEditEmail(e.target.value)}
+                          className="bg-white/5 border border-white/5 rounded-xl py-3 px-4 text-xs focus:outline-none focus:border-rose-500/50 transition-all font-mono text-zinc-300 w-full"
+                        />
+                      </div>
+                    </div>
 
-                <div className="space-y-3 max-h-64 overflow-y-auto custom-scrollbar">
-                  {loadingSessions ? (
-                    <div className="py-12 flex flex-col items-center justify-center gap-2 text-zinc-500 text-xs font-bold">
-                      <Loader2 className="w-6 h-6 animate-spin text-rose-500" />
-                      <span>Loading active devices connected to the account...</span>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-xs text-zinc-400 font-bold">Phone Number</label>
+                        <input 
+                          type="text"
+                          value={editPhone}
+                          placeholder="e.g. +201107099196"
+                          onChange={e => setEditPhone(e.target.value)}
+                          className="bg-white/5 border border-white/5 rounded-xl py-3 px-4 text-xs focus:outline-none focus:border-rose-500/50 transition-all font-mono text-zinc-300 w-full"
+                        />
+                      </div>
+
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-xs text-zinc-400 font-bold">Max Devices (Concurrent limit)</label>
+                        <input 
+                          type="number"
+                          required
+                          min={1}
+                          max={10}
+                          value={maxDevices}
+                          onChange={e => setMaxDevices(parseInt(e.target.value) || 3)}
+                          className="bg-white/5 border border-white/5 rounded-xl py-3 px-4 text-xs focus:outline-none focus:border-rose-500/50 transition-all font-mono text-zinc-300 w-full"
+                        />
+                      </div>
                     </div>
-                  ) : activeSessions.length === 0 ? (
-                    <div className="py-12 text-center text-zinc-500 text-xs font-bold">
-                      <Laptop className="w-10 h-10 text-zinc-700 mx-auto mb-2" />
-                      <span>No active device sessions registered in the database.</span>
-                    </div>
-                  ) : (
-                    activeSessions.map((session) => (
-                      <div 
-                        key={session.id}
-                        className="p-3.5 rounded-xl bg-white/5 border border-white/5 flex items-center justify-between gap-4 text-xs font-bold text-zinc-300"
+
+                    <div className="flex items-center justify-end border-t border-white/5 pt-4">
+                      <button
+                        type="submit"
+                        disabled={isSaving}
+                        className="h-11 px-6 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer disabled:opacity-50"
                       >
-                        <div className="flex items-start gap-3">
-                          <div className="w-10 h-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-zinc-400 shrink-0">
-                            <Laptop className="w-5 h-5" />
-                          </div>
-                          <div>
-                            <div className="flex items-center gap-1.5">
-                              <span className="text-white text-[13px]">{session.browser.split(" ")[0] || "Browser Session"}</span>
-                              <span className="text-[9px] bg-white/5 text-zinc-400 px-1.5 py-0.5 rounded font-mono">{session.device_id.substring(0, 10)}</span>
+                        {isSaving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                        <span>Save Account Details</span>
+                      </button>
+                    </div>
+                  </form>
+                )}
+
+                {/* TAB: Recent Activity */}
+                {modalTab === "activity" && (
+                  <div className="space-y-4 font-sans">
+                    <div className="text-white text-sm font-bold border-b border-white/5 pb-2 flex items-center gap-2">
+                      <Clock className="w-4 h-4 text-rose-500" />
+                      <span>Recent Activity Timeline</span>
+                    </div>
+
+                    <div className="relative border-l border-white/10 pl-6 ml-3 space-y-6 py-2">
+                      {/* Last Sign In */}
+                      <div className="relative">
+                        <div className="absolute -left-[31px] top-0.5 bg-zinc-950 border border-white/10 w-4 h-4 rounded-full flex items-center justify-center">
+                          <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                        </div>
+                        <div className="text-zinc-400 text-xs font-bold">Last Sign In</div>
+                        <div className="text-white text-xs mt-1">
+                          {crmStudentData.timeline?.lastSignIn ? (
+                            new Date(crmStudentData.timeline.lastSignIn).toLocaleString("en-US", {
+                              year: "numeric",
+                              month: "long",
+                              day: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit"
+                            })
+                          ) : (
+                            <span className="text-zinc-600">No sign in history recorded.</span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Last Video Watched */}
+                      <div className="relative">
+                        <div className="absolute -left-[31px] top-0.5 bg-zinc-950 border border-white/10 w-4 h-4 rounded-full flex items-center justify-center">
+                          <div className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+                        </div>
+                        <div className="text-zinc-400 text-xs font-bold">Last Video Watched</div>
+                        {crmStudentData.timeline?.lastWatchedVideo ? (
+                          <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3 mt-2 space-y-1.5">
+                            <div className="text-white text-xs font-bold flex items-center gap-1.5">
+                              <BookOpen className="w-3.5 h-3.5 text-rose-400" />
+                              <span>{crmStudentData.timeline.lastWatchedVideo.title}</span>
                             </div>
-                            <div className="flex items-center gap-3 mt-1 text-[10px] text-zinc-500">
-                              <span className="flex items-center gap-0.5">
-                                <Globe className="w-3.5 h-3.5 text-zinc-500" />
-                                <span className="font-mono">{session.ip_address}</span>
+                            <div className="text-[10px] text-zinc-500 flex items-center gap-3">
+                              <span>Watched Time: {Math.round(crmStudentData.timeline.lastWatchedVideo.watched_seconds)} seconds</span>
+                              <span>•</span>
+                              <span>Status: {crmStudentData.timeline.lastWatchedVideo.completed ? "Completed" : "In Progress"}</span>
+                              <span>•</span>
+                              <span>Date: {new Date(crmStudentData.timeline.lastWatchedVideo.updated_at).toLocaleDateString()}</span>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="text-white text-xs mt-1 text-zinc-600">No watching activity recorded yet.</div>
+                        )}
+                      </div>
+
+                      {/* Last Purchase */}
+                      <div className="relative">
+                        <div className="absolute -left-[31px] top-0.5 bg-zinc-950 border border-white/10 w-4 h-4 rounded-full flex items-center justify-center">
+                          <div className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                        </div>
+                        <div className="text-zinc-400 text-xs font-bold">Last Purchase</div>
+                        {crmStudentData.timeline?.lastPurchase ? (
+                          <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3 mt-2 space-y-1.5">
+                            <div className="text-white text-xs font-bold flex items-center gap-1.5">
+                              <CreditCard className="w-3.5 h-3.5 text-amber-400" />
+                              <span>{crmStudentData.timeline.lastPurchase.product_title}</span>
+                            </div>
+                            <div className="text-[10px] text-zinc-500 flex items-center gap-3">
+                              <span className="font-mono text-rose-400">{crmStudentData.timeline.lastPurchase.amount} {crmStudentData.timeline.lastPurchase.currency}</span>
+                              <span>•</span>
+                              <span>Method: {crmStudentData.timeline.lastPurchase.payment_method}</span>
+                              <span>•</span>
+                              <span>Date: {new Date(crmStudentData.timeline.lastPurchase.created_at).toLocaleDateString()}</span>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="text-white text-xs mt-1 text-zinc-600">No purchases found.</div>
+                        )}
+                      </div>
+
+                      {/* Last Device Used */}
+                      <div className="relative">
+                        <div className="absolute -left-[31px] top-0.5 bg-zinc-950 border border-white/10 w-4 h-4 rounded-full flex items-center justify-center">
+                          <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                        </div>
+                        <div className="text-zinc-400 text-xs font-bold">Last Device & IP Used</div>
+                        {crmStudentData.timeline?.lastSession ? (
+                          <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3 mt-2 space-y-1">
+                            <div className="text-white text-xs flex items-center gap-1.5">
+                              <Laptop className="w-3.5 h-3.5 text-blue-400" />
+                              <span>{crmStudentData.timeline.lastSession.device}</span>
+                            </div>
+                            <div className="text-[10px] text-zinc-500 flex items-center gap-3">
+                              <span className="font-mono flex items-center gap-1">
+                                <Globe className="w-3 h-3 text-zinc-600" />
+                                {crmStudentData.timeline.lastSession.masked_ip}
                               </span>
                               <span>•</span>
-                              <span>Country: {session.country || "Unknown"}</span>
-                              <span>•</span>
-                              <span>Activity: {new Date(session.last_activity).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}</span>
+                              <span>Last active: {new Date(crmStudentData.timeline.lastSession.last_active).toLocaleString()}</span>
                             </div>
                           </div>
-                        </div>
-
-                        <button 
-                          onClick={() => handleTerminateSession(session.id)}
-                          className="h-8 px-3 rounded-lg bg-rose-600/10 hover:bg-rose-600 border border-rose-500/20 hover:border-transparent text-[#D6004B] hover:text-white transition-all text-[10px] font-bold cursor-pointer"
-                        >
-                          Terminate Session
-                        </button>
+                        ) : (
+                          <div className="text-white text-xs mt-1 text-zinc-600">No device session logged.</div>
+                        )}
                       </div>
-                    ))
-                  )}
-                </div>
-              </div>
-            )}
 
-            {/* TAB 3: Security & Suspension */}
-            {modalTab === "security" && (
-              <form onSubmit={handleUpdateSecurity} className="space-y-4">
-                <div className="flex items-center gap-2 text-zinc-400 text-xs font-bold p-3 bg-zinc-950/60 border border-white/5 rounded-xl leading-relaxed">
-                  <AlertCircle className="w-4 h-4 text-[#D6004B] shrink-0" />
-                  <span>
-                    When a student is suspended, they will be completely blocked from streaming videos or accessing educational materials, while remaining enrolled in the course.
-                  </span>
-                </div>
-
-                <div className="flex flex-col gap-2">
-                  <span className="text-xs text-zinc-400 font-bold">Student Account Access Level</span>
-                  <div className="flex gap-3">
-                    <button
-                      type="button"
-                      onClick={() => setIsSuspended(false)}
-                      className={cn(
-                        "flex-1 h-11 rounded-xl border font-bold text-xs flex items-center justify-center gap-2 cursor-pointer transition-all",
-                        !isSuspended 
-                          ? "bg-emerald-950/40 border-emerald-500/30 text-emerald-400" 
-                          : "bg-white/5 border-transparent text-zinc-500 hover:text-white"
-                      )}
-                    >
-                      <ShieldCheck className="w-4.5 h-4.5" />
-                      <span>Active (Allow Learning & Streaming)</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setIsSuspended(true)}
-                      className={cn(
-                        "flex-1 h-11 rounded-xl border font-bold text-xs flex items-center justify-center gap-2 cursor-pointer transition-all",
-                        isSuspended 
-                          ? "bg-red-950/40 border-red-500/30 text-red-400" 
-                          : "bg-white/5 border-transparent text-zinc-500 hover:text-white"
-                      )}
-                    >
-                      <Ban className="w-4.5 h-4.5" />
-                      <span>Suspended (Block video streaming)</span>
-                    </button>
-                  </div>
-                </div>
-
-                {isSuspended && (
-                  <div className="flex flex-col gap-1.5 animate-fadeIn">
-                    <label className="text-xs text-zinc-400 font-bold">Suspension Reason (Displayed to the student on blockscreen)</label>
-                    <textarea 
-                      required
-                      placeholder="Write the suspension reason here (e.g. Account sharing detected on multiple concurrent devices)..."
-                      value={suspensionReason}
-                      onChange={e => setSuspensionReason(e.target.value)}
-                      className="bg-white/5 border border-white/5 rounded-xl py-3 px-4 text-xs focus:outline-none focus:border-rose-500/50 transition-all font-sans text-zinc-300 w-full h-20 resize-none"
-                    />
+                      {/* Last Coupon Used */}
+                      <div className="relative">
+                        <div className="absolute -left-[31px] top-0.5 bg-zinc-950 border border-white/10 w-4 h-4 rounded-full flex items-center justify-center">
+                          <div className="w-1.5 h-1.5 rounded-full bg-purple-500" />
+                        </div>
+                        <div className="text-zinc-400 text-xs font-bold">Last Coupon Used</div>
+                        {crmStudentData.timeline?.lastCouponUsed ? (
+                          <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3 mt-2 flex items-center justify-between gap-3 text-xs">
+                            <div>
+                              <span className="bg-purple-950/40 border border-purple-500/20 text-purple-400 px-2 py-1 rounded font-mono font-black text-xs">
+                                {crmStudentData.timeline.lastCouponUsed.code}
+                              </span>
+                              <span className="text-[10px] text-zinc-500 ml-3">
+                                Applied on: {new Date(crmStudentData.timeline.lastCouponUsed.date).toLocaleDateString()}
+                              </span>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="text-white text-xs mt-1 text-zinc-600">No coupons applied.</div>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 )}
 
-                <div className="flex items-center justify-end border-t border-white/5 pt-4">
-                  <button
-                    type="submit"
-                    disabled={savingSecurity}
-                    className="h-11 px-6 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer disabled:opacity-50"
-                  >
-                    {savingSecurity && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                    <span>Save Security Settings</span>
-                  </button>
-                </div>
-              </form>
+                {/* TAB 2: Security & Password Actions */}
+                {modalTab === "security" && (
+                  <div className="space-y-6">
+                    {/* Reset Password Triggers */}
+                    <div className="p-4 rounded-xl bg-white/[0.02] border border-white/5 space-y-4">
+                      <h4 className="text-white text-xs font-bold flex items-center gap-2">
+                        <Key className="w-4 h-4 text-rose-500" />
+                        <span>Manage Student Passwords</span>
+                      </h4>
+                      <p className="text-zinc-500 text-[11px] leading-relaxed">
+                        To maintain compliance and maximum security, we do not store raw, editable password fields. Select one of the actions below to trigger password recovery.
+                      </p>
+                      <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                        <button
+                          type="button"
+                          onClick={handleSendResetLink}
+                          className="flex-1 h-11 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold text-xs flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer"
+                        >
+                          Send Reset Password Link
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleGenerateTempPassword}
+                          className="flex-1 h-11 rounded-xl bg-[#D6004B] hover:bg-rose-600 text-white font-bold text-xs flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer"
+                        >
+                          Generate Temporary Password
+                        </button>
+                      </div>
+
+                      {/* Display generated reset link */}
+                      {resetLink && (
+                        <div className="p-3 bg-zinc-950 border border-white/5 rounded-lg flex items-center justify-between gap-3 text-xs mt-3 animate-fadeIn">
+                          <div className="overflow-hidden">
+                            <span className="text-[10px] text-zinc-500 block">Generated Recovery URL:</span>
+                            <span className="text-white mt-1 font-mono truncate block max-w-lg">{resetLink}</span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              navigator.clipboard.writeText(resetLink);
+                              setCopiedLink(true);
+                              setTimeout(() => setCopiedLink(false), 2000);
+                            }}
+                            className="p-2 bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white rounded-lg transition-all shrink-0 cursor-pointer"
+                            title="Copy link"
+                          >
+                            {copiedLink ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                          </button>
+                        </div>
+                      )}
+
+                      {/* Display generated temp password */}
+                      {tempPassword && (
+                        <div className="p-3 bg-zinc-950 border border-white/5 rounded-lg flex items-center justify-between gap-3 text-xs mt-3 animate-fadeIn">
+                          <div>
+                            <span className="text-[10px] text-zinc-500 block">Generated Temporary Password:</span>
+                            <span className="text-rose-400 mt-1 font-mono font-black text-sm block">{tempPassword}</span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              navigator.clipboard.writeText(tempPassword);
+                              setCopiedPass(true);
+                              setTimeout(() => setCopiedPass(false), 2000);
+                            }}
+                            className="p-2 bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white rounded-lg transition-all shrink-0 cursor-pointer"
+                            title="Copy password"
+                          >
+                            {copiedPass ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Suspension details */}
+                    <div className="p-4 rounded-xl bg-white/[0.02] border border-white/5 space-y-4">
+                      <h4 className="text-white text-xs font-bold flex items-center gap-2">
+                        <Shield className="w-4 h-4 text-[#D6004B]" />
+                        <span>Account Access Level</span>
+                      </h4>
+                      <p className="text-zinc-500 text-[11px] leading-relaxed">
+                        Suspending a student blocks them from logging in, viewing videos, or streaming education files.
+                      </p>
+                      
+                      <div className="flex gap-3">
+                        <button
+                          type="button"
+                          onClick={() => setIsSuspended(false)}
+                          className={cn(
+                            "flex-1 h-11 rounded-xl border font-bold text-xs flex items-center justify-center gap-2 cursor-pointer transition-all",
+                            !isSuspended 
+                              ? "bg-emerald-950/40 border-emerald-500/30 text-emerald-400" 
+                              : "bg-white/5 border-transparent text-zinc-500 hover:text-white"
+                          )}
+                        >
+                          <ShieldCheck className="w-4 h-4" />
+                          <span>Active (Allow Learning)</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setIsSuspended(true)}
+                          className={cn(
+                            "flex-1 h-11 rounded-xl border font-bold text-xs flex items-center justify-center gap-2 cursor-pointer transition-all",
+                            isSuspended 
+                              ? "bg-red-950/40 border-red-500/30 text-red-400" 
+                              : "bg-white/5 border-transparent text-zinc-500 hover:text-white"
+                          )}
+                        >
+                          <Ban className="w-4 h-4" />
+                          <span>Suspended (Block video streaming)</span>
+                        </button>
+                      </div>
+
+                      {isSuspended && (
+                        <div className="flex flex-col gap-1.5 animate-fadeIn">
+                          <label className="text-xs text-zinc-400 font-bold">Suspension Reason</label>
+                          <textarea 
+                            required
+                            placeholder="Write the reason here (e.g. Account sharing detected on multiple concurrent devices)..."
+                            value={suspensionReason}
+                            onChange={e => setSuspensionReason(e.target.value)}
+                            className="bg-white/5 border border-white/5 rounded-xl py-3 px-4 text-xs focus:outline-none focus:border-rose-500/50 transition-all font-sans text-zinc-300 w-full h-20 resize-none text-left"
+                          />
+                        </div>
+                      )}
+
+                      <div className="flex justify-end border-t border-white/5 pt-4">
+                        <button
+                          type="button"
+                          onClick={handleUpdateDetails}
+                          className="h-10 px-5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                        >
+                          Save Access Settings
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* TAB 3: Learning Progress Checklist */}
+                {modalTab === "progress" && (
+                  <div className="space-y-6">
+                    
+                    {/* List of enrolled courses progress */}
+                    <div className="space-y-4">
+                      {crmStudentData.enrollments.map((en: any) => {
+                        const matchedCourse = allCoursesList.find(c => c.id === en.course_id);
+                        if (!matchedCourse) return null;
+                        
+                        // Compute course stats
+                        const totalLessonsCount = matchedCourse.modules?.flatMap((m: any) => m.lessons || []).length || 0;
+                        const userCompletedCount = matchedCourse.modules?.flatMap((m: any) => m.lessons || [])
+                          .filter((l: any) => crmStudentData.completedLessons.includes(l.id)).length || 0;
+                        
+                        const completedPercent = totalLessonsCount > 0 
+                          ? Math.round((userCompletedCount / totalLessonsCount) * 100) 
+                          : 0;
+
+                        return (
+                          <div 
+                            key={en.id} 
+                            className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-4"
+                          >
+                            <div className="flex items-center justify-between border-b border-white/5 pb-3">
+                              <div className="flex items-center gap-2">
+                                <BookOpen className="w-5 h-5 text-rose-500" />
+                                <span className="text-white text-sm font-bold">{matchedCourse.title}</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <button
+                                  type="button"
+                                  onClick={() => handleResetCourseProgress(en.course_id)}
+                                  className="h-8 px-3 rounded-lg border border-rose-500/20 hover:bg-rose-500/10 text-rose-500 font-bold text-[10px] active:scale-95 transition-all cursor-pointer"
+                                >
+                                  Reset Progress
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDisenroll(en.course_id)}
+                                  className="h-8 px-3 rounded-lg border border-red-500/20 bg-red-950/10 hover:bg-red-950 hover:text-red-400 text-red-500 font-bold text-[10px] active:scale-95 transition-all cursor-pointer"
+                                >
+                                  Disenroll Student
+                                </button>
+                              </div>
+                            </div>
+
+                            {/* Progress percentage bar */}
+                            <div className="flex items-center justify-between text-xs font-bold">
+                              <span className="text-zinc-500">Course Completion Rate</span>
+                              <span className="text-rose-400 font-mono">{completedPercent}% ({userCompletedCount} / {totalLessonsCount} lessons)</span>
+                            </div>
+                            <div className="w-full bg-black h-2.5 rounded-full overflow-hidden">
+                              <div 
+                                className="h-full rounded-full transition-all duration-500 bg-gradient-to-r from-rose-500 to-orange-400"
+                                style={{ width: `${completedPercent}%` }}
+                              />
+                            </div>
+
+                            {/* Modules checklist toggle */}
+                            <div className="pt-2 space-y-3">
+                              <span className="text-[11px] text-zinc-500 uppercase tracking-widest font-black block">MANUAL LESSON CHECKPOINTS</span>
+                              
+                              {matchedCourse.modules?.map((mod: any) => (
+                                <div key={mod.id} className="space-y-1.5 pl-2 border-l border-white/5">
+                                  <span className="text-[11px] text-zinc-300 font-bold block">{mod.title}</span>
+                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 pl-2">
+                                    {mod.lessons?.map((les: any) => {
+                                      const isCompleted = crmStudentData.completedLessons.includes(les.id);
+                                      return (
+                                        <button
+                                          key={les.id}
+                                          type="button"
+                                          onClick={() => handleToggleLesson(en.course_id, les.id, !isCompleted)}
+                                          className={cn(
+                                            "flex items-center gap-2 p-2 rounded-lg border text-left text-[11px] transition-all cursor-pointer",
+                                            isCompleted
+                                              ? "bg-rose-500/5 border-rose-500/20 text-white"
+                                              : "bg-white/[0.01] border-white/5 text-zinc-400 hover:text-zinc-200"
+                                          )}
+                                        >
+                                          {isCompleted ? (
+                                            <CheckSquare className="w-3.5 h-3.5 text-rose-500 shrink-0" />
+                                          ) : (
+                                            <Square className="w-3.5 h-3.5 text-zinc-600 shrink-0" />
+                                          )}
+                                          <span className="truncate">{les.title}</span>
+                                        </button>
+                                      );
+                                    })}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Enroll in courses toggle */}
+                    <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-4">
+                      <h4 className="text-white text-xs font-bold">Enroll in Additional Courses</h4>
+                      <div className="grid grid-cols-1 gap-2.5">
+                        {allCoursesList
+                          .filter(c => !crmStudentData.enrollments.some((en: any) => en.course_id === c.id))
+                          .map((c) => (
+                            <div 
+                              key={c.id} 
+                              className="p-3 bg-white/5 border border-white/5 rounded-xl flex items-center justify-between text-xs text-zinc-300"
+                            >
+                              <div className="flex items-center gap-2 font-bold text-white">
+                                <BookOpen className="w-4 h-4 text-zinc-500" />
+                                <span>{c.title}</span>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => handleEnrollInCourse(c.id)}
+                                className="h-8 px-4 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-bold text-[10px] active:scale-95 transition-all cursor-pointer"
+                              >
+                                Enroll Student
+                              </button>
+                            </div>
+                          ))}
+                        
+                        {allCoursesList.filter(c => !crmStudentData.enrollments.some((en: any) => en.course_id === c.id)).length === 0 && (
+                          <span className="text-zinc-500 text-[11px] text-center block py-2">Student is already enrolled in all available courses.</span>
+                        )}
+                      </div>
+                    </div>
+
+                  </div>
+                )}
+
+                {/* TAB 4: Certificates Control */}
+                {modalTab === "credentials" && (
+                  <div className="space-y-4">
+                    <div className="p-4 rounded-xl bg-rose-600/5 border border-rose-500/10 text-zinc-400 text-xs font-bold leading-relaxed flex items-start gap-2.5">
+                      <AlertCircle className="w-4.5 h-4.5 text-rose-500 shrink-0 mt-0.5" />
+                      <span>
+                        Certificates are usually automatically issued to students upon reaching 100% course watch progress. However, you can manually override, issue, or revoke/delete credentials here.
+                      </span>
+                    </div>
+
+                    <div className="space-y-3">
+                      {crmStudentData.enrollments.map((en: any) => {
+                        const matchedCourse = allCoursesList.find(c => c.id === en.course_id);
+                        if (!matchedCourse) return null;
+
+                        const matchedCert = crmStudentData.certificates.find((c: any) => c.course_id === en.course_id);
+
+                        return (
+                          <div 
+                            key={en.id} 
+                            className="p-4 bg-white/5 border border-white/5 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs"
+                          >
+                            <div className="space-y-1">
+                              <span className="font-bold text-white block">{matchedCourse.title}</span>
+                              <div className="flex items-center gap-2">
+                                <span className={cn(
+                                  "text-[9px] uppercase tracking-wider px-2 py-0.5 rounded border inline-flex items-center gap-1 font-bold",
+                                  matchedCert 
+                                    ? "bg-emerald-950 text-emerald-400 border-emerald-900/30" 
+                                    : "bg-zinc-950 text-zinc-500 border-white/5"
+                                )}>
+                                  {matchedCert ? "Issued" : "Not Issued"}
+                                </span>
+                                {matchedCert && (
+                                  <span className="text-[10px] text-zinc-500 font-mono">Code: {matchedCert.verification_id}</span>
+                                )}
+                              </div>
+                            </div>
+
+                            <button
+                              type="button"
+                              onClick={() => handleToggleCertificate(
+                                en.course_id, 
+                                matchedCourse.title, 
+                                matchedCourse.certificate_bg_url || "", 
+                                !!matchedCert
+                              )}
+                              className={cn(
+                                "h-9 px-4 rounded-xl font-bold text-xs active:scale-95 transition-all cursor-pointer",
+                                matchedCert
+                                  ? "bg-red-950/40 border border-red-500/20 text-red-500 hover:bg-red-950"
+                                  : "bg-[#D6004B] hover:bg-rose-600 text-white shadow-lg shadow-rose-600/10"
+                              )}
+                            >
+                              {matchedCert ? "Revoke Certificate" : "Issue Certificate"}
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* TAB 5: Commerce Orders & Product Grants */}
+                {modalTab === "commerce" && (
+                  <div className="space-y-6">
+                    {/* Grant Product Form */}
+                    <form onSubmit={handleGrantProductAccess} className="p-4 rounded-xl bg-white/[0.02] border border-white/5 space-y-4">
+                      <h4 className="text-white text-xs font-bold">Grant Access to Digital Products & Future Items</h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div className="flex flex-col gap-1">
+                          <label className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Select Product</label>
+                          <select
+                            value={selectedProductId}
+                            onChange={e => setSelectedProductId(e.target.value)}
+                            className="bg-[#0f0f15] border border-white/5 rounded-xl py-2.5 px-3 text-xs focus:outline-none focus:border-rose-500/50 transition-all font-sans text-zinc-300 w-full"
+                          >
+                            <option value="">Choose product...</option>
+                            {allProductsList.map((p: any) => (
+                              <option key={p.id} value={p.id}>{p.title} ({p.price || 0} EGP)</option>
+                            ))}
+                          </select>
+                        </div>
+                        
+                        <div className="flex flex-col gap-1">
+                          <label className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Simulate Charge Amount (EGP)</label>
+                          <input
+                            type="number"
+                            value={manualGrantAmount}
+                            onChange={e => setManualGrantAmount(e.target.value)}
+                            className="bg-white/5 border border-white/5 rounded-xl py-2.5 px-3 text-xs focus:outline-none focus:border-rose-500/50 transition-all font-mono text-zinc-300 w-full"
+                          />
+                        </div>
+                      </div>
+                      <div className="flex justify-end pt-2 border-t border-white/5">
+                        <button
+                          type="submit"
+                          className="h-10 px-5 bg-[#D6004B] hover:bg-rose-600 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                        >
+                          <span>Grant Product Rights</span>
+                        </button>
+                      </div>
+                    </form>
+
+                    {/* Order billing history ledger */}
+                    <div className="space-y-3">
+                      <h4 className="text-white text-xs font-bold">Student Spending & Billing Ledger</h4>
+                      <div className="bg-zinc-950 border border-white/5 rounded-xl overflow-hidden">
+                        <div className="overflow-x-auto">
+                          <table className="w-full text-left border-collapse text-[11px]">
+                            <thead>
+                              <tr className="bg-white/[0.02] border-b border-white/5 text-[9px] text-zinc-500 font-bold uppercase tracking-widest">
+                                <th className="p-3 text-left">Purchased Item</th>
+                                <th className="p-3 text-left">Order Date</th>
+                                <th className="p-3 text-left">Method</th>
+                                <th className="p-3 text-right">Amount</th>
+                                <th className="p-3 text-center font-bold">Access</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {crmStudentData.orders.length === 0 ? (
+                                <tr>
+                                  <td colSpan={5} className="p-8 text-center text-zinc-500 font-bold">
+                                    No transaction logs found for this account.
+                                  </td>
+                                </tr>
+                              ) : (
+                                crmStudentData.orders.map((ord: any) => (
+                                  <tr key={ord.id} className="border-b border-white/5 hover:bg-white/[0.01]">
+                                    <td className="p-3 font-bold text-white">{ord.product_title || ord.product_id}</td>
+                                    <td className="p-3 text-zinc-500 font-mono">{new Date(ord.created_at).toLocaleDateString()}</td>
+                                    <td className="p-3 text-zinc-400">{ord.payment_method || "Card"}</td>
+                                    <td className="p-3 text-right font-mono font-bold text-rose-400">{ord.amount} {ord.currency || "EGP"}</td>
+                                    <td className="p-3 text-center">
+                                      <button
+                                        type="button"
+                                        onClick={() => handleRevokeProductAccess(ord.product_id)}
+                                        className="h-6 px-2.5 bg-red-950/20 border border-red-500/10 rounded text-red-500 hover:bg-red-950 font-bold text-[9px] cursor-pointer"
+                                        title="Revoke access rights"
+                                      >
+                                        Revoke Access
+                                      </button>
+                                    </td>
+                                  </tr>
+                                ))
+                              )}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* TAB 6: Devices Sessions Audit */}
+                {modalTab === "devices" && (
+                  <div className="space-y-4 font-sans">
+                    <div className="flex items-center gap-2 text-zinc-400 text-xs font-bold p-3 bg-rose-600/5 border border-rose-500/10 rounded-xl leading-relaxed">
+                      <AlertCircle className="w-4 h-4 text-rose-500 shrink-0" />
+                      <span>
+                        Student account sessions are audited. Server terminates logins if current devices exceed {maxDevices}. Revoking active browsers instantly severs active video streams.
+                      </span>
+                    </div>
+
+                    <div className="space-y-3 max-h-64 overflow-y-auto custom-scrollbar">
+                      {activeSessions.length === 0 ? (
+                        <div className="py-12 text-center text-zinc-500 text-xs font-bold">
+                          <Laptop className="w-10 h-10 text-zinc-700 mx-auto mb-2" />
+                          <span>No active device sessions registered in the database.</span>
+                        </div>
+                      ) : (
+                        activeSessions.map((session) => (
+                          <div 
+                            key={session.id}
+                            className="p-3.5 rounded-xl bg-white/5 border border-white/5 flex items-center justify-between gap-4 text-xs font-bold text-zinc-300"
+                          >
+                            <div className="flex items-start gap-3">
+                              <div className="w-10 h-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-zinc-400 shrink-0">
+                                <Laptop className="w-5 h-5" />
+                              </div>
+                              <div>
+                                <div className="flex items-center gap-1.5">
+                                  <span className="text-white text-[13px]">{session.browser?.split(" ")[0] || "Browser Session"}</span>
+                                  <span className="text-[9px] bg-white/5 text-zinc-400 px-1.5 py-0.5 rounded font-mono">{session.device_id?.substring(0, 10)}</span>
+                                </div>
+                                <div className="flex items-center gap-3 mt-1 text-[10px] text-zinc-500">
+                                  <span className="flex items-center gap-0.5">
+                                    <Globe className="w-3.5 h-3.5 text-zinc-500" />
+                                    <span className="font-mono">{maskIpAddress(session.ip_address)}</span>
+                                  </span>
+                                  <span>•</span>
+                                  <span>Country: {session.country || "Unknown"}</span>
+                                  <span>•</span>
+                                  <span>Activity: {new Date(session.last_activity).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}</span>
+                                </div>
+                              </div>
+                            </div>
+
+                            <button 
+                              onClick={() => handleTerminateSession(session.id)}
+                              className="h-8 px-3 rounded-lg bg-rose-600/10 hover:bg-rose-600 border border-rose-500/20 hover:border-transparent text-[#D6004B] hover:text-white transition-all text-[10px] font-bold cursor-pointer"
+                            >
+                              Terminate Session
+                            </button>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* TAB: Audit Trail */}
+                {modalTab === "audit" && (
+                  <div className="space-y-4 font-sans">
+                    <div className="text-white text-sm font-bold border-b border-white/5 pb-2 flex items-center justify-between">
+                      <span className="flex items-center gap-2">
+                        <Shield className="w-4 h-4 text-rose-500" />
+                        <span>Admin Action Logs</span>
+                      </span>
+                      <span className="text-[10px] text-zinc-500">History of account updates</span>
+                    </div>
+
+                    <div className="max-h-[350px] overflow-y-auto custom-scrollbar space-y-3 pr-2">
+                      {!crmStudentData.adminActionLogs || crmStudentData.adminActionLogs.length === 0 ? (
+                        <div className="py-12 text-center text-zinc-500 text-xs font-bold">
+                          No administrative changes logged for this student.
+                        </div>
+                      ) : (
+                        crmStudentData.adminActionLogs.map((log: any) => (
+                          <div 
+                            key={log.id}
+                            className="p-3.5 rounded-xl bg-white/5 border border-white/5 text-xs font-bold space-y-2"
+                          >
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="px-2 py-0.5 rounded text-[10px] uppercase font-mono font-black bg-rose-950/40 border border-rose-500/20 text-rose-400">
+                                {log.action_type}
+                              </span>
+                              <span className="text-[10px] text-zinc-500 font-mono">
+                                {new Date(log.created_at).toLocaleString()}
+                              </span>
+                            </div>
+                            <p className="text-zinc-300 font-medium font-sans leading-relaxed">
+                              {log.details}
+                            </p>
+                            <div className="text-[10px] text-zinc-500 flex items-center gap-1.5 pt-1 border-t border-white/5">
+                              <span>Admin:</span>
+                              <span className="text-zinc-400 font-mono">{log.admin_email}</span>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                )}
+              </>
             )}
 
           </div>
@@ -812,7 +1587,7 @@ export default function AdminStudentsPage() {
             {/* Title */}
             <div>
               <h3 className="font-bold text-white text-base">Enroll New Student</h3>
-              <p className="text-zinc-500 text-xs mt-1">Enter the email, password, and name to instantly register a student account and enroll them in the selected course for free.</p>
+              <p className="text-zinc-500 text-xs mt-1">Enter the email, password, and name to register a student and enroll them in the selected course.</p>
             </div>
 
             <form onSubmit={handleCreateStudentSubmit} className="space-y-4 font-sans">

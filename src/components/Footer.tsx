@@ -1,138 +1,76 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
-import { ArrowLeft, ShieldCheck, Zap, Heart } from "lucide-react";
-import { useState } from "react";
-import { toast } from "sonner";
+import { ShieldCheck, Heart, Clock, Laptop, Tag, Infinity, Phone, Mail, MapPin } from "lucide-react";
 import { SocialLinks } from "./SocialLinks";
 
 export function Footer() {
-  const [email, setEmail] = useState("");
-
-  const handleSubscribe = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email) return;
-    toast.success("تم الاشتراك بنجاح في النشرة البريدية لصناع المحتوى! 🚀");
-    setEmail("");
-  };
-
   return (
-    <footer className="border-t border-white/5 bg-[#030303] pt-20 pb-12 relative overflow-hidden select-none font-cairo text-zinc-400">
+    <footer className="border-t border-white/5 bg-[#030303] pt-12 pb-10 relative overflow-hidden select-none font-cairo text-zinc-400">
       
       {/* Top Gradient Divider Line with Glow */}
       <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-[#D6004B] to-transparent opacity-80" />
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-[10px] bg-[#D6004B]/20 blur-[8px] rounded-full pointer-events-none" />
 
       <div className="container mx-auto px-6 relative z-10 max-w-7xl">
-        
-        {/* Main 4-Column Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 pb-16">
+
+
+        {/* ── 2. Rearranged Grid/Flex Layout (Desktop: Right-to-Left, Mobile: Stacked Vertical) ── */}
+        <div className="flex flex-col md:flex-row-reverse items-center md:items-start justify-between gap-10 pb-8 border-b border-white/5">
           
-          {/* Column 1: Brand Info */}
-          <div className="space-y-6">
-            <Link href="/" className="flex items-center gap-2.5 group w-fit">
-              <div className="w-9 h-9 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
-                <img src="/logo.png" alt="JoeSchool" className="w-full h-full object-contain drop-shadow-[0_0_15px_rgba(214,0,75,0.4)]" />
+          {/* Right Section: Brand Logo */}
+          <div className="flex flex-col items-center md:items-end gap-3.5 w-full md:w-auto text-center md:text-right">
+            <Link href="/" className="flex items-center justify-center group">
+              <div className="w-16 h-16 md:w-20 md:h-20 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
+                <img src="/logo.png" alt="JoeSchool" className="w-full h-full object-contain drop-shadow-[0_0_25px_rgba(214,0,75,0.5)]" />
               </div>
-              <span className="font-alexandria font-bold text-lg tracking-tight text-white" dir="ltr">
-                Joe<span className="text-[#D6004B]">School</span>
-              </span>
             </Link>
-            <p className="text-zinc-500 text-sm leading-relaxed">
-              أكاديميتك الاحترافية لإنتاج المحتوى الإبداعي بالذكاء الاصطناعي، الفيديوهات السينمائية، والأدوات الإبداعية للمبدعين والصانعين.
-            </p>
-            <div className="hidden md:flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
-                <ShieldCheck className="w-4 h-4" />
-              </div>
-              <span className="text-xs font-bold text-zinc-300">متجر موثق وآمن 100%</span>
+          </div>
+
+          {/* Center Section: Horizontal Navigation Links (wraps beautifully on mobile) */}
+          <div className="flex flex-col items-center gap-4 text-center w-full md:w-auto">
+            <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3.5 text-xs sm:text-sm font-bold text-zinc-300">
+              <Link href="/" className="hover:text-[#D6004B] transition-colors">الرئيسية</Link>
+              <Link href="/#courses" className="hover:text-[#D6004B] transition-colors">الدورات</Link>
+              <Link href="/#bundles" className="hover:text-[#D6004B] transition-colors">الدبلومات</Link>
+              <Link href="/#faq" className="hover:text-[#D6004B] transition-colors">مركز المساعدة</Link>
+              <Link href="/privacy?tab=terms" className="hover:text-[#D6004B] transition-colors">سياسة الاستخدام</Link>
+              <Link href="/privacy?tab=privacy" className="hover:text-[#D6004B] transition-colors">سياسة الخصوصية</Link>
+            </div>
+            <div className="text-xs sm:text-sm font-bold text-zinc-400 hover:text-[#D6004B] transition-colors">
+              <Link href="/privacy?tab=refund">قواعد سياسة الاسترجاع</Link>
             </div>
           </div>
 
-          {/* Column 2: Quick Links */}
-          <div className="space-y-5 hidden md:block">
-            <h4 className="font-alexandria font-bold text-white text-xs tracking-wider uppercase">روابط سريعة</h4>
-            <ul className="space-y-3 text-sm">
-              {[
-                { label: "الرئيسية", href: "/" },
-                { label: "الدورات التعليمية", href: "/#courses" },
-                { label: "المنتجات الرقمية", href: "/#products" },
-                { label: "الأسئلة الشائعة", href: "/#faq" }
-              ].map((link, i) => (
-                <li key={i}>
-                  <Link 
-                    href={link.href}
-                    className="hover:text-white transition-colors flex items-center gap-2 group w-fit"
-                  >
-                    <ArrowLeft className="w-3 h-3 text-[#D6004B] opacity-0 group-hover:opacity-100 -translate-x-1 group-hover:translate-x-0 transition-all duration-300" />
-                    <span>{link.label}</span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Column 3: Legal & Support */}
-          <div className="space-y-5">
-            <h4 className="font-alexandria font-bold text-white text-xs tracking-wider uppercase">الدعم والخصوصية</h4>
-            <ul className="space-y-3 text-sm">
-              {[
-                { label: "سياسة الخصوصية والاستخدام", href: "/privacy" },
-                { label: "شروط الدفع والاسترجاع", href: "/privacy" },
-                { label: "الدعم الفني: support@joeschool.com", href: "mailto:support@joeschool.com" }
-              ].map((link, i) => (
-                <li key={i}>
-                  <Link 
-                    href={link.href}
-                    className="hover:text-white transition-colors flex items-center gap-2 group w-fit"
-                  >
-                    <ArrowLeft className="w-3 h-3 text-[#D6004B] opacity-0 group-hover:opacity-100 -translate-x-1 group-hover:translate-x-0 transition-all duration-300" />
-                    <span>{link.label}</span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Column 4: Newsletter & Socials */}
-          <div className="space-y-5">
-            <h4 className="font-alexandria font-bold text-white text-xs tracking-wider uppercase">النشرة البريدية للإبداع</h4>
-            <p className="text-zinc-500 text-xs leading-relaxed">
-              اشترك لتلقي أحدث تقنيات صناعة المحتوى بالذكاء الاصطناعي، أدوات الإنتاج الإبداعي، وأصول المبدعين الحصرية مجاناً.
-            </p>
-            <form onSubmit={handleSubscribe} className="flex gap-2 w-full">
-              <input 
-                type="email"
-                placeholder="بريدك الإلكتروني"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="bg-white/5 border border-white/5 rounded-xl px-4 py-2.5 text-xs text-zinc-300 focus:outline-none focus:border-[#D6004B]/50 transition-all w-full"
-                required
-              />
-              <button 
-                type="submit"
-                className="bg-[#D6004B] hover:bg-[#b0003d] text-white px-4 py-2.5 rounded-xl text-xs font-bold transition-all shrink-0 shadow-lg shadow-[#D6004B]/20"
-              >
-                اشترك
-              </button>
-            </form>
+          {/* Left Section: Contact Info & Social Links */}
+          <div className="flex flex-col items-center md:items-start gap-4.5 w-full md:w-auto">
+            <div className="flex flex-col items-center md:items-start gap-2.5 text-xs sm:text-sm text-zinc-400 font-medium font-sans">
+              <div className="flex items-center gap-2.5 hover:text-white transition-colors" dir="ltr">
+                <Mail className="w-4 h-4 text-zinc-600" />
+                <a href="mailto:support@joeschool.com">support@joeschool.com</a>
+              </div>
+              <div className="flex items-center gap-2.5 text-zinc-500" dir="ltr">
+                <MapPin className="w-4 h-4 text-zinc-600 shrink-0" />
+                <span>Egypt</span>
+              </div>
+            </div>
             
-            {/* Social Icons Row */}
-            <div className="pt-2 flex justify-start">
+            {/* Social icons row */}
+            <div className="flex justify-center scale-90 md:origin-left">
               <SocialLinks />
             </div>
           </div>
 
         </div>
 
-        {/* Bottom Section: Centered Copyright */}
-        <div className="pt-8 border-t border-white/5 flex items-center justify-center text-center">
-          <div className="text-zinc-500 text-xs flex items-center justify-center gap-1.5 flex-wrap">
-            <span>جميع الحقوق محفوظة © {new Date().getFullYear()}</span>
-            <span className="font-alexandria font-bold text-zinc-400">JoeSchool</span>
-            <span>· صنع بكل</span>
-            <Heart className="w-3 h-3 text-[#D6004B] fill-[#D6004B]" />
+        {/* Copyright and Attribution centered at absolute bottom */}
+        <div className="flex flex-col items-center gap-2 mt-8 text-center">
+          <span className="text-zinc-400 text-xs sm:text-sm">
+            جميع الحقوق محفوظة لـ <span className="text-[#CF2946] font-extrabold">JoeSchool</span> ©
+          </span>
+          <div className="flex items-center gap-1.5 text-[11px] sm:text-xs text-zinc-500">
+            <span>صنع بكل</span>
+            <Heart className="w-3.5 h-3.5 text-[#D6004B] fill-[#D6004B]" />
             <span>لدعم مسيرتك الإبداعية</span>
           </div>
         </div>

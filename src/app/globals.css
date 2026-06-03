@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Alexandria:wght@100..900&family=Cairo:wght@200..1000&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Alexandria:wght@100..900&family=Cairo:wght@200..1000&family=Orbitron:wght@400..900&family=Pixelify+Sans:wght@400..700&family=Space+Grotesk:wght@400..700&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
@@ -6,6 +6,9 @@
 :root {
   --font-cairo: 'Cairo', sans-serif;
   --font-alexandria: 'Alexandria', sans-serif;
+  --font-orbitron: 'Orbitron', sans-serif;
+  --font-space-grotesk: 'Space Grotesk', sans-serif;
+  --font-pixel: 'Pixelify Sans', sans-serif;
 }
 
 @custom-variant dark (&:is(.dark *));
@@ -17,6 +20,9 @@
   --font-heading: var(--font-alexandria);
   --font-cairo: var(--font-cairo);
   --font-alexandria: var(--font-alexandria);
+  --font-orbitron: var(--font-orbitron);
+  --font-space-grotesk: var(--font-space-grotesk);
+  --font-pixel: var(--font-pixel);
   
   /* Primary Theme Color Override (#EF0055) */
   --color-rose-50: #fdf2f6;
@@ -107,6 +113,7 @@
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
   --animate-scroll: scroll 30s linear infinite;
+  --animate-text-gradient: text-gradient-shift 5s ease infinite;
   
   /* Premium Shadows */
   --shadow-premium: 0 10px 30px -10px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
@@ -117,6 +124,15 @@
 @keyframes scroll {
   to {
     transform: translate3d(50%, 0, 0);
+  }
+}
+
+@keyframes text-gradient-shift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
   }
 }
 

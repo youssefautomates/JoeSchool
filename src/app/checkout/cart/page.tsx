@@ -42,6 +42,10 @@ export default function CartCheckoutPage() {
   const [showInstapayModal, setShowInstapayModal] = useState(false);
   const [currency, setCurrency] = useState<Currency>("EGP");
   const [exchangeRate, setExchangeRate] = useState<number>(50.0);
+
+  // Global gateway fee settings state
+  const [globalFeeEnabled, setGlobalFeeEnabled] = useState(true);
+  const [globalFeePercentage, setGlobalFeePercentage] = useState(3.00);
   
   // Card Fields State
   const [cardNumber, setCardNumber] = useState("");
@@ -78,6 +82,17 @@ export default function CartCheckoutPage() {
         } catch (err) {}
       }
     });
+
+    // Fetch global settings
+    fetch("/api/admin/settings")
+      .then(res => res.json())
+      .then(data => {
+        if (data && !data.error) {
+          setGlobalFeeEnabled(data.globalGatewayFeeEnabled !== false);
+          setGlobalFeePercentage(typeof data.globalGatewayFeePercentage === "number" ? data.globalGatewayFeePercentage : 3.00);
+        }
+      })
+      .catch(e => console.error("Error fetching settings:", e));
   }, []);
 
   // Force credit card payment for international users
@@ -87,17 +102,36 @@ export default function CartCheckoutPage() {
     }
   }, [currency]);
 
-  // Resolve prices dynamically
+  // Resolve prices dynamically with gateway fee recovery and smart rounding
   const resolvedItems = items.map(item => {
     const resolvedPricing = resolveProductPrice(item, currency);
+    const subtotal = resolvedPricing.price;
+    const showFee = currency === "EGP" && globalFeeEnabled && (item.enable_gateway_fee !== false) && subtotal > 0;
+    const subtotalEGP = currency === "USD" ? Math.round(subtotal * exchangeRate) : subtotal;
+    const feeEGP = showFee ? Math.ceil(subtotalEGP * (globalFeePercentage / 100)) : 0;
+    const isCheap = subtotalEGP < 100;
+    const feeFormatted = showFee ? feeEGP : 0;
+    const finalPrice = subtotal + feeFormatted;
+
     return {
       ...item,
-      price: resolvedPricing.price,
-      original_price: resolvedPricing.original_price
+      price: subtotal,
+      original_price: resolvedPricing.original_price,
+      enable_gateway_fee: item.enable_gateway_fee,
+      feeFormatted,
+      finalPrice,
+      showFee,
+      isCheap
     };
   });
 
-  const resolvedCartTotal = resolvedItems.reduce((sum, item) => sum + item.price, 0);
+  const subtotalCartTotal = resolvedItems.reduce((sum, item) => sum + item.price, 0);
+  const totalBundledFees = resolvedItems.reduce((sum, item) => sum + (item.showFee && item.isCheap ? item.feeFormatted : 0), 0);
+  const hasSeparatedFeeRow = resolvedItems.some(item => item.showFee && !item.isCheap);
+  const displayedFee = hasSeparatedFeeRow ? resolvedItems.reduce((sum, item) => sum + (item.showFee ? item.feeFormatted : 0), 0) : 0;
+  
+  // Total to charge/display
+  const resolvedCartTotal = subtotalCartTotal + (hasSeparatedFeeRow ? displayedFee : totalBundledFees);
 
   // Track InitiateCheckout on mount/currency load
   useEffect(() => {
@@ -322,7 +356,8 @@ export default function CartCheckoutPage() {
           expiry: expiryDate,
           cvv,
           cardHolder
-        } : undefined
+        } : undefined,
+        password: data.password || undefined
       };
 
       const response = await fetch("/api/paymob/initiate-cart", {
@@ -675,14 +710,37 @@ export default function CartCheckoutPage() {
                         </div>
                         <div>
                           <h4 className="font-cairo font-bold text-white text-sm leading-tight mb-1 line-clamp-2">{item.title}</h4>
-                          <span className="text-rose-400 font-bold text-sm">{formatPrice(item.price, currency)}</span>
+                          <span className="text-rose-400 font-bold text-sm">
+                            {formatPrice(
+                              (item.showFee && !hasSeparatedFeeRow) ? item.finalPrice : item.price,
+                              currency
+                            )}
+                          </span>
                         </div>
                       </div>
                     ))}
                   </div>
 
                   <div className="py-6 space-y-4 border-t border-white/10">
-                    <div className="flex justify-between items-center">
+                    {hasSeparatedFeeRow && (
+                      <>
+                        <div className="flex justify-between items-center text-zinc-400 font-cairo">
+                          <span>المجموع الفرعي</span>
+                          <span>{formatPrice(subtotalCartTotal, currency)}</span>
+                        </div>
+                        <div className="flex flex-col gap-0.5 border-t border-white/5 pt-2">
+                          <div className="flex justify-between items-center text-zinc-400 font-cairo text-xs">
+                            <span>رسوم معالجة الدفع</span>
+                            <span>{formatPrice(displayedFee, currency)}</span>
+                          </div>
+                          <span className="text-[9px] text-zinc-500 text-right leading-relaxed font-cairo block">
+                            (رسوم بسيطة للمساعدة في تغطية تكاليف بوابة الدفع الآمنة)
+                          </span>
+                        </div>
+                      </>
+                    )}
+
+                    <div className="flex justify-between items-center pt-4 border-t border-white/10">
                       <span className="font-alexandria font-bold text-white text-xl">الإجمالي</span>
                       <div className="flex items-baseline gap-1 text-white">
                         <span className="text-3xl font-alexandria font-black">{formatPrice(resolvedCartTotal, currency)}</span>

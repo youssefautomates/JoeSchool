@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
@@ -20,7 +20,8 @@ import {
   Activity,
   RefreshCw,
   Play,
-  Trash2
+  Trash2,
+  Globe
 } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
@@ -52,6 +53,10 @@ export default function AdminSettings() {
   const [tiktokPixelId, setTiktokPixelId] = useState("");
   const [tiktokPixelEnabled, setTiktokPixelEnabled] = useState(false);
 
+  // Gateway Fee settings state
+  const [globalGatewayFeeEnabled, setGlobalGatewayFeeEnabled] = useState(true);
+  const [globalGatewayFeePercentage, setGlobalGatewayFeePercentage] = useState(3.00);
+
   // Diagnostics & Local Logs State
   const [logs, setLogs] = useState<any[]>([]);
   const [activeTracking, setActiveTracking] = useState<any>(null);
@@ -66,10 +71,10 @@ export default function AdminSettings() {
         const res = await fetch("/api/admin/settings");
         const data = await res.json();
         if (data && !data.error) {
-          const pId = data.metaPixelId && data.metaPixelId !== "1234567890" ? data.metaPixelId : "2851098458597955";
+          const pId = data.metaPixelId && data.metaPixelId !== "1234567890" ? data.metaPixelId : "26928253836844726";
           const pEnabled = data.metaPixelId ? !!data.metaPixelEnabled : true;
           const cEnabled = data.metaCapiToken ? !!data.metaCapiEnabled : true;
-          const cToken = data.metaCapiToken && data.metaCapiToken !== "placeholder" ? data.metaCapiToken : "EAAgiivlidyEBRqMvMvILkEBvy9cThPMxUpekZBGDChtShYfKLljTXwURIgZAnRUBl4XhGufblytzz9QZB1LWFYh88kcfmskovy1hwcD3ksILWA02M9D2Kq4ucTx2XgRgv4XfhhGapa1kTLSRyuq8DfSan84SLUCSt7mQoK9E3qaIvC5sF9SttSTkfgtZB9lapQZDZD";
+          const cToken = data.metaCapiToken && data.metaCapiToken !== "placeholder" ? data.metaCapiToken : "EAAgiivlidyEBRqjAV1oZADaQZABqaOULEY6altW1dg7kZCC2Jb9H7tOZA2pml3MWUtVDZCpupq4AwXoDj0O4DZBfOCluF6iB1qtkc4Mzmz9XTvYyo4Jp7moLhOnSFdjDAU0lMbjpaVlmGceYNdRNB5J2LLBZCfHq5pSoHTsfM8RMRyDrbGju6HoOlfrYywF6QZDZD";
           
           setMetaPixelId(pId);
           setMetaPixelRawCode(data.metaPixelRawCode || pId);
@@ -79,6 +84,8 @@ export default function AdminSettings() {
           setMetaCapiTestCode(data.metaCapiTestCode || "TEST4319");
           setTiktokPixelId(data.tiktokPixelId || "");
           setTiktokPixelEnabled(!!data.tiktokPixelEnabled);
+          setGlobalGatewayFeeEnabled(data.globalGatewayFeeEnabled !== false);
+          setGlobalGatewayFeePercentage(typeof data.globalGatewayFeePercentage === "number" ? data.globalGatewayFeePercentage : 3.00);
 
           const syncedData = {
             metaPixelId: pId,
@@ -176,7 +183,9 @@ export default function AdminSettings() {
           metaCapiEnabled,
           metaCapiTestCode,
           tiktokPixelId,
-          tiktokPixelEnabled
+          tiktokPixelEnabled,
+          globalGatewayFeeEnabled,
+          globalGatewayFeePercentage
         })
       });
       const resData = await res.json();
@@ -270,6 +279,7 @@ export default function AdminSettings() {
               { id: "payments", label: "Payment Gateway (Paymob)", icon: CreditCard },
               { id: "email", label: "Email Services (Resend)", icon: Mail },
               { id: "tracking", label: "Meta Tracking & CAPI", icon: Code },
+              { id: "tiktok", label: "TikTok Pixel Settings", icon: Globe },
               { id: "security", label: "Security & Privacy", icon: Shield },
             ].map((item) => (
               <button 
@@ -326,6 +336,47 @@ export default function AdminSettings() {
                       onChange={e => setStoreEmail(e.target.value)}
                       dir="ltr"
                       className="h-12 bg-white/5 border-white/10 rounded-xl focus:border-rose-500 transition-all text-xs text-left" 
+                    />
+                  </div>
+                </div>
+              </Card>
+
+              <Card className="border-white/5 bg-[#09090e]/80 rounded-2xl overflow-hidden backdrop-blur-xl p-8 space-y-8 mt-6">
+                <div className="flex items-center gap-4 pb-4 border-b border-white/5">
+                  <div className="w-12 h-12 rounded-xl bg-rose-500/10 flex items-center justify-center text-rose-500 border border-rose-500/20">
+                    <CreditCard className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-white">Payment Processing Fee Recovery</h3>
+                    <p className="text-zinc-500 text-xs">Global gateway fee configuration and default toggle settings.</p>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-6">
+                  <div 
+                    className="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/5 select-none cursor-pointer hover:bg-white/[0.07] transition-all" 
+                    onClick={() => setGlobalGatewayFeeEnabled(!globalGatewayFeeEnabled)}
+                  >
+                    <div className="space-y-1 text-left">
+                      <p className="text-xs font-bold text-zinc-300">Enable Global Fee Surcharge Recovery</p>
+                      <p className="text-[10px] text-zinc-500">When active, applies gateway fee surcharge to all products/courses that have fee recovery enabled.</p>
+                    </div>
+                    <input 
+                      type="checkbox"
+                      checked={globalGatewayFeeEnabled}
+                      onChange={() => {}} // handled by click on card div
+                      className="w-4 h-4 text-rose-600 border-white/10 rounded focus:ring-rose-500 cursor-pointer"
+                    />
+                  </div>
+
+                  <div className="space-y-3">
+                    <Label className="text-zinc-400 font-semibold text-xs">Default Gateway Fee Percentage (%)</Label>
+                    <Input 
+                      type="number"
+                      step="0.01"
+                      value={globalGatewayFeePercentage} 
+                      onChange={e => setGlobalGatewayFeePercentage(parseFloat(e.target.value) || 0)}
+                      className="h-12 bg-white/5 border-white/10 rounded-xl focus:border-rose-500 transition-all text-xs" 
                     />
                   </div>
                 </div>
@@ -528,41 +579,16 @@ export default function AdminSettings() {
                     </div>
                   </div>
 
-                  {/* Meta Test Code & TikTok Pixel ID */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-3">
-                      <Label className="text-zinc-400 font-semibold text-xs">Sandbox Test Event Code (CAPI)</Label>
-                      <Input 
-                        value={metaCapiTestCode} 
-                        onChange={e => setMetaCapiTestCode(e.target.value)}
-                        placeholder="TEST12345"
-                        dir="ltr"
-                        className="h-12 bg-white/5 border-white/10 rounded-xl focus:border-rose-500 transition-all text-xs text-left font-mono text-zinc-300" 
-                      />
-                    </div>
-                    <div className="space-y-3">
-                      <Label className="text-zinc-400 font-semibold text-xs">TikTok Pixel ID</Label>
-                      <div className="flex gap-2">
-                        <Input 
-                          value={tiktokPixelId} 
-                          onChange={e => setTiktokPixelId(e.target.value)}
-                          placeholder="e.g. C12345"
-                          dir="ltr"
-                          className="h-12 bg-white/5 border-white/10 rounded-xl focus:border-rose-500 transition-all text-xs text-left font-mono flex-1" 
-                        />
-                        <button
-                          onClick={() => setTiktokPixelEnabled(!tiktokPixelEnabled)}
-                          className={cn(
-                            "px-4 h-12 rounded-xl font-bold text-xs transition-all border border-white/5 active:scale-95 select-none shrink-0",
-                            tiktokPixelEnabled 
-                              ? "bg-[#fe2c55]/10 text-[#fe2c55] border-[#fe2c55]/20" 
-                              : "bg-white/5 text-zinc-500 hover:text-white"
-                          )}
-                        >
-                          {tiktokPixelEnabled ? "Active" : "Inactive"}
-                        </button>
-                      </div>
-                    </div>
+                  {/* Meta Test Code (CAPI) */}
+                  <div className="space-y-3">
+                    <Label className="text-zinc-400 font-semibold text-xs">Sandbox Test Event Code (CAPI)</Label>
+                    <Input 
+                      value={metaCapiTestCode} 
+                      onChange={e => setMetaCapiTestCode(e.target.value)}
+                      placeholder="TEST12345"
+                      dir="ltr"
+                      className="h-12 bg-white/5 border-white/10 rounded-xl focus:border-rose-500 transition-all text-xs text-left font-mono text-zinc-300" 
+                    />
                   </div>
 
                   {/* Raw Pixel Base Script Input */}
@@ -750,6 +776,76 @@ export default function AdminSettings() {
                       );
                     })
                   )}
+                </div>
+              </Card>
+            </motion.div>
+          )}
+
+          {/* TikTok Pixel Settings */}
+          {activeSubTab === "tiktok" && (
+            <motion.div 
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <Card className="border-white/5 bg-[#09090e]/80 rounded-2xl overflow-hidden backdrop-blur-xl p-8 space-y-8 relative">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-[#fe2c55]/5 rounded-full blur-3xl pointer-events-none" />
+                
+                <div className="flex items-center gap-4 pb-4 border-b border-white/5">
+                  <div className="w-12 h-12 rounded-xl bg-[#fe2c55]/10 flex items-center justify-center text-[#fe2c55] border border-[#fe2c55]/20">
+                    <Globe className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-white">TikTok Pixel Integration</h3>
+                    <p className="text-zinc-500 text-xs">Configure TikTok Ads Pixel tracking for dynamic events and checkout page performance.</p>
+                  </div>
+                </div>
+
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+                    <div className="md:col-span-8 space-y-3">
+                      <Label className="text-zinc-400 font-semibold text-xs">TikTok Pixel ID</Label>
+                      <Input 
+                        value={tiktokPixelId} 
+                        onChange={e => setTiktokPixelId(e.target.value)}
+                        placeholder="e.g. C1234567890"
+                        dir="ltr"
+                        className="h-12 bg-white/5 border-white/10 rounded-xl focus:border-[#fe2c55]/50 focus:ring-[#fe2c55]/20 transition-all text-xs text-left font-mono" 
+                      />
+                    </div>
+                    <div className="md:col-span-4 space-y-3">
+                      <Label className="text-zinc-400 font-semibold text-xs">Tracking State</Label>
+                      <button
+                        onClick={() => setTiktokPixelEnabled(!tiktokPixelEnabled)}
+                        className={cn(
+                          "w-full h-12 rounded-xl font-bold text-xs transition-all border border-white/5 active:scale-95 select-none",
+                          tiktokPixelEnabled 
+                            ? "bg-[#fe2c55]/10 text-[#fe2c55] border-[#fe2c55]/20" 
+                            : "bg-white/5 text-zinc-500 hover:text-white"
+                        )}
+                      >
+                        {tiktokPixelEnabled ? "Active & Firing" : "Disabled"}
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <div className="p-4 rounded-xl bg-[#fe2c55]/5 border border-[#fe2c55]/10 text-zinc-400 text-xs leading-relaxed space-y-2">
+                    <p className="font-bold text-white">💡 How TikTok Tracking Works:</p>
+                    <p>
+                      When active, the platform loads the TikTok Pixel SDK dynamically and fires the standard <code className="text-[#fe2c55] font-bold">PageView</code> event on all routes. On purchase completions, it captures transaction events to help optimize TikTok Ads campaigns.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Save button row */}
+                <div className="pt-6 border-t border-white/5">
+                  <Button
+                    onClick={handleSaveSettings}
+                    disabled={isLoading}
+                    className="bg-[#fe2c55] hover:bg-[#ff4d73] text-white font-bold px-6 h-11 rounded-xl transition-all shadow-md active:scale-98 text-xs shrink-0"
+                  >
+                    {isLoading ? "Saving Settings..." : "Save TikTok Config"}
+                  </Button>
                 </div>
               </Card>
             </motion.div>

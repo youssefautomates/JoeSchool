@@ -161,7 +161,7 @@ export default function AdminProductsPage() {
   const [form, setForm] = useState<any>({
     title: "", arabic_title: "", slug: "", description: "", short_description: "",
     price_egp: "", original_price_egp: "", price_usd: "", original_price_usd: "",
-    status: "Active", is_featured: false,
+    status: "Active", is_featured: false, enable_gateway_fee: true,
     image_url: "", video_url: "", gallery: ["", "", "", ""],
     file_url: "", file_type: "zip", displayTags: "",
     seo_title: "", seo_description: ""
@@ -226,7 +226,7 @@ export default function AdminProductsPage() {
     setForm({
       title: "", arabic_title: "", slug: "", description: "", short_description: "",
       price_egp: "", original_price_egp: "", price_usd: "", original_price_usd: "",
-      status: "Active", is_featured: false,
+      status: "Active", is_featured: false, enable_gateway_fee: true,
       image_url: "", video_url: "", gallery: ["", "", "", ""],
       file_url: "", file_type: "zip", displayTags: "",
       seo_title: "", seo_description: ""
@@ -256,6 +256,7 @@ export default function AdminProductsPage() {
       original_price_usd: unpacked.original_price_usd !== undefined && unpacked.original_price_usd !== null ? String(unpacked.original_price_usd) : "",
       status: unpacked.status === "نشط" ? "Active" : unpacked.status === "مسودة" ? "Draft" : unpacked.status === "مخفي" ? "Hidden" : unpacked.status,
       is_featured: !!unpacked.is_featured,
+      enable_gateway_fee: unpacked.enable_gateway_fee !== false,
       image_url: unpacked.image_url || "",
       video_url: unpacked.video_url || "",
       gallery: Array.isArray(unpacked.gallery) ? [...unpacked.gallery] : ["", "", "", ""],
@@ -539,6 +540,7 @@ export default function AdminProductsPage() {
       discount_pct: calcDiscount(price_egp, original_price_egp),
       status: mappedStatus,
       is_featured: form.is_featured,
+      enable_gateway_fee: form.enable_gateway_fee !== false,
       image_url: finalImageUrl,
       file_url: form.file_url || null,
       category: mappedCategory,
@@ -769,6 +771,24 @@ export default function AdminProductsPage() {
                 <label htmlFor="isFeaturedProductCheckbox" className="text-xs font-bold text-zinc-300 cursor-pointer select-none">
                   Featured Product (Highlight in main storefront collection)
                 </label>
+              </div>
+
+              <div className="flex flex-col gap-1.5 bg-white/[0.01] border border-white/5 rounded-xl p-4 mt-2">
+                <div className="flex items-center gap-4">
+                  <input 
+                    type="checkbox" 
+                    id="enableGatewayFeeCheckbox"
+                    checked={form.enable_gateway_fee !== false} 
+                    onChange={e => setForm({ ...form, enable_gateway_fee: e.target.checked })} 
+                    className="w-4 h-4 text-rose-600 border-white/10 rounded focus:ring-rose-500 cursor-pointer accent-rose-600"
+                  />
+                  <label htmlFor="enableGatewayFeeCheckbox" className="text-xs font-bold text-zinc-300 cursor-pointer select-none">
+                    Enable Payment Processing Fee Recovery (3%)
+                  </label>
+                </div>
+                <p className="text-[10px] text-zinc-500 pl-8 leading-relaxed">
+                  Adds a small processing fee during checkout to help cover secure payment gateway transaction costs.
+                </p>
               </div>
 
             </div>
