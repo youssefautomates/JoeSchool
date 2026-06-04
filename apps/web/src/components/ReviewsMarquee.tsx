@@ -188,7 +188,7 @@ export function ReviewsMarquee() {
         
         {/* ROW 1: Scrolling Left */}
         <div className="overflow-hidden w-full">
-          <div className="marquee-left-track">
+          <div className="flex flex-row flex-nowrap w-max gap-6 marquee-left-track">
             {row1Reviews.map((review, idx) => (
               <ReviewCard key={`row1-${idx}`} review={review} />
             ))}
@@ -197,12 +197,13 @@ export function ReviewsMarquee() {
 
         {/* ROW 2: Scrolling Right */}
         <div className="overflow-hidden w-full">
-          <div className="marquee-right-track">
+          <div className="flex flex-row flex-nowrap w-max gap-6 marquee-right-track">
             {row2Reviews.map((review, idx) => (
               <ReviewCard key={`row2-${idx}`} review={review} />
             ))}
           </div>
         </div>
+
 
       </div>
 
