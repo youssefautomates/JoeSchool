@@ -206,7 +206,7 @@ export function ReviewsMarquee() {
       <div className="flex flex-col gap-6 md:gap-8 relative w-full overflow-hidden" dir="ltr">
         
         {/* Optimized GPU-accelerated CSS Keyframes */}
-        <style jsx global>{`
+        <style dangerouslySetInnerHTML={{ __html: `
           @keyframes marquee-scroll-left {
             0% { transform: translate3d(0, 0, 0); }
             100% { transform: translate3d(-33.3333%, 0, 0); }
@@ -245,7 +245,8 @@ export function ReviewsMarquee() {
               animation-play-state: paused !important;
             }
           }
-        `}</style>
+        `}} />
+
 
         {/* ROW 1: Scrolling Left */}
         <div className="overflow-hidden w-full flex">
