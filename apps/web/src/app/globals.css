@@ -243,3 +243,53 @@
     -webkit-mask-image: radial-gradient(ellipse at top, black 40%, transparent 85%);
   }
 }
+
+/* Infinite Testimonials Marquee Animation */
+@keyframes marquee-left {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-33.3333%, 0, 0);
+  }
+}
+
+@keyframes marquee-right {
+  0% {
+    transform: translate3d(-33.3333%, 0, 0);
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.marquee-left-track {
+  display: flex;
+  width: max-content;
+  gap: 1.5rem;
+  animation: marquee-left 90s linear infinite;
+  will-change: transform;
+}
+
+.marquee-right-track {
+  display: flex;
+  width: max-content;
+  gap: 1.5rem;
+  animation: marquee-right 90s linear infinite;
+  will-change: transform;
+}
+
+@media (hover: hover) {
+  .marquee-left-track:hover,
+  .marquee-right-track:hover {
+    animation-play-state: paused;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-left-track,
+  .marquee-right-track {
+    animation-play-state: paused !important;
+  }
+}
+

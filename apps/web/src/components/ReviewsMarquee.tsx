@@ -70,26 +70,7 @@ function renderFractionalStars(rating: number) {
 export function ReviewsMarquee() {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isIntersecting, setIsIntersecting] = useState(true);
-  const containerRef = useRef<HTMLDivElement>(null);
 
-  // Intersection Observer to pause animation when out of viewport to maximize performance
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setIsIntersecting(entry.isIntersecting);
-      },
-      { threshold: 0.05 }
-    );
-
-    if (containerRef.current) {
-      observer.observe(containerRef.current);
-    }
-
-    return () => {
-      observer.disconnect();
-    };
-  }, []);
 
   useEffect(() => {
     async function loadReviews() {
@@ -183,7 +164,7 @@ export function ReviewsMarquee() {
   const row2Reviews = getRowReviews(reviews, true);
 
   return (
-    <section ref={containerRef} id="reviews" className="py-24 md:py-32 bg-[#050505] overflow-hidden relative select-none">
+    <section id="reviews" className="py-24 md:py-32 bg-[#050505] overflow-hidden relative select-none">
       
       {/* Premium ambient glows */}
       <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-rose-600/5 rounded-full blur-[140px] pointer-events-none" />
@@ -205,55 +186,9 @@ export function ReviewsMarquee() {
       {/* Double Row Infinite Scrolling Marquee */}
       <div className="flex flex-col gap-6 md:gap-8 relative w-full overflow-hidden" dir="ltr">
         
-        {/* Optimized GPU-accelerated CSS Keyframes */}
-        <style dangerouslySetInnerHTML={{ __html: `
-          @keyframes marquee-scroll-left {
-            0% { transform: translate3d(0, 0, 0); }
-            100% { transform: translate3d(-33.3333%, 0, 0); }
-          }
-          @keyframes marquee-scroll-right {
-            0% { transform: translate3d(-33.3333%, 0, 0); }
-            100% { transform: translate3d(0, 0, 0); }
-          }
-          
-          .animate-marquee-left {
-            display: flex;
-            width: max-content;
-            gap: 1.5rem;
-            animation: marquee-scroll-left 85s linear infinite;
-          }
-          
-          .animate-marquee-right {
-            display: flex;
-            width: max-content;
-            gap: 1.5rem;
-            animation: marquee-scroll-right 85s linear infinite;
-          }
-
-          /* Hover behavior ONLY on hover-capable desktop devices (prevents mobile touch lock) */
-          @media (hover: hover) {
-            .animate-marquee-left:hover,
-            .animate-marquee-right:hover {
-              animation-play-state: paused;
-            }
-          }
-          
-          /* Reduced Motion Accessibility Settings */
-          @media (prefers-reduced-motion: reduce) {
-            .animate-marquee-left,
-            .animate-marquee-right {
-              animation-play-state: paused !important;
-            }
-          }
-        `}} />
-
-
         {/* ROW 1: Scrolling Left */}
-        <div className="overflow-hidden w-full flex">
-          <div 
-            className="animate-marquee-left" 
-            style={{ animationPlayState: isIntersecting ? undefined : "paused" }}
-          >
+        <div className="overflow-hidden w-full">
+          <div className="marquee-left-track">
             {row1Reviews.map((review, idx) => (
               <ReviewCard key={`row1-${idx}`} review={review} />
             ))}
@@ -261,11 +196,8 @@ export function ReviewsMarquee() {
         </div>
 
         {/* ROW 2: Scrolling Right */}
-        <div className="overflow-hidden w-full flex">
-          <div 
-            className="animate-marquee-right" 
-            style={{ animationPlayState: isIntersecting ? undefined : "paused" }}
-          >
+        <div className="overflow-hidden w-full">
+          <div className="marquee-right-track">
             {row2Reviews.map((review, idx) => (
               <ReviewCard key={`row2-${idx}`} review={review} />
             ))}
