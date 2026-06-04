@@ -1,0 +1,1251 @@
+openapi: 3.0.3
+info:
+  title: JoeSchool Mobile Admin API
+  description: >
+    Comprehensive documentation for JoeSchool Admin Mobile API endpoints (Phase 1 Refinements).
+    All request paths are relative to the root server. Authorization is handled using Bearer tokens in HTTP headers.
+    Includes support for offline delta synchronization, remote feature flags, device trust score tracking with degradation rules,
+    unified deep links, and quiet hours.
+  version: 1.0.0
+servers:
+  - url: https://joeschool.com
+    description: Production Server
+  - url: http://localhost:3000
+    description: Local Dev Server
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Enter the JWT Access Token obtained from `/api/mobile/v1/auth/login`.
+
+  schemas:
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          description: A human-readable error message explaining the failure.
+          example: Invalid email or password
+
+    RateLimitResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          description: Standard error explaining that the client has hit a rate limit.
+          example: Too many requests. Please slow down.
+
+    UserProfile:
+      type: object
+      required:
+        - id
+        - email
+        - name
+        - role
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: e5c376f9-0361-419b-ab92-5d7f1d46cb6c
+        email:
+          type: string
+          format: email
+          example: admin@joeschool.com
+        name:
+          type: string
+          example: Youssef Mostafa
+        role:
+          type: string
+          example: super_admin
+
+    FeatureFlag:
+      type: object
+      required:
+        - flag_key
+        - is_enabled
+        - value
+      properties:
+        flag_key:
+          type: string
+          example: maintenance_mode
+        is_enabled:
+          type: boolean
+          example: false
+        value:
+          type: string
+          nullable: true
+          example: System operates normally
+        description:
+          type: string
+          nullable: true
+          example: Global mobile app maintenance mode toggle
+
+    Notification:
+      type: object
+      required:
+        - id
+        - title
+        - body
+        - notification_type
+        - priority
+        - status
+        - created_at
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: a4b126f9-cd61-419b-8e92-3c7f1d461234
+        title:
+          type: string
+          example: "🚨 محاولة اختراق جلسة الدخول!"
+        body:
+          type: string
+          example: تم رصد محاولة مشبوهة لإعادة استخدام رمز التحديث للمشرف.
+        notification_type:
+          type: string
+          example: security_alerts
+        priority:
+          type: string
+          enum: [low, normal, high, critical]
+          example: critical
+        deep_link:
+          type: string
+          nullable: true
+          example: joeschool://orders/123
+        fallback_url:
+          type: string
+          nullable: true
+          example: https://joeschool.com/admin/orders/123
+        status:
+          type: string
+          example: sent
+        error_message:
+          type: string
+          nullable: true
+          example: null
+        data:
+          type: object
+          properties:
+            adminId:
+              type: string
+              example: e5c376f9-0361-419b-ab92-5d7f1d46cb6c
+            severity:
+              type: string
+              example: critical
+        delivered_at:
+          type: string
+          format: date-time
+          nullable: true
+          example: "2026-06-04T12:00:00.000Z"
+        read_at:
+          type: string
+          format: date-time
+          nullable: true
+          example: null
+        opened_at:
+          type: string
+          format: date-time
+          nullable: true
+          example: null
+        clicked_at:
+          type: string
+          format: date-time
+          nullable: true
+          example: null
+        expires_at:
+          type: string
+          format: date-time
+          nullable: true
+          example: "2026-06-05T12:00:00.000Z"
+        created_at:
+          type: string
+          format: date-time
+          example: "2026-06-04T11:59:00.000Z"
+
+    Order:
+      type: object
+      required:
+        - id
+        - customerName
+        - customerEmail
+        - customerPhone
+        - productTitle
+        - productId
+        - amount
+        - currency
+        - status
+        - paymentMethod
+        - createdAt
+      properties:
+        id:
+          type: string
+          example: "123"
+        customerName:
+          type: string
+          example: "Mohamed Ali"
+        customerEmail:
+          type: string
+          example: "mohamed@test.com"
+        customerPhone:
+          type: string
+          example: "01012345678"
+        productTitle:
+          type: string
+          example: "دورة هندسة الذكاء الاصطناعي الكاملة"
+        productId:
+          type: string
+          example: "course_ai_engineering"
+        amount:
+          type: number
+          example: 1500.00
+        currency:
+          type: string
+          example: "EGP"
+        status:
+          type: string
+          example: "completed"
+        paymentMethod:
+          type: string
+          example: "Paymob"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2026-06-04T10:00:00.000Z"
+
+    Review:
+      type: object
+      required:
+        - id
+        - productId
+        - firstName
+        - lastName
+        - rating
+        - text
+        - isVerified
+        - status
+        - createdAt
+      properties:
+        id:
+          type: string
+          example: "88"
+        productId:
+          type: string
+          example: "course_ai_engineering"
+        firstName:
+          type: string
+          example: "أحمد"
+        lastName:
+          type: string
+          example: "عز"
+        rating:
+          type: integer
+          example: 5
+        text:
+          type: string
+          example: "المحتوى رائع ومنظم جداً والتدريب العملي غني."
+        avatarUrl:
+          type: string
+          nullable: true
+          example: "/avatars/avatar_1.png"
+        isVerified:
+          type: boolean
+          example: true
+        status:
+          type: string
+          example: "visible"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2026-06-04T09:00:00.000Z"
+
+    Student:
+      type: object
+      required:
+        - id
+        - name
+        - email
+        - phone
+        - joinedAt
+        - courses
+      properties:
+        id:
+          type: string
+          example: "usr_student_99"
+        name:
+          type: string
+          example: "علي أحمد"
+        email:
+          type: string
+          example: "ali@student.com"
+        phone:
+          type: string
+          example: "01234567890"
+        joinedAt:
+          type: string
+          format: date-time
+          example: "2026-06-03T15:30:00.000Z"
+        courses:
+          type: array
+          items:
+            type: string
+          example: ["course_ai_engineering"]
+
+security:
+  - bearerAuth: []
+
+paths:
+  /api/mobile/v1/auth/login:
+    post:
+      summary: Admin Mobile Login
+      description: Authenticates admin credentials, logs active session, registers device ID, and issues securely hashed refresh/access tokens.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: admin@joeschool.com
+                password:
+                  type: string
+                  format: password
+                  example: SecurePass123
+      responses:
+        '200':
+          description: Successful authentication.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - accessToken
+                  - refreshToken
+                  - user
+                properties:
+                  accessToken:
+                    type: string
+                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+                  refreshToken:
+                    type: string
+                    example: f5a3b987c24f6e...
+                  user:
+                    $ref: '#/components/schemas/UserProfile'
+        '400':
+          description: Missing email or password.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                missingFields:
+                  value:
+                    error: Email and password are required
+        '401':
+          description: Invalid email or password credentials. Triggers automatic device trust degradation (-10 score penalty).
+          headers:
+            X-RateLimit-Limit:
+              schema:
+                type: string
+              description: Maximum allowed attempts.
+            X-RateLimit-Remaining:
+              schema:
+                type: string
+              description: Remaining allowed attempts in window.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalidCredentials:
+                  value:
+                    error: Invalid email or password
+        '403':
+          description: Admin account deactivated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                accountDeactivated:
+                  value:
+                    error: This admin account is deactivated
+        '429':
+          description: Rate limit exceeded (Max 5 login attempts per minute). Triggers automatic device trust degradation (-50 score penalty).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RateLimitResponse'
+
+  /api/mobile/v1/auth/refresh:
+    post:
+      summary: Rotate JWT Session Tokens
+      description: Accepts valid refresh token, checks for hijack attempts (token reuse), validates IP range stability, and rotates session tokens.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - refreshToken
+              properties:
+                refreshToken:
+                  type: string
+                  example: f5a3b987c24f6e...
+      responses:
+        '200':
+          description: Access and refresh tokens rotated successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - accessToken
+                  - refreshToken
+                properties:
+                  accessToken:
+                    type: string
+                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+                  refreshToken:
+                    type: string
+                    example: a8b9c10d23e5f6...
+        '400':
+          description: Refresh token parameter missing.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                missingToken:
+                  value:
+                    error: Refresh token is required
+        '401':
+          description: Invalid token, expired session, or severe token reuse/hijack incident. Triggers critical trust degradation to 0 and session revocation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                tokenExpired:
+                  value:
+                    error: Refresh token has expired
+                hijackIncident:
+                  value:
+                    error: Security warning: Session compromised. All sessions revoked.
+        '429':
+          description: Rate limit exceeded (Max 15 requests per minute).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RateLimitResponse'
+
+  /api/mobile/v1/auth/logout:
+    post:
+      summary: Revoke Admin Session
+      description: Logs out the administrator and invalidates the session refresh token from the database.
+      responses:
+        '200':
+          description: Logged out successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+        '401':
+          description: Unauthorized request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalidToken:
+                  value:
+                    error: Invalid or expired access token
+
+  /api/mobile/v1/dashboard:
+    get:
+      summary: Mobile Telemetry Statistics
+      description: Returns lightweight admin dashboard counters, including sales metrics, student count, and moderation items with sync version control tags.
+      responses:
+        '200':
+          description: Telemetry statistics retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - sales
+                  - students
+                  - moderation
+                  - timestamp
+                  - last_updated_at
+                  - server_sync_version
+                properties:
+                  sales:
+                    type: object
+                    required:
+                      - today
+                      - month
+                    properties:
+                      today:
+                        type: object
+                        required:
+                          - count
+                          - revenue
+                        properties:
+                          count:
+                            type: integer
+                            example: 5
+                          revenue:
+                            type: number
+                            example: 7500.00
+                      month:
+                        type: object
+                        required:
+                          - count
+                          - revenue
+                        properties:
+                          count:
+                            type: integer
+                            example: 120
+                          revenue:
+                            type: number
+                            example: 180000.00
+                  students:
+                    type: object
+                    required:
+                      - totalActive
+                    properties:
+                      totalActive:
+                        type: integer
+                        example: 342
+                  moderation:
+                    type: object
+                    required:
+                      - pendingReviews
+                    properties:
+                      pendingReviews:
+                        type: integer
+                        example: 3
+                  timestamp:
+                    type: string
+                    format: date-time
+                    example: "2026-06-04T12:00:00.000Z"
+                  last_updated_at:
+                    type: string
+                    format: date-time
+                    example: "2026-06-04T12:00:00.000Z"
+                  server_sync_version:
+                    type: string
+                    format: date-time
+                    example: "2026-06-04T12:00:00.000Z"
+        '401':
+          description: Unauthorized access token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalidToken:
+                  value:
+                    error: Invalid or expired access token
+        '429':
+          description: Rate limit exceeded (Max 60 requests per minute).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RateLimitResponse'
+
+  /api/mobile/v1/feature-flags:
+    get:
+      summary: Remote Config Feature Flags
+      description: Returns active remote feature toggles and configs (e.g. maintenance mode, beta options) for non-disruptive app management.
+      security: []
+      responses:
+        '200':
+          description: Returns feature flag maps.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - flags
+                  - list
+                properties:
+                  flags:
+                    type: object
+                    additionalProperties:
+                      type: object
+                      properties:
+                        enabled:
+                          type: boolean
+                        value:
+                          type: string
+                          nullable: true
+                        description:
+                          type: string
+                          nullable: true
+                    example:
+                      maintenance_mode:
+                        enabled: false
+                        value: "System operates normally"
+                        description: "Global mobile app maintenance mode toggle"
+                      beta_analytics_dashboard:
+                        enabled: true
+                        value: "v2-dashboard"
+                        description: "Enables experimental charting metrics for beta group admins"
+                  list:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/FeatureFlag'
+        '429':
+          description: Rate limit exceeded (Max 100 requests per minute).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RateLimitResponse'
+
+  /api/mobile/v1/notifications:
+    get:
+      summary: Fetch Activity Notifications List
+      description: Lists admin push notifications with support for offset pagination, filtering by type/status, and delta check via timestamps. Excludes expired notifications.
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 20
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+        - name: type
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter notifications by type (e.g. security_alerts, completed_orders).
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [pending, sent, failed]
+        - name: since
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+          description: Start timestamp for delta synchronization.
+      responses:
+        '200':
+          description: Array of notifications and pagination meta.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - notifications
+                  - pagination
+                properties:
+                  notifications:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Notification'
+                  pagination:
+                    type: object
+                    properties:
+                      total:
+                        type: integer
+                      limit:
+                        type: integer
+                      offset:
+                        type: integer
+        '401':
+          description: Unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Rate limit exceeded (Max 60 requests per minute).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RateLimitResponse'
+
+    patch:
+      summary: Update Notification Delivery Metrics
+      description: Records analytical action metadata events when notification is delivered, opened, or clicked.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - id
+                - action
+              properties:
+                id:
+                  type: string
+                  format: uuid
+                  example: a4b126f9-cd61-419b-8e92-3c7f1d461234
+                action:
+                  type: string
+                  enum: [read, opened, clicked]
+                  example: opened
+      responses:
+        '200':
+          description: Notification status event logged successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - notification
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  notification:
+                    $ref: '#/components/schemas/Notification'
+        '400':
+          description: Missing or invalid action parameters.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                missingId:
+                  value:
+                    error: Notification 'id' is required
+                invalidAction:
+                  value:
+                    error: Action must be 'read', 'opened', or 'clicked'
+        '401':
+          description: Unauthorized token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/mobile/v1/notifications/register:
+    post:
+      summary: Register Mobile Push Token
+      description: Associates an FCM, APNs, or Expo push token with the active admin account, recording platform and application specifications.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - deviceToken
+                - platform
+              properties:
+                deviceToken:
+                  type: string
+                  example: fcm_token_sample_129841829048...
+                deviceId:
+                  type: string
+                  example: device_uuid_456
+                deviceName:
+                  type: string
+                  example: "iPhone 15 Pro"
+                platform:
+                  type: string
+                  enum: [ios, android]
+                  example: ios
+                appVersion:
+                  type: string
+                  example: "1.0.4"
+                devicePushProvider:
+                  type: string
+                  enum: [fcm, apns, expo]
+                  default: fcm
+                  example: apns
+      responses:
+        '200':
+          description: Token registered successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - message
+                  - device
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Device push token registered successfully
+                  device:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                      admin_id:
+                        type: string
+                        format: uuid
+                      device_token:
+                        type: string
+                      device_id:
+                        type: string
+                      platform:
+                        type: string
+                      device_trust_score:
+                        type: integer
+                        example: 100
+        '400':
+          description: Missing or invalid platform parameter.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                missingToken:
+                  value:
+                    error: deviceToken is required
+                invalidPlatform:
+                  value:
+                    error: platform must be either 'ios' or 'android'
+        '401':
+          description: Unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/mobile/v1/notifications/preferences:
+    get:
+      summary: Retrieve Admin Notification Preferences
+      description: Returns specific switches, priority filters, and Cairo sleep mode quiet hours configurations.
+      responses:
+        '200':
+          description: Preferences loaded successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - preferences
+                properties:
+                  preferences:
+                    type: object
+                    properties:
+                      admin_id:
+                        type: string
+                        format: uuid
+                      completed_orders:
+                        type: boolean
+                        example: true
+                      failed_payments:
+                        type: boolean
+                        example: true
+                      new_reviews:
+                        type: boolean
+                        example: true
+                      security_alerts:
+                        type: boolean
+                        example: true
+                      quiet_hours_enabled:
+                        type: boolean
+                        example: true
+                      quiet_hours_start:
+                        type: string
+                        example: "23:00"
+                      quiet_hours_end:
+                        type: string
+                        example: "08:00"
+                      notification_priority:
+                        type: string
+                        enum: [low, normal, high, critical]
+                        example: normal
+        '401':
+          description: Unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    post:
+      summary: Update Notification Preferences
+      description: Saves active triggers, thresholds, or quiet window intervals for mobile notification alerts.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                completedOrders:
+                  type: boolean
+                failedPayments:
+                  type: boolean
+                newReviews:
+                  type: boolean
+                securityAlerts:
+                  type: boolean
+                quietHoursEnabled:
+                  type: boolean
+                quietHoursStart:
+                  type: string
+                  example: "22:30"
+                quietHoursEnd:
+                  type: string
+                  example: "07:30"
+                notificationPriority:
+                  type: string
+                  enum: [low, normal, high, critical]
+      responses:
+        '200':
+          description: Notification preferences stored.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - preferences
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  preferences:
+                    type: object
+        '400':
+          description: Incorrect request body format.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalidFormat:
+                  value:
+                    error: Invalid parameters supplied
+        '401':
+          description: Unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/mobile/v1/orders:
+    get:
+      summary: Delta Sync Completed Orders
+      description: Synchronizes completed orders using lightweight query structures, including lists of deleted identifiers since the last sync.
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: status
+          in: query
+          schema:
+            type: string
+            example: completed
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: since
+          in: query
+          schema:
+            type: string
+            format: date-time
+          description: Sync timestamp version check for delta downloads.
+      responses:
+        '200':
+          description: List of synced orders.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - orders
+                  - server_sync_version
+                  - pagination
+                properties:
+                  orders:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Order'
+                  deletedIds:
+                    type: array
+                    items:
+                      type: string
+                    example: ["order_uuid_1", "order_uuid_2"]
+                  server_sync_version:
+                    type: string
+                    format: date-time
+                  pagination:
+                    type: object
+                    properties:
+                      total:
+                        type: integer
+                      limit:
+                        type: integer
+                      offset:
+                        type: integer
+        '401':
+          description: Unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/mobile/v1/reviews:
+    get:
+      summary: Delta Sync Product Reviews
+      description: Synchronizes reviews with pagination support and returns hard-deleted review identifiers for local cache validation.
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, visible, hidden, archived]
+        - name: since
+          in: query
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Array of reviews.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - reviews
+                  - server_sync_version
+                  - pagination
+                properties:
+                  reviews:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Review'
+                  deletedIds:
+                    type: array
+                    items:
+                      type: string
+                    example: ["88", "12"]
+                  server_sync_version:
+                    type: string
+                    format: date-time
+                  pagination:
+                    type: object
+        '401':
+          description: Unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    patch:
+      summary: Moderate Product Reviews
+      description: Applies administrative moderation actions to reviews (approve/visible, hide, or archive).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - id
+                - action
+              properties:
+                id:
+                  type: string
+                  example: "88"
+                action:
+                  type: string
+                  enum: [approve, hide, archive]
+                  example: approve
+      responses:
+        '200':
+          description: Moderation action applied.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - message
+                  - review
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Review successfully marked as approved
+                  review:
+                    $ref: '#/components/schemas/Review'
+        '400':
+          description: Invalid request parameters.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                missingId:
+                  value:
+                    error: Review 'id' is required
+                invalidAction:
+                  value:
+                    error: Action must be 'approve', 'hide', or 'archive'
+        '401':
+          description: Unauthorized access.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/mobile/v1/students:
+    get:
+      summary: Delta Sync Active Students Directory
+      description: Loads student directory records grouped by user IDs with their enrollment courses.
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: since
+          in: query
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Synced student arrays.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - students
+                  - pagination
+                properties:
+                  students:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Student'
+                  pagination:
+                    type: object
+        '401':
+          description: Unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/mobile/v1/revenue:
+    get:
+      summary: Aggregate Revenue Telemetry Charting
+      description: Synthesizes daily revenue data (last 30 days) and monthly revenue data (last 12 months) for charts.
+      responses:
+        '200':
+          description: Aggregated charting lists.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - totalYearRevenue
+                  - daily
+                  - monthly
+                properties:
+                  totalYearRevenue:
+                    type: number
+                    example: 2200000.00
+                  daily:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        date:
+                          type: string
+                          example: "2026-06-04"
+                        count:
+                          type: integer
+                          example: 5
+                        revenue:
+                          type: number
+                          example: 7500.00
+                  monthly:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        month:
+                          type: string
+                          example: "2026-06"
+                        count:
+                          type: integer
+                          example: 150
+                        revenue:
+                          type: number
+                          example: 220000.00
+        '401':
+          description: Unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'

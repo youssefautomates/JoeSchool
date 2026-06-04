@@ -423,7 +423,7 @@ export default function BundlePage({ params }: { params: Promise<{ slug: string 
           </div>
 
           {/* Reviews Section */}
-          <ProductReviews productId={bundle.id} initialReviews={allReviews} />
+          <ProductReviews productId={bundle.id} initialReviews={allReviews} productTitle={bundle.title} />
 
           {/* Related engine Carousel */}
           <div className="mt-20 border-t border-white/5 pt-16">

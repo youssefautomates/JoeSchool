@@ -1115,7 +1115,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
             {/* Product Reviews Marquee */}
             {reviews.length > 0 ? (
               <div className="space-y-2 select-none">
-                <ProductReviews productId={product.id} initialReviews={reviews} title="آراء عملائنا ⭐" />
+                <ProductReviews productId={product.id} initialReviews={reviews} productTitle={product.title} title="آراء عملائنا ⭐" />
               </div>
             ) : (
               <div className="mt-16 mb-8 text-center bg-[#08080c]/60 border border-white/5 p-8 rounded-3xl max-w-xl mx-auto backdrop-blur-xl relative group overflow-hidden select-none">

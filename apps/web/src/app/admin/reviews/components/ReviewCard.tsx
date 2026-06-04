@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { Star, ShieldCheck, Sparkles, Edit3, Trash2, Eye, EyeOff } from "lucide-react";
+import { Star, ShieldCheck, Sparkles, Edit3, Trash2, Eye, EyeOff, BookOpen, ShoppingBag } from "lucide-react";
 import { Review } from "@/app/api/admin/reviews/route";
 
 interface StarSVGProps {
@@ -106,9 +106,13 @@ export function ReviewCard({ review, productName, onEdit, onDelete, onStatusChan
     return <MemoizedStars rating={review.rating} />;
   }, [review.rating]);
 
+  const fullName = `${review.firstName} ${review.lastName ? review.lastName.trim().charAt(0) + "." : ""}`;
+  const displayName = fullName.trim().replace(/^\./, "");
+  const fallbackLetter = displayName.replace(/^\./, "").charAt(0);
+
   return (
     <div 
-      className={`bg-[#09090e] p-6 rounded-2xl border transition-all duration-300 flex flex-col justify-between ${
+      className={`bg-[#09090e] p-6 rounded-3xl border transition-all duration-300 flex flex-col justify-between group relative overflow-hidden ${
         review.status === "hidden"
           ? "border-red-500/20 opacity-55 hover:opacity-100"
           : review.status === "pending"
@@ -119,17 +123,34 @@ export function ReviewCard({ review, productName, onEdit, onDelete, onStatusChan
       }`}
       dir="rtl"
     >
-      <div className="space-y-4">
-        {/* Header section */}
+      <div className="space-y-4 relative z-10">
+        {/* Header section (Avatar + Name & Stars Stacked) */}
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div>
-              <h4 className="text-white font-bold text-xs font-alexandria">
-                {review.firstName} {review.lastName ? review.lastName.charAt(0) + "." : ""}
+            <div className="shrink-0 relative">
+              {review.avatarUrl ? (
+                <img 
+                  src={review.avatarUrl} 
+                  className="w-10 h-10 rounded-full object-cover border border-white/10 shadow-inner" 
+                  alt={displayName} 
+                />
+              ) : (
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-rose-500/20 to-orange-500/10 flex items-center justify-center border border-white/5 text-rose-400 font-alexandria font-bold text-sm shadow-inner">
+                  {fallbackLetter}
+                </div>
+              )}
+            </div>
+            <div className="min-w-0">
+              <h4 className="text-white font-bold text-xs md:text-sm font-alexandria truncate">
+                {displayName}
               </h4>
-              <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+              <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                {renderedStarsBlock}
+                <span className="text-[9px] font-mono text-zinc-500 bg-white/[0.03] px-1 rounded border border-white/5">
+                  {review.rating.toFixed(1)}
+                </span>
                 {review.isFeatured && (
-                  <div className="flex items-center gap-0.5 text-rose-500">
+                  <div className="flex items-center gap-0.5 text-rose-500 ml-1.5 shrink-0">
                     <Sparkles className="w-3 h-3 fill-current" />
                     <span className="text-[8px] font-bold font-cairo">مميز ({review.featuredPosition || 0})</span>
                   </div>
@@ -142,17 +163,9 @@ export function ReviewCard({ review, productName, onEdit, onDelete, onStatusChan
           </div>
         </div>
 
-        {/* Stars */}
-        <div className="flex items-center gap-2">
-          {renderedStarsBlock}
-          <span className="text-[10px] font-mono text-zinc-500 bg-white/5 px-1.5 py-0.5 rounded">
-            {review.rating.toFixed(1)}
-          </span>
-        </div>
-
         {/* Review testimonial with expand/collapse */}
         <div className="space-y-1">
-          <p className="text-zinc-400 font-cairo text-xs leading-relaxed italic">
+          <p className="text-zinc-350 font-cairo text-xs leading-relaxed italic">
             &ldquo;{displayedText}&rdquo;
           </p>
           {isLongText && (
@@ -166,7 +179,18 @@ export function ReviewCard({ review, productName, onEdit, onDelete, onStatusChan
         </div>
       </div>
 
-      <div className="pt-4 mt-6 border-t border-white/5 space-y-4">
+      <div className="pt-4 mt-6 border-t border-white/5 space-y-4 relative z-10">
+        {/* Product/Course pill badge */}
+        {productName && (
+          <div className="flex items-center gap-1.5 text-zinc-500 bg-white/[0.02] border border-white/5 px-2.5 py-1 rounded-full text-[10px] font-bold font-cairo w-fit max-w-full" title={productName}>
+            {review.sourceType === "course" ? (
+              <BookOpen className="w-3 h-3 text-[#D6004B] shrink-0" />
+            ) : (
+              <ShoppingBag className="w-3 h-3 text-[#D6004B] shrink-0" />
+            )}
+            <span className="truncate max-w-[220px]">{productName}</span>
+          </div>
+        )}
 
         {/* Quick action controls */}
         <div className="flex items-center gap-2">
@@ -226,6 +250,12 @@ export function ReviewCard({ review, productName, onEdit, onDelete, onStatusChan
             <Trash2 className="w-3.5 h-3.5" />
           </button>
         </div>
+      </div>
+
+      {/* Subtle Ambient Hover Glow & Testimonial Quote Mark */}
+      <div className="absolute top-0 right-0 w-32 h-32 bg-[#D6004B]/5 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+      <div className="absolute top-4 left-4 text-white/[0.02] font-serif text-6xl pointer-events-none">
+        ”
       </div>
     </div>
   );

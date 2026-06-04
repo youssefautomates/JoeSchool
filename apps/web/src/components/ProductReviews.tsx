@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef, memo } from "react";
-import { Star, ShieldCheck, MessageSquareQuote, CheckCircle2 } from "lucide-react";
+import { Star, ShieldCheck, MessageSquareQuote, CheckCircle2, BookOpen, ShoppingBag, Sparkles } from "lucide-react";
 
 interface Review {
   id: string;
@@ -28,21 +28,21 @@ interface StarSVGProps {
 // Highly optimized memoized individual fractional star SVG component
 export const MemoizedStarSVG = memo(function StarSVG({ fillPercent }: StarSVGProps) {
   if (fillPercent <= 0) {
-    return <Star className="w-3.5 h-3.5 text-zinc-800 fill-transparent" />;
+    return <Star className="w-3 h-3 md:w-3.5 md:h-3.5 text-zinc-800 fill-transparent" />;
   }
   if (fillPercent >= 100) {
-    return <Star className="w-3.5 h-3.5 fill-current text-yellow-500" />;
+    return <Star className="w-3 h-3 md:w-3.5 md:h-3.5 fill-current text-yellow-500" />;
   }
   
   return (
-    <div className="relative w-3.5 h-3.5">
-      <Star className="w-3.5 h-3.5 text-zinc-800 fill-transparent absolute inset-0" />
+    <div className="relative w-3 h-3 md:w-3.5 md:h-3.5">
+      <Star className="w-3 h-3 md:w-3.5 md:h-3.5 text-zinc-800 fill-transparent absolute inset-0" />
       <div 
         className="absolute inset-0 overflow-hidden text-yellow-500"
         style={{ width: `${fillPercent}%` }}
       >
-        <div className="w-3.5 h-3.5">
-          <Star className="w-3.5 h-3.5 fill-current text-yellow-500" />
+        <div className="w-3 h-3 md:w-3.5 md:h-3.5">
+          <Star className="w-3 h-3 md:w-3.5 md:h-3.5 fill-current text-yellow-500" />
         </div>
       </div>
     </div>
@@ -74,10 +74,11 @@ interface ProductReviewsProps {
   productId: string;
   initialReviews?: Review[];
   courseTitle?: string;
+  productTitle?: string;
   title?: string;
 }
 
-export function ProductReviews({ productId, initialReviews, courseTitle, title }: ProductReviewsProps) {
+export function ProductReviews({ productId, initialReviews, courseTitle, productTitle, title }: ProductReviewsProps) {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(initialReviews === undefined);
   
@@ -205,66 +206,57 @@ export function ProductReviews({ productId, initialReviews, courseTitle, title }
           onMouseLeave={() => setIsInteractionPaused(false)}
         >
           {marqueeReviews.map((review, idx) => {
-
-
+            const fullName = `${review.firstName} ${review.lastName ? review.lastName.trim().charAt(0) + "." : ""}`;
+            const displayName = fullName.trim().replace(/^\./, "");
+            const fallbackLetter = displayName.replace(/^\./, "").charAt(0);
+            
             return (
               <div
                 key={idx}
-                className="w-[300px] h-[230px] md:w-[360px] md:h-[260px] flex-shrink-0 bg-[#08080c]/60 border border-white/5 p-5 md:p-6 rounded-3xl relative group hover:border-[#D6004B]/30 transition-all duration-500 shadow-2xl flex flex-col justify-between"
+                className="w-[300px] h-[160px] md:w-[360px] md:h-[180px] flex-shrink-0 bg-white/[0.02] border border-white/5 p-4 md:p-5 rounded-3xl relative group hover:border-[#D6004B]/20 transition-all duration-500 shadow-2xl flex flex-col justify-between"
                 dir="rtl"
               >
-                <div className="space-y-3">
-                  {/* User Info Header */}
-                  <div className="flex items-center justify-between gap-2.5">
-                    <div className="flex items-center gap-3">
-                      <div className="min-w-0">
-                        <h4 className="font-alexandria font-bold text-white text-xs md:text-sm truncate">
-                          {review.firstName} {review.lastName ? review.lastName.charAt(0) + "." : ""}
-                        </h4>
-                        {review.isFeatured && (
-                          <span className="text-[8px] text-rose-500 font-bold font-cairo flex items-center gap-0.5 mt-0.5">
-                            ★ مميز
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    {review.isVerified && (
-                      <div className="shrink-0">
-                        <div className="bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/20 flex items-center gap-1">
-                          <CheckCircle2 className="w-2.5 h-2.5" />
-                          <span className="text-[8px] md:text-[9px] font-black font-cairo">موثق</span>
-                        </div>
+                {/* Header (Avatar + Name & Stars Stacked) */}
+                <div className="flex items-center gap-3 relative z-10">
+                  <div className="shrink-0 relative">
+                    {review.avatarUrl ? (
+                      <img 
+                        src={review.avatarUrl} 
+                        className="w-10 h-10 rounded-full object-cover border border-white/10 shadow-inner" 
+                        alt={displayName} 
+                      />
+                    ) : (
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-rose-500/20 to-orange-500/10 flex items-center justify-center border border-white/5 text-rose-400 font-alexandria font-bold text-sm shadow-inner">
+                        {fallbackLetter}
                       </div>
                     )}
                   </div>
-
-                  {/* Star Ratings (Supporting Float Decimals) */}
-                  <div className="flex items-center gap-1.5">
-                    {renderFractionalStars(review.rating)}
-                    <span className="text-[9px] font-mono text-zinc-600 bg-white/5 px-1 rounded">
-                      {review.rating.toFixed(1)}
-                    </span>
+                  <div className="min-w-0 flex-1">
+                    <h4 className="font-alexandria font-bold text-white text-xs md:text-sm truncate">
+                      {displayName}
+                    </h4>
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                      {renderFractionalStars(review.rating)}
+                      <span className="text-[9px] font-mono text-zinc-500 bg-white/[0.03] px-1 rounded border border-white/5">
+                        {review.rating.toFixed(1)}
+                      </span>
+                    </div>
                   </div>
-
-                  {/* Review Text */}
-                  <p className="text-zinc-400 font-cairo text-xs md:text-sm leading-relaxed whitespace-normal pl-2 line-clamp-3 md:line-clamp-4 italic">
-                    &ldquo;{review.text}&rdquo;
-                  </p>
-                </div>
-                
-                {/* Footer with Course Title Tag for courses only */}
-                <div className="flex items-center justify-between border-t border-white/5 pt-3 mt-2">
-                  {courseTitle ? (
-                    <span className="text-[10px] text-zinc-500 font-bold font-cairo opacity-65 truncate max-w-[220px]" title={courseTitle}>
-                      كورس: {courseTitle}
-                    </span>
-                  ) : (
-                    <span />
-                  )}
                 </div>
 
-                {/* Subtle Ambient Hover Glow */}
-                <div className="absolute inset-0 bg-gradient-to-br from-[#D6004B]/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 rounded-3xl pointer-events-none" />
+                {/* Review Text */}
+                <p className="text-zinc-300 font-cairo text-xs md:text-[13px] leading-relaxed whitespace-normal pl-2 line-clamp-2 md:line-clamp-3 italic relative z-10">
+                  "{review.text}"
+                </p>
+
+                {/* Empty spacer to maintain balanced flex layout */}
+                <div className="h-1 relative z-10" />
+
+                {/* Subtle Ambient Hover Glow & Testimonial Quote Mark */}
+                <div className="absolute top-0 right-0 w-32 h-32 bg-[#D6004B]/10 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+                <div className="absolute top-4 left-4 text-white/[0.02] font-serif text-6xl pointer-events-none">
+                  ”
+                </div>
               </div>
             );
           })}

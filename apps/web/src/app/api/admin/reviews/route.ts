@@ -428,6 +428,7 @@ export async function DELETE(req: Request) {
         console.error("Error permanently deleting review:", deleteError.message);
         return NextResponse.json({ error: "فشل حذف التقييم نهائياً" }, { status: 500 });
       }
+
     } else {
       // Soft delete: set status to archived
       const adminEmail = process.env.ADMIN_EMAIL || "admin@joeschool.com";

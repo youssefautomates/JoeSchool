@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, memo } from "react";
-import { Star, CheckCircle2 } from "lucide-react";
+import { Star, CheckCircle2, BookOpen } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 
 interface Review {
@@ -167,23 +167,17 @@ export function ReviewsMarquee() {
 
   const finalReviews = reviews;
 
-  // Split reviews array between Row 1 and Row 2 for double alternating looping marquee rows
-  const halfLength = Math.ceil(finalReviews.length / 2);
-  const row1Raw = finalReviews.slice(0, halfLength);
-  const row2Raw = finalReviews.slice(halfLength);
-
-  // Helper to ensure each row has at least 8 elements for perfect, seamless loop animation transitions
+  // Helper to ensure the row has enough elements for perfect, seamless loop animation transitions
   const duplicateRowReviews = (items: Review[]) => {
     let list = [...items];
-    while (list.length < 8) {
+    while (list.length < 10) {
       list = [...list, ...list];
     }
-    // Duplicate once more to cover full viewport width
+    // Duplicate three times to cover full viewport width and support seamless loop
     return [...list, ...list, ...list];
   };
 
-  const row1Reviews = duplicateRowReviews(row1Raw);
-  const row2Reviews = duplicateRowReviews(row2Raw);
+  const rowReviews = duplicateRowReviews(finalReviews);
 
   return (
     <section ref={containerRef} id="reviews" className="py-24 md:py-32 bg-[#050505] overflow-hidden relative select-none">
@@ -201,157 +195,89 @@ export function ReviewsMarquee() {
         </p>
       </div>
 
-      {/* Endless Double-Row Marquee Slider */}
-      <div className="relative w-full overflow-hidden flex flex-col gap-6" dir="ltr">
+      {/* Endless Single-Row Marquee Slider */}
+      <div className="relative w-full overflow-hidden" dir="ltr">
         
-        {/* CSS Keyframes for perfectly seamless looping slide (both directions) */}
+        {/* CSS Keyframes for perfectly seamless looping slide leftward */}
         <style jsx global>{`
-          @keyframes marquee-scroll-right {
-            0% { transform: translate3d(-33.333%, 0, 0); }
-            100% { transform: translate3d(0, 0, 0); }
-          }
           @keyframes marquee-scroll-left {
             0% { transform: translate3d(0, 0, 0); }
             100% { transform: translate3d(-33.333%, 0, 0); }
           }
-          .animate-marquee-endless-right {
-            display: flex;
-            gap: 1.5rem;
-            width: max-content;
-            animation: marquee-scroll-right 45s linear infinite;
-          }
           .animate-marquee-endless-left {
             display: flex;
-            gap: 1.5rem;
             width: max-content;
-            animation: marquee-scroll-left 45s linear infinite;
+            animation: marquee-scroll-left 70s linear infinite;
           }
-          .animate-marquee-endless-right:hover,
+          .animate-marquee-endless-left > div {
+            margin-right: 1.5rem;
+          }
           .animate-marquee-endless-left:hover {
             animation-play-state: paused;
           }
           
           /* Reduced Motion Support for Accessibility */
           @media (prefers-reduced-motion: reduce) {
-            .animate-marquee-endless-right,
             .animate-marquee-endless-left {
               animation-play-state: paused !important;
             }
           }
         `}</style>
 
-        {/* ROW 1: Right-Scrolling Track */}
-        <div className="animate-marquee-endless-right" style={{ animationPlayState: isIntersecting ? undefined : "paused" }}>
-          {row1Reviews.map((review, idx) => (
-            <div
-              key={`row1-${idx}`}
-              className="w-[320px] h-[250px] md:w-[360px] md:h-[280px] flex-shrink-0 bg-[#08080c]/60 border border-white/5 p-5 md:p-6 rounded-3xl relative group hover:border-[#D6004B]/30 transition-all duration-500 shadow-2xl flex flex-col justify-between"
-              dir="rtl"
-            >
-              <div className="space-y-3.5">
-                
-                {/* User Info Header */}
-                <div className="flex items-center gap-3 md:gap-4">
-                  <div className="min-w-0 flex-1">
-                    <h4 className="font-alexandria font-bold text-white text-xs md:text-sm truncate">
-                      {review.name}
-                    </h4>
-                    <p className="text-[9px] md:text-[10px] text-zinc-500 font-bold truncate mt-0.5 font-cairo">{review.title}</p>
-                  </div>
-                  <div className="shrink-0">
-                    <div className="bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/20 flex items-center gap-1">
-                      <CheckCircle2 className="w-2.5 h-2.5" />
-                      <span className="text-[8px] md:text-[9px] font-black font-cairo">موثق</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Star Ratings (Supporting Float Decimals) */}
-                <div className="flex items-center gap-1">
-                  {renderFractionalStars(review.stars)}
-                  <span className="text-[9px] font-mono text-zinc-600 bg-white/5 px-1 rounded">
-                    {review.stars.toFixed(1)}
-                  </span>
-                </div>
-
-                {/* Review Text */}
-                <p className="text-zinc-400 font-cairo text-xs md:text-sm leading-relaxed whitespace-normal pl-2 line-clamp-3 md:line-clamp-4 italic">
-                  "{review.text}"
-                </p>
-
-              </div>
-              
-              {/* Card Footer: Displays Course Title underneath review cards ONLY for Courses */}
-              <div className="flex items-center justify-between border-t border-white/5 pt-3">
-                {review.isCourse && review.courseTitle ? (
-                  <span className="text-[10px] text-zinc-500 font-bold font-cairo opacity-65 truncate max-w-[220px]" title={review.courseTitle}>
-                    كورس: {review.courseTitle}
-                  </span>
-                ) : (
-                  <span />
-                )}
-              </div>
-              
-              {/* Subtle Ambient Hover Glow */}
-              <div className="absolute inset-0 bg-gradient-to-br from-[#D6004B]/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 rounded-3xl pointer-events-none" />
-            </div>
-          ))}
-        </div>
-
-        {/* ROW 2: Left-Scrolling Track */}
+        {/* SINGLE ROW: Left-Scrolling Track */}
         <div className="animate-marquee-endless-left" style={{ animationPlayState: isIntersecting ? undefined : "paused" }}>
-          {row2Reviews.map((review, idx) => (
+          {rowReviews.map((review, idx) => (
             <div
-              key={`row2-${idx}`}
-              className="w-[320px] h-[250px] md:w-[360px] md:h-[280px] flex-shrink-0 bg-[#08080c]/60 border border-white/5 p-5 md:p-6 rounded-3xl relative group hover:border-[#D6004B]/30 transition-all duration-500 shadow-2xl flex flex-col justify-between"
+              key={`row-${idx}`}
+              className="w-[320px] h-[220px] md:w-[360px] md:h-[240px] flex-shrink-0 bg-white/[0.02] border border-white/5 p-5 md:p-6 rounded-3xl relative group hover:border-rose-500/20 transition-all duration-500 shadow-2xl flex flex-col justify-between"
               dir="rtl"
             >
-              <div className="space-y-3.5">
-                
-                {/* User Info Header */}
-                <div className="flex items-center gap-3 md:gap-4">
-                  <div className="min-w-0 flex-1">
-                    <h4 className="font-alexandria font-bold text-white text-xs md:text-sm truncate">
-                      {review.name}
-                    </h4>
-                    <p className="text-[9px] md:text-[10px] text-zinc-500 font-bold truncate mt-0.5 font-cairo">{review.title}</p>
-                  </div>
-                  <div className="shrink-0">
-                    <div className="bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/20 flex items-center gap-1">
-                      <CheckCircle2 className="w-2.5 h-2.5" />
-                      <span className="text-[8px] md:text-[9px] font-black font-cairo">موثق</span>
+              {/* Card Header (Avatar + Name & Stars Stacked) */}
+              <div className="flex items-center gap-3">
+                <div className="shrink-0 relative">
+                  {review.avatarUrl ? (
+                    <img src={review.avatarUrl} className="w-10 h-10 rounded-full object-cover border border-white/10 shadow-inner" alt={review.name} />
+                  ) : (
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-rose-500/20 to-orange-500/10 flex items-center justify-center border border-white/5 text-rose-400 font-alexandria font-bold text-sm shadow-inner">
+                      {review.name.trim().replace(/^\./, "").charAt(0)}
                     </div>
+                  )}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <h4 className="font-alexandria font-bold text-white text-xs md:text-sm truncate">
+                    {review.name.trim().replace(/^\./, "")}
+                  </h4>
+                  <div className="flex items-center gap-1.5 mt-0.5">
+                    {renderFractionalStars(review.stars)}
+                    <span className="text-[9px] font-mono text-zinc-500 bg-white/[0.03] px-1 rounded border border-white/5">
+                      {review.stars.toFixed(1)}
+                    </span>
                   </div>
                 </div>
-
-                {/* Star Ratings (Supporting Float Decimals) */}
-                <div className="flex items-center gap-1">
-                  {renderFractionalStars(review.stars)}
-                  <span className="text-[9px] font-mono text-zinc-600 bg-white/5 px-1 rounded">
-                    {review.stars.toFixed(1)}
-                  </span>
-                </div>
-
-                {/* Review Text */}
-                <p className="text-zinc-400 font-cairo text-xs md:text-sm leading-relaxed whitespace-normal pl-2 line-clamp-3 md:line-clamp-4 italic">
-                  "{review.text}"
-                </p>
-
               </div>
-              
-              {/* Card Footer: Displays Course Title underneath review cards ONLY for Courses */}
-              <div className="flex items-center justify-between border-t border-white/5 pt-3">
+
+              {/* Review Text */}
+              <p className="text-zinc-300 font-cairo text-xs md:text-sm leading-relaxed whitespace-normal pl-2 line-clamp-3 italic relative z-10">
+                "{review.text}"
+              </p>
+
+              {/* Card Footer: Displays Course Title badge */}
+              <div className="flex items-center justify-between border-t border-white/5 pt-3 relative z-10">
                 {review.isCourse && review.courseTitle ? (
-                  <span className="text-[10px] text-zinc-500 font-bold font-cairo opacity-65 truncate max-w-[220px]" title={review.courseTitle}>
-                    كورس: {review.courseTitle}
-                  </span>
+                  <div className="flex items-center gap-1.5 text-zinc-500 bg-white/[0.02] border border-white/5 px-2.5 py-1 rounded-full text-[10px] font-bold font-cairo w-fit max-w-full" title={review.courseTitle}>
+                    <BookOpen className="w-3 h-3 text-rose-500 shrink-0" />
+                    <span className="truncate max-w-[200px]">{review.courseTitle}</span>
+                  </div>
                 ) : (
-                  <span />
+                  <div />
                 )}
               </div>
-              
-              {/* Subtle Ambient Hover Glow */}
-              <div className="absolute inset-0 bg-gradient-to-br from-[#D6004B]/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 rounded-3xl pointer-events-none" />
+
+              {/* Subtle Ambient Hover Glow & Testimonial Quote Mark */}
+              <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/10 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+              <div className="absolute top-4 left-4 text-white/[0.02] font-serif text-6xl pointer-events-none">
+                ”
+              </div>
             </div>
           ))}
         </div>
@@ -362,3 +288,4 @@ export function ReviewsMarquee() {
     </section>
   );
 }
+

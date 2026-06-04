@@ -413,14 +413,12 @@ export default function CartCheckoutPage() {
 
         <div className="container mx-auto px-4 max-w-6xl relative z-10">
           {/* Header */}
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
-            <div>
-              <Link href="/" className="inline-flex items-center text-zinc-500 hover:text-white font-cairo transition-all mb-4 group">
-                <ChevronRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
-                العودة للتسوق
-              </Link>
-              <h1 className="text-3xl md:text-5xl font-alexandria font-black text-white tracking-tight">إتمام الطلب بأمان</h1>
-            </div>
+          <div className="flex flex-col items-center justify-center text-center gap-2 mb-12">
+            <Link href="/" className="inline-flex items-center text-zinc-500 hover:text-white font-cairo transition-all mb-3 group">
+              <ChevronRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
+              العودة للتسوق
+            </Link>
+            <h1 className="text-3xl md:text-5xl font-alexandria font-black text-white tracking-tight">إتمام الطلب بأمان</h1>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 flex-col-reverse lg:flex-row">
