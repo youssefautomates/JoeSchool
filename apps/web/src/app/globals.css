@@ -114,6 +114,26 @@
   --radius-4xl: calc(var(--radius) * 2.6);
   --animate-scroll: scroll 30s linear infinite;
   --animate-text-gradient: text-gradient-shift 5s ease infinite;
+  --animate-marquee-left: marquee-left 90s linear infinite;
+  --animate-marquee-right: marquee-right 90s linear infinite;
+
+  @keyframes marquee-left {
+    0% {
+      transform: translate3d(0, 0, 0);
+    }
+    100% {
+      transform: translate3d(-33.3333%, 0, 0);
+    }
+  }
+
+  @keyframes marquee-right {
+    0% {
+      transform: translate3d(-33.3333%, 0, 0);
+    }
+    100% {
+      transform: translate3d(0, 0, 0);
+    }
+  }
   
   /* Premium Shadows */
   --shadow-premium: 0 10px 30px -10px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
@@ -244,52 +264,19 @@
   }
 }
 
-/* Infinite Testimonials Marquee Animation */
-@keyframes marquee-left {
-  0% {
-    transform: translate3d(0, 0, 0);
-  }
-  100% {
-    transform: translate3d(-33.3333%, 0, 0);
-  }
-}
-
-@keyframes marquee-right {
-  0% {
-    transform: translate3d(-33.3333%, 0, 0);
-  }
-  100% {
-    transform: translate3d(0, 0, 0);
-  }
-}
-
-.marquee-left-track {
-  display: flex;
-  width: max-content;
-  gap: 1.5rem;
-  animation: marquee-left 90s linear infinite;
-  will-change: transform;
-}
-
-.marquee-right-track {
-  display: flex;
-  width: max-content;
-  gap: 1.5rem;
-  animation: marquee-right 90s linear infinite;
-  will-change: transform;
-}
-
+/* Hover play-state modifiers for Tailwind marquee utilities */
 @media (hover: hover) {
-  .marquee-left-track:hover,
-  .marquee-right-track:hover {
+  .animate-marquee-left:hover,
+  .animate-marquee-right:hover {
     animation-play-state: paused;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .marquee-left-track,
-  .marquee-right-track {
+  .animate-marquee-left,
+  .animate-marquee-right {
     animation-play-state: paused !important;
   }
 }
+
 
