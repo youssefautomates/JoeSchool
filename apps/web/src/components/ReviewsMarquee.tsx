@@ -18,12 +18,10 @@ interface Review {
 }
 
 // ─── CSS Keyframes (injected at runtime — never stripped by any build tool) ──
+// Direction: left to right (content slides from left side toward right side)
+// Achieved by moving the track from -33.3334% back to 0% (positive direction)
 const MARQUEE_CSS = `
-  @keyframes __mq_left {
-    0%   { transform: translateX(0%); }
-    100% { transform: translateX(-33.3334%); }
-  }
-  @keyframes __mq_right {
+  @keyframes __mq_ltr {
     0%   { transform: translateX(-33.3334%); }
     100% { transform: translateX(0%); }
   }
@@ -168,33 +166,21 @@ const ReviewCard = memo(function ReviewCard({ review }: { review: Review }) {
 });
 
 // ─── Marquee Track ────────────────────────────────────────────────────────────
-// KEY: render [A, A, A] (3 identical copies), animate -33.333% = exactly 1 copy.
-// When the animation loops back to 0%, it's visually identical → ZERO visible seam.
-function MarqueeTrack({
-  reviews,
-  reverse = false,
-  durationSeconds = 40,
-}: {
-  reviews: Review[];
-  reverse?: boolean;
-  durationSeconds?: number;
-}) {
+// Renders 3 identical copies. Animates -33.3334% → 0% (left-to-right).
+// Loop restart is invisible because copy 1 end === copy 2 start.
+function MarqueeTrack({ reviews, durationSeconds = 90 }: { reviews: Review[]; durationSeconds?: number }) {
   const [paused, setPaused] = useState(false);
 
-  // Ensure we always have enough cards for a full viewport fill (minimum 12 per copy)
-  const padded = (() => {
-    let list = [...reviews];
-    while (list.length < 12) list = [...list, ...list];
-    return list;
-  })();
+  // Pad to minimum 12 cards per copy
+  let padded = [...reviews];
+  while (padded.length < 12) padded = [...padded, ...reviews];
 
-  // Triple the list — the animated track will be exactly 3× one copy's width.
-  // Animating -33.333% = moving by exactly ONE copy → seamless at loop boundary.
+  // Triple for seamless -33.3334% loop
   const tripled = [...padded, ...padded, ...padded];
 
   return (
     <div
-      style={{ overflow: "hidden", width: "100%", cursor: "default" }}
+      style={{ overflow: "hidden", width: "100%" }}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
@@ -205,7 +191,7 @@ function MarqueeTrack({
           flexWrap: "nowrap",
           width: "max-content",
           willChange: "transform",
-          animationName: reverse ? "__mq_right" : "__mq_left",
+          animationName: "__mq_ltr",
           animationDuration: `${durationSeconds}s`,
           animationTimingFunction: "linear",
           animationIterationCount: "infinite",
@@ -292,12 +278,6 @@ export function ReviewsMarquee() {
 
   if (reviews.length === 0) return null;
 
-  // Two offset rows: even-index cards in row 1, odd-index in row 2
-  const row1 = reviews.filter((_, i) => i % 2 === 0);
-  const row2 = reviews.filter((_, i) => i % 2 === 1).length >= 3
-    ? reviews.filter((_, i) => i % 2 === 1)
-    : [...reviews].reverse();
-
   return (
     <section
       id="reviews"
@@ -320,13 +300,8 @@ export function ReviewsMarquee() {
         </p>
       </div>
 
-      {/* Two marquee rows */}
-      <div style={{ display: "flex", flexDirection: "column", gap: 28 }}>
-        {/* Row 1 — left direction */}
-        <MarqueeTrack reviews={row1} reverse={false} durationSeconds={45} />
-        {/* Row 2 — right direction (counter-scroll for depth) */}
-        <MarqueeTrack reviews={row2} reverse={true} durationSeconds={55} />
-      </div>
+      {/* Single continuous left-to-right marquee row */}
+      <MarqueeTrack reviews={reviews} durationSeconds={90} />
 
       {/* Bottom rule */}
       <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 1, background: "linear-gradient(to right, transparent, rgba(255,255,255,0.08), transparent)" }} />
