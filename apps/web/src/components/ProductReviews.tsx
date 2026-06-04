@@ -180,14 +180,9 @@ export function ProductReviews({ productId, initialReviews, courseTitle, product
         <div className="w-11 h-11 md:w-13 md:h-13 bg-gradient-to-br from-rose-600/20 to-rose-900/10 rounded-2xl flex items-center justify-center border border-rose-500/10 shadow-lg shadow-rose-500/5">
           <MessageSquareQuote className="w-5 h-5 md:w-6 md:h-6 text-rose-400" />
         </div>
-        <div>
-          <h2 className="text-xl sm:text-2xl font-alexandria font-black text-white tracking-tight leading-none">
-            {title || "آراء الطلاب"}
-          </h2>
-          <p className="text-xs text-zinc-500 mt-0.5 font-cairo">
-            {sortedReviews.length}+ تقييم حقيقي من طلابنا
-          </p>
-        </div>
+        <h2 className="text-xl sm:text-2xl font-alexandria font-black text-white tracking-tight leading-none">
+          {title || "آراء الطلاب"}
+        </h2>
       </div>
 
       {/* Marquee viewport */}
