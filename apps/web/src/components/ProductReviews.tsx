@@ -26,16 +26,16 @@ interface StarSVGProps {
 
 export const MemoizedStarSVG = memo(function StarSVG({ fillPercent }: StarSVGProps) {
   if (fillPercent <= 0) {
-    return <Star className="w-3.5 h-3.5 text-zinc-700 fill-transparent" />;
+    return <Star className="w-3.5 h-3.5 fill-transparent" style={{ color: "#6b0020" }} />;
   }
   if (fillPercent >= 100) {
-    return <Star className="w-3.5 h-3.5 fill-current text-amber-400" />;
+    return <Star className="w-3.5 h-3.5 fill-current" style={{ color: "#D6004B" }} />;
   }
   return (
     <div className="relative w-3.5 h-3.5">
-      <Star className="w-3.5 h-3.5 text-zinc-700 fill-transparent absolute inset-0" />
+      <Star className="w-3.5 h-3.5 fill-transparent absolute inset-0" style={{ color: "#6b0020" }} />
       <div className="absolute inset-0 overflow-hidden" style={{ width: `${fillPercent}%` }}>
-        <Star className="w-3.5 h-3.5 fill-current text-amber-400" />
+        <Star className="w-3.5 h-3.5 fill-current" style={{ color: "#D6004B" }} />
       </div>
     </div>
   );
@@ -76,7 +76,7 @@ const MARQUEE_CSS = `
   flex-wrap: nowrap;
   width: max-content;
   will-change: transform;
-  animation: pr-marquee-ltr 80s linear infinite;
+  animation: pr-marquee-ltr 120s linear infinite;
 }
 .pr-marquee-track:hover {
   animation-play-state: paused;
@@ -259,11 +259,8 @@ export function ProductReviews({ productId, initialReviews, courseTitle, product
                     <p className="font-alexandria font-bold text-white text-[13px] md:text-sm truncate leading-tight">
                       {displayName}
                     </p>
-                    <div className="flex items-center gap-2 mt-1">
+                    <div className="flex items-center gap-1.5 mt-1">
                       {renderFractionalStars(review.rating)}
-                      <span className="text-[10px] font-bold text-amber-400/80 font-mono leading-none">
-                        {review.rating.toFixed(1)}
-                      </span>
                     </div>
                   </div>
 
