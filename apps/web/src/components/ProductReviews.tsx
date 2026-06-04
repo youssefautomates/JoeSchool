@@ -236,10 +236,12 @@ export function ProductReviews({ productId, initialReviews, courseTitle, product
                   </div>
                 </div>
 
-                {/* Review text */}
-                <p className="text-zinc-300 font-cairo text-xs md:text-[13px] leading-relaxed pl-2 line-clamp-3 italic relative z-10">
-                  &ldquo;{review.text}&rdquo;
-                </p>
+                {/* Review text — centered vertically in remaining space */}
+                <div className="flex-1 flex items-center relative z-10">
+                  <p className="text-zinc-200 font-cairo text-[13px] md:text-[14.5px] leading-relaxed px-1 line-clamp-3 italic w-full text-center">
+                    &ldquo;{review.text}&rdquo;
+                  </p>
+                </div>
 
                 {/* Ambient hover glow */}
                 <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/10 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
