@@ -128,19 +128,12 @@ export function ReviewCard({ review, productName, onEdit, onDelete, onStatusChan
                 {review.firstName} {review.lastName ? review.lastName.charAt(0) + "." : ""}
               </h4>
               <div className="flex items-center gap-1.5 mt-1 flex-wrap">
-                {review.isVerified && (
-                  <div className="flex items-center gap-0.5 text-emerald-400">
-                    <ShieldCheck className="w-3 h-3" />
-                    <span className="text-[8px] font-black font-cairo">مشتري موثق</span>
-                  </div>
-                )}
                 {review.isFeatured && (
                   <div className="flex items-center gap-0.5 text-rose-500">
                     <Sparkles className="w-3 h-3 fill-current" />
                     <span className="text-[8px] font-bold font-cairo">مميز ({review.featuredPosition || 0})</span>
                   </div>
                 )}
-                {getSourceBadge(review.source)}
               </div>
             </div>
           </div>
@@ -174,13 +167,6 @@ export function ReviewCard({ review, productName, onEdit, onDelete, onStatusChan
       </div>
 
       <div className="pt-4 mt-6 border-t border-white/5 space-y-4">
-        {/* Linked product */}
-        <div className="flex items-center justify-between text-[9px] font-bold">
-          <span className="text-zinc-500 font-cairo">العنصر المرتبط:</span>
-          <span className="text-zinc-300 font-sans truncate max-w-[200px]" title={productName}>
-            {productName}
-          </span>
-        </div>
 
         {/* Quick action controls */}
         <div className="flex items-center gap-2">

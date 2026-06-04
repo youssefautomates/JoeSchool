@@ -178,6 +178,45 @@ export async function syncWishlistOnLogin(userId: string): Promise<void> {
   }
 }
 
+// Hydrate any wishlist items by querying courses, products, and bundles
+export async function hydrateWishlistItems(items: WishlistItem[]): Promise<WishlistItem[]> {
+  if (items.length === 0) return [];
+  
+  const courseIds = items.filter(i => i.item_type === "course" && i.course_id).map(i => i.course_id) as string[];
+  const productIds = items.filter(i => i.item_type === "digital_product" && i.product_id).map(i => i.product_id) as string[];
+  const bundleIds = items.filter(i => i.item_type === "bundle" && i.bundle_id).map(i => i.bundle_id) as string[];
+
+  const [coursesRes, productsRes, bundlesRes] = await Promise.all([
+    courseIds.length > 0
+      ? supabaseClient.from("courses").select("*").in("id", courseIds)
+      : Promise.resolve({ data: [], error: null }),
+    productIds.length > 0
+      ? supabaseClient.from("products").select("*").in("id", productIds)
+      : Promise.resolve({ data: [], error: null }),
+    bundleIds.length > 0
+      ? supabaseClient.from("bundles").select("*").in("id", bundleIds)
+      : Promise.resolve({ data: [], error: null }),
+  ]);
+
+  const coursesMap = new Map((coursesRes.data || []).map(c => [c.id, c]));
+  const productsMap = new Map((productsRes.data || []).map(p => [p.id, p]));
+  const bundlesMap = new Map((bundlesRes.data || []).map(b => [b.id, b]));
+
+  const hydrated: WishlistItem[] = items.map((item) => {
+    const h: WishlistItem = { ...item };
+    if (item.item_type === "course" && item.course_id) {
+      h.course = coursesMap.get(item.course_id);
+    } else if (item.item_type === "digital_product" && item.product_id) {
+      h.product = productsMap.get(item.product_id);
+    } else if (item.item_type === "bundle" && item.bundle_id) {
+      h.bundle = bundlesMap.get(item.bundle_id);
+    }
+    return h;
+  }).filter(h => h.course || h.product || h.bundle);
+
+  return hydrated;
+}
+
 // Fetch unified hydrated wishlist items for dashboard
 export async function fetchUserWishlist(userId: string): Promise<{ items: WishlistItem[]; error: string | null }> {
   try {
@@ -189,40 +228,16 @@ export async function fetchUserWishlist(userId: string): Promise<{ items: Wishli
     if (wishlistError) return { items: [], error: wishlistError.message };
     if (!wishlistData || wishlistData.length === 0) return { items: [], error: null };
 
-    const courseIds = wishlistData.filter(i => i.item_type === "course").map(i => i.course_id);
-    const productIds = wishlistData.filter(i => i.item_type === "digital_product").map(i => i.product_id);
-    const bundleIds = wishlistData.filter(i => i.item_type === "bundle").map(i => i.bundle_id);
-
-    const [coursesRes, productsRes, bundlesRes] = await Promise.all([
-      courseIds.length > 0
-        ? supabaseClient.from("courses").select("*").in("id", courseIds)
-        : Promise.resolve({ data: [], error: null }),
-      productIds.length > 0
-        ? supabaseClient.from("products").select("*").in("id", productIds)
-        : Promise.resolve({ data: [], error: null }),
-      bundleIds.length > 0
-        ? supabaseClient.from("bundles").select("*").in("id", bundleIds)
-        : Promise.resolve({ data: [], error: null }),
-    ]);
-
-    const coursesMap = new Map((coursesRes.data || []).map(c => [c.id, c]));
-    const productsMap = new Map((productsRes.data || []).map(p => [p.id, p]));
-    const bundlesMap = new Map((bundlesRes.data || []).map(b => [b.id, b]));
-
-    const hydrated: WishlistItem[] = wishlistData.map((item) => {
-      const h: WishlistItem = { ...item };
-      if (item.item_type === "course") {
-        h.course = coursesMap.get(item.course_id);
-      } else if (item.item_type === "digital_product") {
-        h.product = productsMap.get(item.product_id);
-      } else if (item.item_type === "bundle") {
-        h.bundle = bundlesMap.get(item.bundle_id);
-      }
-      return h;
-    }).filter(h => h.course || h.product || h.bundle);
-
+    const hydrated = await hydrateWishlistItems(wishlistData);
     return { items: hydrated, error: null };
   } catch (err: any) {
     return { items: [], error: err.message };
   }
 }
+
+// Fetch hydrated wishlist items from local storage (for guest users)
+export async function fetchLocalHydratedWishlist(): Promise<WishlistItem[]> {
+  const localItems = getLocalWishlist();
+  return hydrateWishlistItems(localItems);
+}
+

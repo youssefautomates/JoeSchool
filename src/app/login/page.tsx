@@ -89,22 +89,15 @@ function LoginForm() {
 
       <div className="w-full max-w-lg relative z-10">
         {/* Logo and Brand Header */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-8 flex justify-center">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5 }}
             className="inline-block"
           >
-            <Link href="/" className="flex flex-col items-center gap-3 group">
-              <div className="w-16 h-16 relative flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
-                <img src="/logo.png" alt="JoeSchool Logo" className="w-full h-full object-contain" />
-              </div>
-              <div>
-                <h1 className="font-alexandria font-black text-2xl tracking-tight text-white mt-2">
-                  Joe <span className="text-rose-500">School</span>
-                </h1>
-              </div>
+            <Link href="/" className="group inline-block">
+              <img src="/logo-text.png" alt="JoeSchool Logo" className="h-14 sm:h-16 object-contain group-hover:scale-105 transition-transform duration-300" />
             </Link>
           </motion.div>
         </div>

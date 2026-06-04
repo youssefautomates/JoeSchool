@@ -335,9 +335,7 @@ export function ReviewEditor({ review, products, onSave, onClose }: ReviewEditor
             </div>
 
             {/* 6. Settings Toggles and Dropdowns */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-white/[0.01] border border-white/5 p-5 rounded-2xl">
-              
-              {/* Soft Moderation */}
+            <div className="flex flex-col gap-1.5 bg-white/[0.01] border border-white/5 p-5 rounded-2xl">
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs text-zinc-300 font-bold font-cairo">حالة النشر والمراجعة</label>
                 <select
@@ -351,65 +349,6 @@ export function ReviewEditor({ review, products, onSave, onClose }: ReviewEditor
                   <option value="archived" className="bg-[#050508]">📁 مؤرشف / محذوف سوفت</option>
                 </select>
               </div>
-
-              {/* Source tagging */}
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs text-zinc-300 font-bold font-cairo">مصدر التقييم</label>
-                <select
-                  value={formData.source}
-                  onChange={(e) => handleChange("source", e.target.value)}
-                  className="w-full h-11 px-3.5 rounded-xl bg-white/5 border border-white/10 text-zinc-300 font-sans text-xs outline-none focus:border-rose-500/50 cursor-pointer"
-                >
-                  <option value="manual_admin" className="bg-[#050508]">لوحة تحكم المسؤول (يدوي)</option>
-                  <option value="imported" className="bg-[#050508]">مستورد من منصة خارجية</option>
-                  <option value="customer_submitted" className="bg-[#050508]">مضاف تلقائيًا من رأي عميل</option>
-                </select>
-              </div>
-
-              {/* Verified Purchase Check */}
-              <div className="flex items-center justify-between p-3.5 rounded-xl bg-white/5 border border-white/5 select-none cursor-pointer mt-2" onClick={() => handleChange("isVerified", !formData.isVerified)}>
-                <div className="flex items-center gap-2">
-                  <ShieldCheck className="w-4.5 h-4.5 text-emerald-400" />
-                  <span className="text-xs text-zinc-300 font-bold font-cairo">علامة مشتري موثق</span>
-                </div>
-                <input
-                  type="checkbox"
-                  checked={formData.isVerified !== false}
-                  onChange={() => {}}
-                  className="rounded border-zinc-700 bg-white/5 text-emerald-500 focus:ring-emerald-500 cursor-pointer"
-                />
-              </div>
-
-              {/* Featured Review Toggle */}
-              <div className="flex items-center justify-between p-3.5 rounded-xl bg-white/5 border border-white/5 select-none cursor-pointer mt-2" onClick={() => handleChange("isFeatured", !formData.isFeatured)}>
-                <div className="flex items-center gap-2">
-                  <Sparkles className="w-4.5 h-4.5 text-rose-500 fill-current" />
-                  <span className="text-xs text-zinc-300 font-bold font-cairo">تثبيت كتقييم مميز</span>
-                </div>
-                <input
-                  type="checkbox"
-                  checked={formData.isFeatured || false}
-                  onChange={() => {}}
-                  className="rounded border-zinc-700 bg-white/5 text-rose-600 focus:ring-rose-500 cursor-pointer"
-                />
-              </div>
-
-              {/* Featured priority position */}
-              {formData.isFeatured && (
-                <div className="flex flex-col gap-1.5 md:col-span-2">
-                  <label className="text-xs text-zinc-300 font-bold font-cairo">ترتيب أولوية التثبيت (الأقل يظهر أولاً)</label>
-                  <input
-                    type="number"
-                    min={0}
-                    value={formData.featuredPosition || 0}
-                    onChange={(e) => handleChange("featuredPosition", Number(e.target.value))}
-                    className="h-11 px-4 rounded-xl bg-white/5 border border-white/10 text-zinc-300 font-mono text-xs outline-none focus:border-rose-500/50"
-                  />
-                  <span className="text-[10px] text-zinc-500 font-bold font-cairo">
-                    * يتم ترتيب التقييمات المميزة تصاعديًا من 0 إلى ما فوق لعرض الأهم في البداية.
-                  </span>
-                </div>
-              )}
             </div>
 
             {/* Action buttons */}

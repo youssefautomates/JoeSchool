@@ -116,15 +116,7 @@ export default function ProductsPage() {
           </div>
 
           <div className="container relative z-10 mx-auto px-4 text-center max-w-4xl">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5 }}
-              className="inline-flex items-center gap-2 bg-rose-500/10 text-rose-400 border border-rose-500/20 px-4 py-1.5 rounded-full mb-6 font-bold text-xs md:text-sm"
-            >
-              <Sparkles className="w-4 h-4 animate-pulse" />
-              <span>متجر المنتجات الرقمية</span>
-            </motion.div>
+
 
             <motion.h1
               initial={{ opacity: 0, y: 20 }}

@@ -6,7 +6,7 @@ import Link from "next/link";
 
 export function CertificateSection() {
   return (
-    <section className="py-16 md:py-24 relative overflow-hidden bg-[#06060c] border-b border-white/5 select-none font-cairo">
+    <section className="py-16 md:py-24 relative overflow-hidden bg-[#06060c] select-none font-cairo">
       {/* Background glow effects */}
       <div className="absolute inset-0 pointer-events-none z-0">
         <div className="absolute top-1/2 right-1/4 -translate-y-1/2 w-[300px] sm:w-[500px] h-[300px] sm:h-[500px] bg-rose-500/5 rounded-full blur-[100px] mix-blend-screen" />
@@ -78,6 +78,8 @@ export function CertificateSection() {
 
         </div>
       </div>
+      {/* Subtle Bottom Section Divider */}
+      <div className="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
     </section>
   );
 }

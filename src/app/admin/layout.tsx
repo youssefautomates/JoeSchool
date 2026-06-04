@@ -64,12 +64,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* Sidebar - Positioned on Right for RTL */}
       <aside className="fixed right-0 top-0 h-screen w-80 bg-[#09090b] border-l border-white/5 z-50 hidden lg:flex flex-col shadow-2xl" dir="rtl">
         <div className="p-8 flex items-center gap-4 border-b border-white/5">
-          <div className="w-10 h-10 flex items-center justify-center">
-            <img src="/logo.png" alt="Admin Logo" className="w-full h-full object-contain drop-shadow-[0_0_15px_rgba(214,0,75,0.5)]" />
-          </div>
           <div>
             <span className="text-xl font-sans font-black tracking-tighter block uppercase">لوحة الإدارة برو</span>
-            <span className="text-[10px] text-rose-500 font-bold tracking-[0.2em] uppercase">أتمتة يوسف</span>
+            <span className="text-[10px] text-[#D6004B] font-bold tracking-[0.2em] uppercase">أتمتة يوسف</span>
           </div>
         </div>
 

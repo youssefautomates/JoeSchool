@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ChevronLeft, Menu, X, ShoppingCart, Home, User, LogOut, LogIn, BookOpen } from "lucide-react";
+import { ChevronLeft, Menu, X, ShoppingCart, Home, User, LogOut, LogIn, BookOpen, Package, HelpCircle, Heart } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
@@ -20,8 +20,38 @@ export function Navbar() {
 
   const [user, setUser] = useState<any>(null);
   const [imgError, setImgError] = useState(false);
+  const [wishlistCount, setWishlistCount] = useState(0);
 
   const isHomePage = pathname === "/";
+
+  const updateWishlistCount = async (currentUser = user) => {
+    try {
+      if (currentUser?.id) {
+        const { count, error } = await supabaseClient
+          .from("wishlist_items")
+          .select("id", { count: "exact", head: true })
+          .eq("user_id", currentUser.id);
+        if (!error && count !== null) {
+          setWishlistCount(count);
+          return;
+        }
+      }
+      const local = typeof window !== "undefined" ? JSON.parse(localStorage.getItem("youssef-automates-wishlist") || "[]") : [];
+      setWishlistCount(local.length);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  useEffect(() => {
+    updateWishlistCount(user);
+
+    const handleUpdate = () => {
+      updateWishlistCount(user);
+    };
+    window.addEventListener("wishlist-updated", handleUpdate);
+    return () => window.removeEventListener("wishlist-updated", handleUpdate);
+  }, [user]);
 
   const profileImageUrl = user?.user_metadata?.avatar_url || user?.user_metadata?.picture || user?.user_metadata?.profile_image;
   const userName = user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email?.split("@")[0] || "طالب مميز";
@@ -123,8 +153,8 @@ export function Navbar() {
   );
 
   const navLinks = [
-    { href: isHomePage ? "#products" : "/#products", label: "المنتجات الرقمية", section: "products" },
-    { href: isHomePage ? "#faq" : "/#faq", label: "الأسئلة الشائعة", section: "faq" },
+    { href: isHomePage ? "#products" : "/#products", label: "المنتجات الرقمية", section: "products", icon: Package },
+    { href: isHomePage ? "#faq" : "/#faq", label: "الأسئلة الشائعة", section: "faq", icon: HelpCircle },
   ];
 
   return (
@@ -147,19 +177,14 @@ export function Navbar() {
           <div className="flex items-center justify-between h-full">
 
             {/* Right Side: Logo & Brand */}
-            <Link href="/" onClick={handleHomeClick} className="flex items-center gap-2.5 group">
-              <div className="relative">
-                <div className="w-10 h-10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                  <img src="/logo.png" alt="JoeSchool" className="w-full h-full object-contain drop-shadow-[0_0_15px_rgba(214,0,75,0.5)]" />
-                </div>
-              </div>
-              <div className="hidden md:flex items-center">
-                <img src="/logo-text.png" alt="JoeSchool" className="h-16 md:h-20 object-contain" />
-              </div>
-            </Link>
+            <div className="md:flex-1 flex items-center justify-start">
+              <Link href="/" onClick={handleHomeClick} className="flex items-center group">
+                <img src="/logo-text.png" alt="JoeSchool" className="h-18 sm:h-22 md:h-26 object-contain group-hover:scale-[1.03] transition-transform duration-300" />
+              </Link>
+            </div>
 
             {/* Middle: Desktop Nav Links */}
-            <div className="hidden md:flex items-center gap-6 font-cairo text-[15px] font-medium text-zinc-300">
+            <div className="hidden md:flex items-center justify-center gap-6 font-cairo text-[15px] font-medium text-zinc-300 shrink-0">
               <Link
                 href="/"
                 onClick={handleHomeClick}
@@ -168,7 +193,7 @@ export function Navbar() {
                   isHomePage && activeSection === "" ? "text-white" : ""
                 )}
               >
-                الرئيسية
+                الصفحة الرئيسية
                 <span className={cn(
                   "absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-rose-600 to-orange-400 rounded-full transition-all duration-300",
                   isHomePage && activeSection === "" ? "w-full" : "w-0 group-hover:w-full"
@@ -210,9 +235,11 @@ export function Navbar() {
             </div>
 
             {/* Left Side: Action Elements */}
-            <div className="flex items-center gap-2 md:gap-4">
+            <div className="md:flex-1 flex items-center justify-end gap-2 md:gap-4">
 
-              {/* Cart Button */}
+
+
+               {/* Cart Button */}
               <button
                 onClick={() => setIsCartOpen(true)}
                 className="relative p-2 text-zinc-400 hover:text-rose-400 transition-all duration-300 hover:scale-110 hover:-translate-y-0.5 active:scale-95 shrink-0"
@@ -225,6 +252,23 @@ export function Navbar() {
                   </span>
                 )}
               </button>
+
+              {/* Mobile Auth Quick Link */}
+              {user ? (
+                <Link
+                  href="/dashboard"
+                  className="md:hidden font-cairo text-[11px] xs:text-xs font-bold text-[#D6004B] hover:text-[#ff0055] transition-colors bg-[#D6004B]/5 hover:bg-[#D6004B]/10 px-2.5 py-1.5 rounded-xl shrink-0 cursor-pointer"
+                >
+                  لوحة التحكم
+                </Link>
+              ) : (
+                <Link
+                  href="/login"
+                  className="md:hidden font-cairo text-[11px] xs:text-xs font-bold text-white hover:text-white transition-colors bg-[#D6004B] hover:bg-[#b0003d] px-2.5 py-1.5 rounded-xl shrink-0 cursor-pointer"
+                >
+                  تسجيل الدخول
+                </Link>
+              )}
 
               {/* Integrated Auth CTA Actions for Desktop */}
               {user ? (
@@ -303,7 +347,7 @@ export function Navbar() {
                   "md:hidden p-2 rounded-xl transition-all duration-300 shrink-0",
                   scrolled
                     ? "hover:bg-white/10 text-white"
-                    : "bg-white/5 backdrop-blur-md border border-white/10 shadow-sm text-white"
+                    : "bg-white/5 backdrop-blur-md text-white"
                 )}
                 aria-label="فتح القائمة"
                 style={{ pointerEvents: "auto" }}
@@ -360,7 +404,7 @@ export function Navbar() {
                         <User className="w-5 h-5" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs font-alexandria font-bold text-white leading-tight mb-1">مرحباً بك في المنصة</p>
+                        <p className="text-xs font-alexandria font-bold text-white leading-tight mb-1">مرحباً بك في جو سكول</p>
                         <p className="text-[10px] text-zinc-400 font-cairo">سجل دخولك للاستفادة الكاملة</p>
                       </div>
                     </div>
@@ -377,7 +421,7 @@ export function Navbar() {
                   >
                     <span className="flex items-center gap-2">
                       <Home className="w-4 h-4 text-rose-500" />
-                      الرئيسية
+                      الصفحة الرئيسية
                     </span>
                     <ChevronLeft className="w-4 h-4 opacity-0 group-hover:opacity-100 group-hover:-translate-x-1 transition-all" />
                   </Link>
@@ -397,20 +441,48 @@ export function Navbar() {
                     <ChevronLeft className="w-4 h-4 opacity-0 group-hover:opacity-100 group-hover:-translate-x-1 transition-all" />
                   </Link>
 
-                  {navLinks.map((link) => (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      onClick={(e) => handleNavClick(e, link.href.startsWith("/#") ? `#${link.section}` : link.href)}
-                      className={cn(
-                        "p-3 rounded-xl hover:bg-white/5 font-cairo text-zinc-300 hover:text-white transition-all flex items-center justify-between group",
-                        activeSection === link.section ? "text-white bg-white/5" : ""
+                  {navLinks.map((link) => {
+                    const Icon = link.icon;
+                    return (
+                      <Link
+                        key={link.href}
+                        href={link.href}
+                        onClick={(e) => handleNavClick(e, link.href.startsWith("/#") ? `#${link.section}` : link.href)}
+                        className={cn(
+                          "p-3 rounded-xl hover:bg-white/5 font-cairo text-zinc-300 hover:text-white transition-all flex items-center justify-between group",
+                          activeSection === link.section ? "text-white bg-white/5" : ""
+                        )}
+                      >
+                        <span className="flex items-center gap-2">
+                          <Icon className="w-4 h-4 text-rose-500" />
+                          {link.label}
+                        </span>
+                        <ChevronLeft className="w-4 h-4 opacity-0 group-hover:opacity-100 group-hover:-translate-x-1 transition-all" />
+                      </Link>
+                    );
+                  })}
+
+                  {/* Favorites / Wishlist link in mobile menu */}
+                  <button
+                    onClick={() => {
+                      setMobileOpen(false);
+                      window.dispatchEvent(new Event("wishlist-open"));
+                    }}
+                    className="p-3 rounded-xl hover:bg-white/5 font-cairo text-zinc-300 hover:text-white transition-all flex items-center justify-between group w-full text-right cursor-pointer"
+                  >
+                    <span className="flex items-center gap-2">
+                      <Heart className="w-4 h-4 text-rose-500 fill-rose-500/20" />
+                      المفضلة
+                    </span>
+                    <div className="flex items-center gap-2">
+                      {wishlistCount > 0 && (
+                        <span className="bg-[#D6004B] text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full">
+                          {wishlistCount}
+                        </span>
                       )}
-                    >
-                      {link.label}
                       <ChevronLeft className="w-4 h-4 opacity-0 group-hover:opacity-100 group-hover:-translate-x-1 transition-all" />
-                    </Link>
-                  ))}
+                    </div>
+                  </button>
 
                   <Link
                     href={isHomePage ? "#products" : "/#products"}

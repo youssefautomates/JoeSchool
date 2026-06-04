@@ -2,7 +2,7 @@
  
 import { useState, useEffect, Suspense } from "react";
 import { supabaseClient } from "@/lib/supabaseClient";
-import { getCoursesList, type LmsCourse } from "@/lib/coursesDb";
+import { getCoursesList, deleteCourse, type LmsCourse } from "@/lib/coursesDb";
 import { 
   Plus, Trash2, Edit2, Loader2, Save, X, AlignLeft, 
   ChevronDown, ChevronUp, BookOpen, ExternalLink, Layers,
@@ -191,15 +191,38 @@ function CourseCategoriesAdminPageContent() {
     const catProducts = products.filter(p => p.category === catName || getProductCategory(p) === catName);
     
     if (viewTab === "courses" && catCourses.length > 0) {
-      toast.error(`Cannot delete category! It contains ${catCourses.length} active courses. Please reassign them first.`);
-      return;
+      if (!window.confirm(`This category contains ${catCourses.length} active courses. Do you want to reassign these courses to "Unassigned" and delete the category?`)) {
+        return;
+      }
+      try {
+        const { error: updateError } = await supabaseClient
+          .from("courses")
+          .update({ category: "" })
+          .eq("category", catName);
+        if (updateError) throw updateError;
+      } catch (err) {
+        toast.error("Failed to reassign courses inside category");
+        return;
+      }
     }
+    
     if (viewTab === "products" && catProducts.length > 0) {
-      toast.error(`Cannot delete category! It contains ${catProducts.length} active products. Please reassign them first.`);
-      return;
+      if (!window.confirm(`This category contains ${catProducts.length} active products. Do you want to reassign these products to "Unassigned" and delete the category?`)) {
+        return;
+      }
+      try {
+        const { error: updateError } = await supabaseClient
+          .from("products")
+          .update({ category: "" })
+          .eq("category", catName);
+        if (updateError) throw updateError;
+      } catch (err) {
+        toast.error("Failed to reassign digital products inside category");
+        return;
+      }
+    } else if (catCourses.length === 0) {
+      if (!window.confirm("Are you sure you want to permanently delete this category? This action cannot be undone.")) return;
     }
- 
-    if (!window.confirm("Are you sure you want to permanently delete this category? This action cannot be undone.")) return;
     
     const activeTable = viewTab === "courses" ? "course_categories" : "product_categories";
     try {
@@ -209,6 +232,33 @@ function CourseCategoriesAdminPageContent() {
       await fetchCategoriesData();
     } catch (err) {
       toast.error("An error occurred while deleting the category");
+    }
+  };
+
+  const handleDeleteProduct = async (id: string, title: string) => {
+    if (!window.confirm(`Are you sure you want to permanently delete "${title}"? This action cannot be undone.`)) return;
+    try {
+      const { error } = await supabaseClient
+        .from("products")
+        .delete()
+        .eq("id", id);
+      if (error) throw error;
+      toast.success("Product deleted successfully! 🗑️");
+      await fetchCategoriesData();
+    } catch (err) {
+      toast.error("An error occurred while deleting the product");
+    }
+  };
+
+  const handleDeleteCourse = async (id: string, title: string) => {
+    if (!window.confirm(`Are you sure you want to permanently delete course "${title}"? This action cannot be undone.`)) return;
+    try {
+      const success = await deleteCourse(id);
+      if (!success) throw new Error("Delete failed");
+      toast.success("Course deleted successfully! 🗑️");
+      await fetchCategoriesData();
+    } catch (err) {
+      toast.error("An error occurred while deleting the course");
     }
   };
  
@@ -536,6 +586,14 @@ function CourseCategoriesAdminPageContent() {
                                         <ExternalLink className="w-3.5 h-3.5" />
                                       </a>
  
+                                      {/* Delete course button */}
+                                      <button
+                                        onClick={() => handleDeleteCourse(course.id, course.title)}
+                                        className="p-2 rounded-xl bg-white/5 border border-white/5 text-zinc-400 hover:text-rose-400 hover:border-rose-500/20 transition-all cursor-pointer"
+                                        title="Delete Course"
+                                      >
+                                        <Trash2 className="w-3.5 h-3.5" />
+                                      </button>
                                     </div>
                                   </div>
                                 ))}
@@ -641,6 +699,15 @@ function CourseCategoriesAdminPageContent() {
                                       >
                                         <ExternalLink className="w-3.5 h-3.5" />
                                       </a>
+
+                                      {/* Delete product button */}
+                                      <button
+                                        onClick={() => handleDeleteProduct(prod.id, prod.title)}
+                                        className="p-2 rounded-xl bg-white/5 border border-white/5 text-zinc-400 hover:text-rose-400 hover:border-rose-500/20 transition-all cursor-pointer"
+                                        title="Delete Product"
+                                      >
+                                        <Trash2 className="w-3.5 h-3.5" />
+                                      </button>
  
                                     </div>
                                   </div>

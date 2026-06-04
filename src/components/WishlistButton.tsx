@@ -60,6 +60,7 @@ export default function WishlistButton({
         if (success) {
           setIsLiked(false);
           toast.success("تمت الإزالة من المفضلة");
+          window.dispatchEvent(new Event("wishlist-updated"));
         } else {
           toast.error(error || "حدث خطأ أثناء الإزالة");
         }
@@ -68,6 +69,7 @@ export default function WishlistButton({
         if (success) {
           setIsLiked(true);
           toast.success("تمت الإضافة إلى المفضلة");
+          window.dispatchEvent(new Event("wishlist-updated"));
         } else {
           toast.error(error || "حدث خطأ أثناء الإضافة");
         }

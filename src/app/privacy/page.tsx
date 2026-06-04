@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -41,15 +41,6 @@ export default function PrivacyPage() {
         <div className="container mx-auto px-4 max-w-5xl relative z-10">
           {/* Header */}
           <div className="text-center max-w-2xl mx-auto mb-12">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5 }}
-              className="inline-flex items-center gap-2 bg-rose-500/10 text-rose-400 border border-rose-500/20 px-4 py-1.5 rounded-full mb-6 font-bold text-xs md:text-sm"
-            >
-              <Sparkles className="w-4 h-4 animate-pulse" />
-              <span>المركز القانوني لمنصة JoeSchool</span>
-            </motion.div>
 
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
@@ -66,7 +57,7 @@ export default function PrivacyPage() {
           </div>
 
           {/* Legal Navigation Tabs */}
-          <div className="flex items-center justify-center gap-2 mb-10 overflow-x-auto pb-2 scrollbar-none border-b border-white/5">
+          <div className="flex items-center justify-center mb-10 border-b border-white/5 w-full">
             {tabs.map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
@@ -74,14 +65,14 @@ export default function PrivacyPage() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-2 px-5 py-3 rounded-t-xl transition-all duration-300 font-bold text-xs sm:text-sm border-b-2 cursor-pointer whitespace-nowrap ${
+                  className={`flex-1 min-w-0 flex items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-5 py-3 rounded-t-xl transition-all duration-300 font-bold text-xs sm:text-sm md:text-base border-b-2 cursor-pointer whitespace-nowrap ${
                     isActive
                       ? "border-rose-500 text-rose-400 bg-rose-500/5"
                       : "border-transparent text-zinc-400 hover:text-white hover:bg-white/[0.02]"
                   }`}
                 >
-                  <Icon className="w-4 h-4" />
-                  <span>{tab.label}</span>
+                  <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+                  <span className="truncate">{tab.label}</span>
                 </button>
               );
             })}
@@ -170,7 +161,7 @@ export default function PrivacyPage() {
                 >
                   <div className="flex items-center gap-3 border-b border-white/5 pb-4">
                     <Scale className="w-6 h-6 text-rose-500" />
-                    <h2 className="text-xl sm:text-2xl font-alexandria font-bold text-white">الشروط والأحكام والشروط والاستخدام</h2>
+                    <h2 className="text-xl sm:text-2xl font-alexandria font-bold text-white">الشروط والأحكام</h2>
                   </div>
 
                   <p>

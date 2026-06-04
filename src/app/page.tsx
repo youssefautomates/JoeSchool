@@ -20,6 +20,7 @@ import { cn } from "@/lib/utils";
 import { ReviewsMarquee } from "@/components/ReviewsMarquee";
 import { FAQSection } from "@/components/FAQSection";
 import { CertificateSection } from "@/components/CertificateSection";
+import { ContactSection } from "@/components/ContactSection";
 import { ProductMedia } from "@/components/ProductMedia";
 import { getCoursesList, type LmsCourse } from "@/lib/coursesDb";
 import { supabaseClient } from "@/lib/supabaseClient";
@@ -109,27 +110,20 @@ function isProductMatchingCourseCategory(product: any, courseCategory: string): 
 }
 
 const containerVariants = {
-  hidden: { opacity: 0 },
+  hidden: { opacity: 1 },
   show: {
     opacity: 1,
-    transition: {
-      staggerChildren: 0.08,
-      delayChildren: 0.05
-    }
+    transition: { duration: 0.01 }
   }
 };
 
 const cardVariants = {
-  hidden: { opacity: 0, y: 35, scale: 0.97 },
+  hidden: { opacity: 1, y: 0, scale: 1 },
   show: { 
     opacity: 1, 
     y: 0, 
     scale: 1,
-    transition: { 
-      type: "spring" as const, 
-      stiffness: 60, 
-      damping: 15
-    } 
+    transition: { duration: 0.01 }
   }
 };
 
@@ -321,7 +315,7 @@ export default function Home() {
       <main className="flex-1 flex flex-col pt-16">
         
         {/* ── 1. HERO SECTION (Cinematic Premium) ────────────────────────────────── */}
-        <section className="relative min-h-0 md:min-h-[85vh] flex items-center justify-center overflow-hidden pt-6 pb-10 md:pt-24 md:pb-24">
+        <section className="relative min-h-0 md:min-h-[85vh] flex items-center justify-center overflow-hidden pt-24 pb-12 md:pt-28 md:pb-24">
           <div className="absolute inset-0 w-full h-full pointer-events-none bg-[#050505]">
             <div className="absolute inset-0 w-full h-full bg-grid-lines mask-radial-faded opacity-60 md:opacity-100"></div>
             {/* Ambient Blob 1: Rose (Center-Top) */}
@@ -366,24 +360,24 @@ export default function Home() {
                 animate={{ opacity: 1, scale: 1 }}
                 whileHover={{ scale: 1.04, boxShadow: "0 0 30px rgba(239,0,85,0.3)" }}
                 transition={{ duration: 0.5 }}
-                className="inline-flex items-center gap-2.5 bg-rose-950/20 backdrop-blur-xl border border-rose-500/20 px-4 py-2 rounded-full mb-6 md:mb-8 shadow-[0_0_20px_rgba(239,0,85,0.15)] select-none hover:border-rose-500/40 transition-all duration-300 cursor-pointer"
+                className="inline-flex items-center gap-2.5 bg-rose-950/20 backdrop-blur-xl border border-rose-500/20 px-4 py-2 rounded-full mb-5 md:mb-8 shadow-[0_0_20px_rgba(239,0,85,0.15)] select-none hover:border-rose-500/40 transition-all duration-300 cursor-pointer"
               >
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
                 </span>
-                <span className="font-space-grotesk text-[11px] md:text-xs font-bold text-rose-300 tracking-widest uppercase">Welcome to JoeSchool - Discounts up to 35% Now</span>
+                <span className="font-space-grotesk text-[11px] md:text-xs font-bold text-rose-300 tracking-widest uppercase">WELCOME TO JOESCHOOL - UP TO 50% OFF</span>
               </motion.div>
 
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.1 }}
-                className="mb-6 md:mb-10 px-4"
+                className="mb-5 md:mb-10 px-4"
               >
-                <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-8xl font-pixel font-bold text-white leading-[1.3] md:leading-tight tracking-normal block mb-2 uppercase text-center drop-shadow-[0_4px_8px_rgba(0,0,0,0.6)] select-none" dir="ltr">
-                  The Future Of <br className="hidden sm:inline" />
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ff0f53] via-[#ff2d6b] to-[#ff00b3] bg-[length:200%_auto] animate-text-gradient drop-shadow-[0_0_30px_rgba(255,15,83,0.4)]">AI Content</span> <br className="sm:hidden" /> Starts Here!
+                <h1 className="text-[30px] xs:text-[36px] sm:text-5xl md:text-6xl lg:text-[75px] xl:text-[85px] font-pixel font-bold text-white leading-[1.3] md:leading-tight tracking-normal flex flex-col items-center mb-2 uppercase text-center drop-shadow-[0_4px_8px_rgba(0,0,0,0.6)] select-none" dir="ltr">
+                  <span className="whitespace-nowrap">The Future Of AI Content</span>
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ff0f53] via-[#ff2d6b] to-[#ff00b3] bg-[length:200%_auto] animate-text-gradient drop-shadow-[0_0_30px_rgba(255,15,83,0.4)] whitespace-nowrap">Starts Here!</span>
                 </h1>
               </motion.div>
               
@@ -391,7 +385,7 @@ export default function Home() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.2 }}
-                className="text-sm sm:text-base md:text-lg lg:text-xl text-zinc-400 font-space-grotesk max-w-3xl mx-auto mb-8 md:mb-12 leading-relaxed text-center"
+                className="text-sm sm:text-base md:text-lg lg:text-xl text-zinc-400 font-space-grotesk max-w-3xl mx-auto mb-6 md:mb-12 leading-relaxed text-center" dir="ltr"
               >
                 Master AI content creation, cinematic videos, and next-generation creative tools with JoeSchool.
               </motion.p>
@@ -429,10 +423,12 @@ export default function Home() {
               </motion.div>
             </div>
           </div>
+          {/* Subtle Bottom Section Divider */}
+          <div className="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
         </section>
 
         {/* ── 2. قسم الدورات التعليمية (COURSES SECTION) ──────────────────────────────── */}
-        <section id="courses" className="py-16 md:py-32 relative border-b border-white/5">
+        <section id="courses" className="py-16 md:py-32 relative">
           <div className="container mx-auto px-4 max-w-7xl">
             <div className="text-center mb-10 md:mb-16">
               <motion.div
@@ -614,11 +610,13 @@ export default function Home() {
               </Link>
             </div>
           </div>
+          {/* Subtle Bottom Section Divider */}
+          <div className="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
         </section>
 
         {/* ── 2.5. قسم حزم العروض المميزة (BUNDLES SECTION) ───────────────────────────── */}
         {bundles.length > 0 && (
-          <section id="bundles" className="py-16 md:py-32 relative border-b border-white/5 bg-white/[0.01]">
+          <section id="bundles" className="py-16 md:py-32 relative bg-white/[0.01]">
             <div className="absolute inset-0 pointer-events-none z-0">
               <div className="absolute inset-0 bg-grid-lines mask-radial-faded opacity-20"></div>
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[250px] bg-purple-600/5 rounded-full blur-[80px]" />
@@ -748,6 +746,8 @@ export default function Home() {
                 })}
               </motion.div>
             </div>
+            {/* Subtle Bottom Section Divider */}
+            <div className="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
           </section>
         )}
 
@@ -830,10 +830,10 @@ export default function Home() {
                     return (
                       <motion.div 
                         key={product.id}
-                        initial={{ opacity: 0, y: 40 }}
+                        initial={{ opacity: 1, y: 0 }}
                         whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true, margin: "-60px" }}
-                        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: idx * 0.05 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.01 }}
                         className="group h-full"
                       >
                         <div 
@@ -954,6 +954,8 @@ export default function Home() {
               </Link>
             </div>
           </div>
+          {/* Subtle Bottom Section Divider */}
+          <div className="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
         </section>
 
         {/* ── 4. قسم آراء العملاء (REVIEWS SECTION) ──────────────────────────────── */}
@@ -964,6 +966,9 @@ export default function Home() {
 
         {/* ── 5. قسم الأسئلة الشائعة (FAQ SECTION) ────────────────────────────────── */}
         <FAQSection />
+
+        {/* ── 6. قسم تواصل معنا (CONTACT SECTION) ────────────────────────────────── */}
+        <ContactSection />
 
       </main>
 

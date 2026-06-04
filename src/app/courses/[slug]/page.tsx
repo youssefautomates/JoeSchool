@@ -2043,11 +2043,8 @@ function MobileCourseView({
 
       {/* 8. Small Custom Footer */}
       <footer className="border-t border-white/5 pt-6 pb-24 flex flex-col items-center gap-4 text-center text-zinc-500 text-[9px] w-full">
-         <Link href="/" className="flex items-center gap-2 group">
-           <img src="/logo.png" alt="JoeSchool" className="w-5 h-5 object-contain" />
-           <span className="font-alexandria font-bold text-xs tracking-tight text-white" dir="ltr">
-             Joe <span className="text-[#D6004B]">School</span>
-           </span>
+         <Link href="/" className="flex items-center group">
+           <img src="/logo-text.png" alt="JoeSchool" className="h-6 object-contain" />
          </Link>
          
          <div className="flex flex-wrap justify-center gap-3 font-bold">
@@ -2055,7 +2052,7 @@ function MobileCourseView({
            <span>·</span>
            <Link href="/privacy?tab=refund" className="hover:text-white transition-colors">سياسة الإسترجاع</Link>
            <span>·</span>
-           <Link href="/privacy?tab=terms" className="hover:text-white transition-colors">الشروط والاستخدام</Link>
+           <Link href="/privacy?tab=terms" className="hover:text-white transition-colors">الشروط والأحكام</Link>
            <span>·</span>
            <a href="mailto:support@joeschool.com" className="hover:text-white transition-colors">الدعم الفني</a>
          </div>

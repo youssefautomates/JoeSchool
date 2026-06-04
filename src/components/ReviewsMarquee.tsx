@@ -186,7 +186,7 @@ export function ReviewsMarquee() {
   const row2Reviews = duplicateRowReviews(row2Raw);
 
   return (
-    <section ref={containerRef} id="reviews" className="py-24 md:py-32 bg-[#050505] border-y border-white/5 overflow-hidden relative select-none">
+    <section ref={containerRef} id="reviews" className="py-24 md:py-32 bg-[#050505] overflow-hidden relative select-none">
       
       {/* Visual background glows */}
       <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-rose-600/5 rounded-full blur-[120px] pointer-events-none" />
@@ -357,6 +357,8 @@ export function ReviewsMarquee() {
         </div>
 
       </div>
+      {/* Subtle Bottom Section Divider */}
+      <div className="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
     </section>
   );
 }

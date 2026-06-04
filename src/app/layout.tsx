@@ -30,6 +30,14 @@ export const metadata: Metadata = {
     title: "JoeSchool | أكاديمية إنتاج المحتوى الاحترافي بالذكاء الاصطناعي",
     description: "تعلم إنتاج المحتوى الاحترافي، الفيديوهات السينمائية، والأدوات الإبداعية مع أكاديمية جو سكول.",
     siteName: "JoeSchool",
+    images: [
+      {
+        url: "/logo-text.png",
+        width: 800,
+        height: 600,
+        alt: "JoeSchool Logo",
+      }
+    ],
   },
 };
 

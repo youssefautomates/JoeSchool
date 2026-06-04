@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState, Suspense, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -335,21 +335,11 @@ function SuccessContent() {
       </AnimatePresence>
 
       {/* Brand Header */}
-      <div className="relative z-10 py-6 px-6">
-        <Link href="/" className="inline-flex items-center gap-2.5 group">
-          <div className="w-9 h-9 flex items-center justify-center">
-            <img
-              src="/logo.png"
-              alt="JoeSchool"
-              className="w-full h-full object-contain drop-shadow-[0_0_12px_rgba(16,185,129,0.3)]"
-              onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
-            />
-          </div>
-          <div className="flex flex-col">
-            <span className="font-alexandria font-bold text-lg tracking-tight text-white leading-tight" dir="ltr">
-              Joe <span className="text-rose-500">School</span>
-            </span>
-            <span className="font-cairo text-[10px] text-zinc-500 font-medium tracking-wider uppercase">Premium Store</span>
+      <div className="relative z-10 py-6 px-6 flex justify-start">
+        <Link href="/" className="group inline-flex items-center gap-3">
+          <img src="/logo-text.png" alt="JoeSchool Logo" className="h-10 object-contain group-hover:scale-105 transition-transform duration-300" />
+          <div className="flex flex-col text-right justify-center border-r border-white/10 pr-3 h-8">
+            <span className="font-cairo text-[10px] text-zinc-500 font-bold tracking-wider uppercase leading-none">Premium Store</span>
           </div>
         </Link>
       </div>

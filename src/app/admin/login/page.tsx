@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -86,9 +86,9 @@ export default function AdminLogin() {
             initial={{ scale: 0.75, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 0.15, type: "spring", stiffness: 200, damping: 16 }}
-            className="w-20 h-20 flex items-center justify-center mx-auto mb-6 relative"
+            className="w-48 h-16 flex items-center justify-center mx-auto mb-6 relative"
           >
-            <img src="/logo.png" alt="Admin Logo" className="w-full h-full object-contain drop-shadow-[0_0_25px_rgba(214,0,75,0.6)]" />
+            <img src="/logo-text.png" alt="JoeSchool Logo" className="w-full h-full object-contain" />
           </motion.div>
 
           <h1 className="text-4xl font-sans font-black tracking-tighter mb-2" style={{ color: "#ffffff" }}>

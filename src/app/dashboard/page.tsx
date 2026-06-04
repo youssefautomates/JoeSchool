@@ -836,12 +836,9 @@ export default function DashboardPage() {
       <aside className="w-full lg:w-80 bg-[#07070b]/90 backdrop-blur-xl border-b lg:border-b-0 lg:border-l border-white/5 flex flex-col justify-between p-4 lg:p-6 z-20 shrink-0 font-alexandria">
         <div className="space-y-4 lg:space-y-8">
           <div className="flex items-center justify-between lg:justify-start gap-3 border-b border-white/5 pb-6">
-            <Link href="/" className="flex items-center gap-3 group">
-              <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
-                <img src="/logo.png" alt="Logo" className="w-full h-full object-contain" />
-              </div>
+            <Link href="/" className="flex items-center gap-2 group">
               <div>
-                <span className="font-alexandria font-bold text-base block text-white">جو سكول</span>
+                <span className="font-alexandria font-bold text-base block text-white group-hover:text-rose-500 transition-colors">جو سكول</span>
                 <span className="text-[10px] text-zinc-400 block -mt-1 font-medium tracking-wide">STUDENT PORTAL</span>
               </div>
             </Link>
