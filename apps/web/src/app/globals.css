@@ -114,8 +114,8 @@
   --radius-4xl: calc(var(--radius) * 2.6);
   --animate-scroll: scroll 30s linear infinite;
   --animate-text-gradient: text-gradient-shift 5s ease infinite;
-  --animate-marquee-left: marquee-left 90s linear infinite;
-  --animate-marquee-right: marquee-right 90s linear infinite;
+  --animate-marquee-left: marquee-left 120s linear infinite;
+  --animate-marquee-right: marquee-right 120s linear infinite;
 
   @keyframes marquee-left {
     0% {

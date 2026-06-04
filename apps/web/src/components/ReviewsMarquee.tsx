@@ -4,12 +4,13 @@ import { useState, useEffect, useRef, memo } from "react";
 import { Star, CheckCircle2, BookOpen } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
 interface Review {
   name: string;
+  title: string;
   text: string;
   stars: number;
   avatarUrl?: string;
+  gender?: "male" | "female";
   isCourse?: boolean;
   courseTitle?: string;
   isFeatured?: boolean;
@@ -17,294 +18,266 @@ interface Review {
   createdAt?: string;
 }
 
-// ─── CSS Keyframes (injected at runtime — never stripped by any build tool) ──
-// Direction: left to right (content slides from left side toward right side)
-// Achieved by moving the track from -33.3334% back to 0% (positive direction)
-const MARQUEE_CSS = `
-  @keyframes __mq_ltr {
-    0%   { transform: translateX(-33.3334%); }
-    100% { transform: translateX(0%); }
-  }
-`;
-
-function useInjectMarqueeStyles() {
-  useEffect(() => {
-    if (document.getElementById("__mq_styles")) return;
-    const el = document.createElement("style");
-    el.id = "__mq_styles";
-    el.textContent = MARQUEE_CSS;
-    document.head.appendChild(el);
-    return () => {
-      const existing = document.getElementById("__mq_styles");
-      if (existing) document.head.removeChild(existing);
-    };
-  }, []);
+interface StarSVGProps {
+  fillPercent: number;
 }
 
-// ─── Star rendering ───────────────────────────────────────────────────────────
-const StarIcon = memo(function StarIcon({ fill }: { fill: number }) {
-  const id = `star-${Math.round(fill)}`;
-  if (fill <= 0) return (
-    <svg className="w-3 h-3 md:w-3.5 md:h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ color: "#3f3f46" }}>
-      <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" />
-    </svg>
-  );
-  if (fill >= 100) return (
-    <svg className="w-3 h-3 md:w-3.5 md:h-3.5" viewBox="0 0 24 24" fill="#facc15" stroke="#facc15" strokeWidth="0.5">
-      <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" />
-    </svg>
-  );
+// Highly optimized memoized individual fractional star SVG component
+export const MemoizedStarSVG = memo(function StarSVG({ fillPercent }: StarSVGProps) {
+  if (fillPercent <= 0) {
+    return <Star className="w-3 h-3 md:w-3.5 md:h-3.5 fill-transparent" style={{ color: "#6b0020" }} />;
+  }
+  if (fillPercent >= 100) {
+    return <Star className="w-3 h-3 md:w-3.5 md:h-3.5 fill-current" style={{ color: "#D6004B" }} />;
+  }
+  
   return (
-    <svg className="w-3 h-3 md:w-3.5 md:h-3.5" viewBox="0 0 24 24">
-      <defs>
-        <linearGradient id={id} x1="0" x2="1" y1="0" y2="0">
-          <stop offset={`${fill}%`} stopColor="#facc15" />
-          <stop offset={`${fill}%`} stopColor="#3f3f46" />
-        </linearGradient>
-      </defs>
-      <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" fill={`url(#${id})`} stroke="#facc15" strokeWidth="0.3" />
-    </svg>
+    <div className="relative w-3 h-3 md:w-3.5 md:h-3.5">
+      <Star className="w-3 h-3 md:w-3.5 md:h-3.5 fill-transparent absolute inset-0" style={{ color: "#6b0020" }} />
+      <div 
+        className="absolute inset-0 overflow-hidden"
+        style={{ width: `${fillPercent}%` }}
+      >
+        <div className="w-3 h-3 md:w-3.5 md:h-3.5">
+          <Star className="w-3 h-3 md:w-3.5 md:h-3.5 fill-current" style={{ color: "#D6004B" }} />
+        </div>
+      </div>
+    </div>
   );
 });
 
-function renderStars(rating: number) {
+function renderFractionalStars(rating: number) {
   return (
-    <div style={{ display: "flex", gap: 2, direction: "ltr" }}>
-      {[1, 2, 3, 4, 5].map((v) => {
-        const pct = Math.min(100, Math.max(0, (rating - (v - 1)) * 100));
-        return <StarIcon key={v} fill={pct} />;
+    <div className="flex gap-0.5 text-yellow-500" dir="ltr">
+      {Array.from({ length: 5 }).map((_, i) => {
+        const starVal = i + 1;
+        const isFilled = starVal <= Math.floor(rating);
+        const isHalf = !isFilled && starVal - 0.5 <= rating;
+
+        let fillPercent = 0;
+        if (isFilled) {
+          fillPercent = 100;
+        } else if (isHalf) {
+          fillPercent = (rating - (starVal - 1)) * 100;
+        }
+
+        return <MemoizedStarSVG key={i} fillPercent={fillPercent} />;
       })}
     </div>
   );
 }
 
-// ─── Review Card ──────────────────────────────────────────────────────────────
+export function ReviewsMarquee() {
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [loading, setLoading] = useState(true);
+
+
+  useEffect(() => {
+    async function loadReviews() {
+      try {
+        const [reviewsRes, { data: productsData }, { data: coursesData }, { data: bundlesData }] = await Promise.all([
+          fetch("/api/admin/reviews").then(res => res.json()),
+          supabase.from("products").select("id, title"),
+          supabase.from("courses").select("id, title"),
+          supabase.from("bundles").select("id, title")
+        ]);
+
+        if (Array.isArray(reviewsRes)) {
+          const active = reviewsRes.filter((r: any) => r.status === "visible");
+          
+          const mapped = active.map((r: any) => {
+            const course = coursesData?.find((c: any) => c.id === r.productId);
+            const product = productsData?.find((p: any) => p.id === r.productId);
+            const bundle = bundlesData?.find((b: any) => b.id === r.productId);
+            
+            const isCourse = !!course;
+            const itemTitle = course ? course.title : product ? product.title : bundle ? bundle.title : "تم تأكيد الشراء";
+            
+            return {
+              name: `${r.firstName} ${r.lastName ? r.lastName.trim().charAt(0) + "." : ""}`,
+              title: `مشتري موثق · ${itemTitle}`,
+              text: r.text,
+              stars: r.rating || 5,
+              avatarUrl: r.avatarUrl,
+              isCourse,
+              courseTitle: course ? course.title : undefined,
+              isFeatured: r.isFeatured === true,
+              featuredPosition: typeof r.featuredPosition === "number" ? r.featuredPosition : 999,
+              createdAt: r.createdAt
+            };
+          });
+
+          // Separate featured and normal reviews
+          const featured = mapped.filter((r: any) => r.isFeatured);
+          featured.sort((a: any, b: any) => {
+            if (a.featuredPosition !== b.featuredPosition) {
+              return a.featuredPosition - b.featuredPosition;
+            }
+            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+          });
+
+          const normal = mapped.filter((r: any) => !r.isFeatured);
+          normal.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+          // Prioritize featured reviews on homepage, fallback to normal ones if none are marked
+          const displayReviews = featured.length > 0 ? featured : normal;
+          setReviews(displayReviews);
+        }
+      } catch (err) {
+        console.error("Failed to load marquee reviews:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadReviews();
+  }, []);
+
+  if (loading) {
+    return (
+      <section id="reviews" className="py-24 bg-[#050505] border-y border-white/5 relative flex items-center justify-center min-h-[300px]">
+        <div className="w-10 h-10 border-4 border-rose-600/30 border-t-rose-600 rounded-full animate-spin" />
+      </section>
+    );
+  }
+
+  if (reviews.length === 0) {
+    return null;
+  }
+
+  // Splits reviews into two balanced lists and triples them to ensure seamless infinite loops
+  const getRowReviews = (items: Review[], isAlternate: boolean) => {
+    if (items.length === 0) return [];
+    
+    // Distribute reviews between rows
+    const split = items.filter((_, idx) => (idx % 2 === 0) === isAlternate);
+    const base = split.length > 0 ? split : items;
+    
+    let list = [...base];
+    while (list.length < 8) {
+      list = [...list, ...list];
+    }
+    
+    return [...list, ...list, ...list];
+  };
+
+  const row1Reviews = getRowReviews(reviews, false);
+  const row2Reviews = getRowReviews(reviews, true);
+
+  return (
+    <section id="reviews" className="py-24 md:py-32 bg-[#050505] overflow-hidden relative select-none">
+      
+      {/* Premium ambient glows */}
+      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-rose-600/5 rounded-full blur-[140px] pointer-events-none" />
+      <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-rose-600/5 rounded-full blur-[140px] pointer-events-none" />
+
+      {/* Cinematic Vignette Overlays for seamless edge fade-out */}
+      <div className="absolute top-0 left-0 w-20 md:w-56 h-full bg-gradient-to-r from-[#050505] via-[#050505]/70 to-transparent z-20 pointer-events-none" />
+      <div className="absolute top-0 right-0 w-20 md:w-56 h-full bg-gradient-to-l from-[#050505] via-[#050505]/70 to-transparent z-20 pointer-events-none" />
+
+      <div className="container mx-auto px-4 mb-20 text-center relative z-10">
+        <h2 className="text-3xl md:text-5xl font-alexandria font-black text-white mb-4 tracking-tighter">
+          ثقة عملائنا
+        </h2>
+        <p className="text-zinc-500 font-cairo text-sm md:text-base max-w-xl mx-auto">
+          آراء واقعية من أشخاص حقيقيين قاموا بتطوير مهاراتهم الإبداعية وإنتاج محتوى استثنائي معنا بنجاح
+        </p>
+      </div>
+
+      {/* Double Row Infinite Scrolling Marquee */}
+      <div className="flex flex-col gap-6 md:gap-8 relative w-full overflow-hidden" dir="ltr">
+        
+        {/* ROW 1: Scrolling Left */}
+        <div className="overflow-hidden w-full">
+          <div className="flex flex-row flex-nowrap w-max gap-6 animate-marquee-left">
+            {row1Reviews.map((review, idx) => (
+              <ReviewCard key={`row1-${idx}`} review={review} />
+            ))}
+          </div>
+        </div>
+
+        {/* ROW 2: Scrolling Right */}
+        <div className="overflow-hidden w-full">
+          <div className="flex flex-row flex-nowrap w-max gap-6 animate-marquee-right">
+            {row2Reviews.map((review, idx) => (
+              <ReviewCard key={`row2-${idx}`} review={review} />
+            ))}
+          </div>
+        </div>
+
+
+
+      </div>
+
+      {/* Premium Bottom Ambient Line */}
+      <div className="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+    </section>
+  );
+}
+
+// Sub-component: Optimized Memoized Review Card
 const ReviewCard = memo(function ReviewCard({ review }: { review: Review }) {
-  const initial = review.name.trim().replace(/^\./, "").charAt(0).toUpperCase();
   return (
     <div
+      className="w-[310px] h-[210px] md:w-[380px] md:h-[230px] flex-shrink-0 bg-white/[0.01] hover:bg-white/[0.03] backdrop-blur-md border border-white/5 hover:border-rose-500/20 p-5 md:p-6 rounded-[24px] relative group hover:scale-[1.01] hover:-translate-y-0.5 transition-all duration-500 shadow-[0_15px_35px_rgba(0,0,0,0.4)] flex flex-col justify-between"
       dir="rtl"
-      style={{
-        width: 330,
-        flexShrink: 0,
-        marginRight: 24,
-        background: "rgba(255,255,255,0.018)",
-        border: "1px solid rgba(255,255,255,0.07)",
-        borderRadius: 24,
-        padding: "20px 22px",
-        display: "flex",
-        flexDirection: "column",
-        gap: 12,
-        boxShadow: "0 12px 40px rgba(0,0,0,0.4)",
-        transition: "border-color 0.4s, background 0.4s",
-        position: "relative",
-        overflow: "hidden",
-      }}
-      onMouseEnter={e => {
-        (e.currentTarget as HTMLDivElement).style.borderColor = "rgba(244,63,94,0.22)";
-        (e.currentTarget as HTMLDivElement).style.background = "rgba(255,255,255,0.03)";
-      }}
-      onMouseLeave={e => {
-        (e.currentTarget as HTMLDivElement).style.borderColor = "rgba(255,255,255,0.07)";
-        (e.currentTarget as HTMLDivElement).style.background = "rgba(255,255,255,0.018)";
-      }}
     >
-      {/* Header */}
-      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-        {review.avatarUrl ? (
-          <img
-            src={review.avatarUrl}
-            alt={review.name}
-            loading="lazy"
-            style={{ width: 40, height: 40, borderRadius: "50%", objectFit: "cover", border: "1px solid rgba(255,255,255,0.1)", flexShrink: 0 }}
-          />
-        ) : (
-          <div style={{
-            width: 40, height: 40, borderRadius: "50%",
-            background: "linear-gradient(135deg, rgba(244,63,94,0.25), rgba(251,146,60,0.1))",
-            border: "1px solid rgba(255,255,255,0.06)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            color: "#f43f5e", fontWeight: 700, fontSize: 14, flexShrink: 0,
-            fontFamily: "Alexandria, sans-serif"
-          }}>
-            {initial}
-          </div>
-        )}
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-            <span style={{ fontFamily: "Alexandria, sans-serif", fontWeight: 700, color: "#fff", fontSize: 13, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: 140 }}>
+      {/* Header Info */}
+      <div className="flex items-center gap-3">
+        <div className="shrink-0 relative">
+          {review.avatarUrl ? (
+            <img 
+              src={review.avatarUrl} 
+              className="w-10 h-10 rounded-full object-cover border border-white/10 shadow-inner" 
+              alt={review.name} 
+              loading="lazy"
+            />
+          ) : (
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-rose-500/20 to-orange-500/10 flex items-center justify-center border border-white/5 text-rose-400 font-alexandria font-bold text-sm shadow-inner">
+              {review.name.trim().replace(/^\./, "").charAt(0)}
+            </div>
+          )}
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-1.5">
+            <h4 className="font-alexandria font-bold text-white text-xs md:text-sm truncate">
               {review.name.trim().replace(/^\./, "")}
-            </span>
-            <span style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 9, color: "#34d399", background: "rgba(52,211,153,0.06)", border: "1px solid rgba(52,211,153,0.15)", padding: "2px 6px", borderRadius: 100, whiteSpace: "nowrap", fontFamily: "Cairo, sans-serif" }}>
-              <svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round"/></svg>
-              موثق
+            </h4>
+            <span className="flex items-center gap-0.5 text-[9px] text-emerald-400 font-medium font-cairo bg-emerald-500/5 border border-emerald-500/10 px-1.5 py-0.5 rounded-full shrink-0">
+              <CheckCircle2 className="w-2.5 h-2.5" />
+              مشتري موثق
             </span>
           </div>
-          <div style={{ marginTop: 4, display: "flex", alignItems: "center", gap: 5 }}>
-            {renderStars(review.stars)}
-            <span style={{ fontFamily: "monospace", fontSize: 9, color: "#71717a" }}>{review.stars.toFixed(1)}</span>
+          <div className="flex items-center gap-1.5 mt-1">
+            {renderFractionalStars(review.stars)}
           </div>
         </div>
       </div>
 
       {/* Review text */}
-      <p style={{ color: "#d4d4d8", fontFamily: "Cairo, sans-serif", fontSize: 13, lineHeight: 1.7, fontStyle: "italic", display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden", margin: 0 }}>
+      <p className="text-zinc-300 font-cairo text-xs md:text-sm leading-relaxed whitespace-normal pl-2 line-clamp-3 italic relative z-10 mt-2">
         "{review.text}"
       </p>
 
-      {/* Course badge */}
-      {review.isCourse && review.courseTitle && (
-        <div style={{ borderTop: "1px solid rgba(255,255,255,0.05)", paddingTop: 10, display: "flex", alignItems: "center", gap: 6 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 5, background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)", padding: "4px 10px", borderRadius: 100, fontSize: 10, color: "#71717a", fontFamily: "Cairo, sans-serif", fontWeight: 700, maxWidth: "100%", overflow: "hidden" }}>
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#f43f5e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-            <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{review.courseTitle}</span>
+      {/* Footer course title */}
+      <div className="flex items-center justify-between border-t border-white/5 pt-3 relative z-10">
+        {review.isCourse && review.courseTitle ? (
+          <div 
+            className="flex items-center gap-1.5 text-zinc-500 bg-white/[0.02] border border-white/5 px-2.5 py-1 rounded-full text-[10px] font-bold font-cairo w-fit max-w-full" 
+            title={review.courseTitle}
+          >
+            <BookOpen className="w-3 h-3 text-rose-500 shrink-0" />
+            <span className="truncate max-w-[220px]">{review.courseTitle}</span>
           </div>
-        </div>
-      )}
+        ) : (
+          <div />
+        )}
+      </div>
+
+      {/* Subtle Radial Glow & Testimonial Quote Mark */}
+      <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/10 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+      <div className="absolute top-4 left-4 text-white/[0.02] font-serif text-6xl pointer-events-none">
+        ”
+      </div>
     </div>
   );
 });
-
-// ─── Marquee Track ────────────────────────────────────────────────────────────
-// Renders 3 identical copies. Animates -33.3334% → 0% (left-to-right).
-// Loop restart is invisible because copy 1 end === copy 2 start.
-function MarqueeTrack({ reviews, durationSeconds = 90 }: { reviews: Review[]; durationSeconds?: number }) {
-  const [paused, setPaused] = useState(false);
-
-  // Pad to minimum 12 cards per copy
-  let padded = [...reviews];
-  while (padded.length < 12) padded = [...padded, ...reviews];
-
-  // Triple for seamless -33.3334% loop
-  const tripled = [...padded, ...padded, ...padded];
-
-  return (
-    <div
-      style={{ overflow: "hidden", width: "100%" }}
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
-    >
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "row",
-          flexWrap: "nowrap",
-          width: "max-content",
-          willChange: "transform",
-          animationName: "__mq_ltr",
-          animationDuration: `${durationSeconds}s`,
-          animationTimingFunction: "linear",
-          animationIterationCount: "infinite",
-          animationPlayState: paused ? "paused" : "running",
-        }}
-      >
-        {tripled.map((review, idx) => (
-          <ReviewCard key={idx} review={review} />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-// ─── Main Export ──────────────────────────────────────────────────────────────
-export function ReviewsMarquee() {
-  useInjectMarqueeStyles();
-
-  const [reviews, setReviews] = useState<Review[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function load() {
-      try {
-        const [reviewsRes, { data: products }, { data: courses }, { data: bundles }] =
-          await Promise.all([
-            fetch("/api/admin/reviews").then((r) => r.json()),
-            supabase.from("products").select("id, title"),
-            supabase.from("courses").select("id, title"),
-            supabase.from("bundles").select("id, title"),
-          ]);
-
-        if (!Array.isArray(reviewsRes)) return;
-
-        const mapped: Review[] = reviewsRes
-          .filter((r: any) => r.status === "visible")
-          .map((r: any) => {
-            const course = courses?.find((c: any) => c.id === r.productId);
-            return {
-              name: `${r.firstName} ${r.lastName ? r.lastName.trim().charAt(0) + "." : ""}`,
-              text: r.text,
-              stars: r.rating || 5,
-              avatarUrl: r.avatarUrl,
-              isCourse: !!course,
-              courseTitle: course?.title,
-              isFeatured: r.isFeatured === true,
-              featuredPosition: typeof r.featuredPosition === "number" ? r.featuredPosition : 999,
-              createdAt: r.createdAt,
-            };
-          });
-
-        const featured = mapped
-          .filter((r) => r.isFeatured)
-          .sort((a, b) =>
-            a.featuredPosition !== b.featuredPosition
-              ? a.featuredPosition! - b.featuredPosition!
-              : new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime()
-          );
-        const normal = mapped
-          .filter((r) => !r.isFeatured)
-          .sort((a, b) => new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime());
-
-        setReviews(featured.length > 0 ? featured : normal);
-      } catch (err) {
-        console.error("Failed to load reviews:", err);
-      } finally {
-        setLoading(false);
-      }
-    }
-    load();
-  }, []);
-
-  if (loading) {
-    return (
-      <section
-        id="reviews"
-        style={{ padding: "96px 0", background: "#050505", display: "flex", alignItems: "center", justifyContent: "center", minHeight: 300 }}
-      >
-        <div style={{ width: 40, height: 40, border: "3px solid rgba(244,63,94,0.2)", borderTopColor: "#f43f5e", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
-        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-      </section>
-    );
-  }
-
-  if (reviews.length === 0) return null;
-
-  return (
-    <section
-      id="reviews"
-      style={{ padding: "96px 0 112px", background: "#050505", overflow: "hidden", position: "relative", userSelect: "none" }}
-    >
-      {/* Ambient background glows */}
-      <div style={{ position: "absolute", top: 0, left: "20%", width: 600, height: 600, background: "radial-gradient(circle, rgba(244,63,94,0.06) 0%, transparent 70%)", pointerEvents: "none" }} />
-      <div style={{ position: "absolute", bottom: 0, right: "20%", width: 600, height: 600, background: "radial-gradient(circle, rgba(244,63,94,0.04) 0%, transparent 70%)", pointerEvents: "none" }} />
-
-      {/* Left + right fade vignettes */}
-      <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to right, #050505 0%, transparent 8%, transparent 92%, #050505 100%)", pointerEvents: "none", zIndex: 10 }} />
-
-      {/* Section heading */}
-      <div style={{ textAlign: "center", padding: "0 16px", marginBottom: 56, position: "relative", zIndex: 5 }}>
-        <h2 style={{ fontFamily: "Alexandria, sans-serif", fontWeight: 900, fontSize: "clamp(28px, 5vw, 48px)", color: "#fff", letterSpacing: "-0.03em", margin: "0 0 14px" }}>
-          ثقة عملائنا
-        </h2>
-        <p style={{ fontFamily: "Cairo, sans-serif", color: "#71717a", fontSize: "clamp(13px, 2vw, 15px)", maxWidth: 500, margin: "0 auto", lineHeight: 1.75 }}>
-          آراء واقعية من أشخاص حقيقيين قاموا بتطوير مهاراتهم الإبداعية معنا بنجاح
-        </p>
-      </div>
-
-      {/* Single continuous left-to-right marquee row */}
-      <MarqueeTrack reviews={reviews} durationSeconds={90} />
-
-      {/* Bottom rule */}
-      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 1, background: "linear-gradient(to right, transparent, rgba(255,255,255,0.08), transparent)" }} />
-    </section>
-  );
-}
