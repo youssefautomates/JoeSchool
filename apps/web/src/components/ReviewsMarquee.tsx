@@ -18,7 +18,6 @@ interface Review {
   createdAt?: string;
 }
 
-
 interface StarSVGProps {
   fillPercent: number;
 }
@@ -74,8 +73,7 @@ export function ReviewsMarquee() {
   const [isIntersecting, setIsIntersecting] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
 
-
-  // Intersection Observer to pause animation when out of viewport
+  // Intersection Observer to pause animation when out of viewport to maximize performance
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -165,127 +163,189 @@ export function ReviewsMarquee() {
     return null;
   }
 
-  const finalReviews = reviews;
-
-  // Helper to ensure the row has enough elements for perfect, seamless loop animation transitions
-  const duplicateRowReviews = (items: Review[]) => {
-    let list = [...items];
-    while (list.length < 10) {
+  // Splits reviews into two balanced lists and triples them to ensure seamless infinite loops
+  const getRowReviews = (items: Review[], isAlternate: boolean) => {
+    if (items.length === 0) return [];
+    
+    // Distribute reviews between rows
+    const split = items.filter((_, idx) => (idx % 2 === 0) === isAlternate);
+    const base = split.length > 0 ? split : items;
+    
+    let list = [...base];
+    while (list.length < 8) {
       list = [...list, ...list];
     }
-    // Duplicate three times to cover full viewport width and support seamless loop
+    
     return [...list, ...list, ...list];
   };
 
-  const rowReviews = duplicateRowReviews(finalReviews);
+  const row1Reviews = getRowReviews(reviews, false);
+  const row2Reviews = getRowReviews(reviews, true);
 
   return (
     <section ref={containerRef} id="reviews" className="py-24 md:py-32 bg-[#050505] overflow-hidden relative select-none">
       
-      {/* Visual background glows */}
-      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-rose-600/5 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-rose-600/5 rounded-full blur-[120px] pointer-events-none" />
+      {/* Premium ambient glows */}
+      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-rose-600/5 rounded-full blur-[140px] pointer-events-none" />
+      <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-rose-600/5 rounded-full blur-[140px] pointer-events-none" />
 
-      <div className="container mx-auto px-4 mb-16 text-center relative z-10">
+      {/* Cinematic Vignette Overlays for seamless edge fade-out */}
+      <div className="absolute top-0 left-0 w-20 md:w-56 h-full bg-gradient-to-r from-[#050505] via-[#050505]/70 to-transparent z-20 pointer-events-none" />
+      <div className="absolute top-0 right-0 w-20 md:w-56 h-full bg-gradient-to-l from-[#050505] via-[#050505]/70 to-transparent z-20 pointer-events-none" />
+
+      <div className="container mx-auto px-4 mb-20 text-center relative z-10">
         <h2 className="text-3xl md:text-5xl font-alexandria font-black text-white mb-4 tracking-tighter">
           ثقة عملائنا
         </h2>
-        <p className="text-zinc-500 font-cairo text-sm md:text-base">
+        <p className="text-zinc-500 font-cairo text-sm md:text-base max-w-xl mx-auto">
           آراء واقعية من أشخاص حقيقيين قاموا بتطوير مهاراتهم الإبداعية وإنتاج محتوى استثنائي معنا بنجاح
         </p>
       </div>
 
-      {/* Endless Single-Row Marquee Slider */}
-      <div className="relative w-full overflow-hidden" dir="ltr">
+      {/* Double Row Infinite Scrolling Marquee */}
+      <div className="flex flex-col gap-6 md:gap-8 relative w-full overflow-hidden" dir="ltr">
         
-        {/* CSS Keyframes for perfectly seamless looping slide leftward */}
+        {/* Optimized GPU-accelerated CSS Keyframes */}
         <style jsx global>{`
           @keyframes marquee-scroll-left {
             0% { transform: translate3d(0, 0, 0); }
-            100% { transform: translate3d(-33.333%, 0, 0); }
+            100% { transform: translate3d(-33.3333%, 0, 0); }
           }
-          .animate-marquee-endless-left {
-            display: flex;
-            width: max-content;
-            animation: marquee-scroll-left 70s linear infinite;
-          }
-          .animate-marquee-endless-left > div {
-            margin-right: 1.5rem;
-          }
-          .animate-marquee-endless-left:hover {
-            animation-play-state: paused;
+          @keyframes marquee-scroll-right {
+            0% { transform: translate3d(-33.3333%, 0, 0); }
+            100% { transform: translate3d(0, 0, 0); }
           }
           
-          /* Reduced Motion Support for Accessibility */
+          .animate-marquee-left {
+            display: flex;
+            width: max-content;
+            gap: 1.5rem;
+            animation: marquee-scroll-left 85s linear infinite;
+          }
+          
+          .animate-marquee-right {
+            display: flex;
+            width: max-content;
+            gap: 1.5rem;
+            animation: marquee-scroll-right 85s linear infinite;
+          }
+
+          /* Hover behavior ONLY on hover-capable desktop devices (prevents mobile touch lock) */
+          @media (hover: hover) {
+            .animate-marquee-left:hover,
+            .animate-marquee-right:hover {
+              animation-play-state: paused;
+            }
+          }
+          
+          /* Reduced Motion Accessibility Settings */
           @media (prefers-reduced-motion: reduce) {
-            .animate-marquee-endless-left {
+            .animate-marquee-left,
+            .animate-marquee-right {
               animation-play-state: paused !important;
             }
           }
         `}</style>
 
-        {/* SINGLE ROW: Left-Scrolling Track */}
-        <div className="animate-marquee-endless-left" style={{ animationPlayState: isIntersecting ? undefined : "paused" }}>
-          {rowReviews.map((review, idx) => (
-            <div
-              key={`row-${idx}`}
-              className="w-[320px] h-[220px] md:w-[360px] md:h-[240px] flex-shrink-0 bg-white/[0.02] border border-white/5 p-5 md:p-6 rounded-3xl relative group hover:border-rose-500/20 transition-all duration-500 shadow-2xl flex flex-col justify-between"
-              dir="rtl"
-            >
-              {/* Card Header (Avatar + Name & Stars Stacked) */}
-              <div className="flex items-center gap-3">
-                <div className="shrink-0 relative">
-                  {review.avatarUrl ? (
-                    <img src={review.avatarUrl} className="w-10 h-10 rounded-full object-cover border border-white/10 shadow-inner" alt={review.name} />
-                  ) : (
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-rose-500/20 to-orange-500/10 flex items-center justify-center border border-white/5 text-rose-400 font-alexandria font-bold text-sm shadow-inner">
-                      {review.name.trim().replace(/^\./, "").charAt(0)}
-                    </div>
-                  )}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <h4 className="font-alexandria font-bold text-white text-xs md:text-sm truncate">
-                    {review.name.trim().replace(/^\./, "")}
-                  </h4>
-                  <div className="flex items-center gap-1.5 mt-0.5">
-                    {renderFractionalStars(review.stars)}
-                    <span className="text-[9px] font-mono text-zinc-500 bg-white/[0.03] px-1 rounded border border-white/5">
-                      {review.stars.toFixed(1)}
-                    </span>
-                  </div>
-                </div>
-              </div>
+        {/* ROW 1: Scrolling Left */}
+        <div className="overflow-hidden w-full flex">
+          <div 
+            className="animate-marquee-left" 
+            style={{ animationPlayState: isIntersecting ? undefined : "paused" }}
+          >
+            {row1Reviews.map((review, idx) => (
+              <ReviewCard key={`row1-${idx}`} review={review} />
+            ))}
+          </div>
+        </div>
 
-              {/* Review Text */}
-              <p className="text-zinc-300 font-cairo text-xs md:text-sm leading-relaxed whitespace-normal pl-2 line-clamp-3 italic relative z-10">
-                "{review.text}"
-              </p>
-
-              {/* Card Footer: Displays Course Title badge */}
-              <div className="flex items-center justify-between border-t border-white/5 pt-3 relative z-10">
-                {review.isCourse && review.courseTitle ? (
-                  <div className="flex items-center gap-1.5 text-zinc-500 bg-white/[0.02] border border-white/5 px-2.5 py-1 rounded-full text-[10px] font-bold font-cairo w-fit max-w-full" title={review.courseTitle}>
-                    <BookOpen className="w-3 h-3 text-rose-500 shrink-0" />
-                    <span className="truncate max-w-[200px]">{review.courseTitle}</span>
-                  </div>
-                ) : (
-                  <div />
-                )}
-              </div>
-
-              {/* Subtle Ambient Hover Glow & Testimonial Quote Mark */}
-              <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/10 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-              <div className="absolute top-4 left-4 text-white/[0.02] font-serif text-6xl pointer-events-none">
-                ”
-              </div>
-            </div>
-          ))}
+        {/* ROW 2: Scrolling Right */}
+        <div className="overflow-hidden w-full flex">
+          <div 
+            className="animate-marquee-right" 
+            style={{ animationPlayState: isIntersecting ? undefined : "paused" }}
+          >
+            {row2Reviews.map((review, idx) => (
+              <ReviewCard key={`row2-${idx}`} review={review} />
+            ))}
+          </div>
         </div>
 
       </div>
-      {/* Subtle Bottom Section Divider */}
+
+      {/* Premium Bottom Ambient Line */}
       <div className="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
     </section>
   );
 }
 
+// Sub-component: Optimized Memoized Review Card
+const ReviewCard = memo(function ReviewCard({ review }: { review: Review }) {
+  return (
+    <div
+      className="w-[310px] h-[210px] md:w-[380px] md:h-[230px] flex-shrink-0 bg-white/[0.01] hover:bg-white/[0.03] backdrop-blur-md border border-white/5 hover:border-rose-500/20 p-5 md:p-6 rounded-[24px] relative group hover:scale-[1.01] hover:-translate-y-0.5 transition-all duration-500 shadow-[0_15px_35px_rgba(0,0,0,0.4)] flex flex-col justify-between"
+      dir="rtl"
+    >
+      {/* Header Info */}
+      <div className="flex items-center gap-3">
+        <div className="shrink-0 relative">
+          {review.avatarUrl ? (
+            <img 
+              src={review.avatarUrl} 
+              className="w-10 h-10 rounded-full object-cover border border-white/10 shadow-inner" 
+              alt={review.name} 
+              loading="lazy"
+            />
+          ) : (
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-rose-500/20 to-orange-500/10 flex items-center justify-center border border-white/5 text-rose-400 font-alexandria font-bold text-sm shadow-inner">
+              {review.name.trim().replace(/^\./, "").charAt(0)}
+            </div>
+          )}
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-1.5">
+            <h4 className="font-alexandria font-bold text-white text-xs md:text-sm truncate">
+              {review.name.trim().replace(/^\./, "")}
+            </h4>
+            <span className="flex items-center gap-0.5 text-[9px] text-emerald-400 font-medium font-cairo bg-emerald-500/5 border border-emerald-500/10 px-1.5 py-0.5 rounded-full shrink-0">
+              <CheckCircle2 className="w-2.5 h-2.5" />
+              مشتري موثق
+            </span>
+          </div>
+          <div className="flex items-center gap-1.5 mt-1">
+            {renderFractionalStars(review.stars)}
+            <span className="text-[9px] font-mono text-zinc-500 bg-white/[0.03] px-1 rounded border border-white/5">
+              {review.stars.toFixed(1)}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Review text */}
+      <p className="text-zinc-300 font-cairo text-xs md:text-sm leading-relaxed whitespace-normal pl-2 line-clamp-3 italic relative z-10 mt-2">
+        "{review.text}"
+      </p>
+
+      {/* Footer course title */}
+      <div className="flex items-center justify-between border-t border-white/5 pt-3 relative z-10">
+        {review.isCourse && review.courseTitle ? (
+          <div 
+            className="flex items-center gap-1.5 text-zinc-500 bg-white/[0.02] border border-white/5 px-2.5 py-1 rounded-full text-[10px] font-bold font-cairo w-fit max-w-full" 
+            title={review.courseTitle}
+          >
+            <BookOpen className="w-3 h-3 text-rose-500 shrink-0" />
+            <span className="truncate max-w-[220px]">{review.courseTitle}</span>
+          </div>
+        ) : (
+          <div />
+        )}
+      </div>
+
+      {/* Subtle Radial Glow & Testimonial Quote Mark */}
+      <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/10 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+      <div className="absolute top-4 left-4 text-white/[0.02] font-serif text-6xl pointer-events-none">
+        ”
+      </div>
+    </div>
+  );
+});
