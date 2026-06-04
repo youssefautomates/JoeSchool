@@ -259,13 +259,14 @@ export function Navbar() {
                 className="hidden md:block relative p-2 text-zinc-400 hover:text-rose-400 transition-all duration-300 hover:scale-110 hover:-translate-y-0.5 active:scale-95 shrink-0 cursor-pointer"
                 style={{ pointerEvents: "auto" }}
               >
-                <Heart className={cn("w-6 h-6 drop-shadow-lg transition-colors", wishlistCount > 0 ? "text-rose-500 fill-rose-500/20" : "")} />
+                <Heart className="w-6 h-6 drop-shadow-lg" />
                 {wishlistCount > 0 && (
                   <span className="absolute top-0 right-0 w-4 h-4 bg-red-500 text-white text-[10px] font-bold flex items-center justify-center rounded-full border-2 border-[#0a0a0f] shadow-lg animate-in zoom-in">
                     {wishlistCount}
                   </span>
                 )}
               </button>
+
 
 
               {/* Mobile Auth Quick Link */}
