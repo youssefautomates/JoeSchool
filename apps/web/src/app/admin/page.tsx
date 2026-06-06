@@ -1229,39 +1229,53 @@ export default function AdminDashboard() {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-8">
                 
                 {/* Top Countries BarChart */}
-                <div className="rounded-3xl bg-[#09090e]/80 border border-white/5 p-6 shadow-2xl">
-                  <div className="flex items-center justify-between mb-6 pb-4 border-b border-white/5">
+                <div className="rounded-3xl bg-[#09090e]/80 border border-white/5 p-5 sm:p-6 shadow-2xl">
+                  <div className="flex items-center justify-between mb-5 pb-4 border-b border-white/5">
                     <div>
                       <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">Top Purchasing Countries</h3>
-                      <p className="text-[10px] text-zinc-500">Completed order counts grouped by customer country</p>
+                      <p className="text-[10px] text-zinc-500 mt-0.5">Completed orders by customer country</p>
                     </div>
-                    <Globe className="w-4 h-4 text-zinc-500" />
+                    <Globe className="w-4 h-4 text-zinc-500 shrink-0" />
                   </div>
-                  <div className="w-full h-48 sm:h-64">
-                    {topCountriesData.length === 0 ? (
-                      <div className="w-full h-full flex flex-col items-center justify-center border border-dashed border-white/5 rounded-2xl p-6 text-center text-zinc-500 text-xs">
-                        No country data available.
-                      </div>
-                    ) : (
-                      <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={topCountriesData} layout="vertical" margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
-                          <XAxis type="number" stroke="#3f3f46" fontSize={9} tickLine={false} />
-                          <YAxis dataKey="name" type="category" stroke="#3f3f46" fontSize={10} tickLine={false} width={80} />
-                          <Tooltip
-                            contentStyle={{ backgroundColor: "#060608", borderColor: "rgba(255,255,255,0.06)", borderRadius: "12px" }}
-                            labelStyle={{ color: "#ffffff", fontWeight: "bold", fontSize: "10px" }}
-                            itemStyle={{ fontSize: "10px" }}
-                          />
-                          <Bar dataKey="count" fill="#D6004B" radius={[0, 4, 4, 0]}>
-                            {topCountriesData.map((entry: any, index: number) => (
-                              <Cell key={`cell-${index}`} fill={index === 0 ? "#D6004B" : "#10b981"} />
-                            ))}
-                          </Bar>
-                        </BarChart>
-                      </ResponsiveContainer>
-                    )}
-                  </div>
+                  {topCountriesData.length === 0 ? (
+                    <div className="py-10 flex flex-col items-center justify-center border border-dashed border-white/5 rounded-2xl text-center text-zinc-500 text-xs">
+                      <Globe className="w-6 h-6 mb-2 text-zinc-700" />
+                      No country data available yet.
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {topCountriesData.map((entry, index) => {
+                        const maxCount = topCountriesData[0].count;
+                        const pct = maxCount > 0 ? (entry.count / maxCount) * 100 : 0;
+                        const colors = ["#D6004B", "#10b981", "#3b82f6", "#f59e0b", "#a855f7"];
+                        const color = colors[index] || "#71717a";
+                        return (
+                          <div key={entry.name} className="space-y-1.5">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2 min-w-0">
+                                <span className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-black shrink-0"
+                                  style={{ backgroundColor: color + "20", color }}>
+                                  {index + 1}
+                                </span>
+                                <span className="text-xs font-bold text-white truncate">{entry.name}</span>
+                              </div>
+                              <span className="text-xs font-black font-mono shrink-0 ml-2" style={{ color }}>
+                                {entry.count} {entry.count === 1 ? "order" : "orders"}
+                              </span>
+                            </div>
+                            <div className="w-full bg-white/5 rounded-full h-2 overflow-hidden">
+                              <div
+                                className="h-full rounded-full transition-all duration-700"
+                                style={{ width: `${pct}%`, backgroundColor: color }}
+                              />
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
+
 
                 {/* EGP vs USD distribution */}
                 <div className="rounded-3xl bg-[#09090e]/80 border border-white/5 p-6 shadow-2xl">
