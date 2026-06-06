@@ -28,6 +28,7 @@ interface StoreSectionProps {
   categoryStats: any[];
   formatPrice: (amount: number, currency: string) => string;
   dateRange: string;
+  isCompact?: boolean;
 }
 
 export default function StoreSection({
@@ -36,7 +37,8 @@ export default function StoreSection({
   funnelStages,
   categoryStats,
   formatPrice,
-  dateRange
+  dateRange,
+  isCompact = false
 }: StoreSectionProps) {
 
   const comparisonLabel = `مقارنة بـ آخر ${dateRange} يوم`;
@@ -93,6 +95,7 @@ export default function StoreSection({
           trend={storeStats.ordersCount > 0 ? "+0.0% نمو" : undefined}
           trendUp={storeStats.ordersCount > 0}
           trendNeutral={storeStats.ordersCount === 0}
+          isCompact={isCompact}
         />
         <KPICard
           label="مبيعات المنتجات"
@@ -102,6 +105,7 @@ export default function StoreSection({
           trend={storeStats.ordersCount > 0 ? "+0.0% مبيعات" : undefined}
           trendUp={storeStats.ordersCount > 0}
           trendNeutral={storeStats.ordersCount === 0}
+          isCompact={isCompact}
         />
         <KPICard
           label="متوسط قيمة الفاتورة"
@@ -111,15 +115,17 @@ export default function StoreSection({
           trend={storeStats.ordersCount > 0 ? "مستقر" : undefined}
           trendUp={storeStats.ordersCount > 0}
           trendNeutral={storeStats.ordersCount === 0}
+          isCompact={isCompact}
         />
         <KPICard
-          label="معدل التحويل (CR)"
+          label="معدل التحويل للمتجر"
           value={storeStats.cr}
           desc="زيارات تحولت لمبيعات ناجحة"
           icon={Percent}
           trend={storeStats.ordersCount > 0 ? "نشط" : undefined}
           trendUp={storeStats.ordersCount > 0}
           trendNeutral={storeStats.ordersCount === 0}
+          isCompact={isCompact}
         />
         <KPICard
           label="العملاء المستمرين"
@@ -129,6 +135,7 @@ export default function StoreSection({
           trend={storeStats.ordersCount > 0 ? "معدل الولاء" : undefined}
           trendUp={storeStats.ordersCount > 0}
           trendNeutral={storeStats.ordersCount === 0}
+          isCompact={isCompact}
         />
       </div>
 
@@ -255,7 +262,7 @@ export default function StoreSection({
               <h5 className="text-[9px] font-black uppercase text-rose-500 tracking-wider">العملاء الأكثر إنفاقاً بالمتجر</h5>
               <div className="space-y-2">
                 {customerAnalytics.length === 0 ? (
-                  <div className="py-8 text-center text-zinc-600 text-xs">لا يوجد سجل مدفوعات للعملاء حتى الآن.</div>
+                  <div className="py-8 text-center text-zinc-600 text-xs font-semibold">لا يوجد سجل مدفوعات للعملاء حتى الآن.</div>
                 ) : (
                   customerAnalytics.map((c, index) => (
                     <div key={index} className="p-3 rounded-xl bg-white/[0.01] border border-white/5 flex items-center justify-between font-semibold">
