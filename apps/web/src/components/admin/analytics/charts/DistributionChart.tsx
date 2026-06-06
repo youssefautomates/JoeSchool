@@ -1,0 +1,69 @@
+"use client";
+
+import {
+  ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend
+} from "recharts";
+import { CreditCard } from "lucide-react";
+
+interface DistributionChartProps {
+  data: Array<{
+    name: string;
+    value: number;
+  }>;
+}
+
+export default function DistributionChart({ data }: DistributionChartProps) {
+  const totalValue = data.reduce((sum, item) => sum + item.value, 0);
+
+  if (totalValue === 0) {
+    return (
+      <div className="w-full h-full flex flex-col items-center justify-center border border-dashed border-white/5 rounded-2xl p-6 text-center text-zinc-500 text-xs">
+        No sales distribution data available in selected window.
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-full h-full flex flex-col justify-between font-sans">
+      <div className="flex items-center justify-between mb-5 pb-4 border-b border-white/5">
+        <div>
+          <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">EGP vs USD Distribution</h3>
+          <p className="text-[10px] text-zinc-500 mt-0.5">Proportional revenue split across transactions</p>
+        </div>
+        <CreditCard className="w-4 h-4 text-zinc-500 shrink-0" />
+      </div>
+
+      <div className="w-full h-48 sm:h-64 flex items-center justify-center relative">
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart>
+            <Pie
+              data={data}
+              cx="50%"
+              cy="50%"
+              innerRadius={55}
+              outerRadius={75}
+              paddingAngle={4}
+              dataKey="value"
+            >
+              <Cell fill="#D6004B" />
+              <Cell fill="#10b981" />
+            </Pie>
+            <Tooltip
+              formatter={(value: any, name: any) => {
+                if (name === "EGP Revenue") return [`${value} EGP`, name];
+                return [`$${value / 50} USD (equiv. ${value} EGP)`, name];
+              }}
+              contentStyle={{ backgroundColor: "#060608", borderColor: "rgba(255,255,255,0.06)", borderRadius: "12px", textAlign: "left" }}
+              itemStyle={{ fontSize: "10px" }}
+            />
+            <Legend 
+              verticalAlign="bottom" 
+              height={36} 
+              formatter={(value) => <span className="text-[9.5px] sm:text-[10.5px] font-bold text-zinc-400">{value}</span>} 
+            />
+          </PieChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
+  );
+}

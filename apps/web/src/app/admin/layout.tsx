@@ -6,14 +6,21 @@ import { usePathname, useSearchParams } from "next/navigation";
 import {
   LayoutDashboard, Package, ShoppingCart, Settings, LogOut,
   Search, Bell, Sparkles, Target, Star, BarChart3, ShieldAlert,
-  Flame, Globe, ShieldCheck, BookOpen, Users, Award, Mail, LayoutGrid
+  Flame, Globe, ShieldCheck, BookOpen, Users, Award, Mail, LayoutGrid,
+  Menu, X
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { AdminPreferencesProvider } from "@/context/AdminPreferencesContext";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [pathname]);
 
   const navGroups = [
     {
@@ -57,11 +64,75 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }
   ];
 
-  if (pathname === "/admin/login") return <>{children}</>;
-
   return (
-    <div className="min-h-screen bg-[#050505] text-white selection:bg-rose-500/30" dir="ltr">
-      {/* Sidebar - Positioned on Right for RTL */}
+    <AdminPreferencesProvider>
+      {pathname === "/admin/login" ? (
+        children
+      ) : (
+        <div className="min-h-screen bg-[#050505] text-white selection:bg-rose-500/30 overflow-x-hidden" dir="ltr">
+      {/* Mobile Drawer (visible on < lg screens) */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <>
+            {/* Backdrop Overlay */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.5 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="fixed inset-0 bg-black z-50 lg:hidden"
+            />
+            {/* Drawer Sidebar */}
+            <motion.aside
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className="fixed right-0 top-0 h-screen w-80 bg-[#09090b] border-l border-white/5 z-50 flex flex-col shadow-2xl lg:hidden"
+              dir="rtl"
+            >
+              <div className="p-6 flex items-center justify-between border-b border-white/5">
+                <div>
+                  <span className="text-lg font-sans font-black tracking-tighter block uppercase">لوحة الإدارة برو</span>
+                  <span className="text-[10px] text-[#D6004B] font-bold tracking-[0.2em] uppercase">أتمتة يوسف</span>
+                </div>
+                <button
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="w-8 h-8 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center text-zinc-400 hover:text-white"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <nav className="flex-1 p-6 space-y-6 overflow-y-auto custom-scrollbar">
+                <Suspense fallback={
+                  <div className="space-y-4 px-4 py-2">
+                    <div className="h-4 bg-white/5 rounded-md w-2/3 animate-pulse" />
+                    <div className="h-10 bg-white/5 rounded-xl animate-pulse" />
+                  </div>
+                }>
+                  <SidebarNav pathname={pathname} navGroups={navGroups} />
+                </Suspense>
+              </nav>
+
+              <div className="p-6 border-t border-white/5 space-y-4">
+                <button 
+                  onClick={async () => {
+                    await fetch('/api/admin/logout', { method: 'POST' });
+                    window.location.href = '/admin/login';
+                  }}
+                  className="w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl text-red-400 hover:bg-red-500/10 transition-all font-sans font-bold group"
+                >
+                  <LogOut className="w-5 h-5 group-hover:rotate-12 transition-transform" />
+                  <span className="text-xs">تسجيل الخروج</span>
+                </button>
+              </div>
+            </motion.aside>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Sidebar - Positioned on Right for RTL (Desktop only) */}
       <aside className="fixed right-0 top-0 h-screen w-80 bg-[#09090b] border-l border-white/5 z-50 hidden lg:flex flex-col shadow-2xl" dir="rtl">
         <div className="p-8 flex items-center gap-4 border-b border-white/5">
           <div>
@@ -99,8 +170,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* Main Content - Padded on Right for RTL Sidebar */}
       <main className="lg:pr-80 min-h-screen transition-all" dir="rtl">
         {/* Header */}
-        <header className="sticky top-0 h-24 border-b border-white/5 bg-[#050505]/80 backdrop-blur-2xl z-40 px-8 flex items-center justify-between">
-          <div className="flex items-center gap-8 flex-1">
+        <header className="sticky top-0 h-16 sm:h-24 border-b border-white/5 bg-[#050505]/80 backdrop-blur-2xl z-40 px-4 sm:px-8 flex items-center justify-between">
+          <div className="flex items-center gap-4 sm:gap-8 flex-1">
+            <button
+              onClick={() => setIsMobileMenuOpen(true)}
+              className="w-10 h-10 rounded-xl bg-white/5 border border-white/5 flex items-center justify-center text-zinc-400 hover:text-white transition-all lg:hidden"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
             <div className="relative w-full max-w-md hidden md:block group">
               <Search className="w-5 h-5 absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-rose-500 transition-colors" />
               <input 
@@ -111,34 +188,39 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </div>
           </div>
 
-          <div className="flex items-center gap-6">
-            <button className="relative w-12 h-12 rounded-xl bg-white/5 border border-white/5 flex items-center justify-center text-zinc-400 hover:text-white transition-all group">
+          <div className="flex items-center gap-4 sm:gap-6">
+            <button 
+              onClick={() => window.dispatchEvent(new CustomEvent("toggle-admin-notifications"))}
+              className="relative w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-white/5 border border-white/5 flex items-center justify-center text-zinc-400 hover:text-white transition-all group"
+            >
               <Bell className="w-5 h-5 group-hover:scale-110 transition-transform" />
-              <span className="absolute top-3 right-3 w-2 h-2 bg-rose-600 rounded-full border-2 border-[#050505]" />
+              <span className="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 w-2 h-2 bg-rose-600 rounded-full border-2 border-[#050505]" />
             </button>
 
-            <div className="flex items-center gap-4 pl-4 border-l border-white/5 h-10">
+            <div className="flex items-center gap-3 sm:gap-4 pl-3 sm:pl-4 border-l border-white/5 h-10">
               <div className="text-right hidden sm:block">
                 <p className="text-sm font-bold text-white font-sans leading-none mb-1">يوسف مصطفى</p>
                 <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest leading-none">المسؤول العام</p>
               </div>
               <div className="relative group cursor-pointer">
-                <Avatar className="w-12 h-12 rounded-xl border-2 border-white/5 group-hover:border-rose-600/50 transition-all shadow-xl">
+                <Avatar className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl border-2 border-white/5 group-hover:border-rose-600/50 transition-all shadow-xl">
                   <AvatarImage src="https://github.com/shadcn.png" className="rounded-xl" />
                   <AvatarFallback className="bg-rose-600 text-white rounded-xl">YM</AvatarFallback>
                 </Avatar>
-                <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-4 border-[#050505] rounded-full" />
+                <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 border-2 border-[#050505] rounded-full" />
               </div>
             </div>
           </div>
         </header>
 
         {/* Page Content */}
-        <div className="p-8 lg:p-12 max-w-[1600px] mx-auto font-sans">
+        <div className="p-4 sm:p-8 lg:p-12 max-w-[1600px] mx-auto font-sans">
           {children}
         </div>
       </main>
     </div>
+      )}
+    </AdminPreferencesProvider>
   );
 }
 
