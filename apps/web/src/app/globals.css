@@ -262,6 +262,13 @@
     mask-image: radial-gradient(ellipse at top, black 40%, transparent 85%);
     -webkit-mask-image: radial-gradient(ellipse at top, black 40%, transparent 85%);
   }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 /* Hover play-state modifiers for Tailwind marquee utilities */

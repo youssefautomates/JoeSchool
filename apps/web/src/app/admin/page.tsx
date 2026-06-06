@@ -946,123 +946,119 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="space-y-8 font-sans text-zinc-100 min-h-screen pb-16 bg-[#030307]">
+    <div className="space-y-5 sm:space-y-8 font-sans text-zinc-100 min-h-screen pb-20 bg-[#030307] px-0">
       
-      {/* Dynamic Stripe-grade Header Panel */}
-      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6 pb-6 border-b border-white/5">
-        <div>
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-black tracking-tight bg-gradient-to-r from-white via-zinc-200 to-rose-500 bg-clip-text text-transparent">
-              Commerce & Marketing Performance
+      {/* Mobile-Optimized Header Panel */}
+      <div className="px-4 sm:px-6 pt-4 sm:pt-6 pb-4 sm:pb-6 border-b border-white/5 space-y-3">
+        {/* Title Row */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 min-w-0">
+            <h1 className="text-base sm:text-2xl font-black tracking-tight bg-gradient-to-r from-white via-zinc-200 to-rose-500 bg-clip-text text-transparent leading-tight">
+              Commerce Dashboard
             </h1>
-            <span className="relative flex h-2 w-2">
+            <span className="relative flex h-1.5 w-1.5 shrink-0">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
+              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-rose-500"></span>
             </span>
           </div>
-          <p className="text-zinc-500 text-xs mt-1">
-            Live business aggregates tracked directly from Supabase. Strictly database verified.
-          </p>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center bg-white/5 border border-white/5 rounded-xl p-1 gap-1">
-            {[
-              { id: "1", label: "Today" },
-              { id: "7", label: "7 Days" },
-              { id: "30", label: "30 Days" },
-              { id: "90", label: "90 Days" }
-            ].map((range) => (
-              <button
-                key={range.id}
-                onClick={() => setDateRange(range.id)}
-                className={`px-4 py-1.5 rounded-lg text-[10px] font-bold transition-all ${
-                  dateRange === range.id ? "bg-rose-600 text-white shadow-lg" : "text-zinc-400 hover:text-white"
-                }`}
-              >
-                {range.label}
-              </button>
-            ))}
+          {/* Action Buttons Row — compact on mobile */}
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => setSoundEnabled(!soundEnabled)}
+              className="w-8 h-8 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center text-zinc-400 hover:text-white transition-all"
+            >
+              {soundEnabled ? <Volume2 className="w-3.5 h-3.5 text-rose-500" /> : <VolumeX className="w-3.5 h-3.5" />}
+            </button>
+            <button
+              onClick={() => setPollingActive(!pollingActive)}
+              className={`w-8 h-8 rounded-lg border flex items-center justify-center transition-all ${
+                pollingActive 
+                  ? "bg-rose-500/10 border-rose-500/20 text-rose-400"
+                  : "bg-white/5 border-white/5 text-zinc-500"
+              }`}
+            >
+              <Activity className={`w-3.5 h-3.5 ${pollingActive ? "animate-pulse" : ""}`} />
+            </button>
+            <button
+              onClick={loadData}
+              disabled={loading}
+              className="flex items-center gap-1.5 px-3 h-8 rounded-lg text-[11px] font-bold transition-all bg-rose-600/10 border border-rose-500/20 hover:bg-rose-600 text-rose-400 hover:text-white"
+            >
+              <RefreshCw className={`w-3 h-3 ${loading ? "animate-spin" : ""}`} />
+              <span className="hidden sm:inline">Refresh</span>
+            </button>
           </div>
-
-          <button
-            onClick={() => setSoundEnabled(!soundEnabled)}
-            className="w-10 h-10 rounded-xl bg-white/5 border border-white/5 flex items-center justify-center text-zinc-400 hover:text-white transition-all hover:bg-white/10"
-            title={soundEnabled ? "Sound enabled for new orders" : "Sound disabled"}
-          >
-            {soundEnabled ? <Volume2 className="w-4 h-4 text-rose-500" /> : <VolumeX className="w-4 h-4" />}
-          </button>
-
-          <button
-            onClick={() => setPollingActive(!pollingActive)}
-            className={`w-10 h-10 rounded-xl border flex items-center justify-center transition-all ${
-              pollingActive 
-                ? "bg-rose-500/10 border-rose-500/20 text-rose-400 hover:bg-rose-500/20"
-                : "bg-white/5 border-white/5 text-zinc-500 hover:text-white"
-            }`}
-            title={pollingActive ? "Autorefresh active (45s)" : "Autorefresh paused"}
-          >
-            <Activity className={`w-4 h-4 ${pollingActive ? "animate-pulse" : ""}`} />
-          </button>
-
-          <button
-            onClick={loadData}
-            disabled={loading}
-            className="flex items-center gap-2 px-5 h-10 rounded-xl text-xs font-bold transition-all bg-rose-600/10 border border-rose-500/20 hover:bg-rose-600 text-rose-400 hover:text-white"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
-            Refresh
-          </button>
+        </div>
+        {/* Date Range Selector — full width pill row */}
+        <div className="flex items-center bg-white/5 border border-white/5 rounded-xl p-1 gap-1 w-full">
+          {[
+            { id: "1", label: "Today" },
+            { id: "7", label: "7D" },
+            { id: "30", label: "30D" },
+            { id: "90", label: "90D" }
+          ].map((range) => (
+            <button
+              key={range.id}
+              onClick={() => setDateRange(range.id)}
+              className={`flex-1 py-2 rounded-lg text-[11px] font-bold transition-all ${
+                dateRange === range.id ? "bg-rose-600 text-white shadow-lg" : "text-zinc-400 hover:text-white"
+              }`}
+            >
+              {range.label}
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* Main Dashboard Selector Tabs */}
-      <div className="flex border-b border-white/5 pb-1 gap-2">
-        <button
-          onClick={() => setActiveTab("performance")}
-          className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-bold transition-all ${
-            activeTab === "performance" 
-              ? "bg-white/5 text-white border-b-2 border-rose-500" 
-              : "text-zinc-400 hover:text-white hover:bg-white/5"
-          }`}
-        >
-          <BarChart3 className="w-3.5 h-3.5" />
-          Store Performance
-        </button>
-        <button
-          onClick={() => setActiveTab("products")}
-          className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-bold transition-all ${
-            activeTab === "products" 
-              ? "bg-white/5 text-white border-b-2 border-rose-500" 
-              : "text-zinc-400 hover:text-white hover:bg-white/5"
-          }`}
-        >
-          <Package className="w-3.5 h-3.5" />
-          Product & LMS Analytics
-        </button>
-        <button
-          onClick={() => setActiveTab("diagnostics")}
-          className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-bold transition-all ${
-            activeTab === "diagnostics" 
-              ? "bg-white/5 text-white border-b-2 border-rose-500" 
-              : "text-zinc-400 hover:text-white hover:bg-white/5"
-          }`}
-        >
-          <ShieldAlert className="w-3.5 h-3.5" />
-          Diagnostics & Webhooks
-          {diagnosticsLogs.failed.length > 0 && (
-            <span className="px-1.5 py-0.5 rounded bg-red-600 text-white text-[8px] font-black animate-pulse">
-              {diagnosticsLogs.failed.length}
-            </span>
-          )}
-        </button>
+      {/* Mobile-Optimized Scrollable Tabs */}
+      <div className="px-4 sm:px-6">
+        <div className="flex border-b border-white/5 pb-0 gap-1 overflow-x-auto no-scrollbar">
+          <button
+            onClick={() => setActiveTab("performance")}
+            className={`flex items-center gap-1.5 px-3 sm:px-5 py-2.5 rounded-t-xl text-[11px] sm:text-xs font-bold transition-all whitespace-nowrap shrink-0 ${
+              activeTab === "performance" 
+                ? "bg-white/5 text-white border-b-2 border-rose-500" 
+                : "text-zinc-400 hover:text-white"
+            }`}
+          >
+            <BarChart3 className="w-3.5 h-3.5" />
+            <span className="hidden xs:inline">Store </span>Performance
+          </button>
+          <button
+            onClick={() => setActiveTab("products")}
+            className={`flex items-center gap-1.5 px-3 sm:px-5 py-2.5 rounded-t-xl text-[11px] sm:text-xs font-bold transition-all whitespace-nowrap shrink-0 ${
+              activeTab === "products" 
+                ? "bg-white/5 text-white border-b-2 border-rose-500" 
+                : "text-zinc-400 hover:text-white"
+            }`}
+          >
+            <Package className="w-3.5 h-3.5" />
+            Products & LMS
+          </button>
+          <button
+            onClick={() => setActiveTab("diagnostics")}
+            className={`flex items-center gap-1.5 px-3 sm:px-5 py-2.5 rounded-t-xl text-[11px] sm:text-xs font-bold transition-all whitespace-nowrap shrink-0 ${
+              activeTab === "diagnostics" 
+                ? "bg-white/5 text-white border-b-2 border-rose-500" 
+                : "text-zinc-400 hover:text-white"
+            }`}
+          >
+            <ShieldAlert className="w-3.5 h-3.5" />
+            Diagnostics
+            {diagnosticsLogs.failed.length > 0 && (
+              <span className="px-1.5 py-0.5 rounded bg-red-600 text-white text-[8px] font-black animate-pulse">
+                {diagnosticsLogs.failed.length}
+              </span>
+            )}
+          </button>
+        </div>
       </div>
 
       {loading ? (
-        <div className="w-full h-96 flex items-center justify-center">
+        <div className="w-full h-64 flex items-center justify-center">
           <div className="flex flex-col items-center gap-3">
             <Loader2 className="w-8 h-8 text-rose-500 animate-spin" />
-            <p className="text-xs text-zinc-500">Retrieving marketing telemetry...</p>
+            <p className="text-xs text-zinc-500">Retrieving telemetry...</p>
           </div>
         </div>
       ) : (
@@ -1074,35 +1070,35 @@ export default function AdminDashboard() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="space-y-8"
+              className="space-y-5 sm:space-y-8 px-4 sm:px-6"
             >
-              {/* Premium Minimal KPI Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-5">
+              {/* Mobile-First KPI Grid — 2 cols on mobile, 3 on tablet, 6 on desktop */}
+              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 sm:gap-5">
                 {[
-                  { label: "EGP Gross Revenue", value: formatPrice(stats.egpGrossRevenue, "EGP"), desc: "Gross Egyptian Pounds", icon: DollarSign, trend: stats.revenueGrowth >= 0 ? `+${stats.revenueGrowth.toFixed(1)}%` : `${stats.revenueGrowth.toFixed(1)}%`, trendUp: stats.revenueGrowth >= 0 },
-                  { label: "EGP Net Revenue", value: formatPrice(stats.egpNetRevenue, "EGP"), desc: "Net (Excludes Fees)", icon: Activity, trend: "Surcharge removed", trendUp: true },
-                  { label: "USD Revenue (Net & Gross)", value: formatPrice(stats.usdNetRevenue, "USD"), desc: "Gross === Net", icon: Globe, trend: "USD checkouts", trendUp: true },
-                  { label: "Processing Fees", value: formatPrice(stats.processingFees, "EGP"), desc: "Recovered from Paymob", icon: ShieldCheck, trend: "3% EGP transactions", trendUp: true },
-                  { label: "Orders Count", value: stats.successfulOrders.toString(), desc: `Out of ${stats.totalOrders} total attempts`, icon: ShoppingCart, trend: `${((stats.successfulOrders / Math.max(1, stats.totalOrders)) * 100).toFixed(0)}% completion`, trendUp: true },
-                  { label: "Conversion Rate", value: `${stats.conversionRate.toFixed(2)}%`, desc: "Sessions to purchase", icon: Activity, trend: `${stats.sessions} total sessions`, trendUp: stats.conversionRate > 2.5 }
+                  { label: "EGP Gross", value: formatPrice(stats.egpGrossRevenue, "EGP"), desc: "Gross EGP", icon: DollarSign, trend: stats.revenueGrowth >= 0 ? `+${stats.revenueGrowth.toFixed(1)}%` : `${stats.revenueGrowth.toFixed(1)}%`, trendUp: stats.revenueGrowth >= 0 },
+                  { label: "EGP Net", value: formatPrice(stats.egpNetRevenue, "EGP"), desc: "Net (No Fees)", icon: Activity, trend: "Fees removed", trendUp: true },
+                  { label: "USD Revenue", value: formatPrice(stats.usdNetRevenue, "USD"), desc: "USD orders", icon: Globe, trend: "Intl checkouts", trendUp: true },
+                  { label: "Paymob Fees", value: formatPrice(stats.processingFees, "EGP"), desc: "3% gateway", icon: ShieldCheck, trend: "EGP only", trendUp: true },
+                  { label: "Orders ✓", value: stats.successfulOrders.toString(), desc: `of ${stats.totalOrders} total`, icon: ShoppingCart, trend: `${((stats.successfulOrders / Math.max(1, stats.totalOrders)) * 100).toFixed(0)}% done`, trendUp: true },
+                  { label: "Conv. Rate", value: `${stats.conversionRate.toFixed(2)}%`, desc: `${stats.sessions} sessions`, icon: Activity, trend: stats.conversionRate > 2.5 ? "Good CR" : "Low CR", trendUp: stats.conversionRate > 2.5 }
                 ].map((card) => {
                   const Icon = card.icon;
                   return (
-                    <div key={card.label} className="p-5 rounded-2xl bg-[#09090e] border border-white/5 relative overflow-hidden group hover:border-white/10 transition-all duration-300">
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-white/5">
-                          <Icon className="w-4 h-4 text-zinc-400 group-hover:text-rose-500 transition-colors" />
+                    <div key={card.label} className="p-3 sm:p-5 rounded-2xl bg-[#09090e] border border-white/5 relative overflow-hidden group hover:border-white/10 transition-all duration-300">
+                      <div className="flex items-start justify-between mb-2">
+                        <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center bg-white/5 shrink-0">
+                          <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-zinc-400 group-hover:text-rose-500 transition-colors" />
                         </div>
-                        <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
+                        <span className={`text-[8px] sm:text-[9px] font-bold px-1.5 py-0.5 rounded-full shrink-0 ${
                           card.trendUp ? "text-emerald-400 bg-emerald-500/5 border border-emerald-500/10" : "text-zinc-500 bg-white/5 border border-white/5"
                         }`}>
                           {card.trend}
                         </span>
                       </div>
                       <div className="space-y-0.5">
-                        <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">{card.label}</p>
-                        <h3 className="text-lg font-black tracking-tight text-white">{card.value}</h3>
-                        <p className="text-[9px] text-zinc-600 font-semibold">{card.desc}</p>
+                        <p className="text-[9px] sm:text-[10px] font-bold text-zinc-500 uppercase tracking-wider leading-tight">{card.label}</p>
+                        <h3 className="text-sm sm:text-lg font-black tracking-tight text-white leading-tight">{card.value}</h3>
+                        <p className="text-[8px] sm:text-[9px] text-zinc-600 font-semibold">{card.desc}</p>
                       </div>
                     </div>
                   );
@@ -1110,7 +1106,7 @@ export default function AdminDashboard() {
               </div>
 
               {/* Core Charts & Live Feed Section */}
-              <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+              <div className="grid grid-cols-1 xl:grid-cols-3 gap-5 sm:gap-8">
                 
                 {/* Stripe-style Smooth Revenue Area Chart */}
                 <div className="xl:col-span-2 rounded-3xl bg-[#09090e]/80 border border-white/5 p-6 shadow-2xl flex flex-col justify-between">
@@ -1127,7 +1123,7 @@ export default function AdminDashboard() {
                     )}
                   </div>
 
-                  <div className="w-full h-72">
+                  <div className="w-full h-48 sm:h-72">
                     {filteredOrders.length === 0 ? (
                       <div className="w-full h-full flex flex-col items-center justify-center border border-dashed border-white/5 rounded-2xl p-6 text-center">
                         <BarChart3 className="w-8 h-8 text-zinc-600 mb-2" />
@@ -1230,7 +1226,7 @@ export default function AdminDashboard() {
               </div>
 
               {/* International Commerce & Growth Visualizations */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-8">
                 
                 {/* Top Countries BarChart */}
                 <div className="rounded-3xl bg-[#09090e]/80 border border-white/5 p-6 shadow-2xl">
@@ -1241,7 +1237,7 @@ export default function AdminDashboard() {
                     </div>
                     <Globe className="w-4 h-4 text-zinc-500" />
                   </div>
-                  <div className="w-full h-64">
+                  <div className="w-full h-48 sm:h-64">
                     {topCountriesData.length === 0 ? (
                       <div className="w-full h-full flex flex-col items-center justify-center border border-dashed border-white/5 rounded-2xl p-6 text-center text-zinc-500 text-xs">
                         No country data available.
@@ -1276,7 +1272,7 @@ export default function AdminDashboard() {
                     </div>
                     <CreditCard className="w-4 h-4 text-zinc-500" />
                   </div>
-                  <div className="w-full h-64 flex items-center justify-center">
+                  <div className="w-full h-48 sm:h-64 flex items-center justify-center">
                     {currencyDistributionData.reduce((sum, item) => sum + item.value, 0) === 0 ? (
                       <div className="w-full h-full flex flex-col items-center justify-center border border-dashed border-white/5 rounded-2xl p-6 text-center text-zinc-500 text-xs">
                         No revenue recorded in this period.
@@ -1313,7 +1309,7 @@ export default function AdminDashboard() {
               </div>
 
               {/* Bottom Rows: Marketing Funnel, Traffic Sources */}
-              <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 font-sans">
+              <div className="grid grid-cols-1 xl:grid-cols-3 gap-5 sm:gap-8 font-sans">
                 
                 {/* Premium Horizontal Sales Conversion Funnel */}
                 <div className="xl:col-span-2 rounded-3xl bg-[#09090e]/80 border border-white/5 p-6 shadow-2xl flex flex-col justify-between">
@@ -1326,14 +1322,14 @@ export default function AdminDashboard() {
                     {funnelMetrics.map((stage, idx) => (
                       <div key={stage.name} className="relative">
                         <div className="flex items-center justify-between text-xs mb-1">
-                          <span className="font-bold text-zinc-300 flex items-center gap-2">
-                            <span className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] bg-white/5 font-black text-zinc-400">
+                          <span className="font-bold text-zinc-300 flex items-center gap-1.5">
+                            <span className="w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center text-[9px] bg-white/5 font-black text-zinc-400 shrink-0">
                               {idx + 1}
                             </span>
-                            {stage.name}
-                            <span className="text-[9px] text-zinc-500 font-semibold">({stage.label})</span>
+                            <span className="text-[11px] sm:text-xs">{stage.name}</span>
+                            <span className="text-[9px] text-zinc-500 font-semibold hidden sm:inline">({stage.label})</span>
                           </span>
-                          <span className="font-bold text-white font-mono">{stage.count} events</span>
+                          <span className="font-bold text-white font-mono text-[11px] sm:text-xs shrink-0 ml-1">{stage.count}</span>
                         </div>
                         <div className="w-full bg-white/5 h-2.5 rounded-full overflow-hidden flex">
                           <div 
@@ -1398,21 +1394,21 @@ export default function AdminDashboard() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="space-y-8"
+              className="space-y-5 sm:space-y-8 px-4 sm:px-6"
             >
               
               {/* Product Analytics Controls */}
-              <div className="flex justify-between items-center p-6 rounded-2xl bg-[#09090e] border border-white/5 shadow-2xl">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 p-4 sm:p-6 rounded-2xl bg-[#09090e] border border-white/5 shadow-2xl">
                 <div>
-                  <h3 className="text-sm font-bold uppercase tracking-wider text-white">Product & E-Course Micro-Analytics</h3>
-                  <p className="text-[10px] text-zinc-500 mt-1">Granular clickstream attribution, conversion funnels, and registration statistics per course</p>
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-white">Product & E-Course Analytics</h3>
+                  <p className="text-[10px] text-zinc-500 mt-1 hidden sm:block">Granular clickstream attribution, conversion funnels, and registration statistics per course</p>
                 </div>
                 <button
                   onClick={downloadExcelReport}
-                  className="flex items-center gap-2 px-6 h-10 rounded-xl text-xs font-black transition-all bg-rose-600 hover:bg-[#ff0059] text-white shadow-xl shadow-rose-600/10 font-sans"
+                  className="flex items-center gap-2 px-4 sm:px-6 h-9 sm:h-10 rounded-xl text-xs font-black transition-all bg-rose-600 hover:bg-[#ff0059] text-white shadow-xl shadow-rose-600/10 font-sans self-start sm:self-auto"
                 >
-                  <Download className="w-4 h-4" />
-                  Export Excel Report
+                  <Download className="w-3.5 h-3.5" />
+                  Export Excel
                 </button>
               </div>
 
@@ -1585,7 +1581,7 @@ export default function AdminDashboard() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="space-y-8"
+              className="space-y-5 sm:space-y-8 px-4 sm:px-6"
             >
               
               {/* Telemetry Data Seeder Card */}
