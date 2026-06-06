@@ -4,8 +4,8 @@ import { useState, useMemo } from "react";
 import { Flame } from "lucide-react";
 
 interface HeatmapDataPoint {
-  dayIndex: number; // 0 = Sun, 6 = Sat
-  hour: number; // 0 to 23
+  dayIndex: number;
+  hour: number;
   amount: number;
 }
 
@@ -17,7 +17,8 @@ export default function RevenueHeatmap({ orders }: RevenueHeatmapProps) {
   const [hoveredCell, setHoveredCell] = useState<{ day: number; hour: number; amount: number } | null>(null);
   const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
 
-  const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const daysOfWeek = ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
+  const daysOfWeekEn = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const hoursOfDay = ["12A", "2A", "4A", "6A", "8A", "10A", "12P", "2P", "4P", "6P", "8P", "10P"];
 
   // Aggregate orders by day and hour
@@ -70,14 +71,21 @@ export default function RevenueHeatmap({ orders }: RevenueHeatmapProps) {
     return "bg-rose-600 border-rose-500 shadow-md shadow-rose-600/20";
   };
 
+  const formatHour = (hour: number) => {
+    if (hour === 0) return "12 منتصف الليل";
+    if (hour === 12) return "12 ظهراً";
+    if (hour > 12) return `${hour - 12} مساءً`;
+    return `${hour} صباحاً`;
+  };
+
   return (
-    <div className="w-full flex flex-col justify-between font-sans">
+    <div className="w-full flex flex-col justify-between font-sans text-right" dir="rtl">
       
       {/* Header */}
       <div className="flex items-center justify-between mb-5 pb-4 border-b border-white/5">
-        <div>
-          <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">Hourly Revenue Heatmap</h3>
-          <p className="text-[10px] text-zinc-500 mt-0.5">Purchases intensity mapped across weekdays and hours</p>
+        <div className="text-right">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">خريطة المبيعات الحرارية بالساعات</h3>
+          <p className="text-[10px] text-zinc-500 mt-0.5">توزيع حجم المبيعات الإجمالي حسب اليوم وساعات اليوم الفردية</p>
         </div>
         <Flame className="w-4 h-4 text-rose-500 shrink-0" />
       </div>
@@ -87,10 +95,10 @@ export default function RevenueHeatmap({ orders }: RevenueHeatmapProps) {
         <div className="min-w-[620px] space-y-1 relative">
           
           {/* Hour labels row */}
-          <div className="flex items-center text-[8px] font-bold text-zinc-600 pb-1 pl-8">
+          <div className="flex items-center text-[8px] font-bold text-zinc-600 pb-1 pl-12">
             {Array.from({ length: 24 }).map((_, h) => (
               <span key={h} className="w-5 text-center shrink-0">
-                {h % 2 === 0 ? `${h === 0 ? "12" : h > 12 ? h - 12 : h}${h >= 12 ? "P" : "A"}` : ""}
+                {h % 2 === 0 ? `${h === 0 ? "12" : h > 12 ? h - 12 : h}${h >= 12 ? "م" : "ص"}` : ""}
               </span>
             ))}
           </div>
@@ -98,7 +106,7 @@ export default function RevenueHeatmap({ orders }: RevenueHeatmapProps) {
           {/* Days grids */}
           {daysOfWeek.map((dayLabel, dIdx) => (
             <div key={dayLabel} className="flex items-center gap-1.5">
-              <span className="w-8 text-[9px] font-black text-zinc-500 text-left shrink-0">{dayLabel}</span>
+              <span className="w-10 text-[9px] font-black text-zinc-500 text-left shrink-0">{dayLabel}</span>
               <div className="flex items-center gap-1">
                 {Array.from({ length: 24 }).map((_, hIdx) => {
                   const val = heatmapGrid[`${dIdx}-${hIdx}`] || 0;
@@ -119,14 +127,15 @@ export default function RevenueHeatmap({ orders }: RevenueHeatmapProps) {
           {hoveredCell && (
             <div
               style={{ left: tooltipPos.x, top: tooltipPos.y }}
-              className="absolute z-30 p-2.5 rounded-lg bg-[#060608]/95 border border-white/10 shadow-2xl backdrop-blur-md text-[9px] pointer-events-none w-36 space-y-0.5 text-left font-sans"
+              className="absolute z-30 p-2.5 rounded-lg bg-[#060608]/95 border border-white/10 shadow-2xl backdrop-blur-md text-[9px] pointer-events-none w-36 space-y-0.5 text-right font-sans"
+              dir="rtl"
             >
               <div className="font-extrabold text-white">
-                {daysOfWeek[hoveredCell.day]} at {hoveredCell.hour === 0 ? "12 AM" : hoveredCell.hour === 12 ? "12 PM" : hoveredCell.hour > 12 ? `${hoveredCell.hour - 12} PM` : `${hoveredCell.hour} AM`}
+                يوم {daysOfWeek[hoveredCell.day]} الساعة {formatHour(hoveredCell.hour)}
               </div>
               <div className="text-zinc-400 font-semibold flex justify-between">
-                <span>Revenue:</span>
-                <span className="text-rose-400 font-mono font-black">{hoveredCell.amount} L.E</span>
+                <span>الإيرادات:</span>
+                <span className="text-rose-400 font-mono font-black">{hoveredCell.amount} ج.م</span>
               </div>
             </div>
           )}
@@ -135,13 +144,13 @@ export default function RevenueHeatmap({ orders }: RevenueHeatmapProps) {
 
       {/* Legend */}
       <div className="flex items-center gap-2 mt-3 text-[8.5px] font-bold text-zinc-500 justify-end">
-        <span>Less active</span>
+        <span>أقل مبيعات</span>
         <div className="w-3.5 h-3.5 bg-white/[0.02] border border-white/5 rounded" />
         <div className="w-3.5 h-3.5 bg-rose-500/20 border border-rose-500/10 rounded" />
         <div className="w-3.5 h-3.5 bg-rose-500/40 border border-rose-500/20 rounded" />
         <div className="w-3.5 h-3.5 bg-rose-600/70 border border-rose-600/30 rounded" />
         <div className="w-3.5 h-3.5 bg-rose-600 border border-rose-500 rounded" />
-        <span>More active</span>
+        <span>أعلى مبيعات</span>
       </div>
     </div>
   );

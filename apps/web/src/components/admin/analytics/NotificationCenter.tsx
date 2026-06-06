@@ -70,13 +70,13 @@ export default function NotificationCenter({
       const date = new Date(dateStr);
       const diffMs = now.getTime() - date.getTime();
       const diffMins = Math.floor(diffMs / 60000);
-      if (diffMins < 1) return "just now";
-      if (diffMins < 60) return `${diffMins}m ago`;
+      if (diffMins < 1) return "الآن";
+      if (diffMins < 60) return `منذ ${diffMins} د`;
       const diffHours = Math.floor(diffMins / 60);
-      if (diffHours < 24) return `${diffHours}h ago`;
-      return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+      if (diffHours < 24) return `منذ ${diffHours} س`;
+      return date.toLocaleDateString("ar-EG", { month: "short", day: "numeric" });
     } catch (e) {
-      return "recently";
+      return "مؤخراً";
     }
   };
 
@@ -93,24 +93,24 @@ export default function NotificationCenter({
             className="fixed inset-0 bg-black z-50"
           />
 
-          {/* Drawer container - Opens from Left (Standard Drawer in RTL Main) */}
+          {/* Drawer container - Opens from Left */}
           <motion.div
             initial={{ x: "-100%" }}
             animate={{ x: 0 }}
             exit={{ x: "-100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed left-0 top-0 h-screen w-full max-w-sm bg-[#07070b]/98 border-r border-white/5 z-55 flex flex-col shadow-2xl backdrop-blur-lg"
-            dir="ltr"
+            className="fixed left-0 top-0 h-screen w-full max-w-sm bg-[#07070b]/98 border-r border-white/5 z-55 flex flex-col shadow-2xl backdrop-blur-lg text-right"
+            dir="rtl"
           >
             {/* Header */}
             <div className="p-4 sm:p-5 flex items-center justify-between border-b border-white/5">
               <div className="flex items-center gap-2">
                 <Bell className="w-5 h-5 text-rose-500" />
-                <h3 className="font-extrabold text-sm text-white uppercase tracking-wider">Alert Center</h3>
+                <h3 className="font-extrabold text-sm text-white uppercase tracking-wider">مركز الإشعارات والتنبيهات</h3>
               </div>
               <button
                 onClick={onClose}
-                className="w-8 h-8 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center text-zinc-400 hover:text-white transition-colors"
+                className="w-8 h-8 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center text-zinc-400 hover:text-white transition-colors cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -119,16 +119,16 @@ export default function NotificationCenter({
             {/* Notification logs list */}
             <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
               <div className="flex items-center justify-between text-[10px] text-zinc-500 font-bold uppercase tracking-wider mb-2">
-                <span>Recent Notifications ({notifications.length})</span>
+                <span>آخر التنبيهات ({notifications.length})</span>
                 <div className="flex gap-2.5">
                   {notifications.some(n => !n.read) && (
-                    <button onClick={onMarkAllAsRead} className="hover:text-white flex items-center gap-1 transition-colors">
-                      <CheckCircle2 className="w-3 h-3 text-emerald-400" /> Mark all read
+                    <button onClick={onMarkAllAsRead} className="hover:text-white flex items-center gap-1 transition-colors cursor-pointer">
+                      <CheckCircle2 className="w-3 h-3 text-emerald-400" /> قراءة الكل
                     </button>
                   )}
                   {notifications.length > 0 && (
-                    <button onClick={onClearAll} className="hover:text-red-400 flex items-center gap-1 transition-colors">
-                      <Trash2 className="w-3 h-3" /> Clear
+                    <button onClick={onClearAll} className="hover:text-red-400 flex items-center gap-1 transition-colors cursor-pointer">
+                      <Trash2 className="w-3 h-3" /> تفريغ
                     </button>
                   )}
                 </div>
@@ -137,7 +137,7 @@ export default function NotificationCenter({
               <div className="space-y-2">
                 {notifications.length === 0 ? (
                   <div className="py-16 text-center text-zinc-600 text-xs">
-                    No active notifications recorded.
+                    لا توجد تنبيهات نشطة حالياً.
                   </div>
                 ) : (
                   notifications.map((notif) => {
@@ -156,17 +156,17 @@ export default function NotificationCenter({
                         <div className={`w-8 h-8 rounded-lg flex items-center justify-center border shrink-0 ${config.color}`}>
                           <IconComponent className="w-4 h-4" />
                         </div>
-                        <div className="min-w-0 flex-1 space-y-0.5 text-left">
+                        <div className="min-w-0 flex-1 space-y-0.5 text-right">
                           <div className="flex items-center justify-between gap-1.5">
                             <span className="text-[10.5px] font-black text-white truncate">{notif.title}</span>
-                            <span className="text-[8px] text-zinc-500 font-mono shrink-0">
+                            <span className="text-[8px] text-zinc-500 font-mono shrink-0" dir="ltr">
                               {getRelativeTime(notif.created_at)}
                             </span>
                           </div>
                           <p className="text-[9.5px] text-zinc-400 font-medium leading-normal">{notif.message}</p>
                         </div>
                         {!notif.read && (
-                          <span className="absolute top-3 right-3 w-1.5 h-1.5 rounded-full bg-[#D6004B]" />
+                          <span className="absolute top-3 left-3 w-1.5 h-1.5 rounded-full bg-[#D6004B]" />
                         )}
                       </div>
                     );
@@ -179,15 +179,15 @@ export default function NotificationCenter({
             <div className="p-4 border-t border-white/5 bg-[#050508]/80">
               <div className="flex items-center gap-1.5 text-[10px] text-zinc-500 font-bold uppercase tracking-wider mb-3">
                 <Settings className="w-3.5 h-3.5" />
-                <span>Alert Configuration Toggles</span>
+                <span>إعدادات تنبيهات النظام</span>
               </div>
               <div className="grid grid-cols-1 gap-2.5 text-[10px] font-semibold text-zinc-400">
                 {[
-                  { key: "new_order", label: "New Digital Sales" },
-                  { key: "failed_payment", label: "Payment Failures" },
-                  { key: "new_student", label: "LMS Academy Enrollments" },
-                  { key: "new_review", label: "Customer Product Reviews" },
-                  { key: "suspicious_login", label: "Threat/Security Login Anomalies" }
+                  { key: "new_order", label: "مبيعات المنتجات الرقمية الجديدة" },
+                  { key: "failed_payment", label: "عمليات الدفع الفاشلة والمرفوضة" },
+                  { key: "new_student", label: "تسجيلات الطلاب في الأكاديمية (LMS)" },
+                  { key: "new_review", label: "التقييمات والمراجعات المضافة حديثاً" },
+                  { key: "suspicious_login", label: "تنبيهات الأمان ومحاولات الدخول المشبوهة" }
                 ].map((pref) => (
                   <label key={pref.key} className="flex items-center justify-between cursor-pointer select-none">
                     <span>{pref.label}</span>

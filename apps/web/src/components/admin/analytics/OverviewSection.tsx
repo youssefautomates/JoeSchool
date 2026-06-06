@@ -43,7 +43,7 @@ export default function OverviewSection({
 }: OverviewSectionProps) {
 
   // Dynamic label for previous period comparison
-  const comparisonLabel = `vs last ${dateRange} days`;
+  const comparisonLabel = `مقارنة بآخر ${dateRange} يوم`;
 
   const getTrendStr = (val: number | undefined) => {
     if (val === undefined || val === 0) return undefined;
@@ -112,7 +112,7 @@ export default function OverviewSection({
           <RevenueChart 
             data={chartData} 
             revenueGrowth={stats.revenueGrowth} 
-            currencySymbol="L.E"
+            currencySymbol="ج.م"
           />
         </div>
 

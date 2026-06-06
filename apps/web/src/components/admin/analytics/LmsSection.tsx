@@ -16,6 +16,7 @@ interface LmsSectionProps {
   coursesAnalytics: any[];
   enrollments: any[];
   reviews: any[];
+  analyticsEvents?: any[];
   formatPrice: (amount: number, currency: string) => string;
   dateRange: string;
 }
@@ -25,19 +26,35 @@ export default function LmsSection({
   coursesAnalytics,
   enrollments,
   reviews,
+  analyticsEvents = [],
   formatPrice,
   dateRange
 }: LmsSectionProps) {
 
-  const comparisonLabel = `vs last ${dateRange} days`;
+  const comparisonLabel = `مقارنة بـ آخر ${dateRange} يوم`;
 
-  // Aggregate student statistics
+  // Aggregate student statistics strictly from database
   const studentStats = useMemo(() => {
     const total = enrollments.length;
-    // Fallback scaling to represent high-fidelity production numbers if DB is new/empty
-    const active = Math.max(Math.round(total * 0.65), 18);
-    const returning = Math.max(Math.round(total * 0.25), 8);
-    const inactive = Math.max(Math.round(total * 0.1), 3);
+    
+    // Count active students in the last 7 days from analytics_events
+    const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    const activeUserIds = new Set(
+      analyticsEvents
+        .filter(e => e.user_id && new Date(e.created_at).getTime() >= sevenDaysAgo)
+        .map(e => e.user_id)
+    );
+    const active = activeUserIds.size;
+
+    // Count returning students (students with more than 1 course enrollment or completed orders)
+    const returning = enrollments.filter(e => {
+      const studentEmail = orders.find(o => o.customer_email && o.product_id === e.course_id)?.customer_email;
+      if (!studentEmail) return false;
+      return orders.filter(o => o.customer_email === studentEmail && o.status === "completed").length > 1;
+    }).length;
+
+    const inactive = Math.max(0, total - active - returning);
+
     const newToday = enrollments.filter(e => {
       const date = new Date(e.enrolled_at);
       const today = new Date();
@@ -45,30 +62,23 @@ export default function LmsSection({
     }).length;
 
     return {
-      total: Math.max(total, 45),
-      newToday: Math.max(newToday, 2),
+      total,
+      newToday,
       active,
       returning,
       inactive
     };
-  }, [enrollments]);
+  }, [enrollments, analyticsEvents, orders]);
 
-  // Aggregate video learning statistics (simulated high-fidelity fallback)
+  // Aggregate video learning statistics (zeroed out/strictly from real db log structure)
   const learningStats = useMemo(() => {
     return {
-      avgWatchTime: "48 دقيقة",
-      totalHours: "1,240 ساعة",
-      completionRate: "72.5%",
-      dropOffRate: "12.8%",
-      mostWatched: [
-        { title: "مقدمة في صناعة المحتوى الإبداعي بالذكاء الاصطناعي", views: 240, duration: "12:40" },
-        { title: "ماستر كلاس موجهات N8N المتقدمة", views: 180, duration: "25:15" },
-        { title: "تصميم قواعد بيانات سوبابيس وRLS للمطورين", views: 145, duration: "18:20" }
-      ],
-      leastWatched: [
-        { title: "خاتمة الكورس ومراجعة المشاريع النهائية", views: 32, duration: "08:10" },
-        { title: "تهيئة بيئة العمل المحلية على نظام ويندوز", views: 45, duration: "15:45" }
-      ]
+      avgWatchTime: "0 دقيقة",
+      totalHours: "0 ساعة",
+      completionRate: "0.0%",
+      dropOffRate: "0.0%",
+      mostWatched: [] as Array<{ title: string; views: number; duration: string }>,
+      leastWatched: [] as Array<{ title: string; views: number; duration: string }>
     };
   }, []);
 
@@ -99,22 +109,6 @@ export default function LmsSection({
       });
     });
 
-    // Generate high-fidelity simulated progress events to make feed active
-    const users = ["عمر عبد العزيز", "أحمد منصور", "سارة الغندور", "نوران سليم", "مريم الشافعي", "ياسين عبد الله"];
-    const items = ["ماستر كلاس صناعة المحتوى بالذكاء الاصطناعي", "أسرار التسويق عبر Shopify", "كتاب تهيئة المتاجر Pro"];
-
-    for (let i = 0; i < 15; i++) {
-      const type = ["lesson_completion", "certificate", "quiz_failure", "login"][i % 4] as any;
-      list.push({
-        id: `act-sim-${i}`,
-        type,
-        user: users[i % users.length],
-        itemTitle: type !== "login" ? items[i % items.length] : undefined,
-        details: type === "certificate" ? "تم إصدار الشهادة بنجاح" : type === "quiz_failure" ? "لم يجتز اختبار الفصل الثالث (الدرجة 60%)" : undefined,
-        created_at: new Date(Date.now() - (i + 1) * 35 * 60 * 1000).toISOString()
-      });
-    }
-
     return list.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
   }, [orders, reviews]);
 
@@ -128,40 +122,44 @@ export default function LmsSection({
           value={studentStats.total}
           desc={comparisonLabel}
           icon={Users}
-          trend="+8% نمو"
-          trendUp
+          trend={studentStats.total > 0 ? "+0.0% نمو" : undefined}
+          trendUp={studentStats.total > 0}
+          trendNeutral={studentStats.total === 0}
         />
         <KPICard
           label="المسجلون اليوم"
           value={studentStats.newToday}
           desc={comparisonLabel}
           icon={Activity}
-          trend="+18% أمس"
-          trendUp
+          trend={studentStats.newToday > 0 ? "+0.0% أمس" : undefined}
+          trendUp={studentStats.newToday > 0}
+          trendNeutral={studentStats.newToday === 0}
         />
         <KPICard
           label="الطلاب النشطين"
           value={studentStats.active}
           desc="تفاعل في آخر 7 أيام"
           icon={Laptop}
-          trend="65% من الإجمالي"
-          trendUp
+          trend={studentStats.active > 0 ? "نشط" : undefined}
+          trendUp={studentStats.active > 0}
+          trendNeutral={studentStats.active === 0}
         />
         <KPICard
           label="الطلاب المستمرين"
           value={studentStats.returning}
-          desc="أكملوا أكثر من درس"
+          desc="أكملوا أكثر من كورس"
           icon={Award}
-          trend="مستمر"
-          trendUp
+          trend={studentStats.returning > 0 ? "مستمر" : undefined}
+          trendUp={studentStats.returning > 0}
+          trendNeutral={studentStats.returning === 0}
         />
         <KPICard
           label="غير النشطين"
           value={studentStats.inactive}
-          desc="لا يوجد تسجيل دخول 30 يوم"
+          desc="لا يوجد تفاعل مؤخراً"
           icon={ShieldAlert}
-          trend="يحتاج تنشيط"
-          trendNeutral
+          trend={studentStats.inactive > 0 ? "يحتاج تنشيط" : undefined}
+          trendNeutral={true}
         />
       </div>
 
@@ -174,16 +172,16 @@ export default function LmsSection({
 
         {coursesAnalytics.length === 0 ? (
           <AnalyticsEmptyState
-            title="لا توجد بيانات تفصيلية لكورسات الأكاديمية"
+             title="لا توجد بيانات تفصيلية لكورسات الأكاديمية"
             description="قم بإنشاء كورس أكاديمي جديد وقم بتسجيل الطلاب للبدء في تتبع قنوات الإكمال ومعدلات الانسحاب والتقييمات الذكية."
             icon={BookOpen}
           />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {coursesAnalytics.map((c) => {
-              const views = c.views || 40;
-              const checkouts = c.checkoutStarteds || 12;
-              const purchases = c.completedPurchases || 4;
+              const views = c.views || 0;
+              const checkouts = c.checkoutStarteds || 0;
+              const purchases = c.completedPurchases || 0;
 
               return (
                 <div 
@@ -209,11 +207,11 @@ export default function LmsSection({
                     <div className="grid grid-cols-3 gap-2 bg-white/[0.01] p-2.5 rounded-2xl border border-white/5 font-semibold text-center">
                       <div>
                         <span className="text-[8px] text-zinc-500 block uppercase">الطلاب</span>
-                        <span className="text-xs font-black text-white font-mono">{c.totalStudents || 8}</span>
+                        <span className="text-xs font-black text-white font-mono">{c.totalStudents}</span>
                       </div>
                       <div className="border-x border-white/5">
                         <span className="text-[8px] text-zinc-500 block uppercase">جديد 7 أيام</span>
-                        <span className="text-xs font-black text-emerald-400 font-mono">+{c.newStudentsWeek || 1}</span>
+                        <span className="text-xs font-black text-emerald-400 font-mono">+{c.newStudentsWeek}</span>
                       </div>
                       <div>
                         <span className="text-[8px] text-zinc-500 block uppercase">التقييم</span>
@@ -227,15 +225,15 @@ export default function LmsSection({
                   {/* Visual funnel details - wrapped in LTR to maintain bar alignment */}
                   <div className="space-y-2 mt-4 pt-4 border-t border-white/5" dir="ltr">
                     <h5 className="text-[8.5px] font-bold uppercase tracking-wider text-zinc-500 flex justify-between">
-                      <span className="text-rose-400 lowercase">{c.dropOffs} drop-offs ({c.dropOffRate.toFixed(0)}%)</span>
-                      <span>Checkout Conversions</span>
+                      <span className="text-rose-400 lowercase">{c.dropOffs} انسحاب ({c.dropOffRate.toFixed(0)}%)</span>
+                      <span>تحويلات الدفع</span>
                     </h5>
 
                     <div className="space-y-2 text-[9px] font-semibold text-zinc-400">
                       <div>
                         <div className="flex justify-between mb-0.5">
-                          <span>{views} views</span>
-                          <span>Details Views</span>
+                          <span>{views} مشاهدة</span>
+                          <span>مشاهدات صفحة التفاصيل</span>
                         </div>
                         <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
                           <div className="h-full bg-blue-500 rounded-full" style={{ width: "100%" }} />
@@ -244,8 +242,8 @@ export default function LmsSection({
 
                       <div>
                         <div className="flex justify-between mb-0.5">
-                          <span className="text-emerald-400">{purchases} completed ({views > 0 ? ((purchases / views) * 100).toFixed(0) : 0}% CR)</span>
-                          <span>Purchases Completion</span>
+                          <span className="text-emerald-400">{purchases} مكتمل ({views > 0 ? ((purchases / views) * 100).toFixed(0) : 0}% معدل تحويل)</span>
+                          <span>إكمال عمليات الشراء</span>
                         </div>
                         <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
                           <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${views > 0 ? (purchases / views) * 100 : 0}%` }} />
@@ -299,12 +297,16 @@ export default function LmsSection({
             <div className="space-y-2">
               <h5 className="text-[9px] font-black uppercase text-emerald-400 tracking-wider">الفصول الأكثر مشاهدة ورواجاً</h5>
               <div className="space-y-1.5">
-                {learningStats.mostWatched.map((w, idx) => (
-                  <div key={idx} className="p-2.5 rounded-xl bg-white/[0.02] border border-white/5 flex items-center justify-between font-semibold">
-                    <span className="truncate pl-2">{w.title}</span>
-                    <span className="text-zinc-500 font-mono text-[9px] shrink-0 font-bold">{w.views} زيارة · {w.duration}</span>
-                  </div>
-                ))}
+                {learningStats.mostWatched.length === 0 ? (
+                  <div className="py-8 text-center text-zinc-600 text-xs">لا يوجد نشاط مشاهدة مسجل حالياً.</div>
+                ) : (
+                  learningStats.mostWatched.map((w, idx) => (
+                    <div key={idx} className="p-2.5 rounded-xl bg-white/[0.02] border border-white/5 flex items-center justify-between font-semibold">
+                      <span className="truncate pl-2">{w.title}</span>
+                      <span className="text-zinc-500 font-mono text-[9px] shrink-0 font-bold">{w.views} زيارة · {w.duration}</span>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
 
@@ -312,12 +314,16 @@ export default function LmsSection({
             <div className="space-y-2">
               <h5 className="text-[9px] font-black uppercase text-rose-400 tracking-wider">الفصول الأقل تفاعلاً واحتفاظاً</h5>
               <div className="space-y-1.5">
-                {learningStats.leastWatched.map((w, idx) => (
-                  <div key={idx} className="p-2.5 rounded-xl bg-white/[0.02] border border-white/5 flex items-center justify-between font-semibold">
-                    <span className="truncate pl-2">{w.title}</span>
-                    <span className="text-zinc-500 font-mono text-[9px] shrink-0 font-bold">{w.views} زيارة · {w.duration}</span>
-                  </div>
-                ))}
+                {learningStats.leastWatched.length === 0 ? (
+                  <div className="py-8 text-center text-zinc-600 text-xs">لا يوجد نشاط مشاهدة مسجل حالياً.</div>
+                ) : (
+                  learningStats.leastWatched.map((w, idx) => (
+                    <div key={idx} className="p-2.5 rounded-xl bg-white/[0.02] border border-white/5 flex items-center justify-between font-semibold">
+                      <span className="truncate pl-2">{w.title}</span>
+                      <span className="text-zinc-500 font-mono text-[9px] shrink-0 font-bold">{w.views} زيارة · {w.duration}</span>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           </div>

@@ -14,7 +14,13 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { formatPrice as formatPriceRaw } from "@/lib/pricing";
-const formatPrice = (price: number, currency: any) => formatPriceRaw(price, currency).replace("ج.م", "L.E");
+const formatPrice = (price: number, currency: any) => {
+  const formatted = formatPriceRaw(price, currency);
+  if (currency === "USD") {
+    return formatted.replace("USD", "دولار").replace("$", "دولار ");
+  }
+  return formatted.replace("L.E", "ج.م").replace("EGP", "ج.م");
+};
 import dynamic from "next/dynamic";
 import DashboardFilters from "@/components/admin/analytics/DashboardFilters";
 import NotificationCenter, { AlertNotification, NotificationPrefs } from "@/components/admin/analytics/NotificationCenter";
@@ -160,7 +166,7 @@ export default function AdminDashboard() {
         const demoProducts = [
           {
             id: "prod-n8n-mastery",
-            title: "AI Creative Content Production Mastery Suite",
+            title: "كورس احتراف صناعة المحتوى بالذكاء الاصطناعي",
             price: 450,
             sales: 12,
             status: "نشط",
@@ -168,7 +174,7 @@ export default function AdminDashboard() {
           },
           {
             id: "prod-ai-content",
-            title: "AI Content Generator Pro & Prompts Pack",
+            title: "حقيبة أدوات وجداول الذكاء الاصطناعي الاحترافية",
             price: 250,
             sales: 8,
             status: "نشط",
@@ -176,7 +182,7 @@ export default function AdminDashboard() {
           },
           {
             id: "prod-shopify-secrets",
-            title: "Shopify Performance Marketing Secrets Ebook",
+            title: "كتاب أسرار التسويق بالعمولة لـ شوبيفاي",
             price: 150,
             sales: 15,
             status: "نشط",
@@ -186,7 +192,7 @@ export default function AdminDashboard() {
         const { error: prodSeedErr } = await supabase.from("products").insert(demoProducts);
         if (prodSeedErr) throw prodSeedErr;
         productIds = demoProducts.map(p => p.id);
-        toast.success("Successfully seeded 3 digital products!");
+        toast.success("تم بنجاح توليد 3 منتجات رقمية تجريبية!");
       } else {
         productIds = currentProducts.map(p => p.id);
       }
@@ -197,7 +203,7 @@ export default function AdminDashboard() {
       const allItemIds = [...productIds, ...courseIds];
 
       if (allItemIds.length === 0) {
-        throw new Error("No products or courses found to bind orders to!");
+        throw new Error("لم يتم العثور على أي منتجات أو دورات لربط الطلبات بها!");
       }
 
       // 2. Check and Seed Orders
@@ -205,16 +211,16 @@ export default function AdminDashboard() {
       
       if (!currentOrders || currentOrders.length < 10) {
         const customers = [
-          { name: "Ahmed Mansour", email: "ahmed.mansour@gmail.com" },
-          { name: "Sara El-Ghandour", email: "sara.ghandour@yahoo.com" },
-          { name: "Omar Abdelaziz", email: "omar.aziz@hotmail.com" },
-          { name: "Mariam El-Shafei", email: "mariam.shafei@gmail.com" },
-          { name: "Yassine Abdallah", email: "yassine.abd@gmail.com" },
-          { name: "Nouran Selim", email: "nouran.selim@outlook.com" },
-          { name: "Hassan Ibrahim", email: "hassan.heba@gmail.com" }
+          { name: "أحمد منصور", email: "ahmed.mansour@gmail.com" },
+          { name: "سارة الغندور", email: "sara.ghandour@yahoo.com" },
+          { name: "عمر عبد العزيز", email: "omar.aziz@hotmail.com" },
+          { name: "مريم الشافعي", email: "mariam.shafei@gmail.com" },
+          { name: "ياسين عبد الله", email: "yassine.abd@gmail.com" },
+          { name: "نوران سليم", email: "nouran.selim@outlook.com" },
+          { name: "حسن إبراهيم", email: "hassan.heba@gmail.com" }
         ];
 
-        const paymentMethods = ["Card", "Wallet", "Kiosk"];
+        const paymentMethods = ["بطاقة ائتمان", "محفظة إلكترونية", "فوري"];
         const countries = ["EG", "SA", "AE", "US"];
         const statuses = ["completed", "completed", "completed", "pending", "failed"];
         const coupons = ["BLACKFRIDAY", "RAMADAN25", "GROWTH30", ""];
@@ -231,17 +237,17 @@ export default function AdminDashboard() {
           const payId = `pay_mb_${Math.floor(10000000 + Math.random() * 90000000)}`;
           const targetItemId = allItemIds[Math.floor(Math.random() * allItemIds.length)];
           
-          let title = "AI Creative Content Production Mastery Suite";
+          let title = "كورس احتراف صناعة المحتوى بالذكاء الاصطناعي";
           let price = 450;
           
           if (targetItemId === "prod-n8n-mastery") {
-            title = "AI Creative Content Production Mastery Suite";
+            title = "كورس احتراف صناعة المحتوى بالذكاء الاصطناعي";
             price = 450;
           } else if (targetItemId === "prod-ai-content") {
-            title = "AI Content Generator Pro & Prompts Pack";
+            title = "حقيبة أدوات وجداول الذكاء الاصطناعي الاحترافية";
             price = 250;
           } else if (targetItemId === "prod-shopify-secrets") {
-            title = "Shopify Performance Marketing Secrets Ebook";
+            title = "كتاب أسرار التسويق بالعمولة لـ شوبيفاي";
             price = 150;
           } else {
             const matchedC = currentCourses?.find(c => c.id === targetItemId);
@@ -272,7 +278,7 @@ export default function AdminDashboard() {
 
         const { error: orderSeedErr } = await supabase.from("orders").insert(demoOrders);
         if (orderSeedErr) throw orderSeedErr;
-        toast.success("Successfully seeded 30 mock orders with rich metadata!");
+        toast.success("تم بنجاح توليد 30 طلباً تجريبياً ببيانات فوترة كاملة!");
       }
 
       // 3. Try to seed tracking events if table exists
@@ -303,17 +309,17 @@ export default function AdminDashboard() {
           }
 
           await supabase.from("analytics_events").insert(demoEvents);
-          toast.success("Seeded visitor clickstream telemetry!");
+          toast.success("تم بنجاح توليد مسار نقرات وزيارات المستخدمين!");
         }
       } catch (e) {
         console.log("Analytics events table not present, skipped seeding clickstream events.");
       }
 
       await refreshTelemetry();
-      toast.success("Telemetry dashboard fully loaded with seeded values!");
+      toast.success("تم تحميل لوحة التحكم بالبيانات التجريبية بنجاح!");
     } catch (err: any) {
       console.error(err);
-      toast.error(err.message || "Seeding failed");
+      toast.error(err.message || "فشلت عملية توليد البيانات التجريبية");
     } finally {
       setSeeding(false);
     }
@@ -361,7 +367,7 @@ export default function AdminDashboard() {
           playNewOrderSound();
           
           toast.success(
-            `New order received: ${formatPrice(newOrder.amount, (newOrder.currency as any) || 'EGP')} from ${newOrder.customer_name || 'Customer'}`,
+            `تم استلام طلب جديد بقيمة ${formatPrice(newOrder.amount, (newOrder.currency as any) || 'EGP')} من العميل ${newOrder.customer_name || 'زائر'}`,
             { duration: 6000 }
           );
 
@@ -370,8 +376,8 @@ export default function AdminDashboard() {
             const newAlert: AlertNotification = {
               id: `alert-ord-${Date.now()}`,
               type: "new_order",
-              title: "New Digital Sale Received",
-              message: `Processed payment of ${formatPrice(newOrder.amount, newOrder.currency || "EGP")} for "${newOrder.product_title}".`,
+              title: "تم استقبال عملية بيع رقمية جديدة",
+              message: `تم معالجة دفع ${formatPrice(newOrder.amount, newOrder.currency || "EGP")} لمنتج "${newOrder.product_title}".`,
               created_at: new Date().toISOString(),
               read: false
             };
@@ -383,8 +389,8 @@ export default function AdminDashboard() {
             const spikeAlert: AlertNotification = {
               id: `alert-spike-${Date.now()}`,
               type: "revenue_spike",
-              title: "High Revenue Spike Alert",
-              message: `High-value order detected! ${formatPrice(newOrder.amount, newOrder.currency || "EGP")} from ${newOrder.customer_name || "Guest"}.`,
+              title: "تنبيه: ارتفاع مفاجئ في الإيرادات",
+              message: `تم رصد طلب ذو قيمة عالية بقيمة ${formatPrice(newOrder.amount, newOrder.currency || "EGP")} من العميل ${newOrder.customer_name || "زائر"}.`,
               created_at: new Date().toISOString(),
               read: false
             };
@@ -404,8 +410,8 @@ export default function AdminDashboard() {
             const enrollAlert: AlertNotification = {
               id: `alert-enroll-${Date.now()}`,
               type: "new_student",
-              title: "New Course Registration",
-              message: `A new student has registered for course ID: ${newEnroll.course_id}.`,
+              title: "تسجيل جديد في دورة تعليمية",
+              message: `قام طالب جديد بالتسجيل في الدورة ذات الرقم التعريفي: ${newEnroll.course_id}.`,
               created_at: new Date().toISOString(),
               read: false
             };
@@ -425,8 +431,8 @@ export default function AdminDashboard() {
             const reviewAlert: AlertNotification = {
               id: `alert-rev-${Date.now()}`,
               type: "new_review",
-              title: "New Course Review Submitted",
-              message: `Rating: ${newReview.rating || 5} stars left by student "${newReview.student_name || 'Anonymous'}".`,
+              title: "تقديم تقييم جديد للدورة",
+              message: `التقييم: ${newReview.rating || 5} نجوم من الطالب "${newReview.student_name || 'مجهول'}".`,
               created_at: new Date().toISOString(),
               read: false
             };
@@ -462,13 +468,13 @@ export default function AdminDashboard() {
           const loginAlert: AlertNotification = {
             id: `alert-sec-${Date.now()}`,
             type: "suspicious_login",
-            title: "Threat Detected: Suspicious Login",
-            message: "Unusual authentication attempt blocked from IP 192.168.1.189 (Riyadh, SA).",
+            title: "تهديد أمني: محاولة دخول مشبوهة",
+            message: "تم حظر محاولة دخول غير معتادة من عنوان IP 192.168.1.189 (الرياض، السعودية).",
             created_at: new Date().toISOString(),
             read: false
           };
           setNotifications(prev => [loginAlert, ...prev]);
-          toast.warning("Security Warning: Suspicious Login Attempt Detected!");
+          toast.warning("تحذير أمني: تم رصد محاولة دخول مشبوهة!");
         }
       }, 90000);
     }
@@ -611,17 +617,15 @@ export default function AdminDashboard() {
     const rangeEvents = analyticsEvents.filter(e => new Date(e.created_at) >= dateCutoff);
     const uniqueSessionIds = new Set(rangeEvents.map(e => e.session_id));
     
-    // Fallback: If analytics is brand new, calculate session estimate based on orders count
-    const totalSessions = uniqueSessionIds.size > 5 
-      ? uniqueSessionIds.size 
-      : Math.max(25, completed.length * 8.2);
+    // Strictly use actual visitor count from session logs (0 if empty)
+    const totalSessions = uniqueSessionIds.size;
 
     // CR (Conversion Rate)
     const conversionRate = totalSessions > 0 ? (completed.length / totalSessions) * 100 : 0;
 
-    // Cart Abandonment Rate
+    // Cart Abandonment Rate (strictly from database events)
     const checkoutStartedEvents = rangeEvents.filter(e => e.event_name === "checkout_started").length;
-    const abandonedCarts = Math.max(0, (checkoutStartedEvents > 0 ? checkoutStartedEvents : Math.round(completed.length * 1.8)) - completed.length);
+    const abandonedCarts = Math.max(0, checkoutStartedEvents - completed.length);
     const abandonmentRate = (checkoutStartedEvents > 0 || completed.length > 0)
       ? (abandonedCarts / (abandonedCarts + completed.length)) * 100
       : 0;
@@ -662,9 +666,7 @@ export default function AdminDashboard() {
       return d >= startPrev && d < endPrev;
     });
     const prevUniqueSessions = new Set(prevRangeEvents.map(e => e.session_id)).size;
-    const prevSessions = prevUniqueSessions > 5 
-      ? prevUniqueSessions 
-      : Math.max(25, prevCompleted.length * 8.2);
+    const prevSessions = prevUniqueSessions;
     const prevConversionRate = prevSessions > 0 ? (prevCompleted.length / prevSessions) * 100 : 0;
     const conversionRateGrowth = prevConversionRate > 0 
       ? ((conversionRate - prevConversionRate) / prevConversionRate) * 100 
@@ -724,8 +726,8 @@ export default function AdminDashboard() {
       .filter(o => o.status === "completed" && o.currency === "USD")
       .reduce((sum, o) => sum + Number(o.amount || 0), 0);
     return [
-      { name: "EGP Revenue", value: egpSum },
-      { name: "USD Revenue (EGP Equiv)", value: usdSum * 50 }
+      { name: "إيرادات الجنيه المصري", value: egpSum },
+      { name: "إيرادات الدولار الأمريكي (معادل بالجنيه)", value: usdSum * 50 }
     ];
   }, [filteredOrders]);
 
@@ -737,13 +739,13 @@ export default function AdminDashboard() {
 
     for (let i = daysToMap - 1; i >= 0; i--) {
       const d = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
-      const dateStr = d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+      const dateStr = d.toLocaleDateString("ar-EG-u-nu-latn", { month: "short", day: "numeric" });
       dataMap[dateStr] = { revenue: 0, orders: 0 };
     }
 
     filteredOrders.filter(o => o.status === "completed").forEach(o => {
       const d = new Date(o.created_at);
-      const dateStr = d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+      const dateStr = d.toLocaleDateString("ar-EG-u-nu-latn", { month: "short", day: "numeric" });
       if (dataMap[dateStr] !== undefined) {
         dataMap[dateStr].revenue += Number(o.amount || 0);
         dataMap[dateStr].orders += 1;
@@ -764,46 +766,29 @@ export default function AdminDashboard() {
     const rangeOrders = filteredOrders.filter(o => o.status === "completed");
 
     const sources: Record<string, { visits: number; orders: number; revenue: number; color: string }> = {
-      "TikTok Ads": { visits: 0, orders: 0, revenue: 0, color: "#ec4899" },
-      "Facebook Ads": { visits: 0, orders: 0, revenue: 0, color: "#3b82f6" },
-      "Instagram": { visits: 0, orders: 0, revenue: 0, color: "#a855f7" },
-      "Organic Search": { visits: 0, orders: 0, revenue: 0, color: "#10b981" },
-      "Email Campaign": { visits: 0, orders: 0, revenue: 0, color: "#f59e0b" },
-      "Referral Link": { visits: 0, orders: 0, revenue: 0, color: "#06b6d4" },
-      "Direct Traffic": { visits: 0, orders: 0, revenue: 0, color: "#71717a" }
+      "إعلانات تيك توك": { visits: 0, orders: 0, revenue: 0, color: "#ec4899" },
+      "إعلانات فيسبوك": { visits: 0, orders: 0, revenue: 0, color: "#3b82f6" },
+      "إنستجرام": { visits: 0, orders: 0, revenue: 0, color: "#a855f7" },
+      "بحث طبيعي (سيو)": { visits: 0, orders: 0, revenue: 0, color: "#10b981" },
+      "حملات البريد": { visits: 0, orders: 0, revenue: 0, color: "#f59e0b" },
+      "روابط الإحالة": { visits: 0, orders: 0, revenue: 0, color: "#06b6d4" },
+      "زيارات مباشرة": { visits: 0, orders: 0, revenue: 0, color: "#71717a" }
     };
-
-    // Statistical Allocation fallback if events table is newly migrated/empty
-    if (rangeEvents.length === 0) {
-      const completedCount = rangeOrders.length;
-      if (completedCount === 0) {
-        return Object.entries(sources).map(([name, data]) => ({ name, ...data, cr: "0.0%", roas: "0.0x" }));
-      }
-      return [
-        { name: "TikTok Ads", visits: Math.round(completedCount * 14.5), orders: Math.round(completedCount * 0.45), revenue: Math.round(stats.grossRevenue * 0.45), cr: "3.1%", roas: "3.2x", color: "#ec4899" },
-        { name: "Facebook Ads", visits: Math.round(completedCount * 10.2), orders: Math.round(completedCount * 0.30), revenue: Math.round(stats.grossRevenue * 0.30), cr: "2.9%", roas: "2.8x", color: "#3b82f6" },
-        { name: "Instagram", visits: Math.round(completedCount * 4.1), orders: Math.round(completedCount * 0.10), revenue: Math.round(stats.grossRevenue * 0.10), cr: "2.4%", roas: "2.1x", color: "#a855f7" },
-        { name: "Organic Search", visits: Math.round(completedCount * 4.8), orders: Math.round(completedCount * 0.08), revenue: Math.round(stats.grossRevenue * 0.08), cr: "1.7%", roas: "∞", color: "#10b981" },
-        { name: "Email Campaign", visits: Math.round(completedCount * 2.2), orders: Math.round(completedCount * 0.04), revenue: Math.round(stats.grossRevenue * 0.04), cr: "1.8%", roas: "5.1x", color: "#f59e0b" },
-        { name: "Referral Link", visits: Math.round(completedCount * 1.6), orders: Math.round(completedCount * 0.02), revenue: Math.round(stats.grossRevenue * 0.02), cr: "1.3%", roas: "∞", color: "#06b6d4" },
-        { name: "Direct Traffic", visits: Math.round(completedCount * 0.9), orders: Math.round(completedCount * 0.01), revenue: Math.round(stats.grossRevenue * 0.01), cr: "1.1%", roas: "∞", color: "#71717a" }
-      ];
-    }
 
     // Map unique visitor sessions to original traffic source
     const sessionSources: Record<string, string> = {};
     rangeEvents.forEach(e => {
       if (e.session_id && !sessionSources[e.session_id]) {
-        let src = "Direct Traffic";
+        let src = "زيارات مباشرة";
         const utm = e.utm_source?.toLowerCase() || "";
         const ref = e.referrer?.toLowerCase() || "";
 
-        if (utm.includes("tiktok") || utm.includes("tt")) src = "TikTok Ads";
-        else if (utm.includes("facebook") || utm.includes("fb")) src = "Facebook Ads";
-        else if (utm.includes("instagram") || utm.includes("ig")) src = "Instagram";
-        else if (utm.includes("email") || utm.includes("newsletter")) src = "Email Campaign";
-        else if (ref.includes("google") || ref.includes("bing") || ref.includes("yahoo") || ref.includes("duckduckgo")) src = "Organic Search";
-        else if (ref && ref !== "direct" && !ref.includes("localhost") && !ref.includes("joeschool")) src = "Referral Link";
+        if (utm.includes("tiktok") || utm.includes("tt")) src = "إعلانات تيك توك";
+        else if (utm.includes("facebook") || utm.includes("fb")) src = "إعلانات فيسبوك";
+        else if (utm.includes("instagram") || utm.includes("ig")) src = "إنستجرام";
+        else if (utm.includes("email") || utm.includes("newsletter")) src = "حملات البريد";
+        else if (ref.includes("google") || ref.includes("bing") || ref.includes("yahoo") || ref.includes("duckduckgo")) src = "بحث طبيعي (سيو)";
+        else if (ref && ref !== "direct" && !ref.includes("localhost") && !ref.includes("joeschool")) src = "روابط الإحالة";
 
         sessionSources[e.session_id] = src;
         if (sources[src]) sources[src].visits += 1;
@@ -813,7 +798,7 @@ export default function AdminDashboard() {
     // Attribute real orders to their original traffic source
     rangeOrders.forEach(o => {
       const matchingEvent = rangeEvents.find(e => e.session_id === o.payment_id);
-      const src = matchingEvent ? sessionSources[matchingEvent.session_id] || "Direct Traffic" : "Direct Traffic";
+      const src = matchingEvent ? sessionSources[matchingEvent.session_id] || "زيارات مباشرة" : "زيارات مباشرة";
 
       if (sources[src]) {
         sources[src].orders += 1;
@@ -824,16 +809,16 @@ export default function AdminDashboard() {
     return Object.entries(sources).map(([name, data]) => {
       const cr = data.visits > 0 ? ((data.orders / data.visits) * 100).toFixed(1) + "%" : "0.0%";
       let roas = "∞";
-      if (name === "TikTok Ads" && data.revenue > 0) {
+      if (name === "إعلانات تيك توك" && data.revenue > 0) {
         const cost = data.visits * 2.5; // Est 2.5 EGP per click
         roas = (data.revenue / cost).toFixed(1) + "x";
-      } else if (name === "Facebook Ads" && data.revenue > 0) {
+      } else if (name === "إعلانات فيسبوك" && data.revenue > 0) {
         const cost = data.visits * 3.2; // Est 3.2 EGP per click
         roas = (data.revenue / cost).toFixed(1) + "x";
-      } else if (name === "Instagram" && data.revenue > 0) {
+      } else if (name === "إنستجرام" && data.revenue > 0) {
         const cost = data.visits * 2.8; // Est 2.8 EGP per click
         roas = (data.revenue / cost).toFixed(1) + "x";
-      } else if (name === "Email Campaign" && data.revenue > 0) {
+      } else if (name === "حملات البريد" && data.revenue > 0) {
         const cost = data.visits * 0.05; // Est 0.05 EGP per mail
         roas = (data.revenue / cost).toFixed(1) + "x";
       }
@@ -860,24 +845,18 @@ export default function AdminDashboard() {
     const addToCarts = rangeEvents.filter(e => e.event_name === "add_to_cart").length;
     const checkoutStarteds = rangeEvents.filter(e => e.event_name === "checkout_started").length;
 
-    // Fallback scaling factors if tracking clickstream data is newly instantiated
-    const baseVisitors = visitorsCount > 5 ? visitorsCount : Math.max(15, completedCount * 8.2);
-    const baseViews = productViews > 5 ? productViews : Math.max(10, completedCount * 5.4);
-    const baseCarts = addToCarts > 2 ? addToCarts : Math.max(5, completedCount * 2.8);
-    const baseCheckouts = checkoutStarteds > 1 ? checkoutStarteds : Math.max(3, completedCount * 1.8);
-
     const finalPurchases = completedCount;
-    const finalCheckouts = Math.max(baseCheckouts, finalPurchases);
-    const finalCarts = Math.max(baseCarts, finalCheckouts);
-    const finalViews = Math.max(baseViews, finalCarts);
-    const finalVisitors = Math.max(baseVisitors, finalViews);
+    const finalCheckouts = checkoutStarteds;
+    const finalCarts = addToCarts;
+    const finalViews = productViews;
+    const finalVisitors = visitorsCount;
 
     const stages = [
-      { name: "Total Visitors", count: Math.round(finalVisitors), color: "#6366f1", label: "Initial Site Visits" },
-      { name: "Product Views", count: Math.round(finalViews), color: "#3b82f6", label: "Details Page Views" },
-      { name: "Add to Cart", count: Math.round(finalCarts), color: "#a855f7", label: "Expressed Purchasing Intent" },
-      { name: "Checkout Started", count: Math.round(finalCheckouts), color: "#f59e0b", label: "Entered Billing Flow" },
-      { name: "Purchases", count: finalPurchases, color: "#10b981", label: "Successful Payment Received" }
+      { name: "إجمالي الزوار", count: finalVisitors, color: "#6366f1", label: "زيارات الموقع الأولية" },
+      { name: "مشاهدات المنتجات", count: finalViews, color: "#3b82f6", label: "مشاهدات صفحة التفاصيل" },
+      { name: "إضافة إلى السلة", count: finalCarts, color: "#a855f7", label: "إبداء نية الشراء" },
+      { name: "بدء الدفع", count: finalCheckouts, color: "#f59e0b", label: "الدخول في خطوات الدفع" },
+      { name: "عمليات الشراء", count: finalPurchases, color: "#10b981", label: "عمليات الدفع الناجحة" }
     ];
 
     return stages.map((stage, idx) => {
@@ -909,9 +888,8 @@ export default function AdminDashboard() {
       const grossRevenue = successful.reduce((sum, o) => sum + Number(o.amount || 0), 0);
       const failureRate = totalAttempts > 0 ? (failed.length / totalAttempts) * 100 : 0;
 
-      // Extract specific views for this product from event logs
-      const views = analyticsEvents.filter(e => e.product_id === p.id && (e.event_name === "product_view" || e.event_name === "page_view")).length;
-      const finalViews = views > 2 ? views : Math.max(10, salesUnits * 6.5);
+      // Extract specific views for this product from event logs (strict database values)
+      const finalViews = analyticsEvents.filter(e => e.product_id === p.id && (e.event_name === "product_view" || e.event_name === "page_view")).length;
       const conversionRate = finalViews > 0 ? (salesUnits / finalViews) * 100 : 0;
 
       return {
@@ -945,8 +923,8 @@ export default function AdminDashboard() {
       const views = analyticsEvents.filter(e => e.product_id === c.id && (e.event_name === "product_view" || e.event_name === "page_view")).length;
       const checkoutStarteds = analyticsEvents.filter(e => e.product_id === c.id && e.event_name === "checkout_started").length;
 
-      const finalViews = views > 3 ? views : Math.max(15, completed.length * 8.4);
-      const finalCheckouts = checkoutStarteds > 1 ? checkoutStarteds : Math.max(3, completed.length * 2.1);
+      const finalViews = views;
+      const finalCheckouts = checkoutStarteds;
 
       const dropOffs = Math.max(0, finalCheckouts - completed.length);
       const dropOffRate = finalCheckouts > 0 ? (dropOffs / finalCheckouts) * 100 : 0;
@@ -970,36 +948,55 @@ export default function AdminDashboard() {
 
   const categoryStats = useMemo(() => {
     const categoriesMap: Record<string, { revenue: number; visits: number; conversion: number }> = {};
+    
+    // Initialize with all unique categories in courses
+    courses.forEach(c => {
+      const cat = c.category || "أصول رقمية";
+      if (!categoriesMap[cat]) {
+        categoriesMap[cat] = { revenue: 0, visits: 0, conversion: 0 };
+      }
+    });
+    // Add "أصول رقمية" if we have products
+    if (products.length > 0 && !categoriesMap["أصول رقمية"]) {
+      categoriesMap["أصول رقمية"] = { revenue: 0, visits: 0, conversion: 0 };
+    }
+
     const completed = filteredOrders.filter(o => o.status === "completed");
     completed.forEach(o => {
       const matchedCourse = courses.find(c => c.id === o.product_id);
-      const category = matchedCourse?.category || "Digital Assets";
-      if (!categoriesMap[category]) {
-        categoriesMap[category] = { revenue: 0, visits: 0, conversion: 0 };
+      const category = matchedCourse?.category || "أصول رقمية";
+      if (categoriesMap[category]) {
+        categoriesMap[category].revenue += Number(o.amount || 0);
       }
-      categoriesMap[category].revenue += Number(o.amount || 0);
     });
 
     const parsed = Object.entries(categoriesMap).map(([name, data]) => {
       const ordersCount = completed.filter(o => {
         const matchedCourse = courses.find(c => c.id === o.product_id);
-        const category = matchedCourse?.category || "Digital Assets";
+        const category = matchedCourse?.category || "أصول رقمية";
         return category === name;
       }).length;
-      const visits = Math.max(120, ordersCount * 30);
+      
+      // Filter course/product IDs belonging to this category
+      const targetIds = new Set<string>();
+      if (name === "أصول رقمية") {
+        products.forEach(p => targetIds.add(p.id));
+        courses.forEach(c => {
+          if (!c.category) targetIds.add(c.id);
+        });
+      } else {
+        courses.forEach(c => {
+          if (c.category === name) targetIds.add(c.id);
+        });
+      }
+
+      const visits = analyticsEvents.filter(e => e.product_id && targetIds.has(e.product_id) && (e.event_name === "product_view" || e.event_name === "page_view")).length;
       const conversion = visits > 0 ? (ordersCount / visits) * 100 : 0;
       return { name, revenue: data.revenue, visits, conversion };
     });
 
-    if (parsed.length === 0) {
-      return [
-        { name: "AI & Automation", revenue: 8450, visits: 340, conversion: 3.8 },
-        { name: "Content Creation", revenue: 5200, visits: 220, conversion: 2.7 },
-        { name: "Marketing Secrets", revenue: 2450, visits: 180, conversion: 1.9 }
-      ];
-    }
     return parsed.sort((a, b) => b.revenue - a.revenue);
-  }, [filteredOrders, courses]);
+  }, [filteredOrders, courses, products, analyticsEvents]);
 
   // Alert Center toggles observer event
   useEffect(() => {
@@ -1032,7 +1029,7 @@ export default function AdminDashboard() {
   }, [orders]);
 
   const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString("en-US", {
+    return new Date(dateStr).toLocaleDateString("ar-EG-u-nu-latn", {
       month: "short",
       day: "numeric",
       hour: "2-digit",
@@ -1044,7 +1041,7 @@ export default function AdminDashboard() {
   // High-Fidelity Multi-Worksheet Microsoft Excel XML Generator
   const downloadExcelReport = () => {
     const dateStr = new Date().toISOString().split('T')[0];
-    const filename = `JoeSchool_Commerce_Analytics_${dateStr}.xls`;
+    const filename = `تقرير_تحليلات_المبيعات_${dateStr}.xls`;
 
     let xml = `<?xml version="1.0"?>
 <?mso-application progid="Excel.Sheet"?>
@@ -1094,7 +1091,7 @@ export default function AdminDashboard() {
 
     // SHEET 1: Digital Products
     xml += `
- <Worksheet ss:Name="Digital Products Analytics">
+ <Worksheet ss:Name="تحليلات المنتجات الرقمية">
   <Table ss:ExpandedColumnCount="8" ss:ExpandedRowCount="${digitalProductsAnalytics.length + 3}" x:FullColumns="1" x:FullRows="1">
    <Column ss:Width="150"/>
    <Column ss:Width="250"/>
@@ -1105,17 +1102,17 @@ export default function AdminDashboard() {
    <Column ss:Width="120"/>
    <Column ss:Width="150"/>
    <Row ss:Height="30" ss:StyleID="TitleHeader">
-    <Cell ss:MergeAcross="7"><Data ss:Type="String">JoeSchool - Store Digital Products Analytics</Data></Cell>
+    <Cell ss:MergeAcross="7"><Data ss:Type="String">جو سكول - تحليلات المنتجات الرقمية للمتجر</Data></Cell>
    </Row>
    <Row ss:Height="20" ss:StyleID="ColHeader">
-    <Cell><Data ss:Type="String">Product ID</Data></Cell>
-    <Cell><Data ss:Type="String">Product Title</Data></Cell>
-    <Cell><Data ss:Type="String">Unit Price (L.E)</Data></Cell>
-    <Cell><Data ss:Type="String">Units Sold</Data></Cell>
-    <Cell><Data ss:Type="String">Page Views</Data></Cell>
-    <Cell><Data ss:Type="String">Conversion Rate</Data></Cell>
-    <Cell><Data ss:Type="String">Gateway Failure Rate</Data></Cell>
-    <Cell><Data ss:Type="String">Gross Revenue (L.E)</Data></Cell>
+    <Cell><Data ss:Type="String">معرف المنتج</Data></Cell>
+    <Cell><Data ss:Type="String">عنوان المنتج</Data></Cell>
+    <Cell><Data ss:Type="String">سعر الوحدة (ج.م)</Data></Cell>
+    <Cell><Data ss:Type="String">الوحدات المباعة</Data></Cell>
+    <Cell><Data ss:Type="String">مشاهدات الصفحة</Data></Cell>
+    <Cell><Data ss:Type="String">معدل التحويل</Data></Cell>
+    <Cell><Data ss:Type="String">معدل فشل الدفع</Data></Cell>
+    <Cell><Data ss:Type="String">إجمالي الإيرادات (ج.م)</Data></Cell>
    </Row>`;
 
     digitalProductsAnalytics.forEach(p => {
@@ -1138,7 +1135,7 @@ export default function AdminDashboard() {
 
     // SHEET 2: LMS Courses
     xml += `
- <Worksheet ss:Name="LMS Course Analytics">
+ <Worksheet ss:Name="تحليلات الدورات التعليمية">
   <Table ss:ExpandedColumnCount="12" ss:ExpandedRowCount="${lmsCoursesAnalytics.length + 3}" x:FullColumns="1" x:FullRows="1">
    <Column ss:Width="150"/>
    <Column ss:Width="250"/>
@@ -1153,21 +1150,21 @@ export default function AdminDashboard() {
    <Column ss:Width="120"/>
    <Column ss:Width="150"/>
    <Row ss:Height="30" ss:StyleID="TitleHeader">
-    <Cell ss:MergeAcross="11"><Data ss:Type="String">JoeSchool - LMS Course Academy Telemetry</Data></Cell>
+    <Cell ss:MergeAcross="11"><Data ss:Type="String">جو سكول - سجلات أكاديمية التعليم والتحاق الطلاب</Data></Cell>
    </Row>
    <Row ss:Height="20" ss:StyleID="ColHeader">
-    <Cell><Data ss:Type="String">Course ID</Data></Cell>
-    <Cell><Data ss:Type="String">Course Title</Data></Cell>
-    <Cell><Data ss:Type="String">Price (L.E)</Data></Cell>
-    <Cell><Data ss:Type="String">Total Students</Data></Cell>
-    <Cell><Data ss:Type="String">New (Last 7d)</Data></Cell>
-    <Cell><Data ss:Type="String">New (Last 30d)</Data></Cell>
-    <Cell><Data ss:Type="String">Page Views</Data></Cell>
-    <Cell><Data ss:Type="String">Checkout Started</Data></Cell>
-    <Cell><Data ss:Type="String">Completed Orders</Data></Cell>
-    <Cell><Data ss:Type="String">Abandoned Carts</Data></Cell>
-    <Cell><Data ss:Type="String">Drop-off Rate</Data></Cell>
-    <Cell><Data ss:Type="String">Gross Revenue (L.E)</Data></Cell>
+    <Cell><Data ss:Type="String">معرف الدورة</Data></Cell>
+    <Cell><Data ss:Type="String">عنوان الدورة</Data></Cell>
+    <Cell><Data ss:Type="String">السعر (ج.م)</Data></Cell>
+    <Cell><Data ss:Type="String">إجمالي الطلاب</Data></Cell>
+    <Cell><Data ss:Type="String">جدد (آخر 7 أيام)</Data></Cell>
+    <Cell><Data ss:Type="String">جدد (آخر 30 يوم)</Data></Cell>
+    <Cell><Data ss:Type="String">مشاهدات الصفحة</Data></Cell>
+    <Cell><Data ss:Type="String">بدء الدفع</Data></Cell>
+    <Cell><Data ss:Type="String">عمليات الشراء المكتملة</Data></Cell>
+    <Cell><Data ss:Type="String">السلات المتروكة</Data></Cell>
+    <Cell><Data ss:Type="String">معدل التسرب</Data></Cell>
+    <Cell><Data ss:Type="String">إجمالي الإيرادات (ج.م)</Data></Cell>
    </Row>`;
 
     lmsCoursesAnalytics.forEach(c => {
@@ -1203,7 +1200,7 @@ export default function AdminDashboard() {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    toast.success("Excel spreadsheet successfully compiled and downloaded!");
+    toast.success("تم تجميع وتحميل تقرير إكسل بنجاح!");
   };
 
   return (
@@ -1233,10 +1230,10 @@ export default function AdminDashboard() {
       <div className="hidden lg:block border-b border-white/5">
         <div className="flex gap-4">
           {[
-            { id: "overview", label: "Global Performance", icon: BarChart3 },
-            { id: "lms", label: "LMS Academy Analytics", icon: BookOpen },
-            { id: "store", label: "Digital Store Analytics", icon: Package },
-            { id: "diagnostics", label: "Logs & Telemetry", icon: ShieldAlert }
+            { id: "overview", label: "التحليلات العامة", icon: BarChart3 },
+            { id: "lms", label: "تحليلات الأكاديمية", icon: BookOpen },
+            { id: "store", label: "تحليلات المتجر", icon: Package },
+            { id: "diagnostics", label: "سجلات التشغيل", icon: ShieldAlert }
           ].map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -1262,7 +1259,7 @@ export default function AdminDashboard() {
         <div className="w-full h-64 flex items-center justify-center">
           <div className="flex flex-col items-center gap-3">
             <Loader2 className="w-8 h-8 text-rose-500 animate-spin" />
-            <p className="text-xs text-zinc-500 font-semibold">Retrieving platform telemetry...</p>
+            <p className="text-xs text-zinc-500 font-semibold">جاري استرجاع تحليلات المنصة...</p>
           </div>
         </div>
       ) : (
@@ -1287,6 +1284,7 @@ export default function AdminDashboard() {
               coursesAnalytics={lmsCoursesAnalytics}
               enrollments={enrollments}
               reviews={reviews}
+              analyticsEvents={analyticsEvents}
               formatPrice={formatPrice}
               dateRange={dateRange}
             />
@@ -1332,10 +1330,10 @@ export default function AdminDashboard() {
       {/* Mobile Sticky Bottom Tab Bar */}
       <div className="fixed bottom-0 left-0 right-0 z-40 lg:hidden bg-[#07070b]/90 backdrop-blur-md border-t border-white/5 px-4 py-2.5 flex items-center justify-around">
         {[
-          { id: "overview", label: "Overview", icon: BarChart3 },
-          { id: "lms", label: "Academy", icon: BookOpen },
-          { id: "store", label: "Store", icon: Package },
-          { id: "diagnostics", label: "Logs", icon: ShieldAlert }
+          { id: "overview", label: "العامة", icon: BarChart3 },
+          { id: "lms", label: "الأكاديمية", icon: BookOpen },
+          { id: "store", label: "المتجر", icon: Package },
+          { id: "diagnostics", label: "السجلات", icon: ShieldAlert }
         ].map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -1362,41 +1360,41 @@ export default function AdminDashboard() {
               initial={{ scale: 0.96, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.96, opacity: 0 }}
-              className="w-full max-w-md bg-[#07070b] border border-white/10 rounded-2xl overflow-hidden shadow-2xl p-6 relative text-left"
-              dir="ltr"
+              className="w-full max-w-md bg-[#07070b] border border-white/10 rounded-2xl overflow-hidden shadow-2xl p-6 relative text-right"
+              dir="rtl"
             >
               <button
                 onClick={() => setSelectedOrder(null)}
                 className="absolute top-4 left-4 text-zinc-500 hover:text-white text-xs font-bold"
               >
-                CLOSE ✕
+                إغلاق ✕
               </button>
 
-              <h3 className="font-bold text-xs uppercase tracking-widest text-zinc-400 mb-5">Transaction Details</h3>
+              <h3 className="font-bold text-xs uppercase tracking-widest text-zinc-400 mb-5">تفاصيل العملية</h3>
               
               <div className="space-y-4">
                 <div className="bg-white/5 rounded-xl p-4 space-y-2 border border-white/5 text-xs font-semibold text-zinc-300">
                   <div className="flex justify-between">
-                    <span className="text-zinc-500">Customer Name</span>
-                    <span className="font-bold text-white">{selectedOrder.customer_name || "Guest"}</span>
+                    <span className="text-zinc-500">اسم العميل</span>
+                    <span className="font-bold text-white">{selectedOrder.customer_name || "زائر"}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-zinc-500">Email Address</span>
+                    <span className="text-zinc-500">البريد الإلكتروني</span>
                     <span className="font-bold text-white font-mono">{selectedOrder.customer_email}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-zinc-500">Digital Item</span>
+                    <span className="text-zinc-500">المنتج الرقمي</span>
                     <span className="font-bold text-white">{selectedOrder.product_title}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-zinc-500">Charged Amount</span>
+                    <span className="text-zinc-500">المبلغ المدفوع</span>
                     <span className="font-bold text-rose-500 font-mono">
                       {formatPrice(selectedOrder.amount, (selectedOrder.currency as any) || 'EGP')}
                     </span>
                   </div>
                   {selectedOrder.country && (
                     <div className="flex justify-between">
-                      <span className="text-zinc-500">Billing Country</span>
+                      <span className="text-zinc-500">بلد الفوترة</span>
                       <span className="font-bold text-white flex items-center gap-1.5">
                         <Globe className="w-3.5 h-3.5 text-zinc-500" />
                         {selectedOrder.country}
@@ -1405,7 +1403,7 @@ export default function AdminDashboard() {
                   )}
                   {selectedOrder.payment_method && (
                     <div className="flex justify-between">
-                      <span className="text-zinc-500">Payment Gateway Channel</span>
+                      <span className="text-zinc-500">قناة بوابة الدفع</span>
                       <span className="font-bold text-white flex items-center gap-1.5">
                         <CreditCard className="w-3.5 h-3.5 text-zinc-500" />
                         {selectedOrder.payment_method}
@@ -1414,34 +1412,34 @@ export default function AdminDashboard() {
                   )}
                   {selectedOrder.coupon_code && (
                     <div className="flex justify-between">
-                      <span className="text-zinc-500">Redeemed Coupon</span>
+                      <span className="text-zinc-500">الكوبون المستخدم</span>
                       <span className="font-black text-rose-400 font-mono">{selectedOrder.coupon_code}</span>
                     </div>
                   )}
                 </div>
 
-                <div className="space-y-3">
-                  <h4 className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Database Action Audit Logs</h4>
-                  <div className="relative border-l border-white/10 pl-4 ml-1.5 space-y-3">
+                <div className="space-y-3 text-right">
+                  <h4 className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">سجلات فحص العمليات في قاعدة البيانات</h4>
+                  <div className="relative border-r border-white/10 pr-4 mr-1.5 space-y-3">
                     <div className="relative">
-                      <div className="absolute left-[-20.5px] top-1.5 w-2 h-2 rounded-full bg-emerald-500" />
-                      <p className="text-[10px] font-bold text-white">Record created in Supabase</p>
+                      <div className="absolute right-[-20.5px] top-1.5 w-2 h-2 rounded-full bg-emerald-500" />
+                      <p className="text-[10px] font-bold text-white">تم إنشاء السجل في سوبابيس (Supabase)</p>
                       <p className="text-[8px] text-zinc-500 font-mono font-semibold">{formatDate(selectedOrder.created_at)}</p>
                     </div>
 
                     <div className="relative">
-                      <div className="absolute left-[-20.5px] top-1.5 w-2 h-2 rounded-full bg-emerald-500" />
-                      <p className="text-[10px] font-bold text-white">Paymob callback received</p>
-                      <p className="text-[8px] text-zinc-500 font-mono font-semibold">Integrity signature verified</p>
+                      <div className="absolute right-[-20.5px] top-1.5 w-2 h-2 rounded-full bg-emerald-500" />
+                      <p className="text-[10px] font-bold text-white">تم استقبال استدعاء (Callback) باي موب</p>
+                      <p className="text-[8px] text-zinc-500 font-mono font-semibold">تم التحقق من التوقيع الرقمي وصحة البيانات</p>
                     </div>
 
                     <div className="relative">
-                      <div className={`absolute left-[-20.5px] top-1.5 w-2 h-2 rounded-full ${
+                      <div className={`absolute right-[-20.5px] top-1.5 w-2 h-2 rounded-full ${
                         selectedOrder.status === 'completed' ? 'bg-emerald-500' : selectedOrder.status === 'failed' ? 'bg-red-500' : 'bg-amber-500'
                       }`} />
-                      <p className="text-[10px] font-bold text-white">Status updated in database</p>
+                      <p className="text-[10px] font-bold text-white">تحديث الحالة بقاعدة البيانات</p>
                       <p className="text-[8px] text-zinc-500 font-mono font-semibold">
-                        {selectedOrder.status === 'completed' ? 'Auto-fulfillment & LMS Enrollment Completed' : selectedOrder.status === 'failed' ? 'Transaction marked as failed' : 'Awaiting payment confirmation'}
+                        {selectedOrder.status === 'completed' ? 'اكتمل التسليم التلقائي والالتحاق بالدورة التعليمية' : selectedOrder.status === 'failed' ? 'تم تعليم المعاملة كعملية فاشلة' : 'في انتظار تأكيد عملية الدفع من البوابة'}
                       </p>
                     </div>
                   </div>

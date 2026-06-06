@@ -21,8 +21,8 @@ export default function CategoryChart({ data }: CategoryChartProps) {
 
   if (totalRevenue === 0) {
     return (
-      <div className="w-full h-full flex flex-col items-center justify-center border border-dashed border-white/5 rounded-2xl p-6 text-center text-zinc-500 text-xs">
-        No category statistics recorded.
+      <div className="w-full h-full flex flex-col items-center justify-center border border-dashed border-white/5 rounded-2xl p-6 text-center text-zinc-500 text-xs font-sans">
+        لم يتم العثور على إحصائيات مبيعات للتصنيفات.
       </div>
     );
   }
@@ -35,27 +35,27 @@ export default function CategoryChart({ data }: CategoryChartProps) {
   }));
 
   return (
-    <div className="w-full h-full flex flex-col justify-between font-sans">
+    <div className="w-full h-full flex flex-col justify-between font-sans text-right" dir="rtl">
       <div className="flex items-center justify-between mb-5 pb-4 border-b border-white/5">
         <div>
-          <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">Category Sales Breakdown</h3>
-          <p className="text-[10px] text-zinc-500 mt-0.5">Category distribution and conversion rate analysis</p>
+          <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">مبيعات التصنيفات</h3>
+          <p className="text-[10px] text-zinc-500 mt-0.5">توزيع حجم المبيعات ونسبة التحويل حسب نوع المنتج</p>
         </div>
         <Award className="w-4 h-4 text-zinc-500 shrink-0" />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-5 gap-6 items-center">
         {/* Recharts Bar chart - Desktop only */}
-        <div className="md:col-span-3 h-48 sm:h-56 hidden sm:block">
+        <div className="md:col-span-3 h-48 sm:h-56 hidden sm:block" dir="ltr">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={chartData} margin={{ top: 10, right: 5, left: -25, bottom: 0 }}>
               <XAxis dataKey="name" stroke="#3f3f46" fontSize={8} tickLine={false} />
               <YAxis stroke="#3f3f46" fontSize={8} tickLine={false} />
               <Tooltip
-                contentStyle={{ backgroundColor: "#060608", borderColor: "rgba(255,255,255,0.06)", borderRadius: "12px", textAlign: "left" }}
+                contentStyle={{ backgroundColor: "#060608", borderColor: "rgba(255,255,255,0.06)", borderRadius: "12px", textAlign: "right" }}
                 labelStyle={{ color: "#ffffff", fontWeight: "bold", fontSize: "10px" }}
                 itemStyle={{ fontSize: "10px" }}
-                formatter={(value: any, name: any) => [name === "Revenue" ? `${value} L.E` : `${value}%`, name]}
+                formatter={(value: any, name: any) => [name === "Revenue" ? `${value} ج.م` : `${value}%`, name === "Revenue" ? "الإيرادات" : "نسبة التحويل"]}
               />
               <Bar dataKey="Revenue" fill="#D6004B" radius={[4, 4, 0, 0]}>
                 {chartData.map((_, index) => (
@@ -72,18 +72,22 @@ export default function CategoryChart({ data }: CategoryChartProps) {
             const colors = ["#D6004B", "#10b981", "#3b82f6", "#f59e0b"];
             const color = colors[index] || "#71717a";
 
+            // Translate generic fallback category name
+            let catNameAr = c.name;
+            if (c.name === "Digital Assets") catNameAr = "أصول رقمية";
+
             return (
-              <div key={c.name} className="p-2.5 rounded-xl bg-white/[0.01] border border-white/5 space-y-1.5 text-left">
+              <div key={c.name} className="p-2.5 rounded-xl bg-white/[0.01] border border-white/5 space-y-1.5 text-right">
                 <div className="flex items-center justify-between text-xs">
                   <div className="flex items-center gap-1.5 min-w-0">
                     <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: color }} />
-                    <span className="font-bold text-white truncate">{c.name}</span>
+                    <span className="font-bold text-white truncate">{catNameAr}</span>
                   </div>
-                  <span className="font-black text-rose-500 font-mono shrink-0 ml-1">{c.revenue} L.E</span>
+                  <span className="font-black text-rose-500 font-mono shrink-0 ml-1">{c.revenue} ج.م</span>
                 </div>
                 <div className="flex items-center justify-between text-[9px] text-zinc-500 font-bold">
-                  <span>{c.visits} visits</span>
-                  <span className="text-emerald-400">CR: {c.conversion.toFixed(1)}%</span>
+                  <span>{c.visits} زيارة</span>
+                  <span className="text-emerald-400">التحويل: {c.conversion.toFixed(1)}%</span>
                 </div>
               </div>
             );

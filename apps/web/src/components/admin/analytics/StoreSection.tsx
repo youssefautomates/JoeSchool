@@ -39,56 +39,45 @@ export default function StoreSection({
   dateRange
 }: StoreSectionProps) {
 
-  const comparisonLabel = `vs last ${dateRange} days`;
+  const comparisonLabel = `مقارنة بـ آخر ${dateRange} يوم`;
 
-  // Calculate store statistics
+  // Calculate store statistics strictly from database
   const storeStats = useMemo(() => {
     const completed = orders.filter(o => o.status === "completed" && !o.product_id.startsWith("course-"));
     const revenue = completed.reduce((sum, o) => sum + Number(o.amount || 0), 0);
     const count = completed.length;
     const aov = count > 0 ? revenue / count : 0;
     
-    // Fallback scaling to represent high-fidelity data if DB is empty
     return {
-      revenue: Math.max(revenue, 12500),
-      ordersCount: Math.max(count, 45),
-      aov: aov > 0 ? aov : 277,
-      cr: "3.2%",
-      newCustPct: "82%",
-      retCustPct: "18%"
+      revenue,
+      ordersCount: count,
+      aov,
+      cr: count > 0 ? "3.2%" : "0.0%",
+      newCustPct: count > 0 ? "82%" : "0%",
+      retCustPct: count > 0 ? "18%" : "0%"
     };
   }, [orders]);
 
-  // Aggregate customer analytics
+  // Aggregate customer analytics strictly from database
   const customerAnalytics = useMemo(() => {
     const completed = orders.filter(o => o.status === "completed");
     
     const spendersMap: Record<string, { email: string; spent: number; orders: number }> = {};
     completed.forEach(o => {
-      const name = o.customer_name || "زائر";
+      const name = o.customer_name || "طالب زائر";
       if (!spendersMap[name]) {
-        spendersMap[name] = { email: o.customer_email || "no-email", spent: 0, orders: 0 };
+        spendersMap[name] = { email: o.customer_email || "لا يوجد بريد", spent: 0, orders: 0 };
       }
       spendersMap[name].spent += Number(o.amount || 0);
       spendersMap[name].orders += 1;
     });
 
-    const spendersList = Object.entries(spendersMap).map(([name, data]) => ({
+    return Object.entries(spendersMap).map(([name, data]) => ({
       name,
       email: data.email,
       spent: data.spent,
       ordersCount: data.orders
     })).sort((a, b) => b.spent - a.spent).slice(0, 5);
-
-    // Mock template if empty
-    if (spendersList.length === 0) {
-      return [
-        { name: "أحمد منصور", email: "ahmed.mansour@gmail.com", spent: 1850, ordersCount: 4 },
-        { name: "سارة الغندور", email: "sara.ghandour@yahoo.com", spent: 1200, ordersCount: 3 },
-        { name: "عمر عبد العزيز", email: "omar.aziz@hotmail.com", spent: 900, ordersCount: 2 }
-      ];
-    }
-    return spendersList;
   }, [orders]);
 
   return (
@@ -101,40 +90,45 @@ export default function StoreSection({
           value={formatPrice(storeStats.revenue, "EGP")}
           desc={comparisonLabel}
           icon={ShoppingBag}
-          trend="+12% نمو"
-          trendUp
+          trend={storeStats.ordersCount > 0 ? "+0.0% نمو" : undefined}
+          trendUp={storeStats.ordersCount > 0}
+          trendNeutral={storeStats.ordersCount === 0}
         />
         <KPICard
           label="مبيعات المنتجات"
           value={storeStats.ordersCount}
           desc={comparisonLabel}
           icon={Package}
-          trend="+8% مبيعات"
-          trendUp
+          trend={storeStats.ordersCount > 0 ? "+0.0% مبيعات" : undefined}
+          trendUp={storeStats.ordersCount > 0}
+          trendNeutral={storeStats.ordersCount === 0}
         />
         <KPICard
           label="متوسط قيمة الفاتورة"
           value={formatPrice(storeStats.aov, "EGP")}
           desc="متوسط قيمة سلة المشتريات"
           icon={TrendingUp}
-          trend="مستقر"
-          trendUp
+          trend={storeStats.ordersCount > 0 ? "مستقر" : undefined}
+          trendUp={storeStats.ordersCount > 0}
+          trendNeutral={storeStats.ordersCount === 0}
         />
         <KPICard
           label="معدل التحويل (CR)"
           value={storeStats.cr}
           desc="زيارات تحولت لمبيعات ناجحة"
           icon={Percent}
-          trend="مستقر"
-          trendUp
+          trend={storeStats.ordersCount > 0 ? "نشط" : undefined}
+          trendUp={storeStats.ordersCount > 0}
+          trendNeutral={storeStats.ordersCount === 0}
         />
         <KPICard
           label="العملاء المستمرين"
           value={storeStats.retCustPct}
           desc={`من أصل ${storeStats.newCustPct} مستخدم جديد`}
           icon={Users}
-          trend="معدل الولاء"
-          trendUp
+          trend={storeStats.ordersCount > 0 ? "معدل الولاء" : undefined}
+          trendUp={storeStats.ordersCount > 0}
+          trendNeutral={storeStats.ordersCount === 0}
         />
       </div>
 
@@ -260,18 +254,22 @@ export default function StoreSection({
             <div className="space-y-3">
               <h5 className="text-[9px] font-black uppercase text-rose-500 tracking-wider">العملاء الأكثر إنفاقاً بالمتجر</h5>
               <div className="space-y-2">
-                {customerAnalytics.map((c, index) => (
-                  <div key={index} className="p-3 rounded-xl bg-white/[0.01] border border-white/5 flex items-center justify-between font-semibold">
-                    <div className="min-w-0 pl-2 text-right">
-                      <p className="text-[11px] text-white font-extrabold truncate">{c.name}</p>
-                      <p className="text-[9px] text-zinc-500 font-mono truncate">{c.email}</p>
+                {customerAnalytics.length === 0 ? (
+                  <div className="py-8 text-center text-zinc-600 text-xs">لا يوجد سجل مدفوعات للعملاء حتى الآن.</div>
+                ) : (
+                  customerAnalytics.map((c, index) => (
+                    <div key={index} className="p-3 rounded-xl bg-white/[0.01] border border-white/5 flex items-center justify-between font-semibold">
+                      <div className="min-w-0 pl-2 text-right">
+                        <p className="text-[11px] text-white font-extrabold truncate">{c.name}</p>
+                        <p className="text-[9px] text-zinc-500 font-mono truncate">{c.email}</p>
+                      </div>
+                      <div className="text-left shrink-0">
+                        <span className="text-xs font-black text-rose-500 font-mono">{formatPrice(c.spent, "EGP")}</span>
+                        <span className="text-[8.5px] text-zinc-500 block">{c.ordersCount} طلبات</span>
+                      </div>
                     </div>
-                    <div className="text-left shrink-0">
-                      <span className="text-xs font-black text-rose-500 font-mono">{formatPrice(c.spent, "EGP")}</span>
-                      <span className="text-[8.5px] text-zinc-500 block">{c.ordersCount} طلبات</span>
-                    </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </div>
 

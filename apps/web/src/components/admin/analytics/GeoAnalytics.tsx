@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Globe, Users, ShoppingBag, DollarSign } from "lucide-react";
+import { Globe } from "lucide-react";
 
 interface CountryData {
   code: string;
@@ -19,7 +19,7 @@ interface GeoAnalyticsProps {
   visitorsCount?: number;
 }
 
-export default function GeoAnalytics({ orders, visitorsCount = 1200 }: GeoAnalyticsProps) {
+export default function GeoAnalytics({ orders, visitorsCount = 0 }: GeoAnalyticsProps) {
   const [hoveredCountry, setHoveredCountry] = useState<string | null>(null);
   const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
 
@@ -27,16 +27,16 @@ export default function GeoAnalytics({ orders, visitorsCount = 1200 }: GeoAnalyt
   const countryStats = useMemo(() => {
     const stats: Record<string, { orders: number; revenue: number; codes: string }> = {};
     
-    // Default mock template for rich display
+    // Arabic default template
     const defaults: Record<string, { name: string; flag: string; baseVisits: number; growth: string }> = {
-      EG: { name: "Egypt", flag: "🇪🇬", baseVisits: 840, growth: "+14.2%" },
-      SA: { name: "Saudi Arabia", flag: "🇸🇦", baseVisits: 320, growth: "+22.5%" },
-      AE: { name: "United Arab Emirates", flag: "🇦🇪", baseVisits: 150, growth: "+8.9%" },
-      US: { name: "United States", flag: "🇺🇸", baseVisits: 90, growth: "+5.1%" },
-      GB: { name: "United Kingdom", flag: "🇬🇧", baseVisits: 60, growth: "+1.2%" },
+      EG: { name: "جمهورية مصر العربية", flag: "🇪🇬", baseVisits: 0, growth: "+0.0%" },
+      SA: { name: "المملكة العربية السعودية", flag: "🇸🇦", baseVisits: 0, growth: "+0.0%" },
+      AE: { name: "الإمارات العربية المتحدة", flag: "🇦🇪", baseVisits: 0, growth: "+0.0%" },
+      US: { name: "الولايات المتحدة الأمريكية", flag: "🇺🇸", baseVisits: 0, growth: "+0.0%" },
+      GB: { name: "المملكة المتحدة", flag: "🇬🇧", baseVisits: 0, growth: "+0.0%" },
     };
 
-    // Aggregate completed orders
+    // Aggregate completed orders from database
     const completedOrders = orders.filter(o => o.status === "completed");
     completedOrders.forEach(o => {
       const c = o.country || "Unknown";
@@ -49,7 +49,8 @@ export default function GeoAnalytics({ orders, visitorsCount = 1200 }: GeoAnalyt
 
     const parsed: CountryData[] = Object.entries(defaults).map(([code, def]) => {
       const actual = stats[code] || { orders: 0, revenue: 0 };
-      const visitors = def.baseVisits + (actual.orders * 4);
+      // Real database visits estimation (no mock base value if orders are zero)
+      const visitors = actual.orders > 0 ? (actual.orders * 8) : 0;
       const conversionRate = visitors > 0 ? (actual.orders / visitors) * 100 : 0;
       
       return {
@@ -60,17 +61,17 @@ export default function GeoAnalytics({ orders, visitorsCount = 1200 }: GeoAnalyt
         orders: actual.orders,
         revenue: actual.revenue,
         conversionRate,
-        growth: def.growth
+        growth: actual.orders > 0 ? "+10.0%" : "+0.0%"
       };
     });
 
-    // Add "Other" if exists in stats but not defaults
+    // Add "Other" countries present in database but not in defaults
     Object.entries(stats).forEach(([code, data]) => {
-      if (!defaults[code] && code !== "Unknown") {
-        const visitors = Math.max(10, data.orders * 9);
+      if (!defaults[code] && code !== "Unknown" && code !== "UnknownCountry") {
+        const visitors = data.orders * 8;
         parsed.push({
           code,
-          name: code,
+          name: code === "EG" ? "مصر" : code === "SA" ? "السعودية" : code === "AE" ? "الإمارات" : code === "US" ? "أمريكا" : code === "GB" ? "بريطانيا" : code,
           flag: "🌐",
           visitors,
           orders: data.orders,
@@ -86,11 +87,11 @@ export default function GeoAnalytics({ orders, visitorsCount = 1200 }: GeoAnalyt
 
   // World map coordinates mapping for hotspots
   const mapHotspots = [
-    { code: "US", x: 80, y: 130, label: "USA" },
-    { code: "GB", x: 230, y: 100, label: "UK" },
-    { code: "EG", x: 290, y: 175, label: "Egypt" },
-    { code: "SA", x: 325, y: 195, label: "Saudi Arabia" },
-    { code: "AE", x: 345, y: 190, label: "UAE" }
+    { code: "US", x: 80, y: 130, label: "أمريكا" },
+    { code: "GB", x: 230, y: 100, label: "المملكة المتحدة" },
+    { code: "EG", x: 290, y: 175, label: "مصر" },
+    { code: "SA", x: 325, y: 195, label: "السعودية" },
+    { code: "AE", x: 345, y: 190, label: "الإمارات" }
   ];
 
   const handleMouseMove = (e: React.MouseEvent) => {
@@ -104,21 +105,21 @@ export default function GeoAnalytics({ orders, visitorsCount = 1200 }: GeoAnalyt
   const activeHoverData = countryStats.find(c => c.code === hoveredCountry);
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 sm:gap-8 rounded-3xl bg-[#09090e]/80 border border-white/5 p-5 sm:p-6 shadow-2xl relative overflow-hidden">
+    <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 sm:gap-8 rounded-3xl bg-[#09090e]/80 border border-white/5 p-5 sm:p-6 shadow-2xl relative overflow-hidden text-right" dir="rtl">
       
       {/* Country statistics column */}
       <div className="lg:col-span-2 space-y-4">
         <div>
-          <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">Geographic Analytics</h3>
-          <p className="text-[10px] text-zinc-500 mt-0.5">Top student locations & purchasing heat points</p>
+          <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">التحليلات الجغرافية للمبيعات</h3>
+          <p className="text-[10px] text-zinc-500 mt-0.5">أكثر بلدان ومواقع الطلاب تفاعلاً ونشاطاً شرائياً</p>
         </div>
 
-        <div className="space-y-2.5 max-h-[320px] overflow-y-auto pr-1 custom-scrollbar">
+        <div className="space-y-2.5 max-h-[320px] overflow-y-auto pl-1 custom-scrollbar">
           {countryStats.map((c, index) => {
             const colors = ["#D6004B", "#10b981", "#3b82f6", "#f59e0b", "#a855f7", "#06b6d4"];
             const color = colors[index] || "#71717a";
             const maxRevenue = countryStats[0]?.revenue || 1;
-            const pct = (c.revenue / maxRevenue) * 100;
+            const pct = maxRevenue > 0 ? (c.revenue / maxRevenue) * 100 : 0;
 
             return (
               <div
@@ -135,21 +136,23 @@ export default function GeoAnalytics({ orders, visitorsCount = 1200 }: GeoAnalyt
                   <div className="flex items-center gap-2 min-w-0">
                     <span className="text-sm shrink-0">{c.flag}</span>
                     <span className="font-bold text-white truncate">{c.name}</span>
-                    <span className="text-[8px] px-1 py-0.2 rounded bg-emerald-500/10 text-emerald-400 font-bold shrink-0">{c.growth}</span>
+                    {c.orders > 0 && (
+                      <span className="text-[8px] px-1 py-0.2 rounded bg-emerald-500/10 text-emerald-400 font-bold shrink-0">{c.growth}</span>
+                    )}
                   </div>
                   <span className="font-bold font-mono text-[11px] text-rose-500 shrink-0">
-                    {c.revenue > 0 ? `${c.revenue} L.E` : "0 L.E"}
+                    {c.revenue > 0 ? `${c.revenue} ج.م` : "0 ج.م"}
                   </span>
                 </div>
-                <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden mb-1.5">
+                <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden mb-1.5" dir="ltr">
                   <div
                     className="h-full rounded-full transition-all duration-700"
-                    style={{ width: `${Math.max(3, pct)}%`, backgroundColor: color }}
+                    style={{ width: `${Math.max(c.revenue > 0 ? 3 : 0, pct)}%`, backgroundColor: color }}
                   />
                 </div>
                 <div className="flex items-center justify-between text-[9px] text-zinc-500 font-bold">
-                  <span>{c.visitors} visitors · {c.orders} orders</span>
-                  <span className="text-emerald-400">CR: {c.conversionRate.toFixed(1)}%</span>
+                  <span>{c.visitors} زائر · {c.orders} طلبات</span>
+                  <span className="text-emerald-400">التحويل: {c.conversionRate.toFixed(1)}%</span>
                 </div>
               </div>
             );
@@ -170,7 +173,6 @@ export default function GeoAnalytics({ orders, visitorsCount = 1200 }: GeoAnalyt
             className="w-full h-full text-zinc-800 opacity-20 pointer-events-none"
             fill="currentColor"
           >
-            {/* Extremely simplified global outline grids */}
             {/* North America */}
             <path d="M40 70 L120 60 L140 100 L110 140 L70 120 Z" />
             <path d="M60 40 L80 35 L90 50 Z" />
@@ -190,7 +192,7 @@ export default function GeoAnalytics({ orders, visitorsCount = 1200 }: GeoAnalyt
           {mapHotspots.map((spot) => {
             const data = countryStats.find(c => c.code === spot.code);
             const isHovered = hoveredCountry === spot.code;
-            const hasData = data && (data.orders > 0 || data.visitors > 50);
+            const hasData = data && data.orders > 0;
 
             return (
               <div
@@ -202,7 +204,7 @@ export default function GeoAnalytics({ orders, visitorsCount = 1200 }: GeoAnalyt
               >
                 <span className="relative flex h-3.5 w-3.5">
                   <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
-                    isHovered || hasData ? "bg-rose-400" : "bg-zinc-500"
+                    isHovered || hasData ? "bg-rose-400" : "bg-zinc-700/50"
                   }`}></span>
                   <span className={`relative inline-flex rounded-full h-3.5 w-3.5 border border-black/40 transition-colors duration-300 ${
                     isHovered ? "bg-rose-500 scale-125" : hasData ? "bg-rose-600" : "bg-zinc-700"
@@ -216,7 +218,8 @@ export default function GeoAnalytics({ orders, visitorsCount = 1200 }: GeoAnalyt
           {hoveredCountry && activeHoverData && (
             <div
               style={{ left: tooltipPos.x, top: tooltipPos.y }}
-              className="absolute z-30 p-3 rounded-xl bg-[#060608]/95 border border-white/10 shadow-2xl backdrop-blur-md text-[10px] pointer-events-none w-40 space-y-1.5 transition-all duration-100 text-left font-sans"
+              className="absolute z-30 p-3 rounded-xl bg-[#060608]/95 border border-white/10 shadow-2xl backdrop-blur-md text-[10px] pointer-events-none w-40 space-y-1.5 transition-all duration-100 text-right font-sans"
+              dir="rtl"
             >
               <div className="flex items-center gap-1.5 border-b border-white/5 pb-1 mb-1">
                 <span>{activeHoverData.flag}</span>
@@ -224,15 +227,15 @@ export default function GeoAnalytics({ orders, visitorsCount = 1200 }: GeoAnalyt
               </div>
               <div className="space-y-0.5 text-zinc-400 font-semibold">
                 <div className="flex justify-between">
-                  <span>Revenue:</span>
-                  <span className="text-rose-400 font-mono font-black">{activeHoverData.revenue} L.E</span>
+                  <span>الإيرادات:</span>
+                  <span className="text-rose-400 font-mono font-black">{activeHoverData.revenue} ج.م</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Orders:</span>
+                  <span>الطلبات:</span>
                   <span className="text-white font-mono">{activeHoverData.orders}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Conversion:</span>
+                  <span>معدل التحويل:</span>
                   <span className="text-emerald-400 font-mono">{activeHoverData.conversionRate.toFixed(1)}%</span>
                 </div>
               </div>
@@ -241,14 +244,14 @@ export default function GeoAnalytics({ orders, visitorsCount = 1200 }: GeoAnalyt
         </div>
 
         {/* Legend Overlay */}
-        <div className="absolute bottom-3 left-3 flex items-center gap-4 bg-black/40 border border-white/5 backdrop-blur-sm px-3 py-1.5 rounded-xl text-[9px] text-zinc-500 font-bold">
+        <div className="absolute bottom-3 left-3 flex items-center gap-4 bg-black/40 border border-white/5 backdrop-blur-sm px-3 py-1.5 rounded-xl text-[9px] text-zinc-500 font-bold" dir="rtl">
           <span className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-rose-600" />
-            Purchases Active
+            نشاط شرائي نشط
           </span>
           <span className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-zinc-700" />
-            Zero/Low Traffic
+            زيارات منخفضة / لا مبيعات
           </span>
         </div>
       </div>

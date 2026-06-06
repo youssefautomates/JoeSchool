@@ -17,23 +17,23 @@ export default function DistributionChart({ data }: DistributionChartProps) {
 
   if (totalValue === 0) {
     return (
-      <div className="w-full h-full flex flex-col items-center justify-center border border-dashed border-white/5 rounded-2xl p-6 text-center text-zinc-500 text-xs">
-        No sales distribution data available in selected window.
+      <div className="w-full h-full flex flex-col items-center justify-center border border-dashed border-white/5 rounded-2xl p-6 text-center text-zinc-500 text-xs font-sans">
+        لا توجد بيانات لتوزيع الإيرادات في الفترة المحددة.
       </div>
     );
   }
 
   return (
-    <div className="w-full h-full flex flex-col justify-between font-sans">
+    <div className="w-full h-full flex flex-col justify-between font-sans text-right" dir="rtl">
       <div className="flex items-center justify-between mb-5 pb-4 border-b border-white/5">
         <div>
-          <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">EGP vs USD Distribution</h3>
-          <p className="text-[10px] text-zinc-500 mt-0.5">Proportional revenue split across transactions</p>
+          <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">نسبة تقسيم الجنيه والدولار</h3>
+          <p className="text-[10px] text-zinc-500 mt-0.5">توزيع حجم المبيعات الإجمالي حسب العملة</p>
         </div>
         <CreditCard className="w-4 h-4 text-zinc-500 shrink-0" />
       </div>
 
-      <div className="w-full h-48 sm:h-64 flex items-center justify-center relative">
+      <div className="w-full h-48 sm:h-64 flex items-center justify-center relative" dir="ltr">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
@@ -50,16 +50,20 @@ export default function DistributionChart({ data }: DistributionChartProps) {
             </Pie>
             <Tooltip
               formatter={(value: any, name: any) => {
-                if (name === "EGP Revenue") return [`${value} EGP`, name];
-                return [`$${value / 50} USD (equiv. ${value} EGP)`, name];
+                const nameAr = name === "EGP Revenue" ? "إيرادات الجنيه" : "إيرادات الدولار (معادل بالجنيه)";
+                if (name === "EGP Revenue") return [`${value} ج.م`, nameAr];
+                return [`$${value / 50} دولار (معادل ${value} ج.م)`, nameAr];
               }}
-              contentStyle={{ backgroundColor: "#060608", borderColor: "rgba(255,255,255,0.06)", borderRadius: "12px", textAlign: "left" }}
+              contentStyle={{ backgroundColor: "#060608", borderColor: "rgba(255,255,255,0.06)", borderRadius: "12px", textAlign: "right" }}
               itemStyle={{ fontSize: "10px" }}
             />
             <Legend 
               verticalAlign="bottom" 
               height={36} 
-              formatter={(value) => <span className="text-[9.5px] sm:text-[10.5px] font-bold text-zinc-400">{value}</span>} 
+              formatter={(value) => {
+                const valueAr = value === "EGP Revenue" ? "إيرادات الجنيه" : "إيرادات الدولار";
+                return <span className="text-[9.5px] sm:text-[10.5px] font-bold text-zinc-400">{valueAr}</span>;
+              }} 
             />
           </PieChart>
         </ResponsiveContainer>
