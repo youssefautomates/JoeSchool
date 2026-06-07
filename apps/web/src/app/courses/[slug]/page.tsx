@@ -1735,12 +1735,13 @@ function MobileCourseView({
 
       {/* 5. Mobile Tabbed Content Box */}
       <div className="bg-[#09090e] border border-white/5 rounded-2xl p-4 space-y-4">
-         {/* Tab switches: centered premium tab bar with icons */}
-         <div className="flex items-center justify-around border-b border-white/5 pb-2 w-full">
+         {/* Tab switches: scrollable on mobile to fit all 5 tabs nicely */}
+         <div className="flex items-center justify-between overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] border-b border-white/5 pb-2 w-full gap-1 sm:gap-2">
             {[
               { id: 'overview', label: 'الوصف', icon: FileText },
               { id: 'curriculum', label: 'المنهج', icon: BookOpen },
               { id: 'certificate', label: 'الشهادة', icon: Award },
+              { id: 'instructor', label: 'المدرب', icon: User },
               { id: 'faq', label: 'الأسئلة', icon: HelpCircle }
             ].map((tab) => {
               const TabIcon = tab.icon;
@@ -1750,16 +1751,16 @@ function MobileCourseView({
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as any)}
                   className={cn(
-                    "flex flex-col items-center justify-center gap-1.5 py-3 transition-all relative cursor-pointer font-alexandria font-bold text-xs flex-1 text-center select-none",
+                    "flex flex-col items-center justify-center gap-1 py-2 px-2.5 transition-all relative cursor-pointer font-alexandria font-bold text-xs shrink-0 select-none",
                     isActive ? "text-[#D6004B]" : "text-zinc-400 hover:text-white"
                   )}
                 >
                   <TabIcon className={cn("w-4.5 h-4.5 mb-0.5", isActive ? "text-[#D6004B]" : "text-zinc-500")} />
-                  <span className="text-[10.5px]">{tab.label}</span>
+                  <span className="text-[10px]">{tab.label}</span>
                   {isActive && (
                     <motion.div 
                       layoutId="activeTabIndicatorMobile" 
-                      className="absolute bottom-0 h-[2.5px] bg-[#D6004B] rounded-full w-10" 
+                      className="absolute bottom-0 h-[2.5px] bg-[#D6004B] rounded-full w-8" 
                       transition={{ type: "spring", stiffness: 380, damping: 30 }}
                     />
                   )}
@@ -2156,7 +2157,7 @@ function MobileCourseView({
       {/* 8. Small Custom Footer */}
       <footer className="border-t border-white/5 pt-6 pb-24 flex flex-col items-center gap-4 text-center text-zinc-500 text-[9px] w-full">
          <Link href="/" className="flex items-center group">
-           <img src="/logo-text.png" alt="JoeSchool" className="h-6 object-contain" />
+           <img src="/logo-text.png" alt="JoeSchool" className="h-20 object-contain" />
          </Link>
          
          <div className="flex flex-wrap justify-center gap-3 font-bold">

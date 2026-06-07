@@ -1255,7 +1255,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
             {/* Custom Footer */}
             <footer className="border-t border-white/5 pt-6 pb-24 flex flex-col items-center gap-4 text-center text-zinc-500 text-[9px] w-full">
               <Link href="/" className="flex items-center group">
-                <img src="/logo-text.png" alt="JoeSchool" className="h-6 object-contain" />
+                <img src="/logo-text.png" alt="JoeSchool" className="h-20 object-contain" />
               </Link>
               
               <div className="flex flex-wrap justify-center gap-3 font-bold font-cairo">
