@@ -3,6 +3,7 @@
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { SocialLinks } from "@/components/SocialLinks";
+import { CustomVideoPlayer } from "@/components/CustomVideoPlayer";
 import { 
   Zap, Lock, Star, ShieldCheck, Target, 
   MonitorPlay, ArrowLeft, ShoppingCart, Play, CheckCircle2, ChevronLeft,
@@ -450,38 +451,46 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                       exit={{ opacity: 0 }}
                       className="absolute inset-0 z-10 flex items-center justify-center bg-black"
                     >
-                      {!hasInteracted ? (
-                        <div 
-                          onClick={handleUnmuteAndStart}
-                          className="absolute inset-0 flex flex-col items-center justify-center cursor-pointer group/play"
-                          style={{ zIndex: 25 }}
-                        >
-                          {product.image_url ? (
-                            <Image 
-                              src={product.image_url} 
-                              alt={product.title}
-                              fill
-                              className="object-cover transition-transform duration-700 group-hover/play:scale-102"
-                              priority
-                            />
-                          ) : (
-                            <div className="absolute inset-0 bg-[#0a0a0f] flex items-center justify-center" />
-                          )}
-                          <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 backdrop-blur-[2px] transition-all group-hover/play:bg-black/20" style={{ zIndex: 20 }}>
-                            <motion.div 
-                              animate={{ scale: [1, 1.08, 1] }}
-                              transition={{ duration: 2, repeat: Infinity }}
-                              className="w-16 h-16 bg-[#D6004B] border border-white/20 rounded-full flex items-center justify-center mb-4 shadow-2xl"
-                            >
-                               <Play className="w-6 h-6 text-white fill-current ml-0.5" />
-                            </motion.div>
-                            <span className="font-alexandria font-black text-sm text-white tracking-widest bg-black/50 px-5 py-2.5 rounded-xl border border-white/10 shadow-lg">
-                               تشغيل العرض الترويجي
-                            </span>
+                      {activeMedia.url.includes('youtube.com') || activeMedia.url.includes('youtu.be') ? (
+                        !hasInteracted ? (
+                          <div 
+                            onClick={handleUnmuteAndStart}
+                            className="absolute inset-0 flex flex-col items-center justify-center cursor-pointer group/play"
+                            style={{ zIndex: 25 }}
+                          >
+                            {product.image_url ? (
+                              <Image 
+                                src={product.image_url} 
+                                alt={product.title}
+                                fill
+                                className="object-cover transition-transform duration-700 group-hover/play:scale-102"
+                                priority
+                              />
+                            ) : (
+                              <div className="absolute inset-0 bg-[#0a0a0f] flex items-center justify-center" />
+                            )}
+                            <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 backdrop-blur-[2px] transition-all group-hover/play:bg-black/20" style={{ zIndex: 20 }}>
+                              <motion.div 
+                                animate={{ scale: [1, 1.08, 1] }}
+                                transition={{ duration: 2, repeat: Infinity }}
+                                className="w-16 h-16 bg-[#D6004B] border border-white/20 rounded-full flex items-center justify-center mb-4 shadow-2xl"
+                              >
+                                 <Play className="w-6 h-6 text-white fill-current ml-0.5" />
+                              </motion.div>
+                              <span className="font-alexandria font-black text-sm text-white tracking-widest bg-black/50 px-5 py-2.5 rounded-xl border border-white/10 shadow-lg">
+                                 تشغيل العرض الترويجي
+                              </span>
+                            </div>
                           </div>
-                        </div>
+                        ) : (
+                          renderVideoPlayer(activeMedia.url)
+                        )
                       ) : (
-                        renderVideoPlayer(activeMedia.url)
+                        <CustomVideoPlayer 
+                          src={activeMedia.url}
+                          poster={product.image_url || undefined}
+                          className="w-full h-full"
+                        />
                       )}
                     </motion.div>
                   ) : activeMedia?.url ? (
@@ -856,35 +865,43 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                       </div>
                     ) : activeMedia?.type === 'video' ? (
                       <div className="absolute inset-0 z-10 flex items-center justify-center bg-black">
-                        {!hasInteracted ? (
-                          <div 
-                            onClick={handleUnmuteAndStart}
-                            className="absolute inset-0 flex flex-col items-center justify-center cursor-pointer bg-black/45 backdrop-blur-[2px] z-20"
-                          >
-                            {product.image_url ? (
-                              <Image 
-                                src={product.image_url} 
-                                alt={product.title}
-                                fill
-                                className="object-cover opacity-60 pointer-events-none"
-                              />
-                            ) : (
-                              <div className="absolute inset-0 bg-[#0a0a0f] opacity-60" />
-                            )}
-                            <motion.div 
-                              animate={{ scale: [1, 1.06, 1] }}
-                              transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-                              className="relative w-14 h-14 bg-[#D6004B]/95 border border-white/20 rounded-full flex items-center justify-center mb-3 shadow-[0_0_20px_rgba(214,0,75,0.4)]"
+                        {activeMedia.url.includes('youtube.com') || activeMedia.url.includes('youtu.be') ? (
+                          !hasInteracted ? (
+                            <div 
+                              onClick={handleUnmuteAndStart}
+                              className="absolute inset-0 flex flex-col items-center justify-center cursor-pointer bg-black/45 backdrop-blur-[2px] z-20"
                             >
-                              <Play className="w-5 h-5 text-white fill-current ml-0.5" />
-                            </motion.div>
-                            <span className="relative text-[10px] font-cairo font-bold text-white/95 bg-black/60 backdrop-blur-md px-3.5 py-1.5 rounded-lg border border-white/10 flex items-center gap-1.5">
-                              <VolumeX className="w-3 h-3" />
-                              اضغط لتشغيل الصوت
-                            </span>
-                          </div>
+                              {product.image_url ? (
+                                <Image 
+                                  src={product.image_url} 
+                                  alt={product.title}
+                                  fill
+                                  className="object-cover opacity-60 pointer-events-none"
+                                />
+                              ) : (
+                                <div className="absolute inset-0 bg-[#0a0a0f] opacity-60" />
+                              )}
+                              <motion.div 
+                                animate={{ scale: [1, 1.06, 1] }}
+                                transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+                                className="relative w-14 h-14 bg-[#D6004B]/95 border border-white/20 rounded-full flex items-center justify-center mb-3 shadow-[0_0_20px_rgba(214,0,75,0.4)]"
+                              >
+                                <Play className="w-5 h-5 text-white fill-current ml-0.5" />
+                              </motion.div>
+                              <span className="relative text-[10px] font-cairo font-bold text-white/95 bg-black/60 backdrop-blur-md px-3.5 py-1.5 rounded-lg border border-white/10 flex items-center gap-1.5">
+                                <VolumeX className="w-3 h-3" />
+                                اضغط لتشغيل الصوت
+                              </span>
+                            </div>
+                          ) : (
+                            renderVideoPlayer(activeMedia.url)
+                          )
                         ) : (
-                          renderVideoPlayer(activeMedia.url)
+                          <CustomVideoPlayer 
+                            src={activeMedia.url}
+                            poster={product.image_url || undefined}
+                            className="w-full h-full"
+                          />
                         )}
                       </div>
                     ) : activeMedia?.url ? (
