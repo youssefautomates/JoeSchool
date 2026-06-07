@@ -18,6 +18,7 @@ import { ProductReviews } from "@/components/ProductReviews";
 import { SocialLinks } from "@/components/SocialLinks";
 import { useCart } from "@/context/CartContext";
 import { resolveUserCurrency, resolveProductPrice, formatPrice, type Currency } from "@/lib/pricing";
+import { trackEvent } from "@/lib/analytics";
 
 interface ShowcaseVideo {
   id: string;
@@ -215,6 +216,9 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
       
       // Now unblock the page — video URL is already set
       setIsLoading(false);
+
+      // Track course view in Supabase analytics database
+      trackEvent("product_view", c.id, c.title, { price: c.price, category: c.category, type: "course" });
 
       // Pre-fetch all showcase video URLs in parallel for instant synchronous autoplay on click
       if (c.showcase_videos && Array.isArray(c.showcase_videos)) {

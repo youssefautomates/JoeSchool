@@ -21,6 +21,7 @@ import { supabase, type Product, calcDiscount, fetchActiveProducts } from "@/lib
 import { useCart } from "@/context/CartContext";
 import { resolveUserCurrency, resolveProductPrice, formatPrice, type Currency } from "@/lib/pricing";
 import { trackViewContent, trackAddToCart, trackInitiateCheckout } from "@/lib/metaPixel";
+import { trackEvent } from "@/lib/analytics";
 import { ProductReviews } from "@/components/ProductReviews";
 
 // ── Helper: Unpack Media and Tags ──────────────────────────────────────
@@ -260,6 +261,8 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
         const pricing = resolveProductPrice(data as any, currency);
         const price = pricing ? pricing.price : unpacked.price;
         trackViewContent(unpacked.id, unpacked.title, price, currency, "product");
+        // Track product view in Supabase analytics database
+        trackEvent("product_view", unpacked.id, unpacked.title, { price, currency });
       }
     } catch (err) {
       console.error("[PRODUCT_PAGE] Fetch Error Details:", err);

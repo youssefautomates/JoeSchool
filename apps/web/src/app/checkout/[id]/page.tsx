@@ -20,6 +20,7 @@ import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
 import { supabaseClient } from "@/lib/supabaseClient";
 import { type Product, calcDiscount } from "@/lib/products";
+import { trackEvent } from "@/lib/analytics";
 
 import { resolveUserCurrency, resolveProductPrice, formatPrice, getUSDtoEGPExchangeRate, type Currency } from "@/lib/pricing";
 
@@ -39,6 +40,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
   const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<"card" | "wallet" | "instapay">("card");
   const [showInstapayModal, setShowInstapayModal] = useState(false);
+  const [instapayReturnBanner, setInstapayReturnBanner] = useState(false);
   const [instapayScreenshot, setInstapayScreenshot] = useState<string | null>(null);
   const [instapayScreenshotUrl, setInstapayScreenshotUrl] = useState<string | null>(null);
   const [instapayFile, setInstapayFile] = useState<File | null>(null);
@@ -241,6 +243,22 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
 
       setProduct(mappedProduct);
       setIsCourse(isCourseItem);
+      
+      // Track InitiateCheckout in Supabase analytics database
+      trackEvent("checkout_started", mappedProduct.id, mappedProduct.title, {
+        price: mappedProduct.price,
+        currency: resolvedCurrency,
+        type: isCourseItem ? "course" : "product"
+      });
+      
+      // Restore Instapay modal if user is returning from external payment link
+      if (typeof window !== "undefined") {
+        const instapayPending = sessionStorage.getItem(`instapay_pending_${resolvedParams.id}`);
+        if (instapayPending === "true") {
+          setInstapayReturnBanner(true);
+          setPaymentMethod("instapay");
+        }
+      }
       
       // Track InitiateCheckout
       if (typeof window !== "undefined") {
@@ -503,6 +521,8 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
          }
 
          toast.success(isFree ? "تم تفعيل الكورس بنجاح!" : (paymentMethod === "instapay" ? "تم تسجيل طلبك بنجاح! جاري تحويلك لواتساب..." : "تم الدفع بنجاح!"));
+         // Clear the instapay pending flag on successful completion
+         sessionStorage.removeItem(`instapay_pending_${resolvedParams.id}`);
          router.push(`/checkout/success?order_id=${result.orderId}`);
       } else {
         throw new Error(result.error || "فشل بدء عملية الدفع");
@@ -555,6 +575,43 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
   return (
     <div className="min-h-screen bg-[#050505] text-white font-cairo">
       <Navbar />
+
+      {/* Instapay Return Banner - Shows when user returns from external Instapay payment */}
+      {instapayReturnBanner && (
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="fixed top-0 left-0 right-0 z-[200] bg-gradient-to-r from-purple-900/95 to-purple-800/95 border-b border-purple-500/30 backdrop-blur-xl p-3 text-center font-cairo"
+        >
+          <div className="container mx-auto flex items-center justify-center gap-3 flex-wrap">
+            <div className="flex items-center gap-2 text-purple-200 text-sm font-bold">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-purple-400"></span>
+              </span>
+              هل أكملت التحويل عبر Instapay؟ ارفع صورة إثبات الدفع لإتمام طلبك!
+            </div>
+            <button
+              onClick={() => {
+                setShowInstapayModal(true);
+                setInstapayReturnBanner(false);
+              }}
+              className="bg-purple-500 hover:bg-purple-400 text-white text-xs font-bold px-4 py-1.5 rounded-lg transition-all cursor-pointer"
+            >
+              رفع إثبات الدفع الآن
+            </button>
+            <button
+              onClick={() => {
+                setInstapayReturnBanner(false);
+                sessionStorage.removeItem(`instapay_pending_${resolvedParams.id}`);
+              }}
+              className="text-purple-400 hover:text-white text-xs transition-colors cursor-pointer"
+            >
+              ✕
+            </button>
+          </div>
+        </motion.div>
+      )}
       
       <main className="pt-32 pb-24 relative overflow-hidden">
         {/* Glow Effects */}
@@ -1070,6 +1127,12 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                 href="https://ipn.eg/S/youssefmohamed2003/instapay/MJ1vR8" 
                 target="_blank" 
                 rel="noopener noreferrer"
+                onClick={() => {
+                  // Mark that user is going to pay via instapay externally so we can detect return
+                  if (typeof window !== "undefined") {
+                    sessionStorage.setItem(`instapay_pending_${resolvedParams.id}`, "true");
+                  }
+                }}
                 className="w-full h-12 bg-purple-600 hover:bg-purple-500 text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-[0_4px_14px_rgba(147,51,234,0.3)] font-cairo"
               >
                 ادفع مباشرة عبر Instapay

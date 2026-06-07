@@ -4,6 +4,7 @@ import { createContext, useContext, useState, useEffect, ReactNode } from "react
 import { Product } from "@/lib/products";
 import { toast } from "sonner";
 import { trackAddToCart } from "@/lib/metaPixel";
+import { trackEvent } from "@/lib/analytics";
 
 interface CartItem extends Product {
   quantity: number;
@@ -57,6 +58,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
       
       // Track AddToCart — uses queue so fires even if fbq not yet ready
       trackAddToCart(product.id, product.title, product.price, "EGP", "product");
+
+      // Track AddToCart in Supabase analytics database
+      trackEvent("add_to_cart", product.id, product.title, { price: product.price });
 
       // TikTok AddToCart
       if (typeof window !== "undefined" && (window as any).ttq) {
