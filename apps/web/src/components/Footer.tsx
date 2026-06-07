@@ -21,7 +21,7 @@ export function Footer() {
           {/* Right Section: Brand Logo */}
           <div className="flex flex-col items-center md:items-end gap-3.5 w-full md:w-auto text-center md:text-right">
             <Link href="/" className="flex items-center justify-center group">
-              <div className="h-24 md:h-32 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
+              <div className="h-32 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
                 <img src="/logo-text.png" alt="JoeSchool" className="h-full object-contain" />
               </div>
             </Link>
