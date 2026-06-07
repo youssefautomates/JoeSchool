@@ -70,13 +70,13 @@ export default function NotificationCenter({
       const date = new Date(dateStr);
       const diffMs = now.getTime() - date.getTime();
       const diffMins = Math.floor(diffMs / 60000);
-      if (diffMins < 1) return "الآن";
-      if (diffMins < 60) return `منذ ${diffMins} د`;
+      if (diffMins < 1) return "Just now";
+      if (diffMins < 60) return `${diffMins}m ago`;
       const diffHours = Math.floor(diffMins / 60);
-      if (diffHours < 24) return `منذ ${diffHours} س`;
-      return date.toLocaleDateString("ar-EG", { month: "short", day: "numeric" });
+      if (diffHours < 24) return `${diffHours}h ago`;
+      return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
     } catch (e) {
-      return "مؤخراً";
+      return "Recently";
     }
   };
 
@@ -99,14 +99,14 @@ export default function NotificationCenter({
             animate={{ x: 0 }}
             exit={{ x: "-100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed left-0 top-0 h-screen w-full max-w-sm bg-[#07070b]/98 border-r border-white/5 z-55 flex flex-col shadow-2xl backdrop-blur-lg text-right"
-            dir="rtl"
+            className="fixed left-0 top-0 h-screen w-full max-w-sm bg-[#07070b]/98 border-r border-white/5 z-55 flex flex-col shadow-2xl backdrop-blur-lg text-left"
+            dir="ltr"
           >
             {/* Header */}
             <div className="p-4 sm:p-5 flex items-center justify-between border-b border-white/5">
               <div className="flex items-center gap-2">
                 <Bell className="w-5 h-5 text-rose-500" />
-                <h3 className="font-extrabold text-sm text-white uppercase tracking-wider">مركز الإشعارات والتنبيهات</h3>
+                <h3 className="font-extrabold text-sm text-white uppercase tracking-wider">Notification Center</h3>
               </div>
               <button
                 onClick={onClose}
@@ -119,16 +119,16 @@ export default function NotificationCenter({
             {/* Notification logs list */}
             <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
               <div className="flex items-center justify-between text-[10px] text-zinc-500 font-bold uppercase tracking-wider mb-2">
-                <span>آخر التنبيهات ({notifications.length})</span>
+                <span>Recent Notifications ({notifications.length})</span>
                 <div className="flex gap-2.5">
                   {notifications.some(n => !n.read) && (
                     <button onClick={onMarkAllAsRead} className="hover:text-white flex items-center gap-1 transition-colors cursor-pointer">
-                      <CheckCircle2 className="w-3 h-3 text-emerald-400" /> قراءة الكل
+                      <CheckCircle2 className="w-3 h-3 text-emerald-400" /> Mark all read
                     </button>
                   )}
                   {notifications.length > 0 && (
                     <button onClick={onClearAll} className="hover:text-red-400 flex items-center gap-1 transition-colors cursor-pointer">
-                      <Trash2 className="w-3 h-3" /> تفريغ
+                      <Trash2 className="w-3 h-3" /> Clear
                     </button>
                   )}
                 </div>
@@ -137,7 +137,7 @@ export default function NotificationCenter({
               <div className="space-y-2">
                 {notifications.length === 0 ? (
                   <div className="py-16 text-center text-zinc-600 text-xs">
-                    لا توجد تنبيهات نشطة حالياً.
+                    No active notifications at the moment.
                   </div>
                 ) : (
                   notifications.map((notif) => {
@@ -156,7 +156,7 @@ export default function NotificationCenter({
                         <div className={`w-8 h-8 rounded-lg flex items-center justify-center border shrink-0 ${config.color}`}>
                           <IconComponent className="w-4 h-4" />
                         </div>
-                        <div className="min-w-0 flex-1 space-y-0.5 text-right">
+                        <div className="min-w-0 flex-1 space-y-0.5 text-left">
                           <div className="flex items-center justify-between gap-1.5">
                             <span className="text-[10.5px] font-black text-white truncate">{notif.title}</span>
                             <span className="text-[8px] text-zinc-500 font-mono shrink-0" dir="ltr">
@@ -166,7 +166,7 @@ export default function NotificationCenter({
                           <p className="text-[9.5px] text-zinc-400 font-medium leading-normal">{notif.message}</p>
                         </div>
                         {!notif.read && (
-                          <span className="absolute top-3 left-3 w-1.5 h-1.5 rounded-full bg-[#D6004B]" />
+                          <span className="absolute top-3 right-3 w-1.5 h-1.5 rounded-full bg-[#D6004B]" />
                         )}
                       </div>
                     );
@@ -179,15 +179,15 @@ export default function NotificationCenter({
             <div className="p-4 border-t border-white/5 bg-[#050508]/80">
               <div className="flex items-center gap-1.5 text-[10px] text-zinc-500 font-bold uppercase tracking-wider mb-3">
                 <Settings className="w-3.5 h-3.5" />
-                <span>إعدادات تنبيهات النظام</span>
+                <span>System Alert Settings</span>
               </div>
               <div className="grid grid-cols-1 gap-2.5 text-[10px] font-semibold text-zinc-400">
                 {[
-                  { key: "new_order", label: "مبيعات المنتجات الرقمية الجديدة" },
-                  { key: "failed_payment", label: "عمليات الدفع الفاشلة والمرفوضة" },
-                  { key: "new_student", label: "تسجيلات الطلاب في الأكاديمية (LMS)" },
-                  { key: "new_review", label: "التقييمات والمراجعات المضافة حديثاً" },
-                  { key: "suspicious_login", label: "تنبيهات الأمان ومحاولات الدخول المشبوهة" }
+                  { key: "new_order", label: "New Digital Product Sales" },
+                  { key: "failed_payment", label: "Failed & Declined Payments" },
+                  { key: "new_student", label: "LMS Academy Student Signups" },
+                  { key: "new_review", label: "Newly Added Reviews & Ratings" },
+                  { key: "suspicious_login", label: "Security Alerts & Suspicious Logins" }
                 ].map((pref) => (
                   <label key={pref.key} className="flex items-center justify-between cursor-pointer select-none">
                     <span>{pref.label}</span>

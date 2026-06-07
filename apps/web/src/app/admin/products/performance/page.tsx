@@ -101,7 +101,7 @@ export default function DigitalProductsPerformance() {
                   const downloads = Math.round((p.sales || 0) * 1.4); // Dynamic estimation based on multiple devices downloads
                   const activationRate = p.sales > 0 ? "96.4%" : "0.0%";
                   const revenue = (p.sales || 0) * p.price;
-                  const displayStatus = p.status === "نشط" ? "Active" : p.status === "مسودة" ? "Draft" : p.status === "مخفي" ? "Hidden" : p.status;
+                  const displayStatus = p.status === "active" || p.status === "\u0646\u0634\u0637" ? "Active" : p.status === "draft" || p.status === "\u0645\u0633\u0648\u062f\u0629" ? "Draft" : "Hidden";
                   return (
                     <tr key={p.id} className="hover:bg-white/[0.01] transition-colors">
                       <td className="py-4">
@@ -117,7 +117,7 @@ export default function DigitalProductsPerformance() {
                         </div>
                       </td>
                       <td className="py-4 text-center font-bold text-emerald-400">{activationRate}</td>
-                      <td className="py-4 text-center font-bold text-rose-500">{formatPrice(revenue, 'EGP').replace("ج.م", "L.E")}</td>
+                      <td className="py-4 text-center font-bold text-rose-500">{formatPrice(revenue, 'EGP').replace("EGP", "L.E")}</td>
                       <td className="py-4 text-center font-bold text-white">{p.sales || 0} units</td>
                       <td className="py-4 text-right">
                         <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${

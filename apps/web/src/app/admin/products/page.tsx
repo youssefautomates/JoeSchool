@@ -254,7 +254,7 @@ export default function AdminProductsPage() {
       original_price_egp: unpacked.original_price_egp !== undefined && unpacked.original_price_egp !== null ? String(unpacked.original_price_egp) : String(unpacked.original_price || ""),
       price_usd: unpacked.price_usd !== undefined && unpacked.price_usd !== null ? String(unpacked.price_usd) : "",
       original_price_usd: unpacked.original_price_usd !== undefined && unpacked.original_price_usd !== null ? String(unpacked.original_price_usd) : "",
-      status: unpacked.status === "نشط" ? "Active" : unpacked.status === "مسودة" ? "Draft" : unpacked.status === "مخفي" ? "Hidden" : unpacked.status,
+      status: unpacked.status === "\u0646\u0634\u0637" ? "Active" : unpacked.status === "\u0645\u0633\u0648\u062f\u0629" ? "Draft" : unpacked.status === "\u0645\u062e\u0641\u064a" ? "Hidden" : unpacked.status,
       is_featured: !!unpacked.is_featured,
       enable_gateway_fee: unpacked.enable_gateway_fee !== false,
       image_url: unpacked.image_url || "",
@@ -517,13 +517,13 @@ export default function AdminProductsPage() {
       finalImageUrl = form.gallery.find((g: string) => g) || "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=800";
     }
 
-    const mappedStatus = form.status === "Active" ? "نشط" : form.status === "Draft" ? "مسودة" : "مخفي";
+    const mappedStatus = form.status === "Active" ? "\u0646\u0634\u0637" : form.status === "Draft" ? "\u0645\u0633\u0648\u062f\u0629" : "\u0645\u062e\u0641\u064a";
     
     // Category mapping: match dynamic category strings or fallback
     let mappedCategory = form.category;
-    if (form.category === "Automation") mappedCategory = "الأتمتة";
-    else if (form.category === "Artificial Intelligence") mappedCategory = "الذكاء الاصطناعي";
-    else if (form.category === "Content Creation") mappedCategory = "صناعة المحتوى";
+    if (form.category === "Automation") mappedCategory = "\u0627\u0644\u0623\u062a\u0645\u062a\u0629";
+    else if (form.category === "Artificial Intelligence") mappedCategory = "\u0627\u0644\u0630\u0643\u0627\u0621 \u0627\u0644\u0627\u0635\u0637\u0646\u0627\u0639\u064a";
+    else if (form.category === "Content Creation") mappedCategory = "\u0635\u0646\u0627\u0639\u0629 \u0627\u0644\u0645\u062d\u062a\u0648\u0649";
 
     const payload = {
       title: form.title.trim(),
@@ -623,11 +623,11 @@ export default function AdminProductsPage() {
                     <div className="absolute top-4 left-4 z-20 flex gap-2">
                       <span className={cn(
                         "text-[9px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded border border-none",
-                        p.status === 'نشط' || p.status === 'Active' ? "bg-emerald-950 text-emerald-400" :
-                        p.status === 'مسودة' || p.status === 'Draft' ? "bg-amber-950 text-amber-400" :
+                        p.status === '\u0646\u0634\u0637' || p.status === 'Active' || (p.status as string) === 'active' ? "bg-emerald-950 text-emerald-400" :
+                        p.status === '\u0645\u0633\u0648\u062f\u0629' || p.status === 'Draft' || (p.status as string) === 'draft' ? "bg-amber-950 text-amber-400" :
                         "bg-zinc-800 text-zinc-400"
                       )}>
-                        {p.status === 'نشط' ? 'Active' : p.status === 'مسودة' ? 'Draft' : p.status === 'مخفي' ? 'Hidden' : p.status}
+                        {p.status === '\u0646\u0634\u0637' || p.status === 'Active' || (p.status as string) === 'active' ? 'Active' : p.status === '\u0645\u0633\u0648\u062f\u0629' || p.status === 'Draft' || (p.status as string) === 'draft' ? 'Draft' : p.status === '\u0645\u062e\u0641\u064a' || p.status === 'Hidden' || (p.status as string) === 'hidden' ? 'Hidden' : p.status}
                       </span>
                       {p.is_featured && (
                         <span className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-rose-950 text-rose-400 border border-rose-900/30">
@@ -640,7 +640,7 @@ export default function AdminProductsPage() {
                   <div className="p-6 flex-1 flex flex-col justify-between space-y-4">
                     <div className="space-y-1">
                       <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider block">
-                        {p.category === "الأتمتة" ? "Automation" : p.category === "الذكاء الاصطناعي" ? "Artificial Intelligence" : p.category === "صناعة المحتوى" ? "Content Creation" : p.category}
+                        {p.category === "\u0627\u0644\u0623\u062a\u0645\u062a\u0629" || p.category === "Automation" ? "Automation" : p.category === "\u0627\u0644\u0630\u0643\u0627\u0621 \u0627\u0644\u0627\u0635\u0637\u0646\u0627\u0639\u064a" || p.category === "Artificial Intelligence" ? "Artificial Intelligence" : p.category === "\u0635\u0646\u0627\u0639\u0629 \u0627\u0644\u0645\u062d\u062a\u0648\u0649" || p.category === "Content Creation" ? "Content Creation" : p.category}
                       </span>
                       <h3 className="text-base font-alexandria font-bold text-white line-clamp-2">{p.title}</h3>
                       {p.arabic_title && <p className="text-xs text-zinc-400 font-bold font-cairo line-clamp-1">{p.arabic_title}</p>}
@@ -649,7 +649,7 @@ export default function AdminProductsPage() {
                     <div className="flex justify-between items-center py-2 border-t border-b border-white/5">
                       <div className="flex flex-col">
                         <span className="text-rose-400 text-sm font-bold font-sans">
-                          {formatPrice(Number(p.price_egp || p.price), 'EGP').replace("ج.م", "L.E")}
+                          {formatPrice(Number(p.price_egp || p.price), 'EGP').replace("EGP", "L.E")}
                         </span>
                         <span className="text-emerald-400 text-[10px] font-sans">
                           ${p.price_usd || 0}
@@ -718,9 +718,9 @@ export default function AdminProductsPage() {
                 <input 
                   value={form.arabic_title} 
                   onChange={e => setForm({ ...form, arabic_title: e.target.value })} 
-                  className="bg-white/5 border border-white/5 rounded-xl py-3.5 px-4 text-sm focus:border-rose-500/50 text-white outline-none text-right font-cairo" 
-                  placeholder="مثال: حزمة قوالب أتمتة ممتازة" 
-                  dir="rtl"
+                  className="bg-white/5 border border-white/5 rounded-xl py-3.5 px-4 text-sm focus:border-rose-500/50 text-white outline-none text-left font-sans" 
+                  placeholder="e.g. Premium Automation Templates Bundle" 
+                  dir="ltr"
                 />
               </div>
 

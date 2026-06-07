@@ -31,7 +31,7 @@ export default function LmsSection({
   dateRange
 }: LmsSectionProps) {
 
-  const comparisonLabel = `مقارنة بـ آخر ${dateRange} يوم`;
+  const comparisonLabel = `Vs last ${dateRange} days`;
 
   // Aggregate student statistics strictly from database
   const studentStats = useMemo(() => {
@@ -73,8 +73,8 @@ export default function LmsSection({
   // Aggregate video learning statistics (zeroed out/strictly from real db log structure)
   const learningStats = useMemo(() => {
     return {
-      avgWatchTime: "0 دقيقة",
-      totalHours: "0 ساعة",
+      avgWatchTime: "0 min",
+      totalHours: "0 hrs",
       completionRate: "0.0%",
       dropOffRate: "0.0%",
       mostWatched: [] as Array<{ title: string; views: number; duration: string }>,
@@ -91,7 +91,7 @@ export default function LmsSection({
       list.push({
         id: `act-en-${index}`,
         type: "enrollment",
-        user: o.customer_name || "طالب زائر",
+        user: o.customer_name || "Student Guest",
         itemTitle: o.product_title,
         created_at: o.created_at
       });
@@ -102,9 +102,9 @@ export default function LmsSection({
       list.push({
         id: `act-rev-${index}`,
         type: "review",
-        user: r.student_name || "مستخدم مجهول",
-        itemTitle: r.course_title || "كورس تعليمي",
-        details: `التقييم: ${r.rating || 5}★ - "${r.content || ''}"`,
+        user: r.student_name || "Anonymous User",
+        itemTitle: r.course_title || "LMS Course",
+        details: `Rating: ${r.rating || 5}★ - "${r.content || ''}"`,
         created_at: r.created_at || new Date(Date.now() - index * 60 * 60 * 1000).toISOString()
       });
     });
@@ -113,52 +113,52 @@ export default function LmsSection({
   }, [orders, reviews]);
 
   return (
-    <div className="space-y-6 sm:space-y-8 text-right" dir="rtl">
+    <div className="space-y-6 sm:space-y-8 text-left" dir="ltr">
       
       {/* 5 KPI Student Cards Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
         <KPICard
-          label="إجمالي الطلاب"
+          label="Total Students"
           value={studentStats.total}
           desc={comparisonLabel}
           icon={Users}
-          trend={studentStats.total > 0 ? "+0.0% نمو" : undefined}
+          trend={studentStats.total > 0 ? "+0.0% growth" : undefined}
           trendUp={studentStats.total > 0}
           trendNeutral={studentStats.total === 0}
         />
         <KPICard
-          label="المسجلون اليوم"
+          label="Registered Today"
           value={studentStats.newToday}
           desc={comparisonLabel}
           icon={Activity}
-          trend={studentStats.newToday > 0 ? "+0.0% أمس" : undefined}
+          trend={studentStats.newToday > 0 ? "+0.0% vs yesterday" : undefined}
           trendUp={studentStats.newToday > 0}
           trendNeutral={studentStats.newToday === 0}
         />
         <KPICard
-          label="الطلاب النشطين"
+          label="Active Students"
           value={studentStats.active}
-          desc="تفاعل في آخر 7 أيام"
+          desc="Interacted in last 7 days"
           icon={Laptop}
-          trend={studentStats.active > 0 ? "نشط" : undefined}
+          trend={studentStats.active > 0 ? "Active" : undefined}
           trendUp={studentStats.active > 0}
           trendNeutral={studentStats.active === 0}
         />
         <KPICard
-          label="الطلاب المستمرين"
+          label="Returning Students"
           value={studentStats.returning}
-          desc="أكملوا أكثر من كورس"
+          desc="Completed >1 course"
           icon={Award}
-          trend={studentStats.returning > 0 ? "مستمر" : undefined}
+          trend={studentStats.returning > 0 ? "Returning" : undefined}
           trendUp={studentStats.returning > 0}
           trendNeutral={studentStats.returning === 0}
         />
         <KPICard
-          label="غير النشطين"
+          label="Inactive Students"
           value={studentStats.inactive}
-          desc="لا يوجد تفاعل مؤخراً"
+          desc="No recent activity"
           icon={ShieldAlert}
-          trend={studentStats.inactive > 0 ? "يحتاج تنشيط" : undefined}
+          trend={studentStats.inactive > 0 ? "Needs activation" : undefined}
           trendNeutral={true}
         />
       </div>
@@ -166,14 +166,14 @@ export default function LmsSection({
       {/* Course detailed statistics grids */}
       <div className="space-y-4">
         <div className="border-b border-white/5 pb-2">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">أداء كورسات الأكاديمية (LMS)</h3>
-          <p className="text-[10px] text-zinc-500 mt-0.5">مؤشرات تفصيلية لنسب الحضور ونقاط الانسحاب لكل كورس</p>
+          <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">Academy Course Performance (LMS)</h3>
+          <p className="text-[10px] text-zinc-500 mt-0.5">Detailed indicators of enrollment metrics, drop-offs, and conversion rates per course</p>
         </div>
 
         {coursesAnalytics.length === 0 ? (
           <AnalyticsEmptyState
-             title="لا توجد بيانات تفصيلية لكورسات الأكاديمية"
-            description="قم بإنشاء كورس أكاديمي جديد وقم بتسجيل الطلاب للبدء في تتبع قنوات الإكمال ومعدلات الانسحاب والتقييمات الذكية."
+             title="No detailed academy course data found"
+            description="Create a new course and enroll students to start tracking completion funnels, drop-off rates, and smart reviews."
             icon={BookOpen}
           />
         ) : (
@@ -191,7 +191,7 @@ export default function LmsSection({
                   <div className="space-y-3">
                     <div className="flex justify-between items-start">
                       <span className="px-2 py-0.5 rounded bg-rose-600/10 border border-rose-500/20 text-rose-500 text-[8.5px] font-black uppercase tracking-wider">
-                        كورس الأكاديمية
+                        Academy Course
                       </span>
                       <span className="text-xs font-black text-rose-500 font-mono">
                         {formatPrice(c.grossRevenue, "EGP")}
@@ -200,21 +200,21 @@ export default function LmsSection({
 
                     <div>
                       <h4 className="font-extrabold text-white text-xs leading-snug truncate">{c.title}</h4>
-                      <p className="text-[9px] text-zinc-500 font-mono mt-0.5">رمز: {c.id} · قيمة الكورس: {formatPrice(c.price, "EGP")}</p>
+                      <p className="text-[9px] text-zinc-500 font-mono mt-0.5">ID: {c.id} · Course Price: {formatPrice(c.price, "EGP")}</p>
                     </div>
 
                     {/* Stats cells */}
                     <div className="grid grid-cols-3 gap-2 bg-white/[0.01] p-2.5 rounded-2xl border border-white/5 font-semibold text-center">
                       <div>
-                        <span className="text-[8px] text-zinc-500 block uppercase">الطلاب</span>
+                        <span className="text-[8px] text-zinc-500 block uppercase">Students</span>
                         <span className="text-xs font-black text-white font-mono">{c.totalStudents}</span>
                       </div>
                       <div className="border-x border-white/5">
-                        <span className="text-[8px] text-zinc-500 block uppercase">جديد 7 أيام</span>
+                        <span className="text-[8px] text-zinc-500 block uppercase">7d New</span>
                         <span className="text-xs font-black text-emerald-400 font-mono">+{c.newStudentsWeek}</span>
                       </div>
                       <div>
-                        <span className="text-[8px] text-zinc-500 block uppercase">التقييم</span>
+                        <span className="text-[8px] text-zinc-500 block uppercase">Rating</span>
                         <span className="text-xs font-black text-amber-400 font-mono flex items-center justify-center gap-0.5">
                           5.0 <Star className="w-2.5 h-2.5 fill-current" />
                         </span>
@@ -225,15 +225,15 @@ export default function LmsSection({
                   {/* Visual funnel details - wrapped in LTR to maintain bar alignment */}
                   <div className="space-y-2 mt-4 pt-4 border-t border-white/5" dir="ltr">
                     <h5 className="text-[8.5px] font-bold uppercase tracking-wider text-zinc-500 flex justify-between">
-                      <span className="text-rose-400 lowercase">{c.dropOffs} انسحاب ({c.dropOffRate.toFixed(0)}%)</span>
-                      <span>تحويلات الدفع</span>
+                      <span className="text-rose-400 lowercase">{c.dropOffs} Drop-offs ({c.dropOffRate.toFixed(0)}%)</span>
+                      <span>Payment Funnel</span>
                     </h5>
 
                     <div className="space-y-2 text-[9px] font-semibold text-zinc-400">
                       <div>
                         <div className="flex justify-between mb-0.5">
-                          <span>{views} مشاهدة</span>
-                          <span>مشاهدات صفحة التفاصيل</span>
+                          <span>{views} Views</span>
+                          <span>Detail page views</span>
                         </div>
                         <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
                           <div className="h-full bg-blue-500 rounded-full" style={{ width: "100%" }} />
@@ -242,8 +242,8 @@ export default function LmsSection({
 
                       <div>
                         <div className="flex justify-between mb-0.5">
-                          <span className="text-emerald-400">{purchases} مكتمل ({views > 0 ? ((purchases / views) * 100).toFixed(0) : 0}% معدل تحويل)</span>
-                          <span>إكمال عمليات الشراء</span>
+                          <span className="text-emerald-400">{purchases} Completed ({views > 0 ? ((purchases / views) * 100).toFixed(0) : 0}% Conv. Rate)</span>
+                          <span>Completed Purchases</span>
                         </div>
                         <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
                           <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${views > 0 ? (purchases / views) * 100 : 0}%` }} />
@@ -265,29 +265,29 @@ export default function LmsSection({
         {/* Watch KPI Details */}
         <div className="xl:col-span-2 rounded-3xl bg-[#09090e]/80 border border-white/5 p-5 sm:p-6 shadow-2xl flex flex-col justify-between">
           <div className="pb-3 border-b border-white/5 mb-4">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">تحليلات مشاهدات المحتوى التعليمي</h3>
-            <p className="text-[10px] text-zinc-500">متوسط فترات الاحتفاظ بالمشاهد ونقاط انقطاع المشاهدة للفيديوهات</p>
+            <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">Educational Content View Analytics</h3>
+            <p className="text-[10px] text-zinc-500">Average viewer retention metrics and drop-off points for learning videos</p>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 bg-white/[0.01] p-4 rounded-2xl border border-white/5 mb-5 text-center">
             <div>
               <Clock className="w-4 h-4 text-rose-500 mx-auto mb-1" />
-              <span className="text-[8px] text-zinc-500 block uppercase font-bold">متوسط وقت المشاهدة</span>
+              <span className="text-[8px] text-zinc-500 block uppercase font-bold">Avg Watch Time</span>
               <span className="text-xs font-black text-white font-mono">{learningStats.avgWatchTime}</span>
             </div>
-            <div className="border-r border-white/5">
+            <div className="border-l border-white/5">
               <PlayCircle className="w-4 h-4 text-blue-500 mx-auto mb-1" />
-              <span className="text-[8px] text-zinc-500 block uppercase font-bold">إجمالي ساعات المشاهدة</span>
+              <span className="text-[8px] text-zinc-500 block uppercase font-bold">Total Watch Hours</span>
               <span className="text-xs font-black text-white font-mono">{learningStats.totalHours}</span>
             </div>
-            <div className="border-r border-white/5">
+            <div className="border-l border-white/5">
               <Award className="w-4 h-4 text-purple-500 mx-auto mb-1" />
-              <span className="text-[8px] text-zinc-500 block uppercase font-bold">نسبة إكمال الفيديوهات</span>
+              <span className="text-[8px] text-zinc-500 block uppercase font-bold">Video Completion Rate</span>
               <span className="text-xs font-black text-emerald-400 font-mono">{learningStats.completionRate}</span>
             </div>
-            <div className="border-r border-white/5">
+            <div className="border-l border-white/5">
               <ShieldAlert className="w-4 h-4 text-rose-500 mx-auto mb-1" />
-              <span className="text-[8px] text-zinc-500 block uppercase font-bold">انقطاع المشاهدة</span>
+              <span className="text-[8px] text-zinc-500 block uppercase font-bold">Drop-off Rate</span>
               <span className="text-xs font-black text-rose-400 font-mono">{learningStats.dropOffRate}</span>
             </div>
           </div>
@@ -295,15 +295,15 @@ export default function LmsSection({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-xs">
             {/* Most watched */}
             <div className="space-y-2">
-              <h5 className="text-[9px] font-black uppercase text-emerald-400 tracking-wider">الفصول الأكثر مشاهدة ورواجاً</h5>
+              <h5 className="text-[9px] font-black uppercase text-emerald-400 tracking-wider">Most Watched Chapters</h5>
               <div className="space-y-1.5">
                 {learningStats.mostWatched.length === 0 ? (
-                  <div className="py-8 text-center text-zinc-600 text-xs">لا يوجد نشاط مشاهدة مسجل حالياً.</div>
+                  <div className="py-8 text-center text-zinc-600 text-xs">No watch activity logged currently.</div>
                 ) : (
                   learningStats.mostWatched.map((w, idx) => (
                     <div key={idx} className="p-2.5 rounded-xl bg-white/[0.02] border border-white/5 flex items-center justify-between font-semibold">
-                      <span className="truncate pl-2">{w.title}</span>
-                      <span className="text-zinc-500 font-mono text-[9px] shrink-0 font-bold">{w.views} زيارة · {w.duration}</span>
+                      <span className="truncate pr-2">{w.title}</span>
+                      <span className="text-zinc-500 font-mono text-[9px] shrink-0 font-bold">{w.views} Views · {w.duration}</span>
                     </div>
                   ))
                 )}
@@ -312,15 +312,15 @@ export default function LmsSection({
 
             {/* Least watched */}
             <div className="space-y-2">
-              <h5 className="text-[9px] font-black uppercase text-rose-400 tracking-wider">الفصول الأقل تفاعلاً واحتفاظاً</h5>
+              <h5 className="text-[9px] font-black uppercase text-rose-400 tracking-wider">Least Watched Chapters</h5>
               <div className="space-y-1.5">
                 {learningStats.leastWatched.length === 0 ? (
-                  <div className="py-8 text-center text-zinc-600 text-xs">لا يوجد نشاط مشاهدة مسجل حالياً.</div>
+                  <div className="py-8 text-center text-zinc-600 text-xs">No watch activity logged currently.</div>
                 ) : (
                   learningStats.leastWatched.map((w, idx) => (
                     <div key={idx} className="p-2.5 rounded-xl bg-white/[0.02] border border-white/5 flex items-center justify-between font-semibold">
-                      <span className="truncate pl-2">{w.title}</span>
-                      <span className="text-zinc-500 font-mono text-[9px] shrink-0 font-bold">{w.views} زيارة · {w.duration}</span>
+                      <span className="truncate pr-2">{w.title}</span>
+                      <span className="text-zinc-500 font-mono text-[9px] shrink-0 font-bold">{w.views} Views · {w.duration}</span>
                     </div>
                   ))
                 )}
@@ -335,7 +335,7 @@ export default function LmsSection({
       </div>
 
       {/* Geographic student analytics world map heatmap - Collapsible on Mobile */}
-      <CollapsibleSection title="توزيع حضور الطلاب الجغرافي والبلدان الأكثر نشاطاً" defaultExpanded={false}>
+      <CollapsibleSection title="Geographic Student Attendance &amp; Top Countries" defaultExpanded={false}>
         <div className="rounded-3xl bg-[#09090e]/80 border border-white/5 p-4 sm:p-6 shadow-2xl" dir="ltr">
           <GeoAnalytics orders={orders} />
         </div>

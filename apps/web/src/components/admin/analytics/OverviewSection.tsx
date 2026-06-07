@@ -43,7 +43,7 @@ export default function OverviewSection({
 }: OverviewSectionProps) {
 
   // Dynamic label for previous period comparison
-  const comparisonLabel = `مقارنة بآخر ${dateRange} يوم`;
+  const comparisonLabel = `Vs last ${dateRange} days`;
 
   const getTrendStr = (val: number | undefined) => {
     if (val === undefined || val === 0) return undefined;
@@ -51,12 +51,12 @@ export default function OverviewSection({
   };
 
   return (
-    <div className="space-y-6 sm:space-y-8 text-right" dir="rtl">
+    <div className="space-y-6 sm:space-y-8 text-left" dir="ltr">
       
       {/* 6 KPI Cards Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
         <KPICard
-          label="إجمالي الجنيه (Gross)"
+          label="EGP Revenue (Gross)"
           value={formatPrice(stats.egpGrossRevenue, "EGP")}
           desc={comparisonLabel}
           icon={DollarSign}
@@ -64,7 +64,7 @@ export default function OverviewSection({
           trendUp={stats.revenueGrowth >= 0}
         />
         <KPICard
-          label="صافي الجنيه (Net)"
+          label="EGP Revenue (Net)"
           value={formatPrice(stats.egpNetRevenue, "EGP")}
           desc={comparisonLabel}
           icon={Activity}
@@ -72,7 +72,7 @@ export default function OverviewSection({
           trendUp={stats.egpNetGrowth >= 0}
         />
         <KPICard
-          label="إيرادات الدولار (USD)"
+          label="USD Revenue (Gross)"
           value={formatPrice(stats.usdGrossRevenue, "USD")}
           desc={comparisonLabel}
           icon={Globe}
@@ -80,7 +80,7 @@ export default function OverviewSection({
           trendUp={stats.usdGrossGrowth >= 0}
         />
         <KPICard
-          label="رسوم باي موب"
+          label="Paymob Gateway Fees"
           value={formatPrice(stats.processingFees, "EGP")}
           desc={comparisonLabel}
           icon={ShieldCheck}
@@ -88,7 +88,7 @@ export default function OverviewSection({
           trendUp={stats.feesGrowth <= 0} // Decreased fees is positive
         />
         <KPICard
-          label="العمليات الناجحة"
+          label="Successful Orders"
           value={stats.successfulOrders}
           desc={comparisonLabel}
           icon={ShoppingCart}
@@ -96,7 +96,7 @@ export default function OverviewSection({
           trendUp={stats.successfulOrdersGrowth >= 0}
         />
         <KPICard
-          label="معدل التحويل"
+          label="Conversion Rate"
           value={`${stats.conversionRate.toFixed(2)}%`}
           desc={comparisonLabel}
           icon={Activity}
@@ -112,7 +112,7 @@ export default function OverviewSection({
           <RevenueChart 
             data={chartData} 
             revenueGrowth={stats.revenueGrowth} 
-            currencySymbol="ج.م"
+            currencySymbol="EGP"
           />
         </div>
 
@@ -123,14 +123,14 @@ export default function OverviewSection({
       </div>
 
       {/* Hourly Heatmap - Collapsible on Mobile */}
-      <CollapsibleSection title="توزيع المبيعات على مدار اليوم والساعة (Heatmap)" defaultExpanded={false}>
+      <CollapsibleSection title="Sales Hourly Heatmap Distribution" defaultExpanded={false}>
         <div className="rounded-3xl bg-[#09090e]/80 border border-white/5 p-4 sm:p-6 shadow-2xl" dir="ltr">
           <RevenueHeatmap orders={orders} />
         </div>
       </CollapsibleSection>
 
       {/* Smart insights section - Collapsible on Mobile */}
-      <CollapsibleSection title="رؤى ذكاء الاصطناعي والتحليلات المتقدمة" defaultExpanded={true}>
+      <CollapsibleSection title="AI Smart Insights & Advanced Analytics" defaultExpanded={true}>
         <InsightsSection 
           orders={orders} 
           stats={stats} 

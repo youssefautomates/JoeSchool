@@ -36,19 +36,19 @@ export default function AnalyticsEmptyState({
   
   const defaultSteps: OnboardingStep[] = [
     {
-      title: "توليد بيانات تجريبية",
-      desc: "قم بحقن طلبات ودورات وسجلات نقرات زيارات تجريبية فوراً لرؤية لوحة التحليلات تعمل بشكل حي.",
+      title: "Generate Telemetry Data",
+      desc: "Inject mock transactions, courses, and clickstream events instantly to see the analytics panel in action.",
       icon: Sparkles,
-      actionLabel: "توليد قاعدة البيانات التجريبية"
+      actionLabel: "Generate Mock Telemetry"
     },
     {
-      title: "نشر دورة تعليمية (LMS)",
-      desc: "انتقل إلى لوحة إدارة الدورات وقم بنشر دورة جديدة لتفعيل تتبع تقدم الطلاب ومعدلات الإكمال وتسرب الطلاب.",
+      title: "Publish LMS Course",
+      desc: "Navigate to the courses panel and publish a new course to activate student progress metrics and completion funnels.",
       icon: BookOpen
     },
     {
-      title: "إضافة منتجات رقمية",
-      desc: "قم بتسجيل حزم محتوى، أو مجموعات قوالب، أو أدلة ملفات PDF في لوحة المتجر لتفعيل تحليلات المنتجات الرقمية.",
+      title: "Add Digital Products",
+      desc: "Register digital files, prompt guides, or PDF checklists in the store panel to unlock digital product analytics.",
       icon: Package
     }
   ];
@@ -89,10 +89,10 @@ export default function AnalyticsEmptyState({
       </div>
 
       {/* Onboarding Guidance Cards */}
-      <div className="space-y-4 relative z-10 text-right" dir="rtl">
+      <div className="space-y-4 relative z-10 text-left" dir="ltr">
         <div className="flex items-center gap-2 border-b border-white/5 pb-2 mb-3">
           <Lightbulb className="w-4 h-4 text-amber-400" />
-          <span className="text-[10px] font-black uppercase tracking-wider text-zinc-400">دليل البدء السريع وإعداد المنصة</span>
+          <span className="text-[10px] font-black uppercase tracking-wider text-zinc-400">Quickstart Guide &amp; Platform Configuration</span>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -101,7 +101,7 @@ export default function AnalyticsEmptyState({
             return (
               <div 
                 key={idx}
-                className="p-4 rounded-2xl bg-white/[0.01] hover:bg-white/[0.02] border border-white/5 hover:border-white/10 transition-all flex flex-col justify-between text-right"
+                className="p-4 rounded-2xl bg-white/[0.01] hover:bg-white/[0.02] border border-white/5 hover:border-white/10 transition-all flex flex-col justify-between text-left"
               >
                 <div className="space-y-2">
                   <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center shrink-0">
@@ -119,7 +119,7 @@ export default function AnalyticsEmptyState({
                     className="flex items-center gap-1 text-[9px] font-bold text-[#D6004B] hover:text-[#ff3883] transition-colors mt-3 group"
                   >
                     {step.actionLabel}
-                    <ArrowRight className="w-3 h-3 group-hover:-translate-x-0.5 transition-transform rotate-180" />
+                    <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
                   </button>
                 )}
               </div>

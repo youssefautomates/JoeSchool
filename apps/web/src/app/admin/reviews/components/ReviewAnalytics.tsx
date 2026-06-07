@@ -43,7 +43,7 @@ export function ReviewAnalytics({ reviews, items }: ReviewAnalyticsProps) {
   // 3. Reviews Volume Over Time (Past 6 Months)
   const getPast6Months = () => {
     const months = [];
-    const locale = "ar-EG";
+    const locale = "en-US";
     for (let i = 5; i >= 0; i--) {
       const d = new Date();
       d.setMonth(d.getMonth() - i);
@@ -114,21 +114,21 @@ export function ReviewAnalytics({ reviews, items }: ReviewAnalyticsProps) {
     .slice(0, 3);
 
   return (
-    <div className="space-y-6" dir="rtl">
+    <div className="space-y-6 font-sans" dir="ltr">
       
       {/* Upper Analytics Row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* COLUMN 1: Key Performance Metrics */}
         <div className="bg-[#09090e]/60 border border-white/5 p-6 rounded-3xl backdrop-blur-xl flex flex-col justify-between space-y-6">
-          <h3 className="text-sm font-bold text-white flex items-center gap-2 font-alexandria">
+          <h3 className="text-sm font-bold text-white flex items-center gap-2 font-sans">
             <TrendingUp className="w-4.5 h-4.5 text-rose-500" />
-            <span>مؤشرات الأداء الرئيسية</span>
+            <span>Key Performance Indicators</span>
           </h3>
           
           <div className="grid grid-cols-2 gap-4">
             <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5">
-              <span className="text-[10px] text-zinc-500 font-bold block mb-1 font-cairo">متوسط التقييم</span>
+              <span className="text-[10px] text-zinc-500 font-bold block mb-1 font-sans">Average Rating</span>
               <div className="flex items-baseline gap-1">
                 <span className="text-2xl font-black text-white font-mono">{average.toFixed(1)}</span>
                 <Star className="w-4 h-4 text-yellow-400 fill-current" />
@@ -136,19 +136,19 @@ export function ReviewAnalytics({ reviews, items }: ReviewAnalyticsProps) {
             </div>
             
             <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5">
-              <span className="text-[10px] text-zinc-500 font-bold block mb-1 font-cairo">إجمالي الآراء</span>
+              <span className="text-[10px] text-zinc-500 font-bold block mb-1 font-sans">Total Reviews</span>
               <span className="text-2xl font-black text-white font-mono">{total}</span>
             </div>
 
             <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5">
-              <span className="text-[10px] text-zinc-500 font-bold block mb-1 font-cairo">قيد المراجعة / مخفي</span>
+              <span className="text-[10px] text-zinc-500 font-bold block mb-1 font-sans">Pending / Hidden</span>
               <span className="text-xl font-bold text-amber-500 font-mono">
                 {pending} <span className="text-zinc-600 text-xs font-normal">/</span> {hidden}
               </span>
             </div>
 
             <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5">
-              <span className="text-[10px] text-zinc-500 font-bold block mb-1 font-cairo">المميزة</span>
+              <span className="text-[10px] text-zinc-500 font-bold block mb-1 font-sans">Featured</span>
               <div className="flex items-center gap-1.5">
                 <span className="text-2xl font-black text-rose-500 font-mono">{featured}</span>
                 <Sparkles className="w-3.5 h-3.5 text-rose-500 fill-current" />
@@ -158,8 +158,8 @@ export function ReviewAnalytics({ reviews, items }: ReviewAnalyticsProps) {
 
           {/* Conversion rate indicator */}
           <div className="pt-4 border-t border-white/5 space-y-2">
-            <div className="flex items-center justify-between text-xs font-bold font-cairo">
-              <span className="text-zinc-400">معدل التقييم الإيجابي (4+★)</span>
+            <div className="flex items-center justify-between text-xs font-bold font-sans">
+              <span className="text-zinc-400">Positive Review Rate (4+★)</span>
               <span className="text-emerald-400 font-mono">{conversionRate.toFixed(0)}%</span>
             </div>
             <div className="w-full h-2 bg-zinc-800 rounded-full overflow-hidden">
@@ -173,9 +173,9 @@ export function ReviewAnalytics({ reviews, items }: ReviewAnalyticsProps) {
 
         {/* COLUMN 2: Ratings Distribution Histogram */}
         <div className="bg-[#09090e]/60 border border-white/5 p-6 rounded-3xl backdrop-blur-xl space-y-5">
-          <h3 className="text-sm font-bold text-white flex items-center gap-2 font-alexandria">
+          <h3 className="text-sm font-bold text-white flex items-center gap-2 font-sans">
             <Star className="w-4.5 h-4.5 text-yellow-400" />
-            <span>توزيع التقييمات</span>
+            <span>Ratings Distribution</span>
           </h3>
 
           <div className="space-y-3.5 pt-2">
@@ -203,9 +203,9 @@ export function ReviewAnalytics({ reviews, items }: ReviewAnalyticsProps) {
 
         {/* COLUMN 3: Monthly Volume Trend */}
         <div className="bg-[#09090e]/60 border border-white/5 p-6 rounded-3xl backdrop-blur-xl flex flex-col justify-between space-y-5">
-          <h3 className="text-sm font-bold text-white flex items-center gap-2 font-alexandria">
+          <h3 className="text-sm font-bold text-white flex items-center gap-2 font-sans">
             <MessageSquare className="w-4.5 h-4.5 text-indigo-400" />
-            <span>حجم التقييمات المضافة مؤخرًا</span>
+            <span>Recent Review Volume</span>
           </h3>
 
           <div className="h-32 flex items-end justify-between gap-3 pt-4 px-2 relative">
@@ -214,7 +214,7 @@ export function ReviewAnalytics({ reviews, items }: ReviewAnalyticsProps) {
               return (
                 <div key={idx} className="flex-1 flex flex-col items-center gap-2 group relative">
                   <div className="absolute bottom-[105%] bg-zinc-950 border border-white/10 text-white font-mono text-[9px] py-1 px-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 shadow-xl select-none text-center min-w-[50px]">
-                    {m.count} تقييم
+                    {m.count} {m.count === 1 ? "review" : "reviews"}
                   </div>
                   
                   <div className="w-full bg-zinc-900 rounded-t-lg overflow-hidden flex items-end h-20">
@@ -224,7 +224,7 @@ export function ReviewAnalytics({ reviews, items }: ReviewAnalyticsProps) {
                     />
                   </div>
                   
-                  <span className="text-[10px] text-zinc-500 font-bold font-cairo text-center">
+                  <span className="text-[10px] text-zinc-500 font-bold font-sans text-center">
                     {m.label}
                   </span>
                 </div>
@@ -233,19 +233,19 @@ export function ReviewAnalytics({ reviews, items }: ReviewAnalyticsProps) {
           </div>
         </div>
       </div>
-
+      
       {/* Miniature Aggregate Summary Widgets */}
       {total > 0 && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-2 font-cairo">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-2 font-sans">
           {/* Top Rated Courses Widget */}
           <div className="bg-[#09090e]/40 border border-white/5 p-5 rounded-2xl space-y-3.5">
-            <h4 className="text-xs font-bold text-zinc-300 flex items-center gap-1.5 font-alexandria">
+            <h4 className="text-xs font-bold text-zinc-300 flex items-center gap-1.5 font-sans">
               <Award className="w-4 h-4 text-rose-500" />
-              <span>أعلى الكورسات تقييماً</span>
+              <span>Top Rated Courses</span>
             </h4>
             <div className="space-y-2">
               {topCourses.length === 0 ? (
-                <span className="text-[10px] text-zinc-600 block py-2">لا توجد تقييمات مسجلة</span>
+                <span className="text-[10px] text-zinc-600 block py-2">No reviews recorded</span>
               ) : (
                 topCourses.map((c, idx) => (
                   <div key={c.id} className="flex items-center justify-between p-2.5 rounded-xl bg-white/[0.01] border border-white/5 text-[11px]">
@@ -253,13 +253,13 @@ export function ReviewAnalytics({ reviews, items }: ReviewAnalyticsProps) {
                       <span className="font-mono text-zinc-500">#{idx+1}</span>
                       <span className="text-white truncate font-medium">{c.title}</span>
                       {c.isVolatile && (
-                        <span className="bg-red-500/15 text-red-400 border border-red-500/20 px-1.5 py-0.5 rounded text-[8px] font-bold font-cairo shrink-0" title="تقييمات متذبذبة (الانحراف المعياري > 1.2)">
-                          ⚠️ متذبذب
+                        <span className="bg-red-500/15 text-red-400 border border-red-500/20 px-1.5 py-0.5 rounded text-[8px] font-bold font-sans shrink-0" title="Volatile reviews (StdDev > 1.2)">
+                          ⚠️ Volatile
                         </span>
                       )}
                     </div>
                     <div className="flex items-center gap-2 shrink-0 font-mono">
-                      <span className="text-zinc-500">({c.total} تقييم)</span>
+                      <span className="text-zinc-500">({c.total} {c.total === 1 ? "review" : "reviews"})</span>
                       <div className="flex items-center text-yellow-400 gap-0.5 font-bold">
                         <span>{c.avg.toFixed(1)}</span>
                         <Star className="w-3.5 h-3.5 fill-current" />
@@ -270,16 +270,16 @@ export function ReviewAnalytics({ reviews, items }: ReviewAnalyticsProps) {
               )}
             </div>
           </div>
-
+ 
           {/* Top Rated Products Widget */}
           <div className="bg-[#09090e]/40 border border-white/5 p-5 rounded-2xl space-y-3.5">
-            <h4 className="text-xs font-bold text-zinc-300 flex items-center gap-1.5 font-alexandria">
+            <h4 className="text-xs font-bold text-zinc-300 flex items-center gap-1.5 font-sans">
               <ShoppingBag className="w-4 h-4 text-emerald-500" />
-              <span>أعلى المنتجات الرقمية تقييماً</span>
+              <span>Top Rated Digital Products</span>
             </h4>
             <div className="space-y-2">
               {topProducts.length === 0 ? (
-                <span className="text-[10px] text-zinc-600 block py-2">لا توجد تقييمات مسجلة</span>
+                <span className="text-[10px] text-zinc-600 block py-2">No reviews recorded</span>
               ) : (
                 topProducts.map((p, idx) => (
                   <div key={p.id} className="flex items-center justify-between p-2.5 rounded-xl bg-white/[0.01] border border-white/5 text-[11px]">
@@ -287,13 +287,13 @@ export function ReviewAnalytics({ reviews, items }: ReviewAnalyticsProps) {
                       <span className="font-mono text-zinc-500">#{idx+1}</span>
                       <span className="text-white truncate font-medium">{p.title}</span>
                       {p.isVolatile && (
-                        <span className="bg-red-500/15 text-red-400 border border-red-500/20 px-1.5 py-0.5 rounded text-[8px] font-bold font-cairo shrink-0" title="تقييمات متذبذبة (الانحراف المعياري > 1.2)">
-                          ⚠️ متذبذب
+                        <span className="bg-red-500/15 text-red-400 border border-red-500/20 px-1.5 py-0.5 rounded text-[8px] font-bold font-sans shrink-0" title="Volatile reviews (StdDev > 1.2)">
+                          ⚠️ Volatile
                         </span>
                       )}
                     </div>
                     <div className="flex items-center gap-2 shrink-0 font-mono">
-                      <span className="text-zinc-500">({p.total} تقييم)</span>
+                      <span className="text-zinc-500">({p.total} {p.total === 1 ? "review" : "reviews"})</span>
                       <div className="flex items-center text-yellow-400 gap-0.5 font-bold">
                         <span>{p.avg.toFixed(1)}</span>
                         <Star className="w-3.5 h-3.5 fill-current" />
@@ -304,16 +304,16 @@ export function ReviewAnalytics({ reviews, items }: ReviewAnalyticsProps) {
               )}
             </div>
           </div>
-
+ 
           {/* Most Reviewed Items Widget */}
           <div className="bg-[#09090e]/40 border border-white/5 p-5 rounded-2xl space-y-3.5">
-            <h4 className="text-xs font-bold text-zinc-300 flex items-center gap-1.5 font-alexandria">
+            <h4 className="text-xs font-bold text-zinc-300 flex items-center gap-1.5 font-sans">
               <MessageSquare className="w-4 h-4 text-indigo-400" />
-              <span>أكثر العناصر مراجعة</span>
+              <span>Most Reviewed Items</span>
             </h4>
             <div className="space-y-2">
               {mostReviewed.length === 0 ? (
-                <span className="text-[10px] text-zinc-600 block py-2">لا توجد تقييمات مسجلة</span>
+                <span className="text-[10px] text-zinc-600 block py-2">No reviews recorded</span>
               ) : (
                 mostReviewed.map((m, idx) => (
                   <div key={m.id} className="flex items-center justify-between p-2.5 rounded-xl bg-white/[0.01] border border-white/5 text-[11px]">
@@ -321,13 +321,13 @@ export function ReviewAnalytics({ reviews, items }: ReviewAnalyticsProps) {
                       <span className="font-mono text-zinc-500">#{idx+1}</span>
                       <span className="text-white truncate font-medium">{m.title}</span>
                       {m.isVolatile && (
-                        <span className="bg-red-500/15 text-red-400 border border-red-500/20 px-1.5 py-0.5 rounded text-[8px] font-bold font-cairo shrink-0" title="تقييمات متذبذبة (الانحراف المعياري > 1.2)">
-                          ⚠️ متذبذب
+                        <span className="bg-red-500/15 text-red-400 border border-red-500/20 px-1.5 py-0.5 rounded text-[8px] font-bold font-sans shrink-0" title="Volatile reviews (StdDev > 1.2)">
+                          ⚠️ Volatile
                         </span>
                       )}
                     </div>
                     <div className="flex items-center gap-2 shrink-0 font-mono">
-                      <span className="text-zinc-400 font-bold">{m.total} تقييم</span>
+                      <span className="text-zinc-400 font-bold">{m.total} {m.total === 1 ? "review" : "reviews"}</span>
                       <div className="flex items-center text-yellow-400 gap-0.5">
                         <span>{m.avg.toFixed(1)}</span>
                         <Star className="w-3.5 h-3.5 fill-current" />

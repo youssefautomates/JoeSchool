@@ -16,21 +16,21 @@ interface RevenueChartProps {
   currencySymbol?: string;
 }
 
-export default function RevenueChart({ data, revenueGrowth, currencySymbol = "ج.م" }: RevenueChartProps) {
+export default function RevenueChart({ data, revenueGrowth, currencySymbol = "EGP" }: RevenueChartProps) {
   if (!data || data.length === 0) {
     return (
       <div className="w-full h-full flex flex-col items-center justify-center border border-dashed border-white/5 rounded-2xl p-6 text-center text-zinc-500 text-xs font-sans">
-        لم يتم العثور على سجلات عمليات الدفع في الفترة المحددة.
+        No payment records found for the selected period.
       </div>
     );
   }
 
   return (
-    <div className="w-full h-full flex flex-col justify-between font-sans text-right" dir="rtl">
+    <div className="w-full h-full flex flex-col justify-between font-sans text-left" dir="ltr">
       <div className="flex items-center justify-between mb-5 pb-4 border-b border-white/5">
         <div>
-          <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">تطور الإيرادات وصافي الأرباح</h3>
-          <p className="text-[10px] text-zinc-500 mt-0.5">حجم العمليات التجارية المكتملة بالعملة المحلية</p>
+          <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">Revenue & Profit Progression</h3>
+          <p className="text-[10px] text-zinc-500 mt-0.5">Volume of completed business transactions in the local currency</p>
         </div>
         {revenueGrowth !== undefined && revenueGrowth !== 0 && (
           <span className={`flex items-center gap-1 text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-full ${
@@ -39,7 +39,7 @@ export default function RevenueChart({ data, revenueGrowth, currencySymbol = "ج
               : "text-rose-400 bg-rose-500/5 border border-rose-500/10"
           }`}>
             {revenueGrowth >= 0 ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
-            {revenueGrowth >= 0 ? "+" : ""}{revenueGrowth.toFixed(1)}% مقارنة بالفترة السابقة
+            {revenueGrowth >= 0 ? "+" : ""}{revenueGrowth.toFixed(1)}% vs previous period
           </span>
         )}
       </div>
@@ -66,16 +66,16 @@ export default function RevenueChart({ data, revenueGrowth, currencySymbol = "ج
               minTickGap={15}
             />
             <YAxis 
-              stroke="#3f3f46" 
+               stroke="#3f3f46" 
               fontSize={8.5} 
               tickLine={false}
               dx={-5}
             />
             <Tooltip 
-              contentStyle={{ backgroundColor: "#060608", borderColor: "rgba(255,255,255,0.06)", borderRadius: "12px", textAlign: "right" }}
+              contentStyle={{ backgroundColor: "#060608", borderColor: "rgba(255,255,255,0.06)", borderRadius: "12px", textAlign: "left" }}
               labelStyle={{ color: "#ffffff", fontWeight: "bold", fontSize: "10px" }}
               itemStyle={{ fontSize: "10px", padding: "1px 0" }}
-              formatter={(value: any, name: any) => [`${value} ${currencySymbol === 'USD' ? 'دولار' : 'ج.م'}`, name === 'Revenue' ? 'الإيرادات' : 'صافي الربح']}
+              formatter={(value: any, name: any) => [`${value} ${currencySymbol === 'USD' ? 'USD' : 'EGP'}`, name === 'Revenue' ? 'Revenue' : 'Net Profit']}
             />
             <Area type="monotone" dataKey="Revenue" stroke="#D6004B" strokeWidth={1.5} fillOpacity={1} fill="url(#revenueGlow)" name="Revenue" />
             <Area type="monotone" dataKey="Profit" stroke="#10b981" strokeWidth={1.5} fillOpacity={1} fill="url(#profitGlow)" name="Profit" />

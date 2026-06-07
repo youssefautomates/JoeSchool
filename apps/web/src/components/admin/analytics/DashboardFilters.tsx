@@ -57,26 +57,26 @@ export default function DashboardFilters({
   };
 
   const countries = [
-    { id: "ALL", label: "جميع الدول والمناطق" },
+    { id: "ALL", label: "All Countries & Regions" },
     ...hasCountriesData.map(c => {
-      const label = c === "EG" ? "🇪🇬 مصر" : c === "SA" ? "🇸🇦 المملكة العربية السعودية" : c === "AE" ? "🇦🇪 الإمارات" : c === "US" ? "🇺🇸 أمريكا" : `🌐 ${c}`;
+      const label = c === "EG" ? "🇪🇬 Egypt" : c === "SA" ? "🇸🇦 Saudi Arabia" : c === "AE" ? "🇦🇪 UAE" : c === "US" ? "🇺🇸 USA" : `🌐 ${c}`;
       return { id: c, label };
     }),
-    { id: "Unknown", label: "دول أخرى / مجهولة" }
+    { id: "Unknown", label: "Other / Unknown Countries" }
   ];
 
   return (
-    <div className="flex flex-col gap-4 p-4 rounded-2xl bg-[#09090e]/80 border border-white/5 relative z-30 text-right" dir="rtl">
+    <div className="flex flex-col gap-4 p-4 rounded-2xl bg-[#09090e]/80 border border-white/5 relative z-30 text-left" dir="ltr">
       
       {/* Top row: Filter Selectors */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {/* Date Range Selector */}
         <div className="flex items-center bg-white/5 border border-white/5 rounded-xl p-1 gap-1">
           {[
-            { id: "1", label: "اليوم" },
-            { id: "7", label: "٧ أيام" },
-            { id: "30", label: "٣٠ يوم" },
-            { id: "90", label: "٩٠ يوم" }
+            { id: "1", label: "Today" },
+            { id: "7", label: "7 Days" },
+            { id: "30", label: "30 Days" },
+            { id: "90", label: "90 Days" }
           ].map((range) => (
             <button
               key={range.id}
@@ -93,12 +93,12 @@ export default function DashboardFilters({
         </div>
 
         {/* Country Filter */}
-        <div className="relative flex items-center pr-10">
-          <Globe className="w-4.5 h-4.5 text-zinc-500 absolute right-3 top-1/2 -translate-y-1/2 shrink-0 pointer-events-none" />
+        <div className="relative flex items-center pl-10">
+          <Globe className="w-4.5 h-4.5 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2 shrink-0 pointer-events-none" />
           <select
             value={country}
             onChange={(e) => setCountry(e.target.value)}
-            className="w-full bg-white/5 border border-white/5 hover:border-white/10 text-xs text-zinc-300 font-bold rounded-xl py-2.5 pr-10 pl-3 focus:outline-none focus:border-rose-500/50 transition-all appearance-none cursor-pointer text-right"
+            className="w-full bg-white/5 border border-white/5 hover:border-white/10 text-xs text-zinc-300 font-bold rounded-xl py-2.5 pl-10 pr-3 focus:outline-none focus:border-rose-500/50 transition-all appearance-none cursor-pointer text-left"
           >
             {countries.map((c) => (
               <option key={c.id} value={c.id} className="bg-[#09090e] text-white">
@@ -109,16 +109,16 @@ export default function DashboardFilters({
         </div>
 
         {/* Currency Filter */}
-        <div className="relative flex items-center pr-10">
-          <DollarSign className="w-4.5 h-4.5 text-zinc-500 absolute right-3 top-1/2 -translate-y-1/2 shrink-0 pointer-events-none" />
+        <div className="relative flex items-center pl-10">
+          <DollarSign className="w-4.5 h-4.5 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2 shrink-0 pointer-events-none" />
           <select
             value={currency}
             onChange={(e) => setCurrency(e.target.value)}
-            className="w-full bg-white/5 border border-white/5 hover:border-white/10 text-xs text-zinc-300 font-bold rounded-xl py-2.5 pr-10 pl-3 focus:outline-none focus:border-rose-500/50 transition-all appearance-none cursor-pointer text-right"
+            className="w-full bg-white/5 border border-white/5 hover:border-white/10 text-xs text-zinc-300 font-bold rounded-xl py-2.5 pl-10 pr-3 focus:outline-none focus:border-rose-500/50 transition-all appearance-none cursor-pointer text-left"
           >
-            <option value="ALL" className="bg-[#09090e] text-white">جميع العملات</option>
-            <option value="EGP" className="bg-[#09090e] text-white">🇪🇬 الجنيه المصري فقط</option>
-            <option value="USD" className="bg-[#09090e] text-white">🇺🇸 الدولار الأمريكي فقط</option>
+            <option value="ALL" className="bg-[#09090e] text-white">All Currencies</option>
+            <option value="EGP" className="bg-[#09090e] text-white">🇪🇬 EGP (Egyptian Pound)</option>
+            <option value="USD" className="bg-[#09090e] text-white">🇺🇸 USD (US Dollar)</option>
           </select>
         </div>
       </div>
@@ -134,14 +134,14 @@ export default function DashboardFilters({
             className="flex items-center gap-1.5 px-3 h-8.5 rounded-xl text-[11px] font-black transition-all bg-white/5 hover:bg-white/10 border border-white/5 text-zinc-300 hover:text-white cursor-pointer"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
-            تحديث البيانات
+            Refresh Data
           </button>
           <button
             onClick={onExport}
             className="flex items-center gap-1.5 px-3.5 h-8.5 rounded-xl text-[11px] font-black transition-all bg-rose-600 hover:bg-[#ff0059] text-white shadow-md shadow-rose-600/10 border border-transparent cursor-pointer"
           >
             <Download className="w-3.5 h-3.5" />
-            تصدير تقرير إكسل
+            Export Excel
           </button>
         </div>
 
@@ -151,7 +151,7 @@ export default function DashboardFilters({
           <button
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
             className="w-8.5 h-8.5 rounded-xl bg-white/5 border border-white/5 flex items-center justify-center text-zinc-400 hover:text-white transition-all cursor-pointer"
-            title={theme === "dark" ? "التحويل للوضع المضيء" : "التحويل للوضع الداكن"}
+            title={theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
           >
             {theme === "dark" ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-indigo-400" />}
           </button>
@@ -160,7 +160,7 @@ export default function DashboardFilters({
           <button
             onClick={toggleFullscreen}
             className="w-8.5 h-8.5 rounded-xl bg-white/5 border border-white/5 flex items-center justify-center text-zinc-400 hover:text-white transition-all hidden md:flex cursor-pointer"
-            title="ملء الشاشة"
+            title="Toggle Fullscreen"
           >
             {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
           </button>

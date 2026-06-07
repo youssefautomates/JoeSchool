@@ -128,7 +128,7 @@ export default function AdminSettings() {
   const handleSendTestPurchase = async () => {
     const { trackMetaEvent } = await import("@/lib/metaPixel");
     const testId = `YA-TEST-${Math.floor(1000 + Math.random() * 9000)}`;
-    toast.info("جاري إرسال حدث شراء تجريبي CAPI + Pixel...", { duration: 1500 });
+    toast.info("Sending test purchase event via CAPI + Pixel...", { duration: 1500 });
     
     trackMetaEvent("Purchase", {
       value: 199.00,
@@ -141,7 +141,7 @@ export default function AdminSettings() {
     
     setTimeout(() => {
       loadLogs();
-      toast.success("تم إرسال حدث الشراء بنجاح! تحقق من Events Manager.");
+      toast.success("Test purchase event sent successfully! Check Meta Events Manager.");
     }, 1800);
   };
 
@@ -149,7 +149,7 @@ export default function AdminSettings() {
     if (typeof window === "undefined") return;
     localStorage.removeItem("meta_pixel_events_log");
     setLogs([]);
-    toast.success("تم تفريغ لوحة التشخيص بنجاح");
+    toast.success("Diagnostics terminal logs cleared successfully.");
   };
 
   const handleSaveSettings = async () => {
@@ -159,7 +159,7 @@ export default function AdminSettings() {
       if (metaPixelRawCode.trim()) {
         const extracted = extractMetaPixelId(metaPixelRawCode);
         if (!extracted) {
-          toast.error("فشل التحقق: كود Meta Pixel غير صالح أو غير رسمي. يرجى التأكد من إدخال الكود بشكل صحيح.");
+          toast.error("Verification failed: Invalid or unofficial Meta Pixel code. Please check and try again.");
           setIsLoading(false);
           return false;
         }

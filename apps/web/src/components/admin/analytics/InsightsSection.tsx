@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Sparkles, TrendingUp, AlertTriangle, Zap, ArrowLeft } from "lucide-react";
+import { Sparkles, TrendingUp, AlertTriangle, Zap, ArrowRight } from "lucide-react";
 import { useMemo } from "react";
 
 export interface InsightItem {
@@ -30,19 +30,19 @@ export default function InsightsSection({ orders, stats, coursesAnalytics }: Ins
       list.push({
         id: "ins-rev",
         type: isPositive ? "positive" : "negative",
-        title: isPositive ? "تم رصد طفرة في الإيرادات" : "تحذير: تراجع حجم الإيرادات",
+        title: isPositive ? "Revenue Spike Detected" : "Warning: Revenue Drop",
         description: isPositive 
-          ? `ارتفع حجم الإيرادات والمعاملات المالية بنسبة ${Math.abs(stats.revenueGrowth).toFixed(1)}% مقارنة بالفترة السابقة.`
-          : `انخفض حجم الإيرادات والمعاملات المالية بنسبة ${Math.abs(stats.revenueGrowth).toFixed(1)}% مقارنة بالفترة السابقة.`,
-        impact: isPositive ? "قوة دفع عالية لمعدل التحويل" : "مطلوب إجراء: فحص ومراجعة خطوات قمع الشراء والدفع"
+          ? `Revenue and transactions increased by ${Math.abs(stats.revenueGrowth).toFixed(1)}% compared to the previous period.`
+          : `Revenue and transactions decreased by ${Math.abs(stats.revenueGrowth).toFixed(1)}% compared to the previous period.`,
+        impact: isPositive ? "High conversion rate momentum" : "Action required: Inspect purchasing and checkout funnel steps"
       });
     } else {
       list.push({
         id: "ins-rev",
         type: "trend",
-        title: "استقرار أداء الأرباح والإيرادات",
-        description: "حافظ حجم المبيعات الإجمالي على استقراره التام مقارنة بفترة القياس السابقة.",
-        impact: "الاستمرار على استراتيجيات التسعير والخطط التسويقية الحالية"
+        title: "Stable Revenue Performance",
+        description: "Overall sales volume has maintained complete stability compared to the previous period.",
+        impact: "Continue with current pricing strategies and marketing plans"
       });
     }
 
@@ -52,17 +52,17 @@ export default function InsightsSection({ orders, stats, coursesAnalytics }: Ins
       list.push({
         id: "ins-course-drop",
         type: "negative",
-        title: "تنبيه: انسحاب الطلاب من دفع كورس (LMS)",
-        description: `يظهر كورس "${highDropOffCourse.title}" نسبة انسحاب تبلغ ${highDropOffCourse.dropOffRate.toFixed(1)}% عند خطوة الدفع.`,
-        impact: "مراجعة إرشادات وتسهيلات بوابات الدفع في صفحات الكورسات"
+        title: "Alert: High Drop-off Rate (LMS)",
+        description: `Course "${highDropOffCourse.title}" shows a drop-off rate of ${highDropOffCourse.dropOffRate.toFixed(1)}% at checkout.`,
+        impact: "Review checkout guidelines and ease of payment gateways on course pages"
       });
     } else {
       list.push({
         id: "ins-course-drop",
         type: "positive",
-        title: "تهيئة ممتازة لتسجيلات الطلاب (LMS)",
-        description: "متوسط نسب إكمال الشراء لكورسات الأكاديمية يتجاوز المستويات القياسية المعتادة بنجاح.",
-        impact: "معدلات نشاط وتفاعل طلابي مرتفعة داخل الفصول"
+        title: "Excellent LMS Registration Rates",
+        description: "Average course completion and purchase rates successfully exceed normal benchmarks.",
+        impact: "High student activity and interaction levels in classrooms"
       });
     }
 
@@ -75,17 +75,17 @@ export default function InsightsSection({ orders, stats, coursesAnalytics }: Ins
       list.push({
         id: "ins-geo-trend",
         type: "info",
-        title: "مؤشر نمو المبيعات في السعودية",
-        description: "تجاوزت طلبات المملكة العربية السعودية طلبات جمهورية مصر العربية في نطاق القياس المحدد.",
-        impact: "نوصي بتسهيل خيارات الدفع المحلية وإبراز الأسعار بالريال السعودي"
+        title: "Sales Growth Trend in KSA",
+        description: "Saudi Arabia orders exceeded Egypt orders within the specified measurement scope.",
+        impact: "We recommend enabling local payment methods and showing prices in SAR"
       });
     } else {
       list.push({
         id: "ins-geo-trend",
         type: "info",
-        title: "تفوق معدلات تحويل TikTok الإعلانية",
-        description: "تفوقت مبيعات حملات TikTok الإعلانية على قنوات الدخول الأخرى والشبكات الاجتماعية اليوم.",
-        impact: "توجيه الجزء الأكبر من الميزانية الإعلانية نحو قنوات إعلانات TikTok"
+        title: "TikTok Ad Conversions Outperforming",
+        description: "Sales from TikTok campaigns outperformed other acquisition channels and social networks today.",
+        impact: "Allocate the major portion of the ad budget towards TikTok channels"
       });
     }
 
@@ -95,9 +95,9 @@ export default function InsightsSection({ orders, stats, coursesAnalytics }: Ins
       list.push({
         id: "ins-best-product",
         type: "trend",
-        title: "المنتج الأكثر رواجاً وطلباً بالأكاديمية",
-        description: `كورس "${topSeller.title}" هو المنتج الأسرع نمواً وطلباً حالياً على المنصة.`,
-        impact: "إبراز هذا المنتج وتوفير عروض تسويقية له في النشرات البريدية للمشتركين"
+        title: "Most Popular Academy Course",
+        description: `Course "${topSeller.title}" is currently the fastest-growing and highest-demand item on the platform.`,
+        impact: "Feature this product and provide promotional offers in newsletter campaigns"
       });
     }
 
@@ -118,10 +118,10 @@ export default function InsightsSection({ orders, stats, coursesAnalytics }: Ins
   };
 
   return (
-    <div className="space-y-4 text-right" dir="rtl">
+    <div className="space-y-4 text-left" dir="ltr">
       <div className="flex items-center gap-2">
         <Sparkles className="w-4.5 h-4.5 text-[#D6004B]" />
-        <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">رؤى وتوصيات الذكاء الاصطناعي للأداء</h3>
+        <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">AI Performance Insights & Recommendations</h3>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -136,7 +136,7 @@ export default function InsightsSection({ orders, stats, coursesAnalytics }: Ins
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.05 }}
               whileHover={{ y: -2, borderColor: "rgba(255,255,255,0.1)" }}
-              className="p-4 rounded-2xl bg-[#09090e]/80 border border-white/5 relative overflow-hidden group flex gap-3 text-right font-sans"
+              className="p-4 rounded-2xl bg-[#09090e]/80 border border-white/5 relative overflow-hidden group flex gap-3 text-left font-sans"
             >
               {/* Glow background */}
               <div className={`absolute -inset-px bg-gradient-to-br ${style.glow} opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none rounded-2xl`} />
@@ -149,8 +149,8 @@ export default function InsightsSection({ orders, stats, coursesAnalytics }: Ins
                 <h4 className="font-extrabold text-[11px] sm:text-xs text-white leading-tight">{item.title}</h4>
                 <p className="text-[10px] sm:text-[10.5px] text-zinc-400 leading-relaxed font-semibold">{item.description}</p>
                 <div className="flex items-center gap-1 text-[9px] font-bold text-[#D6004B] pt-1">
-                  <span>التوصية المقترحة: {item.impact}</span>
-                  <ArrowLeft className="w-2.5 h-2.5" />
+                  <span>Action Recommendation: {item.impact}</span>
+                  <ArrowRight className="w-2.5 h-2.5" />
                 </div>
               </div>
             </motion.div>

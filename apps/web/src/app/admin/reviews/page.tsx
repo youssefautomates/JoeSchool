@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
-import { Plus, ArrowRight, BookOpen, ShoppingBag, Loader2, Sliders } from "lucide-react";
+import { Plus, ArrowLeft, BookOpen, ShoppingBag, Loader2, Sliders } from "lucide-react";
 import { motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
 
@@ -164,10 +164,10 @@ export default function ReviewsAdminPage() {
         const { data: prodCats, error } = await supabase.from("product_categories").select("id, name, slug").order("order_index");
         if (error || !prodCats || prodCats.length === 0) {
           setCategories([
-            { id: "1", name: "صناعة المحتوى بالذكاء الاصطناعي", slug: "ai-content-creation" },
-            { id: "2", name: "صناعة الأنيميشن بالذكاء الاصطناعي", slug: "ai-animation" },
-            { id: "3", name: "إنتاج الفيديو الإبداعي", slug: "creative-video-production" },
-            { id: "4", name: "السرد القصصي الرقمي", slug: "digital-storytelling" }
+            { id: "1", name: "AI Content Creation", slug: "ai-content-creation" },
+            { id: "2", name: "AI Animation", slug: "ai-animation" },
+            { id: "3", name: "Creative Video Production", slug: "creative-video-production" },
+            { id: "4", name: "Digital Storytelling", slug: "digital-storytelling" }
           ]);
         } else {
           setCategories(prodCats);
@@ -176,7 +176,7 @@ export default function ReviewsAdminPage() {
 
       // Fetch courses, products, bundles
       const [{ data: productsData }, { data: coursesData }, { data: bundlesData }] = await Promise.all([
-        supabase.from("products").select("id, title, category, image_url, status").neq("status", "مخفي"),
+        supabase.from("products").select("id, title, category, image_url, status").neq("status", "\u0645\u062e\u0641\u064a"),
         supabase.from("courses").select("id, title, category, image_url, status").neq("status", "hidden"),
         supabase.from("bundles").select("id, title, image_url, status").neq("status", "hidden")
       ]);
@@ -184,21 +184,21 @@ export default function ReviewsAdminPage() {
       const getProductCategory = (p: any) => {
         if (p.category) return p.category;
         const title = (p.title || "").toLowerCase();
-        if (title.includes("animation") || title.includes("تحريك") || title.includes("رسوم")) return "صناعة الأنيميشن بالذكاء الاصطناعي";
-        if (title.includes("story") || title.includes("قصص") || title.includes("سرد")) return "السرد القصصي الرقمي";
-        if (title.includes("video") || title.includes("فيديو") || title.includes("إنتاج")) return "إنتاج الفيديو الإبداعي";
-        return "صناعة المحتوى بالذكاء الاصطناعي";
+        if (title.includes("animation") || title.includes("\u062a\u062d\u0631\u064a\u0643") || title.includes("\u0631\u0633\u0648\u0645")) return "AI Animation";
+        if (title.includes("story") || title.includes("\u0642\u0635\u0635") || title.includes("\u0633\u0631\u062f")) return "Digital Storytelling";
+        if (title.includes("video") || title.includes("\u0641\u064a\u062f\u064a\u0648") || title.includes("\u0625\u0646\u062a\u0627\u062c")) return "Creative Video Production";
+        return "AI Content Creation";
       };
 
       const mapped: DisplayItem[] = [
         ...(productsData || []).map(p => ({ id: p.id, title: p.title, category: getProductCategory(p), type: "product" as const, imageUrl: p.image_url })),
         ...(coursesData || []).map(c => ({ id: c.id, title: c.title, category: c.category || "", type: "course" as const, imageUrl: c.image_url })),
-        ...(bundlesData || []).map(b => ({ id: b.id, title: b.title, category: "الباقات", type: "bundle" as const, imageUrl: b.image_url }))
+        ...(bundlesData || []).map(b => ({ id: b.id, title: b.title, category: "\u0627\u0644\u0628\u0627\u0642\u0627\u062a", type: "bundle" as const, imageUrl: b.image_url }))
       ];
       setCombinedItems(mapped);
 
     } catch (err: any) {
-      toast.error("فشل تحميل بيانات المراجعات والتقييمات");
+      toast.error("Failed to load reviews and ratings data");
     } finally {
       setLoading(false);
     }
@@ -230,12 +230,12 @@ export default function ReviewsAdminPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
 
-      toast.success(isNew ? "تم إضافة التقييم بنجاح 🎉" : "تم تحديث بيانات التقييم بنجاح ✨");
+      toast.success(isNew ? "Review added successfully 🎉" : "Review updated successfully ✨");
       setIsEditorOpen(false);
       setEditingReview(null);
       fetchData();
     } catch (err: any) {
-      toast.error(err.message || "فشل حفظ التقييم");
+      toast.error(err.message || "Failed to save review");
     }
   };
 
@@ -261,7 +261,7 @@ export default function ReviewsAdminPage() {
       }
       const res = await fetch(`/api/admin/reviews?${queryParams.toString()}`, { method: "DELETE" });
       if (!res.ok) throw new Error();
-      toast.success(isArchived ? "تم حذف التقييم نهائيًا" : "تم نقل التقييم إلى الأرشيف بنجاح");
+      toast.success(isArchived ? "Review permanently deleted" : "Review successfully moved to archive");
       fetchData();
     } catch {
       if (verifyTransaction(id, txId)) {
@@ -271,7 +271,7 @@ export default function ReviewsAdminPage() {
           setReviews(prev => prev.map(r => r.id === id ? originalReview : r));
         }
       }
-      toast.error("فشل تنفيذ الإجراء. تم التراجع عن التغيير.");
+      toast.error("Failed to execute action. Changes reverted.");
     }
   };
 
@@ -292,19 +292,19 @@ export default function ReviewsAdminPage() {
       
       toast.success(
         status === "visible" 
-          ? "التقييم الآن نشط وظاهر بالصفحة الرئيسية" 
+          ? "Review is now active and visible on the home page" 
           : status === "hidden" 
-          ? "تم حجب وإخفاء التقييم بنجاح" 
+          ? "Review hidden successfully" 
           : status === "archived"
-          ? "تم نقل التقييم إلى الأرشيف"
-          : "التقييم معلق الآن قيد المراجعة"
+          ? "Review moved to archive"
+          : "Review is now pending moderation"
       );
       fetchData();
     } catch {
       if (verifyTransaction(review.id, txId)) {
         setReviews(prev => prev.map(r => r.id === review.id ? originalReview : r));
       }
-      toast.error("فشل تعديل حالة النشر. تم التراجع عن التغيير.");
+      toast.error("Failed to update status. Changes reverted.");
     }
   };
 
@@ -335,7 +335,7 @@ export default function ReviewsAdminPage() {
         body: JSON.stringify({ ids, action, params }),
       });
       if (!res.ok) throw new Error();
-      toast.success("تم تحديث حالة التقييمات المحددة بنجاح");
+      toast.success("Selected reviews updated successfully");
       fetchData();
     } catch {
       setReviews(prev => prev.map(r => {
@@ -345,7 +345,7 @@ export default function ReviewsAdminPage() {
         }
         return r;
       }));
-      toast.error("فشل تنفيذ العملية الجماعية. تم التراجع عن التغيير.");
+      toast.error("Failed to execute bulk action. Changes reverted.");
     }
   };
 
@@ -363,7 +363,7 @@ export default function ReviewsAdminPage() {
         body: JSON.stringify({ ids, action: isFeatured ? "mark_featured" : "unfeature" }),
       });
       if (!res.ok) throw new Error();
-      toast.success("تم تعديل التمييز الجماعي بنجاح");
+      toast.success("Bulk feature status updated successfully");
       fetchData();
     } catch {
       setReviews(prev => prev.map(r => {
@@ -373,7 +373,7 @@ export default function ReviewsAdminPage() {
         }
         return r;
       }));
-      toast.error("فشل تعديل التمييز الجماعي. تم التراجع عن التغيير.");
+      toast.error("Failed to update bulk feature status. Changes reverted.");
     }
   };
 
@@ -391,7 +391,7 @@ export default function ReviewsAdminPage() {
         body: JSON.stringify({ ids, action: "delete", params: { archiveReason } }),
       });
       if (!res.ok) throw new Error();
-      toast.success("تم نقل التقييمات المحددة إلى الأرشيف بنجاح");
+      toast.success("Selected reviews archived successfully");
       fetchData();
     } catch {
       setReviews(prev => prev.map(r => {
@@ -401,7 +401,7 @@ export default function ReviewsAdminPage() {
         }
         return r;
       }));
-      toast.error("فشل أرشفة التقييمات. تم التراجع عن التغيير.");
+      toast.error("Failed to archive reviews. Changes reverted.");
     }
   };
 
@@ -409,7 +409,7 @@ export default function ReviewsAdminPage() {
   const getProductNamesMap = () => {
     const map: Record<string, string> = {};
     combinedItems.forEach(item => {
-      const prefix = item.type === "course" ? "🎓 كورس" : item.type === "product" ? "🛍️ منتج" : "📦 باقة";
+      const prefix = item.type === "course" ? "🎓 Course" : item.type === "product" ? "🛍️ Product" : "📦 Bundle";
       map[item.id] = `${prefix} - ${item.title}`;
     });
     return map;
@@ -417,7 +417,7 @@ export default function ReviewsAdminPage() {
 
   const getProductName = (id: string) => {
     const item = combinedItems.find(p => p.id === id);
-    return item ? item.title : "عنصر غير معروف";
+    return item ? item.title : "Unknown Item";
   };
 
   // ── FILTERING & SORTING LOGIC ─────────────────────────────────────────
@@ -544,7 +544,7 @@ export default function ReviewsAdminPage() {
   const getEditorProductsList = () => {
     return combinedItems.map(item => ({
       id: item.id,
-      title: `${item.type === "course" ? "🎓 كورس" : item.type === "product" ? "🛍️ منتج" : "📦 باقة"} - ${item.title}`,
+      title: `${item.type === "course" ? "🎓 Course" : item.type === "product" ? "🛍️ Product" : "📦 Bundle"} - ${item.title}`,
       type: item.type
     }));
   };
@@ -553,13 +553,13 @@ export default function ReviewsAdminPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-3">
         <Loader2 className="w-12 h-12 text-[#D6004B] animate-spin" />
-        <span className="text-zinc-500 font-bold text-xs font-cairo">جاري تحميل لوحة التحكم الذكية...</span>
+        <span className="text-zinc-500 font-bold text-xs font-sans">Loading reviews management dashboard...</span>
       </div>
     );
   }
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 p-2 md:p-6" dir="rtl">
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 p-2 md:p-6 font-sans" dir="ltr">
       
       {/* 1. Header Navigation Bar */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 border-b border-white/5 pb-6">
@@ -568,36 +568,36 @@ export default function ReviewsAdminPage() {
             {viewMode !== "select" && (
               <button
                 onClick={handleBackToSelect}
-                className="p-1.5 rounded-lg bg-white/5 border border-white/5 text-zinc-400 hover:text-white transition-all cursor-pointer font-cairo text-xs flex items-center gap-1 ml-2"
+                className="p-1.5 rounded-lg bg-white/5 border border-white/5 text-zinc-400 hover:text-white transition-all cursor-pointer font-sans text-xs flex items-center gap-1 mr-2"
               >
-                <ArrowRight className="w-3.5 h-3.5" />
-                <span>الرئيسية</span>
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span>Back</span>
               </button>
             )}
-            <h1 className="text-xl md:text-3xl font-black text-white font-alexandria leading-none">
+            <h1 className="text-xl md:text-3xl font-black text-white font-sans leading-none">
               {viewMode === "select" 
-                ? "إدارة مراجعات العملاء" 
+                ? "Manage Customer Reviews" 
                 : viewMode === "all" 
-                ? "جميع التقييمات والمراجعات"
+                ? "All Reviews & Feedback"
                 : viewMode === "courses" 
-                ? "تقييمات ومراجعات الكورسات" 
-                : "تقييمات ومراجعات المنتجات الرقمية"}
+                ? "Course Reviews" 
+                : "Digital Product Reviews"}
             </h1>
           </div>
-          <p className="text-zinc-500 text-xs mt-2 font-cairo">
+          <p className="text-zinc-500 text-xs mt-2 font-sans">
             {viewMode === "select"
-              ? "إدارة وضبط تقييمات المشترين المعروضة عبر موقع الويب لتعزيز المبيعات والتحويل."
-              : `تصفح وفلترة ومراجعة التقييمات المسجلة بقسم ${viewMode === "all" ? "المنصة بالكامل" : viewMode === "courses" ? "الكورسات" : "المنتجات الرقمية"}.`}
+              ? "Manage and moderate customer reviews displayed across the website to boost conversion rates and social proof."
+              : `Browse, filter, and moderate reviews in the ${viewMode === "all" ? "entire platform" : viewMode === "courses" ? "courses" : "digital products"} section.`}
           </p>
         </div>
 
         {viewMode !== "select" && (
           <button
             onClick={handleOpenAdd}
-            className="h-11 px-6 bg-[#D6004B] hover:bg-[#ff0059] text-white text-xs font-bold rounded-xl flex items-center gap-2 transition-all active:scale-95 shadow-[0_8px_20px_rgba(214,0,75,0.2)] cursor-pointer font-cairo shrink-0"
+            className="h-11 px-6 bg-[#D6004B] hover:bg-[#ff0059] text-white text-xs font-bold rounded-xl flex items-center gap-2 transition-all active:scale-95 shadow-[0_8px_20px_rgba(214,0,75,0.2)] cursor-pointer font-sans shrink-0"
           >
             <Plus className="w-4 h-4" />
-            <span>إضافة تقييم يدوي</span>
+            <span>Add Manual Review</span>
           </button>
         )}
       </div>
@@ -616,21 +616,21 @@ export default function ReviewsAdminPage() {
         >
           <div className="absolute top-0 left-0 w-32 h-32 bg-[#D6004B]/5 rounded-full blur-2xl pointer-events-none" />
           
-          <h3 className="text-sm font-bold text-white flex items-center gap-2 border-b border-white/5 pb-4 font-alexandria">
+          <h3 className="text-sm font-bold text-white flex items-center gap-2 border-b border-white/5 pb-4 font-sans">
             {viewMode === "courses" ? <BookOpen className="w-5 h-5 text-rose-500" /> : <ShoppingBag className="w-5 h-5 text-emerald-500" />}
-            <span>{viewMode === "courses" ? "مسار تصفية كورسات الأكاديمية" : "مسار تصفية منتجات المتجر"}</span>
+            <span>{viewMode === "courses" ? "Filter Academy Courses" : "Filter Store Products"}</span>
           </h3>
 
           <div className="space-y-5">
             {/* STEP 1: Searchable Dropdown Category */}
             <div className="flex flex-col gap-2 relative">
-              <label className="text-xs text-zinc-300 font-bold font-cairo">الخطوة 1: اختر التصنيف</label>
+              <label className="text-xs text-zinc-300 font-bold font-sans">Step 1: Select Category</label>
               
               <div 
                 onClick={() => setCatDropdownOpen(!catDropdownOpen)}
-                className="w-full h-11 px-4 rounded-xl bg-white/5 border border-white/10 text-zinc-300 text-xs flex items-center justify-between cursor-pointer focus:border-rose-500/50 hover:bg-white/[0.07] transition-all font-cairo"
+                className="w-full h-11 px-4 rounded-xl bg-white/5 border border-white/10 text-zinc-300 text-xs flex items-center justify-between cursor-pointer focus:border-rose-500/50 hover:bg-white/[0.07] transition-all font-sans"
               >
-                <span>{selectedCat || "ابحث واختر التصنيف..."}</span>
+                <span>{selectedCat || "Search and select category..."}</span>
                 <Sliders className="w-4 h-4 text-zinc-500" />
               </div>
 
@@ -638,15 +638,15 @@ export default function ReviewsAdminPage() {
                 <div className="absolute top-[105%] left-0 right-0 bg-[#09090e] border border-white/10 rounded-xl p-3 z-30 shadow-2xl space-y-2 animate-in fade-in slide-in-from-top-1 duration-200">
                   <input
                     type="text"
-                    placeholder="ابحث عن تصنيف..."
+                    placeholder="Search category..."
                     value={catSearch}
                     onChange={(e) => setCatSearch(e.target.value)}
-                    className="w-full h-9 px-3 rounded-lg bg-white/5 border border-white/10 text-zinc-300 text-xs outline-none focus:border-rose-500/40 font-cairo"
+                    className="w-full h-9 px-3 rounded-lg bg-white/5 border border-white/10 text-zinc-300 text-xs outline-none focus:border-rose-500/40 font-sans"
                     onClick={(e) => e.stopPropagation()}
                   />
                   <div className="max-h-48 overflow-y-auto space-y-1 custom-scrollbar">
                     {filteredCategories.length === 0 ? (
-                      <span className="text-[10px] text-zinc-600 block text-center py-3 font-cairo">لا توجد تصنيفات مطابقة</span>
+                      <span className="text-[10px] text-zinc-600 block text-center py-3 font-sans">No matching categories</span>
                     ) : (
                       filteredCategories.map(cat => (
                         <div
@@ -657,7 +657,7 @@ export default function ReviewsAdminPage() {
                             setCatDropdownOpen(false);
                             setCatSearch("");
                           }}
-                          className={`p-2.5 rounded-lg text-xs font-bold font-cairo cursor-pointer transition-colors ${
+                          className={`p-2.5 rounded-lg text-xs font-bold font-sans cursor-pointer transition-colors ${
                             selectedCat === cat.name ? "bg-[#D6004B]/10 text-rose-500" : "hover:bg-white/5 text-zinc-400 hover:text-white"
                           }`}
                         >
@@ -672,13 +672,13 @@ export default function ReviewsAdminPage() {
 
             {/* STEP 2: Searchable Dropdown Product / Course */}
             <div className="flex flex-col gap-2 relative">
-              <label className="text-xs text-zinc-300 font-bold font-cairo">
-                الخطوة 2: اختر {viewMode === "courses" ? "الكورس" : "المنتج"}
+              <label className="text-xs text-zinc-300 font-bold font-sans">
+                Step 2: Select {viewMode === "courses" ? "Course" : "Product"}
               </label>
 
               <div 
                 onClick={() => selectedCat && setItemDropdownOpen(!itemDropdownOpen)}
-                className={`w-full h-11 px-4 rounded-xl border text-xs flex items-center justify-between transition-all font-cairo ${
+                className={`w-full h-11 px-4 rounded-xl border text-xs flex items-center justify-between transition-all font-sans ${
                   selectedCat 
                     ? "bg-white/5 border-white/10 text-zinc-300 cursor-pointer hover:bg-white/[0.07]" 
                     : "bg-white/[0.01] border-white/5 text-zinc-600 cursor-not-allowed"
@@ -688,8 +688,8 @@ export default function ReviewsAdminPage() {
                   {selectedItem 
                     ? combinedItems.find(i => i.id === selectedItem)?.title 
                     : selectedCat 
-                    ? `ابحث واختر ${viewMode === "courses" ? "الكورس" : "المنتج"}...` 
-                    : `يرجى تحديد التصنيف أولاً`}
+                    ? `Search and select ${viewMode === "courses" ? "course" : "product"}...` 
+                    : `Please select a category first`}
                 </span>
                 <Sliders className="w-4 h-4 text-zinc-500" />
               </div>
@@ -698,15 +698,15 @@ export default function ReviewsAdminPage() {
                 <div className="absolute top-[105%] left-0 right-0 bg-[#09090e] border border-white/10 rounded-xl p-3 z-30 shadow-2xl space-y-2 animate-in fade-in slide-in-from-top-1 duration-200">
                   <input
                     type="text"
-                    placeholder={`البحث عن ${viewMode === "courses" ? "كورس" : "منتج"}...`}
+                    placeholder={`Search ${viewMode === "courses" ? "course" : "product"}...`}
                     value={itemSearch}
                     onChange={(e) => setItemSearch(e.target.value)}
-                    className="w-full h-9 px-3 rounded-lg bg-white/5 border border-white/10 text-zinc-300 text-xs outline-none focus:border-rose-500/40 font-cairo"
+                    className="w-full h-9 px-3 rounded-lg bg-white/5 border border-white/10 text-zinc-300 text-xs outline-none focus:border-rose-500/40 font-sans"
                     onClick={(e) => e.stopPropagation()}
                   />
                   <div className="max-h-48 overflow-y-auto space-y-1 custom-scrollbar">
                     {filteredItemList.length === 0 ? (
-                      <span className="text-[10px] text-zinc-600 block text-center py-3 font-cairo">لا توجد عناصر مطابقة</span>
+                      <span className="text-[10px] text-zinc-600 block text-center py-3 font-sans">No matching items</span>
                     ) : (
                       filteredItemList.map(item => (
                         <div
@@ -716,7 +716,7 @@ export default function ReviewsAdminPage() {
                             setItemDropdownOpen(false);
                             setItemSearch("");
                           }}
-                          className={`p-2.5 rounded-lg text-xs font-bold font-cairo cursor-pointer transition-colors ${
+                          className={`p-2.5 rounded-lg text-xs font-bold font-sans cursor-pointer transition-colors ${
                             selectedItem === item.id ? "bg-[#D6004B]/10 text-rose-500" : "hover:bg-white/5 text-zinc-400 hover:text-white"
                           }`}
                         >
@@ -733,9 +733,9 @@ export default function ReviewsAdminPage() {
             <button
               onClick={() => setShowActiveReviews(true)}
               disabled={!selectedCat || !selectedItem}
-              className="w-full py-3.5 bg-[#D6004B] hover:bg-[#ff0059] text-white rounded-xl text-xs font-bold font-cairo transition-all disabled:opacity-20 disabled:cursor-not-allowed active:scale-[0.98] shrink-0"
+              className="w-full py-3.5 bg-[#D6004B] hover:bg-[#ff0059] text-white rounded-xl text-xs font-bold font-sans transition-all disabled:opacity-20 disabled:cursor-not-allowed active:scale-[0.98] shrink-0"
             >
-              عرض التقييمات والمراجعات الآن
+              Show Reviews Now
             </button>
           </div>
         </motion.div>
@@ -747,10 +747,10 @@ export default function ReviewsAdminPage() {
           
           {/* Header Title inside specific workflows */}
           {showActiveReviews && (
-            <div className="bg-[#09090e]/60 border border-rose-500/10 p-5 rounded-2xl flex items-center justify-between gap-4 font-cairo">
+            <div className="bg-[#09090e]/60 border border-rose-500/10 p-5 rounded-2xl flex items-center justify-between gap-4 font-sans">
               <div className="flex items-center gap-2">
                 <span className="text-rose-500">📌</span>
-                <span className="text-zinc-300 font-bold">تصفية التقييمات لـ:</span>
+                <span className="text-zinc-300 font-bold">Filtered Reviews for:</span>
                 <span className="text-white font-black font-sans">{getProductName(selectedItem)}</span>
               </div>
               <button
@@ -760,7 +760,7 @@ export default function ReviewsAdminPage() {
                 }}
                 className="text-[10px] bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white px-3 py-1.5 rounded-lg border border-white/5 transition-all font-bold cursor-pointer"
               >
-                تغيير الكورس/المنتج
+                Change Course/Product
               </button>
             </div>
           )}

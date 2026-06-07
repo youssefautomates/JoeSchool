@@ -27,7 +27,7 @@ interface DigitalProduct {
   slug: string;
   price: number;
   original_price?: number;
-  status: string; // "نشط" | "مسودة" | "مخفي" -> "active" | "draft" | "hidden"
+  status: string; // "active" | "draft" | "hidden"
   image_url?: string;
   category?: string;
   sales?: number;
@@ -134,13 +134,13 @@ function CourseCategoriesAdminPageContent() {
     // 2. Fallback heuristic rules (sync with storefront homepage)
     const title = (prod.title || "").toLowerCase();
     
-    if (title.includes("animation") || title.includes("تحريك") || title.includes("رسوم") || categoryField.includes("animation") || categoryField.includes("رسوم")) {
+    if (title.includes("animation") || categoryField.includes("animation")) {
       return "AI Animation";
     }
-    if (title.includes("story") || title.includes("قصص") || title.includes("سرد") || categoryField.includes("storytelling") || categoryField.includes("قصص")) {
+    if (title.includes("story") || categoryField.includes("storytelling")) {
       return "Digital Storytelling";
     }
-    if (title.includes("video") || title.includes("فيديو") || title.includes("إنتاج") || categoryField.includes("video") || categoryField.includes("إنتاج")) {
+    if (title.includes("video") || categoryField.includes("video")) {
       return "Creative Video Production";
     }
     
@@ -321,7 +321,7 @@ function CourseCategoriesAdminPageContent() {
  
   // Quick Action: Toggle product status
   const handleToggleProductStatus = async (productId: string, currentStatus: string) => {
-    const nextStatus = currentStatus === "نشط" || currentStatus === "active" ? "مسودة" : "نشط";
+    const nextStatus = currentStatus === "active" ? "draft" : "active";
     try {
       const { error } = await supabaseClient
         .from("products")
@@ -329,7 +329,7 @@ function CourseCategoriesAdminPageContent() {
         .eq("id", productId);
  
       if (error) throw error;
-      toast.success(nextStatus === "نشط" ? "Product activated for sale in the storefront! 🟢" : "Product successfully set to Draft mode 🟡");
+      toast.success(nextStatus === "active" ? "Product activated for sale in the storefront! 🟢" : "Product successfully set to Draft mode 🟡");
       await fetchCategoriesData();
     } catch (err) {
       toast.error("Failed to change product status");
@@ -349,7 +349,7 @@ function CourseCategoriesAdminPageContent() {
   const generateSlug = (name: string) => {
     return name.trim().toLowerCase()
       .replace(/[\s_]+/g, "-")
-      .replace(/[^\w\u0600-\u06FF-]/g, "");
+      .replace(/[^\w-]/g, "");
   };
  
   return (
@@ -681,14 +681,14 @@ function CourseCategoriesAdminPageContent() {
                                         onClick={() => handleToggleProductStatus(prod.id, prod.status || "draft")}
                                         className={cn(
                                           "h-8 px-2.5 rounded-xl border font-bold text-[10px] flex items-center gap-1.5 cursor-pointer transition-all",
-                                          prod.status === "نشط" || prod.status === "active"
+                                          prod.status === "active"
                                             ? "bg-emerald-950/40 border-emerald-500/20 text-emerald-400 hover:bg-emerald-900/30"
                                             : "bg-amber-950/40 border-amber-500/20 text-amber-400 hover:bg-amber-900/30"
                                         )}
-                                        title={prod.status === "نشط" || prod.status === "active" ? "Deactivate Product" : "Activate Product"}
+                                        title={prod.status === "active" ? "Deactivate Product" : "Activate Product"}
                                       >
-                                        {prod.status === "نشط" || prod.status === "active" ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
-                                        <span>{prod.status === "نشط" || prod.status === "active" ? "Active" : "Draft"}</span>
+                                        {prod.status === "active" ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                                        <span>{prod.status === "active" ? "Active" : "Draft"}</span>
                                       </button>
  
                                       {/* Edit full details button */}

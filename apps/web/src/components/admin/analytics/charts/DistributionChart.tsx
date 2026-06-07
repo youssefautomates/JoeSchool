@@ -18,17 +18,17 @@ export default function DistributionChart({ data }: DistributionChartProps) {
   if (totalValue === 0) {
     return (
       <div className="w-full h-full flex flex-col items-center justify-center border border-dashed border-white/5 rounded-2xl p-6 text-center text-zinc-500 text-xs font-sans">
-        لا توجد بيانات لتوزيع الإيرادات في الفترة المحددة.
+        No revenue distribution data found for the selected period.
       </div>
     );
   }
 
   return (
-    <div className="w-full h-full flex flex-col justify-between font-sans text-right" dir="rtl">
+    <div className="w-full h-full flex flex-col justify-between font-sans text-left" dir="ltr">
       <div className="flex items-center justify-between mb-5 pb-4 border-b border-white/5">
         <div>
-          <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">نسبة تقسيم الجنيه والدولار</h3>
-          <p className="text-[10px] text-zinc-500 mt-0.5">توزيع حجم المبيعات الإجمالي حسب العملة</p>
+          <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">EGP vs USD Revenue Split</h3>
+          <p className="text-[10px] text-zinc-500 mt-0.5">Distribution of total sales volume by currency</p>
         </div>
         <CreditCard className="w-4 h-4 text-zinc-500 shrink-0" />
       </div>
@@ -50,19 +50,19 @@ export default function DistributionChart({ data }: DistributionChartProps) {
             </Pie>
             <Tooltip
               formatter={(value: any, name: any) => {
-                const nameAr = name === "EGP Revenue" ? "إيرادات الجنيه" : "إيرادات الدولار (معادل بالجنيه)";
-                if (name === "EGP Revenue") return [`${value} ج.م`, nameAr];
-                return [`$${value / 50} دولار (معادل ${value} ج.م)`, nameAr];
+                const nameEn = name === "EGP Revenue" ? "EGP Revenue" : "USD Revenue (EGP Equivalent)";
+                if (name === "EGP Revenue") return [`${value} EGP`, nameEn];
+                return [`$${(value / 50).toFixed(2)} USD (Equivalent to ${value} EGP)`, nameEn];
               }}
-              contentStyle={{ backgroundColor: "#060608", borderColor: "rgba(255,255,255,0.06)", borderRadius: "12px", textAlign: "right" }}
+              contentStyle={{ backgroundColor: "#060608", borderColor: "rgba(255,255,255,0.06)", borderRadius: "12px", textAlign: "left" }}
               itemStyle={{ fontSize: "10px" }}
             />
             <Legend 
               verticalAlign="bottom" 
               height={36} 
               formatter={(value) => {
-                const valueAr = value === "EGP Revenue" ? "إيرادات الجنيه" : "إيرادات الدولار";
-                return <span className="text-[9.5px] sm:text-[10.5px] font-bold text-zinc-400">{valueAr}</span>;
+                const valueEn = value === "EGP Revenue" ? "EGP Revenue" : "USD Revenue";
+                return <span className="text-[9.5px] sm:text-[10.5px] font-bold text-zinc-400">{valueEn}</span>;
               }} 
             />
           </PieChart>

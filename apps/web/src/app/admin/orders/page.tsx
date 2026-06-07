@@ -190,7 +190,7 @@ export default function AdminOrders() {
       const matchesCountry = filterCountry === "all" || order.country === filterCountry;
       const matchesCurrency = filterCurrency === "all" || order.currency === filterCurrency;
       
-      const isCourse = order.product_id?.startsWith("course-") || order.product_title?.includes("دورة") || order.product_title?.includes("كورس");
+      const isCourse = order.product_id?.startsWith("course-") || order.product_title?.toLowerCase().includes("course") || order.product_title?.toLowerCase().includes("track");
       const matchesProductType = filterProductType === "all" || 
         (filterProductType === "course" && isCourse) || 
         (filterProductType === "product" && !isCourse);
@@ -265,7 +265,7 @@ export default function AdminOrders() {
               color: #1f2937;
               background-color: #ffffff;
               padding: 40px;
-              direction: rtl;
+              direction: ltr;
             }
             .invoice-container {
               max-width: 800px;
@@ -285,7 +285,7 @@ export default function AdminOrders() {
               direction: ltr;
             }
             .logo-section {
-              text-align: left;
+              text-align: right;
             }
             .logo-title {
               font-family: 'Alexandria', sans-serif;
@@ -300,7 +300,7 @@ export default function AdminOrders() {
               margin-top: 4px;
             }
             .invoice-title {
-              text-align: right;
+              text-align: left;
             }
             .invoice-title h1 {
               font-size: 28px;
@@ -318,7 +318,7 @@ export default function AdminOrders() {
               grid-template-cols: 1fr 1fr;
               gap: 40px;
               margin-bottom: 40px;
-              text-align: right;
+              text-align: left;
             }
             .details-section h3 {
               font-size: 16px;
@@ -344,7 +344,7 @@ export default function AdminOrders() {
             table {
               width: 100%;
               border-collapse: collapse;
-              text-align: right;
+              text-align: left;
             }
             th {
               background-color: #f9fafb;
@@ -366,7 +366,7 @@ export default function AdminOrders() {
               padding-bottom: 12px;
             }
             .total-label {
-              text-align: left;
+              text-align: right;
               font-weight: 700;
               color: #374151;
             }
@@ -414,30 +414,30 @@ export default function AdminOrders() {
           <div class="invoice-container">
             <div class="header">
               <div class="invoice-title">
-                <h1>فاتورة شراء رقمية</h1>
-                <p>رقم الفاتورة: ${order.invoice_id || order.payment_id || order.id?.slice(0, 8)}</p>
-                <p>تاريخ الشراء: ${new Date(order.created_at).toLocaleString("ar-EG")}</p>
+                <h1>Digital Purchase Invoice</h1>
+                <p>Invoice ID: ${order.invoice_id || order.payment_id || order.id?.slice(0, 8)}</p>
+                <p>Purchase Date: ${new Date(order.created_at).toLocaleString("en-US")}</p>
               </div>
               <div class="logo-section">
                 <h1 class="logo-title">JOESCHOOL</h1>
-                <p class="logo-subtitle">أكاديمية لتعليم صناعة المحتوى بالذكاء الاصطناعي</p>
+                <p class="logo-subtitle">Academy for Content Creation & AI Education</p>
               </div>
             </div>
 
             <div class="details-grid">
               <div class="details-section">
-                <h3>معلومات المشترك</h3>
-                <p>الاسم: <span>${order.customer_name}</span></p>
-                <p>البريد الإلكتروني: <span>${order.customer_email}</span></p>
-                <p>الهاتف: <span>${order.customer_phone || "-"}</span></p>
-                <p>الدولة: <span>${countryName}</span></p>
+                <h3>Subscriber Details</h3>
+                <p>Name: <span>${order.customer_name}</span></p>
+                <p>Email: <span>${order.customer_email}</span></p>
+                <p>Phone: <span>${order.customer_phone || "-"}</span></p>
+                <p>Country: <span>${countryName}</span></p>
               </div>
               <div class="details-section">
-                <h3>تفاصيل الدفع والمزود</h3>
-                <p>مزود الخدمة: <span>JoeSchool Academy</span></p>
-                <p>بوابة الدفع: <span>${order.payment_provider || "Paymob"}</span></p>
-                <p>عنوان الـ IP (مشفر): <span>${maskedIp}</span></p>
-                <div class="seal">مدفوع PAID</div>
+                <h3>Payment & Provider Details</h3>
+                <p>Provider: <span>JoeSchool Academy</span></p>
+                <p>Payment Gateway: <span>${order.payment_provider || "Paymob"}</span></p>
+                <p>IP Address (Masked): <span>${maskedIp}</span></p>
+                <div class="seal">PAID</div>
               </div>
             </div>
 
@@ -445,42 +445,42 @@ export default function AdminOrders() {
               <table>
                 <thead>
                   <tr>
-                    <th>الوصف</th>
-                    <th style="text-align: left;">المبلغ</th>
+                    <th>Description</th>
+                    <th style="text-align: right;">Amount</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
                     <td>${order.product_title}</td>
-                    <td style="text-align: left;">${formattedSubtotal}</td>
+                    <td style="text-align: right;">${formattedSubtotal}</td>
                   </tr>
                   <tr class="total-row">
-                    <td class="total-label">المجموع الفرعي:</td>
-                    <td style="text-align: left;" class="total-value">${formattedSubtotal}</td>
+                    <td class="total-label">Subtotal:</td>
+                    <td style="text-align: right;" class="total-value">${formattedSubtotal}</td>
                   </tr>
                   ${gatewayFee > 0 ? `
                   <tr class="total-row">
-                    <td class="total-label">رسوم معالجة الدفع:</td>
-                    <td style="text-align: left;" class="total-value">${formattedFee}</td>
+                    <td class="total-label">Payment Processing Fee:</td>
+                    <td style="text-align: right;" class="total-value">${formattedFee}</td>
                   </tr>
                   ` : ''}
                   ${order.coupon_code ? `
                   <tr class="total-row">
-                    <td class="total-label">الكوبون المستخدم:</td>
-                    <td style="text-align: left;" class="total-value font-mono text-rose-500">${order.coupon_code}</td>
+                    <td class="total-label">Coupon Code Used:</td>
+                    <td style="text-align: right;" class="total-value font-mono text-rose-500">${order.coupon_code}</td>
                   </tr>
                   ` : ''}
                   <tr class="total-row" style="border-top: 2px solid #e5e7eb;">
-                    <td class="total-label grand-total">الإجمالي المدفوع:</td>
-                    <td style="text-align: left;" class="total-value grand-total">${formattedTotal}</td>
+                    <td class="total-label grand-total">Total Paid:</td>
+                    <td style="text-align: right;" class="total-value grand-total">${formattedTotal}</td>
                   </tr>
                 </tbody>
               </table>
             </div>
 
             <div class="footer">
-              <p>شكراً لاشتراكك في مساراتنا التعليمية الفاخرة.</p>
-              <p>هذه الفاتورة مستند معتمد لعملية الشراء ولا تحتاج لتوقيع رسمي.</p>
+              <p>Thank you for subscribing to our premium learning paths.</p>
+              <p>This invoice is a certified proof of purchase and requires no signature.</p>
               <p>JoeSchool © 2026. All rights reserved. support@joeschool.com</p>
             </div>
           </div>
@@ -573,7 +573,7 @@ export default function AdminOrders() {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
         {[
-          { label: "EGP Revenue (Completed)", value: formatPrice(totalRevenueEGP, "EGP").replace("ج.م", "L.E"), sub: "Egypt payments", accent: "#D6004B", glow: "rgba(214,0,75,0.12)" },
+          { label: "EGP Revenue (Completed)", value: formatPrice(totalRevenueEGP, "EGP").replace("\u062c.\u0645", "L.E").replace("EGP", "L.E"), sub: "Egypt payments", accent: "#D6004B", glow: "rgba(214,0,75,0.12)" },
           { label: "USD Revenue (Completed)", value: formatPrice(totalRevenueUSD, "USD"), sub: "International payments", accent: "#3b82f6", glow: "rgba(59,130,246,0.12)" },
           { label: "International Orders", value: internationalCount, sub: "Completed outside Egypt", accent: "#10b981", glow: "rgba(16,185,129,0.12)" },
           { label: "Conversion Rate", value: `${conversionRate}%`, sub: `Across ${totalOrdersCount} orders`, accent: "#f59e0b", glow: "rgba(245,158,11,0.12)" },

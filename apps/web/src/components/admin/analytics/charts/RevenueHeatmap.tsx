@@ -17,8 +17,7 @@ export default function RevenueHeatmap({ orders }: RevenueHeatmapProps) {
   const [hoveredCell, setHoveredCell] = useState<{ day: number; hour: number; amount: number } | null>(null);
   const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
 
-  const daysOfWeek = ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
-  const daysOfWeekEn = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const hoursOfDay = ["12A", "2A", "4A", "6A", "8A", "10A", "12P", "2P", "4P", "6P", "8P", "10P"];
 
   // Aggregate orders by day and hour
@@ -72,20 +71,20 @@ export default function RevenueHeatmap({ orders }: RevenueHeatmapProps) {
   };
 
   const formatHour = (hour: number) => {
-    if (hour === 0) return "12 منتصف الليل";
-    if (hour === 12) return "12 ظهراً";
-    if (hour > 12) return `${hour - 12} مساءً`;
-    return `${hour} صباحاً`;
+    if (hour === 0) return "12:00 AM";
+    if (hour === 12) return "12:00 PM";
+    if (hour > 12) return `${hour - 12}:00 PM`;
+    return `${hour}:00 AM`;
   };
 
   return (
-    <div className="w-full flex flex-col justify-between font-sans text-right" dir="rtl">
+    <div className="w-full flex flex-col justify-between font-sans text-left" dir="ltr">
       
       {/* Header */}
       <div className="flex items-center justify-between mb-5 pb-4 border-b border-white/5">
-        <div className="text-right">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">خريطة المبيعات الحرارية بالساعات</h3>
-          <p className="text-[10px] text-zinc-500 mt-0.5">توزيع حجم المبيعات الإجمالي حسب اليوم وساعات اليوم الفردية</p>
+        <div className="text-left">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">Hourly Sales Revenue Heatmap</h3>
+          <p className="text-[10px] text-zinc-500 mt-0.5">Distribution of total sales volume by weekday and hour of the day</p>
         </div>
         <Flame className="w-4 h-4 text-rose-500 shrink-0" />
       </div>
@@ -98,7 +97,7 @@ export default function RevenueHeatmap({ orders }: RevenueHeatmapProps) {
           <div className="flex items-center text-[8px] font-bold text-zinc-600 pb-1 pl-12">
             {Array.from({ length: 24 }).map((_, h) => (
               <span key={h} className="w-5 text-center shrink-0">
-                {h % 2 === 0 ? `${h === 0 ? "12" : h > 12 ? h - 12 : h}${h >= 12 ? "م" : "ص"}` : ""}
+                {h % 2 === 0 ? `${h === 0 ? "12" : h > 12 ? h - 12 : h}${h >= 12 ? "P" : "A"}` : ""}
               </span>
             ))}
           </div>
@@ -127,15 +126,15 @@ export default function RevenueHeatmap({ orders }: RevenueHeatmapProps) {
           {hoveredCell && (
             <div
               style={{ left: tooltipPos.x, top: tooltipPos.y }}
-              className="absolute z-30 p-2.5 rounded-lg bg-[#060608]/95 border border-white/10 shadow-2xl backdrop-blur-md text-[9px] pointer-events-none w-36 space-y-0.5 text-right font-sans"
-              dir="rtl"
+              className="absolute z-30 p-2.5 rounded-lg bg-[#060608]/95 border border-white/10 shadow-2xl backdrop-blur-md text-[9px] pointer-events-none w-36 space-y-0.5 text-left font-sans"
+              dir="ltr"
             >
               <div className="font-extrabold text-white">
-                يوم {daysOfWeek[hoveredCell.day]} الساعة {formatHour(hoveredCell.hour)}
+                {daysOfWeek[hoveredCell.day]} at {formatHour(hoveredCell.hour)}
               </div>
               <div className="text-zinc-400 font-semibold flex justify-between">
-                <span>الإيرادات:</span>
-                <span className="text-rose-400 font-mono font-black">{hoveredCell.amount} ج.م</span>
+                <span>Revenue:</span>
+                <span className="text-rose-400 font-mono font-black">{hoveredCell.amount} EGP</span>
               </div>
             </div>
           )}
@@ -143,14 +142,14 @@ export default function RevenueHeatmap({ orders }: RevenueHeatmapProps) {
       </div>
 
       {/* Legend */}
-      <div className="flex items-center gap-2 mt-3 text-[8.5px] font-bold text-zinc-500 justify-end">
-        <span>أقل مبيعات</span>
+      <div className="flex items-center gap-2 mt-3 text-[8.5px] font-bold text-zinc-500 justify-start">
+        <span>Low Sales</span>
         <div className="w-3.5 h-3.5 bg-white/[0.02] border border-white/5 rounded" />
         <div className="w-3.5 h-3.5 bg-rose-500/20 border border-rose-500/10 rounded" />
         <div className="w-3.5 h-3.5 bg-rose-500/40 border border-rose-500/20 rounded" />
         <div className="w-3.5 h-3.5 bg-rose-600/70 border border-rose-600/30 rounded" />
         <div className="w-3.5 h-3.5 bg-rose-600 border border-rose-500 rounded" />
-        <span>أعلى مبيعات</span>
+        <span>High Sales</span>
       </div>
     </div>
   );

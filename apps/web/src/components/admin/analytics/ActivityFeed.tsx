@@ -44,13 +44,13 @@ export default function ActivityFeed({ activities, maxItems = 15 }: ActivityFeed
 
   const getLabel = (type: string) => {
     switch (type) {
-      case "enrollment": return "سجل في الكورس";
-      case "lesson_completion": return "أكمل الدرس في";
-      case "certificate": return "حصل على شهادة إتمام في";
-      case "review": return "أضاف تقييماً جديداً لـ";
-      case "quiz_failure": return "لم يجتز اختباراً في";
-      case "login": return "سجل الدخول للوحة التحكم";
-      default: return "قام بنشاط في";
+      case "enrollment": return "enrolled in course";
+      case "lesson_completion": return "completed lesson in";
+      case "certificate": return "earned completion certificate in";
+      case "review": return "added a new review for";
+      case "quiz_failure": return "failed a quiz in";
+      case "login": return "logged into the control panel";
+      default: return "performed activity in";
     }
   };
 
@@ -61,25 +61,25 @@ export default function ActivityFeed({ activities, maxItems = 15 }: ActivityFeed
       const diffMs = now.getTime() - date.getTime();
       const diffMins = Math.floor(diffMs / 60000);
       
-      if (diffMins < 1) return "الآن";
-      if (diffMins < 60) return `منذ ${diffMins} د`;
+      if (diffMins < 1) return "Just now";
+      if (diffMins < 60) return `${diffMins}m ago`;
       
       const diffHours = Math.floor(diffMins / 60);
-      if (diffHours < 24) return `منذ ${diffHours} س`;
+      if (diffHours < 24) return `${diffHours}h ago`;
       
-      return date.toLocaleDateString("ar-EG", { month: "short", day: "numeric" });
+      return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
     } catch (e) {
-      return "مؤخراً";
+      return "recently";
     }
   };
 
   return (
-    <div className="rounded-3xl bg-[#09090e]/80 border border-white/5 p-5 sm:p-6 shadow-2xl flex flex-col justify-between h-[420px] relative overflow-hidden text-right" dir="rtl">
+    <div className="rounded-3xl bg-[#09090e]/80 border border-white/5 p-5 sm:p-6 shadow-2xl flex flex-col justify-between h-[420px] relative overflow-hidden text-left" dir="ltr">
       <div>
         <div className="flex items-center justify-between mb-4 pb-3 border-b border-white/5">
           <div>
-            <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">سجل نشاط الطلاب المباشر</h3>
-            <p className="text-[10px] text-zinc-500">أحداث التعلم التفاعلية وتفاعلات الطلاب الفورية</p>
+            <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">Live Student Activity Log</h3>
+            <p className="text-[10px] text-zinc-500">Interactive learning events and instant student interactions</p>
           </div>
           <span className="flex h-2 w-2 relative">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
@@ -91,7 +91,7 @@ export default function ActivityFeed({ activities, maxItems = 15 }: ActivityFeed
           <AnimatePresence initial={false}>
             {visibleActivities.length === 0 ? (
               <div className="py-16 text-center text-zinc-600 text-xs">
-                لا توجد سجلات أنشطة مؤخراً.
+                No recent activity logs found.
               </div>
             ) : (
               visibleActivities.map((act) => {
@@ -104,7 +104,7 @@ export default function ActivityFeed({ activities, maxItems = 15 }: ActivityFeed
                     initial={{ opacity: 0, x: 10 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -10 }}
-                    className="p-3 rounded-xl bg-white/[0.01] hover:bg-white/[0.03] border border-white/5 hover:border-white/10 transition-all flex items-start gap-3 text-right font-sans"
+                    className="p-3 rounded-xl bg-white/[0.01] hover:bg-white/[0.03] border border-white/5 hover:border-white/10 transition-all flex items-start gap-3 text-left font-sans"
                   >
                     <div className={`w-8 h-8 rounded-lg flex items-center justify-center border shrink-0 ${config.color}`}>
                       <IconComponent className="w-4 h-4" />
@@ -136,8 +136,8 @@ export default function ActivityFeed({ activities, maxItems = 15 }: ActivityFeed
       </div>
 
       <div className="pt-3 border-t border-white/5 flex items-center justify-between text-[9px] text-zinc-600 font-bold">
-        <span>عرض أحدث {maxItems} حدث</span>
-        <span className="text-rose-500 uppercase tracking-widest">تحديث مباشر نشط</span>
+        <span>Showing latest {maxItems} events</span>
+        <span className="text-rose-500 uppercase tracking-widest">Active Live Feed</span>
       </div>
     </div>
   );
