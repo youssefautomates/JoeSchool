@@ -106,7 +106,7 @@ export default function CartCheckoutPage() {
   const resolvedItems = items.map(item => {
     const resolvedPricing = resolveProductPrice(item, currency);
     const subtotal = resolvedPricing.price;
-    const showFee = currency === "EGP" && globalFeeEnabled && (item.enable_gateway_fee !== false) && subtotal > 0;
+    const showFee = currency === "EGP" && paymentMethod !== "instapay" && globalFeeEnabled && (item.enable_gateway_fee !== false) && subtotal > 0;
     const subtotalEGP = currency === "USD" ? Math.round(subtotal * exchangeRate) : subtotal;
     const feeEGP = showFee ? Math.ceil(subtotalEGP * (globalFeePercentage / 100)) : 0;
     const isCheap = subtotalEGP < 100;

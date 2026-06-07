@@ -420,7 +420,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
         ? Math.round(baseFinalPrice * exchangeRate)
         : baseFinalPrice;
 
-      const isFeeActive = currency === "EGP" && globalFeeEnabled && (product.enable_gateway_fee !== false) && baseFinalPrice > 0;
+      const isFeeActive = currency === "EGP" && paymentMethod !== "instapay" && globalFeeEnabled && (product.enable_gateway_fee !== false) && baseFinalPrice > 0;
       const gatewayFeeAmount = isFeeActive ? Math.ceil(subtotalEGP * (globalFeePercentage / 100)) : 0;
       const finalPriceEGP = subtotalEGP + gatewayFeeAmount;
 
@@ -503,7 +503,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
     ? Math.round(product.price * (1 - appliedCoupon.percent / 100)) 
     : product.price;
 
-  const showFeeRecover = currency === "EGP" && globalFeeEnabled && (product.enable_gateway_fee !== false) && basePriceAfterCoupon > 0;
+  const showFeeRecover = currency === "EGP" && paymentMethod !== "instapay" && globalFeeEnabled && (product.enable_gateway_fee !== false) && basePriceAfterCoupon > 0;
   const subtotalForFeeEGP = currency === "USD" ? Math.round(basePriceAfterCoupon * exchangeRate) : basePriceAfterCoupon;
   const feeAmountEGP = showFeeRecover ? Math.ceil(subtotalForFeeEGP * (globalFeePercentage / 100)) : 0;
 
@@ -776,16 +776,25 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
 
                         {currency === "EGP" && (
                           <div 
-                            onClick={() => setShowInstapayModal(true)}
-                            className="cursor-pointer border rounded-2xl p-3.5 flex items-center gap-3 transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] border-white/5 bg-white/5 hover:border-purple-500/30 hover:bg-purple-500/5 hover:shadow-[inset_0_0_20px_rgba(147,51,234,0.05)]"
+                            onClick={() => {
+                              setPaymentMethod("instapay");
+                              setShowInstapayModal(true);
+                            }}
+                            className={cn(
+                              "cursor-pointer border rounded-2xl p-3.5 flex items-center gap-3 transition-all duration-300 hover:scale-[1.01] active:scale-[0.99]",
+                              paymentMethod === "instapay" 
+                                ? "border-purple-500/50 bg-purple-500/10 shadow-[inset_0_0_30px_rgba(147,51,234,0.1)]" 
+                                : "border-white/5 bg-white/5 hover:border-purple-500/30 hover:bg-purple-500/5 hover:shadow-[inset_0_0_20px_rgba(147,51,234,0.05)]"
+                            )}
                           >
-                            <div className="w-5 h-5 rounded-full border-2 flex items-center justify-center border-zinc-500">
+                            <div className={cn("w-5 h-5 rounded-full border-2 flex items-center justify-center", paymentMethod === "instapay" ? "border-purple-500" : "border-zinc-500")}>
+                              {paymentMethod === "instapay" && <div className="w-2.5 h-2.5 rounded-full bg-purple-500" />}
                             </div>
                             <div className="w-6 h-6 rounded flex items-center justify-center bg-purple-900/30 shrink-0">
-                              <span className="text-[8px] font-black font-sans text-purple-400">IPN</span>
+                              <span className={cn("text-[8px] font-black font-sans", paymentMethod === "instapay" ? "text-purple-400" : "text-zinc-500")}>IPN</span>
                             </div>
                             <div className="font-cairo">
-                              <p className="font-bold text-zinc-300">Instapay تحويل فوري</p>
+                              <p className={cn("font-bold", paymentMethod === "instapay" ? "text-white" : "text-zinc-300")}>Instapay تحويل فوري</p>
                               <p className="text-xs text-zinc-500">تحويل بنكي فوري عبر إنستاباي</p>
                             </div>
                           </div>
