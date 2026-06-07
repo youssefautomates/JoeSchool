@@ -1519,9 +1519,9 @@ function MobileCourseView({
                   <motion.div 
                     animate={{ scale: [1, 1.08, 1] }}
                     transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-                    className="relative w-12 h-12 bg-[#D6004B]/90 backdrop-blur-xl border-2 border-white/20 rounded-full flex items-center justify-center mb-3 shadow-[0_0_30px_rgba(214,0,75,0.5)] group-hover/unmute:shadow-[0_0_50px_rgba(214,0,75,0.7)] transition-shadow"
+                    className="relative w-14 h-14 bg-[#D6004B]/90 backdrop-blur-xl border-2 border-white/20 rounded-full flex items-center justify-center mb-3 shadow-[0_0_30px_rgba(214,0,75,0.5)] group-hover/unmute:shadow-[0_0_50px_rgba(214,0,75,0.7)] transition-shadow"
                   >
-                    <Play className="w-5 h-5 text-white fill-current ml-0.5" />
+                    <Play className="w-6 h-6 text-white fill-current ml-0.5" />
                   </motion.div>
                   <span className="relative text-[11px] font-cairo font-bold text-white/80 bg-black/50 backdrop-blur-md px-4 py-1.5 rounded-lg border border-white/10 group-hover/unmute:text-white transition-all flex items-center gap-1.5">
                     <VolumeX className="w-3 h-3" />

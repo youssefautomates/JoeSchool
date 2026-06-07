@@ -883,9 +883,9 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                               <motion.div 
                                 animate={{ scale: [1, 1.06, 1] }}
                                 transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-                                className="relative w-11 h-11 bg-[#D6004B]/95 border border-white/20 rounded-full flex items-center justify-center mb-3 shadow-[0_0_20px_rgba(214,0,75,0.4)]"
+                                className="relative w-[52px] h-[52px] bg-[#D6004B]/95 border border-white/20 rounded-full flex items-center justify-center mb-3 shadow-[0_0_20px_rgba(214,0,75,0.4)]"
                               >
-                                <Play className="w-4 h-4 text-white fill-current ml-0.5" />
+                                <Play className="w-5 h-5 text-white fill-current ml-0.5" />
                               </motion.div>
                               <span className="relative text-[10px] font-cairo font-bold text-white/95 bg-black/60 backdrop-blur-md px-3.5 py-1.5 rounded-lg border border-white/10 flex items-center gap-1.5">
                                 <VolumeX className="w-3 h-3" />

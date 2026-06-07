@@ -299,8 +299,8 @@ export function CustomVideoPlayer({ src, className }: CustomVideoPlayerProps) {
           className="absolute inset-0 z-40 flex flex-col items-center justify-center cursor-pointer bg-black/10 hover:bg-black/5 transition-all"
         >
           {/* Big pulsing play button */}
-          <div className="relative w-12 h-12 sm:w-20 sm:h-20 bg-[#D6004B] border-2 border-white/20 rounded-full flex items-center justify-center mb-4 shadow-[0_0_40px_rgba(214,0,75,0.6)] hover:scale-105 transition-transform duration-300">
-            <Play className="w-5 h-5 sm:w-8 sm:h-8 text-white fill-current ml-0.5 sm:ml-1" />
+          <div className="relative w-14 h-14 sm:w-20 sm:h-20 bg-[#D6004B] border-2 border-white/20 rounded-full flex items-center justify-center mb-4 shadow-[0_0_40px_rgba(214,0,75,0.6)] hover:scale-105 transition-transform duration-300">
+            <Play className="w-6 h-6 sm:w-8 sm:h-8 text-white fill-current ml-0.5 sm:ml-1" />
             <span className="absolute inset-0 rounded-full bg-[#D6004B]/30 animate-ping" />
           </div>
 
@@ -338,13 +338,13 @@ export function CustomVideoPlayer({ src, className }: CustomVideoPlayerProps) {
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
               <div
                 key={centerFlash}
-                className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-black/50 flex items-center justify-center"
+                className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-black/50 flex items-center justify-center"
                 style={{ animation: 'centerFlashAnim 0.6s ease-out forwards' }}
               >
                 {centerFlash === "pause" ? (
-                  <Pause className="w-5 h-5 sm:w-7 sm:h-7 text-white fill-current" />
+                  <Pause className="w-6 h-6 sm:w-7 sm:h-7 text-white fill-current" />
                 ) : (
-                  <Play className="w-5 h-5 sm:w-7 sm:h-7 text-white fill-current ml-0.5 sm:ml-1" />
+                  <Play className="w-6 h-6 sm:w-7 sm:h-7 text-white fill-current ml-0.5 sm:ml-1" />
                 )}
               </div>
             </div>
