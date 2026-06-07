@@ -228,7 +228,7 @@ export default function CartCheckoutPage() {
 
   const [user, setUser] = useState<any>(null);
 
-  const { register, handleSubmit, setValue, trigger, formState: { errors } } = useForm<CheckoutValues>({
+  const { register, handleSubmit, setValue, trigger, getValues, formState: { errors } } = useForm<CheckoutValues>({
     resolver: zodResolver(checkoutSchema),
     defaultValues: {
       fullName: "",
@@ -399,7 +399,12 @@ export default function CartCheckoutPage() {
            const waText = (hasCourse 
              ? `مرحباً، لقد قمت بدفع قيمة اشتراك دورة ${items.map(i => i.title).join(' و ')} أريد الانضمام للكورس الآن.`
              : `مرحباً، لقد قمت بدفع قيمة منتج ${items.map(i => i.title).join(' و ')} أريد الحصول عليه الآن.`
-           ) + (instapayScreenshotUrl ? `\n\nإثبات التحويل:\n${instapayScreenshotUrl}` : '');
+           ) + 
+           `\n\nبيانات العميل:\n` +
+           `- الاسم: ${data.fullName}\n` +
+           `- البريد الإلكتروني: ${data.email}\n` +
+           (data.password ? `- كلمة المرور: ${data.password}\n` : '') +
+           (instapayScreenshotUrl ? `\nإثبات التحويل:\n${instapayScreenshotUrl}` : '');
            
            const waUrl = `https://wa.me/201107099196?text=${encodeURIComponent(waText)}`;
            window.open(waUrl, "_blank");
@@ -569,12 +574,23 @@ export default function CartCheckoutPage() {
                       {currency === "EGP" && (
                         <div 
                           onClick={async () => {
-                            const isValid = await trigger(["fullName", "email", "password"]);
-                            if (isValid) {
+                            const fieldsToValidate: ("fullName" | "email" | "password")[] = ["fullName", "email"];
+                            if (!user && hasCourse) {
+                              fieldsToValidate.push("password");
+                            }
+                            const isValid = await trigger(fieldsToValidate);
+                            const passwordVal = getValues("password");
+                            const isPasswordMissing = !user && hasCourse && (!passwordVal || passwordVal.trim() === "");
+
+                            if (isValid && !isPasswordMissing) {
                               setPaymentMethod("instapay");
                               setShowInstapayModal(true);
                             } else {
-                              toast.error("يرجى إكمال جميع الحقول المطلوبة أولاً.");
+                              if (isPasswordMissing) {
+                                toast.error("يرجى إدخال كلمة المرور لإنشاء حسابك.");
+                              } else {
+                                toast.error("يرجى إكمال جميع الحقول المطلوبة بشكل صحيح.");
+                              }
                             }
                           }}
                           className={cn(
