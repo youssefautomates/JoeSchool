@@ -19,7 +19,6 @@ interface LmsSectionProps {
   analyticsEvents?: any[];
   formatPrice: (amount: number, currency: string) => string;
   dateRange: string;
-  isCompact?: boolean;
 }
 
 export default function LmsSection({
@@ -29,8 +28,7 @@ export default function LmsSection({
   reviews,
   analyticsEvents = [],
   formatPrice,
-  dateRange,
-  isCompact = false
+  dateRange
 }: LmsSectionProps) {
 
   const comparisonLabel = `مقارنة بـ آخر ${dateRange} يوم`;
@@ -72,7 +70,7 @@ export default function LmsSection({
     };
   }, [enrollments, analyticsEvents, orders]);
 
-  // Aggregate video learning statistics (strictly from real db log structure)
+  // Aggregate video learning statistics (zeroed out/strictly from real db log structure)
   const learningStats = useMemo(() => {
     return {
       avgWatchTime: "0 دقيقة",
@@ -127,7 +125,6 @@ export default function LmsSection({
           trend={studentStats.total > 0 ? "+0.0% نمو" : undefined}
           trendUp={studentStats.total > 0}
           trendNeutral={studentStats.total === 0}
-          isCompact={isCompact}
         />
         <KPICard
           label="المسجلون اليوم"
@@ -137,7 +134,6 @@ export default function LmsSection({
           trend={studentStats.newToday > 0 ? "+0.0% أمس" : undefined}
           trendUp={studentStats.newToday > 0}
           trendNeutral={studentStats.newToday === 0}
-          isCompact={isCompact}
         />
         <KPICard
           label="الطلاب النشطين"
@@ -147,7 +143,6 @@ export default function LmsSection({
           trend={studentStats.active > 0 ? "نشط" : undefined}
           trendUp={studentStats.active > 0}
           trendNeutral={studentStats.active === 0}
-          isCompact={isCompact}
         />
         <KPICard
           label="الطلاب المستمرين"
@@ -157,7 +152,6 @@ export default function LmsSection({
           trend={studentStats.returning > 0 ? "مستمر" : undefined}
           trendUp={studentStats.returning > 0}
           trendNeutral={studentStats.returning === 0}
-          isCompact={isCompact}
         />
         <KPICard
           label="غير النشطين"
@@ -166,7 +160,6 @@ export default function LmsSection({
           icon={ShieldAlert}
           trend={studentStats.inactive > 0 ? "يحتاج تنشيط" : undefined}
           trendNeutral={true}
-          isCompact={isCompact}
         />
       </div>
 
@@ -305,7 +298,7 @@ export default function LmsSection({
               <h5 className="text-[9px] font-black uppercase text-emerald-400 tracking-wider">الفصول الأكثر مشاهدة ورواجاً</h5>
               <div className="space-y-1.5">
                 {learningStats.mostWatched.length === 0 ? (
-                  <div className="py-8 text-center text-zinc-600 text-xs font-semibold">لا يوجد نشاط مشاهدة مسجل حالياً.</div>
+                  <div className="py-8 text-center text-zinc-600 text-xs">لا يوجد نشاط مشاهدة مسجل حالياً.</div>
                 ) : (
                   learningStats.mostWatched.map((w, idx) => (
                     <div key={idx} className="p-2.5 rounded-xl bg-white/[0.02] border border-white/5 flex items-center justify-between font-semibold">
@@ -322,7 +315,7 @@ export default function LmsSection({
               <h5 className="text-[9px] font-black uppercase text-rose-400 tracking-wider">الفصول الأقل تفاعلاً واحتفاظاً</h5>
               <div className="space-y-1.5">
                 {learningStats.leastWatched.length === 0 ? (
-                  <div className="py-8 text-center text-zinc-600 text-xs font-semibold">لا يوجد نشاط مشاهدة مسجل حالياً.</div>
+                  <div className="py-8 text-center text-zinc-600 text-xs">لا يوجد نشاط مشاهدة مسجل حالياً.</div>
                 ) : (
                   learningStats.leastWatched.map((w, idx) => (
                     <div key={idx} className="p-2.5 rounded-xl bg-white/[0.02] border border-white/5 flex items-center justify-between font-semibold">

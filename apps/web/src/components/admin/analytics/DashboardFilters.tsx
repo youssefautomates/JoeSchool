@@ -19,8 +19,6 @@ interface DashboardFiltersProps {
   onRefresh: () => void;
   onExport: () => void;
   hasCountriesData?: string[];
-  isCompact: boolean;
-  setIsCompact: (isCompact: boolean) => void;
 }
 
 export default function DashboardFilters({
@@ -35,9 +33,7 @@ export default function DashboardFilters({
   loading,
   onRefresh,
   onExport,
-  hasCountriesData = ["EG", "SA", "AE", "US"],
-  isCompact,
-  setIsCompact,
+  hasCountriesData = ["EG", "SA", "AE", "US"]
 }: DashboardFiltersProps) {
   const [isFullscreen, setIsFullscreen] = useState(false);
 
@@ -63,7 +59,7 @@ export default function DashboardFilters({
   const countries = [
     { id: "ALL", label: "جميع الدول والمناطق" },
     ...hasCountriesData.map(c => {
-      const label = c === "EG" ? "🇪🇬 مصر" : c === "SA" ? "🇸🇦 المملكة العربية السعودية" : c === "AE" ? "🇦🇪 الإمارات" : c === "US" ? "🇺🇸 الولايات المتحدة" : `🌐 ${c}`;
+      const label = c === "EG" ? "🇪🇬 مصر" : c === "SA" ? "🇸🇦 المملكة العربية السعودية" : c === "AE" ? "🇦🇪 الإمارات" : c === "US" ? "🇺🇸 أمريكا" : `🌐 ${c}`;
       return { id: c, label };
     }),
     { id: "Unknown", label: "دول أخرى / مجهولة" }
@@ -121,8 +117,8 @@ export default function DashboardFilters({
             className="w-full bg-white/5 border border-white/5 hover:border-white/10 text-xs text-zinc-300 font-bold rounded-xl py-2.5 pr-10 pl-3 focus:outline-none focus:border-rose-500/50 transition-all appearance-none cursor-pointer text-right"
           >
             <option value="ALL" className="bg-[#09090e] text-white">جميع العملات</option>
-            <option value="EGP" className="bg-[#09090e] text-white">🇪🇬 الجنيه المصري</option>
-            <option value="USD" className="bg-[#09090e] text-white">🇺🇸 الدولار الأمريكي</option>
+            <option value="EGP" className="bg-[#09090e] text-white">🇪🇬 الجنيه المصري فقط</option>
+            <option value="USD" className="bg-[#09090e] text-white">🇺🇸 الدولار الأمريكي فقط</option>
           </select>
         </div>
       </div>
@@ -149,22 +145,8 @@ export default function DashboardFilters({
           </button>
         </div>
 
-        {/* Theme Toggles, At-a-Glance, Fullscreen */}
+        {/* Theme Toggles & Fullscreen (desktop only) */}
         <div className="flex items-center gap-2">
-          {/* At-a-Glance Mode Toggle */}
-          <button
-            onClick={() => setIsCompact(!isCompact)}
-            className={`flex items-center gap-1.5 px-3 h-8.5 rounded-xl text-[11px] font-black transition-all border cursor-pointer ${
-              isCompact 
-                ? "bg-rose-950/40 text-rose-400 border-rose-500/30" 
-                : "bg-white/5 border-white/5 text-zinc-400 hover:text-white"
-            }`}
-            title="معاينة موجزة (تقليل المسافات والحجم)"
-          >
-            {isCompact ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
-            معاينة موجزة
-          </button>
-
           {/* Theme Switcher */}
           <button
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}

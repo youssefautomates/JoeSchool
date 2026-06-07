@@ -42,7 +42,7 @@ const StoreSection = dynamic(() => import("@/components/admin/analytics/StoreSec
   loading: () => <div className="h-64 w-full animate-pulse bg-white/5 rounded-3xl" />
 });
 
-const LiveActivitySection = dynamic(() => import("@/components/admin/analytics/LiveActivitySection"), {
+const DiagnosticsSection = dynamic(() => import("@/components/admin/analytics/DiagnosticsSection"), {
   ssr: false,
   loading: () => <div className="h-64 w-full animate-pulse bg-white/5 rounded-3xl" />
 });
@@ -135,7 +135,6 @@ export default function AdminDashboard() {
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [notifications, setNotifications] = useState<AlertNotification[]>([]);
   const [reviews, setReviews] = useState<any[]>([]);
-  const [isCompact, setIsCompact] = useState(false);
 
   // Local storage backup persistence only for alert notifications logs
   useEffect(() => {
@@ -853,11 +852,11 @@ export default function AdminDashboard() {
     const finalVisitors = visitorsCount;
 
     const stages = [
-      { name: "مشاهدة المنتجات", count: finalViews || finalVisitors, color: "#3b82f6", label: "مشاهدات صفحة التفاصيل" },
-      { name: "إضافة للسلة", count: finalCarts, color: "#a855f7", label: "إبداء نية الشراء" },
+      { name: "إجمالي الزوار", count: finalVisitors, color: "#6366f1", label: "زيارات الموقع الأولية" },
+      { name: "مشاهدات المنتجات", count: finalViews, color: "#3b82f6", label: "مشاهدات صفحة التفاصيل" },
+      { name: "إضافة إلى السلة", count: finalCarts, color: "#a855f7", label: "إبداء نية الشراء" },
       { name: "بدء الدفع", count: finalCheckouts, color: "#f59e0b", label: "الدخول في خطوات الدفع" },
-      { name: "محاولة الدفع", count: Math.max(finalPurchases, Math.round(finalCheckouts * 0.85)), color: "#ec4899", label: "محاولة السداد والفوترة" },
-      { name: "إكمال الشراء", count: finalPurchases, color: "#10b981", label: "عمليات الدفع الناجحة" }
+      { name: "عمليات الشراء", count: finalPurchases, color: "#10b981", label: "عمليات الدفع الناجحة" }
     ];
 
     return stages.map((stage, idx) => {
@@ -1204,84 +1203,6 @@ export default function AdminDashboard() {
     toast.success("تم تجميع وتحميل تقرير إكسل بنجاح!");
   };
 
-  // Realtime Live Stats Ticker Calculation
-  const liveStats = useMemo(() => {
-    const now = new Date();
-    const tenMinutesAgo = new Date(now.getTime() - 10 * 60 * 1000);
-    const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
-    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-
-    const activeVisitors = new Set(
-      analyticsEvents
-        .filter(e => new Date(e.created_at) >= tenMinutesAgo)
-        .map(e => e.session_id)
-    ).size || 2;
-
-    const ordersLastHour = orders.filter(o => o.status === "completed" && new Date(o.created_at) >= oneHourAgo).length;
-
-    const completedToday = orders.filter(o => o.status === "completed" && new Date(o.created_at) >= startOfToday);
-    const revTodayEgp = completedToday.filter(o => o.currency !== "USD").reduce((sum, o) => sum + Number(o.amount || 0), 0);
-    const revTodayUsd = completedToday.filter(o => o.currency === "USD").reduce((sum, o) => sum + Number(o.amount || 0), 0);
-    const revenueToday = revTodayEgp + (revTodayUsd * 50.0);
-
-    const sessionsToday = new Set(
-      analyticsEvents
-        .filter(e => new Date(e.created_at) >= startOfToday)
-        .map(e => e.session_id)
-    ).size;
-    const completedOrdersToday = completedToday.length;
-    const liveConversionRate = sessionsToday > 0 ? (completedOrdersToday / sessionsToday) * 100 : 0;
-
-    return {
-      activeVisitors,
-      ordersLastHour,
-      revenueToday,
-      liveConversionRate
-    };
-  }, [orders, analyticsEvents]);
-
-  // Aggregate live activities for Stripe-style feed
-  const liveActivities = useMemo(() => {
-    const list: any[] = [];
-
-    orders.forEach((o, index) => {
-      if (o.status === "completed") {
-        list.push({
-          id: `act-pur-${o.id}-${index}`,
-          type: "purchase",
-          user: o.customer_name || "زائر للموقع",
-          itemTitle: o.product_title,
-          details: `تم دفع مبلغ ${formatPrice(o.amount, o.currency || "EGP")}`,
-          created_at: o.created_at
-        });
-      }
-    });
-
-    enrollments.forEach((e, index) => {
-      const matchedCourse = courses.find(c => c.id === e.course_id);
-      list.push({
-        id: `act-en-${e.id}-${index}`,
-        type: "enrollment",
-        user: "طالب جديد",
-        itemTitle: matchedCourse?.title || "كورس تعليمي",
-        created_at: e.enrolled_at
-      });
-    });
-
-    reviews.forEach((r, index) => {
-      list.push({
-        id: `act-rev-${r.id || index}-${index}`,
-        type: "review",
-        user: r.student_name || "مستخدم مجهول",
-        itemTitle: r.course_title || "كورس تعليمي",
-        details: `التقييم: ${r.rating || 5}★ - "${r.content || ''}"`,
-        created_at: r.created_at
-      });
-    });
-
-    return list.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 50);
-  }, [orders, enrollments, reviews, courses]);
-
   return (
     <div className="space-y-6 sm:space-y-8 text-zinc-100 min-h-screen pb-24 bg-transparent px-0 font-sans">
       
@@ -1303,56 +1224,16 @@ export default function AdminDashboard() {
           if (cName && cName !== "Unknown") acc[cName] = true;
           return acc;
         }, {}))}
-        isCompact={isCompact}
-        setIsCompact={setIsCompact}
       />
-
-      {/* Realtime Live Ticker */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 bg-[#09090e]/60 border border-white/5 rounded-2xl p-3 text-right" dir="rtl">
-        <div className="flex items-center gap-2.5 px-3 py-1">
-          <span className="flex h-2 w-2 relative shrink-0">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-          </span>
-          <div>
-            <span className="text-[9px] text-zinc-500 block font-bold">الزوار النشطين الآن</span>
-            <span className="text-xs font-black text-white font-mono">{liveStats.activeVisitors} زائر متصل</span>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2.5 px-3 py-1 border-r border-white/5">
-          <Activity className="w-4 h-4 text-rose-500 shrink-0" />
-          <div>
-            <span className="text-[9px] text-zinc-500 block font-bold">مبيعات آخر ساعة</span>
-            <span className="text-xs font-black text-white font-mono">{liveStats.ordersLastHour} طلبات مكتملة</span>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2.5 px-3 py-1 border-r border-white/5">
-          <DollarSign className="w-4 h-4 text-emerald-400 shrink-0" />
-          <div>
-            <span className="text-[9px] text-zinc-500 block font-bold">إيرادات اليوم</span>
-            <span className="text-xs font-black text-white font-mono">{formatPrice(liveStats.revenueToday, "EGP")}</span>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2.5 px-3 py-1 border-r border-white/5">
-          <Percent className="w-4 h-4 text-blue-400 shrink-0" />
-          <div>
-            <span className="text-[9px] text-zinc-500 block font-bold">معدل التحويل اليومي</span>
-            <span className="text-xs font-black text-white font-mono">{liveStats.liveConversionRate.toFixed(1)}%</span>
-          </div>
-        </div>
-      </div>
 
       {/* Desktop view switcher tabs (hidden on mobile) */}
       <div className="hidden lg:block border-b border-white/5">
         <div className="flex gap-4">
           {[
-            { id: "overview", label: "نظرة عامة", icon: BarChart3 },
+            { id: "overview", label: "التحليلات العامة", icon: BarChart3 },
             { id: "lms", label: "تحليلات الأكاديمية", icon: BookOpen },
             { id: "store", label: "تحليلات المتجر", icon: Package },
-            { id: "diagnostics", label: "النشاط المباشر", icon: Activity }
+            { id: "diagnostics", label: "سجلات التشغيل", icon: ShieldAlert }
           ].map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -1391,10 +1272,8 @@ export default function AdminDashboard() {
               coursesAnalytics={lmsCoursesAnalytics}
               chartData={revenueChartData}
               currencyData={currencyDistributionData}
-              trafficData={trafficMetrics}
               formatPrice={formatPrice}
               dateRange={dateRange}
-              isCompact={isCompact}
             />
           )}
 
@@ -1408,7 +1287,6 @@ export default function AdminDashboard() {
               analyticsEvents={analyticsEvents}
               formatPrice={formatPrice}
               dateRange={dateRange}
-              isCompact={isCompact}
             />
           )}
 
@@ -1421,14 +1299,12 @@ export default function AdminDashboard() {
               categoryStats={categoryStats}
               formatPrice={formatPrice}
               dateRange={dateRange}
-              isCompact={isCompact}
             />
           )}
 
-          {/* Tab 4: Live Activity */}
+          {/* Tab 4: Diagnostics Logs */}
           {activeTab === "diagnostics" && (
-            <LiveActivitySection
-              activities={liveActivities}
+            <DiagnosticsSection
               seeding={seeding}
               analyticsTableMissing={analyticsTableMissing}
               diagnosticsLogs={diagnosticsLogs}
@@ -1454,10 +1330,10 @@ export default function AdminDashboard() {
       {/* Mobile Sticky Bottom Tab Bar */}
       <div className="fixed bottom-0 left-0 right-0 z-40 lg:hidden bg-[#07070b]/90 backdrop-blur-md border-t border-white/5 px-4 py-2.5 flex items-center justify-around">
         {[
-          { id: "overview", label: "نظرة عامة", icon: BarChart3 },
+          { id: "overview", label: "العامة", icon: BarChart3 },
           { id: "lms", label: "الأكاديمية", icon: BookOpen },
           { id: "store", label: "المتجر", icon: Package },
-          { id: "diagnostics", label: "النشاط", icon: Activity }
+          { id: "diagnostics", label: "السجلات", icon: ShieldAlert }
         ].map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
