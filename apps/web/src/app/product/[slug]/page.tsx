@@ -585,7 +585,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
 
                 <div className="prose prose-invert prose-rose max-w-none text-zinc-350 leading-[2.1] font-cairo">
                   {product.description ? (
-                    <div className="text-zinc-300 font-cairo text-sm sm:text-base leading-[2.2] [&_p]:mb-4 [&_p]:leading-[2.2] [&_li]:mb-3 [&_li]:leading-[2.2] [&_h1]:mt-6 [&_h1]:mb-2 [&_h1]:text-lg [&_h2]:mt-5 [&_h2]:mb-2 [&_h2]:text-base [&_span]:leading-[2.2]" dangerouslySetInnerHTML={{ __html: product.description }} />
+                    <div className="text-zinc-300 font-cairo text-sm sm:text-base leading-[1.8] [&_p]:mb-4 [&_p]:leading-[1.8] [&_li]:mb-3 [&_li]:leading-[1.8] [&_h1]:mt-6 [&_h1]:mb-2 [&_h1]:text-lg [&_h2]:mt-5 [&_h2]:mb-2 [&_h2]:text-base [&_span]:leading-[1.8]" dangerouslySetInnerHTML={{ __html: product.description }} />
                   ) : (
                     <p>هذا المنتج الرقمي مصمم لمساعدتك في تسريع صناعة المحتوى ورفع جودة إنتاجك الإبداعي بالذكاء الاصطناعي.</p>
                   )}
@@ -1096,7 +1096,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
               
               {product.description ? (
                 <div 
-                  className="text-zinc-300 font-cairo text-xs leading-[1.8] prose prose-invert prose-rose max-w-none [&_p]:mb-3 [&_p]:leading-[1.8]" 
+                  className="text-zinc-300 font-cairo text-xs leading-[1.7] prose prose-invert prose-rose max-w-none [&_p]:mb-3 [&_p]:leading-[1.7]" 
                   dangerouslySetInnerHTML={{ __html: sanitizeHtml(product.description) }} 
                 />
               ) : (
