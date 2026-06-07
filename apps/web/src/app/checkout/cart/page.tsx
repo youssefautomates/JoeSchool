@@ -272,8 +272,8 @@ export default function CartCheckoutPage() {
   const onInvalid = () => {
     if (paymentMethod === "card") {
       validateCardFields();
-      toast.error("يرجى إكمال جميع الحقول المطلوبة بشكل صحيح.");
     }
+    toast.error("يُرجى إكمال جميع الحقول لإتمام الدفع");
   };
 
   async function onSubmit(data: CheckoutValues) {
@@ -297,8 +297,8 @@ export default function CartCheckoutPage() {
       // If user is not logged in, perform Instant Purchase Authentication
       if (!activeUser) {
         if (!data.password) {
-          setError("password", { type: "manual", message: "يرجى إدخال كلمة المرور لإنشاء حسابك." });
-          toast.error("يرجى إدخال كلمة مرور لإنشاء حسابك وتأمين مشترياتك.");
+          setError("password", { type: "manual", message: "يُرجى إكمال جميع الحقول لإتمام الدفع" });
+          toast.error("يُرجى إكمال جميع الحقول لإتمام الدفع");
           setIsLoading(false);
           return;
         }
@@ -587,10 +587,9 @@ export default function CartCheckoutPage() {
                               setPaymentMethod("instapay");
                               setShowInstapayModal(true);
                             } else {
+                              toast.error("يُرجى إكمال جميع الحقول لإتمام الدفع");
                               if (isPasswordMissing) {
-                                toast.error("يرجى إدخال كلمة المرور لإنشاء حسابك.");
-                              } else {
-                                toast.error("يرجى إكمال جميع الحقول المطلوبة بشكل صحيح.");
+                                setError("password", { type: "manual", message: "يُرجى إكمال جميع الحقول لإتمام الدفع" });
                               }
                             }
                           }}
