@@ -272,7 +272,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
 
   const [user, setUser] = useState<any>(null);
 
-  const { register, handleSubmit, setValue, trigger, getValues, formState: { errors } } = useForm<CheckoutValues>({
+  const { register, handleSubmit, setValue, trigger, getValues, setError, formState: { errors } } = useForm<CheckoutValues>({
     resolver: zodResolver(checkoutSchema),
     defaultValues: {
       fullName: "",
@@ -371,8 +371,9 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
       let activeUser = user;
 
       // If user is not logged in, perform Instant Purchase Authentication
-      if (!activeUser && isCourse) {
+      if (!activeUser) {
         if (!data.password) {
+          setError("password", { type: "manual", message: "يرجى إدخال كلمة المرور لإنشاء حسابك." });
           toast.error("يرجى إدخال كلمة مرور لإنشاء حسابك وتأمين مشترياتك.");
           setIsLoading(false);
           return;
@@ -731,10 +732,10 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                     {errors.email && <p className="text-xs text-red-400 font-cairo flex items-center gap-1 mt-1"><ShieldAlert className="w-3 h-3" /> {errors.email.message}</p>}
                   </div>
 
-                  {!user && isCourse && (
+                  {!user && (
                     <>
                       <div className="space-y-2">
-                        <Label className="font-cairo font-bold text-zinc-400 text-sm">كلمة المرور الجديدة</Label>
+                        <Label className="font-cairo font-bold text-zinc-400 text-sm">كلمة المرور</Label>
                         <div className="relative">
                           <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
                           <Input 
@@ -810,12 +811,12 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                           <div 
                             onClick={async () => {
                               const fieldsToValidate: ("fullName" | "email" | "password")[] = ["fullName", "email"];
-                              if (!user && isCourse) {
+                              if (!user) {
                                 fieldsToValidate.push("password");
                               }
                               const isValid = await trigger(fieldsToValidate);
                               const passwordVal = getValues("password");
-                              const isPasswordMissing = !user && isCourse && (!passwordVal || passwordVal.trim() === "");
+                              const isPasswordMissing = !user && (!passwordVal || passwordVal.trim() === "");
 
                               if (isValid && !isPasswordMissing) {
                                 setPaymentMethod("instapay");
