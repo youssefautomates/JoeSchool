@@ -13,6 +13,10 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "videoId is required" }, { status: 400 });
     }
 
+    if (videoId.startsWith("http")) {
+      return NextResponse.json({ url: videoId });
+    }
+
     // Generate signed embed URL with 24 hours expiry for public showcase playback
     const signedUrl = generateSignedEmbedUrl(videoId, 1440);
     

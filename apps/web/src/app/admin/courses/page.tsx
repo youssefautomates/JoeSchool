@@ -12,7 +12,7 @@ import {
   getEnrollmentsForAdmin,
   type LmsCourse, type LmsSection, type LmsLesson, type LmsEnrollment
 } from "@/lib/coursesDb";
-import { uploadFile, uploadPrivateFile, deletePrivateFileFromUrl, uploadFileChunked } from "@/lib/upload";
+import { uploadFile, uploadPrivateFile, deleteFileFromUrl, deletePrivateFileFromUrl, uploadFileChunked } from "@/lib/upload";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { supabaseClient } from "@/lib/supabaseClient";
@@ -715,6 +715,7 @@ export default function AdminCoursesPage() {
   // Promo Video State
   const [promoUploading, setPromoUploading] = useState(false);
   const [promoProgress, setPromoProgress] = useState<number | null>(null);
+  const promoUploadXhrRef = useRef<XMLHttpRequest | null>(null);
 
   // Form State
   const [courseForm, setCourseForm] = useState<Partial<LmsCourse>>({
@@ -1019,34 +1020,33 @@ export default function AdminCoursesPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // Validate size (up to 300MB for promo video)
+    const maxPromoSize = 300 * 1024 * 1024;
+    if (file.size > maxPromoSize) {
+      toast.error("File size exceeds the 300MB limit.");
+      e.target.value = "";
+      return;
+    }
+
     setPromoUploading(true);
     setPromoProgress(0);
 
     try {
-      const configRes = await fetch("/api/admin/bunny/config");
-      if (!configRes.ok) {
-        throw new Error("Failed to load Bunny Stream configuration.");
-      }
-      const { libraryId, apiKey } = await configRes.json();
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+      const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
 
-      // Create a video placeholder DIRECTLY from browser → Bunny API
-      const createRes = await fetch(`https://video.bunnycdn.com/library/${libraryId}/videos`, {
-        method: "POST",
-        headers: {
-          "AccessKey": apiKey,
-          "Accept": "application/json",
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ title: `promo-${selectedCourse?.id || 'course'}-${Date.now()}` })
-      });
-      if (!createRes.ok) {
-        const errText = await createRes.text();
-        throw new Error(`Failed to create promo video container (${createRes.status}): ${errText.slice(0,200)}`);
+      if (!supabaseUrl || !supabaseAnonKey) {
+        throw new Error("Supabase credentials are missing.");
       }
-      const createData = await createRes.json();
-      const videoId = createData.guid;
+
+      const extension = file.name.split(".").pop();
+      const baseName = file.name.substring(0, file.name.lastIndexOf(".")).replace(/[^a-zA-Z0-9]/g, "_");
+      const sanitizedName = `promo_${baseName}_${Date.now()}.${extension}`;
+      const uniquePath = `courses/videos/${sanitizedName}`;
 
       const xhr = new XMLHttpRequest();
+      promoUploadXhrRef.current = xhr;
+
       xhr.upload.addEventListener("progress", (event) => {
         if (event.lengthComputable) {
           const percentage = Math.round((event.loaded / event.total) * 100);
@@ -1054,33 +1054,52 @@ export default function AdminCoursesPage() {
         }
       });
 
-      const uploadPromise = new Promise<void>((resolve, reject) => {
+      const uploadPromise = new Promise<string>((resolve, reject) => {
         xhr.onload = () => {
-          if (xhr.status >= 200 && xhr.status < 300) resolve();
-          else reject(new Error("Failed to upload video file to Bunny Stream."));
+          if (xhr.status >= 200 && xhr.status < 300) {
+            const publicUrl = `${supabaseUrl}/storage/v1/object/public/course-images/${uniquePath}`;
+            resolve(publicUrl);
+          } else {
+            reject(new Error(`Upload failed to Supabase: ${xhr.statusText} (${xhr.status})`));
+          }
         };
-        xhr.onerror = () => reject(new Error("Connection error during upload."));
+        xhr.onerror = () => reject(new Error("Network error during upload."));
+        xhr.onabort = () => reject(new Error("canceled"));
       });
 
-      xhr.open("PUT", `https://video.bunnycdn.com/library/${libraryId}/videos/${videoId}`);
-      xhr.setRequestHeader("AccessKey", apiKey);
+      const uploadUrl = `${supabaseUrl}/storage/v1/object/course-images/${uniquePath}`;
+      xhr.open("POST", uploadUrl);
+      xhr.setRequestHeader("Authorization", `Bearer ${supabaseAnonKey}`);
+      xhr.setRequestHeader("apikey", supabaseAnonKey);
+      xhr.setRequestHeader("Content-Type", file.type);
       xhr.send(file);
 
-      await uploadPromise;
+      const publicUrl = await uploadPromise;
 
       setCourseForm(prev => ({
         ...prev,
-        promo_video_id: videoId
+        promo_video_id: publicUrl
       }));
 
-      toast.success("Promo video uploaded successfully! 🚀 Don't forget to save changes.");
+      toast.success("Promo video uploaded successfully! Don't forget to save changes.");
     } catch (err: any) {
-      console.error(err);
-      toast.error(err.message || "Error uploading video.");
+      if (err.message === "canceled") {
+        toast.info("Upload cancelled.");
+      } else {
+        console.error(err);
+        toast.error(err.message || "Error uploading video.");
+      }
     } finally {
       setPromoUploading(false);
       setPromoProgress(null);
+      promoUploadXhrRef.current = null;
       e.target.value = "";
+    }
+  };
+
+  const handleCancelPromoUpload = () => {
+    if (promoUploadXhrRef.current) {
+      promoUploadXhrRef.current.abort();
     }
   };
 
@@ -1090,11 +1109,15 @@ export default function AdminCoursesPage() {
     if (!confirm("Are you sure you want to permanently delete the promo video for this course?")) return;
 
     try {
-      const res = await fetch(`/api/admin/bunny/video?videoId=${videoId}`, {
-        method: "DELETE"
-      });
-      if (!res.ok) {
-        throw new Error("Failed to delete video from Bunny Stream.");
+      if (videoId.startsWith("http")) {
+        await deleteFileFromUrl(videoId, "course-images");
+      } else {
+        const res = await fetch(`/api/admin/bunny/video?videoId=${videoId}`, {
+          method: "DELETE"
+        });
+        if (!res.ok) {
+          throw new Error("Failed to delete video from Bunny Stream.");
+        }
       }
       
       setCourseForm(prev => ({
@@ -1477,10 +1500,11 @@ export default function AdminCoursesPage() {
                   <input 
                     value={courseForm.promo_video_id || ""} 
                     onChange={e => setCourseForm({ ...courseForm, promo_video_id: e.target.value })} 
-                    placeholder="Bunny Stream Video ID..."
-                    className="bg-white/5 border border-white/5 rounded-xl py-3 px-4 text-sm flex-1 text-zinc-300" 
+                    placeholder={promoUploading ? "Uploading promo video..." : "Bunny Stream Video ID..."}
+                    disabled={promoUploading}
+                    className="bg-white/5 border border-white/5 rounded-xl py-3 px-4 text-sm flex-1 text-zinc-300 disabled:opacity-50" 
                   />
-                  {courseForm.promo_video_id && (
+                  {courseForm.promo_video_id && !promoUploading && (
                     <button
                       type="button"
                       onClick={handlePromoVideoDelete}
@@ -1489,11 +1513,22 @@ export default function AdminCoursesPage() {
                       Delete
                     </button>
                   )}
-                  <label className="h-[46px] px-4 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer">
-                    {promoUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Video className="w-4 h-4" />}
-                    <span>{promoUploading ? `Uploading ${promoProgress}%` : "Upload Video"}</span>
-                    <input type="file" accept="video/*" className="hidden" onChange={handlePromoVideoUpload} disabled={promoUploading} />
-                  </label>
+                  {promoUploading ? (
+                    <button
+                      type="button"
+                      onClick={handleCancelPromoUpload}
+                      className="h-[46px] px-4 bg-red-600/10 hover:bg-red-600 text-red-500 hover:text-white border border-red-500/20 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                    >
+                      <X className="w-4 h-4" />
+                      <span>Cancel ({promoProgress}%)</span>
+                    </button>
+                  ) : (
+                    <label className="h-[46px] px-4 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer">
+                      <Video className="w-4 h-4" />
+                      <span>Upload Video</span>
+                      <input type="file" accept="video/*" className="hidden" onChange={handlePromoVideoUpload} disabled={promoUploading} />
+                    </label>
+                  )}
                 </div>
                 {promoProgress !== null && (
                   <div className="w-full bg-white/5 rounded-full h-1.5 overflow-hidden">

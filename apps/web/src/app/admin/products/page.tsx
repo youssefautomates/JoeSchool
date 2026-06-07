@@ -12,7 +12,7 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { formatPrice } from "@/lib/pricing";
-import { uploadFile, uploadPrivateFile, deletePrivateFileFromUrl } from "@/lib/upload";
+import { uploadFile, uploadPrivateFile, deleteFileFromUrl, deletePrivateFileFromUrl } from "@/lib/upload";
 import { RichTextEditor } from "@/components/RichTextEditor";
 import * as tus from "tus-js-client";
 
@@ -171,18 +171,16 @@ export default function AdminProductsPage() {
   const [uploadingField, setUploadingField] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
 
-  // Video direct Bunny upload states
-  const [bunnyUploadStatus, setBunnyUploadStatus] = useState<"Queued" | "Uploading" | "Encoding" | "Ready" | "Failed" | null>(null);
+  // Video upload states (local Supabase upload with progressive cancellation)
+  const [videoUploading, setVideoUploading] = useState(false);
   const [videoUploadProgress, setVideoUploadProgress] = useState<number | null>(null);
-  const [bunnyEncodeProgress, setBunnyEncodeProgress] = useState<number>(0);
   const [videoFileName, setVideoFileName] = useState<string | null>(null);
   const [videoFileSize, setVideoFileSize] = useState<string | null>(null);
   const [videoSourceTab, setVideoSourceTab] = useState<"upload" | "link">("upload");
   const [externalVideoInput, setExternalVideoInput] = useState("");
   const [fetchingVideoDetails, setFetchingVideoDetails] = useState(false);
 
-  const tusUploadRef = useRef<tus.Upload | null>(null);
-  const pollingIntervalRef = useRef<any>(null);
+  const videoUploadXhrRef = useRef<XMLHttpRequest | null>(null);
 
   // Load Initial Data
   useEffect(() => {
@@ -231,9 +229,8 @@ export default function AdminProductsPage() {
       file_url: "", file_type: "zip", displayTags: "",
       seo_title: "", seo_description: ""
     });
-    setBunnyUploadStatus(null);
+    setVideoUploading(false);
     setVideoUploadProgress(null);
-    setBunnyEncodeProgress(0);
     setVideoFileName(null);
     setVideoFileSize(null);
     setVideoSourceTab("upload");
@@ -267,9 +264,8 @@ export default function AdminProductsPage() {
       seo_description: unpacked.seo_description || ""
     });
 
-    setBunnyUploadStatus(null);
+    setVideoUploading(false);
     setVideoUploadProgress(null);
-    setBunnyEncodeProgress(0);
     setVideoFileName(null);
     setVideoFileSize(null);
     
@@ -360,7 +356,7 @@ export default function AdminProductsPage() {
     }
   };
 
-  // Bunny Stream Video Upload Handler
+  // Local Supabase Storage Video Upload Handler (Cancelable XMLHttpRequests)
   const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -372,105 +368,80 @@ export default function AdminProductsPage() {
 
     cancelVideoUpload();
 
-    setBunnyUploadStatus('Uploading');
+    setVideoUploading(true);
     setVideoUploadProgress(0);
-    setBunnyEncodeProgress(0);
 
     try {
-      // 1. Create placeholder and retrieve TUS credentials from backend
-      const createRes = await fetch(`/api/admin/bunny/create-video`, {
-        method: "POST",
-        headers: {
-          "Accept": "application/json",
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ title: form.title || file.name })
-      });
-      if (!createRes.ok) {
-        const errData = await createRes.json().catch(() => ({}));
-        throw new Error(errData.error || createRes.statusText);
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+      const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
+
+      if (!supabaseUrl || !supabaseAnonKey) {
+        throw new Error("Supabase credentials are missing.");
       }
-      const { videoId, signature, expiry, libraryId } = await createRes.json();
 
-      // 2. Perform client-side direct TUS upload to Bunny Stream
-      const upload = new tus.Upload(file, {
-        endpoint: "https://video.bunnycdn.com/tusupload",
-        retryDelays: [0, 3000, 5000, 10000, 20000],
-        headers: {
-          AuthorizationSignature: signature,
-          AuthorizationExpire: expiry.toString(),
-          VideoId: videoId,
-          LibraryId: libraryId,
-        },
-        metadata: {
-          filename: file.name,
-          filetype: file.type,
-        },
-        onError: (error) => {
-          if (!error.message.includes("abort")) {
-            throw new Error(error.message);
-          }
-        },
-        onProgress: (bytesUploaded, bytesTotal) => {
-          const percentage = Math.round((bytesUploaded / bytesTotal) * 100);
+      const extension = file.name.split(".").pop();
+      const baseName = file.name.substring(0, file.name.lastIndexOf(".")).replace(/[^a-zA-Z0-9]/g, "_");
+      const sanitizedName = `promo_${baseName}_${Date.now()}.${extension}`;
+      const uniquePath = `products/videos/${sanitizedName}`;
+
+      const xhr = new XMLHttpRequest();
+      videoUploadXhrRef.current = xhr;
+
+      xhr.upload.addEventListener("progress", (event) => {
+        if (event.lengthComputable) {
+          const percentage = Math.round((event.loaded / event.total) * 100);
           setVideoUploadProgress(percentage);
-        },
-        onSuccess: () => {
-          // Polling status
-          setBunnyUploadStatus('Encoding');
-          setVideoUploadProgress(0);
-
-          const interval = setInterval(async () => {
-            try {
-              const res = await fetch(`/api/admin/bunny/video?videoId=${videoId}`);
-              if (!res.ok) return;
-              const data = await res.json();
-              
-              if (data.status === 3 || data.status === 4) {
-                clearInterval(interval);
-                pollingIntervalRef.current = null;
-                setBunnyUploadStatus('Ready');
-                setVideoUploadProgress(100);
-                
-                const playUrl = `https://iframe.mediadelivery.net/play/${libraryId}/${videoId}/playlist.m3u8`;
-                setForm((prev: any) => ({ ...prev, video_url: playUrl }));
-                toast.success(`Video processed successfully! 🚀`);
-              } else if (data.status === 5 || data.status === 8) {
-                clearInterval(interval);
-                pollingIntervalRef.current = null;
-                setBunnyUploadStatus('Failed');
-                toast.error("Failed to encode video on Bunny Stream.");
-              } else {
-                setBunnyEncodeProgress(data.encodeProgress || 0);
-              }
-            } catch (err: any) {
-              console.warn("Polling error:", err);
-            }
-          }, 4000);
-
-          pollingIntervalRef.current = interval;
-        },
+        }
       });
 
-      tusUploadRef.current = upload;
-      upload.start();
+      const uploadPromise = new Promise<string>((resolve, reject) => {
+        xhr.onload = () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            const publicUrl = `${supabaseUrl}/storage/v1/object/public/course-images/${uniquePath}`;
+            resolve(publicUrl);
+          } else {
+            reject(new Error(`Upload failed to Supabase: ${xhr.statusText} (${xhr.status})`));
+          }
+        };
+        xhr.onerror = () => reject(new Error("Network error during upload."));
+        xhr.onabort = () => reject(new Error("canceled"));
+      });
 
+      const uploadUrl = `${supabaseUrl}/storage/v1/object/course-images/${uniquePath}`;
+      xhr.open("POST", uploadUrl);
+      xhr.setRequestHeader("Authorization", `Bearer ${supabaseAnonKey}`);
+      xhr.setRequestHeader("apikey", supabaseAnonKey);
+      xhr.setRequestHeader("Content-Type", file.type);
+      xhr.send(file);
+
+      const publicUrl = await uploadPromise;
+
+      setForm((prev: any) => ({
+        ...prev,
+        video_url: publicUrl
+      }));
+
+      toast.success("Promo video uploaded successfully! Don't forget to save changes.");
     } catch (err: any) {
-      setBunnyUploadStatus('Failed');
-      toast.error(err.message || "Bunny Stream upload failed");
+      if (err.message === "canceled") {
+        toast.info("Upload cancelled.");
+      } else {
+        console.error(err);
+        toast.error(err.message || "Error uploading video.");
+      }
       setVideoFileName(null);
       setVideoFileSize(null);
+    } finally {
+      setVideoUploading(false);
+      setVideoUploadProgress(null);
+      videoUploadXhrRef.current = null;
+      e.target.value = "";
     }
   };
 
   const cancelVideoUpload = () => {
-    if (tusUploadRef.current) {
-      tusUploadRef.current.abort();
-      tusUploadRef.current = null;
-    }
-    if (pollingIntervalRef.current) {
-      clearInterval(pollingIntervalRef.current);
-      pollingIntervalRef.current = null;
+    if (videoUploadXhrRef.current) {
+      videoUploadXhrRef.current.abort();
     }
   };
 
@@ -483,17 +454,29 @@ export default function AdminProductsPage() {
     toast.success("External video link set!");
   };
 
-  // Safe Deletes (No hard-deletes from storage without explicit actions)
-  const handleDeleteMedia = (field: "image_url" | "video_url" | number) => {
-    if (!confirm("Remove this media URL? (The file remains in storage unless explicitly deleted)")) return;
+  // Safe Deletes
+  const handleDeleteMedia = async (field: "image_url" | "video_url" | number) => {
     if (field === "image_url") {
+      if (!confirm("Remove this media URL? (The file remains in storage unless explicitly deleted)")) return;
       setForm((prev: any) => ({ ...prev, image_url: "" }));
     } else if (field === "video_url") {
-      setForm((prev: any) => ({ ...prev, video_url: "" }));
-      cancelVideoUpload();
-      setBunnyUploadStatus(null);
-      setVideoUploadProgress(null);
+      const url = form.video_url;
+      if (!url) return;
+      if (!confirm("Are you sure you want to permanently delete this video?")) return;
+      try {
+        if (url.startsWith("http")) {
+          await deleteFileFromUrl(url, "course-images");
+        }
+        setForm((prev: any) => ({ ...prev, video_url: "" }));
+        cancelVideoUpload();
+        setVideoUploading(false);
+        setVideoUploadProgress(null);
+        toast.success("Video deleted successfully.");
+      } catch (err: any) {
+        toast.error(err.message || "Error deleting video.");
+      }
     } else {
+      if (!confirm("Remove this media URL? (The file remains in storage unless explicitly deleted)")) return;
       const newGallery = [...form.gallery];
       newGallery[field] = "";
       setForm((prev: any) => ({ ...prev, gallery: newGallery }));
@@ -992,41 +975,34 @@ export default function AdminProductsPage() {
                         accept="video/*" 
                         onChange={handleVideoUpload}
                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" 
-                        disabled={bunnyUploadStatus === "Uploading" || bunnyUploadStatus === "Encoding"}
+                        disabled={videoUploading}
                       />
                       <div className="space-y-2">
                         <UploadCloud className="w-8 h-8 text-zinc-500 group-hover:text-rose-500 mx-auto transition-colors" />
                         <div className="text-xs font-bold text-white">Drag video here or click to browse</div>
-                        <p className="text-[10px] text-zinc-500">Supports direct upload pipeline to Bunny Stream</p>
+                        <p className="text-[10px] text-zinc-500">Public bucket: course-images/products/videos</p>
                       </div>
 
-                      {videoUploadProgress !== null && bunnyUploadStatus === "Uploading" && (
+                      {videoUploadProgress !== null && videoUploading && (
                         <div className="absolute inset-0 bg-[#0a0a0f]/95 rounded-xl flex flex-col items-center justify-center p-6 space-y-2 z-20">
                           <Loader2 className="w-6 h-6 text-rose-500 animate-spin" />
                           <div className="w-full max-w-xs space-y-1">
                             <div className="flex justify-between text-[10px] font-bold text-white">
-                              <span>Uploading to Bunny Stream...</span>
+                              <span>Uploading to Supabase...</span>
                               <span>{videoUploadProgress}%</span>
                             </div>
                             <div className="w-full bg-white/10 h-1 rounded-full overflow-hidden">
                               <div className="bg-rose-500 h-full" style={{ width: `${videoUploadProgress}%` }} />
                             </div>
                             <p className="text-[9px] text-zinc-500 truncate">{videoFileName} ({videoFileSize})</p>
-                          </div>
-                        </div>
-                      )}
-
-                      {bunnyUploadStatus === "Encoding" && (
-                        <div className="absolute inset-0 bg-[#0a0a0f]/95 rounded-xl flex flex-col items-center justify-center p-6 space-y-2 z-20">
-                          <Loader2 className="w-6 h-6 text-amber-500 animate-spin" />
-                          <div className="w-full max-w-xs space-y-1">
-                            <div className="flex justify-between text-[10px] font-bold text-white animate-pulse">
-                              <span>Processing & Encoding video...</span>
-                              <span>{bunnyEncodeProgress}%</span>
-                            </div>
-                            <div className="w-full bg-white/10 h-1 rounded-full overflow-hidden">
-                              <div className="bg-amber-500 h-full" style={{ width: `${bunnyEncodeProgress}%` }} />
-                            </div>
+                            
+                            <button
+                              type="button"
+                              onClick={cancelVideoUpload}
+                              className="mt-3 w-full py-1.5 bg-red-650/20 hover:bg-red-600 text-red-400 hover:text-white rounded-lg text-[10px] font-bold transition-colors cursor-pointer"
+                            >
+                              Cancel Upload
+                            </button>
                           </div>
                         </div>
                       )}
