@@ -921,7 +921,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                               <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-4 sm:p-5 text-zinc-300 font-cairo text-sm sm:text-base leading-[2] relative">
                                 <span className="absolute -top-3 right-4 bg-[#D6004B] text-white text-[9px] font-black px-2.5 py-0.5 rounded-full font-alexandria">نبذة عن المحاضر</span>
                                 <p className="pt-2">
-                                  أنا يوسف مصطفى، خبير ومتخصص في صناعة المحتوى بالذكاء الاصطناعي لأكثر من 3 سنوات ومؤسس أكاديمية جو سكول التعليمية.
+                                  خبير ومتخصص في صناعة المحتوى بالذكاء الاصطناعي لأكثر من 3 سنوات ومؤسس أكاديمية جو سكول التعليمية.
                                 </p>
                                 <p className="mt-3">
                                   قمت بتدريب أكثر من 2000+ طالب خلال هذه المدة، وأطمح من هذه المنصة أن تكون دوراتي ذات فائدة لكل من يهتم بصناعة محتوى احترافي بالذكاء الاصطناعي لعمله أو حتى الربح منه كمجال منفصل.
@@ -2043,7 +2043,7 @@ function MobileCourseView({
                      
                      <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3.5 text-zinc-300 font-cairo text-xs leading-[1.8] text-right">
                        <p>
-                         أنا يوسف مصطفى، خبير ومتخصص في صناعة المحتوى بالذكاء الاصطناعي لأكثر من 3 سنوات ومؤسس أكاديمية جو سكول التعليمية.
+                         خبير ومتخصص في صناعة المحتوى بالذكاء الاصطناعي لأكثر من 3 سنوات ومؤسس أكاديمية جو سكول التعليمية.
                        </p>
                        <p className="mt-2">
                          قمت بتدريب أكثر من 2000+ طالب خلال هذه المدة، وأطمح من هذه المنصة أن تكون دوراتي ذات فائدة لكل من يهتم بصناعة محتوى احترافي بالذكاء الاصطناعي لعمله أو حتى الربح منه كمجال منفصل.
