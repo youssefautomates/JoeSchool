@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { 
   Sparkles, BookOpen, Clock, ArrowLeft, Star, 
   CheckCircle2, ChevronDown, Award, PlayCircle, ShieldCheck, 
-  Loader2, Play, Users, Check, AlertCircle, HelpCircle, Zap, VolumeX, Volume2, X, ShoppingCart, FileText
+  Loader2, Play, Users, User, Check, AlertCircle, HelpCircle, Zap, VolumeX, Volume2, X, ShoppingCart, FileText
 } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -181,7 +181,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
   const mobileVideoRef = useRef<HTMLVideoElement>(null);
 
   // Tabs State
-  const [activeTab, setActiveTab] = useState<'overview' | 'curriculum' | 'reviews' | 'faq' | 'certificate'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'curriculum' | 'reviews' | 'faq' | 'certificate' | 'instructor'>('overview');
   
   // Accordion curriculum index
   const [openModuleIndex, setOpenModuleIndex] = useState<number | null>(0);
@@ -598,6 +598,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                       { id: 'overview', label: 'الوصف', icon: FileText },
                       { id: 'curriculum', label: 'المنهج', icon: BookOpen },
                       { id: 'certificate', label: 'الشهادة', icon: Award },
+                      { id: 'instructor', label: 'المدرب', icon: User },
                       { id: 'faq', label: 'الأسئلة', icon: HelpCircle }
                     ].map((tab) => {
                       const TabIcon = tab.icon;
@@ -886,6 +887,62 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                         </motion.div>
                       )}
 
+
+                      {activeTab === 'instructor' && (
+                        <motion.div
+                          key="instructor"
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -10 }}
+                          className="space-y-6 text-right"
+                        >
+                          <div className="flex flex-col md:flex-row items-center md:items-start gap-6 sm:gap-8 bg-gradient-to-br from-[#0c0c12] to-[#060609] border border-white/5 rounded-3xl p-6 sm:p-8 relative overflow-hidden shadow-2xl w-full">
+                            {/* Decorative background glows */}
+                            <div className="absolute -top-20 -right-20 w-40 h-40 bg-[#D6004B]/5 rounded-full blur-3xl pointer-events-none" />
+                            <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-orange-600/5 rounded-full blur-3xl pointer-events-none" />
+                            
+                            {/* Photo */}
+                            <div className="relative w-44 h-56 sm:w-48 sm:h-64 rounded-2xl overflow-hidden border border-[#D6004B]/20 shadow-[0_0_20px_rgba(214,0,75,0.15)] shrink-0 self-center md:self-auto">
+                              <img 
+                                src="/instructor-youssef.jpg" 
+                                alt="يوسف مصطفى" 
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                            
+                            {/* Details */}
+                            <div className="space-y-5 flex-grow text-right w-full">
+                              <div className="space-y-1">
+                                <span className="text-[10px] text-[#D6004B] font-black uppercase tracking-widest font-alexandria">مؤسس الأكاديمية</span>
+                                <h3 className="text-xl sm:text-2xl font-alexandria font-black text-white leading-tight">يوسف مصطفى</h3>
+                                <p className="text-xs text-zinc-400 font-bold font-cairo">خبير وصانع محتوى بالذكاء الاصطناعي</p>
+                              </div>
+                              
+                              <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-4 sm:p-5 text-zinc-300 font-cairo text-sm sm:text-base leading-[2] relative">
+                                <span className="absolute -top-3 right-4 bg-[#D6004B] text-white text-[9px] font-black px-2.5 py-0.5 rounded-full font-alexandria">نبذة عن المحاضر</span>
+                                <p className="pt-2">
+                                  أنا يوسف مصطفى، خبير ومتخصص في صناعة المحتوى بالذكاء الاصطناعي لأكثر من 3 سنوات ومؤسس أكاديمية جو سكول التعليمية.
+                                </p>
+                                <p className="mt-3">
+                                  قمت بتدريب أكثر من 2000+ طالب خلال هذه المدة، وأطمح من هذه المنصة أن تكون دوراتي ذات فائدة لكل من يهتم بصناعة محتوى احترافي بالذكاء الاصطناعي لعمله أو حتى الربح منه كمجال منفصل.
+                                </p>
+                              </div>
+                              
+                              {/* Quick stats grid */}
+                              <div className="grid grid-cols-2 gap-4 pt-1">
+                                <div className="bg-white/[0.01] border border-white/5 rounded-xl p-3 text-center">
+                                  <span className="block text-[#D6004B] font-alexandria font-black text-lg sm:text-xl">3+ سنوات</span>
+                                  <span className="text-[10px] text-zinc-500 font-bold font-cairo">الخبرة العملية</span>
+                                </div>
+                                <div className="bg-white/[0.01] border border-white/5 rounded-xl p-3 text-center">
+                                  <span className="block text-[#D6004B] font-alexandria font-black text-lg sm:text-xl">2000+</span>
+                                  <span className="text-[10px] text-zinc-500 font-bold font-cairo">طالب متدرب</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </motion.div>
+                      )}
 
                       {activeTab === 'faq' && (
                         <motion.div
@@ -1951,6 +2008,63 @@ function MobileCourseView({
              )}
 
              
+
+             {activeTab === 'instructor' && (
+               <motion.div
+                 key="instructor-mobile"
+                 initial={{ opacity: 0, y: 10 }}
+                 animate={{ opacity: 1, y: 0 }}
+                 exit={{ opacity: 0, y: -10 }}
+                 className="space-y-4 text-right"
+               >
+                 <div className="flex items-center gap-2 border-b border-white/5 pb-2">
+                   <User className="w-4 h-4 text-[#D6004B]" />
+                   <h3 className="text-xs font-alexandria font-bold text-white">المدرب</h3>
+                 </div>
+                 
+                 <div className="flex flex-col items-center gap-4 bg-gradient-to-br from-[#0c0c12] to-[#060609] border border-white/5 rounded-2xl p-4 relative overflow-hidden shadow-xl text-center">
+                   {/* Decorative background glows */}
+                   <div className="absolute -top-10 -right-10 w-24 h-24 bg-[#D6004B]/5 rounded-full blur-2xl pointer-events-none" />
+                   
+                   <div className="relative w-40 h-52 rounded-xl overflow-hidden border border-[#D6004B]/20 shadow-[0_0_20px_rgba(214,0,75,0.15)] shrink-0">
+                     <img 
+                       src="/instructor-youssef.jpg" 
+                       alt="يوسف مصطفى" 
+                       className="w-full h-full object-cover"
+                     />
+                   </div>
+                   
+                   <div className="space-y-3 w-full">
+                     <div className="space-y-0.5 text-center">
+                       <span className="text-[8px] text-[#D6004B] font-black uppercase tracking-widest font-alexandria">مؤسس الأكاديمية</span>
+                       <h3 className="text-base font-alexandria font-black text-white">يوسف مصطفى</h3>
+                       <p className="text-[10px] text-zinc-400 font-bold font-cairo">خبير وصانع محتوى بالذكاء الاصطناعي</p>
+                     </div>
+                     
+                     <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3.5 text-zinc-300 font-cairo text-xs leading-[1.8] text-right">
+                       <p>
+                         أنا يوسف مصطفى، خبير ومتخصص في صناعة المحتوى بالذكاء الاصطناعي لأكثر من 3 سنوات ومؤسس أكاديمية جو سكول التعليمية.
+                       </p>
+                       <p className="mt-2">
+                         قمت بتدريب أكثر من 2000+ طالب خلال هذه المدة، وأطمح من هذه المنصة أن تكون دوراتي ذات فائدة لكل من يهتم بصناعة محتوى احترافي بالذكاء الاصطناعي لعمله أو حتى الربح منه كمجال منفصل.
+                       </p>
+                     </div>
+
+                     {/* Stats */}
+                     <div className="grid grid-cols-2 gap-3 pt-1">
+                       <div className="bg-white/[0.01] border border-white/5 rounded-lg p-2.5 text-center">
+                         <span className="block text-[#D6004B] font-alexandria font-black text-sm">3+ سنوات</span>
+                         <span className="text-[8px] text-zinc-500 font-bold font-cairo">الخبرة العملية</span>
+                       </div>
+                       <div className="bg-white/[0.01] border border-white/5 rounded-lg p-2.5 text-center">
+                         <span className="block text-[#D6004B] font-alexandria font-black text-sm">2000+</span>
+                         <span className="text-[8px] text-zinc-500 font-bold font-cairo">طالب متدرب</span>
+                       </div>
+                     </div>
+                   </div>
+                 </div>
+               </motion.div>
+             )}
 
              {activeTab === 'faq' && (
                <motion.div
