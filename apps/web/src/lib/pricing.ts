@@ -78,7 +78,10 @@ export function resolveProductPrice(
  */
 export function formatPrice(price: number, currency: Currency): string {
   if (currency === "EGP") {
-    return `${price} ج.م`;
+    if (typeof window !== "undefined" && window.location.pathname.includes("/admin")) {
+      return `${price} EGP`;
+    }
+    return `${price} \u062c.\u0645`;
   }
   return `$${price.toFixed(2)}`;
 }
