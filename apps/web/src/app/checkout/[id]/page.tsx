@@ -9,7 +9,7 @@ import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Lock, ShieldCheck, CreditCard, ChevronRight, Loader2, ShieldAlert, Sparkles, CheckCircle2, Package, Mail } from "lucide-react";
+import { Lock, ShieldCheck, CreditCard, ChevronRight, Loader2, ShieldAlert, Sparkles, CheckCircle2, Package, Mail, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -66,6 +66,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
   const [cardType, setCardType] = useState<"visa" | "mastercard" | "meeza" | null>(null);
   const cardNumberRef = useRef<HTMLInputElement>(null);
   const isFirstRender = useRef(true);
+  const [showPassword, setShowPassword] = useState(false);
 
   // Auto-focus card number when selected
   useEffect(() => {
@@ -801,12 +802,20 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                           <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
                           <Input 
                             placeholder="••••••••" 
-                            type="password"
+                            type={showPassword ? "text" : "password"}
                             dir="ltr"
-                            className={cn("h-12 rounded-xl bg-white/5 border-white/5 text-white text-sm font-cairo hover:bg-white/[0.07] focus:bg-white/10 focus:border-white/20 focus:ring-1 focus:ring-white/20 transition-all pl-11", errors.password && "border-red-500/50 focus:ring-red-500")}
+                            className={cn("h-12 rounded-xl bg-white/5 border-white/5 text-white text-sm font-cairo hover:bg-white/[0.07] focus:bg-white/10 focus:border-white/20 focus:ring-1 focus:ring-white/20 transition-all pl-11 pr-11", errors.password && "border-red-500/50 focus:ring-red-500")}
                             disabled={isLoading}
                             {...register("password")}
                           />
+                          <button
+                            type="button"
+                            onClick={() => setShowPassword(prev => !prev)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center text-zinc-500 hover:text-white transition-colors rounded-lg hover:bg-white/10 cursor-pointer"
+                            tabIndex={-1}
+                          >
+                            {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                          </button>
                         </div>
                         {errors.password && <p className="text-xs text-red-400 font-cairo flex items-center gap-1 mt-1"><ShieldAlert className="w-3 h-3" /> {errors.password.message}</p>}
                       </div>
