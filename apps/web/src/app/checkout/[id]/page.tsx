@@ -291,7 +291,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
 
   const [user, setUser] = useState<any>(null);
 
-  const { register, handleSubmit, setValue, trigger, getValues, setError, formState: { errors } } = useForm<CheckoutValues>({
+  const { register, handleSubmit, setValue, trigger, getValues, setError, clearErrors, formState: { errors } } = useForm<CheckoutValues>({
     resolver: zodResolver(checkoutSchema),
     defaultValues: {
       fullName: "",
@@ -337,7 +337,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
       validateCardFields();
     }
     const passwordVal = getValues("password");
-    if (!user && (!passwordVal || passwordVal.trim() === "")) {
+    if (!user && (!passwordVal || passwordVal.trim() === "") && paymentMethod !== "instapay") {
       setError("password", { type: "manual", message: "يُرجى إكمال جميع الحقول لإتمام الدفع" });
     }
     toast.error("يُرجى إكمال جميع الحقول لإتمام الدفع");
@@ -393,8 +393,8 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
     try {
       let activeUser = user;
 
-      // If user is not logged in, perform Instant Purchase Authentication
-      if (!activeUser) {
+      // If user is not logged in, perform Instant Purchase Authentication (only for card & wallet)
+      if (!activeUser && paymentMethod !== "instapay") {
         if (!data.password) {
           setError("password", { type: "manual", message: "يُرجى إكمال جميع الحقول لإتمام الدفع" });
           toast.error("يُرجى إكمال جميع الحقول لإتمام الدفع");
@@ -794,7 +794,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                     {errors.email && <p className="text-xs text-red-400 font-cairo flex items-center gap-1 mt-1"><ShieldAlert className="w-3 h-3" /> {errors.email.message}</p>}
                   </div>
 
-                  {!user && (
+                  {!user && paymentMethod !== "instapay" && (
                     <>
                       <div className="space-y-2">
                         <Label className="font-cairo font-bold text-zinc-400 text-sm">كلمة المرور</Label>
@@ -880,22 +880,15 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                         {currency === "EGP" && (
                           <div 
                             onClick={async () => {
-                              const fieldsToValidate: ("fullName" | "email" | "password")[] = ["fullName", "email"];
-                              if (!user) {
-                                fieldsToValidate.push("password");
-                              }
+                              const fieldsToValidate: ("fullName" | "email")[] = ["fullName", "email"];
                               const isValid = await trigger(fieldsToValidate);
-                              const passwordVal = getValues("password");
-                              const isPasswordMissing = !user && (!passwordVal || passwordVal.trim() === "");
 
-                              if (isValid && !isPasswordMissing) {
+                              if (isValid) {
                                 setPaymentMethod("instapay");
+                                clearErrors("password");
                                 setShowInstapayModal(true);
                               } else {
                                 toast.error("يُرجى إكمال جميع الحقول لإتمام الدفع");
-                                if (isPasswordMissing) {
-                                  setError("password", { type: "manual", message: "يُرجى إكمال جميع الحقول لإتمام الدفع" });
-                                }
                               }
                             }}
                             className={cn(
@@ -1016,13 +1009,27 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                     {!(appliedCoupon && appliedCoupon.percent === 100) ? (
                       <>
                         <Button 
-                          type="submit" 
+                          type={paymentMethod === "instapay" ? "button" : "submit"}
+                          onClick={async (e) => {
+                            if (paymentMethod === "instapay") {
+                              e.preventDefault();
+                              const isValid = await trigger(["fullName", "email"]);
+                              if (isValid) {
+                                clearErrors("password");
+                                setShowInstapayModal(true);
+                              } else {
+                                toast.error("يُرجى إكمال جميع الحقول لإتمام الدفع");
+                              }
+                            }
+                          }}
                           disabled={isLoading}
                           className={cn(
                             "w-full h-14 text-white font-alexandria text-lg font-bold rounded-xl transition-all active:scale-[0.98] cursor-pointer",
                             paymentMethod === "card" 
                               ? "bg-[#D6004B] hover:bg-[#b0003d] shadow-[0_4px_14px_0_rgba(214,0,75,0.39)] hover:shadow-[0_6px_20px_rgba(214,0,75,0.23)] hover:-translate-y-0.5" 
-                              : "bg-emerald-600 hover:bg-emerald-500 shadow-[0_4px_14px_0_rgba(16,185,129,0.39)] hover:shadow-[0_6px_20px_rgba(16,185,129,0.23)] hover:-translate-y-0.5"
+                              : paymentMethod === "instapay"
+                                ? "bg-purple-600 hover:bg-purple-500 shadow-[0_4px_14px_0_rgba(147,51,234,0.39)] hover:shadow-[0_6px_20px_rgba(147,51,234,0.23)] hover:-translate-y-0.5"
+                                : "bg-emerald-600 hover:bg-emerald-500 shadow-[0_4px_14px_0_rgba(16,185,129,0.39)] hover:shadow-[0_6px_20px_rgba(16,185,129,0.23)] hover:-translate-y-0.5"
                           )}
                         >
                           {isLoading ? (
@@ -1033,6 +1040,8 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                           ) : (
                             paymentMethod === "card" ? (
                               <>إتمام الدفع الآمن <Lock className="w-5 h-5 mr-3 opacity-80" /></>
+                            ) : paymentMethod === "instapay" ? (
+                              <>إتمام الطلب عن طريق إنستاباي</>
                             ) : (
                               <>إتمام الطلب بواسطة المحفظة</>
                             )

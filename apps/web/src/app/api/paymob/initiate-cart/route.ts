@@ -443,22 +443,6 @@ export async function POST(req: Request) {
     // INSTAPAY FLOW: MANUAL TRANSFER RECORDING
     // ==========================================
     if (paymentMethod === "instapay") {
-      let resolvedUserId: string | null = null;
-      const hasCourse = verifiedItems.some(i => i.id.startsWith("course-"));
-      if (hasCourse) {
-        try {
-          const userAccount = await getOrCreateUser(email, `${firstName} ${lastName}`, password || undefined);
-          resolvedUserId = userAccount.userId;
-          
-          // Update all orders with the same customer ID
-          await supabase
-            .from("orders")
-            .update({ customer_id: resolvedUserId })
-            .in("id", dbOrders.map(o => o.id));
-        } catch (err: any) {
-          console.error(`[PAYMOB_CART_INITIATE] ❌ Error in getOrCreateUser for Instapay:`, err.message || err);
-        }
-      }
       return NextResponse.json({
         success: true,
         orderId: dbOrders[0].id
