@@ -488,7 +488,6 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                       ) : (
                         <CustomVideoPlayer 
                           src={activeMedia.url}
-                          poster={product.image_url || undefined}
                           className="w-full h-full"
                         />
                       )}
@@ -899,7 +898,6 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                         ) : (
                           <CustomVideoPlayer 
                             src={activeMedia.url}
-                            poster={product.image_url || undefined}
                             className="w-full h-full"
                           />
                         )}

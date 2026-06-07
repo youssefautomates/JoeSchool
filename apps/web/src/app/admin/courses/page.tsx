@@ -1500,7 +1500,7 @@ export default function AdminCoursesPage() {
                   <input 
                     value={courseForm.promo_video_id || ""} 
                     onChange={e => setCourseForm({ ...courseForm, promo_video_id: e.target.value })} 
-                    placeholder={promoUploading ? "Uploading promo video..." : "Bunny Stream Video ID..."}
+                    placeholder={promoUploading ? "Uploading promo video..." : "Video ID or URL..."}
                     disabled={promoUploading}
                     className="bg-white/5 border border-white/5 rounded-xl py-3 px-4 text-sm flex-1 text-zinc-300 disabled:opacity-50" 
                   />
@@ -2098,7 +2098,7 @@ export default function AdminCoursesPage() {
                 </div>
               </div>
               
-              {/* Video URL with Live Preview & Direct Upload to Bunny Stream */}
+              {/* Video URL with Live Preview & Direct Upload */}
               {editingLesson.lecture_type === "video" && (
                 <div className="flex flex-col gap-3 sm:col-span-2 space-y-2 bg-white/[0.01] border border-white/5 p-5 rounded-2xl">
                   <div className="flex items-center justify-between border-b border-white/5 pb-2.5">
@@ -2106,7 +2106,7 @@ export default function AdminCoursesPage() {
                       <Video className="w-4 h-4" />
                       <span>Secure Video Upload & Hosting (Private Streaming)</span>
                     </label>
-                    <span className="text-[10px] text-zinc-500 font-bold">Powered by Bunny Stream API</span>
+                    <span className="text-[10px] text-zinc-500 font-bold">Private Video Hosting</span>
                   </div>
 
                   {/* Tab Selector - Only show if video is not yet uploaded/linked */}
@@ -2136,7 +2136,7 @@ export default function AdminCoursesPage() {
                         )}
                       >
                         <LinkIcon className="w-3.5 h-3.5" />
-                        <span>Link External Bunny.net Video</span>
+                        <span>Link External Video</span>
                       </button>
                     </div>
                   )}
@@ -2158,7 +2158,7 @@ export default function AdminCoursesPage() {
                         </div>
                         <div className="text-sm font-bold text-white">Drag video file here or click to browse</div>
                         <p className="text-zinc-500 text-xs font-sans">
-                          Uploads directly to Bunny Stream (supports very large files)
+                          Uploads directly to streaming server (supports very large files)
                         </p>
                       </div>
 
@@ -2168,7 +2168,7 @@ export default function AdminCoursesPage() {
                           <Loader2 className="w-8 h-8 text-[#D6004B] animate-spin" />
                           <div className="w-full max-w-xs space-y-1">
                             <div className="flex justify-between text-xs font-bold text-white">
-                              <span>Uploading video to Bunny Stream...</span>
+                              <span>Uploading video to server...</span>
                               <span>{videoUploadProgress}%</span>
                             </div>
                             <div className="w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
@@ -2190,7 +2190,7 @@ export default function AdminCoursesPage() {
                   {videoSourceTab === "link" && !(editingLesson.video_url || editingLesson.video_id) && (
                     <div className="bg-black/25 border border-white/5 rounded-xl p-6 space-y-4">
                       <div className="flex flex-col gap-1.5">
-                        <label className="text-xs text-zinc-400 font-bold font-sans">Enter a Bunny.net video URL or ID</label>
+                        <label className="text-xs text-zinc-400 font-bold font-sans">Enter a video URL or ID</label>
                         <p className="text-[10px] text-zinc-500 leading-normal mb-1 font-sans">
                           e.g. embed URL, playback URL, or raw video GUID. We'll extract the video ID and fetch full details automatically.
                         </p>
@@ -2231,7 +2231,7 @@ export default function AdminCoursesPage() {
                     <div className="border border-dashed border-amber-500/20 rounded-xl p-8 text-center bg-black/25 relative">
                       <div className="space-y-3 max-w-md mx-auto">
                         <Loader2 className="w-10 h-10 text-amber-500 animate-spin mx-auto" />
-                        <div className="text-sm font-bold text-white">Encoding & processing video on Bunny Stream servers</div>
+                        <div className="text-sm font-bold text-white">Encoding & processing video on server</div>
                         <div className="w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
                           <div 
                             className="bg-amber-500 h-full transition-all duration-300"
@@ -2254,7 +2254,7 @@ export default function AdminCoursesPage() {
                         type="text" 
                         value={editingLesson.video_id || editingLesson.video_url || ""} 
                         onChange={e => setEditingLesson({ ...editingLesson, video_url: e.target.value })} 
-                        placeholder="Video path or Bunny Video ID..." 
+                        placeholder="Video path or Video ID..." 
                         className="bg-white/5 border border-white/5 rounded-xl py-3 px-4 text-xs flex-1 font-mono text-zinc-300" 
                       />
                       {(editingLesson.video_url || editingLesson.video_id) && (
@@ -2298,7 +2298,7 @@ export default function AdminCoursesPage() {
                         ) : (
                           <div className="text-center p-4">
                             <Video className="w-8 h-8 text-zinc-600 mx-auto mb-2" />
-                            <p className="text-zinc-500 text-[11px] font-bold">Video is privately hosted on Bunny Stream</p>
+                            <p className="text-zinc-500 text-[11px] font-bold">Video is privately hosted</p>
                           </div>
                         )}
                       </div>

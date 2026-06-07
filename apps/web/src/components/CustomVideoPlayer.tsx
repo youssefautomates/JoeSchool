@@ -8,11 +8,10 @@ import { cn } from "@/lib/utils";
 
 interface CustomVideoPlayerProps {
   src: string;
-  poster?: string;
   className?: string;
 }
 
-export function CustomVideoPlayer({ src, poster, className }: CustomVideoPlayerProps) {
+export function CustomVideoPlayer({ src, className }: CustomVideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -28,6 +27,9 @@ export function CustomVideoPlayer({ src, poster, className }: CustomVideoPlayerP
   const [isLoading, setIsLoading] = useState(true);
   const [showSpeedMenu, setShowSpeedMenu] = useState(false);
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
+  // Center click feedback flash
+  const [centerFlash, setCenterFlash] = useState<"play" | "pause" | null>(null);
+  const centerFlashTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Auto-hide controls timer
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -77,18 +79,35 @@ export function CustomVideoPlayer({ src, poster, className }: CustomVideoPlayerP
   }, [isPlaying, hasInteracted, showSpeedMenu]);
 
   // Play / Pause toggle
-  const togglePlay = (e?: React.MouseEvent) => {
-    e?.stopPropagation();
+  const togglePlay = (e?: React.MouseEvent | React.TouchEvent, showFlash = false) => {
+    if (e && 'stopPropagation' in e) e.stopPropagation();
     const video = videoRef.current;
     if (!video) return;
 
     if (isPlaying) {
       video.pause();
       setIsPlaying(false);
+      if (showFlash) triggerCenterFlash("pause");
     } else {
       video.play().catch(() => {});
       setIsPlaying(true);
+      if (showFlash) triggerCenterFlash("play");
     }
+    resetControlsTimeout();
+  };
+
+  // Trigger center flash icon feedback
+  const triggerCenterFlash = (type: "play" | "pause") => {
+    if (centerFlashTimeoutRef.current) clearTimeout(centerFlashTimeoutRef.current);
+    setCenterFlash(type);
+    centerFlashTimeoutRef.current = setTimeout(() => setCenterFlash(null), 700);
+  };
+
+  // Center area click handler (mouse + touch)
+  const handleCenterClick = (e: React.MouseEvent | React.TouchEvent) => {
+    e.stopPropagation();
+    if (!hasInteracted) return; // pre-interaction is handled by overlay
+    togglePlay(undefined, true);
     resetControlsTimeout();
   };
 
@@ -243,7 +262,7 @@ export function CustomVideoPlayer({ src, poster, className }: CustomVideoPlayerP
       <video
         ref={videoRef}
         src={src}
-        poster={poster}
+        preload="auto"
         playsInline
         className={cn(
           "w-full h-full object-contain transition-all duration-700",
@@ -297,31 +316,55 @@ export function CustomVideoPlayer({ src, poster, className }: CustomVideoPlayerP
       {hasInteracted && (
         <div 
           className={cn(
-            "absolute inset-0 z-30 bg-gradient-to-t from-black/80 via-transparent to-black/35 flex flex-col justify-end p-3 transition-opacity duration-300 pointer-events-none",
+            "absolute inset-0 z-30 flex flex-col justify-end transition-opacity duration-300",
             showControls ? "opacity-100" : "opacity-0"
           )}
           onClick={(e) => {
-            // Click on overlay pauses/plays the video
             if (e.target === e.currentTarget) {
-              togglePlay();
+              handleCenterClick(e);
             }
           }}
         >
-          {/* Top title or shadow bar (optional) */}
-          <div className="absolute top-0 inset-x-0 h-16 pointer-events-none" />
+          {/* Center click-to-play/pause area (covers video area, excludes bottom controls) */}
+          <div
+            className="absolute top-0 left-0 right-0 z-10 cursor-pointer"
+            style={{ height: 'calc(100% - 80px)' }}
+            onClick={handleCenterClick}
+            onTouchEnd={(e) => { e.preventDefault(); handleCenterClick(e); }}
+          />
 
-          {/* Bottom control panel */}
-          <div className="w-full space-y-2.5 pointer-events-auto bg-[#0a0a0f]/85 backdrop-blur-md border border-white/5 rounded-2xl p-3 shadow-2xl">
+          {/* Center flash feedback */}
+          {centerFlash && (
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
+              <div
+                key={centerFlash}
+                className="w-16 h-16 rounded-full bg-black/50 flex items-center justify-center"
+                style={{ animation: 'centerFlashAnim 0.6s ease-out forwards' }}
+              >
+                {centerFlash === "pause" ? (
+                  <Pause className="w-7 h-7 text-white fill-current" />
+                ) : (
+                  <Play className="w-7 h-7 text-white fill-current ml-1" />
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Bottom gradient fade */}
+          <div className="absolute bottom-0 inset-x-0 h-36 bg-gradient-to-t from-black/85 via-black/40 to-transparent pointer-events-none" />
+
+          {/* Bottom control panel — full width, transparent */}
+          <div className="relative z-30 w-full px-4 pb-3 pt-1 space-y-1.5 pointer-events-auto" dir="ltr">
             
             {/* Progress Slider (Full width) */}
-            <div className="flex items-center gap-3 group/progress relative">
+            <div className="flex items-center group/progress relative">
               <input
                 type="range"
                 min={0}
                 max={duration || 100}
                 value={currentTime}
                 onChange={handleSeekChange}
-                className="w-full h-1 bg-white/20 rounded-full appearance-none cursor-pointer outline-none transition-all accent-[#D6004B] hover:h-1.5 focus:outline-none"
+                className="w-full h-1 bg-white/20 rounded-full appearance-none cursor-pointer outline-none transition-all accent-[#D6004B] hover:h-1.5 focus:outline-none custom-video-slider"
                 style={{
                   background: `linear-gradient(to right, #D6004B 0%, #D6004B ${(currentTime / (duration || 1)) * 100}%, rgba(255, 255, 255, 0.2) ${(currentTime / (duration || 1)) * 100}%, rgba(255, 255, 255, 0.2) 100%)`
                 }}
@@ -331,46 +374,41 @@ export function CustomVideoPlayer({ src, poster, className }: CustomVideoPlayerP
             {/* Controls Row */}
             <div className="flex items-center justify-between">
               
-              {/* Left Side Controls: Play, Back 10s, Fwd 10s */}
-              <div className="flex items-center gap-4">
+              {/* Left Side Controls: Play, Back 10s, Fwd 10s, Volume, Time */}
+              <div className="flex items-center gap-3">
+                {/* Play/Pause */}
                 <button 
                   onClick={togglePlay} 
-                  className="text-white hover:text-[#D6004B] transition-colors p-1"
+                  className="text-white hover:text-[#D6004B] transition-colors p-1 flex items-center justify-center shrink-0"
                 >
                   {isPlaying ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current ml-0.5" />}
                 </button>
 
+                {/* Rewind 10s */}
                 <button 
                   onClick={handleRewind10} 
-                  className="text-zinc-400 hover:text-white transition-colors p-1 relative flex items-center justify-center group"
+                  className="text-zinc-400 hover:text-white transition-colors p-1 relative flex items-center justify-center group shrink-0"
                   title="10 seconds back"
                 >
                   <RotateCcw className="w-4.5 h-4.5" />
-                  <span className="absolute text-[8px] font-bold mt-1 scale-90 text-white font-sans">10</span>
+                  <span className="absolute text-[7px] font-bold mt-1 scale-90 text-white font-sans">10</span>
                 </button>
 
+                {/* Forward 10s */}
                 <button 
                   onClick={handleForward10} 
-                  className="text-zinc-400 hover:text-white transition-colors p-1 relative flex items-center justify-center group"
+                  className="text-zinc-400 hover:text-white transition-colors p-1 relative flex items-center justify-center group shrink-0"
                   title="10 seconds forward"
                 >
                   <RotateCw className="w-4.5 h-4.5" />
-                  <span className="absolute text-[8px] font-bold mt-1 scale-90 text-white font-sans">10</span>
+                  <span className="absolute text-[7px] font-bold mt-1 scale-90 text-white font-sans">10</span>
                 </button>
-              </div>
-
-              {/* Right Side Controls: Time, Volume, Speed, Fullscreen */}
-              <div className="flex items-center gap-4">
-                {/* Time Indicator */}
-                <div className="text-[11px] text-zinc-300 font-medium font-sans">
-                  {formatTime(currentTime)} / {formatTime(duration)}
-                </div>
 
                 {/* Volume slider & mute */}
-                <div className="flex items-center gap-1.5 group/volume">
+                <div className="flex items-center gap-1 group/volume shrink-0">
                   <button 
                     onClick={toggleMute} 
-                    className="text-zinc-350 hover:text-white transition-colors p-1"
+                    className="text-zinc-350 hover:text-white transition-colors p-1 flex items-center justify-center"
                   >
                     {isMuted ? <VolumeX className="w-4.5 h-4.5 text-zinc-400" /> : <Volume2 className="w-4.5 h-4.5" />}
                   </button>
@@ -382,13 +420,21 @@ export function CustomVideoPlayer({ src, poster, className }: CustomVideoPlayerP
                     step={0.05}
                     value={isMuted ? 0 : volume}
                     onChange={handleVolumeSliderChange}
-                    className="w-0 overflow-hidden group-hover/volume:w-16 h-1 appearance-none cursor-pointer outline-none transition-all duration-350 rounded-full accent-[#D6004B]"
+                    className="w-0 overflow-hidden group-hover/volume:w-16 h-1 appearance-none cursor-pointer outline-none transition-all duration-300 rounded-full accent-[#D6004B]"
                     style={{
                       background: `linear-gradient(to right, #D6004B 0%, #D6004B ${(isMuted ? 0 : volume) * 100}%, rgba(255, 255, 255, 0.2) ${(isMuted ? 0 : volume) * 100}%, rgba(255, 255, 255, 0.2) 100%)`
                     }}
                   />
                 </div>
 
+                {/* Time Indicator */}
+                <div className="text-[10px] sm:text-[11px] text-zinc-300 font-medium font-sans pl-1 select-none">
+                  {formatTime(currentTime)} / {formatTime(duration)}
+                </div>
+              </div>
+
+              {/* Right Side Controls: Speed (Cog), Fullscreen */}
+              <div className="flex items-center gap-3">
                 {/* Speed Controls Cog */}
                 <div className="relative">
                   <button 
@@ -397,7 +443,7 @@ export function CustomVideoPlayer({ src, poster, className }: CustomVideoPlayerP
                       setShowSpeedMenu(!showSpeedMenu);
                     }}
                     className={cn(
-                      "text-zinc-350 hover:text-white transition-colors p-1",
+                      "text-zinc-350 hover:text-white transition-colors p-1 flex items-center justify-center",
                       showSpeedMenu && "text-[#D6004B] hover:text-[#D6004B]"
                     )}
                   >
@@ -405,7 +451,7 @@ export function CustomVideoPlayer({ src, poster, className }: CustomVideoPlayerP
                   </button>
 
                   {showSpeedMenu && (
-                    <div className="absolute bottom-9 right-0 bg-[#0c0c12]/95 backdrop-blur-xl border border-white/10 rounded-xl py-1.5 w-20 shadow-2xl z-50 flex flex-col text-center font-sans text-xs">
+                    <div className="absolute bottom-9 right-0 bg-[#0a0a0f]/95 backdrop-blur-xl border border-white/10 rounded-xl py-1 w-20 shadow-2xl z-50 flex flex-col text-center font-sans text-[11px]">
                       {[0.5, 1, 1.25, 1.5, 2].map((speed) => (
                         <button
                           key={speed}
@@ -414,7 +460,7 @@ export function CustomVideoPlayer({ src, poster, className }: CustomVideoPlayerP
                             changeSpeed(speed);
                           }}
                           className={cn(
-                            "py-1.5 text-zinc-400 hover:bg-white/5 hover:text-white transition-colors",
+                            "py-1 text-zinc-400 hover:bg-white/5 hover:text-white transition-colors",
                             playbackSpeed === speed && "text-[#D6004B] font-bold"
                           )}
                         >
@@ -428,7 +474,7 @@ export function CustomVideoPlayer({ src, poster, className }: CustomVideoPlayerP
                 {/* Fullscreen Button */}
                 <button 
                   onClick={toggleFullscreen} 
-                  className="text-zinc-350 hover:text-white transition-colors p-1"
+                  className="text-zinc-350 hover:text-white transition-colors p-1 flex items-center justify-center"
                 >
                   {isFullscreen ? <Minimize className="w-4.5 h-4.5" /> : <Maximize className="w-4.5 h-4.5" />}
                 </button>
@@ -438,6 +484,40 @@ export function CustomVideoPlayer({ src, poster, className }: CustomVideoPlayerP
           </div>
         </div>
       )}
+      <style dangerouslySetInnerHTML={{ __html: `
+        .custom-video-slider::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          appearance: none;
+          width: 10px;
+          height: 10px;
+          border-radius: 50%;
+          background: #D6004B;
+          cursor: pointer;
+          opacity: 0;
+          transition: opacity 0.2s, transform 0.2s;
+        }
+        .group\\/progress:hover .custom-video-slider::-webkit-slider-thumb {
+          opacity: 1;
+        }
+        .custom-video-slider::-moz-range-thumb {
+          width: 10px;
+          height: 10px;
+          border: 0;
+          border-radius: 50%;
+          background: #D6004B;
+          cursor: pointer;
+          opacity: 0;
+          transition: opacity 0.2s, transform 0.2s;
+        }
+        .group\\/progress:hover .custom-video-slider::-moz-range-thumb {
+          opacity: 1;
+        }
+        @keyframes centerFlashAnim {
+          0%   { opacity: 1; transform: scale(0.7); }
+          40%  { opacity: 1; transform: scale(1.15); }
+          100% { opacity: 0; transform: scale(1.4); }
+        }
+      `}} />
     </div>
   );
 }

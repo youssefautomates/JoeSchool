@@ -202,8 +202,18 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
       
       const firstSlug = s[0]?.lessons[0]?.slug || "introduction";
       setFirstLessonSlug(firstSlug);
+
+      // ── Critical path: resolve promo video URL BEFORE showing the page ──
+      // This ensures the video is ready to autoplay the instant the page renders
+      if (c.promo_video_id) {
+        try {
+          const res = await fetch(`/api/video/showcase?videoId=${c.promo_video_id}`);
+          const data = await res.json();
+          if (data.url) setPromoVideoSignedUrl(data.url);
+        } catch {}
+      }
       
-      // Stop blocking the page load here so content appears fast
+      // Now unblock the page — video URL is already set
       setIsLoading(false);
 
       // Pre-fetch all showcase video URLs in parallel for instant synchronous autoplay on click
@@ -223,16 +233,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
         });
       }
 
-      // Fetch all secondary page details in parallel
-      const promoVideoPromise = c.promo_video_id
-        ? fetch(`/api/video/showcase?videoId=${c.promo_video_id}`)
-            .then(res => res.json())
-            .then(data => {
-              if (data.url) setPromoVideoSignedUrl(data.url);
-            })
-            .catch(() => {})
-        : Promise.resolve();
-
+      // Fetch remaining secondary details in parallel (non-blocking)
       const enrollmentPromise = supabaseClient.auth.getSession()
         .then(async ({ data: { session } }) => {
           if (session) {
@@ -262,7 +263,6 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
         .catch(() => {});
 
       await Promise.all([
-        promoVideoPromise,
         enrollmentPromise,
         reviewsPromise,
         recommendationsPromise
@@ -441,10 +441,14 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                     ) : (
                       <CustomVideoPlayer 
                         src={previewVideoUrl}
-                        poster={course.image_url || undefined}
                         className="w-full h-full"
                       />
                     )
+                  ) : course.promo_video_id ? (
+                    /* Video is expected but URL is still loading — black placeholder */
+                    <div className="absolute inset-0 flex items-center justify-center bg-black">
+                      <Loader2 className="w-8 h-8 text-[#D6004B] animate-spin" />
+                    </div>
                   ) : (
                     <>
                       {course.image_url ? (
@@ -1529,10 +1533,14 @@ function MobileCourseView({
           ) : (
             <CustomVideoPlayer 
               src={previewVideoUrl}
-              poster={course.image_url || undefined}
               className="w-full h-full"
             />
           )
+        ) : course.promo_video_id ? (
+          /* Video is expected but URL is still loading — black placeholder */
+          <div className="absolute inset-0 flex items-center justify-center bg-black">
+            <Loader2 className="w-7 h-7 text-[#D6004B] animate-spin" />
+          </div>
         ) : (
           <>
             {course.image_url ? (
