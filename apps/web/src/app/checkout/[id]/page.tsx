@@ -317,6 +317,10 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
     if (paymentMethod === "card") {
       validateCardFields();
     }
+    const passwordVal = getValues("password");
+    if (!user && (!passwordVal || passwordVal.trim() === "")) {
+      setError("password", { type: "manual", message: "يُرجى إكمال جميع الحقول لإتمام الدفع" });
+    }
     toast.error("يُرجى إكمال جميع الحقول لإتمام الدفع");
   };
 
