@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 import { createOrder } from "@/lib/orders";
 import { headers } from "next/headers";
+import { getOrCreateUser } from "@/lib/authHelpers";
 import { resolveUserCurrency, resolveProductPrice, getUSDtoEGPExchangeRate } from "@/lib/pricing";
 import { getKV } from "@/lib/kv";
 
@@ -31,7 +32,7 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
     console.log("[CART_BACKEND_REQUEST_BODY] Received:", JSON.stringify(body, null, 2));
-    const { amount, email, firstName, lastName, phone, items, paymentMethod, cardData, password } = body;
+    const { amount, email, firstName, lastName, phone, items, paymentMethod, cardData, password, instapayScreenshotUrl } = body;
 
     // --- Geolocation Currency Resolver & Tracking ---
     const headersList = await headers();
@@ -216,7 +217,7 @@ export async function POST(req: Request) {
         amount: userCurrency === "USD" ? item.finalUSDPrice : item.finalEGPPrice,
         currency: userCurrency,
         status: "pending",
-        payment_id: "PENDING", 
+        payment_id: paymentMethod === "instapay" ? (instapayScreenshotUrl || "PENDING_INSTAPAY") : "PENDING", 
         original_amount_usd: userCurrency === "USD" ? item.finalUSDPrice : null,
         charged_amount_egp: item.finalEGPPrice,
         exchange_rate: userCurrency === "USD" ? exchangeRate : null,
@@ -232,7 +233,7 @@ export async function POST(req: Request) {
         city,
         timezone,
         ip_address: ipAddress,
-        payment_provider: paymentMethod === "card" ? "paymob" : "paymob",
+        payment_provider: paymentMethod === "instapay" ? "instapay" : "paymob",
         device_type: deviceType,
         browser,
         os,
@@ -436,6 +437,32 @@ export async function POST(req: Request) {
         || payData.detail 
         || (payData.data ? JSON.stringify(payData.data) : 'Unknown error');
       throw new Error(`Payment declined: ${declineReason}`);
+    }
+
+    // ==========================================
+    // INSTAPAY FLOW: MANUAL TRANSFER RECORDING
+    // ==========================================
+    if (paymentMethod === "instapay") {
+      let resolvedUserId: string | null = null;
+      const hasCourse = verifiedItems.some(i => i.id.startsWith("course-"));
+      if (hasCourse) {
+        try {
+          const userAccount = await getOrCreateUser(email, `${firstName} ${lastName}`, password || undefined);
+          resolvedUserId = userAccount.userId;
+          
+          // Update all orders with the same customer ID
+          await supabase
+            .from("orders")
+            .update({ customer_id: resolvedUserId })
+            .in("id", dbOrders.map(o => o.id));
+        } catch (err: any) {
+          console.error(`[PAYMOB_CART_INITIATE] ❌ Error in getOrCreateUser for Instapay:`, err.message || err);
+        }
+      }
+      return NextResponse.json({
+        success: true,
+        orderId: dbOrders[0].id
+      });
     }
 
     throw new Error("Invalid Payment Method");
