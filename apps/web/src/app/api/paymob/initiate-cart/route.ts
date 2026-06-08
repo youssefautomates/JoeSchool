@@ -167,7 +167,7 @@ export async function POST(req: Request) {
         : resolvedPrice.price;
 
       // Surcharge gateway fee recovery calculation
-      const isFeeActive = userCurrency === "EGP" && globalFeeEnabled && (dbItem.enable_gateway_fee !== false) && itemEGPPrice > 0;
+      const isFeeActive = userCurrency === "EGP" && paymentMethod !== "instapay" && globalFeeEnabled && (dbItem.enable_gateway_fee !== false) && itemEGPPrice > 0;
       const gatewayFeeEGP = isFeeActive ? Math.ceil(itemEGPPrice * (globalFeePercentage / 100)) : 0;
       const itemFinalEGPPrice = itemEGPPrice + gatewayFeeEGP;
 

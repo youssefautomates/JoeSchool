@@ -232,7 +232,7 @@ export async function POST(req: Request) {
     const globalFeeEnabled = settings.globalGatewayFeeEnabled !== false;
     const globalFeePercentage = typeof settings.globalGatewayFeePercentage === "number" ? settings.globalGatewayFeePercentage : 3.00;
 
-    const isFeeActive = userCurrency === "EGP" && globalFeeEnabled && (dbItem.enable_gateway_fee !== false) && expectedPriceEGP > 0;
+    const isFeeActive = userCurrency === "EGP" && paymentMethod !== "instapay" && globalFeeEnabled && (dbItem.enable_gateway_fee !== false) && expectedPriceEGP > 0;
     const gatewayFeeEGP = isFeeActive ? Math.ceil(expectedPriceEGP * (globalFeePercentage / 100)) : 0;
     const finalPriceEGP = expectedPriceEGP + gatewayFeeEGP;
 
@@ -602,6 +602,6 @@ export async function POST(req: Request) {
     throw new Error("Invalid Payment Method");
   } catch (error: any) {
     console.error("[PAYMOB_ERROR]", error);
-    return NextResponse.json({ error: "عذراً، حدث خطأ أثناء معالجة الطلب. يرجى المحاولة مرة أخرى أو التواصل مع الدعم." }, { status: 500 });
+    return NextResponse.json({ error: `عذراً، حدث خطأ أثناء معالجة الطلب: ${error.message || error}` }, { status: 500 });
   }
 }
