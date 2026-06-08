@@ -593,21 +593,6 @@ export async function POST(req: Request) {
     // INSTAPAY FLOW: MANUAL TRANSFER RECORDING
     // ==========================================
     if (paymentMethod === "instapay") {
-      let resolvedUserId: string | null = null;
-      if (isCourseItem) {
-        try {
-          const userAccount = await getOrCreateUser(email, `${firstName} ${lastName}`, password || undefined);
-          resolvedUserId = userAccount.userId;
-          
-          // Update the order row in the database with the resolved customer_id
-          await supabaseAdmin
-            .from("orders")
-            .update({ customer_id: resolvedUserId })
-            .eq("id", dbOrder.id);
-        } catch (err: any) {
-          console.error(`[PAYMOB_INITIATE] ❌ Error in getOrCreateUser for Instapay:`, err.message || err);
-        }
-      }
       return NextResponse.json({
         success: true,
         orderId: dbOrder.id

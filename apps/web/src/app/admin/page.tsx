@@ -149,6 +149,11 @@ export default function AdminDashboard() {
 
   const hasFetched = useRef(false);
   const audioContextRef = useRef<AudioContext | null>(null);
+  // Use refs for notification prefs and sound so the Supabase channel is not recreated on pref changes
+  const notificationPrefsRef = useRef(notificationPrefs);
+  const soundEnabledRef = useRef(soundEnabled);
+  useEffect(() => { notificationPrefsRef.current = notificationPrefs; }, [notificationPrefs]);
+  useEffect(() => { soundEnabledRef.current = soundEnabled; }, [soundEnabled]);
 
   const handleSeedTelemetry = async () => {
     setSeeding(true);
@@ -323,7 +328,7 @@ export default function AdminDashboard() {
   };
 
   const playNewOrderSound = () => {
-    if (!soundEnabled) return;
+    if (!soundEnabledRef.current) return;
     try {
       if (!audioContextRef.current) {
         audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
@@ -369,7 +374,7 @@ export default function AdminDashboard() {
           );
 
           // Pushing alert to Notification center if preferred
-          if (notificationPrefs.new_order) {
+          if (notificationPrefsRef.current.new_order) {
             const newAlert: AlertNotification = {
               id: `alert-ord-${Date.now()}`,
               type: "new_order",
@@ -382,7 +387,7 @@ export default function AdminDashboard() {
           }
 
           // Revenue spike alert
-          if (newOrder.status === "completed" && newOrder.amount >= 1500 && notificationPrefs.revenue_spike) {
+          if (newOrder.status === "completed" && newOrder.amount >= 1500 && notificationPrefsRef.current.revenue_spike) {
             const spikeAlert: AlertNotification = {
               id: `alert-spike-${Date.now()}`,
               type: "revenue_spike",
@@ -403,7 +408,7 @@ export default function AdminDashboard() {
           const newEnroll = payload.new as any;
           setEnrollments(prev => [newEnroll, ...prev]);
           
-          if (notificationPrefs.new_student) {
+          if (notificationPrefsRef.current.new_student) {
             const enrollAlert: AlertNotification = {
               id: `alert-enroll-${Date.now()}`,
               type: "new_student",
@@ -424,7 +429,7 @@ export default function AdminDashboard() {
           const newReview = payload.new as any;
           setReviews(prev => [newReview, ...prev]);
 
-          if (notificationPrefs.new_review) {
+          if (notificationPrefsRef.current.new_review) {
             const reviewAlert: AlertNotification = {
               id: `alert-rev-${Date.now()}`,
               type: "new_review",
@@ -458,7 +463,7 @@ export default function AdminDashboard() {
 
     // 3. Security anomaly periodic simulator
     let anomalyInterval: any;
-    if (notificationPrefs.suspicious_login) {
+    if (notificationPrefsRef.current.suspicious_login) {
       anomalyInterval = setInterval(() => {
         // 5% chance of triggering a mock security anomaly warning every 90 seconds
         if (Math.random() > 0.90) {
@@ -481,7 +486,8 @@ export default function AdminDashboard() {
       if (pollInterval) clearInterval(pollInterval);
       if (anomalyInterval) clearInterval(anomalyInterval);
     };
-  }, [pollingActive, soundEnabled, notificationPrefs]);
+  // Only re-run on pollingActive change — refs handle the rest without recreating channels
+  }, [pollingActive]);
 
   async function loadData() {
     setLoading(true);
@@ -669,6 +675,13 @@ export default function AdminDashboard() {
       ? ((conversionRate - prevConversionRate) / prevConversionRate) * 100 
       : 0;
 
+    // Additional funnel stats for overview cards
+    const rangeEventsAll = analyticsEvents.filter(e => new Date(e.created_at) >= dateCutoff);
+    const totalVisitorsCount = new Set(rangeEventsAll.map(e => e.session_id)).size;
+    const addToCartCount = rangeEventsAll.filter(e => e.event_name === "add_to_cart").length;
+    const checkoutStartedCount = rangeEventsAll.filter(e => e.event_name === "checkout_started").length;
+    const abandonedCheckouts = Math.max(0, checkoutStartedCount - completed.length);
+
     return {
       grossRevenue,
       netRevenue,
@@ -684,6 +697,10 @@ export default function AdminDashboard() {
       aov,
       abandonmentRate,
       sessions: totalSessions,
+      totalVisitors: totalVisitorsCount,
+      addToCartCount,
+      checkoutStartedCount,
+      abandonedCheckouts,
       revenueGrowth,
       egpNetGrowth,
       usdGrossGrowth,

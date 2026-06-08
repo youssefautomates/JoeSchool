@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { DollarSign, Activity, Globe, ShieldCheck, ShoppingCart } from "lucide-react";
+import { DollarSign, Activity, Globe, ShieldCheck, ShoppingCart, Users, TrendingDown, MousePointerClick, ShoppingBag } from "lucide-react";
 import KPICard from "./KPICard";
 import InsightsSection from "./InsightsSection";
 import CollapsibleSection from "./CollapsibleSection";
@@ -53,8 +53,8 @@ export default function OverviewSection({
   return (
     <div className="space-y-6 sm:space-y-8 text-left" dir="ltr">
       
-      {/* 6 KPI Cards Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+      {/* KPI Cards Grid - 5 per row on large screens */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-5 gap-4">
         <KPICard
           label="EGP Revenue (Gross)"
           value={formatPrice(stats.egpGrossRevenue, "EGP")}
@@ -94,6 +94,46 @@ export default function OverviewSection({
           icon={ShoppingCart}
           trend={getTrendStr(stats.successfulOrdersGrowth)}
           trendUp={stats.successfulOrdersGrowth >= 0}
+        />
+      </div>
+
+      {/* Funnel KPI Cards Row 2 */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+        <KPICard
+          label="Unique Visitors"
+          value={stats.totalVisitors ?? 0}
+          desc={`Tracked sessions (${dateRange}d)`}
+          icon={Users}
+          trend={stats.totalVisitors > 0 ? "Live sessions" : undefined}
+          trendUp={true}
+          trendNeutral={!stats.totalVisitors}
+        />
+        <KPICard
+          label="Add to Cart Events"
+          value={stats.addToCartCount ?? 0}
+          desc="Products added to cart"
+          icon={ShoppingBag}
+          trend={stats.addToCartCount > 0 ? "Purchase intent" : undefined}
+          trendUp={true}
+          trendNeutral={!stats.addToCartCount}
+        />
+        <KPICard
+          label="Checkout Started"
+          value={stats.checkoutStartedCount ?? 0}
+          desc="Entered checkout flow"
+          icon={MousePointerClick}
+          trend={stats.checkoutStartedCount > 0 ? "High intent" : undefined}
+          trendUp={true}
+          trendNeutral={!stats.checkoutStartedCount}
+        />
+        <KPICard
+          label="Abandoned Checkouts"
+          value={stats.abandonedCheckouts ?? 0}
+          desc="Started checkout, didn't pay"
+          icon={TrendingDown}
+          trend={stats.abandonedCheckouts > 0 ? "Needs recovery" : "All converted!"}
+          trendUp={false}
+          trendNeutral={!stats.abandonedCheckouts}
         />
         <KPICard
           label="Conversion Rate"
