@@ -25,7 +25,8 @@ import { trackEvent } from "@/lib/analytics";
 import { resolveUserCurrency, resolveProductPrice, formatPrice, getUSDtoEGPExchangeRate, type Currency } from "@/lib/pricing";
 
 const checkoutSchema = z.object({
-  fullName: z.string().min(3, { message: "الاسم يجب أن يكون 3 أحرف على الأقل" }),
+  firstName: z.string().min(2, { message: "الاسم الأول يجب أن يكون حرفين على الأقل" }),
+  lastName: z.string().min(2, { message: "الاسم الأخير يجب أن يكون حرفين على الأقل" }),
   email: z.string().email({ message: "البريد الإلكتروني غير صالح" }),
   password: z.string().optional(),
 });
@@ -294,7 +295,8 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
   const { register, handleSubmit, setValue, trigger, getValues, setError, clearErrors, formState: { errors } } = useForm<CheckoutValues>({
     resolver: zodResolver(checkoutSchema),
     defaultValues: {
-      fullName: "",
+      firstName: "",
+      lastName: "",
       email: "",
       password: "",
     },
@@ -305,7 +307,10 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
       const { data: { session } } = await supabaseClient.auth.getSession();
       if (session?.user) {
         setUser(session.user);
-        setValue("fullName", session.user.user_metadata?.full_name || "");
+        const fullName = session.user.user_metadata?.full_name || "";
+        const parts = fullName.split(" ");
+        setValue("firstName", parts[0] || "");
+        setValue("lastName", parts.slice(1).join(" ") || "");
         setValue("email", session.user.email || "");
       }
     }
@@ -337,7 +342,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
       validateCardFields();
     }
     const passwordVal = getValues("password");
-    if (!user && (!passwordVal || passwordVal.trim() === "") && paymentMethod !== "instapay") {
+    if (!user && (!passwordVal || passwordVal.trim() === "")) {
       setError("password", { type: "manual", message: "يُرجى إكمال جميع الحقول لإتمام الدفع" });
     }
     toast.error("يُرجى إكمال جميع الحقول لإتمام الدفع");
@@ -393,8 +398,8 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
     try {
       let activeUser = user;
 
-      // If user is not logged in, perform Instant Purchase Authentication (only for card & wallet)
-      if (!activeUser && paymentMethod !== "instapay") {
+      // If user is not logged in, perform Instant Purchase Authentication
+      if (!activeUser) {
         if (!data.password) {
           setError("password", { type: "manual", message: "يُرجى إكمال جميع الحقول لإتمام الدفع" });
           toast.error("يُرجى إكمال جميع الحقول لإتمام الدفع");
@@ -402,39 +407,41 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
           return;
         }
 
-        // Try to sign up
-        const { data: signUpData, error: signUpError } = await supabaseClient.auth.signUp({
-          email: data.email,
-          password: data.password,
-          options: {
-            data: {
-              full_name: data.fullName,
-              phone: "",
+        if (paymentMethod !== "instapay") {
+          // Try to sign up
+          const { data: signUpData, error: signUpError } = await supabaseClient.auth.signUp({
+            email: data.email,
+            password: data.password,
+            options: {
+              data: {
+                full_name: `${data.firstName} ${data.lastName}`,
+                phone: "",
+              }
             }
-          }
-        });
+          });
 
-        if (signUpError) {
-          // If already registered, try signing in with password automatically
-          if (signUpError.message.includes("already registered") || signUpError.status === 422) {
-            const { data: signInData, error: signInError } = await supabaseClient.auth.signInWithPassword({
-              email: data.email,
-              password: data.password,
-            });
+          if (signUpError) {
+            // If already registered, try signing in with password automatically
+            if (signUpError.message.includes("already registered") || signUpError.status === 422) {
+              const { data: signInData, error: signInError } = await supabaseClient.auth.signInWithPassword({
+                email: data.email,
+                password: data.password,
+              });
 
-            if (signInError) {
-              toast.error("هذا البريد مسجل بالفعل بكلمة مرور أخرى. يرجى إدخال كلمة المرور الصحيحة لحسابك، أو تسجيل الدخول.");
+              if (signInError) {
+                toast.error("هذا البريد مسجل بالفعل بكلمة مرور أخرى. يرجى إدخال كلمة المرور الصحيحة لحسابك، أو تسجيل الدخول.");
+                setIsLoading(false);
+                return;
+              }
+              activeUser = signInData.user;
+            } else {
+              toast.error(`فشل إنشاء الحساب: ${signUpError.message}`);
               setIsLoading(false);
               return;
             }
-            activeUser = signInData.user;
           } else {
-            toast.error(`فشل إنشاء الحساب: ${signUpError.message}`);
-            setIsLoading(false);
-            return;
+            activeUser = signUpData.user;
           }
-        } else {
-          activeUser = signUpData.user;
         }
       }
 
@@ -455,8 +462,8 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
       const payloadBody = {
         amount: finalPriceEGP,
         email: data.email,
-        firstName: data.fullName.split(" ")[0],
-        lastName: data.fullName.split(" ").slice(1).join(" ") || "Customer",
+        firstName: data.firstName,
+        lastName: data.lastName,
         phone: "",
         productId: resolvedParams.id,
         paymentMethod: isFree ? "free" : paymentMethod, 
@@ -512,7 +519,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
              : `مرحباً، لقد قمت بدفع قيمة منتج ${product?.title || ''} أريد الحصول عليه الآن.`
             ) + 
             `\n\nبيانات العميل:\n` +
-            `- الاسم: ${data.fullName}\n` +
+            `- الاسم: ${data.firstName} ${data.lastName}\n` +
             `- البريد الإلكتروني: ${data.email}\n` +
             (data.password ? `- كلمة المرور: ${data.password}\n` : '') +
             (instapayScreenshotUrl ? `\nإثبات التحويل:\n${instapayScreenshotUrl}` : '');
@@ -642,7 +649,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                 
                 <h2 className="text-xl font-alexandria font-bold text-white mb-6">معلومات الاستلام</h2>
                 
-                <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="space-y-4">
+                <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="space-y-4" dir="rtl">
 
                   {/* Compact Order Summary Box */}
                   <div className="bg-[#050505]/40 border border-white/5 rounded-2xl p-4 mb-6 space-y-4">
@@ -763,19 +770,34 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                     </div>
                   </div>
 
-                  {/* Name field */}
-                  <div className="space-y-2">
-                    <Label className="font-cairo font-bold text-zinc-400 text-sm">الاسم الكامل</Label>
-                    <div className="relative">
-                      <Input 
-                        placeholder="الاسم الثلاثي لتأكيد الملكية" 
-                        className={cn("h-12 rounded-xl bg-white/5 border-white/5 text-white text-sm font-cairo hover:bg-white/[0.07] focus:bg-white/10 focus:border-white/20 focus:ring-1 focus:ring-white/20 transition-all", errors.fullName && "border-red-500/50 focus:ring-red-500")}
-                        disabled={isLoading}
-                        autoFocus
-                        {...register("fullName")}
-                      />
+                  {/* First Name & Last Name Grid */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label className="font-cairo font-bold text-zinc-400 text-sm">الاسم الأول</Label>
+                      <div className="relative">
+                        <Input 
+                          placeholder="الاسم الأول" 
+                          className={cn("h-12 rounded-xl bg-white/5 border-white/5 text-white text-sm font-cairo hover:bg-white/[0.07] focus:bg-white/10 focus:border-white/20 focus:ring-1 focus:ring-white/20 transition-all text-right", errors.firstName && "border-red-500/50 focus:ring-red-500")}
+                          disabled={isLoading}
+                          autoFocus
+                          {...register("firstName")}
+                        />
+                      </div>
+                      {errors.firstName && <p className="text-[10px] text-red-400 font-cairo flex items-center gap-1 mt-1"><ShieldAlert className="w-3 h-3" /> {errors.firstName.message}</p>}
                     </div>
-                    {errors.fullName && <p className="text-xs text-red-400 font-cairo flex items-center gap-1 mt-1"><ShieldAlert className="w-3 h-3" /> {errors.fullName.message}</p>}
+
+                    <div className="space-y-2">
+                      <Label className="font-cairo font-bold text-zinc-400 text-sm">الاسم الأخير</Label>
+                      <div className="relative">
+                        <Input 
+                          placeholder="الاسم الأخير" 
+                          className={cn("h-12 rounded-xl bg-white/5 border-white/5 text-white text-sm font-cairo hover:bg-white/[0.07] focus:bg-white/10 focus:border-white/20 focus:ring-1 focus:ring-white/20 transition-all text-right", errors.lastName && "border-red-500/50 focus:ring-red-500")}
+                          disabled={isLoading}
+                          {...register("lastName")}
+                        />
+                      </div>
+                      {errors.lastName && <p className="text-[10px] text-red-400 font-cairo flex items-center gap-1 mt-1"><ShieldAlert className="w-3 h-3" /> {errors.lastName.message}</p>}
+                    </div>
                   </div>
 
                   <div className="space-y-2">
@@ -794,7 +816,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                     {errors.email && <p className="text-xs text-red-400 font-cairo flex items-center gap-1 mt-1"><ShieldAlert className="w-3 h-3" /> {errors.email.message}</p>}
                   </div>
 
-                  {!user && paymentMethod !== "instapay" && (
+                  {!user && (
                     <>
                       <div className="space-y-2">
                         <Label className="font-cairo font-bold text-zinc-400 text-sm">كلمة المرور</Label>
@@ -879,17 +901,8 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
 
                         {currency === "EGP" && (
                           <div 
-                            onClick={async () => {
-                              const fieldsToValidate: ("fullName" | "email")[] = ["fullName", "email"];
-                              const isValid = await trigger(fieldsToValidate);
-
-                              if (isValid) {
-                                setPaymentMethod("instapay");
-                                clearErrors("password");
-                                setShowInstapayModal(true);
-                              } else {
-                                toast.error("يُرجى إكمال جميع الحقول لإتمام الدفع");
-                              }
+                            onClick={() => {
+                              setPaymentMethod("instapay");
                             }}
                             className={cn(
                               "cursor-pointer border rounded-2xl p-3.5 flex items-center gap-3 transition-all duration-300 hover:scale-[1.01] active:scale-[0.99]",
@@ -1013,12 +1026,21 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                           onClick={async (e) => {
                             if (paymentMethod === "instapay") {
                               e.preventDefault();
-                              const isValid = await trigger(["fullName", "email"]);
-                              if (isValid) {
-                                clearErrors("password");
+                              const fieldsToValidate: ("firstName" | "lastName" | "email" | "password")[] = ["firstName", "lastName", "email"];
+                              if (!user) {
+                                fieldsToValidate.push("password");
+                              }
+                              const isValid = await trigger(fieldsToValidate);
+                              const passwordVal = getValues("password");
+                              const isPasswordMissing = !user && (!passwordVal || passwordVal.trim() === "");
+
+                              if (isValid && !isPasswordMissing) {
                                 setShowInstapayModal(true);
                               } else {
                                 toast.error("يُرجى إكمال جميع الحقول لإتمام الدفع");
+                                if (isPasswordMissing) {
+                                  setError("password", { type: "manual", message: "يُرجى إكمال جميع الحقول لإتمام الدفع" });
+                                }
                               }
                             }
                           }}
