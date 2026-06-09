@@ -503,9 +503,9 @@ export default function Home() {
                       
                       {/* Discount Badge on Image */}
                       {coursePricing && coursePricing.original_price > coursePricing.price && (
-                        <div className="absolute bottom-3 right-3 z-20">
-                          <span className="bg-emerald-500 text-white font-black text-[9px] font-alexandria py-1 px-2.5 rounded-lg shadow-md animate-pulse">
-                            وفر {coursePricing.discount_pct}%
+                        <div className="absolute top-4 left-4 z-20">
+                          <span className="bg-gradient-to-r from-[#ff0f53] to-[#ff00b3] text-white font-black text-[9px] font-alexandria py-1 px-2.5 rounded-lg shadow-[0_0_15px_rgba(214,0,75,0.5)] animate-pulse border border-white/10">
+                            خصم {coursePricing.discount_pct}%
                           </span>
                         </div>
                       )}
