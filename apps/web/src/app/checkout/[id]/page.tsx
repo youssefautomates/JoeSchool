@@ -292,8 +292,9 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
 
   const [user, setUser] = useState<any>(null);
 
-  const { register, handleSubmit, setValue, trigger, getValues, setError, clearErrors, formState: { errors } } = useForm<CheckoutValues>({
+  const { register, handleSubmit, setValue, trigger, getValues, setError, clearErrors, watch, formState: { errors } } = useForm<CheckoutValues>({
     resolver: zodResolver(checkoutSchema),
+    mode: "onChange",
     defaultValues: {
       firstName: "",
       lastName: "",
@@ -301,6 +302,11 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
       password: "",
     },
   });
+
+  const firstNameValue = watch("firstName");
+  const lastNameValue = watch("lastName");
+  const emailValue = watch("email");
+  const passwordValue = watch("password");
 
   useEffect(() => {
     async function checkUser() {
@@ -777,7 +783,14 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                       <div className="relative">
                         <Input 
                           placeholder="الاسم الأول" 
-                          className={cn("h-12 rounded-xl bg-white/5 border-white/5 text-white text-sm font-cairo hover:bg-white/[0.07] focus:bg-white/10 focus:border-white/20 focus:ring-1 focus:ring-white/20 transition-all text-right", errors.firstName && "border-red-500/50 focus:ring-red-500")}
+                          className={cn(
+                            "h-12 rounded-xl bg-white/5 border text-white text-sm font-cairo hover:bg-white/[0.07] focus:bg-white/10 focus:ring-1 transition-all text-right",
+                            firstNameValue && firstNameValue.length > 0
+                              ? (errors.firstName 
+                                  ? "border-red-500/50 focus:border-red-500 focus:ring-red-500" 
+                                  : "border-emerald-500/50 focus:border-emerald-500 focus:ring-emerald-500")
+                              : "border-white/5 focus:border-white/20 focus:ring-white/20"
+                          )}
                           disabled={isLoading}
                           autoFocus
                           {...register("firstName")}
@@ -791,7 +804,14 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                       <div className="relative">
                         <Input 
                           placeholder="الاسم الأخير" 
-                          className={cn("h-12 rounded-xl bg-white/5 border-white/5 text-white text-sm font-cairo hover:bg-white/[0.07] focus:bg-white/10 focus:border-white/20 focus:ring-1 focus:ring-white/20 transition-all text-right", errors.lastName && "border-red-500/50 focus:ring-red-500")}
+                          className={cn(
+                            "h-12 rounded-xl bg-white/5 border text-white text-sm font-cairo hover:bg-white/[0.07] focus:bg-white/10 focus:ring-1 transition-all text-right",
+                            lastNameValue && lastNameValue.length > 0
+                              ? (errors.lastName 
+                                  ? "border-red-500/50 focus:border-red-500 focus:ring-red-500" 
+                                  : "border-emerald-500/50 focus:border-emerald-500 focus:ring-emerald-500")
+                              : "border-white/5 focus:border-white/20 focus:ring-white/20"
+                          )}
                           disabled={isLoading}
                           {...register("lastName")}
                         />
@@ -803,12 +823,26 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                   <div className="space-y-2">
                     <Label className="font-cairo font-bold text-zinc-400 text-sm">البريد الإلكتروني</Label>
                     <div className="relative">
-                      <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                      <Mail 
+                        className={cn(
+                          "absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors",
+                          emailValue && emailValue.length > 0
+                            ? (errors.email ? "text-red-400" : "text-emerald-400")
+                            : "text-zinc-500"
+                        )} 
+                      />
                       <Input 
                         placeholder="name@email.com" 
                         type="email"
                         dir="ltr"
-                        className={cn("h-12 rounded-xl bg-white/5 border-white/5 text-white text-sm font-cairo hover:bg-white/[0.07] focus:bg-white/10 focus:border-white/20 focus:ring-1 focus:ring-white/20 transition-all pl-11", errors.email && "border-red-500/50 focus:ring-red-500")}
+                        className={cn(
+                          "h-12 rounded-xl bg-white/5 border text-white text-sm font-cairo hover:bg-white/[0.07] focus:bg-white/10 focus:ring-1 transition-all pl-11",
+                          emailValue && emailValue.length > 0
+                            ? (errors.email 
+                                ? "border-red-500/50 focus:border-red-500 focus:ring-red-500" 
+                                : "border-emerald-500/50 focus:border-emerald-500 focus:ring-emerald-500")
+                            : "border-white/5 focus:border-white/20 focus:ring-white/20"
+                        )}
                         disabled={isLoading}
                         {...register("email")}
                       />
@@ -821,19 +855,38 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                       <div className="space-y-2">
                         <Label className="font-cairo font-bold text-zinc-400 text-sm">كلمة المرور</Label>
                         <div className="relative">
-                          <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                          <Lock 
+                            className={cn(
+                              "absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors",
+                              passwordValue && passwordValue.length > 0
+                                ? (errors.password ? "text-red-400" : "text-emerald-400")
+                                : "text-zinc-500"
+                            )} 
+                          />
                           <Input 
                             placeholder="••••••••" 
                             type={showPassword ? "text" : "password"}
                             dir="ltr"
-                            className={cn("h-12 rounded-xl bg-white/5 border-white/5 text-white text-sm font-cairo hover:bg-white/[0.07] focus:bg-white/10 focus:border-white/20 focus:ring-1 focus:ring-white/20 transition-all pl-11 pr-11", errors.password && "border-red-500/50 focus:ring-red-500")}
+                            className={cn(
+                              "h-12 rounded-xl bg-white/5 border text-white text-sm font-cairo hover:bg-white/[0.07] focus:bg-white/10 focus:ring-1 transition-all pl-11 pr-11",
+                              passwordValue && passwordValue.length > 0
+                                ? (errors.password 
+                                    ? "border-red-500/50 focus:border-red-500 focus:ring-red-500" 
+                                    : "border-emerald-500/50 focus:border-emerald-500 focus:ring-emerald-500")
+                                : "border-white/5 focus:border-white/20 focus:ring-white/20"
+                            )}
                             disabled={isLoading}
                             {...register("password")}
                           />
                           <button
                             type="button"
                             onClick={() => setShowPassword(prev => !prev)}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center text-zinc-500 hover:text-white transition-colors rounded-lg hover:bg-white/10 cursor-pointer"
+                            className={cn(
+                              "absolute right-3 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center transition-colors rounded-lg hover:bg-white/10 cursor-pointer",
+                              passwordValue && passwordValue.length > 0
+                                ? (errors.password ? "text-red-400 hover:text-red-300" : "text-emerald-400 hover:text-emerald-300")
+                                : "text-zinc-500 hover:text-white"
+                            )}
                             tabIndex={-1}
                           >
                             {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}

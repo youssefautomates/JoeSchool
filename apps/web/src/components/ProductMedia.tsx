@@ -146,7 +146,9 @@ export function ProductMedia({
       )}
 
       {/* Subtle bottom gradient for card content readability */}
-      <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0f]/80 via-transparent to-transparent opacity-60" />
+      {!staticOnly && (
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0f]/80 via-transparent to-transparent opacity-60" />
+      )}
     </div>
   );
 }

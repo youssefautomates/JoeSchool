@@ -492,7 +492,7 @@ export default function Home() {
                     {/* Glow Light Sweep Shimmer Effect */}
                     <div className="absolute inset-0 w-[50%] h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12 -translate-x-[200%] group-hover:translate-x-[350%] transition-transform duration-1000 ease-out pointer-events-none z-10" />
                     {/* Course Card Top Banner */}
-                    <div className="relative h-48 bg-zinc-950 overflow-hidden border-b border-white/5">
+                    <div className="relative w-full aspect-video bg-zinc-950 overflow-hidden border-b border-white/5">
                       {course.image_url && (
                         <img 
                           src={course.image_url} 
@@ -500,15 +500,7 @@ export default function Home() {
                           className="absolute inset-0 w-full h-full object-cover group-hover:scale-112 transition-transform duration-700 ease-out"
                         />
                       )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-[#07070c] via-transparent to-black/30" />
                       
-                      {/* Left Badge (Category) */}
-                      <div className="absolute top-4 left-4 z-20">
-                        <span className="bg-black/50 backdrop-blur-md text-white border border-white/10 font-cairo text-[9px] font-bold py-1 px-3 rounded-lg shadow-lg">
-                          {course.category}
-                        </span>
-                      </div>
-
                       {/* Discount Badge on Image */}
                       {coursePricing && coursePricing.original_price > coursePricing.price && (
                         <div className="absolute bottom-3 right-3 z-20">
@@ -845,7 +837,7 @@ export default function Home() {
                           {/* Glow Light Sweep Shimmer Effect */}
                           <div className="absolute inset-0 w-[50%] h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12 -translate-x-[200%] group-hover:translate-x-[350%] transition-transform duration-1000 ease-out pointer-events-none z-10" />
                           {/* Media Area */}
-                          <div className="relative w-full aspect-video overflow-hidden border-b border-white/5">
+                          <div className="relative aspect-video overflow-hidden border-b border-white/5">
                             <ProductMedia 
                               image_url={primaryImage}
                               video_url={primaryVideo}
@@ -863,13 +855,6 @@ export default function Home() {
                               ) : product.is_featured ? (
                                 <Badge className="bg-[#D6004B] text-white border-none font-cairo text-[9px] md:text-[10px] py-0.5 px-2.5 shadow-lg rounded-md font-bold">الأكثر مبيعاً</Badge>
                               ) : null}
-                            </div>
-
-                            {/* Category Badge */}
-                            <div className="absolute top-4 right-4 md:top-6 md:right-6 z-20">
-                              <span className="bg-[#D6004B]/15 text-[#D6004B] border border-[#D6004B]/30 font-cairo text-[9px] md:text-[10px] font-black py-1 px-3 rounded-full backdrop-blur-md shadow-[0_0_15px_rgba(214,0,75,0.2)] tracking-wide">
-                                {getProductCategory(product)}
-                              </span>
                             </div>
 
                             {/* Wishlist Heart Button */}
