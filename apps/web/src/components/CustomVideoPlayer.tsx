@@ -89,6 +89,10 @@ export function CustomVideoPlayer({ src, className }: CustomVideoPlayerProps) {
       setIsPlaying(false);
       if (showFlash) triggerCenterFlash("pause");
     } else {
+      if (video.ended || video.currentTime >= duration) {
+        video.currentTime = 0;
+        setCurrentTime(0);
+      }
       video.play().catch(() => {});
       setIsPlaying(true);
       if (showFlash) triggerCenterFlash("play");
