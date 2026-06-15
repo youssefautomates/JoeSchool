@@ -1,4 +1,4 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { Resend } from "resend";
 
 /**
@@ -77,13 +77,49 @@ export async function GET(req: Request) {
       to: targetEmail,
       subject: "🧪 JoeSchool - Custom Domain Verified Test Email",
       html: `
-        <div style="direction: rtl; font-family: sans-serif; padding: 20px; background-color: #f9f9fc; border-radius: 12px; border: 1px solid rgba(0,0,0,0.05);">
-          <h2 style="color: #D6004B;">🧪 اختبار بريد النطاق المخصص</h2>
-          <p>أهلاً بك، هذه رسالة بريد إلكتروني تجريبية لتأكيد نجاح ربط النطاق المخصص بنجاح 100%!</p>
-          <hr style="border: 0; border-top: 1px solid #ddd; margin: 20px 0;"/>
-          <p style="font-size: 12px; color: #666;">المرسل الفعلي: ${sender}</p>
-          <p style="font-size: 12px; color: #999;">توقيت الإرسال: ${new Date().toLocaleString()}</p>
-        </div>
+        <!DOCTYPE html>
+        <html dir="rtl" lang="ar">
+        <head>
+          <meta charset="utf-8">
+        </head>
+        <body style="margin:0;padding:0;background-color:#f5f7fa;direction:rtl;font-family:'Segoe UI', Arial, sans-serif;">
+          <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f5f7fa;padding:30px 0;">
+            <tr>
+              <td align="center">
+                <table width="100%" cellpadding="0" cellspacing="0" style="max-width:580px;background-color:#ffffff;border-radius:20px;overflow:hidden;border: 1px solid #e2e8f0;box-shadow: 0 10px 30px rgba(0,0,0,0.025);">
+                  <!-- Header -->
+                  <tr>
+                    <td style="padding:30px 24px;text-align:center;background-color:#050505;border-bottom:4px solid #D6004B;">
+                      <img src="${process.env.NEXT_PUBLIC_APP_URL || 'https://www.joeschool.com'}/logo-email.png" alt="JoeSchool Logo" style="height: 40px; display: block; margin: 0 auto 12px auto;" />
+                      <h2 style="margin: 0; color: #ffffff; font-size: 20px; font-weight: 800; font-family: 'Segoe UI', Arial, sans-serif;">🧪 اختبار توصيلية البريد</h2>
+                    </td>
+                  </tr>
+                  <!-- Body -->
+                  <tr>
+                    <td style="padding:32px 24px; text-align: center; direction: rtl;">
+                      <h3 style="color: #16a34a; font-size: 20px; font-weight: bold; margin-top: 0;">🎉 تم الاتصال والربط بنجاح!</h3>
+                      <p style="font-size: 14px; line-height: 1.6; color: #334155; font-family: 'Segoe UI', Arial, sans-serif;">
+                        أهلاً بك، هذه رسالة بريد إلكتروني تجريبية لتأكيد نجاح ربط النطاق المخصص بنجاح 100% وإمكانية إرسال البريد بصورة سليمة.
+                      </p>
+                      
+                      <div style="background-color: #fcfcfd; border-radius: 12px; border: 1px solid #eef2f6; padding: 16px; margin-top: 24px; text-align: right; font-size: 12px; color: #64748b;">
+                        <p style="margin: 4px 0;"><strong>المرسل الفعلي:</strong> ${sender}</p>
+                        <p style="margin: 4px 0;"><strong>توقيت الإرسال:</strong> ${new Date().toLocaleString('ar-EG')}</p>
+                      </div>
+                    </td>
+                  </tr>
+                  <!-- Footer -->
+                  <tr>
+                    <td style="padding:24px;text-align:center;background-color:#f8fafc;border-top: 1px solid #e2e8f0;">
+                      <p style="color:#94a3b8;font-size:11px;margin:0;font-family: 'Segoe UI', Arial, sans-serif;">&copy; ${new Date().getFullYear()} JoeSchool. جميع الحقوق محفوظة.</p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </body>
+        </html>
       `
     });
 

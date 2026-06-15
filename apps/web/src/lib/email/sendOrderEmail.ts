@@ -154,16 +154,16 @@ export async function sendOrderEmail(
       if (product.isCourse) {
         productsBlock += `
         <tr>
-          <td style="padding: 10px 0;">
-            <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0; direction: rtl;">
+          <td style="padding: 8px 0;">
+            <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #fcfcfd; border-radius: 16px; border: 1px solid #eef2f6; direction: rtl;">
               <tr>
-                <td style="padding: 20px; text-align: right;">
-                  <span style="font-size: 11px; color: #b91c1c; font-weight: bold; font-family: 'Segoe UI', Arial, sans-serif; display: block; margin-bottom: 4px;">🎓 دورة تعليمية معتمدة</span>
-                  <h3 style="margin: 0 0 12px 0; font-size: 16px; color: #0f172a; font-weight: bold; font-family: 'Segoe UI', Arial, sans-serif;">${product.title}</h3>
+                <td style="padding: 24px; text-align: right;">
+                  <span style="font-size: 12px; color: #D6004B; font-weight: bold; font-family: 'Segoe UI', Arial, sans-serif; display: inline-block; padding: 4px 10px; background-color: #fff0f5; border-radius: 20px; margin-bottom: 8px;">🎓 دورة تعليمية معتمدة</span>
+                  <h3 style="margin: 0 0 16px 0; font-size: 18px; color: #0f172a; font-weight: bold; font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.4;">${product.title}</h3>
                   <table cellpadding="0" cellspacing="0" style="margin-top: 5px;">
                     <tr>
-                      <td style="background-color: #b91c1c; border-radius: 6px;">
-                        <a href="${dashboardLink}" style="display: inline-block; padding: 10px 20px; color: #ffffff; text-decoration: none; font-weight: bold; font-size: 13px; font-family: 'Segoe UI', Arial, sans-serif;">🚀 ابدأ التعلم الآن</a>
+                      <td style="background-color: #D6004B; border-radius: 10px; box-shadow: 0 4px 12px rgba(214, 0, 75, 0.25);">
+                        <a href="${dashboardLink}" style="display: inline-block; padding: 12px 24px; color: #ffffff; text-decoration: none; font-weight: bold; font-size: 14px; font-family: 'Segoe UI', Arial, sans-serif;">🚀 ابدأ التعلم الآن</a>
                       </td>
                     </tr>
                   </table>
@@ -176,16 +176,16 @@ export async function sendOrderEmail(
       } else {
         productsBlock += `
         <tr>
-          <td style="padding: 10px 0;">
-            <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0; direction: rtl;">
+          <td style="padding: 8px 0;">
+            <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #fcfcfd; border-radius: 16px; border: 1px solid #eef2f6; direction: rtl;">
               <tr>
-                <td style="padding: 20px; text-align: right;">
-                  <span style="font-size: 11px; color: #15803d; font-weight: bold; font-family: 'Segoe UI', Arial, sans-serif; display: block; margin-bottom: 4px;">⬇️ منتج رقمي جاهز للتحميل</span>
-                  <h3 style="margin: 0 0 12px 0; font-size: 16px; color: #0f172a; font-weight: bold; font-family: 'Segoe UI', Arial, sans-serif;">${product.title}</h3>
+                <td style="padding: 24px; text-align: right;">
+                  <span style="font-size: 12px; color: #15803d; font-weight: bold; font-family: 'Segoe UI', Arial, sans-serif; display: inline-block; padding: 4px 10px; background-color: #f0fdf4; border-radius: 20px; margin-bottom: 8px;">⬇️ منتج رقمي جاهز للتحميل</span>
+                  <h3 style="margin: 0 0 16px 0; font-size: 18px; color: #0f172a; font-weight: bold; font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.4;">${product.title}</h3>
                   <table cellpadding="0" cellspacing="0" style="margin-top: 5px;">
                     <tr>
-                      <td style="background-color: #15803d; border-radius: 6px;">
-                        <a href="${downloadLink || '#'}" style="display: inline-block; padding: 10px 20px; color: #ffffff; text-decoration: none; font-weight: bold; font-size: 13px; font-family: 'Segoe UI', Arial, sans-serif;">⬇️ تحميل الملف الرقمي</a>
+                      <td style="background-color: #15803d; border-radius: 10px; box-shadow: 0 4px 12px rgba(21, 128, 61, 0.25);">
+                        <a href="${downloadLink || '#'}" style="display: inline-block; padding: 12px 24px; color: #ffffff; text-decoration: none; font-weight: bold; font-size: 14px; font-family: 'Segoe UI', Arial, sans-serif;">⬇️ تحميل الملف الرقمي</a>
                       </td>
                     </tr>
                   </table>
@@ -201,27 +201,27 @@ export async function sendOrderEmail(
     let credentialsBlock = "";
     if (credentials && credentials.password) {
       credentialsBlock = `
-      <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8fafc; border-radius: 12px; border: 1px solid #cbd5e1; direction: rtl; text-align: right; margin-bottom: 20px;">
+      <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #fcfcfd; border-radius: 16px; border: 1px solid #eef2f6; border-right: 4px solid #D6004B; direction: rtl; text-align: right; margin-bottom: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.02);">
         <tr>
-          <td style="padding: 20px;">
-            <h3 style="margin: 0 0 10px 0; font-size: 15px; color: #0f172a; font-weight: bold; font-family: 'Segoe UI', Arial, sans-serif;">🔑 تفاصيل الدخول لحسابك</h3>
-            <p style="margin: 0 0 14px 0; font-size: 12px; color: #475569; font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.5;">استخدم البيانات التالية لتسجيل الدخول إلى حسابك والدراسة مباشرة:</p>
+          <td style="padding: 24px;">
+            <h3 style="margin: 0 0 8px 0; font-size: 16px; color: #0f172a; font-weight: bold; font-family: 'Segoe UI', Arial, sans-serif;">🔑 تفاصيل الدخول لحسابك</h3>
+            <p style="margin: 0 0 18px 0; font-size: 13px; color: #475569; font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6;">استخدم البيانات التالية لتسجيل الدخول إلى حسابك والدراسة مباشرة:</p>
             
-            <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 16px;">
+            <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 20px; overflow: hidden;">
               <tr>
-                <td style="padding: 10px 14px; border-bottom: 1px solid #f1f5f9; font-size: 12px; color: #475569; font-family: 'Segoe UI', Arial, sans-serif;"><strong>البريد الإلكتروني:</strong></td>
-                <td style="padding: 10px 14px; border-bottom: 1px solid #f1f5f9; font-size: 12px; color: #0f172a; font-family: 'Segoe UI', Arial, sans-serif; text-align: left; font-weight: bold; font-mono: true;">${credentials.email}</td>
+                <td style="padding: 14px 18px; border-bottom: 1px solid #f1f5f9; font-size: 13px; color: #475569; font-family: 'Segoe UI', Arial, sans-serif; background-color: #fcfcfd;"><strong>البريد الإلكتروني:</strong></td>
+                <td style="padding: 14px 18px; border-bottom: 1px solid #f1f5f9; font-size: 13px; color: #0f172a; font-family: 'Segoe UI', Arial, sans-serif; text-align: left; font-weight: bold; font-mono: true;">${credentials.email}</td>
               </tr>
               <tr>
-                <td style="padding: 10px 14px; font-size: 12px; color: #475569; font-family: 'Segoe UI', Arial, sans-serif;"><strong>كلمة المرور:</strong></td>
-                <td style="padding: 10px 14px; font-size: 12px; color: #0f172a; font-family: 'Segoe UI', Arial, sans-serif; text-align: left; font-weight: bold; font-mono: true;">${credentials.password}</td>
+                <td style="padding: 14px 18px; font-size: 13px; color: #475569; font-family: 'Segoe UI', Arial, sans-serif; background-color: #fcfcfd;"><strong>كلمة المرور:</strong></td>
+                <td style="padding: 14px 18px; font-size: 13px; color: #0f172a; font-family: 'Segoe UI', Arial, sans-serif; text-align: left; font-weight: bold; font-mono: true;">${credentials.password}</td>
               </tr>
             </table>
             
             <table cellpadding="0" cellspacing="0" style="margin: 0 auto;">
               <tr>
-                <td style="background-color: #b91c1c; border-radius: 6px;">
-                  <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://www.joeschool.com'}/login?email=${encodeURIComponent(credentials.email)}&redirect=%2Fdashboard" style="display: inline-block; padding: 10px 24px; color: #ffffff; text-decoration: none; font-weight: bold; font-size: 13px; font-family: 'Segoe UI', Arial, sans-serif;">🔑 تسجيل الدخول إلى حسابك</a>
+                <td style="background-color: #D6004B; border-radius: 10px; box-shadow: 0 4px 12px rgba(214, 0, 75, 0.25);">
+                  <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://www.joeschool.com'}/login?email=${encodeURIComponent(credentials.email)}&redirect=%2Fdashboard" style="display: inline-block; padding: 12px 28px; color: #ffffff; text-decoration: none; font-weight: bold; font-size: 14px; font-family: 'Segoe UI', Arial, sans-serif;">🔑 تسجيل الدخول إلى حسابك</a>
                 </td>
               </tr>
             </table>
@@ -239,47 +239,48 @@ export async function sendOrderEmail(
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${subjectLine}</title>
 </head>
-<body style="margin:0;padding:0;background-color:#f1f5f9;direction:rtl;font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;-webkit-text-size-adjust:100%;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f1f5f9;padding:20px 0;">
+<body style="margin:0;padding:0;background-color:#f5f7fa;direction:rtl;font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;-webkit-text-size-adjust:100%;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f5f7fa;padding:30px 0;">
     <tr>
       <td align="center">
-        <table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background-color:#ffffff;border-radius:16px;overflow:hidden;border: 1px solid #cbd5e1;box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+        <table width="100%" cellpadding="0" cellspacing="0" style="max-width:580px;background-color:#ffffff;border-radius:20px;overflow:hidden;border: 1px solid #e2e8f0;box-shadow: 0 10px 30px rgba(0,0,0,0.025);">
           <!-- Header block -->
           <tr>
-            <td style="padding:30px 24px;text-align:center;background-color:#0f172a;border-bottom:3px solid #b91c1c;">
-              <h1 style="margin:0;color:#ffffff;font-size:20px;font-weight: bold;font-family: 'Segoe UI', Arial, sans-serif;">أهلاً ${customerName} 🎉</h1>
-              <p style="color:#94a3b8;margin:8px 0 0 0;font-size:13px;font-family: 'Segoe UI', Arial, sans-serif;">تم تأكيد وتفعيل طلبك بنجاح. منتجاتك جاهزة لك الآن.</p>
+            <td style="padding:40px 24px;text-align:center;background-color:#050505;border-bottom:4px solid #D6004B;">
+              <img src="${process.env.NEXT_PUBLIC_APP_URL || 'https://www.joeschool.com'}/logo-email.png" alt="JoeSchool Logo" style="height: 48px; max-height: 48px; width: auto; display: block; margin: 0 auto 20px auto; outline: none; border: none; text-decoration: none;" />
+              <h1 style="margin:0;color:#ffffff;font-size:22px;font-weight: 800;font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.4;">أهلاً ${customerName} 🎉</h1>
+              <p style="color:#94a3b8;margin:8px 0 0 0;font-size:14px;font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6;">تم تأكيد وتفعيل طلبك بنجاح. منتجاتك بانتظارك للدراسة والتحميل.</p>
             </td>
           </tr>
           <!-- Products & Credentials Block -->
           <tr>
-            <td style="padding:24px;">
+            <td style="padding:32px 24px;">
               ${credentialsBlock}
               <table width="100%" cellpadding="0" cellspacing="0">${productsBlock}</table>
               
               <!-- Transaction Summary / Invoice -->
-              <div style="margin-top:24px;padding:16px;background-color:#f8fafc;border-radius:8px;border: 1px solid #e2e8f0;text-align: right; direction: rtl;">
-                <p style="color:#64748b;font-size:11px;text-transform:uppercase;margin:0 0 8px 0;font-weight: bold;font-family: 'Segoe UI', Arial, sans-serif;">🧾 تفاصيل الفاتورة المعتمدة</p>
-                <p style="color:#334155;font-size:13px;margin:4px 0;font-family: 'Segoe UI', Arial, sans-serif;"><strong>رقم الفاتورة:</strong> #${transactionId}</p>
-                <p style="color:#334155;font-size:13px;margin:4px 0;font-family: 'Segoe UI', Arial, sans-serif;"><strong>التاريخ:</strong> ${new Date().toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+              <div style="margin-top:32px;padding:24px;background-color:#fcfcfd;border-radius:16px;border: 1px solid #eef2f6;text-align: right; direction: rtl; box-shadow: 0 4px 20px rgba(0,0,0,0.01);">
+                <p style="color:#64748b;font-size:12px;text-transform:uppercase;margin:0 0 12px 0;font-weight: 800;font-family: 'Segoe UI', Arial, sans-serif; letter-spacing: 0.5px;">🧾 تفاصيل الفاتورة المعتمدة</p>
+                <p style="color:#334155;font-size:14px;margin:6px 0;font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.5;"><strong>رقم الفاتورة:</strong> #${transactionId}</p>
+                <p style="color:#334155;font-size:14px;margin:6px 0;font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.5;"><strong>التاريخ:</strong> ${new Date().toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
                 ${isUSDOrder ? `
-                  <p style="color:#16a34a;font-size:14px;font-weight:bold;margin:4px 0;font-family: 'Segoe UI', Arial, sans-serif;"><strong>المبلغ الإجمالي:</strong> $${totalOriginalUsd.toFixed(2)} USD</p>
-                  <p style="color:#475569;font-size:12px;margin:4px 0;font-family: 'Segoe UI', Arial, sans-serif;"><strong>المبلغ المخصوم فعلياً:</strong> ${totalChargedEgp.toFixed(2)} ج.م</p>
-                  ${firstExchangeRate ? `<p style="color:#64748b;font-size:10px;margin:4px 0;font-family: 'Segoe UI', Arial, sans-serif;">سعر الصرف المثبت: 1 USD = ${firstExchangeRate.toFixed(4)} ج.م</p>` : ''}
+                  <p style="color:#D6004B;font-size:15px;font-weight:bold;margin:6px 0;font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.5;"><strong>المبلغ الإجمالي:</strong> $${totalOriginalUsd.toFixed(2)} USD</p>
+                  <p style="color:#475569;font-size:13px;margin:6px 0;font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.5;"><strong>المبلغ المخصوم فعلياً:</strong> ${totalChargedEgp.toFixed(2)} ج.م</p>
+                  ${firstExchangeRate ? `<p style="color:#64748b;font-size:11px;margin:4px 0;font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.5;">سعر الصرف المثبت: 1 USD = ${firstExchangeRate.toFixed(4)} ج.م</p>` : ''}
                 ` : `
-                  <p style="color:#16a34a;font-size:13px;font-weight:bold;margin:4px 0;font-family: 'Segoe UI', Arial, sans-serif;"><strong>المبلغ الإجمالي:</strong> ${totalAmount.toFixed(2)} ج.م</p>
+                  <p style="color:#D6004B;font-size:15px;font-weight:bold;margin:6px 0;font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.5;"><strong>المبلغ الإجمالي:</strong> ${totalAmount.toFixed(2)} ج.م</p>
                 `}
               </div>
             </td>
           </tr>
           <!-- Footer Block -->
           <tr>
-            <td style="padding:24px;text-align:center;background-color:#f8fafc;border-top: 1px solid #e2e8f0;">
-              <p style="color:#475569;font-size:12px;margin:0 0 8px 0;line-height: 1.5;font-family: 'Segoe UI', Arial, sans-serif;">
+            <td style="padding:32px 24px;text-align:center;background-color:#050505;border-top: 1px solid #1e293b;">
+              <p style="color:#94a3b8;font-size:13px;margin:0 0 12px 0;line-height: 1.6;font-family: 'Segoe UI', Arial, sans-serif;">
                 استلمت هذا البريد لأنك قمت بشراء منتج من JoeSchool.<br/>
-                لديك استفسار؟ <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://www.joeschool.com'}/contact" style="color:#b91c1c;text-decoration:underline;font-weight:bold;">اتصل بالدعم الفني</a>
+                لديك استفسار؟ <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://www.joeschool.com'}/contact" style="color:#D6004B;text-decoration:underline;font-weight:bold;margin-top:4px;display:inline-block;">اتصل بالدعم الفني للمنصة</a>
               </p>
-              <p style="color:#94a3b8;font-size:10px;margin:12px 0 0 0;font-family: 'Segoe UI', Arial, sans-serif;">&copy; ${new Date().getFullYear()} JoeSchool. جميع الحقوق محفوظة.</p>
+              <p style="color:#64748b;font-size:11px;margin:16px 0 0 0;font-family: 'Segoe UI', Arial, sans-serif;">&copy; ${new Date().getFullYear()} JoeSchool. جميع الحقوق محفوظة.</p>
             </td>
           </tr>
         </table>
