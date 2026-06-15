@@ -187,17 +187,23 @@ export async function POST(req: Request) {
         <html dir="rtl" lang="ar">
         <head>
           <meta charset="utf-8">
+          <link rel="preconnect" href="https://fonts.googleapis.com">
+          <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+          <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+          <style>
+            * { font-family: 'Cairo', 'Segoe UI', Arial, sans-serif !important; }
+            body { margin: 0; padding: 0; background-color: #f5f7fa; direction: rtl; }
+          </style>
         </head>
-        <body style="margin:0;padding:0;background-color:#f5f7fa;direction:rtl;font-family:'Segoe UI', Arial, sans-serif;">
+        <body style="margin:0;padding:0;background-color:#f5f7fa;direction:rtl;">
           <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f5f7fa;padding:30px 0;">
             <tr>
               <td align="center">
                 <table width="100%" cellpadding="0" cellspacing="0" style="max-width:580px;background-color:#ffffff;border-radius:20px;overflow:hidden;border: 1px solid #e2e8f0;box-shadow: 0 10px 30px rgba(0,0,0,0.025);">
                   <!-- Header -->
                   <tr>
-                    <td style="padding:30px 24px;text-align:center;background-color:#050505;border-bottom:4px solid #D6004B;">
-                      <img src="${process.env.NEXT_PUBLIC_APP_URL || 'https://www.joeschool.com'}/logo-email.png" alt="JoeSchool Logo" style="height: 40px; display: block; margin: 0 auto 12px auto;" />
-                      <h2 style="margin: 0; color: #ffffff; font-size: 20px; font-weight: 800; font-family: 'Segoe UI', Arial, sans-serif;">🧪 فحص وتوصيلية البريد الإلكتروني</h2>
+                    <td style="padding:30px 24px;text-align:center;background-color:#060505;border-bottom:4px solid #D6004B;">
+                      <h2 style="margin: 0; color: #ffffff; font-size: 20px; font-weight: 800;">🧪 فحص وتوصيلية البريد الإلكتروني</h2>
                       <p style="color: #94a3b8; font-size: 13px; margin: 6px 0 0 0;">Deliverability & Inbox Placement Test</p>
                     </td>
                   </tr>
@@ -206,20 +212,20 @@ export async function POST(req: Request) {
                     <td style="padding:32px 24px; text-align: right; direction: rtl;">
                       <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #fcfcfd; border-radius: 16px; border: 1px solid #eef2f6; margin-bottom: 24px;">
                         <tr>
-                          <td style="padding: 14px 18px; border-bottom: 1px solid #f1f5f9; font-size: 13px; color: #475569; font-family: 'Segoe UI', Arial, sans-serif;"><strong>المستلم:</strong></td>
-                          <td style="padding: 14px 18px; border-bottom: 1px solid #f1f5f9; font-size: 13px; color: #0f172a; font-family: 'Segoe UI', Arial, sans-serif; font-weight: bold; text-align: left;" dir="ltr">${targetEmail}</td>
+                          <td style="padding: 14px 18px; border-bottom: 1px solid #f1f5f9; font-size: 13px; color: #475569;"><strong>المستلم:</strong></td>
+                          <td style="padding: 14px 18px; border-bottom: 1px solid #f1f5f9; font-size: 13px; color: #0f172a; font-weight: bold; text-align: left;" dir="ltr">${targetEmail}</td>
                         </tr>
                         <tr>
-                          <td style="padding: 14px 18px; border-bottom: 1px solid #f1f5f9; font-size: 13px; color: #475569; font-family: 'Segoe UI', Arial, sans-serif;"><strong>اسم الخادم:</strong></td>
-                          <td style="padding: 14px 18px; border-bottom: 1px solid #f1f5f9; font-size: 13px; color: #0f172a; font-family: 'Segoe UI', Arial, sans-serif; font-weight: bold;">Resend SMTP Relay</td>
+                          <td style="padding: 14px 18px; border-bottom: 1px solid #f1f5f9; font-size: 13px; color: #475569;"><strong>اسم الخادم:</strong></td>
+                          <td style="padding: 14px 18px; border-bottom: 1px solid #f1f5f9; font-size: 13px; color: #0f172a; font-weight: bold;">Resend SMTP Relay</td>
                         </tr>
                         <tr>
-                          <td style="padding: 14px 18px; font-size: 13px; color: #475569; font-family: 'Segoe UI', Arial, sans-serif;"><strong>حالة الترويسات (Headers):</strong></td>
-                          <td style="padding: 14px 18px; font-size: 13px; color: #0f172a; font-family: 'Segoe UI', Arial, sans-serif; font-weight: bold;">متوافقة مع شروط Gmail/Outlook 2026</td>
+                          <td style="padding: 14px 18px; font-size: 13px; color: #475569;"><strong>حالة الترويسات (Headers):</strong></td>
+                          <td style="padding: 14px 18px; font-size: 13px; color: #0f172a; font-weight: bold;">متوافقة مع شروط Gmail/Outlook 2026</td>
                         </tr>
                       </table>
                       
-                      <p style="font-size: 14px; line-height: 1.6; color: #334155; font-family: 'Segoe UI', Arial, sans-serif; margin-top: 0;">
+                      <p style="font-size: 14px; line-height: 1.6; color: #334155; margin-top: 0;">
                         هذا اختبار حقيقي لتوصيل الرسائل البريدية إلى صندوق الوارد الأساسي (Inbox) دون تصنيفها كـ Spam. 
                         يحتوي هذا البريد على ترويسات الغاء الاشتراك التلقائي (List-Unsubscribe) ومعرف الكيان الفريد لضمان كفاءة عالية.
                       </p>
