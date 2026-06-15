@@ -14,7 +14,7 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const redirectPath = searchParams.get("redirect") || "/dashboard";
 
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(searchParams.get("email") || "");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [checkingSession, setCheckingSession] = useState(true);

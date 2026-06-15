@@ -111,10 +111,10 @@ export async function sendOrderEmail(
     emailText += `تم تأكيد وتفعيل طلبك بنجاح. جميع ملفاتك ودوراتك جاهزة لك الآن.\n\n`;
     
     if (credentials && credentials.password) {
-      emailText += `تفاصيل حسابك للمنصة:\n`;
+      emailText += `تفاصيل الدخول لحسابك:\n`;
       emailText += `البريد الإلكتروني: ${credentials.email}\n`;
       emailText += `كلمة المرور: ${credentials.password}\n`;
-      emailText += `رابط تسجيل الدخول: ${process.env.NEXT_PUBLIC_APP_URL || "https://www.joeschool.com"}/login\n\n`;
+      emailText += `رابط تسجيل الدخول: ${process.env.NEXT_PUBLIC_APP_URL || "https://www.joeschool.com"}/login?email=${encodeURIComponent(credentials.email)}&redirect=%2Fdashboard\n\n`;
     }
 
     emailText += `تفاصيل المنتجات المشتراة:\n`;
@@ -122,7 +122,7 @@ export async function sendOrderEmail(
     for (const product of resolvedProducts) {
       emailText += `- ${product.title} (${product.isCourse ? 'دورة تدريبية' : 'منتج رقمي للتحميل'})\n`;
       if (product.isCourse) {
-        emailText += `  رابط بدء التعلم: ${process.env.NEXT_PUBLIC_APP_URL || "https://www.joeschool.com"}/dashboard\n`;
+        emailText += `  رابط بدء التعلم: ${process.env.NEXT_PUBLIC_APP_URL || "https://www.joeschool.com"}/login?email=${encodeURIComponent(customerEmail)}&redirect=%2Fdashboard\n`;
       } else if (product.downloadUrl) {
         emailText += `  رابط التحميل المباشر: ${product.downloadUrl}\n`;
       }
@@ -149,7 +149,7 @@ export async function sendOrderEmail(
     let productsBlock = "";
     for (const product of resolvedProducts) {
       const downloadLink = product.downloadUrl;
-      const dashboardLink = `${process.env.NEXT_PUBLIC_APP_URL || "https://www.joeschool.com"}/dashboard`;
+      const dashboardLink = `${process.env.NEXT_PUBLIC_APP_URL || "https://www.joeschool.com"}/login?email=${encodeURIComponent(customerEmail)}&redirect=%2Fdashboard`;
 
       if (product.isCourse) {
         productsBlock += `
@@ -204,8 +204,8 @@ export async function sendOrderEmail(
       <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8fafc; border-radius: 12px; border: 1px solid #cbd5e1; direction: rtl; text-align: right; margin-bottom: 20px;">
         <tr>
           <td style="padding: 20px;">
-            <h3 style="margin: 0 0 10px 0; font-size: 15px; color: #0f172a; font-weight: bold; font-family: 'Segoe UI', Arial, sans-serif;">🔑 تفاصيل حسابك على المنصة</h3>
-            <p style="margin: 0 0 14px 0; font-size: 12px; color: #475569; font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.5;">تم إنشاء حساب جديد لك لتتمكن من تسجيل الدخول والدراسة مباشرة:</p>
+            <h3 style="margin: 0 0 10px 0; font-size: 15px; color: #0f172a; font-weight: bold; font-family: 'Segoe UI', Arial, sans-serif;">🔑 تفاصيل الدخول لحسابك</h3>
+            <p style="margin: 0 0 14px 0; font-size: 12px; color: #475569; font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.5;">استخدم البيانات التالية لتسجيل الدخول إلى حسابك والدراسة مباشرة:</p>
             
             <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 16px;">
               <tr>
@@ -221,7 +221,7 @@ export async function sendOrderEmail(
             <table cellpadding="0" cellspacing="0" style="margin: 0 auto;">
               <tr>
                 <td style="background-color: #b91c1c; border-radius: 6px;">
-                  <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://www.joeschool.com'}/login" style="display: inline-block; padding: 10px 24px; color: #ffffff; text-decoration: none; font-weight: bold; font-size: 13px; font-family: 'Segoe UI', Arial, sans-serif;">🔑 تسجيل الدخول إلى حسابك</a>
+                  <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://www.joeschool.com'}/login?email=${encodeURIComponent(credentials.email)}&redirect=%2Fdashboard" style="display: inline-block; padding: 10px 24px; color: #ffffff; text-decoration: none; font-weight: bold; font-size: 13px; font-family: 'Segoe UI', Arial, sans-serif;">🔑 تسجيل الدخول إلى حسابك</a>
                 </td>
               </tr>
             </table>

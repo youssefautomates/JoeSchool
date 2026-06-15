@@ -148,9 +148,11 @@ export async function POST(request: Request) {
     // ── 4. Process Status & Deliveries ────────────────────────────
     if (isSuccess) {
       if (orderToUpdate) {
-        // Resolve customer billing details
-        const customerEmail = transaction.payment_key_claims?.billing_data?.email || orderToUpdate.customer_email;
-        const customerName = transaction.payment_key_claims?.billing_data?.first_name || orderToUpdate.customer_name || "عميلنا العزيز";
+        const billingData = transaction.payment_key_claims?.billing_data;
+        const customerEmail = billingData?.email || orderToUpdate.customer_email;
+        const customerName = billingData?.first_name && billingData?.last_name
+          ? `${billingData.first_name} ${billingData.last_name}`.trim()
+          : (billingData?.first_name || orderToUpdate.customer_name || "عميلنا العزيز");
         const currency = orderToUpdate.currency || "EGP";
 
         // Query all sibling orders sharing the same payment_id (Multi-item cart purchase support)
@@ -207,14 +209,14 @@ export async function POST(request: Request) {
           try {
             const userAccount = await getOrCreateUser(customerEmail, customerName, explicitPassword || undefined);
             resolvedUserId = userAccount.userId;
-            if (userAccount.isNew && explicitPassword) {
+            if (explicitPassword) {
               resolvedCredentials = {
                 email: customerEmail,
                 password: explicitPassword
               };
-              console.log(`[PAYMOB_WEBHOOK][${requestId}] New student account created. Credentials set.`);
+              console.log(`[PAYMOB_WEBHOOK][${requestId}] Student account credentials set (checkout password present).`);
             } else {
-              console.log(`[PAYMOB_WEBHOOK][${requestId}] Existing student account resolved. No credentials.`);
+              console.log(`[PAYMOB_WEBHOOK][${requestId}] Existing student account resolved. No explicit password found.`);
             }
           } catch (err: any) {
             console.error(`[PAYMOB_WEBHOOK][${requestId}] ❌ Error in getOrCreateUser:`, err.message || err);
