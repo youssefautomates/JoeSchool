@@ -2,6 +2,12 @@ import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 import { createOrder } from "@/lib/orders";
 import { headers } from "next/headers";
+import { createClient } from "@supabase/supabase-js";
+
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
 import { getOrCreateUser } from "@/lib/authHelpers";
 import { resolveUserCurrency, resolveProductPrice, getUSDtoEGPExchangeRate } from "@/lib/pricing";
 import { getKV } from "@/lib/kv";
@@ -32,7 +38,10 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
     console.log("[CART_BACKEND_REQUEST_BODY] Received:", JSON.stringify(body, null, 2));
-    const { amount, email, firstName, lastName, phone, items, paymentMethod, cardData, password, instapayScreenshotUrl } = body;
+    const { 
+      amount, email, firstName, lastName, phone, items, paymentMethod, cardData, password, instapayScreenshotUrl,
+      utm_source, utm_medium, utm_campaign, utm_content, utm_term, fbclid, campaign_id, campaign_name, adset_id, adset_name, ad_id, ad_name
+    } = body;
 
     // --- Geolocation Currency Resolver & Tracking ---
     const headersList = await headers();
@@ -210,6 +219,8 @@ export async function POST(req: Request) {
     for (const item of verifiedItems) {
       const order = await createOrder({
         customer_name: `${firstName} ${lastName}`,
+        first_name: firstName,
+        last_name: lastName,
         customer_email: email,
         customer_phone: safePhone,
         product_id: item.id,
@@ -238,8 +249,44 @@ export async function POST(req: Request) {
         browser,
         os,
         language,
-        checkout_password: password || null
+        checkout_password: password || null,
+        utm_source: utm_source || null,
+        utm_medium: utm_medium || null,
+        utm_campaign: utm_campaign || null,
+        utm_content: utm_content || null,
+        utm_term: utm_term || null,
+        fbclid: fbclid || null,
+        campaign_id: campaign_id || null,
+        campaign_name: campaign_name || null,
+        adset_id: adset_id || null,
+        adset_name: adset_name || null,
+        ad_id: ad_id || null,
+        ad_name: ad_name || null
       } as any);
+
+      // Log timeline event for order creation in analytics_events
+      try {
+        await supabaseAdmin.from("analytics_events").insert({
+          event_name: "order_created",
+          product_id: item.id,
+          product_title: item.title,
+          utm_source: utm_source || null,
+          utm_medium: utm_medium || null,
+          utm_campaign: utm_campaign || null,
+          utm_content: utm_content || null,
+          utm_term: utm_term || null,
+          ip_address: ipAddress,
+          user_agent: userAgent,
+          metadata: {
+            order_id: order.id,
+            description_ar: "تم إنشاء طلب السلة بنجاح بانتظار الدفع",
+            description_en: "Cart order created successfully, awaiting payment"
+          }
+        });
+      } catch (analyticsErr) {
+        console.error("Failed to log order_created event to analytics_events:", analyticsErr);
+      }
+
       dbOrders.push(order);
     }
 

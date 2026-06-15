@@ -489,6 +489,22 @@ export async function POST(req: Request) {
       } else {
         console.log(`[VERIFY][${requestId}] ✅ Order ${order.id} status updated to completed`);
         
+        // Log timeline event for payment success
+        try {
+          await supabaseAdmin.from("analytics_events").insert({
+            event_name: "payment_success",
+            product_id: order.product_id,
+            product_title: order.product_title,
+            metadata: {
+              order_id: order.id,
+              description_ar: "تم تأكيد عملية الدفع بنجاح",
+              description_en: "Payment confirmed successfully"
+            }
+          });
+        } catch (analyticsErr) {
+          console.error("Failed to log payment_success event:", analyticsErr);
+        }
+        
         // Increment coupon count if used
         if (order.coupon_code) {
           try {
@@ -553,6 +569,24 @@ export async function POST(req: Request) {
                 name: customerName
               });
               console.log(`[VERIFY][${requestId}] 🎓 Auto-enrollment completed successfully`);
+
+              // Log timeline event for course enrollment
+              try {
+                await supabaseAdmin.from("analytics_events").insert({
+                  event_name: "course_enrolled",
+                  product_id: order.product_id,
+                  product_title: order.product_title,
+                  user_id: userId,
+                  metadata: {
+                    order_id: order.id,
+                    course_id: matchedCourse.id,
+                    description_ar: `تم تفعيل دورة (${matchedCourse.title}) للطالب بنجاح`,
+                    description_en: `Course (${matchedCourse.title}) activated for student successfully`
+                  }
+                });
+              } catch (analyticsErr) {
+                console.error("Failed to log course_enrolled event:", analyticsErr);
+              }
             }
           } catch (enrollErr) {
             console.error(`[VERIFY][${requestId}] ❌ Auto-enrollment error:`, enrollErr);
@@ -594,6 +628,24 @@ export async function POST(req: Request) {
         const courseEmailResult = await sendOrderEmail(courseOrders, customerEmail, customerName, currency, resolvedCredentials);
         if (courseEmailResult.success) {
           console.log(`[VERIFY][${requestId}] ✅ Dedicated course email delivered successfully`);
+          
+          // Log timeline event for course email sent
+          for (const order of courseOrders) {
+            try {
+              await supabaseAdmin.from("analytics_events").insert({
+                event_name: "email_sent",
+                product_id: order.product_id,
+                product_title: order.product_title,
+                metadata: {
+                  order_id: order.id,
+                  email_type: "course_activation",
+                  recipient: customerEmail,
+                  description_ar: `تم إرسال إيميل تفعيل الكورس بنجاح إلى (${customerEmail})`,
+                  description_en: `Course activation email sent successfully to (${customerEmail})`
+                }
+              });
+            } catch (err) {}
+          }
         } else {
           console.error(`[VERIFY][${requestId}] ⚠️ Dedicated course email failed:`, courseEmailResult.error);
         }
@@ -604,6 +656,24 @@ export async function POST(req: Request) {
         const digitalEmailResult = await sendOrderEmail(digitalOrders, customerEmail, customerName, currency);
         if (digitalEmailResult.success) {
           console.log(`[VERIFY][${requestId}] ✅ Dedicated digital email delivered successfully`);
+
+          // Log timeline event for digital product email sent
+          for (const order of digitalOrders) {
+            try {
+              await supabaseAdmin.from("analytics_events").insert({
+                event_name: "email_sent",
+                product_id: order.product_id,
+                product_title: order.product_title,
+                metadata: {
+                  order_id: order.id,
+                  email_type: "digital_download",
+                  recipient: customerEmail,
+                  description_ar: `تم إرسال إيميل تحميل المنتج الرقمي بنجاح إلى (${customerEmail})`,
+                  description_en: `Digital download email sent successfully to (${customerEmail})`
+                }
+              });
+            } catch (err) {}
+          }
         } else {
           console.error(`[VERIFY][${requestId}] ⚠️ Dedicated digital email failed:`, digitalEmailResult.error);
         }

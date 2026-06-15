@@ -1,4 +1,4 @@
-﻿/**
+/**
  * 🎓 JoeSchool - Advanced Client-Side Marketing & Analytics Engine
  * 
  * Manages unique user sessions, captures UTM attribution parameters, locks referrers,
@@ -40,7 +40,10 @@ export function initSession() {
 
   // 3. Extract and lock UTM query parameters (Session attribution persistence)
   const urlParams = new URLSearchParams(window.location.search);
-  const utmParams = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"];
+  const utmParams = [
+    "utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term",
+    "fbclid", "campaign_id", "campaign_name", "adset_id", "adset_name", "ad_id", "ad_name"
+  ];
   
   utmParams.forEach(param => {
     const value = urlParams.get(param);
@@ -51,6 +54,22 @@ export function initSession() {
   });
 
   return sessionId;
+}
+
+/**
+ * Retrieves all captured marketing attribution parameters from sessionStorage.
+ */
+export function getAttributionData() {
+  if (typeof window === "undefined") return {};
+  const params = [
+    "utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term",
+    "fbclid", "campaign_id", "campaign_name", "adset_id", "adset_name", "ad_id", "ad_name"
+  ];
+  const data: Record<string, string | null> = {};
+  params.forEach(param => {
+    data[param] = sessionStorage.getItem(`youssef_${param}`) || null;
+  });
+  return data;
 }
 
 /**

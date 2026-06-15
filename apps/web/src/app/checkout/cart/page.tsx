@@ -19,10 +19,12 @@ import { cn } from "@/lib/utils";
 import { useCart } from "@/context/CartContext";
 import { supabaseClient } from "@/lib/supabaseClient";
 
+import { getAttributionData } from "@/lib/analytics";
 import { resolveUserCurrency, resolveProductPrice, formatPrice, getUSDtoEGPExchangeRate, type Currency } from "@/lib/pricing";
 
 const checkoutSchema = z.object({
-  fullName: z.string().min(3, { message: "الاسم يجب أن يكون 3 أحرف على الأقل" }),
+  firstName: z.string().min(2, { message: "الاسم الأول يجب أن يكون حرفين على الأقل" }),
+  lastName: z.string().min(2, { message: "الاسم الأخير يجب أن يكون حرفين على الأقل" }),
   email: z.string().email({ message: "البريد الإلكتروني غير صالح" }),
   password: z.string().optional(),
 });
@@ -232,13 +234,15 @@ export default function CartCheckoutPage() {
     resolver: zodResolver(checkoutSchema),
     mode: "onChange",
     defaultValues: {
-      fullName: "",
+      firstName: "",
+      lastName: "",
       email: "",
       password: "",
     },
   });
 
-  const fullNameValue = watch("fullName");
+  const firstNameValue = watch("firstName");
+  const lastNameValue = watch("lastName");
   const emailValue = watch("email");
   const passwordValue = watch("password");
 
@@ -247,7 +251,9 @@ export default function CartCheckoutPage() {
       const { data: { session } } = await supabaseClient.auth.getSession();
       if (session?.user) {
         setUser(session.user);
-        setValue("fullName", session.user.user_metadata?.full_name || "");
+        const nameParts = (session.user.user_metadata?.full_name || "").trim().split(" ");
+        setValue("firstName", nameParts[0] || "");
+        setValue("lastName", nameParts.slice(1).join(" ") || "");
         setValue("email", session.user.email || "");
       }
     }
@@ -318,8 +324,7 @@ export default function CartCheckoutPage() {
           password: data.password,
           options: {
             data: {
-              full_name: data.fullName,
-              phone: "",
+              full_name: `${data.firstName} ${data.lastName}`,
             }
           }
         });
@@ -361,8 +366,8 @@ export default function CartCheckoutPage() {
         }),
         amount: finalPriceEGP,
         email: data.email,
-        firstName: data.fullName.split(" ")[0],
-        lastName: data.fullName.split(" ").slice(1).join(" ") || "Customer",
+        firstName: data.firstName,
+        lastName: data.lastName,
         phone: "",
         paymentMethod: paymentMethod, 
         cardData: paymentMethod === "card" ? {
@@ -372,7 +377,8 @@ export default function CartCheckoutPage() {
           cardHolder
         } : undefined,
         password: data.password || undefined,
-        instapayScreenshotUrl: paymentMethod === "instapay" ? (instapayScreenshotUrl || undefined) : undefined
+        instapayScreenshotUrl: paymentMethod === "instapay" ? (instapayScreenshotUrl || undefined) : undefined,
+        ...getAttributionData()
       };
 
       const response = await fetch("/api/paymob/initiate-cart", {
@@ -411,7 +417,7 @@ export default function CartCheckoutPage() {
              : `مرحباً، لقد قمت بدفع قيمة منتج ${items.map(i => i.title).join(' و ')} أريد الحصول عليه الآن.`
            ) + 
            `\n\nبيانات العميل:\n` +
-           `- الاسم: ${data.fullName}\n` +
+           `- الاسم: ${data.firstName} ${data.lastName}\n` +
            `- البريد الإلكتروني: ${data.email}\n` +
            (data.password ? `- كلمة المرور: ${data.password}\n` : '') +
            (instapayScreenshotUrl ? `\nإثبات التحويل:\n${instapayScreenshotUrl}` : '');
@@ -476,25 +482,48 @@ export default function CartCheckoutPage() {
                 <h2 className="text-xl font-alexandria font-bold text-white mb-6">تفاصيل الطلب</h2>
                 
                 <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label className="font-cairo font-bold text-zinc-400 text-sm">الاسم الكامل</Label>
-                    <div className="relative">
-                      <Input 
-                        placeholder="الاسم الثلاثي لتأكيد الملكية" 
-                        className={cn(
-                          "h-12 rounded-xl bg-white/5 border text-white text-sm font-cairo hover:bg-white/[0.07] focus:bg-white/10 focus:ring-1 transition-all",
-                          fullNameValue && fullNameValue.length > 0
-                            ? (errors.fullName 
-                                ? "border-red-500/50 focus:border-red-500 focus:ring-red-500" 
-                                : "border-emerald-500/50 focus:border-emerald-500 focus:ring-emerald-500")
-                            : "border-white/5 focus:border-white/20 focus:ring-white/20"
-                        )}
-                        disabled={isLoading}
-                        autoFocus
-                        {...register("fullName")}
-                      />
+                  {/* First Name & Last Name Grid */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label className="font-cairo font-bold text-zinc-400 text-sm">الاسم الأول</Label>
+                      <div className="relative">
+                        <Input 
+                          placeholder="الاسم الأول" 
+                          className={cn(
+                            "h-12 rounded-xl bg-white/5 border text-white text-sm font-cairo hover:bg-white/[0.07] focus:bg-white/10 focus:ring-1 transition-all text-right",
+                            firstNameValue && firstNameValue.length > 0
+                              ? (errors.firstName 
+                                  ? "border-red-500/50 focus:border-red-500 focus:ring-red-500" 
+                                  : "border-emerald-500/50 focus:border-emerald-500 focus:ring-emerald-500")
+                              : "border-white/5 focus:border-white/20 focus:ring-white/20"
+                          )}
+                          disabled={isLoading}
+                          autoFocus
+                          {...register("firstName")}
+                        />
+                      </div>
+                      {errors.firstName && <p className="text-xs text-red-400 font-cairo flex items-center gap-1 mt-1"><ShieldAlert className="w-3 h-3" /> {errors.firstName.message}</p>}
                     </div>
-                    {errors.fullName && <p className="text-xs text-red-400 font-cairo flex items-center gap-1 mt-1"><ShieldAlert className="w-3 h-3" /> {errors.fullName.message}</p>}
+
+                    <div className="space-y-2">
+                      <Label className="font-cairo font-bold text-zinc-400 text-sm">الاسم الأخير</Label>
+                      <div className="relative">
+                        <Input 
+                          placeholder="الاسم الأخير" 
+                          className={cn(
+                            "h-12 rounded-xl bg-white/5 border text-white text-sm font-cairo hover:bg-white/[0.07] focus:bg-white/10 focus:ring-1 transition-all text-right",
+                            lastNameValue && lastNameValue.length > 0
+                              ? (errors.lastName 
+                                  ? "border-red-500/50 focus:border-red-500 focus:ring-red-500" 
+                                  : "border-emerald-500/50 focus:border-emerald-500 focus:ring-emerald-500")
+                              : "border-white/5 focus:border-white/20 focus:ring-white/20"
+                          )}
+                          disabled={isLoading}
+                          {...register("lastName")}
+                        />
+                      </div>
+                      {errors.lastName && <p className="text-xs text-red-400 font-cairo flex items-center gap-1 mt-1"><ShieldAlert className="w-3 h-3" /> {errors.lastName.message}</p>}
+                    </div>
                   </div>
 
                   <div className="space-y-2">
@@ -618,7 +647,7 @@ export default function CartCheckoutPage() {
                       {currency === "EGP" && (
                         <div 
                           onClick={async () => {
-                            const fieldsToValidate: ("fullName" | "email" | "password")[] = ["fullName", "email"];
+                            const fieldsToValidate: ("firstName" | "lastName" | "email" | "password")[] = ["firstName", "lastName", "email"];
                             if (!user) {
                               fieldsToValidate.push("password");
                             }
