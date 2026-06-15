@@ -113,9 +113,9 @@ export default function DashboardPage() {
         // Verify if session is valid (old sessions might have been deactivated)
         const isSessionValid = await checkSessionIsValid(session.user.id, deviceId);
         if (!isSessionValid) {
-          toast.error("تم تسجيل خروجك بسبب تجاوز الحد الأقصى للأجهزة النشطة (3 أجهزة)");
+          toast.error("تم إيقاف حسابك أو انتهت صلاحية الجلسة. يرجى التواصل مع الدعم الفني.");
           await supabaseClient.auth.signOut();
-          router.push("/login?error=max_devices");
+          router.push("/login?error=suspended");
           return;
         }
       } catch (e) {

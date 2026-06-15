@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { supabaseClient } from "@/lib/supabaseClient";
+import { supabaseClient, syncSessionToCookie } from "@/lib/supabaseClient";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { Mail, Lock, Loader2, ArrowLeft, Sparkles, ShieldCheck } from "lucide-react";
@@ -52,6 +52,9 @@ function LoginForm() {
         console.error("Login error:", error);
         toast.error(error.message || "فشل تسجيل الدخول. يرجى التحقق من بيانات الاعتماد الخاصة بك.");
       } else if (data?.session) {
+        // Sync access token cookie synchronously before client redirect to prevent Next.js Middleware blocking
+        syncSessionToCookie(data.session);
+
         if (data.user?.user_metadata?.requires_password_change === true) {
           toast.success("يرجى تغيير كلمة المرور المؤقتة للاستمرار.");
           router.push("/reset-password?temp=true");

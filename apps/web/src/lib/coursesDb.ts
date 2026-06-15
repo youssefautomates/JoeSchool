@@ -1704,6 +1704,8 @@ export async function trackActiveSession(
       .order("last_activity", { ascending: false });
 
     let terminatedOldest = false;
+    // Disabled session deactivation to allow unlimited devices per account
+    /*
     if (activeList && activeList.length > maxSessions) {
       // Deactivate oldest sessions exceeding the limit
       const sessionsToDeactivate = activeList.slice(maxSessions);
@@ -1718,6 +1720,7 @@ export async function trackActiveSession(
       // Log this termination activity
       await logUserActivity(userId, "SESSION_AUTO_TERMINATED", ipAddress, browser, deviceId);
     }
+    */
 
     return { success: true, terminatedOldest };
   } catch (e) {
@@ -1751,9 +1754,10 @@ export async function trackActiveSession(
         });
       }
 
-      // Filter active and enforce max limit
+      // Filter active and enforce max limit (Disabled to allow unlimited devices)
       let activeSessions = list.filter(x => x.user_id === userId && x.is_active);
       let terminatedOldest = false;
+      /*
       if (activeSessions.length > maxSessions) {
         activeSessions.sort((a, b) => new Date(b.last_activity).getTime() - new Date(a.last_activity).getTime());
         const older = activeSessions.slice(maxSessions);
@@ -1763,6 +1767,7 @@ export async function trackActiveSession(
         });
         terminatedOldest = true;
       }
+      */
 
       localStorage.setItem(key, JSON.stringify(list));
       return { success: true, terminatedOldest };
@@ -1786,15 +1791,7 @@ export async function checkSessionIsValid(userId: string, deviceId: string): Pro
 
     if (status && status.is_suspended) return false;
 
-    // 2. Check if this device session is active
-    const { data: session } = await supabaseClient
-      .from("active_sessions")
-      .select("is_active")
-      .eq("user_id", userId)
-      .eq("device_id", deviceId)
-      .maybeSingle();
-
-    if (session && !session.is_active) return false;
+    // 2. Device session is always active (Unlimited devices feature)
     return true;
   } catch (e) {
     // Fail-safe to true in case network fails
