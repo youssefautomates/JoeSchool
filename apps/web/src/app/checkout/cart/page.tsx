@@ -19,7 +19,6 @@ import { cn } from "@/lib/utils";
 import { useCart } from "@/context/CartContext";
 import { supabaseClient } from "@/lib/supabaseClient";
 
-import { getAttributionData } from "@/lib/analytics";
 import { resolveUserCurrency, resolveProductPrice, formatPrice, getUSDtoEGPExchangeRate, type Currency } from "@/lib/pricing";
 
 const checkoutSchema = z.object({
@@ -377,8 +376,7 @@ export default function CartCheckoutPage() {
           cardHolder
         } : undefined,
         password: data.password || undefined,
-        instapayScreenshotUrl: paymentMethod === "instapay" ? (instapayScreenshotUrl || undefined) : undefined,
-        ...getAttributionData()
+        instapayScreenshotUrl: paymentMethod === "instapay" ? (instapayScreenshotUrl || undefined) : undefined
       };
 
       const response = await fetch("/api/paymob/initiate-cart", {

@@ -20,7 +20,7 @@ import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
 import { supabaseClient } from "@/lib/supabaseClient";
 import { type Product, calcDiscount } from "@/lib/products";
-import { trackEvent, getAttributionData } from "@/lib/analytics";
+import { trackEvent } from "@/lib/analytics";
 
 import { resolveUserCurrency, resolveProductPrice, formatPrice, getUSDtoEGPExchangeRate, type Currency } from "@/lib/pricing";
 
@@ -465,8 +465,6 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
       const gatewayFeeAmount = isFeeActive ? Math.ceil(subtotalEGP * (globalFeePercentage / 100)) : 0;
       const finalPriceEGP = subtotalEGP + gatewayFeeAmount;
 
-      const attribution = getAttributionData();
-
       const payloadBody = {
         amount: finalPriceEGP,
         email: data.email,
@@ -487,8 +485,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
         subtotalPrice: subtotalEGP,
         gateway_fee_percentage: isFeeActive ? globalFeePercentage : 0,
         password: data.password || undefined,
-        instapayScreenshotUrl: paymentMethod === "instapay" ? (instapayScreenshotUrl || undefined) : undefined,
-        ...attribution
+        instapayScreenshotUrl: paymentMethod === "instapay" ? (instapayScreenshotUrl || undefined) : undefined
       };
 
       console.log("[FORM_SUBMIT_DATA] Request body before fetch:", JSON.stringify(payloadBody, null, 2));

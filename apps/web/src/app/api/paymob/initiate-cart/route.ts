@@ -38,10 +38,7 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
     console.log("[CART_BACKEND_REQUEST_BODY] Received:", JSON.stringify(body, null, 2));
-    const { 
-      amount, email, firstName, lastName, phone, items, paymentMethod, cardData, password, instapayScreenshotUrl,
-      utm_source, utm_medium, utm_campaign, utm_content, utm_term, fbclid, campaign_id, campaign_name, adset_id, adset_name, ad_id, ad_name
-    } = body;
+    const { amount, email, firstName, lastName, phone, items, paymentMethod, cardData, password, instapayScreenshotUrl } = body;
 
     // --- Geolocation Currency Resolver & Tracking ---
     const headersList = await headers();
@@ -249,19 +246,7 @@ export async function POST(req: Request) {
         browser,
         os,
         language,
-        checkout_password: password || null,
-        utm_source: utm_source || null,
-        utm_medium: utm_medium || null,
-        utm_campaign: utm_campaign || null,
-        utm_content: utm_content || null,
-        utm_term: utm_term || null,
-        fbclid: fbclid || null,
-        campaign_id: campaign_id || null,
-        campaign_name: campaign_name || null,
-        adset_id: adset_id || null,
-        adset_name: adset_name || null,
-        ad_id: ad_id || null,
-        ad_name: ad_name || null
+        checkout_password: password || null
       } as any);
 
       // Log timeline event for order creation in analytics_events
@@ -270,11 +255,6 @@ export async function POST(req: Request) {
           event_name: "order_created",
           product_id: item.id,
           product_title: item.title,
-          utm_source: utm_source || null,
-          utm_medium: utm_medium || null,
-          utm_campaign: utm_campaign || null,
-          utm_content: utm_content || null,
-          utm_term: utm_term || null,
           ip_address: ipAddress,
           user_agent: userAgent,
           metadata: {

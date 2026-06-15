@@ -40,18 +40,6 @@ export interface Order {
   invoice_id?: string;
   first_name?: string;
   last_name?: string;
-  utm_source?: string | null;
-  utm_medium?: string | null;
-  utm_campaign?: string | null;
-  utm_content?: string | null;
-  utm_term?: string | null;
-  fbclid?: string | null;
-  campaign_id?: string | null;
-  campaign_name?: string | null;
-  adset_id?: string | null;
-  adset_name?: string | null;
-  ad_id?: string | null;
-  ad_name?: string | null;
 }
 
 export async function createOrder(order: Order) {
