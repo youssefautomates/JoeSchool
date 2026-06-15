@@ -634,12 +634,11 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
 
         <div className="container mx-auto px-4 max-w-6xl relative z-10">
           {/* Header */}
-          <div className="flex flex-col items-center justify-center text-center gap-2 mb-12">
-            <Link href={`/product/${product?.slug || resolvedParams.id}`} className="inline-flex items-center text-zinc-500 hover:text-white font-cairo transition-all mb-3 group">
+          <div className="flex flex-col items-center justify-center text-center gap-2 mb-8">
+            <Link href={`/product/${product?.slug || resolvedParams.id}`} className="inline-flex items-center text-zinc-500 hover:text-white font-cairo transition-all group">
               <ChevronRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
               العودة لتفاصيل المنتج
             </Link>
-            <h1 className="text-3xl md:text-5xl font-alexandria font-black text-white tracking-tight">إتمام الطلب بأمان</h1>
           </div>
 
           <div className="max-w-3xl mx-auto w-full">
@@ -653,7 +652,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
               >
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#ff0f53] to-[#ff00b3]" />
                 
-                <h2 className="text-xl font-alexandria font-bold text-white mb-6">معلومات الاستلام</h2>
+                <h2 className="text-xl font-alexandria font-bold text-white mb-6">تفاصيل الطلب</h2>
                 
                 <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="space-y-4" dir="rtl">
 

@@ -455,12 +455,11 @@ export default function CartCheckoutPage() {
 
         <div className="container mx-auto px-4 max-w-6xl relative z-10">
           {/* Header */}
-          <div className="flex flex-col items-center justify-center text-center gap-2 mb-12">
-            <Link href="/" className="inline-flex items-center text-zinc-500 hover:text-white font-cairo transition-all mb-3 group">
+          <div className="flex flex-col items-center justify-center text-center gap-2 mb-8">
+            <Link href="/" className="inline-flex items-center text-zinc-500 hover:text-white font-cairo transition-all group">
               <ChevronRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
               العودة للتسوق
             </Link>
-            <h1 className="text-3xl md:text-5xl font-alexandria font-black text-white tracking-tight">إتمام الطلب بأمان</h1>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 flex-col-reverse lg:flex-row">
@@ -474,7 +473,7 @@ export default function CartCheckoutPage() {
               >
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-rose-600 to-orange-400" />
                 
-                <h2 className="text-xl font-alexandria font-bold text-white mb-6">معلومات الاستلام</h2>
+                <h2 className="text-xl font-alexandria font-bold text-white mb-6">تفاصيل الطلب</h2>
                 
                 <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="space-y-4">
                   <div className="space-y-2">
