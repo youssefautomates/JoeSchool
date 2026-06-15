@@ -36,9 +36,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       items: [
         { name: "Products", href: "/admin/products", icon: Package },
         { name: "Store Categories", href: "/admin/categories?tab=products", icon: LayoutGrid },
-        { name: "Marketing & Coupons", href: "/admin/marketing", icon: Target },
-        { name: "Order Management", href: "/admin/orders", icon: ShoppingCart },
-        { name: "Live Orders", href: "/admin/orders/live", icon: Flame }
+        { name: "Marketing & Coupons", href: "/admin/marketing", icon: Target }
       ]
     },
     {

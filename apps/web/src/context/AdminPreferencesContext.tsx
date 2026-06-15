@@ -13,7 +13,7 @@ export interface NotificationPrefs {
 }
 
 export interface AdminPreferences {
-  activeTab: "overview" | "lms" | "store" | "diagnostics";
+  activeTab: "overview" | "lms" | "store" | "orders" | "live-orders" | "diagnostics";
   theme: "dark" | "light";
   dateRange: string;
   currency: string;

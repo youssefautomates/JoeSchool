@@ -44,6 +44,16 @@ const DiagnosticsSection = dynamic(() => import("@/components/admin/analytics/Di
   loading: () => <div className="h-64 w-full animate-pulse bg-white/5 rounded-3xl" />
 });
 
+const AdminOrders = dynamic(() => import("./orders/page"), {
+  ssr: false,
+  loading: () => <div className="h-64 w-full animate-pulse bg-white/5 rounded-3xl" />
+});
+
+const LiveOrdersFeed = dynamic(() => import("./orders/live/page"), {
+  ssr: false,
+  loading: () => <div className="h-64 w-full animate-pulse bg-white/5 rounded-3xl" />
+});
+
 // Interfaces mapped to database schemas
 interface Order {
   id: string;
@@ -1247,6 +1257,8 @@ export default function AdminDashboard() {
             { id: "overview", label: "Global Overview", icon: BarChart3 },
             { id: "lms", label: "LMS Academy", icon: BookOpen },
             { id: "store", label: "Store Analytics", icon: Package },
+            { id: "orders", label: "Order Management", icon: ShoppingCart },
+            { id: "live-orders", label: "Live Orders", icon: Flame },
             { id: "diagnostics", label: "Diagnostics & Logs", icon: ShieldAlert }
           ].map((tab) => {
             const Icon = tab.icon;
@@ -1316,7 +1328,17 @@ export default function AdminDashboard() {
             />
           )}
 
-          {/* Tab 4: Diagnostics Logs */}
+          {/* Tab 4: Order Management */}
+          {activeTab === "orders" && (
+            <AdminOrders />
+          )}
+
+          {/* Tab 5: Live Orders */}
+          {activeTab === "live-orders" && (
+            <LiveOrdersFeed />
+          )}
+
+          {/* Tab 6: Diagnostics Logs */}
           {activeTab === "diagnostics" && (
             <DiagnosticsSection
               seeding={seeding}
@@ -1347,6 +1369,8 @@ export default function AdminDashboard() {
           { id: "overview", label: "Overview", icon: BarChart3 },
           { id: "lms", label: "LMS", icon: BookOpen },
           { id: "store", label: "Store", icon: Package },
+          { id: "orders", label: "Orders", icon: ShoppingCart },
+          { id: "live-orders", label: "Live", icon: Flame },
           { id: "diagnostics", label: "Logs", icon: ShieldAlert }
         ].map((tab) => {
           const Icon = tab.icon;
