@@ -332,11 +332,11 @@ export default function AdminStudentsPage() {
   const handleSetCustomPassword = async () => {
     if (!selectedStudent) return;
     if (!customPasswordInput || customPasswordInput.length < 6) {
-      toast.error("يجب أن تكون كلمة المرور 6 أحرف على الأقل");
+      toast.error("Password must be at least 6 characters");
       return;
     }
     setIsSettingCustomPassword(true);
-    toast.loading("جاري تحديث كلمة المرور...", { id: "custom-pwd" });
+    toast.loading("Updating password...", { id: "custom-pwd" });
     try {
       const res = await fetch(`/api/admin/students/${selectedStudent.user_id}`, {
         method: "PUT",
@@ -349,14 +349,14 @@ export default function AdminStudentsPage() {
       });
       const data = await res.json();
       if (res.ok && data.success) {
-        toast.success("تم تغيير كلمة المرور بنجاح للمشترك! 🔑", { id: "custom-pwd" });
+        toast.success("Password updated successfully! 🔑", { id: "custom-pwd" });
         setCustomPasswordInput("");
         await refreshCrmData(selectedStudent.user_id);
       } else {
-        toast.error(data.error || "فشل تغيير كلمة المرور", { id: "custom-pwd" });
+        toast.error(data.error || "Failed to update password", { id: "custom-pwd" });
       }
     } catch (err) {
-      toast.error("خطأ في الاتصال بالسيرفر", { id: "custom-pwd" });
+      toast.error("Error communicating with server", { id: "custom-pwd" });
     } finally {
       setIsSettingCustomPassword(false);
     }
@@ -1261,21 +1261,21 @@ export default function AdminStudentsPage() {
                     </div>
 
                     {/* Set Custom Password */}
-                    <div className="p-4 rounded-xl bg-white/[0.02] border border-white/5 space-y-4" dir="rtl">
+                    <div className="p-4 rounded-xl bg-white/[0.02] border border-white/5 space-y-4">
                       <h4 className="text-white text-xs font-bold flex items-center gap-2">
                         <Key className="w-4 h-4 text-emerald-400" />
-                        <span>تعيين كلمة مرور مخصصة</span>
+                        <span>Set Custom Password</span>
                       </h4>
                       <p className="text-zinc-500 text-[11px] leading-relaxed">
-                        يمكنك تغيير كلمة مرور الطالب وتعيين كلمة مرور مخصصة له مباشرة من هنا (الحد الأدنى 6 أحرف).
+                        You can change the student's password and set a custom one directly from here (minimum 6 characters).
                       </p>
                       <div className="flex gap-2 max-w-md">
                         <input
                           type="text"
-                          placeholder="كلمة المرور الجديدة..."
+                          placeholder="Enter new password..."
                           value={customPasswordInput}
                           onChange={(e) => setCustomPasswordInput(e.target.value)}
-                          className="flex-1 bg-zinc-950 border border-white/5 rounded-xl px-3 h-10 text-xs text-white placeholder-zinc-600 outline-none focus:border-rose-500 transition-colors text-right"
+                          className="flex-1 bg-zinc-950 border border-white/5 rounded-xl px-3 h-10 text-xs text-white placeholder-zinc-600 outline-none focus:border-rose-500 transition-colors"
                         />
                         <button
                           type="button"
@@ -1283,7 +1283,7 @@ export default function AdminStudentsPage() {
                           disabled={isSettingCustomPassword}
                           className="px-4 h-10 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-2 cursor-pointer transition-all disabled:opacity-50"
                         >
-                          {isSettingCustomPassword ? "جاري الحفظ..." : "تحديث كلمة المرور"}
+                          {isSettingCustomPassword ? "Saving..." : "Update Password"}
                         </button>
                       </div>
                     </div>
@@ -1564,9 +1564,20 @@ export default function AdminStudentsPage() {
                             className="bg-[#0f0f15] border border-white/5 rounded-xl py-2.5 px-3 text-xs focus:outline-none focus:border-rose-500/50 transition-all font-sans text-zinc-300 w-full"
                           >
                             <option value="">Choose product...</option>
-                            {allProductsList.map((p: any) => (
-                              <option key={p.id} value={p.id}>{p.title} ({p.price || 0} EGP)</option>
-                            ))}
+                            {allProductsList.length > 0 && (
+                              <optgroup label="Digital Products">
+                                {allProductsList.map((p: any) => (
+                                  <option key={p.id} value={p.id}>{p.title} ({p.price || 0} EGP)</option>
+                                ))}
+                              </optgroup>
+                            )}
+                            {allCoursesList.length > 0 && (
+                              <optgroup label="Courses">
+                                {allCoursesList.map((c: any) => (
+                                  <option key={`course-${c.id}`} value={c.id}>{c.title} ({c.price || 0} EGP)</option>
+                                ))}
+                              </optgroup>
+                            )}
                           </select>
                         </div>
                         

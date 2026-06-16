@@ -27,7 +27,7 @@ export async function GET(
 ) {
   try {
     if (!(await verifyAdmin())) {
-      return NextResponse.json({ error: "غير مصرح بالدخول" }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized access" }, { status: 401 });
     }
 
     const { id } = await params;
@@ -35,7 +35,7 @@ export async function GET(
     // 1. Get user auth data from Supabase Auth admin SDK
     const { data: authData, error: authError } = await supabaseAdmin.auth.admin.getUserById(id);
     if (authError || !authData?.user) {
-      return NextResponse.json({ error: authError?.message || "الطالب غير موجود" }, { status: 404 });
+      return NextResponse.json({ error: authError?.message || "Student not found" }, { status: 404 });
     }
     const authUser = authData.user;
 
@@ -184,7 +184,7 @@ export async function GET(
       });
       const latestProgress = sortedProgress[0];
       if (latestProgress) {
-        let lessonTitle = "درس غير معروف";
+        let lessonTitle = "Unknown lesson";
         let found = false;
         for (const course of coursesWithCurriculum) {
           for (const mod of course.modules) {
@@ -265,7 +265,7 @@ export async function GET(
 
   } catch (error: any) {
     console.error("[GET_STUDENT_CRM_ERROR]:", error);
-    return NextResponse.json({ error: "حدث خطأ داخلي في الخادم" }, { status: 500 });
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
@@ -278,7 +278,7 @@ export async function PUT(
 ) {
   try {
     if (!(await verifyAdmin())) {
-      return NextResponse.json({ error: "غير مصرح بالدخول" }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized access" }, { status: 401 });
     }
 
     const { id } = await params;
@@ -329,7 +329,7 @@ export async function PUT(
 
       return NextResponse.json({
         success: true,
-        message: "تم توليد رابط إعادة تعيين كلمة المرور بنجاح وإرساله للبريد الإلكتروني",
+        message: "Password reset link generated and sent to email successfully",
         resetLink: recoveryData.properties?.action_link || ""
       });
     }
@@ -379,7 +379,7 @@ export async function PUT(
 
       return NextResponse.json({
         success: true,
-        message: "تم تغيير كلمة المرور وتوليد كلمة مرور مؤقتة بنجاح",
+        message: "Temporary password generated successfully",
         tempPassword
       });
     }
@@ -387,7 +387,7 @@ export async function PUT(
     if (action === "set_custom_password") {
       const { customPassword } = body;
       if (!customPassword || customPassword.length < 6) {
-        return NextResponse.json({ error: "يجب أن تكون كلمة المرور 6 أحرف على الأقل" }, { status: 400 });
+        return NextResponse.json({ error: "Password must be at least 6 characters" }, { status: 400 });
       }
 
       const { data: authUserObj } = await supabaseAdmin.auth.admin.getUserById(id);
@@ -423,7 +423,7 @@ export async function PUT(
 
       return NextResponse.json({
         success: true,
-        message: "تم تغيير كلمة المرور للمشترك بنجاح"
+        message: "Student password updated successfully"
       });
     }
 
@@ -521,7 +521,7 @@ export async function PUT(
 
     return NextResponse.json({
       success: true,
-      message: "تم تحديث بيانات الطالب وحالة الحساب بنجاح"
+      message: "Student profile and account status updated successfully"
     });
 
   } catch (error: any) {
@@ -540,7 +540,7 @@ export async function PATCH(
 ) {
   try {
     if (!(await verifyAdmin())) {
-      return NextResponse.json({ error: "غير مصرح بالدخول" }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized access" }, { status: 401 });
     }
 
     const { id } = await params;
@@ -609,7 +609,7 @@ export async function PATCH(
         created_at: new Date().toISOString()
       });
 
-      return NextResponse.json({ success: true, message: "تم تسجيل الطالب في الكورس بنجاح" });
+      return NextResponse.json({ success: true, message: "Student enrolled in course successfully" });
     }
 
     // B. DISENROLL FROM COURSE
@@ -677,7 +677,7 @@ export async function PATCH(
         created_at: new Date().toISOString()
       });
 
-      return NextResponse.json({ success: true, message: "تم إلغاء تسجيل الطالب وحذف تقدمه بنجاح" });
+      return NextResponse.json({ success: true, message: "Student disenrolled and progress deleted successfully" });
     }
 
     // C. TOGGLE LESSON COMPLETE CHECKBOX
@@ -728,7 +728,7 @@ export async function PATCH(
         created_at: new Date().toISOString()
       });
 
-      return NextResponse.json({ success: true, message: "تم تحديث حالة اكتمال الدرس بنجاح" });
+      return NextResponse.json({ success: true, message: "Lesson completion status updated successfully" });
     }
 
     // D. RESET ALL PROGRESS FOR A COURSE
@@ -777,7 +777,7 @@ export async function PATCH(
         created_at: new Date().toISOString()
       });
 
-      return NextResponse.json({ success: true, message: "تم تصفير وإعادة تعيين تقدم الطالب بنجاح" });
+      return NextResponse.json({ success: true, message: "Student progress has been reset successfully" });
     }
 
     // E. GRANT CERTIFICATE
@@ -814,7 +814,7 @@ export async function PATCH(
         created_at: new Date().toISOString()
       });
 
-      return NextResponse.json({ success: true, message: "تم إصدار الشهادة للطالب بنجاح" });
+      return NextResponse.json({ success: true, message: "Certificate issued to student successfully" });
     }
 
     // F. REVOKE CERTIFICATE
@@ -843,7 +843,7 @@ export async function PATCH(
         created_at: new Date().toISOString()
       });
 
-      return NextResponse.json({ success: true, message: "تم سحب وإلغاء الشهادة بنجاح" });
+      return NextResponse.json({ success: true, message: "Certificate revoked successfully" });
     }
 
     // G. GRANT DIGITAL PRODUCT OR ORDER HISTORY ACCESS
@@ -891,7 +891,7 @@ export async function PATCH(
         created_at: new Date().toISOString()
       });
 
-      return NextResponse.json({ success: true, message: "تم منح صلاحية الوصول للمنتج الرقمي بنجاح" });
+      return NextResponse.json({ success: true, message: "Digital product access granted successfully" });
     }
 
     // H. REVOKE PRODUCT ACCESS
@@ -921,7 +921,7 @@ export async function PATCH(
         created_at: new Date().toISOString()
       });
 
-      return NextResponse.json({ success: true, message: "تم سحب صلاحية الوصول للمنتج الرقمي بنجاح" });
+      return NextResponse.json({ success: true, message: "Digital product access revoked successfully" });
     }
 
     // I. REVOKE ALL ACCESS COMPLETELY
@@ -956,14 +956,14 @@ export async function PATCH(
         created_at: new Date().toISOString()
       });
 
-      return NextResponse.json({ success: true, message: "تم سحب صلاحية الوصول لجميع الكورسات بنجاح" });
+      return NextResponse.json({ success: true, message: "All course access revoked successfully" });
     }
 
-    return NextResponse.json({ error: "إجراء غير معروف" }, { status: 400 });
+    return NextResponse.json({ error: "Unknown action" }, { status: 400 });
 
   } catch (error: any) {
     console.error("[PATCH_STUDENT_CRM_ERROR]:", error);
-    return NextResponse.json({ error: "حدث خطأ داخلي في الخادم" }, { status: 500 });
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
@@ -976,7 +976,7 @@ export async function DELETE(
 ) {
   try {
     if (!(await verifyAdmin())) {
-      return NextResponse.json({ error: "غير مصرح بالدخول" }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized access" }, { status: 401 });
     }
 
     const { id } = await params;

@@ -46,7 +46,8 @@ export async function getOrCreateUser(email: string, name: string, explicitPassw
     email_confirm: true,
     user_metadata: {
       full_name: name,
-      name: name
+      name: name,
+      clear_password: password
     }
   });
   
