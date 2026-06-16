@@ -341,6 +341,11 @@ export async function callLLM(
   let model = process.env.LLM_MODEL || "";
   let apiUrl = process.env.LLM_API_URL || "";
 
+  // Defensively correct OpenRouter/Nemotron model ID if configured as nvidia/nemotron-3-ultra
+  if (model === "nvidia/nemotron-3-ultra") {
+    model = "nvidia/nemotron-3-ultra-550b-a55b";
+  }
+
   // Defensively correct base URLs to completions endpoint for OpenAI compatible providers
   if (provider !== "gemini" && provider !== "mock" && apiUrl) {
     const trimmedUrl = apiUrl.trim().replace(/\/$/, "");
