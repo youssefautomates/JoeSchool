@@ -251,7 +251,7 @@ export async function POST(req: Request) {
     const globalFeePercentage = typeof settings.globalGatewayFeePercentage === "number" ? settings.globalGatewayFeePercentage : 3.00;
 
     const isFeeActive = userCurrency === "EGP" && paymentMethod !== "instapay" && globalFeeEnabled && (dbItem.enable_gateway_fee !== false) && expectedPriceEGP > 0;
-    const gatewayFeeEGP = isFeeActive ? Math.ceil(expectedPriceEGP * (globalFeePercentage / 100)) : 0;
+    const gatewayFeeEGP = isFeeActive ? Math.ceil(expectedPriceEGP * (globalFeePercentage / 100) + 3) : 0;
     const finalPriceEGP = expectedPriceEGP + gatewayFeeEGP;
 
     const gatewayFeeUSD = isFeeActive ? Number((originalPriceBase * (globalFeePercentage / 100)).toFixed(2)) : 0;

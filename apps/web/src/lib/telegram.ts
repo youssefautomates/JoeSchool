@@ -82,56 +82,132 @@ export async function sendTelegramMessage(text: string): Promise<boolean> {
 }
 
 /**
+ * Maps raw gateway method and provider values to clean business labels.
+ */
+function formatPaymentMethod(method?: string, provider?: string, amount?: number): string {
+  if (amount === 0 || provider === "admin_grant" || method === "Admin Manual Grant") {
+    if (provider === "admin_grant" || method === "Admin Manual Grant") {
+      return "Admin Manual Grant";
+    }
+    return "Free Order (100% Coupon)";
+  }
+
+  const m = (method || "").toLowerCase();
+  const p = (provider || "").toLowerCase();
+
+  if (m === "tbc" || m === "card" || m.includes("card") || p.includes("card")) {
+    return "Bank Card";
+  }
+  if (m === "wallet" || m.includes("wallet") || m === "mw" || p.includes("wallet")) {
+    return "E-Wallet";
+  }
+  if (m === "instapay") {
+    return "Instapay";
+  }
+
+  return method || provider || "Online Payment";
+}
+
+/**
  * Formats and sends a Telegram notification for a completed order.
  */
 export async function sendOrderTelegramNotification(order: {
   id: string;
   customer_name: string;
   customer_email: string;
-  customer_phone?: string;
   product_title: string;
   amount: number;
   currency: string;
   payment_method?: string;
   payment_provider?: string;
   coupon_code?: string;
+  subtotal_price?: number;
+  gateway_fee_amount?: number;
   created_at?: string;
 }) {
   const dateStr = order.created_at
-    ? new Date(order.created_at).toLocaleString("ar-EG", {
+    ? new Date(order.created_at).toLocaleString("en-US", {
         timeZone: "Africa/Cairo",
+        dateStyle: "medium",
+        timeStyle: "short",
       })
-    : new Date().toLocaleString("ar-EG", { timeZone: "Africa/Cairo" });
+    : new Date().toLocaleString("en-US", {
+        timeZone: "Africa/Cairo",
+        dateStyle: "medium",
+        timeStyle: "short",
+      });
 
-  const amountFormatted = `${order.amount} ${order.currency || "EGP"}`;
-  const couponText = order.coupon_code?.trim()
-    ? `<code>${order.coupon_code}</code>`
-    : "لا يوجد";
+  const currency = order.currency || "EGP";
+  const originalPrice = order.subtotal_price || order.amount || 0;
+  const finalPaid = order.amount || 0;
 
-  // Check if it was an admin grant or normal checkout
+  const hasCoupon = !!(order.coupon_code && order.coupon_code.trim() !== "");
+  const isFree = finalPaid === 0 || order.payment_provider === "admin_grant" || order.payment_method === "Admin Manual Grant";
+
+  // Calculate discount
+  let discountAmount = 0;
+  if (hasCoupon) {
+    if (isFree) {
+      discountAmount = originalPrice;
+    } else {
+      const finalBeforeFee = finalPaid - (order.gateway_fee_amount || 0);
+      discountAmount = Math.max(0, originalPrice - finalBeforeFee);
+    }
+  }
+
+  // Format payment method
+  const formattedPaymentMethod = formatPaymentMethod(order.payment_method, order.payment_provider, finalPaid);
+
+  // Format final paid text
+  let finalPaidText = `${finalPaid} ${currency}`;
+  if (isFree && hasCoupon) {
+    finalPaidText = `Free (100% Coupon)`;
+  } else if (isFree) {
+    finalPaidText = `Free`;
+  }
+
+  // Check category (isCourse)
+  const isCourse = 
+    order.product_title?.includes("دورة") || 
+    order.product_title?.includes("كورس") || 
+    order.product_title?.toLowerCase().includes("course");
+
+  const statusText = isCourse 
+    ? "✅ Course Access Granted Successfully" 
+    : "✅ Product Delivered Successfully";
+
+  // Is it manual grant?
   const isManual =
     order.payment_provider === "admin_grant" ||
     order.payment_method === "Admin Manual Grant";
-  const headerIcon = isManual ? "🎁" : "🛒";
-  const headerText = isManual ? "منح يدوي لمنتج رقمي" : "طلب جديد في المنصة";
 
-  const message = `
-${headerIcon} <b>${headerText}</b>
+  const header = isManual ? "🎁 Manual Grant" : "🛒 New Order";
 
-👤 <b>العميل:</b> ${order.customer_name || "غير معروف"}
-📧 <b>البريد الإلكتروني:</b> ${order.customer_email || "لا يوجد"}
-📞 <b>الهاتف:</b> ${order.customer_phone || "لا يوجد"}
+  let message = `${header}\n\n`;
+  message += `👤 <b>Customer:</b> ${order.customer_name || "Unknown"}\n`;
+  message += `📧 <b>Email:</b> ${order.customer_email || "None"}\n\n`;
+  
+  message += `📚 <b>Product:</b>\n${order.product_title || "Unknown"}\n\n`;
+  
+  message += `💰 <b>Original Price:</b> ${originalPrice} ${currency}\n`;
+  if (hasCoupon) {
+    message += `🎟️ <b>Discount:</b> ${discountAmount} ${currency}\n`;
+  }
+  message += `💵 <b>Final Paid:</b> ${finalPaidText}\n\n`;
+  
+  message += `💳 <b>Payment Method:</b> ${formattedPaymentMethod}\n\n`;
+  
+  if (hasCoupon) {
+    message += `🎁 <b>Coupon:</b> <code>${order.coupon_code?.trim()}</code>\n\n`;
+  }
+  
+  message += `<b>${statusText}</b>\n\n`;
+  
+  message += `🧾 <b>Order ID:</b> <code>${order.id}</code>\n`;
+  message += `📅 <b>Date:</b> ${dateStr}\n\n`;
 
-📦 <b>المنتج / الكورس:</b> ${order.product_title || "غير محدد"}
-💰 <b>القيمة:</b> <b>${amountFormatted}</b>
-💳 <b>طريقة الدفع:</b> ${order.payment_method || "غير محدد"} (${
-    order.payment_provider || "بوابة الدفع"
-  })
-🎟️ <b>كوبون الخصم:</b> ${couponText}
-🔢 <b>رقم الطلب:</b> <code>${order.id}</code>
-
-📅 <b>التاريخ:</b> ${dateStr}
-  `.trim();
+  // 📊 Structured analytics block at the bottom for business exports
+  message += `📊 <b>Metadata:</b> [Category: ${isCourse ? 'course' : 'digital'} | Coupon: ${order.coupon_code || 'none'} | Method: ${formattedPaymentMethod} | Provider: ${order.payment_provider || 'none'} | Original: ${originalPrice} | Discount: ${discountAmount} | Final: ${finalPaid} | Currency: ${currency}]`;
 
   return await sendTelegramMessage(message);
 }
@@ -145,19 +221,28 @@ export async function sendEnrollmentTelegramNotification(enrollment: {
   course_title: string;
   enrolled_by?: string;
 }) {
-  const dateStr = new Date().toLocaleString("ar-EG", {
+  const dateStr = new Date().toLocaleString("en-US", {
     timeZone: "Africa/Cairo",
+    dateStyle: "medium",
+    timeStyle: "short",
   });
 
   const message = `
-🎓 <b>تسجيل يدوي جديد في كورس</b>
+🎓 <b>Manual Course Enrollment</b>
 
-👤 <b>الاسم:</b> ${enrollment.user_name || "طالب جو سكول"}
-📧 <b>البريد الإلكتروني:</b> ${enrollment.user_email}
-📚 <b>الكورس:</b> ${enrollment.course_title}
-⚙️ <b>بواسطة:</b> لوحة التحكم (الأدمن)
+👤 <b>Customer:</b> ${enrollment.user_name || "Unknown"}
+📧 <b>Email:</b> ${enrollment.user_email}
 
-📅 <b>التاريخ:</b> ${dateStr}
+📚 <b>Product:</b>
+${enrollment.course_title}
+
+💳 <b>Payment Method:</b> Admin Manual Enrollment
+
+<b>✅ Course Access Granted Successfully</b>
+
+📅 <b>Date:</b> ${dateStr}
+
+📊 <b>Metadata:</b> [Category: course | Coupon: none | Method: Admin Manual Enrollment | Provider: admin | Original: 0 | Discount: 0 | Final: 0 | Currency: EGP]
   `.trim();
 
   return await sendTelegramMessage(message);

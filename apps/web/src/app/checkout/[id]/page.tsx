@@ -462,7 +462,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
         : baseFinalPrice;
 
       const isFeeActive = currency === "EGP" && paymentMethod !== "instapay" && globalFeeEnabled && (product.enable_gateway_fee !== false) && baseFinalPrice > 0;
-      const gatewayFeeAmount = isFeeActive ? Math.ceil(subtotalEGP * (globalFeePercentage / 100)) : 0;
+      const gatewayFeeAmount = isFeeActive ? Math.ceil(subtotalEGP * (globalFeePercentage / 100) + 3) : 0;
       const finalPriceEGP = subtotalEGP + gatewayFeeAmount;
 
       const payloadBody = {
@@ -576,7 +576,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
 
   const showFeeRecover = currency === "EGP" && paymentMethod !== "instapay" && globalFeeEnabled && (product.enable_gateway_fee !== false) && basePriceAfterCoupon > 0;
   const subtotalForFeeEGP = currency === "USD" ? Math.round(basePriceAfterCoupon * exchangeRate) : basePriceAfterCoupon;
-  const feeAmountEGP = showFeeRecover ? Math.ceil(subtotalForFeeEGP * (globalFeePercentage / 100)) : 0;
+  const feeAmountEGP = showFeeRecover ? Math.ceil(subtotalForFeeEGP * (globalFeePercentage / 100) + 3) : 0;
 
   const isCheapItem = subtotalForFeeEGP < 100;
   const showFeeRowSeparately = showFeeRecover && !isCheapItem;
