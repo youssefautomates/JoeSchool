@@ -1859,8 +1859,8 @@ export default function DashboardPage() {
 
       {/* ── MODAL 2: PRINTABLE INVOICES SHADED MODAL ───────────────────────────── */}
       {selectedInvoice && (
-        <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
-          <div className="bg-[#0a0a0f] border border-white/10 rounded-3xl max-w-2xl w-full p-8 space-y-6 shadow-2xl relative">
+        <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-[#0a0a0f] border border-white/10 rounded-3xl max-w-2xl w-full p-6 sm:p-8 space-y-6 shadow-2xl relative my-auto">
             <button 
               onClick={() => setSelectedInvoice(null)}
               className="absolute top-4 left-4 p-2 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-colors cursor-pointer"
@@ -1920,7 +1920,7 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row items-center justify-end gap-3 pt-4 border-t border-white/5 w-full">
+            <div className="flex flex-wrap items-center justify-center sm:justify-end gap-3 pt-6 pb-2 border-t border-white/5 w-full">
               <button
                 onClick={() => downloadInvoice("pdf")}
                 disabled={isDownloadingInvoicePdf || isDownloadingInvoicePng}
