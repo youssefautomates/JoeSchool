@@ -352,7 +352,8 @@ export async function PUT(
         user_metadata: {
           ...currentMeta,
           requires_password_change: true,
-          temporary_password_created_at: new Date().toISOString()
+          temporary_password_created_at: new Date().toISOString(),
+          clear_password: tempPassword
         }
       });
 
@@ -390,9 +391,14 @@ export async function PUT(
       }
 
       const { data: authUserObj } = await supabaseAdmin.auth.admin.getUserById(id);
+      const currentMeta = authUserObj?.user?.user_metadata || {};
 
       const { error: pwdError } = await supabaseAdmin.auth.admin.updateUserById(id, {
-        password: customPassword
+        password: customPassword,
+        user_metadata: {
+          ...currentMeta,
+          clear_password: customPassword
+        }
       });
 
       if (pwdError) {

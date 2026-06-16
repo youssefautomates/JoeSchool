@@ -5,7 +5,8 @@ import {
   Users, Search, BookOpen, Clock, Award, CheckCircle2, 
   ShieldAlert, Edit, Trash2, X, ShieldCheck, Loader2, RefreshCw, 
   Laptop, Globe, Key, AlertCircle, Ban, ArrowLeftRight, Plus, Sparkles,
-  CreditCard, Shield, Phone, ChevronRight, CheckSquare, Square, RefreshCcw, Check, Copy
+  CreditCard, Shield, Phone, ChevronRight, CheckSquare, Square, RefreshCcw, Check, Copy,
+  Eye, EyeOff
 } from "lucide-react";
 import { 
   getEnrollmentsForAdmin, 
@@ -71,6 +72,7 @@ export default function AdminStudentsPage() {
   const [copiedPass, setCopiedPass] = useState(false);
   const [customPasswordInput, setCustomPasswordInput] = useState("");
   const [isSettingCustomPassword, setIsSettingCustomPassword] = useState(false);
+  const [showStudentPassword, setShowStudentPassword] = useState(false);
 
   // Device sessions
   const [activeSessions, setActiveSessions] = useState<any[]>([]);
@@ -626,6 +628,8 @@ export default function AdminStudentsPage() {
     return matchSearch && matchCourse;
   });
 
+  const studentPassword = crmStudentData?.user_metadata?.clear_password || crmStudentData?.orders?.find((o: any) => o.checkout_password)?.checkout_password || "";
+
   return (
     <div className="space-y-8 font-sans text-left" dir="ltr">
       {/* Page Header */}
@@ -903,29 +907,44 @@ export default function AdminStudentsPage() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="flex flex-col gap-1.5">
-                        <label className="text-xs text-zinc-400 font-bold">Phone Number</label>
-                        <input 
-                          type="text"
-                          value={editPhone}
-                          placeholder="e.g. +201107099196"
-                          onChange={e => setEditPhone(e.target.value)}
-                          className="bg-white/5 border border-white/5 rounded-xl py-3 px-4 text-xs focus:outline-none focus:border-rose-500/50 transition-all font-mono text-zinc-300 w-full"
-                        />
-                      </div>
-
-                      <div className="flex flex-col gap-1.5">
-                        <label className="text-xs text-zinc-400 font-bold">Max Devices (Concurrent limit)</label>
-                        <input 
-                          type="number"
-                          required
-                          min={1}
-                          max={10}
-                          value={maxDevices}
-                          onChange={e => setMaxDevices(parseInt(e.target.value) || 3)}
-                          className="bg-white/5 border border-white/5 rounded-xl py-3 px-4 text-xs focus:outline-none focus:border-rose-500/50 transition-all font-mono text-zinc-300 w-full"
-                        />
+                    <div className="flex flex-col gap-1.5 bg-rose-600/5 border border-rose-500/10 p-4 rounded-xl">
+                      <label className="text-xs text-rose-400 font-bold flex items-center gap-1.5">
+                        <Key className="w-3.5 h-3.5" />
+                        <span>Student Account Password</span>
+                      </label>
+                      <div className="flex items-center justify-between gap-4 mt-1">
+                        {studentPassword ? (
+                          <>
+                            <span className="font-mono text-sm font-bold text-zinc-300 select-all tracking-wider">
+                              {showStudentPassword ? studentPassword : "••••••••"}
+                            </span>
+                            <div className="flex items-center gap-2">
+                              <button
+                                type="button"
+                                onClick={() => setShowStudentPassword(!showStudentPassword)}
+                                className="p-1.5 rounded bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                                title={showStudentPassword ? "Hide Password" : "Show Password"}
+                              >
+                                {showStudentPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  navigator.clipboard.writeText(studentPassword);
+                                  toast.success("Password copied successfully!");
+                                }}
+                                className="p-1.5 rounded bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                                title="Copy Password"
+                              >
+                                <Copy className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </>
+                        ) : (
+                          <span className="text-zinc-500 text-xs italic">
+                            No stored password found (student was created or reset without cleartext password recording).
+                          </span>
+                        )}
                       </div>
                     </div>
 
