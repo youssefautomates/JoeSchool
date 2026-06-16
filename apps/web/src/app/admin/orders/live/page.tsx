@@ -5,7 +5,9 @@ import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import {
   Flame, ShoppingCart, Loader2, Volume2, VolumeX,
-  Play, RefreshCw, ArrowUpRight, CheckCircle2, Clock, XCircle, X
+  Play, RefreshCw, ArrowUpRight, CheckCircle2, Clock, XCircle, X,
+  BookOpen, Eye, EyeOff, Copy, Lock, Calendar, User, Mail, CreditCard,
+  Sparkles, Check
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { formatPrice } from "@/lib/pricing";
@@ -116,6 +118,7 @@ export default function LiveOrdersFeed() {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [originalPrice, setOriginalPrice] = useState<number | null>(null);
   const [fetchingOriginalPrice, setFetchingOriginalPrice] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   // Filter and Timeline States
   const [statusFilter, setStatusFilter] = useState<"all" | "completed" | "incomplete">("all");
@@ -173,6 +176,7 @@ export default function LiveOrdersFeed() {
   useEffect(() => {
     if (!selectedOrder) {
       setOriginalPrice(null);
+      setShowPassword(false);
       return;
     }
 
@@ -278,7 +282,7 @@ export default function LiveOrdersFeed() {
     if (eventName) {
       switch (eventName) {
         case "email_sent":
-          return "تم إرسال إيميل التفعيل بنجاح";
+          return "تم تفعيل الكورس وإرسال الإيميل بنجاح";
         case "course_enrolled":
           return "تم تفعيل الكورس للمشترك";
         case "payment_success":
@@ -306,6 +310,32 @@ export default function LiveOrdersFeed() {
     }
   };
 
+  const getStageStyles = (order: Order, eventName?: string) => {
+    const desc = getStageDescription(order, eventName);
+    if (order.status === "completed") {
+      return {
+        bg: "bg-emerald-50/50 border border-emerald-100/50",
+        dot: "bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]",
+        text: "text-emerald-800 font-bold",
+        desc
+      };
+    } else if (order.status === "failed") {
+      return {
+        bg: "bg-red-50/50 border border-red-100/50",
+        dot: "bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]",
+        text: "text-red-800 font-bold",
+        desc
+      };
+    } else {
+      return {
+        bg: "bg-amber-50/50 border border-amber-100/50",
+        dot: "bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.5)] animate-pulse",
+        text: "text-amber-800 font-bold",
+        desc
+      };
+    }
+  };
+
   // Filter and pricing calculations
   const filteredOrders = orders.filter(order => {
     if (statusFilter === "all") return true;
@@ -324,7 +354,18 @@ export default function LiveOrdersFeed() {
   const discountVal = hasDiscount ? (originalPriceVal - netPaidPriceVal) : 0;
 
   return (
-    <div className="space-y-8 font-sans text-zinc-100 min-h-screen pb-16 text-left" dir="ltr">
+    <div className="space-y-8 min-h-screen pb-16 text-left live-orders-feed-container" dir="ltr">
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+      <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Alexandria:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+      <style>{`
+        .live-orders-feed-container, 
+        .live-orders-feed-container *,
+        .font-cairo,
+        .font-cairo * {
+          font-family: 'Cairo', 'Alexandria', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+        }
+      `}</style>
       
       {/* Header */}
       <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6 pb-6 border-b border-white/5">
@@ -416,7 +457,7 @@ export default function LiveOrdersFeed() {
                       <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-rose-600/10 border border-rose-500/20 shrink-0">
                         <ShoppingCart className="w-5 h-5 text-rose-500" />
                       </div>
-                      <div className="min-w-0">
+                      <div className="min-w-0 text-left">
                         <h3 
                           onClick={() => setSelectedOrder(order)}
                           className="text-sm font-bold text-white truncate cursor-pointer hover:text-rose-500 hover:underline transition-colors inline-block"
@@ -454,118 +495,203 @@ export default function LiveOrdersFeed() {
       {/* Customer / Order Detail Modal (Arabic, RTL) */}
       <AnimatePresence>
         {selectedOrder && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm overflow-y-auto">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm overflow-y-auto">
             <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              className="w-full max-w-lg bg-white rounded-3xl overflow-hidden shadow-2xl p-6 relative text-right text-zinc-900 border border-zinc-100"
+              initial={{ scale: 0.96, opacity: 0, y: 15 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.96, opacity: 0, y: 15 }}
+              transition={{ type: "spring", duration: 0.4 }}
+              className="w-full max-w-lg bg-white rounded-[32px] overflow-hidden shadow-[0_32px_64px_-12px_rgba(0,0,0,0.14)] border border-zinc-100 p-8 relative text-right text-zinc-900 font-cairo"
               dir="rtl"
             >
               {/* Close Button */}
               <button
                 onClick={() => setSelectedOrder(null)}
-                className="absolute top-4 left-4 w-8 h-8 rounded-full bg-zinc-100 hover:bg-zinc-200 flex items-center justify-center text-zinc-500 hover:text-zinc-900 transition-colors cursor-pointer"
+                className="absolute top-6 left-6 w-10 h-10 rounded-2xl bg-zinc-50 hover:bg-zinc-100 border border-zinc-100 flex items-center justify-center text-zinc-400 hover:text-zinc-700 transition-all active:scale-95 cursor-pointer shadow-sm z-10"
+                title="إغلاق"
               >
-                <X className="w-4 h-4" />
+                <X className="w-5 h-5" />
               </button>
 
               <div className="space-y-6 mt-4">
-                {/* Title and Badge */}
-                <div>
-                  <h2 className="text-xl font-bold text-zinc-900 leading-snug">{selectedOrder.product_title}</h2>
-                  <div className="flex items-center gap-3 mt-2 text-xs text-zinc-500">
-                    <span>{formatArabicDate(selectedOrder.created_at)}</span>
-                    <span className={`px-3 py-0.5 rounded-full font-bold text-[11px] border ${
+                {/* Header: Product & Status */}
+                <div className="space-y-3">
+                  <div className="inline-flex items-center gap-1.5 bg-rose-50 text-rose-600 px-3 py-1 rounded-full text-[10px] font-extrabold border border-rose-100">
+                    <Sparkles className="w-3.5 h-3.5 text-rose-500" />
+                    <span>تفاصيل الطلب والتحصيل</span>
+                  </div>
+                  
+                  <h2 className="text-xl md:text-2xl font-black text-zinc-900 leading-snug tracking-tight">
+                    {selectedOrder.product_title}
+                  </h2>
+                  
+                  <div className="flex flex-wrap items-center gap-3 text-xs text-zinc-500">
+                    <div className="flex items-center gap-1.5 bg-zinc-50 px-2.5 py-1 rounded-lg border border-zinc-100">
+                      <Calendar className="w-3.5 h-3.5 text-zinc-400" />
+                      <span className="font-semibold">{formatArabicDate(selectedOrder.created_at)}</span>
+                    </div>
+
+                    <span className={`px-3 py-1 rounded-full font-bold text-xs border flex items-center gap-1.5 ${
                       selectedOrder.status === 'completed'
-                        ? 'bg-emerald-50 text-emerald-600 border-emerald-200'
+                        ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
                         : selectedOrder.status === 'pending'
-                          ? 'bg-amber-50 text-amber-600 border-amber-200'
-                          : 'bg-red-50 text-red-600 border-red-200'
+                          ? 'bg-amber-50 text-amber-600 border-amber-100'
+                          : 'bg-rose-50 text-rose-600 border-rose-100'
                     }`}>
-                      {selectedOrder.status === 'completed' ? 'مؤكد' : selectedOrder.status === 'pending' ? 'انتظار الدفع' : 'غير مدفوع'}
+                      {selectedOrder.status === 'completed' && <Check className="w-3.5 h-3.5" />}
+                      {selectedOrder.status === 'pending' && <Clock className="w-3.5 h-3.5" />}
+                      {selectedOrder.status === 'failed' && <XCircle className="w-3.5 h-3.5" />}
+                      {selectedOrder.status === 'completed' ? 'عملية مؤكدة' : selectedOrder.status === 'pending' ? 'انتظار الدفع' : 'عملية غير مكتملة'}
                     </span>
                   </div>
                 </div>
 
-                <hr className="border-zinc-100" />
+                {/* Card 1: Last Stage Reached */}
+                <div className="bg-zinc-50/50 border border-zinc-100 rounded-2xl p-4 space-y-2">
+                  <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">المرحلة الحالية للطلب</span>
+                  {(() => {
+                    const stageStyles = getStageStyles(selectedOrder, orderEvents[selectedOrder.id]);
+                    return (
+                      <div className={`flex items-center gap-3 p-3.5 rounded-xl ${stageStyles.bg} transition-all`}>
+                        <div className={`w-3 h-3 rounded-full shrink-0 ${stageStyles.dot}`} />
+                        <p className={`text-sm leading-relaxed ${stageStyles.text}`}>{stageStyles.desc}</p>
+                      </div>
+                    );
+                  })()}
+                </div>
 
-                {/* Last Step Reached */}
-                <div className="space-y-2">
-                  <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider">آخر مرحلة وصل إليها العميل</h3>
-                  <div className="flex items-center gap-2 mt-1 bg-zinc-50 border border-zinc-100 p-3 rounded-2xl">
-                    <div className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse" />
-                    <p className="text-sm font-bold text-zinc-800">{getStageDescription(selectedOrder, orderEvents[selectedOrder.id])}</p>
+                {/* Card 2: Financial Slip / Invoice */}
+                <div className="bg-zinc-50/30 border border-zinc-100 rounded-2xl overflow-hidden shadow-sm">
+                  {/* Purchase Price Header */}
+                  <div className="p-4 bg-zinc-50/80 border-b border-zinc-100 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <CreditCard className="w-4 h-4 text-rose-500" />
+                      <span className="text-xs font-bold text-zinc-500 uppercase tracking-wider">بيانات السعر والخصومات</span>
+                    </div>
+                  </div>
+
+                  <div className="p-4 space-y-4">
+                    {/* Price and Discount */}
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-zinc-400">سعر المنتج</span>
+                      <div className="text-right">
+                        {hasDiscount ? (
+                          <div className="flex flex-col items-end gap-1">
+                            <div className="flex items-center gap-2 text-xs">
+                              <span className="text-zinc-400 line-through font-semibold">{formatArabicPrice(originalPriceVal, selectedOrder.currency)}</span>
+                              <span className="text-rose-600 font-bold bg-rose-50 px-2 py-0.5 rounded-lg text-[10px] border border-rose-100">{formatArabicPrice(discountVal, selectedOrder.currency)} خصم</span>
+                            </div>
+                            <div className="text-2xl font-black text-zinc-900 leading-none mt-1">
+                              {formatArabicPrice(netPaidPriceVal, selectedOrder.currency)}
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="text-2xl font-black text-zinc-900 leading-none">
+                            {formatArabicPrice(netPaidPriceVal, selectedOrder.currency)}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Dotted separator */}
+                    <div className="border-t border-dashed border-zinc-200 my-2" />
+
+                    {/* Settlement details */}
+                    <div className="space-y-2.5 text-xs">
+                      <div className="flex justify-between items-center text-zinc-500 font-semibold">
+                        <span>المبلغ الكلي المسحوب</span>
+                        <span className="font-bold text-zinc-900">{formatArabicPrice(totalCharged, selectedOrder.currency)}</span>
+                      </div>
+                      
+                      <div className="flex justify-between items-center text-zinc-500 font-semibold">
+                        <span>رسوم بوابة الدفع الالكترونية</span>
+                        <span className="font-bold text-amber-600 bg-amber-50/80 border border-amber-100/50 px-2.5 py-0.5 rounded-lg text-[11px]">{formatArabicPrice(gatewayFee, selectedOrder.currency)}</span>
+                      </div>
+
+                      <div className="border-t border-zinc-100 pt-3 mt-3 flex justify-between items-center font-bold text-sm">
+                        <span className="text-zinc-800">صافي أرباح المحفظة</span>
+                        <span className="text-[#D6004B] font-black text-base">{formatArabicPrice(netSettled, selectedOrder.currency)}</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
-                <hr className="border-zinc-100" />
-
-                {/* Purchase Price */}
-                <div className="space-y-2">
-                  <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider">سعر الشراء</h3>
-                  <div className="space-y-1">
-                    {hasDiscount && (
-                      <>
-                        <div className="text-sm text-zinc-400 line-through">
-                          {formatArabicPrice(originalPriceVal, selectedOrder.currency)}
-                        </div>
-                        <div className="text-sm text-red-500 font-bold">
-                          {formatArabicPrice(discountVal, selectedOrder.currency)} (خصم)
-                        </div>
-                      </>
-                    )}
-                    <div className="text-2xl font-black text-zinc-900">
-                      {formatArabicPrice(netPaidPriceVal, selectedOrder.currency)}
-                    </div>
+                {/* Card 3: Customer Card & Login info */}
+                <div className="bg-zinc-50/30 border border-zinc-100 rounded-2xl overflow-hidden shadow-sm">
+                  <div className="p-4 bg-zinc-50/80 border-b border-zinc-100 flex items-center gap-2">
+                    <User className="w-4 h-4 text-rose-500" />
+                    <span className="text-xs font-bold text-zinc-500 uppercase tracking-wider">بيانات العميل وحسابه</span>
                   </div>
-                </div>
 
-                <hr className="border-zinc-100" />
-
-                {/* Settlement Amount */}
-                <div className="space-y-3">
-                  <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider">مبلغ التسوية</h3>
-                  <div className="space-y-1.5 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-zinc-500">المبلغ الكلي</span>
-                      <span className="font-semibold text-zinc-900">{formatArabicPrice(totalCharged, selectedOrder.currency)}</span>
+                  <div className="p-4 space-y-4">
+                    {/* Customer Profile Details */}
+                    <div className="flex items-center gap-3.5">
+                      <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-rose-500 to-rose-600 text-white font-black text-base flex items-center justify-center shadow-lg shadow-rose-600/15 shrink-0 select-none">
+                        {selectedOrder.customer_name ? selectedOrder.customer_name.trim().charAt(0) : "ي"}
+                      </div>
+                      <div className="text-right min-w-0 flex-1">
+                        <h4 className="font-bold text-zinc-900 text-sm leading-tight truncate">
+                          {selectedOrder.customer_name || "مشتري مجهول"}
+                        </h4>
+                        
+                        {/* Interactive Copy Email */}
+                        <button
+                          onClick={() => {
+                            navigator.clipboard.writeText(selectedOrder.customer_email);
+                            toast.success("تم نسخ البريد الإلكتروني!");
+                          }}
+                          className="text-zinc-500 hover:text-rose-600 font-mono text-[11px] flex items-center gap-1.5 mt-1 cursor-pointer transition-colors w-fit group"
+                          title="نسخ البريد الإلكتروني"
+                        >
+                          <Mail className="w-3.5 h-3.5 shrink-0 text-zinc-400 group-hover:text-rose-500" />
+                          <span className="select-all truncate">{selectedOrder.customer_email}</span>
+                          <Copy className="w-3 h-3 text-zinc-400 group-hover:text-rose-500 shrink-0" />
+                        </button>
+                      </div>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-zinc-500">رسوم الدفع</span>
-                      <span className="font-semibold text-amber-600">{formatArabicPrice(gatewayFee, selectedOrder.currency)}</span>
+
+                    {/* Location Badge */}
+                    <div className="flex items-center gap-1.5 bg-zinc-100/60 border border-zinc-200/20 px-3 py-1.5 rounded-xl text-xs text-zinc-600 font-medium w-fit">
+                      <span className="text-base select-none">{getFlagEmoji(selectedOrder.country)}</span>
+                      <span className="font-bold">{getLocalizedLocation(selectedOrder.country_name || selectedOrder.country, selectedOrder.city)}</span>
                     </div>
-                    <div className="flex justify-between border-t border-dashed border-zinc-100 pt-1.5 font-bold">
-                      <span className="text-zinc-800">المبلغ الصافي</span>
-                      <span className="text-zinc-950">{formatArabicPrice(netSettled, selectedOrder.currency)}</span>
-                    </div>
-                  </div>
-                </div>
 
-                <hr className="border-zinc-100" />
-
-                {/* Product */}
-                <div className="space-y-1">
-                  <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider">المنتج</h3>
-                  <p className="text-sm font-bold text-zinc-950">{selectedOrder.product_title}</p>
-                </div>
-
-                <hr className="border-zinc-100" />
-
-                {/* Customer Info */}
-                <div className="space-y-2">
-                  <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider">العميل</h3>
-                  <div className="space-y-1 text-sm">
-                    <p className="font-bold text-zinc-900">{selectedOrder.customer_name || "مشتري مجهول"}</p>
-                    <p className="text-sky-600 font-mono select-all">{selectedOrder.customer_email}</p>
-                    <p className="text-zinc-600 flex items-center gap-1">
-                      <span>{getFlagEmoji(selectedOrder.country)}</span>
-                      <span>{getLocalizedLocation(selectedOrder.country_name || selectedOrder.country, selectedOrder.city)}</span>
-                    </p>
+                    {/* Password Sub-card */}
                     {selectedOrder.checkout_password && (
-                      <div className="mt-3 bg-rose-50 border border-rose-100/30 p-3 rounded-2xl flex justify-between items-center text-xs">
-                        <span className="text-zinc-500 font-bold">كلمة مرور الحساب:</span>
-                        <span className="font-mono font-black text-rose-600 select-all">{selectedOrder.checkout_password}</span>
+                      <div className="bg-rose-50/30 border border-rose-100/30 p-3.5 rounded-xl flex justify-between items-center text-xs mt-2 transition-all hover:bg-rose-50/50">
+                        <div className="flex items-center gap-2 text-zinc-600">
+                          <Lock className="w-4 h-4 text-rose-500" />
+                          <span className="font-bold">كلمة مرور الحساب:</span>
+                        </div>
+                        
+                        <div className="flex items-center gap-2 font-mono">
+                          <span className="font-bold text-rose-600 text-sm bg-white border border-rose-100/30 px-3 py-1 rounded-lg select-all shadow-sm">
+                            {showPassword ? selectedOrder.checkout_password : "••••••••"}
+                          </span>
+                          
+                          <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="text-zinc-400 hover:text-rose-600 p-1.5 rounded-lg hover:bg-rose-100/40 transition-all cursor-pointer"
+                            title={showPassword ? "إخفاء كلمة المرور" : "إظهار كلمة المرور"}
+                          >
+                            {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                          </button>
+                          
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (selectedOrder.checkout_password) {
+                                navigator.clipboard.writeText(selectedOrder.checkout_password);
+                                toast.success("تم نسخ كلمة المرور!");
+                              }
+                            }}
+                            className="text-zinc-400 hover:text-rose-600 p-1.5 rounded-lg hover:bg-rose-100/40 transition-all cursor-pointer"
+                            title="نسخ كلمة المرور"
+                          >
+                            <Copy className="w-4 h-4" />
+                          </button>
+                        </div>
                       </div>
                     )}
                   </div>
