@@ -21,7 +21,8 @@ import {
   RefreshCw,
   Play,
   Trash2,
-  Globe
+  Globe,
+  Send
 } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
@@ -64,6 +65,13 @@ export default function AdminSettings() {
   // Connection & Verification States
   const [testConnectionStatus, setTestConnectionStatus] = useState<"idle" | "testing" | "success" | "failed">("idle");
 
+  // Telegram Bot Settings State
+  const [telegramBotToken, setTelegramBotToken] = useState("");
+  const [telegramChatId, setTelegramChatId] = useState("");
+  const [telegramEnabled, setTelegramEnabled] = useState(false);
+  const [telegramTesting, setTelegramTesting] = useState(false);
+  const [showTelegramToken, setShowTelegramToken] = useState(false);
+
   // Load settings on mount
   useEffect(() => {
     async function loadSettings() {
@@ -86,6 +94,9 @@ export default function AdminSettings() {
           setTiktokPixelEnabled(!!data.tiktokPixelEnabled);
           setGlobalGatewayFeeEnabled(data.globalGatewayFeeEnabled !== false);
           setGlobalGatewayFeePercentage(typeof data.globalGatewayFeePercentage === "number" ? data.globalGatewayFeePercentage : 3.00);
+          setTelegramBotToken(data.telegramBotToken || "");
+          setTelegramChatId(data.telegramChatId || "");
+          setTelegramEnabled(!!data.telegramEnabled);
 
           const syncedData = {
             metaPixelId: pId,
@@ -185,7 +196,10 @@ export default function AdminSettings() {
           tiktokPixelId,
           tiktokPixelEnabled,
           globalGatewayFeeEnabled,
-          globalGatewayFeePercentage
+          globalGatewayFeePercentage,
+          telegramBotToken,
+          telegramChatId,
+          telegramEnabled
         })
       });
       const resData = await res.json();
@@ -221,6 +235,36 @@ export default function AdminSettings() {
       return false;
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleTestTelegramConnection = async () => {
+    if (!telegramBotToken || !telegramChatId) {
+      toast.error("Please enter both Bot Token and Chat ID to run connection test");
+      return;
+    }
+    setTelegramTesting(true);
+    try {
+      const res = await fetch("/api/admin/settings/test-telegram", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          botToken: telegramBotToken,
+          chatId: telegramChatId
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success("Test message sent successfully! Please check your Telegram chat.");
+      } else {
+        toast.error(data.error || "Failed to send test message.");
+      }
+    } catch (err: any) {
+      toast.error(err.message || "An error occurred while testing connection");
+    } finally {
+      setTelegramTesting(false);
     }
   };
 
@@ -280,6 +324,7 @@ export default function AdminSettings() {
               { id: "email", label: "Email Services (Resend)", icon: Mail },
               { id: "tracking", label: "Meta Tracking & CAPI", icon: Code },
               { id: "tiktok", label: "TikTok Pixel Settings", icon: Globe },
+              { id: "telegram", label: "Telegram Bot", icon: Send },
               { id: "security", label: "Security & Privacy", icon: Shield },
             ].map((item) => (
               <button 
@@ -877,6 +922,139 @@ export default function AdminSettings() {
                     <CheckCircle2 className="w-4 h-4" />
                     <span>SSL/TLS Secure Socket Channels Active</span>
                   </div>
+                </div>
+              </Card>
+            </motion.div>
+          )}
+
+          {/* Telegram Bot Settings Panel */}
+          {activeSubTab === "telegram" && (
+            <motion.div 
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <Card className="border-white/5 bg-[#09090e]/80 rounded-2xl overflow-hidden backdrop-blur-xl p-8 space-y-8">
+                <div className="flex items-center gap-4 pb-4 border-b border-white/5">
+                  <div className="w-12 h-12 rounded-xl bg-sky-500/10 flex items-center justify-center text-sky-400 border border-sky-500/20">
+                    <Send className="w-6 h-6 rotate-[-15deg] translate-x-[-2px] translate-y-[2px]" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-white">Telegram Notifications</h3>
+                    <p className="text-zinc-500 text-xs">Receive instant Telegram updates for every new order and course subscription.</p>
+                  </div>
+                </div>
+
+                {/* Enable Toggle Card */}
+                <div 
+                  onClick={() => setTelegramEnabled(!telegramEnabled)}
+                  className={cn(
+                    "flex items-center justify-between p-4 rounded-xl border transition-all duration-300 cursor-pointer select-none",
+                    telegramEnabled 
+                      ? "bg-sky-500/5 border-sky-500/20 text-sky-400" 
+                      : "bg-white/5 border-white/10 text-zinc-400"
+                  )}
+                >
+                  <div className="space-y-1 text-left">
+                    <p className="text-xs font-bold text-zinc-300">Enable Telegram Alerts</p>
+                    <p className="text-[10px] text-zinc-500">When active, notifications are immediately pushed to your specified chat ID.</p>
+                  </div>
+                  <input 
+                    type="checkbox"
+                    checked={telegramEnabled}
+                    onChange={() => {}} // toggled by click on parent div
+                    className="w-4 h-4 text-sky-600 border-white/10 rounded focus:ring-sky-500 cursor-pointer"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Bot Token */}
+                  <div className="space-y-3 relative">
+                    <Label className="text-zinc-400 font-semibold text-xs">Telegram Bot Token</Label>
+                    <div className="relative">
+                      <Input 
+                        type={showTelegramToken ? "text" : "password"}
+                        value={telegramBotToken} 
+                        onChange={e => setTelegramBotToken(e.target.value)}
+                        placeholder="e.g. 123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ"
+                        className="h-12 bg-white/5 border-white/10 rounded-xl focus:border-sky-500 transition-all text-xs pr-12" 
+                      />
+                      <button 
+                        type="button"
+                        onClick={() => setShowTelegramToken(!showTelegramToken)}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white transition-colors"
+                      >
+                        {showTelegramToken ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Chat ID */}
+                  <div className="space-y-3">
+                    <Label className="text-zinc-400 font-semibold text-xs">Telegram Chat ID</Label>
+                    <Input 
+                      type="text"
+                      value={telegramChatId} 
+                      onChange={e => setTelegramChatId(e.target.value)}
+                      placeholder="e.g. 987654321"
+                      className="h-12 bg-white/5 border-white/10 rounded-xl focus:border-sky-500 transition-all text-xs" 
+                    />
+                  </div>
+                </div>
+
+                {/* Instructions Alert Box */}
+                <div className="p-5 rounded-2xl bg-[#0e1621] border border-sky-500/10 text-zinc-400 space-y-3 text-xs leading-relaxed text-left">
+                  <h4 className="font-bold text-white flex items-center gap-2">
+                    <Send className="w-4 h-4 text-sky-400" />
+                    How to Set Up Your Telegram Bot:
+                  </h4>
+                  <ol className="list-decimal list-inside space-y-2 text-zinc-400 font-semibold pl-2">
+                    <li>Open Telegram and search for <a href="https://t.me/BotFather" target="_blank" rel="noreferrer" className="text-sky-400 hover:underline">@BotFather</a>.</li>
+                    <li>Send the command <code>/newbot</code> and follow the instructions to get your <b>Bot Token</b>.</li>
+                    <li>Search for <a href="https://t.me/GetIDBot" target="_blank" rel="noreferrer" className="text-sky-400 hover:underline">@GetIDBot</a> or <a href="https://t.me/userinfobot" target="_blank" rel="noreferrer" className="text-sky-400 hover:underline">@userinfobot</a> and send them a message to get your <b>Chat ID</b>.</li>
+                    <li><b>CRITICAL:</b> You must send a message (like <code>/start</code>) to your new bot on Telegram first, otherwise it cannot send you messages.</li>
+                  </ol>
+                </div>
+
+                {/* Button Action Row */}
+                <div className="flex flex-wrap gap-4 pt-6 border-t border-white/5">
+                  <Button
+                    onClick={handleTestTelegramConnection}
+                    disabled={telegramTesting}
+                    type="button"
+                    className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 font-bold px-6 h-11 rounded-xl transition-all text-xs flex items-center gap-2"
+                  >
+                    {telegramTesting ? (
+                      <>
+                        <RefreshCw className="w-4 h-4 animate-spin text-sky-400" />
+                        Testing Connection...
+                      </>
+                    ) : (
+                      <>
+                        <Send className="w-4 h-4" />
+                        Test Connection
+                      </>
+                    )}
+                  </Button>
+
+                  <Button
+                    onClick={handleSaveSettings}
+                    disabled={isLoading}
+                    type="button"
+                    className="bg-[#D6004B] hover:bg-[#ff0059] text-white font-bold px-6 h-11 rounded-xl transition-all shadow-md active:scale-98 text-xs flex items-center gap-2"
+                  >
+                    {isLoading ? (
+                      <>
+                        <RefreshCw className="w-4 h-4 animate-spin text-white" />
+                        Saving Config...
+                      </>
+                    ) : (
+                      <>
+                        <Save className="w-4 h-4" />
+                        Save Telegram Settings
+                      </>
+                    )}
+                  </Button>
                 </div>
               </Card>
             </motion.div>

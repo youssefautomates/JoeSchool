@@ -330,8 +330,28 @@ export async function POST(req: Request) {
 
     if (expectedPriceEGP === 0) {
       // 100% Free Promo Code Flow!
-      // Update order status to completed directly
-      await supabaseAdmin.from("orders").update({ status: "completed", payment_id: "FREE_COUPON" }).eq("id", dbOrder.id);
+      const { data: updatedOrders } = await supabaseAdmin
+        .from("orders")
+        .update({ status: "completed", payment_id: "FREE_COUPON" })
+        .eq("id", dbOrder.id)
+        .neq("status", "completed")
+        .select();
+
+      const wasUpdated = updatedOrders && updatedOrders.length > 0;
+      if (wasUpdated) {
+        // Send Telegram Notification
+        try {
+          const { sendOrderTelegramNotification } = await import("@/lib/telegram");
+          const fullOrderInfo = {
+            ...dbOrder,
+            status: "completed",
+            payment_id: "FREE_COUPON"
+          };
+          await sendOrderTelegramNotification(fullOrderInfo);
+        } catch (teleErr) {
+          console.error("[PAYMOB_INITIATE] ❌ Telegram notification error:", teleErr);
+        }
+      }
 
       // Increment coupon count if used
       if (couponCode) {

@@ -14,7 +14,10 @@ export async function GET() {
     tiktokPixelId: "",
     tiktokPixelEnabled: false,
     globalGatewayFeeEnabled: true,
-    globalGatewayFeePercentage: 3.00
+    globalGatewayFeePercentage: 3.00,
+    telegramBotToken: "",
+    telegramChatId: "",
+    telegramEnabled: false
   };
   const saved = await getKV(MARKETING_KEY);
   const settings = saved ? { ...defaultSettings, ...saved } : defaultSettings;

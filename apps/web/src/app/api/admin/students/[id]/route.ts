@@ -609,6 +609,18 @@ export async function PATCH(
         created_at: new Date().toISOString()
       });
 
+      // Send Telegram Notification
+      try {
+        const { sendEnrollmentTelegramNotification } = await import("@/lib/telegram");
+        await sendEnrollmentTelegramNotification({
+          user_name: studentName || "طالب جو سكول",
+          user_email: studentEmailVal || "",
+          course_title: courseTitle || courseId
+        });
+      } catch (teleErr) {
+        console.error("Telegram manual enrollment notification error:", teleErr);
+      }
+
       return NextResponse.json({ success: true, message: "Student enrolled in course successfully" });
     }
 
@@ -882,14 +894,36 @@ export async function PATCH(
       }
 
       // Log admin action
-      await supabaseAdmin.from("admin_action_logs").insert({
-        admin_email: "admin@joeschool.com",
-        student_id: id,
-        student_email: studentEmailVal || "",
-        action_type: "GRANT_PRODUCT",
-        details: `Manually granted digital product: ${productTitle || productId}. Order ID: ${orderId}`,
-        created_at: new Date().toISOString()
-      });
+      try {
+        await supabaseAdmin.from("admin_action_logs").insert({
+          admin_email: "admin@joeschool.com",
+          student_id: id,
+          student_email: studentEmailVal || "",
+          action_type: "GRANT_PRODUCT",
+          details: `Manually granted digital product: ${productTitle || productId}. Order ID: ${orderId}`,
+          created_at: new Date().toISOString()
+        });
+      } catch (logErr) {
+        console.error("Failed to log manual grant action:", logErr);
+      }
+
+      // Send Telegram Notification
+      try {
+        const { sendOrderTelegramNotification } = await import("@/lib/telegram");
+        await sendOrderTelegramNotification({
+          id: orderId,
+          customer_name: studentName || "عميل جو سكول",
+          customer_email: studentEmailVal || "",
+          product_title: productTitle,
+          amount: Number(amount) || 0,
+          currency: "EGP",
+          payment_provider: "admin_grant",
+          payment_method: "Admin Manual Grant",
+          created_at: new Date().toISOString()
+        });
+      } catch (teleErr) {
+        console.error("Telegram manual grant notification error:", teleErr);
+      }
 
       return NextResponse.json({ success: true, message: "Digital product access granted successfully" });
     }

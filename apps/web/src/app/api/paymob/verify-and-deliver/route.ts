@@ -479,15 +479,34 @@ export async function POST(req: Request) {
         updatePayload.customer_id = resolvedUserId;
       }
 
-      const { error: updateError } = await supabaseAdmin
+      const { data: updatedOrders, error: updateError } = await supabaseAdmin
         .from("orders")
         .update(updatePayload)
-        .eq("id", order.id);
+        .eq("id", order.id)
+        .neq("status", "completed")
+        .select();
 
       if (updateError) {
         console.error(`[VERIFY][${requestId}] ❌ Update Error for order ${order.id}:`, updateError);
       } else {
-        console.log(`[VERIFY][${requestId}] ✅ Order ${order.id} status updated to completed`);
+        const wasUpdated = updatedOrders && updatedOrders.length > 0;
+        if (wasUpdated) {
+          console.log(`[VERIFY][${requestId}] ✅ Order ${order.id} status updated to completed`);
+          
+          // Send Telegram Notification
+          try {
+            const { sendOrderTelegramNotification } = await import("@/lib/telegram");
+            const fullOrderInfo = {
+              ...order,
+              ...updatePayload
+            };
+            await sendOrderTelegramNotification(fullOrderInfo);
+          } catch (teleErr) {
+            console.error(`[VERIFY][${requestId}] ❌ Telegram notification error:`, teleErr);
+          }
+        } else {
+          console.log(`[VERIFY][${requestId}] ⚠️ Order ${order.id} was already completed. Notification skipped.`);
+        }
         
         // Log timeline event for payment success
         try {

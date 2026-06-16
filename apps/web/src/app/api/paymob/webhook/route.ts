@@ -247,14 +247,33 @@ export async function POST(request: Request) {
             updatePayload.customer_id = resolvedUserId;
           }
 
-          const { error: updErr } = await supabaseAdmin
+          const { data: updatedOrders, error: updErr } = await supabaseAdmin
             .from("orders")
             .update(updatePayload)
-            .eq("id", ord.id);
+            .eq("id", ord.id)
+            .neq("status", "completed")
+            .select();
 
           if (updErr) {
             console.error(`[PAYMOB_WEBHOOK][${requestId}] ❌ Database update error for ${ord.id}:`, updErr);
             continue;
+          }
+
+          const wasUpdated = updatedOrders && updatedOrders.length > 0;
+          if (wasUpdated) {
+            // Send Telegram Notification
+            try {
+              const { sendOrderTelegramNotification } = await import("@/lib/telegram");
+              const fullOrderInfo = {
+                ...ord,
+                ...updatePayload
+              };
+              await sendOrderTelegramNotification(fullOrderInfo);
+            } catch (teleErr) {
+              console.error(`[PAYMOB_WEBHOOK][${requestId}] ❌ Telegram notification error:`, teleErr);
+            }
+          } else {
+            console.log(`[PAYMOB_WEBHOOK][${requestId}] ⚠️ Order ${ord.id} was already completed. Notification skipped.`);
           }
 
           // If a coupon code was used, increment its usage count securely
