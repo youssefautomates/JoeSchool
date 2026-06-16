@@ -118,6 +118,8 @@ export async function getRevenueAnalytics(startDate: string, endDate: string) {
   return {
     totalRevenue: metrics.revenue,
     completedOrders: metrics.orders,
+    freeOrdersCount: (metrics as any).freeOrdersCount || 0,
+    freeOrdersCoupons: (metrics as any).freeOrdersCoupons || [],
     aov: metrics.aov
   };
 }
@@ -322,6 +324,7 @@ Behavior Rules:
 * Clearly state when data is insufficient.
 * Base every conclusion on actual platform data returned by tools.
 * Prefer concise actionable insights over long explanations.
+* فهم كوبونات الخصم 100%: إذا كانت الإيرادات 0 وهناك طلبات (orders) تم تسجيلها، تحقق من عدد الطلبات المجانية (freeOrdersCount) والكوبونات المستخدمة. بدلاً من قول "الإيرادات 0 جنيه" أو "المبيعات 0 جنيه" بصورة توحي بعدم وجود أي نشاط، وضّح بدقة: "تم تسجيل [عدد] طلب اليوم باستخدام كوبون خصم 100%، لذلك لا توجد إيرادات نقدية محصلة حتى الآن." (أو الصياغة المناسبة لذكاء الأعمال حسب الفترة المستعلم عنها).
 
 Your role is not only to report numbers but to act as a business advisor helping grow JoeSchool.
 

@@ -1224,6 +1224,16 @@ export async function compileRawMetricsForRange(start: Date, end: Date) {
   const completedOrders = orders || [];
   const revenue = completedOrders.reduce((sum, o) => sum + (o.amount || 0), 0);
   const ordersCount = completedOrders.length;
+
+  const freeOrdersCount = completedOrders.filter(o => {
+    const amount = o.amount || 0;
+    const hasCoupon = !!(o.coupon_code && o.coupon_code.trim() !== "");
+    return amount === 0 && hasCoupon;
+  }).length;
+
+  const freeOrdersCoupons = completedOrders
+    .filter(o => (o.amount || 0) === 0 && o.coupon_code && o.coupon_code.trim() !== "")
+    .map(o => o.coupon_code!.trim());
   
   // Count new registrations
   const newStudents = allUsers.filter(u => {
@@ -1293,6 +1303,8 @@ export async function compileRawMetricsForRange(start: Date, end: Date) {
   return {
     revenue,
     orders: ordersCount,
+    freeOrdersCount,
+    freeOrdersCoupons,
     newStudents,
     aov,
     visits,
