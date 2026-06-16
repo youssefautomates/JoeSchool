@@ -341,6 +341,18 @@ export async function callLLM(
   let model = process.env.LLM_MODEL || "";
   let apiUrl = process.env.LLM_API_URL || "";
 
+  // Defensively correct base URLs to completions endpoint for OpenAI compatible providers
+  if (provider !== "gemini" && provider !== "mock" && apiUrl) {
+    const trimmedUrl = apiUrl.trim().replace(/\/$/, "");
+    if (!trimmedUrl.endsWith("/chat/completions") && !trimmedUrl.endsWith("/completions")) {
+      if (trimmedUrl.endsWith("/v1")) {
+        apiUrl = trimmedUrl + "/chat/completions";
+      } else {
+        apiUrl = trimmedUrl + "/v1/chat/completions";
+      }
+    }
+  }
+
   if (provider === "gemini") {
     model = model || "gemini-2.5-flash";
     apiUrl = apiUrl || `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
