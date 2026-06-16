@@ -161,6 +161,52 @@ export default function AdminOrders() {
     }
   };
 
+  const getPaymentMethodInfo = (order: { payment_method?: string; payment_provider?: string }) => {
+    if (order.payment_provider === "instapay") return null;
+    
+    const method = (order.payment_method || "").toLowerCase();
+    const provider = (order.payment_provider || "").toLowerCase();
+    
+    if (method === "instapay" || provider === "instapay") return null;
+    
+    if (
+      method.includes("wallet") || 
+      method.includes("vodafone") || 
+      method.includes("etisalat") || 
+      method.includes("orange") || 
+      method.includes("we") || 
+      method === "mw"
+    ) {
+      return {
+        text: "Mobile Wallet",
+        color: "text-purple-400 bg-purple-500/10 border-purple-500/20",
+      };
+    }
+    
+    if (
+      method.includes("card") || 
+      method.includes("visa") || 
+      method.includes("mastercard") || 
+      method.includes("meeza") || 
+      method === "card"
+    ) {
+      return {
+        text: "Bank Card",
+        color: "text-blue-400 bg-blue-500/10 border-blue-500/20",
+      };
+    }
+
+    // Fallback for default Paymob integration
+    if (provider === "paymob" || method === "tbc") {
+      return {
+        text: "Bank Card",
+        color: "text-blue-400 bg-blue-500/10 border-blue-500/20",
+      };
+    }
+
+    return null;
+  };
+
   // Filter Unique Options dynamically from the loaded list
   const uniqueCountries = useMemo(() => {
     return Array.from(new Set(orders.map(o => o.country).filter(Boolean)));
@@ -815,15 +861,26 @@ export default function AdminOrders() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge className={
-                          order.status === 'completed'
-                            ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 px-2.5 py-0.5 rounded-lg text-[10px]'
-                            : order.status === 'pending'
-                              ? 'bg-amber-500/10 text-amber-400 border-amber-500/20 px-2.5 py-0.5 rounded-lg text-[10px]'
-                              : 'bg-red-500/10 text-red-400 border-red-500/20 px-2.5 py-0.5 rounded-lg text-[10px]'
-                        }>
-                          {order.status === 'completed' ? 'Paid' : order.status === 'pending' ? 'Pending' : 'Failed'}
-                        </Badge>
+                        <div className="flex items-center gap-2">
+                          {(() => {
+                            const payMethodInfo = getPaymentMethodInfo(order);
+                            if (!payMethodInfo) return null;
+                            return (
+                              <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${payMethodInfo.color}`}>
+                                {payMethodInfo.text}
+                              </span>
+                            );
+                          })()}
+                          <Badge className={
+                            order.status === 'completed'
+                              ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 px-2.5 py-0.5 rounded-lg text-[10px]'
+                              : order.status === 'pending'
+                                ? 'bg-amber-500/10 text-amber-400 border-amber-500/20 px-2.5 py-0.5 rounded-lg text-[10px]'
+                                : 'bg-red-500/10 text-red-400 border-red-500/20 px-2.5 py-0.5 rounded-lg text-[10px]'
+                          }>
+                            {order.status === 'completed' ? 'Paid' : order.status === 'pending' ? 'Pending' : 'Failed'}
+                          </Badge>
+                        </div>
                       </TableCell>
                       <TableCell className="text-zinc-400 text-xs font-mono">
                         <div className="flex flex-col">
@@ -974,9 +1031,23 @@ export default function AdminOrders() {
                           </span>
                         </div>
                       </div>
-                      <div>
-                        <span className="text-[10px] text-zinc-500 block">Payment Method Channel</span>
-                        <span className="text-white mt-1 block capitalize">{selectedOrder.payment_provider || "Paymob"}</span>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <span className="text-[10px] text-zinc-500 block">Payment Channel</span>
+                          <span className="text-white mt-1 block capitalize">{selectedOrder.payment_provider || "Paymob"}</span>
+                        </div>
+                        {(() => {
+                          const payMethodInfo = getPaymentMethodInfo(selectedOrder);
+                          if (!payMethodInfo) return null;
+                          return (
+                            <div>
+                              <span className="text-[10px] text-zinc-500 block">Payment Method</span>
+                              <span className={`inline-block text-[10px] font-bold px-2 py-0.5 mt-1 rounded border ${payMethodInfo.color}`}>
+                                {payMethodInfo.text}
+                              </span>
+                            </div>
+                          );
+                        })()}
                       </div>
                     </div>
                   </div>

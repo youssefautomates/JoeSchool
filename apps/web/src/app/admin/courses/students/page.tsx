@@ -582,6 +582,55 @@ export default function AdminStudentsPage() {
     }
   };
 
+  const handleRevokeAllAccess = async () => {
+    if (!selectedStudent) return;
+    if (!confirm("⚠️ WARNING: Are you sure you want to completely revoke all course enrollments and product accesses for this student? This will clear all course access immediately.")) return;
+
+    toast.loading("Revoking all access...", { id: "revoke-all-act" });
+    try {
+      const res = await fetch(`/api/admin/students/${selectedStudent.user_id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "revoke_all_access",
+          studentEmail: editEmail
+        })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        toast.success("All access revoked successfully!", { id: "revoke-all-act" });
+        await refreshCrmData(selectedStudent.user_id);
+      } else {
+        toast.error(data.error || "Failed to revoke access", { id: "revoke-all-act" });
+      }
+    } catch (err) {
+      toast.error("Error communicating with server", { id: "revoke-all-act" });
+    }
+  };
+
+  const handleDeleteStudent = async () => {
+    if (!selectedStudent) return;
+    if (!confirm("🚨 CRITICAL WARNING: Are you sure you want to delete this student account completely from the platform? This will delete their login credentials, profile, orders, progress, and certificates. This action is irreversible!")) return;
+
+    toast.loading("Deleting student account...", { id: "delete-student-act" });
+    try {
+      const res = await fetch(`/api/admin/students/${selectedStudent.user_id}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" }
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        toast.success("Student account deleted successfully!", { id: "delete-student-act" });
+        setSelectedStudent(null); // Close modal
+        loadData(); // Refresh list
+      } else {
+        toast.error(data.error || "Failed to delete student account", { id: "delete-student-act" });
+      }
+    } catch (err) {
+      toast.error("Error communicating with server", { id: "delete-student-act" });
+    }
+  };
+
   const handleCreateStudentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newStudent.email || !newStudent.password || !newStudent.firstName || !newStudent.lastName || !newStudent.courseId) {
@@ -808,13 +857,26 @@ export default function AdminStudentsPage() {
 
                     {/* Quick Action controls */}
                     <td className="p-5 text-center">
-                      <button 
-                        onClick={() => handleOpenActionModal(row)}
-                        className="h-8 px-3 rounded-lg bg-white/5 border border-white/10 hover:border-rose-500/30 hover:text-rose-400 text-zinc-400 font-bold transition-all text-[11px] inline-flex items-center gap-1 cursor-pointer"
-                      >
-                        <Edit className="w-3 h-3" />
-                        <span>Manage</span>
-                      </button>
+                      <div className="flex items-center justify-center gap-2">
+                        <button 
+                          onClick={() => handleOpenActionModal(row)}
+                          className="h-8 px-3 rounded-lg bg-white/5 border border-white/10 hover:border-rose-500/30 hover:text-rose-400 text-zinc-400 font-bold transition-all text-[11px] inline-flex items-center gap-1 cursor-pointer"
+                        >
+                          <Edit className="w-3 h-3" />
+                          <span>Manage</span>
+                        </button>
+                        <button 
+                          onClick={() => {
+                            setSelectedStudent(row);
+                            setTimeout(() => handleDisenroll(row.course_id), 100);
+                          }}
+                          className="h-8 px-3 rounded-lg bg-red-950/10 border border-red-500/20 hover:bg-red-950/40 hover:text-red-400 text-red-500 font-bold transition-all text-[11px] inline-flex items-center gap-1 cursor-pointer"
+                          title="إلغاء التسجيل في هذا الكورس"
+                        >
+                          <Ban className="w-3 h-3" />
+                          <span>Revoke</span>
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -882,7 +944,8 @@ export default function AdminStudentsPage() {
               <>
                 {/* TAB 1: Profile Details */}
                 {modalTab === "profile" && (
-                  <form onSubmit={handleUpdateDetails} className="space-y-4 font-sans">
+                  <>
+                    <form onSubmit={handleUpdateDetails} className="space-y-4 font-sans">
                     <div className="grid grid-cols-2 gap-4">
                       <div className="flex flex-col gap-1.5">
                         <label className="text-xs text-zinc-400 font-bold">Student Full Name</label>
@@ -959,6 +1022,37 @@ export default function AdminStudentsPage() {
                       </button>
                     </div>
                   </form>
+
+                  {/* Danger Zone: Access & Account Controls */}
+                  <div className="p-4 rounded-xl bg-red-950/20 border border-red-500/10 space-y-3 mt-4 text-left" dir="ltr">
+                    <h4 className="text-red-400 text-xs font-bold flex items-center gap-2">
+                      <Trash2 className="w-4 h-4 text-red-500" />
+                      <span>Danger Zone: Access & Account Controls</span>
+                    </h4>
+                    <p className="text-zinc-500 text-[11px] leading-relaxed">
+                      These actions are destructive and cannot be undone. Completely revoke all access or delete the student from the entire platform.
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-3 pt-1">
+                      <button
+                        type="button"
+                        onClick={handleRevokeAllAccess}
+                        className="h-10 px-4 bg-red-950/40 border border-red-500/20 hover:bg-red-950 text-red-400 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                      >
+                        <ShieldAlert className="w-3.5 h-3.5" />
+                        <span>Revoke Access to All Courses</span>
+                      </button>
+                      
+                      <button
+                        type="button"
+                        onClick={handleDeleteStudent}
+                        className="h-10 px-4 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        <span>Delete Student from Platform</span>
+                      </button>
+                    </div>
+                  </div>
+                  </>
                 )}
 
                 {/* TAB: Recent Activity */}

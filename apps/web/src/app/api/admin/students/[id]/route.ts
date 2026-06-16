@@ -924,10 +924,95 @@ export async function PATCH(
       return NextResponse.json({ success: true, message: "تم سحب صلاحية الوصول للمنتج الرقمي بنجاح" });
     }
 
+    // I. REVOKE ALL ACCESS COMPLETELY
+    if (action === "revoke_all_access") {
+      // 1. Delete all enrollments
+      const { error: enrollErr } = await supabaseAdmin
+        .from("enrollments")
+        .delete()
+        .or(`user_id.eq.${id},user_email.eq.${studentEmailVal}`);
+
+      if (enrollErr) {
+        return NextResponse.json({ error: enrollErr.message }, { status: 400 });
+      }
+
+      // 2. Delete all product orders/grants
+      const { error: ordError } = await supabaseAdmin
+        .from("orders")
+        .delete()
+        .or(`customer_id.eq.${id},customer_email.eq.${studentEmailVal}`);
+
+      if (ordError) {
+        return NextResponse.json({ error: ordError.message }, { status: 400 });
+      }
+
+      // Log admin action
+      await supabaseAdmin.from("admin_action_logs").insert({
+        admin_email: "admin@joeschool.com",
+        student_id: id,
+        student_email: studentEmailVal || "",
+        action_type: "REVOKE_ALL_ACCESS",
+        details: `Revoked all active course enrollments and product accesses completely.`,
+        created_at: new Date().toISOString()
+      });
+
+      return NextResponse.json({ success: true, message: "تم سحب صلاحية الوصول لجميع الكورسات بنجاح" });
+    }
+
     return NextResponse.json({ error: "إجراء غير معروف" }, { status: 400 });
 
   } catch (error: any) {
     console.error("[PATCH_STUDENT_CRM_ERROR]:", error);
+    return NextResponse.json({ error: "حدث خطأ داخلي في الخادم" }, { status: 500 });
+  }
+}
+
+/**
+ * DELETE: Delete a student from the platform completely.
+ */
+export async function DELETE(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    if (!(await verifyAdmin())) {
+      return NextResponse.json({ error: "غير مصرح بالدخول" }, { status: 401 });
+    }
+
+    const { id } = await params;
+    
+    // 1. Get the student's email first to clean up custom tables by email
+    const { data: authData, error: authError } = await supabaseAdmin.auth.admin.getUserById(id);
+    const studentEmail = authData?.user?.email;
+    const studentEmailVal = studentEmail || "";
+
+    // 2. Delete from custom tables in a transactional order (or concurrently)
+    const promises = [
+      supabaseAdmin.from("enrollments").delete().eq("user_id", id),
+      supabaseAdmin.from("user_course_progress").delete().eq("user_id", id),
+      supabaseAdmin.from("user_video_sessions").delete().eq("user_id", id),
+      supabaseAdmin.from("certificates").delete().eq("user_id", id),
+      supabaseAdmin.from("user_status").delete().eq("user_id", id),
+      supabaseAdmin.from("profiles").delete().eq("id", id),
+    ];
+
+    if (studentEmailVal) {
+      promises.push(supabaseAdmin.from("enrollments").delete().eq("user_email", studentEmailVal));
+      promises.push(supabaseAdmin.from("customers").delete().eq("email", studentEmailVal));
+      promises.push(supabaseAdmin.from("orders").delete().eq("customer_email", studentEmailVal));
+    }
+
+    await Promise.all(promises);
+
+    // 3. Delete from Supabase Auth admin
+    const { error: deleteAuthError } = await supabaseAdmin.auth.admin.deleteUser(id);
+    if (deleteAuthError) {
+      console.error("Auth user delete failed:", deleteAuthError);
+    }
+
+    return NextResponse.json({ success: true, message: "Student account deleted completely from the platform." });
+  } catch (error: any) {
+    console.error("[DELETE_STUDENT_CRM_ERROR]:", error);
     return NextResponse.json({ error: "حدث خطأ داخلي في الخادم" }, { status: 500 });
   }
 }

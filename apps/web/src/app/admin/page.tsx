@@ -104,6 +104,9 @@ interface AnalyticsEvent {
   utm_medium?: string | null;
   utm_campaign?: string | null;
   referrer?: string | null;
+  ip_address?: string | null;
+  user_agent?: string | null;
+  metadata?: any;
   created_at: string;
 }
 
@@ -140,22 +143,117 @@ export default function AdminDashboard() {
 
   const [country, setCountry] = useState("ALL");
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
-  const [notifications, setNotifications] = useState<AlertNotification[]>([]);
   const [reviews, setReviews] = useState<any[]>([]);
+  
+  // Track read and cleared notification IDs in localStorage to prevent duplication and simulator dependency
+  const [readNotifIds, setReadNotifIds] = useState<string[]>([]);
+  const [clearedNotifIds, setClearedNotifIds] = useState<string[]>([]);
 
-  // Local storage backup persistence only for alert notifications logs
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const storedNotifs = localStorage.getItem("joe_admin_notifications");
-      if (storedNotifs) {
-        try { setNotifications(JSON.parse(storedNotifs)); } catch (e) {}
-      }
+      try {
+        setReadNotifIds(JSON.parse(localStorage.getItem("admin_notifications_read") || "[]"));
+        setClearedNotifIds(JSON.parse(localStorage.getItem("admin_notifications_cleared") || "[]"));
+      } catch (e) {}
     }
   }, []);
 
-  useEffect(() => {
-    localStorage.setItem("joe_admin_notifications", JSON.stringify(notifications));
-  }, [notifications]);
+  const derivedNotifications = useMemo(() => {
+    const derived: AlertNotification[] = [];
+
+    // 1. Process Orders for Sales Notifications (Completed vs Incomplete)
+    orders.forEach(order => {
+      // Completed Sale
+      if (order.status === "completed") {
+        const id = `sale-completed-${order.id}`;
+        if (!clearedNotifIds.includes(id) && notificationPrefs.new_order) {
+          derived.push({
+            id,
+            type: "new_order",
+            title: "Completed Sale Received",
+            message: `Completed payment of ${formatPrice(order.amount, order.currency || "EGP")} processed for "${order.product_title}" from ${order.customer_name || 'Guest'}.`,
+            created_at: order.created_at,
+            read: readNotifIds.includes(id)
+          });
+        }
+        
+        // Revenue spike alert (if amount >= 1500)
+        if (order.amount >= 1500 && notificationPrefs.revenue_spike) {
+          const spikeId = `sale-spike-${order.id}`;
+          if (!clearedNotifIds.includes(spikeId)) {
+            derived.push({
+              id: spikeId,
+              type: "revenue_spike",
+              title: "Alert: Revenue Spike",
+              message: `A high-value order of ${formatPrice(order.amount, order.currency || "EGP")} was processed from customer ${order.customer_name || "Guest"}.`,
+              created_at: order.created_at,
+              read: readNotifIds.includes(spikeId)
+            });
+          }
+        }
+      } 
+      // Incomplete/Pending/Failed Sale
+      else {
+        const id = `sale-incomplete-${order.id}`;
+        if (!clearedNotifIds.includes(id) && notificationPrefs.failed_payment) {
+          const statusText = order.status === "failed" ? "Failed" : "Pending";
+          derived.push({
+            id,
+            type: "failed_payment",
+            title: `Incomplete Sale (${statusText})`,
+            message: `An order of ${formatPrice(order.amount, order.currency || "EGP")} for "${order.product_title}" by ${order.customer_name || 'Guest'} is currently ${statusText.toLowerCase()}.`,
+            created_at: order.created_at,
+            read: readNotifIds.includes(id)
+          });
+        }
+      }
+    });
+
+    // 2. Process analyticsEvents for security alerts (real failed login attempts)
+    const seenFailedLogins = new Set<string>();
+    
+    // Process analytics events in reverse order to keep the newest one first, but since we are pushing to derived array,
+    // we can just check if we have already added an alert for this email.
+    // First, sort by created_at desc so we see newest first
+    const sortedEvents = [...analyticsEvents].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    
+    sortedEvents.forEach(evt => {
+      if (evt.event_name === "admin_login_failed" && notificationPrefs.suspicious_login) {
+        const email = evt.metadata?.email_attempted || "Unknown email";
+        if (!seenFailedLogins.has(email)) {
+          seenFailedLogins.add(email);
+          const id = `sec-alert-${evt.id}`;
+          if (!clearedNotifIds.includes(id)) {
+            derived.push({
+              id,
+              type: "suspicious_login",
+              title: "Security Threat: Blocked Login Attempt",
+              message: `A failed login attempt for admin email "${email}" from IP ${evt.ip_address || 'Unknown'} was blocked.`,
+              created_at: evt.created_at,
+              read: readNotifIds.includes(id)
+            });
+          }
+        }
+      }
+    });
+
+    // Sort notifications by created_at descending
+    return derived.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  }, [orders, analyticsEvents, readNotifIds, clearedNotifIds, notificationPrefs]);
+
+  const handleMarkAllAsRead = () => {
+    const currentIds = derivedNotifications.map(n => n.id);
+    const newReadIds = Array.from(new Set([...readNotifIds, ...currentIds]));
+    setReadNotifIds(newReadIds);
+    localStorage.setItem("admin_notifications_read", JSON.stringify(newReadIds));
+  };
+
+  const handleClearAll = () => {
+    const currentIds = derivedNotifications.map(n => n.id);
+    const newClearedIds = Array.from(new Set([...clearedNotifIds, ...currentIds]));
+    setClearedNotifIds(newClearedIds);
+    localStorage.setItem("admin_notifications_cleared", JSON.stringify(newClearedIds));
+  };
 
   const hasFetched = useRef(false);
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -369,44 +467,29 @@ export default function AdminDashboard() {
     // 1. Setup Postgres Live subscription for real-time commerce alerts
     const channel = supabase
       .channel("admin-realtime-feed")
-      // Listen to new orders
+      // Listen to all changes on orders (INSERT, UPDATE)
       .on(
         "postgres_changes",
-        { event: "INSERT", schema: "public", table: "orders" },
+        { event: "*", schema: "public", table: "orders" },
         (payload) => {
-          const newOrder = payload.new as Order;
-          setOrders(prev => [newOrder, ...prev]);
-          playNewOrderSound();
-          
-          toast.success(
-            `New order received: ${formatPrice(newOrder.amount, (newOrder.currency as any) || 'EGP')} from customer ${newOrder.customer_name || 'Guest'}`,
-            { duration: 6000 }
-          );
-
-          // Pushing alert to Notification center if preferred
-          if (notificationPrefsRef.current.new_order) {
-            const newAlert: AlertNotification = {
-              id: `alert-ord-${Date.now()}`,
-              type: "new_order",
-              title: "New Digital Sale Received",
-              message: `Payment of ${formatPrice(newOrder.amount, newOrder.currency || "EGP")} processed for product "${newOrder.product_title}".`,
-              created_at: new Date().toISOString(),
-              read: false
-            };
-            setNotifications(prev => [newAlert, ...prev]);
-          }
-
-          // Revenue spike alert
-          if (newOrder.status === "completed" && newOrder.amount >= 1500 && notificationPrefsRef.current.revenue_spike) {
-            const spikeAlert: AlertNotification = {
-              id: `alert-spike-${Date.now()}`,
-              type: "revenue_spike",
-              title: "Alert: Revenue Spike",
-              message: `A high-value order of ${formatPrice(newOrder.amount, newOrder.currency || "EGP")} was detected from customer ${newOrder.customer_name || "Guest"}.`,
-              created_at: new Date().toISOString(),
-              read: false
-            };
-            setNotifications(prev => [spikeAlert, ...prev]);
+          if (payload.eventType === "INSERT") {
+            const newOrder = payload.new as Order;
+            setOrders(prev => [newOrder, ...prev]);
+            playNewOrderSound();
+            toast.success(
+              `New order received: ${formatPrice(newOrder.amount, (newOrder.currency as any) || 'EGP')} from customer ${newOrder.customer_name || 'Guest'}`,
+              { duration: 6000 }
+            );
+          } else if (payload.eventType === "UPDATE") {
+            const updatedOrder = payload.new as Order;
+            setOrders(prev => prev.map(o => o.id === updatedOrder.id ? updatedOrder : o));
+            if (updatedOrder.status === "completed") {
+              playNewOrderSound();
+              toast.success(
+                `Order completed! ${formatPrice(updatedOrder.amount, (updatedOrder.currency as any) || 'EGP')} from ${updatedOrder.customer_name || 'Guest'}`,
+                { duration: 6000 }
+              );
+            }
           }
         }
       )
@@ -417,18 +500,7 @@ export default function AdminDashboard() {
         (payload) => {
           const newEnroll = payload.new as any;
           setEnrollments(prev => [newEnroll, ...prev]);
-          
-          if (notificationPrefsRef.current.new_student) {
-            const enrollAlert: AlertNotification = {
-              id: `alert-enroll-${Date.now()}`,
-              type: "new_student",
-              title: "New Course Registration",
-              message: `A new student has enrolled in course ID: ${newEnroll.course_id}.`,
-              created_at: new Date().toISOString(),
-              read: false
-            };
-            setNotifications(prev => [enrollAlert, ...prev]);
-          }
+          toast.info(`New student registration: Student enrolled in course ID: ${newEnroll.course_id}`);
         }
       )
       // Listen to product reviews
@@ -438,18 +510,7 @@ export default function AdminDashboard() {
         (payload) => {
           const newReview = payload.new as any;
           setReviews(prev => [newReview, ...prev]);
-
-          if (notificationPrefsRef.current.new_review) {
-            const reviewAlert: AlertNotification = {
-              id: `alert-rev-${Date.now()}`,
-              type: "new_review",
-              title: "New Course Review Submitted",
-              message: `Rating: ${newReview.rating || 5} stars from student "${newReview.student_name || 'Anonymous'}".`,
-              created_at: new Date().toISOString(),
-              read: false
-            };
-            setNotifications(prev => [reviewAlert, ...prev]);
-          }
+          toast.info(`New review submitted: Rating ${newReview.rating || 5} stars from student "${newReview.student_name || 'Anonymous'}"`);
         }
       )
       // Listen to visitor clicks / clickstreams in real-time
@@ -459,6 +520,9 @@ export default function AdminDashboard() {
         (payload) => {
           const newEvent = payload.new as AnalyticsEvent;
           setAnalyticsEvents(prev => [newEvent, ...prev]);
+          if (newEvent.event_name === "admin_login_failed") {
+            toast.error(`Security Alert: A failed admin login attempt from IP ${newEvent.ip_address || 'Unknown'} was blocked!`);
+          }
         }
       )
       .subscribe();
@@ -471,30 +535,9 @@ export default function AdminDashboard() {
       }, 20000);
     }
 
-    // 3. Security anomaly periodic simulator
-    let anomalyInterval: any;
-    if (notificationPrefsRef.current.suspicious_login) {
-      anomalyInterval = setInterval(() => {
-        // 5% chance of triggering a mock security anomaly warning every 90 seconds
-        if (Math.random() > 0.90) {
-          const loginAlert: AlertNotification = {
-            id: `alert-sec-${Date.now()}`,
-            type: "suspicious_login",
-            title: "Security Threat: Suspicious Login Attempt",
-            message: "An unusual login attempt from IP 192.168.1.189 (Riyadh, Saudi Arabia) was blocked.",
-            created_at: new Date().toISOString(),
-            read: false
-          };
-          setNotifications(prev => [loginAlert, ...prev]);
-          toast.warning("Security Warning: Suspicious login attempt detected!");
-        }
-      }, 90000);
-    }
-
     return () => {
       supabase.removeChannel(channel);
       if (pollInterval) clearInterval(pollInterval);
-      if (anomalyInterval) clearInterval(anomalyInterval);
     };
   // Only re-run on pollingActive change — refs handle the rest without recreating channels
   }, [pollingActive]);
@@ -1356,9 +1399,9 @@ export default function AdminDashboard() {
       <NotificationCenter
         isOpen={isNotificationOpen}
         onClose={() => setIsNotificationOpen(false)}
-        notifications={notifications}
-        onMarkAllAsRead={() => setNotifications(prev => prev.map(n => ({ ...n, read: true })))}
-        onClearAll={() => setNotifications([])}
+        notifications={derivedNotifications}
+        onMarkAllAsRead={handleMarkAllAsRead}
+        onClearAll={handleClearAll}
         prefs={notificationPrefs}
         onUpdatePref={updateNotificationPref}
       />

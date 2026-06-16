@@ -301,6 +301,7 @@ export async function POST(req: Request) {
       timezone,
       ip_address: ipAddress,
       payment_provider: paymentMethod === "instapay" ? "instapay" : "paymob",
+      payment_method: paymentMethod || "card",
       device_type: deviceType,
       browser,
       os,

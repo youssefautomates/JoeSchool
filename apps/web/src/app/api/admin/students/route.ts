@@ -24,6 +24,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "يرجى ملء جميع الحقول المطلوبة" }, { status: 400 });
     }
 
+    let userId = "";
+
     // 1. Create the user in Supabase Auth using Admin Auth API
     const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
       email,
@@ -38,12 +40,42 @@ export async function POST(req: Request) {
     });
 
     if (authError) {
-      return NextResponse.json({ error: authError.message }, { status: 400 });
+      if (authError.message.includes("already been registered") || authError.message.includes("already exists")) {
+        // Find existing user
+        const { data: pageData } = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 1000 });
+        const existingUser = pageData?.users?.find(u => u.email === email);
+        if (existingUser) {
+          userId = existingUser.id;
+          // Update password if they exist
+          await supabaseAdmin.auth.admin.updateUserById(userId, { password });
+        } else {
+          return NextResponse.json({ error: authError.message }, { status: 400 });
+        }
+      } else {
+        return NextResponse.json({ error: authError.message }, { status: 400 });
+      }
+    } else {
+      userId = authData.user?.id || "";
     }
 
-    const userId = authData.user?.id;
     if (!userId) {
       return NextResponse.json({ error: "فشل إنشاء حساب الطالب" }, { status: 500 });
+    }
+
+    // Check if already enrolled to avoid duplicates
+    const { data: existingEnroll } = await supabaseAdmin.from("enrollments").select("id").eq("user_id", userId).eq("course_id", courseId).maybeSingle();
+
+    if (existingEnroll) {
+      return NextResponse.json({
+        success: true,
+        message: "الطالب مسجل بالفعل في هذا الكورس. تم تحديث بيانات الحساب.",
+        student: {
+          id: userId,
+          name: `${firstName} ${lastName}`.trim(),
+          email: email,
+          course_id: courseId
+        }
+      });
     }
 
     // 2. Enroll the student in the selected course
@@ -56,8 +88,6 @@ export async function POST(req: Request) {
     });
 
     if (enrollError) {
-      // Cleanup created auth user if enrollment failed to maintain consistency
-      await supabaseAdmin.auth.admin.deleteUser(userId);
       return NextResponse.json({ error: `فشل تسجيل الطالب في الكورس: ${enrollError.message}` }, { status: 400 });
     }
 

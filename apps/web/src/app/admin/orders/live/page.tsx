@@ -31,6 +31,7 @@ interface Order {
   city?: string;
   country_name?: string;
   payment_provider?: string;
+  payment_method?: string;
   checkout_password?: string;
 }
 
@@ -106,6 +107,52 @@ const formatArabicDate = (dateStr: string) => {
 const formatArabicPrice = (amount: number, currency: string = "EGP") => {
   const symbol = currency === "EGP" ? "ج.م" : currency;
   return `${amount.toFixed(2)} ${symbol}`;
+};
+
+const getPaymentMethodInfo = (order: { payment_method?: string; payment_provider?: string }) => {
+  if (order.payment_provider === "instapay") return null;
+  
+  const method = (order.payment_method || "").toLowerCase();
+  const provider = (order.payment_provider || "").toLowerCase();
+  
+  if (method === "instapay" || provider === "instapay") return null;
+  
+  if (
+    method.includes("wallet") || 
+    method.includes("vodafone") || 
+    method.includes("etisalat") || 
+    method.includes("orange") || 
+    method.includes("we") || 
+    method === "mw"
+  ) {
+    return {
+      text: "Mobile Wallet",
+      color: "text-purple-400 bg-purple-500/10 border-purple-500/20",
+    };
+  }
+  
+  if (
+    method.includes("card") || 
+    method.includes("visa") || 
+    method.includes("mastercard") || 
+    method.includes("meeza") || 
+    method === "card"
+  ) {
+    return {
+      text: "Bank Card",
+      color: "text-blue-400 bg-blue-500/10 border-blue-500/20",
+    };
+  }
+
+  // Fallback for default Paymob integration
+  if (provider === "paymob" || method === "tbc") {
+    return {
+      text: "Bank Card",
+      color: "text-blue-400 bg-blue-500/10 border-blue-500/20",
+    };
+  }
+
+  return null;
 };
 
 export default function LiveOrdersFeed() {
@@ -480,9 +527,20 @@ export default function LiveOrdersFeed() {
                         <p className="text-sm font-bold text-rose-500">{formatPrice(order.amount, (order.currency as any) || 'EGP').replace("EGP", "L.E")}</p>
                         <p className="text-[10px] text-zinc-500 mt-0.5">{formatDate(order.created_at)}</p>
                       </div>
-                      <span className={`text-[10px] font-bold px-3 py-1 rounded-full border ${statusColors[order.status] || statusColors.pending}`}>
-                        {order.status === "completed" ? "Completed" : order.status === "failed" ? "Failed" : "Pending"}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        {(() => {
+                          const payMethodInfo = getPaymentMethodInfo(order);
+                          if (!payMethodInfo) return null;
+                          return (
+                            <span className={`text-[10px] font-bold px-3 py-1 rounded-full border ${payMethodInfo.color}`}>
+                              {payMethodInfo.text}
+                            </span>
+                          );
+                        })()}
+                        <span className={`text-[10px] font-bold px-3 py-1 rounded-full border ${statusColors[order.status] || statusColors.pending}`}>
+                          {order.status === "completed" ? "Completed" : order.status === "failed" ? "Failed" : "Pending"}
+                        </span>
+                      </div>
                     </div>
                   </motion.div>
                 );
@@ -598,6 +656,19 @@ export default function LiveOrdersFeed() {
 
                     {/* Settlement details */}
                     <div className="space-y-2.5 text-xs">
+                      {(() => {
+                        const payMethodInfo = getPaymentMethodInfo(selectedOrder);
+                        if (!payMethodInfo) return null;
+                        return (
+                          <div className="flex justify-between items-center text-zinc-500 font-semibold border-b border-zinc-100 pb-2 mb-2">
+                            <span>Payment Method</span>
+                            <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-lg border ${payMethodInfo.color}`}>
+                              {payMethodInfo.text}
+                            </span>
+                          </div>
+                        );
+                      })()}
+                      
                       <div className="flex justify-between items-center text-zinc-500 font-semibold">
                         <span>Total Amount Charged</span>
                         <span className="font-bold text-zinc-900">{formatPrice(totalCharged, selectedOrder.currency as any)}</span>
