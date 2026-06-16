@@ -78,7 +78,7 @@ export async function sendOrderEmail(
           tags: product.tags || [],
           isCourse,
           hasDownload: !!product.file_url,
-          downloadUrl: product.file_url ? `${process.env.NEXT_PUBLIC_APP_URL || "https://www.joeschool.com"}/api/download?token=${order.id}` : null,
+          downloadUrl: product.file_url ? `https://www.joeschool.com/api/download?token=${order.id}` : null,
           orderId: order.id
         });
       } else {
@@ -98,31 +98,35 @@ export async function sendOrderEmail(
     const containsCourses = resolvedProducts.some(p => p.isCourse);
     const containsDigital = resolvedProducts.some(p => p.hasDownload);
 
-    // 2. Set dynamic transactional subject line based on product types
-    let subjectLine = "تم تسليم طلبك | JoeSchool";
+    // 2. Set dynamic subject line
+    let subjectLine = "تم تسليم طلبك بنجاح | JoeSchool";
     if (containsCourses && !containsDigital) {
       subjectLine = "تم تفعيل دورتك التعليمية | JoeSchool";
     } else if (containsDigital && !containsCourses) {
       subjectLine = "روابط تحميل ملفاتك الرقمية | JoeSchool";
     }
 
+    const loginEmail = credentials?.email || customerEmail;
+    const loginPassword = credentials?.password;
+
     // 3. Build bulletproof Plain Text Version (Crucial for Anti-Spam scores)
     let emailText = `أهلاً ${customerName}!\n\n`;
     emailText += `تم تأكيد وتفعيل طلبك بنجاح. جميع ملفاتك ودوراتك جاهزة لك الآن.\n\n`;
     
-    if (credentials && credentials.password) {
-      emailText += `تفاصيل الدخول لحسابك:\n`;
-      emailText += `البريد الإلكتروني: ${credentials.email}\n`;
-      emailText += `كلمة المرور: ${credentials.password}\n`;
-      emailText += `رابط تسجيل الدخول: ${process.env.NEXT_PUBLIC_APP_URL || "https://www.joeschool.com"}/login?email=${encodeURIComponent(credentials.email)}&redirect=%2Fdashboard\n\n`;
+    emailText += `تفاصيل الدخول لحسابك:\n`;
+    emailText += `البريد الإلكتروني: ${loginEmail}\n`;
+    if (loginPassword) {
+      emailText += `كلمة المرور: ${loginPassword}\n`;
+    } else {
+      emailText += `كلمة المرور: استخدم كلمة مرور حسابك الحالية التي قمت باختيارها أثناء التسجيل\n`;
     }
+    emailText += `رابط تسجيل الدخول: https://www.joeschool.com/login?email=${encodeURIComponent(loginEmail)}&redirect=%2Fdashboard\n\n`;
 
     emailText += `تفاصيل المنتجات المشتراة:\n`;
-    
     for (const product of resolvedProducts) {
       emailText += `- ${product.title} (${product.isCourse ? 'دورة تدريبية' : 'منتج رقمي للتحميل'})\n`;
       if (product.isCourse) {
-        emailText += `  رابط بدء التعلم: ${process.env.NEXT_PUBLIC_APP_URL || "https://www.joeschool.com"}/login?email=${encodeURIComponent(customerEmail)}&redirect=%2Fdashboard\n`;
+        emailText += `  رابط بدء التعلم: https://www.joeschool.com/login?email=${encodeURIComponent(loginEmail)}&redirect=%2Fdashboard\n`;
       } else if (product.downloadUrl) {
         emailText += `  رابط التحميل المباشر: ${product.downloadUrl}\n`;
       }
@@ -143,13 +147,13 @@ export async function sendOrderEmail(
     emailText += `--------------------------------------------------\n`;
     emailText += `استلمت هذا البريد لأنك قمت بشراء منتج من JoeSchool.\n`;
     emailText += `الدعم الفني: support@joeschool.com\n`;
-    emailText += `رابط الدعم: ${process.env.NEXT_PUBLIC_APP_URL || "https://www.joeschool.com"}/contact\n`;
+    emailText += `رابط الدعم: https://www.joeschool.com/contact\n`;
 
-    // 4. Build Clean, Anti-Spam Compliant HTML Version (No heavy shadows/glows/complex CSS)
+    // 4. Build HTML products block
     let productsBlock = "";
     for (const product of resolvedProducts) {
       const downloadLink = product.downloadUrl;
-      const dashboardLink = `${process.env.NEXT_PUBLIC_APP_URL || "https://www.joeschool.com"}/login`;
+      const dashboardLink = `https://www.joeschool.com/login?email=${encodeURIComponent(loginEmail)}&redirect=%2Fdashboard`;
 
       if (product.isCourse) {
         productsBlock += `
@@ -159,7 +163,7 @@ export async function sendOrderEmail(
               <tr>
                 <td style="padding: 24px; text-align: right;">
                   <span style="font-size: 12px; color: #D6004B; font-weight: bold; margin-bottom: 8px; display: inline-block; padding: 4px 10px; background-color: #fff0f5; border-radius: 20px;">🎓 دورة تعليمية معتمدة</span>
-                  <h3 style="margin: 0 0 16px 0; font-size: 18px; color: #0f172a; font-weight: bold; line-height: 1.4;">${product.title}</h3>
+                  <h3 style="margin: 0 0 16px 0; font-size: 16px; color: #0f172a; font-weight: bold; line-height: 1.4;">${product.title}</h3>
                   <table cellpadding="0" cellspacing="0" style="margin-top: 5px;">
                     <tr>
                       <td style="background-color: #D6004B; border-radius: 10px; box-shadow: 0 4px 12px rgba(214, 0, 75, 0.25);">
@@ -181,7 +185,7 @@ export async function sendOrderEmail(
               <tr>
                 <td style="padding: 24px; text-align: right;">
                   <span style="font-size: 12px; color: #15803d; font-weight: bold; margin-bottom: 8px; display: inline-block; padding: 4px 10px; background-color: #f0fdf4; border-radius: 20px;">⬇️ منتج رقمي جاهز للتحميل</span>
-                  <h3 style="margin: 0 0 16px 0; font-size: 18px; color: #0f172a; font-weight: bold; line-height: 1.4;">${product.title}</h3>
+                  <h3 style="margin: 0 0 16px 0; font-size: 16px; color: #0f172a; font-weight: bold; line-height: 1.4;">${product.title}</h3>
                   <table cellpadding="0" cellspacing="0" style="margin-top: 5px;">
                     <tr>
                       <td style="background-color: #15803d; border-radius: 10px; box-shadow: 0 4px 12px rgba(21, 128, 61, 0.25);">
@@ -198,38 +202,45 @@ export async function sendOrderEmail(
       }
     }
 
-    let credentialsBlock = "";
-    if (credentials && credentials.password) {
-      credentialsBlock = `
-      <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #fcfcfd; border-radius: 16px; border: 1px solid #eef2f6; border-right: 4px solid #D6004B; direction: rtl; text-align: right; margin-bottom: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.02);">
-        <tr>
-          <td style="padding: 24px;">
-            <h3 style="margin: 0 0 8px 0; font-size: 16px; color: #0f172a; font-weight: bold;">🔑 تفاصيل الدخول لحسابك</h3>
-            <p style="margin: 0 0 18px 0; font-size: 13px; color: #475569; line-height: 1.6;">استخدم البيانات التالية لتسجيل الدخول إلى حسابك والدراسة مباشرة:</p>
-            
-            <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 20px; overflow: hidden;">
-              <tr>
-                <td style="padding: 14px 18px; border-bottom: 1px solid #f1f5f9; font-size: 13px; color: #475569; background-color: #fcfcfd;"><strong>البريد الإلكتروني:</strong></td>
-                <td style="padding: 14px 18px; border-bottom: 1px solid #f1f5f9; font-size: 13px; color: #0f172a; text-align: left; font-weight: bold; font-mono: true;">${credentials.email}</td>
-              </tr>
-              <tr>
-                <td style="padding: 14px 18px; font-size: 13px; color: #475569; background-color: #fcfcfd;"><strong>كلمة المرور:</strong></td>
-                <td style="padding: 14px 18px; font-size: 13px; color: #0f172a; text-align: left; font-weight: bold; font-mono: true;">${credentials.password}</td>
-              </tr>
-            </table>
-            
-            <table cellpadding="0" cellspacing="0" style="margin: 0 auto;">
-              <tr>
-                <td style="background-color: #D6004B; border-radius: 10px; box-shadow: 0 4px 12px rgba(214, 0, 75, 0.25);">
-                  <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://www.joeschool.com'}/login" style="display: inline-block; padding: 12px 28px; color: #ffffff; text-decoration: none; font-weight: bold; font-size: 14px;">🔑 تسجيل الدخول إلى حسابك</a>
-                </td>
-              </tr>
-            </table>
-          </td>
-        </tr>
-      </table>
-      `;
-    }
+    // Build Credentials Card (Always shown now)
+    const passwordRow = loginPassword ? `
+      <tr>
+        <td style="padding: 12px 16px; border-bottom: 1px solid #f1f5f9; font-size: 13px; color: #475569; background-color: #f8fafc; width: 120px;"><strong>كلمة المرور:</strong></td>
+        <td style="padding: 12px 16px; border-bottom: 1px solid #f1f5f9; font-size: 13px; color: #0f172a; text-align: left; font-weight: bold; font-family: monospace; direction: ltr;">${loginPassword}</td>
+      </tr>
+    ` : `
+      <tr>
+        <td style="padding: 12px 16px; border-bottom: 1px solid #f1f5f9; font-size: 13px; color: #475569; background-color: #f8fafc; width: 120px;"><strong>كلمة المرور:</strong></td>
+        <td style="padding: 12px 16px; border-bottom: 1px solid #f1f5f9; font-size: 13px; color: #64748b; text-align: left; font-style: italic;">استخدم كلمة مرور حسابك الحالية</td>
+      </tr>
+    `;
+
+    const credentialsBlock = `
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #fcfcfd; border-radius: 16px; border: 1px solid #eef2f6; border-right: 4px solid #D6004B; direction: rtl; text-align: right; margin-bottom: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.02);">
+      <tr>
+        <td style="padding: 24px;">
+          <h3 style="margin: 0 0 8px 0; font-size: 16px; color: #0f172a; font-weight: bold;">🔑 تفاصيل الدخول لحسابك الموحد</h3>
+          <p style="margin: 0 0 18px 0; font-size: 13px; color: #475569; line-height: 1.6;">استخدم البيانات التالية لتسجيل الدخول إلى حسابك ومتابعة كورساتك:</p>
+          
+          <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 20px; overflow: hidden;">
+            <tr>
+              <td style="padding: 12px 16px; border-bottom: 1px solid #f1f5f9; font-size: 13px; color: #475569; background-color: #f8fafc; width: 120px;"><strong>البريد الإلكتروني:</strong></td>
+              <td style="padding: 12px 16px; border-bottom: 1px solid #f1f5f9; font-size: 13px; color: #0f172a; text-align: left; font-weight: bold; font-family: monospace; direction: ltr;">${loginEmail}</td>
+            </tr>
+            ${passwordRow}
+          </table>
+          
+          <table cellpadding="0" cellspacing="0" style="margin: 0 auto;">
+            <tr>
+              <td style="background-color: #D6004B; border-radius: 10px; box-shadow: 0 4px 12px rgba(214, 0, 75, 0.25);">
+                <a href="https://www.joeschool.com/login?email=${encodeURIComponent(loginEmail)}&redirect=%2Fdashboard" style="display: inline-block; padding: 12px 28px; color: #ffffff; text-decoration: none; font-weight: bold; font-size: 14px;">🔑 اضغط هنا لتسجيل الدخول مباشرة</a>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+    `;
 
     const emailHtml = `
 <!DOCTYPE html>
@@ -256,7 +267,7 @@ export async function sendOrderEmail(
           <tr>
             <td style="padding:40px 24px;text-align:center;background-color:#060505;border-bottom:4px solid #D6004B;">
               <h1 style="margin:0;color:#ffffff;font-size:24px;font-weight: 900;line-height: 1.4;">أهلاً ${customerName} 🎉</h1>
-              <p style="color:#94a3b8;margin:8px 0 0 0;font-size:14px;line-height: 1.6;">تم تأكيد وتفعيل طلبك بنجاح. منتجاتك بانتظارك للدراسة والتحميل.</p>
+              <p style="color:#94a3b8;margin:8px 0 0 0;font-size:14px;line-height: 1.6;">تم تأكيد وتفعيل طلبك بنجاح. دورتك ومنتجاتك التعليمية بانتظارك.</p>
             </td>
           </tr>
           <!-- Products & Credentials Block -->
@@ -285,8 +296,8 @@ export async function sendOrderEmail(
           <tr>
             <td style="padding:32px 24px;text-align:center;background-color:#060505;border-top: 1px solid #1e293b;">
               <p style="color:#94a3b8;font-size:13px;margin:0 0 12px 0;line-height: 1.6;">
-                استلمت هذا البريد لأنك قمت بشراء منتج من JoeSchool.<br/>
-                لديك استفسار؟ <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://www.joeschool.com'}/contact" style="color:#D6004B;text-decoration:underline;font-weight:bold;margin-top:4px;display:inline-block;">اتصل بالدعم الفني للمنصة</a>
+                استلمت هذا البريد لأنك قمت بالاشتراك في دورتنا التعليمية عبر JoeSchool.<br/>
+                لديك استفسار؟ <a href="https://www.joeschool.com/contact" style="color:#D6004B;text-decoration:underline;font-weight:bold;margin-top:4px;display:inline-block;">اتصل بالدعم الفني للمنصة</a>
               </p>
               <p style="color:#64748b;font-size:11px;margin:16px 0 0 0;">&copy; ${new Date().getFullYear()} JoeSchool. جميع الحقوق محفوظة.</p>
             </td>
