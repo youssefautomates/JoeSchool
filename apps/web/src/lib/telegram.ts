@@ -23,20 +23,20 @@ export async function getTelegramSettings(): Promise<TelegramSettings> {
   }
 }
 
-export async function sendTelegramMessage(text: string): Promise<boolean> {
+export async function sendTelegramMessage(text: string, customChatId?: string): Promise<boolean> {
   // 1. Try environment variables first (development/hosting overrides)
   const envToken = process.env.TELEGRAM_BOT_TOKEN;
   const envChatId = process.env.TELEGRAM_CHAT_ID;
 
   let botToken = envToken;
-  let chatId = envChatId;
+  let chatId = customChatId || envChatId;
   let enabled = true; // Enabled by default if environment variables are explicitly provided
 
   // 2. Fall back to settings stored in KV database
   if (!botToken || !chatId) {
     const settings = await getTelegramSettings();
     botToken = settings.telegramBotToken;
-    chatId = settings.telegramChatId;
+    chatId = customChatId || settings.telegramChatId;
     enabled = settings.telegramEnabled;
   }
 
@@ -247,3 +247,62 @@ ${enrollment.course_title}
 
   return await sendTelegramMessage(message);
 }
+
+/**
+ * Sends a document (such as an Excel report) directly to Telegram.
+ */
+export async function sendTelegramDocument(
+  chatId: string,
+  fileBuffer: Buffer,
+  fileName: string,
+  caption?: string
+): Promise<boolean> {
+  const envToken = process.env.TELEGRAM_BOT_TOKEN;
+  let botToken = envToken;
+
+  if (!botToken) {
+    const settings = await getTelegramSettings();
+    botToken = settings.telegramBotToken;
+    if (!settings.telegramEnabled || !botToken) {
+      console.log("[Telegram Document] Bot Token is missing or disabled.");
+      return false;
+    }
+  }
+
+  try {
+    const formData = new FormData();
+    formData.append("chat_id", chatId);
+    
+    // Convert Buffer to Blob so standard FormData sends it as a multipart file upload
+    const fileBlob = new Blob([new Uint8Array(fileBuffer)], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+    formData.append("document", fileBlob, fileName);
+    
+    if (caption) {
+      formData.append("caption", caption);
+      formData.append("parse_mode", "HTML");
+    }
+
+    const response = await fetch(
+      `https://api.telegram.org/bot${botToken}/sendDocument`,
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
+
+    const data = await response.json();
+    if (!response.ok || !data.ok) {
+      console.error("[Telegram Document] Telegram API returned error:", data);
+      return false;
+    }
+
+    console.log("[Telegram Document] Document sent successfully!");
+    return true;
+  } catch (err) {
+    console.error("[Telegram Document] Exception sending document:", err);
+    return false;
+  }
+}
+
