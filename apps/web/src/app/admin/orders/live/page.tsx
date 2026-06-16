@@ -28,6 +28,7 @@ interface Order {
   country?: string;
   city?: string;
   country_name?: string;
+  payment_provider?: string;
 }
 
 const countryTranslations: Record<string, string> = {
@@ -115,6 +116,10 @@ export default function LiveOrdersFeed() {
   const [originalPrice, setOriginalPrice] = useState<number | null>(null);
   const [fetchingOriginalPrice, setFetchingOriginalPrice] = useState(false);
 
+  // Filter and Timeline States
+  const [statusFilter, setStatusFilter] = useState<"all" | "completed" | "incomplete">("all");
+  const [orderEvents, setOrderEvents] = useState<Record<string, string>>({});
+
   const playSuccessChime = () => {
     if (!soundEnabled) return;
     try {
@@ -151,6 +156,7 @@ export default function LiveOrdersFeed() {
         (payload) => {
           const newOrder = payload.new as Order;
           setOrders(prev => [newOrder, ...prev]);
+          setOrderEvents(prev => ({ ...prev, [newOrder.id]: "order_created" }));
           playSuccessChime();
           toast.success(`New order: ${newOrder.customer_name} purchased ${newOrder.product_title}`);
         }
@@ -220,7 +226,37 @@ export default function LiveOrdersFeed() {
         .order("created_at", { ascending: false })
         .limit(40);
 
-      if (data) setOrders(data as Order[]);
+      if (data) {
+        setOrders(data as Order[]);
+        
+        // Fetch timeline events for these orders to determine exact last stage
+        const orderIds = data.map(o => o.id);
+        if (orderIds.length > 0) {
+          try {
+            const { data: events, error: eventsErr } = await supabase
+              .from("analytics_events")
+              .select("event_name, metadata, created_at")
+              .filter("metadata->>order_id", "in", `(${orderIds.join(",")})`);
+            
+            if (events) {
+              const eventMap: Record<string, string> = {};
+              // Sort by created_at ascending so that the last one processed (latest) overwrites
+              const sortedEvents = [...events].sort((a, b) => 
+                new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+              );
+              sortedEvents.forEach(evt => {
+                const oid = evt.metadata?.order_id;
+                if (oid) {
+                  eventMap[oid] = evt.event_name;
+                }
+              });
+              setOrderEvents(eventMap);
+            }
+          } catch (evtErr) {
+            console.error("Failed to query order events:", evtErr);
+          }
+        }
+      }
     } catch (err) {
       console.error("[LIVE ORDERS] Load error:", err);
     } finally {
@@ -237,7 +273,46 @@ export default function LiveOrdersFeed() {
     });
   };
 
-  // Pricing calculations for selected order modal
+  const getStageDescription = (order: Order, eventName?: string) => {
+    if (eventName) {
+      switch (eventName) {
+        case "email_sent":
+          return "تم إرسال إيميل التفعيل بنجاح";
+        case "course_enrolled":
+          return "تم تفعيل الكورس للمشترك";
+        case "payment_success":
+          return "تم السداد بنجاح";
+        case "order_created":
+          return "تم إنشاء الطلب / في انتظار السداد";
+        default:
+          break;
+      }
+    }
+
+    if (order.status === "completed") {
+      const isCourse = 
+        order.product_title?.includes("دورة") || 
+        order.product_title?.includes("كورس") || 
+        order.product_id?.startsWith("course-");
+      return isCourse ? "تم تفعيل الكورس وإرسال الإيميل" : "تم السداد وإرسال الفاتورة";
+    } else if (order.status === "failed") {
+      return "فشلت عملية الدفع";
+    } else {
+      if (order.payment_provider === "instapay") {
+        return "اختيار انستاباي / بانتظار تأكيد التحويل";
+      }
+      return "في صفحة الدفع / بانتظار إتمام السداد";
+    }
+  };
+
+  // Filter and pricing calculations
+  const filteredOrders = orders.filter(order => {
+    if (statusFilter === "all") return true;
+    if (statusFilter === "completed") return order.status === "completed";
+    if (statusFilter === "incomplete") return order.status !== "completed";
+    return true;
+  });
+
   const totalCharged = selectedOrder ? Number(selectedOrder.final_price || selectedOrder.amount || 0) : 0;
   const gatewayFee = selectedOrder ? Number(selectedOrder.gateway_fee_amount || 0) : 0;
   const netSettled = selectedOrder ? (selectedOrder.subtotal_price ? Number(selectedOrder.subtotal_price) : (totalCharged - gatewayFee)) : 0;
@@ -282,20 +357,46 @@ export default function LiveOrdersFeed() {
         </div>
       </div>
 
+      {/* Filter Tabs */}
+      <div className="flex flex-wrap gap-2 p-1.5 bg-[#09090b]/40 border border-white/5 rounded-2xl w-fit">
+        {[
+          { id: "all", label: "كل العمليات", count: orders.length },
+          { id: "completed", label: "الطلبات الناجحة (المكتملة)", count: orders.filter(o => o.status === "completed").length },
+          { id: "incomplete", label: "الطلبات غير المكتملة", count: orders.filter(o => o.status !== "completed").length }
+        ].map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setStatusFilter(tab.id as any)}
+            className={`flex items-center gap-2.5 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              statusFilter === tab.id
+                ? "bg-rose-600 text-white shadow-lg shadow-rose-600/10"
+                : "text-zinc-400 hover:text-white hover:bg-white/5"
+            }`}
+          >
+            <span>{tab.label}</span>
+            <span className={`text-[10px] font-mono px-2 py-0.5 rounded-md ${
+              statusFilter === tab.id ? "bg-white/20 text-white" : "bg-white/5 text-zinc-500"
+            }`}>
+              {tab.count}
+            </span>
+          </button>
+        ))}
+      </div>
+
       {/* Live Feed List */}
       <div className="max-w-4xl mx-auto space-y-4">
         {loading ? (
           <div className="w-full h-80 flex items-center justify-center bg-[#09090b]/40 rounded-3xl border border-white/5 animate-pulse">
             <Loader2 className="w-8 h-8 text-rose-500 animate-spin" />
           </div>
-        ) : orders.length === 0 ? (
-          <div className="py-20 text-center text-zinc-500 text-sm">
-            No live transactional activity recorded yet.
+        ) : filteredOrders.length === 0 ? (
+          <div className="py-20 text-center text-zinc-500 text-sm bg-[#09090b]/20 rounded-3xl border border-white/5">
+            لا توجد طلبات تطابق هذا التصنيف حالياً.
           </div>
         ) : (
           <div className="space-y-4">
             <AnimatePresence>
-              {orders.map((order) => {
+              {filteredOrders.map((order) => {
                 const statusColors = {
                   completed: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
                   pending: "text-amber-400 bg-amber-500/10 border-amber-500/20",
@@ -323,6 +424,12 @@ export default function LiveOrdersFeed() {
                         </h3>
                         <p className="text-xs text-zinc-400 mt-1 truncate">{order.product_title}</p>
                         <p className="text-[10px] text-zinc-500 font-mono mt-0.5">{order.customer_email}</p>
+                        
+                        {/* Last Stage Badge */}
+                        <div className="mt-2.5 flex items-center gap-1.5 bg-white/5 border border-white/5 px-2.5 py-1 rounded-xl w-fit">
+                          <span className="text-[#D6004B] font-bold text-[9px] uppercase tracking-wider">آخر مرحلة:</span>
+                          <span className="text-zinc-300 text-xs font-semibold">{getStageDescription(order, orderEvents[order.id])}</span>
+                        </div>
                       </div>
                     </div>
 
@@ -377,6 +484,17 @@ export default function LiveOrdersFeed() {
                     }`}>
                       {selectedOrder.status === 'completed' ? 'مؤكد' : selectedOrder.status === 'pending' ? 'انتظار الدفع' : 'غير مدفوع'}
                     </span>
+                  </div>
+                </div>
+
+                <hr className="border-zinc-100" />
+
+                {/* Last Step Reached */}
+                <div className="space-y-2">
+                  <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider">آخر مرحلة وصل إليها العميل</h3>
+                  <div className="flex items-center gap-2 mt-1 bg-zinc-50 border border-zinc-100 p-3 rounded-2xl">
+                    <div className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse" />
+                    <p className="text-sm font-bold text-zinc-800">{getStageDescription(selectedOrder, orderEvents[selectedOrder.id])}</p>
                   </div>
                 </div>
 
@@ -454,4 +572,3 @@ export default function LiveOrdersFeed() {
     </div>
   );
 }
-
