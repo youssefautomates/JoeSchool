@@ -383,6 +383,44 @@ export async function PUT(
       });
     }
 
+    if (action === "set_custom_password") {
+      const { customPassword } = body;
+      if (!customPassword || customPassword.length < 6) {
+        return NextResponse.json({ error: "يجب أن تكون كلمة المرور 6 أحرف على الأقل" }, { status: 400 });
+      }
+
+      const { data: authUserObj } = await supabaseAdmin.auth.admin.getUserById(id);
+
+      const { error: pwdError } = await supabaseAdmin.auth.admin.updateUserById(id, {
+        password: customPassword
+      });
+
+      if (pwdError) {
+        return NextResponse.json({ error: pwdError.message }, { status: 400 });
+      }
+
+      // Log admin action
+      await supabaseAdmin.from("admin_action_logs").insert({
+        admin_email: "admin@joeschool.com",
+        student_id: id,
+        student_email: email || authUserObj?.user?.email || "",
+        action_type: "SET_CUSTOM_PASSWORD",
+        details: "Admin manually updated the student's password.",
+        created_at: new Date().toISOString()
+      });
+
+      // Invalidate active sessions to log user out immediately
+      await supabaseAdmin
+        .from("active_sessions")
+        .update({ is_active: false })
+        .eq("user_id", id);
+
+      return NextResponse.json({
+        success: true,
+        message: "تم تغيير كلمة المرور للمشترك بنجاح"
+      });
+    }
+
     // Standard profile update
     const firstName = name.split(" ")[0] || "";
     const lastName = name.split(" ").slice(1).join(" ") || "";

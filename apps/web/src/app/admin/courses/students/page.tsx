@@ -69,6 +69,8 @@ export default function AdminStudentsPage() {
   const [resetLink, setResetLink] = useState("");
   const [copiedLink, setCopiedLink] = useState(false);
   const [copiedPass, setCopiedPass] = useState(false);
+  const [customPasswordInput, setCustomPasswordInput] = useState("");
+  const [isSettingCustomPassword, setIsSettingCustomPassword] = useState(false);
 
   // Device sessions
   const [activeSessions, setActiveSessions] = useState<any[]>([]);
@@ -322,6 +324,39 @@ export default function AdminStudentsPage() {
       }
     } catch (err) {
       toast.error("Server communication error", { id: "temp-pwd" });
+    }
+  };
+
+  const handleSetCustomPassword = async () => {
+    if (!selectedStudent) return;
+    if (!customPasswordInput || customPasswordInput.length < 6) {
+      toast.error("يجب أن تكون كلمة المرور 6 أحرف على الأقل");
+      return;
+    }
+    setIsSettingCustomPassword(true);
+    toast.loading("جاري تحديث كلمة المرور...", { id: "custom-pwd" });
+    try {
+      const res = await fetch(`/api/admin/students/${selectedStudent.user_id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: editEmail,
+          action: "set_custom_password",
+          customPassword: customPasswordInput
+        })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        toast.success("تم تغيير كلمة المرور بنجاح للمشترك! 🔑", { id: "custom-pwd" });
+        setCustomPasswordInput("");
+        await refreshCrmData(selectedStudent.user_id);
+      } else {
+        toast.error(data.error || "فشل تغيير كلمة المرور", { id: "custom-pwd" });
+      }
+    } catch (err) {
+      toast.error("خطأ في الاتصال بالسيرفر", { id: "custom-pwd" });
+    } finally {
+      setIsSettingCustomPassword(false);
     }
   };
 
@@ -1110,6 +1145,34 @@ export default function AdminStudentsPage() {
                           </button>
                         </div>
                       )}
+                    </div>
+
+                    {/* Set Custom Password */}
+                    <div className="p-4 rounded-xl bg-white/[0.02] border border-white/5 space-y-4" dir="rtl">
+                      <h4 className="text-white text-xs font-bold flex items-center gap-2">
+                        <Key className="w-4 h-4 text-emerald-400" />
+                        <span>تعيين كلمة مرور مخصصة</span>
+                      </h4>
+                      <p className="text-zinc-500 text-[11px] leading-relaxed">
+                        يمكنك تغيير كلمة مرور الطالب وتعيين كلمة مرور مخصصة له مباشرة من هنا (الحد الأدنى 6 أحرف).
+                      </p>
+                      <div className="flex gap-2 max-w-md">
+                        <input
+                          type="text"
+                          placeholder="كلمة المرور الجديدة..."
+                          value={customPasswordInput}
+                          onChange={(e) => setCustomPasswordInput(e.target.value)}
+                          className="flex-1 bg-zinc-950 border border-white/5 rounded-xl px-3 h-10 text-xs text-white placeholder-zinc-600 outline-none focus:border-rose-500 transition-colors text-right"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleSetCustomPassword}
+                          disabled={isSettingCustomPassword}
+                          className="px-4 h-10 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-2 cursor-pointer transition-all disabled:opacity-50"
+                        >
+                          {isSettingCustomPassword ? "جاري الحفظ..." : "تحديث كلمة المرور"}
+                        </button>
+                      </div>
                     </div>
 
                     {/* Suspension details */}

