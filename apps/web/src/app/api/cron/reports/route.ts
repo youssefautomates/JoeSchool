@@ -4,11 +4,11 @@ import { runReportWorkflow } from "@/lib/reports";
 /**
  * Scheduled Cron Endpoint (/api/cron/reports)
  * 
- * Secure endpoint designed to run hourly (configured in vercel.json).
- * In Cairo Local Time (Africa/Cairo), it executes:
- * - Daily report: Every day at midnight.
- * - Weekly report: Every Saturday at midnight.
- * - Monthly report + Excel workbook: On the 1st day of every month at midnight.
+ * Secure endpoint designed to run once daily (configured in vercel.json).
+ * Runs at 21:00 UTC (00:00 midnight Cairo local time).
+ * - Daily report: Runs daily.
+ * - Weekly report: Runs every Saturday.
+ * - Monthly report + Excel workbook: Runs on the 1st day of every month.
  */
 export async function GET(request: Request) {
   try {
@@ -26,29 +26,7 @@ export async function GET(request: Request) {
 
     const now = new Date();
     
-    // 2. Format Cairo Local Time components
-    const cairoHourStr = new Intl.DateTimeFormat("en-US", {
-      timeZone: "Africa/Cairo",
-      hour: "numeric",
-      hour12: false
-    }).format(now);
-    
-    const cairoHour = parseInt(cairoHourStr, 10);
-    const isCairoMidnight = cairoHour === 0 || cairoHour === 24;
-
-    console.log(`[CRON_REPORTS] Scheduler invoked. Current UTC: ${now.toISOString()} | Cairo Hour: ${cairoHourStr} (Is Midnight: ${isCairoMidnight})`);
-
-    // For debugging or manual execution, we can bypass the midnight hour check by passing ?force=true
-    const force = searchParams.get("force") === "true";
-
-    if (!isCairoMidnight && !force) {
-      return NextResponse.json({
-        success: true,
-        message: `Skipped. Reports only run at midnight Cairo time. Current Cairo hour is: ${cairoHour}`
-      });
-    }
-
-    // Determine other Cairo date properties for scheduling
+    // Determine Cairo date properties for scheduling
     const cairoDayOfWeek = new Intl.DateTimeFormat("en-US", {
       timeZone: "Africa/Cairo",
       weekday: "long"
@@ -60,7 +38,10 @@ export async function GET(request: Request) {
     }).format(now);
     const cairoDayOfMonth = parseInt(cairoDayOfMonthStr, 10); // e.g. 1
 
-    console.log(`[CRON_REPORTS] Triggering reports... Cairo Day: ${cairoDayOfWeek} | Day of Month: ${cairoDayOfMonth}`);
+    console.log(`[CRON_REPORTS] Scheduler invoked. Current UTC: ${now.toISOString()} | Cairo Day: ${cairoDayOfWeek} | Day of Month: ${cairoDayOfMonth}`);
+
+    // For debugging or manual execution, we can bypass scheduling checks using ?force=true
+    const force = searchParams.get("force") === "true";
 
     // Trigger daily report (covers previous day)
     const dailyResult = await runReportWorkflow("daily", now);
