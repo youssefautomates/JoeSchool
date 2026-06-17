@@ -9,9 +9,9 @@ export async function GET() {
     console.log(`[GEOLOCATION_API] Resolved Country: ${country}`);
     
     const currency = country.toUpperCase() === "EG" ? "EGP" : "USD";
-    return NextResponse.json({ currency });
+    return NextResponse.json({ currency, country });
   } catch (error: any) {
     console.error("[GEOLOCATION_API_ERROR]", error);
-    return NextResponse.json({ currency: "EGP" });
+    return NextResponse.json({ currency: "EGP", country: "EG" });
   }
 }

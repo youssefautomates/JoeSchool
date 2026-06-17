@@ -108,6 +108,14 @@ function formatPaymentMethod(method?: string, provider?: string, amount?: number
   return method || provider || "Online Payment";
 }
 
+function escapeHtml(str?: string): string {
+  if (!str) return "";
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
 /**
  * Formats and sends a Telegram notification for a completed order.
  */
@@ -115,6 +123,7 @@ export async function sendOrderTelegramNotification(order: {
   id: string;
   customer_name: string;
   customer_email: string;
+  customer_phone?: string;
   product_title: string;
   amount: number;
   currency: string;
@@ -144,70 +153,72 @@ export async function sendOrderTelegramNotification(order: {
   const hasCoupon = !!(order.coupon_code && order.coupon_code.trim() !== "");
   const isFree = finalPaid === 0 || order.payment_provider === "admin_grant" || order.payment_method === "Admin Manual Grant";
 
-  // Calculate discount
-  let discountAmount = 0;
-  if (hasCoupon) {
-    if (isFree) {
-      discountAmount = originalPrice;
-    } else {
-      const finalBeforeFee = finalPaid - (order.gateway_fee_amount || 0);
-      discountAmount = Math.max(0, originalPrice - finalBeforeFee);
-    }
-  }
+  // Calculate discount based on net net payment compared to subtotal
+  const finalBeforeFee = finalPaid - (order.gateway_fee_amount || 0);
+  const discountAmount = originalPrice > finalBeforeFee ? (originalPrice - finalBeforeFee) : 0;
+  const discountPercentage = originalPrice > 0 ? Math.round((discountAmount / originalPrice) * 100) : 0;
+  
+  // A discount is applied if the discount amount is at least 1 and percentage > 0
+  const hasDiscount = discountAmount >= 1 && discountPercentage > 0;
 
-  // Format payment method
+  // Format payment method using existing helper
   const formattedPaymentMethod = formatPaymentMethod(order.payment_method, order.payment_provider, finalPaid);
+
+  // Translate payment method to Arabic for template readability
+  let paymentMethodArabic = formattedPaymentMethod;
+  if (formattedPaymentMethod === "Admin Manual Grant") {
+    paymentMethodArabic = "تفعيل إداري (مجاني)";
+  } else if (formattedPaymentMethod === "Free Order (100% Coupon)") {
+    paymentMethodArabic = "طلب مجاني (كوبون 100%)";
+  } else if (formattedPaymentMethod === "Bank Card") {
+    paymentMethodArabic = "بطاقة بنكية";
+  } else if (formattedPaymentMethod === "E-Wallet") {
+    paymentMethodArabic = "محفظة إلكترونية (فودافون كاش...)";
+  } else if (formattedPaymentMethod === "Instapay") {
+    paymentMethodArabic = "إنستاباي (Instapay)";
+  } else if (formattedPaymentMethod === "Online Payment") {
+    paymentMethodArabic = "دفع إلكتروني";
+  }
 
   // Format final paid text
   let finalPaidText = `${finalPaid} ${currency}`;
   if (isFree && hasCoupon) {
-    finalPaidText = `Free (100% Coupon)`;
+    finalPaidText = `0 ${currency} (كوبون 100%)`;
   } else if (isFree) {
-    finalPaidText = `Free`;
+    finalPaidText = `0 ${currency} (مجاني)`;
   }
 
-  // Check category (isCourse)
-  const isCourse = 
-    order.product_title?.includes("دورة") || 
-    order.product_title?.includes("كورس") || 
-    order.product_title?.toLowerCase().includes("course");
+  // Check phone conditional display rules
+  const phone = order.customer_phone?.trim();
+  const hasPhone = phone && phone !== "" && phone !== "+201000000000" && !phone.toLowerCase().includes("placeholder") && phone.toLowerCase() !== "n/a";
 
-  const statusText = isCourse 
-    ? "✅ Course Access Granted Successfully" 
-    : "✅ Product Delivered Successfully";
-
-  // Is it manual grant?
-  const isManual =
-    order.payment_provider === "admin_grant" ||
-    order.payment_method === "Admin Manual Grant";
-
-  const header = isManual ? "🎁 Manual Grant" : "🛒 New Order";
-
-  let message = `${header}\n\n`;
-  message += `👤 <b>Customer:</b> ${order.customer_name || "Unknown"}\n`;
-  message += `📧 <b>Email:</b> ${order.customer_email || "None"}\n\n`;
+  let message = `🎉 <b>طلب جديد</b>\n\n`;
+  message += `👤 <b>الاسم</b>\n${escapeHtml(order.customer_name) || "غير معروف"}\n\n`;
+  message += `📧 <b>البريد الإلكتروني</b>\n${escapeHtml(order.customer_email) || "لا يوجد"}\n\n`;
   
-  message += `📚 <b>Product:</b>\n${order.product_title || "Unknown"}\n\n`;
-  
-  message += `💰 <b>Original Price:</b> ${originalPrice} ${currency}\n`;
-  if (hasCoupon) {
-    message += `🎟️ <b>Discount:</b> ${discountAmount} ${currency}\n`;
+  if (hasPhone) {
+    message += `📱 <b>رقم الهاتف (واتساب)</b>\n<code>${escapeHtml(phone)}</code>\n\n`;
   }
-  message += `💵 <b>Final Paid:</b> ${finalPaidText}\n\n`;
   
-  message += `💳 <b>Payment Method:</b> ${formattedPaymentMethod}\n\n`;
+  message += `📚 <b>الكورس</b>\n${escapeHtml(order.product_title) || "غير معروف"}\n\n`;
+  
+  message += `💰 <b>تفاصيل السعر</b>\n\n`;
+  message += `• <b>السعر الأصلي:</b> ${originalPrice} ${currency}\n\n`;
+  
+  if (hasDiscount) {
+    message += `• <b>نسبة الخصم:</b> %${discountPercentage}\n\n`;
+    message += `• <b>قيمة الخصم:</b> ${discountAmount} ${currency}\n\n`;
+  }
+  
+  message += `• <b>المبلغ المدفوع:</b> ${finalPaidText}\n\n`;
   
   if (hasCoupon) {
-    message += `🎁 <b>Coupon:</b> <code>${order.coupon_code?.trim()}</code>\n\n`;
+    message += `🎟️ <b>الكوبون</b>\n<code>${escapeHtml(order.coupon_code?.trim().toUpperCase())}</code>\n\n`;
   }
   
-  message += `<b>${statusText}</b>\n\n`;
-  
-  message += `🧾 <b>Order ID:</b> <code>${order.id}</code>\n`;
-  message += `📅 <b>Date:</b> ${dateStr}\n\n`;
-
-  // 📊 Structured analytics block at the bottom for business exports
-  message += `📊 <b>Metadata:</b> [Category: ${isCourse ? 'course' : 'digital'} | Coupon: ${order.coupon_code || 'none'} | Method: ${formattedPaymentMethod} | Provider: ${order.payment_provider || 'none'} | Original: ${originalPrice} | Discount: ${discountAmount} | Final: ${finalPaid} | Currency: ${currency}]`;
+  message += `💳 <b>طريقة الدفع</b>\n${escapeHtml(paymentMethodArabic)}\n\n`;
+  message += `🧾 <b>رقم الطلب</b>\n<code>${escapeHtml(order.id)}</code>\n\n`;
+  message += `🕒 <b>وقت الطلب</b>\n${dateStr}\n`;
 
   return await sendTelegramMessage(message);
 }

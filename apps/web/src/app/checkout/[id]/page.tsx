@@ -9,7 +9,7 @@ import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Lock, ShieldCheck, CreditCard, ChevronRight, Loader2, ShieldAlert, Sparkles, CheckCircle2, Package, Mail, Eye, EyeOff, BookOpen, LayoutDashboard } from "lucide-react";
+import { Lock, ShieldCheck, CreditCard, ChevronRight, ChevronDown, Loader2, ShieldAlert, Sparkles, CheckCircle2, Package, Mail, Eye, EyeOff, BookOpen, LayoutDashboard } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -26,11 +26,27 @@ import { resolveUserCurrency, resolveProductPrice, formatPrice, getUSDtoEGPExcha
 import { getUserEnrollments } from "@/lib/coursesDb";
 
 const checkoutSchema = z.object({
-  firstName: z.string().min(2, { message: "الاسم الأول يجب أن يكون حرفين على الأقل" }),
-  lastName: z.string().min(2, { message: "الاسم الأخير يجب أن يكون حرفين على الأقل" }),
+  fullName: z.string().min(3, { message: "الاسم بالكامل يجب أن يكون 3 أحرف على الأقل" }),
   email: z.string().email({ message: "البريد الإلكتروني غير صالح" }),
   password: z.string().optional(),
 });
+
+const countries = [
+  { code: "EG", dial: "+20", flag: "🇪🇬", name: "Egypt" },
+  { code: "SA", dial: "+966", flag: "🇸🇦", name: "Saudi Arabia" },
+  { code: "AE", dial: "+971", flag: "🇦🇪", name: "UAE" },
+  { code: "KW", dial: "+965", flag: "🇰🇼", name: "Kuwait" },
+  { code: "QA", dial: "+974", flag: "🇶🇦", name: "Qatar" },
+  { code: "OM", dial: "+968", flag: "🇴🇲", name: "Oman" },
+  { code: "BH", dial: "+973", flag: "🇧🇭", name: "Bahrain" },
+  { code: "JO", dial: "+962", flag: "🇯🇴", name: "Jordan" },
+  { code: "LY", dial: "+218", flag: "🇱🇾", name: "Libya" },
+  { code: "SD", dial: "+249", flag: "🇸🇩", name: "Sudan" },
+  { code: "IQ", dial: "+964", flag: "🇮🇶", name: "Iraq" },
+  { code: "US", dial: "+1", flag: "🇺🇸", name: "USA" },
+  { code: "GB", dial: "+44", flag: "🇬🇧", name: "UK" },
+  { code: "CA", dial: "+1", flag: "🇨🇦", name: "Canada" },
+];
 
 type CheckoutValues = z.infer<typeof checkoutSchema>;
 
@@ -382,17 +398,37 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
     resolver: zodResolver(checkoutSchema),
     mode: "onChange",
     defaultValues: {
-      firstName: "",
-      lastName: "",
+      fullName: "",
       email: "",
       password: "",
     },
   });
 
-  const firstNameValue = watch("firstName");
-  const lastNameValue = watch("lastName");
+  const fullNameValue = watch("fullName");
   const emailValue = watch("email");
   const passwordValue = watch("password");
+
+  const [selectedCountry, setSelectedCountry] = useState(countries[0]);
+  const [phoneVal, setPhoneVal] = useState("");
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  useEffect(() => {
+    async function detectCountry() {
+      try {
+        const response = await fetch("/api/pricing/detect");
+        const data = await response.json();
+        if (data && data.country) {
+          const matched = countries.find(c => c.code === data.country.toUpperCase());
+          if (matched) {
+            setSelectedCountry(matched);
+          }
+        }
+      } catch (err) {
+        console.warn("Failed to detect country:", err);
+      }
+    }
+    detectCountry();
+  }, []);
 
   useEffect(() => {
     async function checkUser() {
@@ -400,9 +436,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
       if (session?.user) {
         setUser(session.user);
         const fullName = session.user.user_metadata?.full_name || "";
-        const parts = fullName.split(" ");
-        setValue("firstName", parts[0] || "");
-        setValue("lastName", parts.slice(1).join(" ") || "");
+        setValue("fullName", fullName);
         setValue("email", session.user.email || "");
       }
     }
@@ -475,6 +509,10 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
 
   async function onSubmit(data: CheckoutValues) {
     if (!product) return;
+
+    const nameParts = data.fullName.trim().split(/\s+/);
+    const firstName = nameParts[0] || "";
+    const lastName = nameParts.slice(1).join(" ") || "Student";
 
     const isFree = appliedCoupon && appliedCoupon.percent === 100;
 
@@ -566,9 +604,9 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
       const payloadBody = {
         amount: finalPriceEGP,
         email: data.email,
-        firstName: data.firstName,
-        lastName: data.lastName,
-        phone: "",
+        firstName: firstName,
+        lastName: lastName,
+        phone: phoneVal ? `${selectedCountry.dial}${phoneVal}` : "",
         productId: resolvedParams.id,
         paymentMethod: isFree ? "free" : paymentMethod, 
         couponCode: appliedCoupon ? appliedCoupon.code : undefined,
@@ -623,9 +661,10 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
              : `مرحباً، لقد قمت بدفع قيمة منتج ${product?.title || ''} أريد الحصول عليه الآن.`
             ) + 
             `\n\nبيانات العميل:\n` +
-            `- الاسم: ${data.firstName} ${data.lastName}\n` +
+            `- الاسم: ${data.fullName}\n` +
             `- البريد الإلكتروني: ${data.email}\n` +
             (data.password ? `- كلمة المرور: ${data.password}\n` : '') +
+            (phoneVal ? `- رقم الهاتف: ${selectedCountry.dial}${phoneVal}\n` : '') +
             (instapayScreenshotUrl ? `\nإثبات التحويل:\n${instapayScreenshotUrl}` : '');
            
            const waUrl = `https://wa.me/201107099196?text=${encodeURIComponent(waText)}`;
@@ -909,47 +948,92 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                     </div>
                   </div>
 
-                  {/* First Name & Last Name Grid */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label className="font-cairo font-bold text-zinc-400 text-sm">الاسم الأول</Label>
-                      <div className="relative">
-                        <Input 
-                          placeholder="الاسم الأول" 
-                          className={cn(
-                            "h-12 rounded-xl bg-white/5 border text-white text-sm font-cairo hover:bg-white/[0.07] focus:bg-white/10 focus:ring-1 transition-all text-right",
-                            firstNameValue && firstNameValue.length > 0
-                              ? (errors.firstName 
-                                  ? "border-red-500/50 focus:border-red-500 focus:ring-red-500" 
-                                  : "border-emerald-500/50 focus:border-emerald-500 focus:ring-emerald-500")
-                              : "border-white/5 focus:border-white/20 focus:ring-white/20"
-                          )}
-                          disabled={isLoading}
-                          autoFocus
-                          {...register("firstName")}
-                        />
-                      </div>
-                      {errors.firstName && <p className="text-[10px] text-red-400 font-cairo flex items-center gap-1 mt-1"><ShieldAlert className="w-3 h-3" /> {errors.firstName.message}</p>}
+                  {/* Full Name */}
+                  <div className="space-y-2">
+                    <Label className="font-cairo font-bold text-zinc-400 text-sm">الاسم بالكامل *</Label>
+                    <div className="relative">
+                      <Input 
+                        placeholder="الاسم بالكامل" 
+                        className={cn(
+                          "h-12 rounded-xl bg-white/5 border text-white text-sm font-cairo hover:bg-white/[0.07] focus:bg-white/10 focus:ring-1 transition-all text-right",
+                          fullNameValue && fullNameValue.length > 0
+                            ? (errors.fullName 
+                                ? "border-red-500/50 focus:border-red-500 focus:ring-red-500" 
+                                : "border-emerald-500/50 focus:border-emerald-500 focus:ring-emerald-500")
+                            : "border-white/5 focus:border-white/20 focus:ring-white/20"
+                        )}
+                        disabled={isLoading}
+                        autoFocus
+                        {...register("fullName")}
+                      />
                     </div>
+                    {errors.fullName && <p className="text-[10px] text-red-400 font-cairo flex items-center gap-1 mt-1"><ShieldAlert className="w-3 h-3" /> {errors.fullName.message}</p>}
+                  </div>
 
-                    <div className="space-y-2">
-                      <Label className="font-cairo font-bold text-zinc-400 text-sm">الاسم الأخير</Label>
-                      <div className="relative">
-                        <Input 
-                          placeholder="الاسم الأخير" 
-                          className={cn(
-                            "h-12 rounded-xl bg-white/5 border text-white text-sm font-cairo hover:bg-white/[0.07] focus:bg-white/10 focus:ring-1 transition-all text-right",
-                            lastNameValue && lastNameValue.length > 0
-                              ? (errors.lastName 
-                                  ? "border-red-500/50 focus:border-red-500 focus:ring-red-500" 
-                                  : "border-emerald-500/50 focus:border-emerald-500 focus:ring-emerald-500")
-                              : "border-white/5 focus:border-white/20 focus:ring-white/20"
-                          )}
+                  {/* Phone Number (Optional) */}
+                  <div className="space-y-2">
+                    <Label className="font-cairo font-bold text-zinc-400 text-sm">رقم الهاتف (اختياري)</Label>
+                    <div className="relative flex items-center h-12 rounded-xl bg-white/5 border border-white/5 hover:bg-white/[0.07] focus-within:bg-white/10 focus-within:border-white/20 focus-within:ring-1 focus-within:ring-white/20 transition-all">
+                      
+                      {/* Country Selector Button */}
+                      <div className="relative h-full flex items-center">
+                        <button
+                          type="button"
+                          onClick={() => setIsDropdownOpen(prev => !prev)}
                           disabled={isLoading}
-                          {...register("lastName")}
-                        />
+                          className="flex items-center gap-1.5 px-3 h-full border-l border-white/10 text-white font-cairo hover:bg-white/5 transition-all cursor-pointer select-none text-sm"
+                          style={{ minWidth: "90px" }}
+                        >
+                          <span className="text-lg leading-none">{selectedCountry.flag}</span>
+                          <span dir="ltr" className="text-zinc-200 font-bold text-xs">{selectedCountry.dial}</span>
+                          <ChevronDown className="w-3 h-3 text-zinc-400 shrink-0" />
+                        </button>
+
+                        {/* Dropdown list */}
+                        {isDropdownOpen && (
+                          <>
+                            {/* Backdrop to close */}
+                            <div className="fixed inset-0 z-40" onClick={() => setIsDropdownOpen(false)} />
+                            <div className="absolute top-full left-0 mt-1.5 w-64 max-h-60 overflow-y-auto bg-[#0a0a0a] border border-white/10 rounded-xl shadow-2xl py-1 z-50 animate-in fade-in slide-in-from-top-2 duration-100">
+                              {countries.map((c) => (
+                                <button
+                                  key={c.code}
+                                  type="button"
+                                  onClick={() => {
+                                    setSelectedCountry(c);
+                                    setIsDropdownOpen(false);
+                                  }}
+                                  className={cn(
+                                    "w-full flex items-center gap-3 px-3 py-2 text-right hover:bg-white/5 transition-all text-xs font-cairo",
+                                    selectedCountry.code === c.code ? "bg-white/10 text-rose-400" : "text-zinc-300 hover:text-white"
+                                  )}
+                                >
+                                  <span className="text-lg leading-none">{c.flag}</span>
+                                  <span className="font-medium flex-1 text-right">{c.name}</span>
+                                  <span dir="ltr" className="text-zinc-400 font-mono text-left">{c.dial}</span>
+                                </button>
+                              ))}
+                            </div>
+                          </>
+                        )}
                       </div>
-                      {errors.lastName && <p className="text-[10px] text-red-400 font-cairo flex items-center gap-1 mt-1"><ShieldAlert className="w-3 h-3" /> {errors.lastName.message}</p>}
+
+                      {/* Phone Input */}
+                      <input
+                        type="tel"
+                        value={phoneVal}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/\D/g, ""); // allow only digits
+                          setPhoneVal(val);
+                        }}
+                        placeholder="رقم الهاتف"
+                        dir={phoneVal ? "ltr" : "rtl"}
+                        disabled={isLoading}
+                        className={cn(
+                          "flex-1 h-full bg-transparent border-0 outline-none text-white text-sm font-cairo px-3 focus:ring-0 focus:outline-none placeholder:text-zinc-500",
+                          phoneVal ? "text-left" : "text-right"
+                        )}
+                      />
                     </div>
                   </div>
 
@@ -1212,7 +1296,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                           onClick={async (e) => {
                             if (paymentMethod === "instapay") {
                               e.preventDefault();
-                              const fieldsToValidate: ("firstName" | "lastName" | "email" | "password")[] = ["firstName", "lastName", "email"];
+                              const fieldsToValidate: ("fullName" | "email" | "password")[] = ["fullName", "email"];
                               if (!user) {
                                 fieldsToValidate.push("password");
                               }
