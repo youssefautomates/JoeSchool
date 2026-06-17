@@ -752,6 +752,7 @@ export default function CartCheckoutPage() {
                         }}
                         enableSearch={true}
                         searchPlaceholder="ابحث عن الدولة..."
+                        countryCodeEditable={false}
                         inputProps={{
                           name: "phone",
                           disabled: isLoading,

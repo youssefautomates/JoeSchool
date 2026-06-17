@@ -1068,6 +1068,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                         }}
                         enableSearch={true}
                         searchPlaceholder="ابحث عن الدولة..."
+                        countryCodeEditable={false}
                         inputProps={{
                           name: "phone",
                           disabled: isLoading,
