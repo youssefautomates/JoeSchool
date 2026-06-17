@@ -24,6 +24,10 @@ import { trackEvent } from "@/lib/analytics";
 
 import { resolveUserCurrency, resolveProductPrice, formatPrice, getUSDtoEGPExchangeRate, type Currency } from "@/lib/pricing";
 import { getUserEnrollments } from "@/lib/coursesDb";
+import { normalizePhoneNumber } from "@/lib/phone";
+import dynamic from "next/dynamic";
+const PhoneInput = dynamic(() => import("react-phone-input-2"), { ssr: false });
+import "react-phone-input-2/lib/style.css";
 
 const checkoutSchema = z.object({
   fullName: z.string().min(3, { message: "الاسم بالكامل يجب أن يكون 3 أحرف على الأقل" }),
@@ -408,9 +412,9 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
   const emailValue = watch("email");
   const passwordValue = watch("password");
 
-  const [selectedCountry, setSelectedCountry] = useState(countries[0]);
   const [phoneVal, setPhoneVal] = useState("");
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [dialCode, setDialCode] = useState("20");
+  const [detectedCountry, setDetectedCountry] = useState("eg");
 
   useEffect(() => {
     async function detectCountry() {
@@ -418,10 +422,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
         const response = await fetch("/api/pricing/detect");
         const data = await response.json();
         if (data && data.country) {
-          const matched = countries.find(c => c.code === data.country.toUpperCase());
-          if (matched) {
-            setSelectedCountry(matched);
-          }
+          setDetectedCountry(data.country.toLowerCase());
         }
       } catch (err) {
         console.warn("Failed to detect country:", err);
@@ -606,7 +607,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
         email: data.email,
         firstName: firstName,
         lastName: lastName,
-        phone: phoneVal ? `${selectedCountry.dial}${phoneVal}` : "",
+        phone: phoneVal ? normalizePhoneNumber(phoneVal, dialCode) : "",
         productId: resolvedParams.id,
         paymentMethod: isFree ? "free" : paymentMethod, 
         couponCode: appliedCoupon ? appliedCoupon.code : undefined,
@@ -664,7 +665,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
             `- الاسم: ${data.fullName}\n` +
             `- البريد الإلكتروني: ${data.email}\n` +
             (data.password ? `- كلمة المرور: ${data.password}\n` : '') +
-            (phoneVal ? `- رقم الهاتف: ${selectedCountry.dial}${phoneVal}\n` : '') +
+            (phoneVal ? `- رقم الهاتف: ${normalizePhoneNumber(phoneVal, dialCode)}\n` : '') +
             (instapayScreenshotUrl ? `\nإثبات التحويل:\n${instapayScreenshotUrl}` : '');
            
            const waUrl = `https://wa.me/201107099196?text=${encodeURIComponent(waText)}`;
@@ -970,75 +971,8 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                     {errors.fullName && <p className="text-[10px] text-red-400 font-cairo flex items-center gap-1 mt-1"><ShieldAlert className="w-3 h-3" /> {errors.fullName.message}</p>}
                   </div>
 
-                  {/* Phone Number (Optional) */}
                   <div className="space-y-2">
-                    <Label className="font-cairo font-bold text-zinc-400 text-sm">رقم الهاتف (اختياري)</Label>
-                    <div className="relative flex items-center h-12 rounded-xl bg-white/5 border border-white/5 hover:bg-white/[0.07] focus-within:bg-white/10 focus-within:border-white/20 focus-within:ring-1 focus-within:ring-white/20 transition-all">
-                      
-                      {/* Country Selector Button */}
-                      <div className="relative h-full flex items-center">
-                        <button
-                          type="button"
-                          onClick={() => setIsDropdownOpen(prev => !prev)}
-                          disabled={isLoading}
-                          className="flex items-center gap-1.5 px-3 h-full border-l border-white/10 text-white font-cairo hover:bg-white/5 transition-all cursor-pointer select-none text-sm"
-                          style={{ minWidth: "90px" }}
-                        >
-                          <span className="text-lg leading-none">{selectedCountry.flag}</span>
-                          <span dir="ltr" className="text-zinc-200 font-bold text-xs">{selectedCountry.dial}</span>
-                          <ChevronDown className="w-3 h-3 text-zinc-400 shrink-0" />
-                        </button>
-
-                        {/* Dropdown list */}
-                        {isDropdownOpen && (
-                          <>
-                            {/* Backdrop to close */}
-                            <div className="fixed inset-0 z-40" onClick={() => setIsDropdownOpen(false)} />
-                            <div className="absolute top-full left-0 mt-1.5 w-64 max-h-60 overflow-y-auto bg-[#0a0a0a] border border-white/10 rounded-xl shadow-2xl py-1 z-50 animate-in fade-in slide-in-from-top-2 duration-100">
-                              {countries.map((c) => (
-                                <button
-                                  key={c.code}
-                                  type="button"
-                                  onClick={() => {
-                                    setSelectedCountry(c);
-                                    setIsDropdownOpen(false);
-                                  }}
-                                  className={cn(
-                                    "w-full flex items-center gap-3 px-3 py-2 text-right hover:bg-white/5 transition-all text-xs font-cairo",
-                                    selectedCountry.code === c.code ? "bg-white/10 text-rose-400" : "text-zinc-300 hover:text-white"
-                                  )}
-                                >
-                                  <span className="text-lg leading-none">{c.flag}</span>
-                                  <span className="font-medium flex-1 text-right">{c.name}</span>
-                                  <span dir="ltr" className="text-zinc-400 font-mono text-left">{c.dial}</span>
-                                </button>
-                              ))}
-                            </div>
-                          </>
-                        )}
-                      </div>
-
-                      {/* Phone Input */}
-                      <input
-                        type="tel"
-                        value={phoneVal}
-                        onChange={(e) => {
-                          const val = e.target.value.replace(/\D/g, ""); // allow only digits
-                          setPhoneVal(val);
-                        }}
-                        placeholder="رقم الهاتف"
-                        dir={phoneVal ? "ltr" : "rtl"}
-                        disabled={isLoading}
-                        className={cn(
-                          "flex-1 h-full bg-transparent border-0 outline-none text-white text-sm font-cairo px-3 focus:ring-0 focus:outline-none placeholder:text-zinc-500",
-                          phoneVal ? "text-left" : "text-right"
-                        )}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label className="font-cairo font-bold text-zinc-400 text-sm">البريد الإلكتروني</Label>
+                    <Label className="font-cairo font-bold text-zinc-400 text-sm">البريد الإلكتروني *</Label>
                     <div className="relative">
                       <Mail 
                         className={cn(
@@ -1070,7 +1004,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                   {!user && (
                     <>
                       <div className="space-y-2">
-                        <Label className="font-cairo font-bold text-zinc-400 text-sm">كلمة المرور</Label>
+                        <Label className="font-cairo font-bold text-zinc-400 text-sm">كلمة المرور *</Label>
                         <div className="relative">
                           <Lock 
                             className={cn(
@@ -1120,6 +1054,146 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                       </p>
                     </>
                   )}
+
+                  {/* Phone Number (Optional) */}
+                  <div className="space-y-2">
+                    <Label className="font-cairo font-bold text-zinc-400 text-sm">رقم الهاتف (واتساب) (اختياري)</Label>
+                    <div className="relative w-full" dir="ltr">
+                      <PhoneInput
+                        country={detectedCountry}
+                        value={phoneVal}
+                        onChange={(value, countryData: any) => {
+                          setPhoneVal(value);
+                          setDialCode(countryData.dialCode || "20");
+                        }}
+                        enableSearch={true}
+                        searchPlaceholder="ابحث عن الدولة..."
+                        inputProps={{
+                          name: "phone",
+                          disabled: isLoading,
+                          placeholder: "101 234 5678",
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  <style>{`
+                    .react-tel-input {
+                      font-family: var(--font-cairo), sans-serif;
+                      width: 100%;
+                    }
+                    .react-tel-input .form-control {
+                      height: 48px !important;
+                      width: 100% !important;
+                      background-color: rgba(255, 255, 255, 0.05) !important;
+                      border: 1px solid rgba(255, 255, 255, 0.05) !important;
+                      border-radius: 12px !important;
+                      color: white !important;
+                      font-size: 14px !important;
+                      padding-left: 56px !important;
+                      transition: all 0.2s ease !important;
+                    }
+                    .react-tel-input .form-control:focus {
+                      background-color: rgba(255, 255, 255, 0.1) !important;
+                      border-color: rgba(255, 255, 255, 0.2) !important;
+                      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.2) !important;
+                    }
+                    .react-tel-input .flag-dropdown {
+                      background-color: transparent !important;
+                      border: none !important;
+                      border-radius: 12px 0 0 12px !important;
+                      padding: 0 !important;
+                      height: 46px !important;
+                      top: 1px !important;
+                      left: 1px !important;
+                    }
+                    .react-tel-input .flag-dropdown:hover, 
+                    .react-tel-input .flag-dropdown.open,
+                    .react-tel-input .selected-flag:hover {
+                      background-color: rgba(255, 255, 255, 0.05) !important;
+                      border-radius: 12px 0 0 12px !important;
+                    }
+                    .react-tel-input .selected-flag {
+                      background-color: transparent !important;
+                      padding-left: 12px !important;
+                      width: 48px !important;
+                    }
+                    .react-tel-input .selected-flag .arrow {
+                      border-top-color: #a1a1aa !important;
+                      left: 28px !important;
+                    }
+                    .react-tel-input .selected-flag .arrow.up {
+                      border-bottom-color: #a1a1aa !important;
+                    }
+                    .react-tel-input .country-list {
+                      background-color: #0c0c0e !important;
+                      border: 1px solid rgba(255, 255, 255, 0.1) !important;
+                      border-radius: 12px !important;
+                      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
+                      margin-top: 6px !important;
+                      width: 320px !important;
+                      padding: 6px 0 !important;
+                      z-index: 9999 !important;
+                      max-height: 220px !important;
+                      overflow-y: auto !important;
+                    }
+                    .react-tel-input .country-list::-webkit-scrollbar {
+                      width: 6px;
+                    }
+                    .react-tel-input .country-list::-webkit-scrollbar-thumb {
+                      background-color: rgba(255, 255, 255, 0.1);
+                      border-radius: 3px;
+                    }
+                    .react-tel-input .country-list .search {
+                      padding: 6px 10px !important;
+                      background-color: #0c0c0e !important;
+                      position: sticky !important;
+                      top: 0 !important;
+                      z-index: 10 !important;
+                      border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+                    }
+                    .react-tel-input .country-list .search-box {
+                      width: 100% !important;
+                      height: 36px !important;
+                      background-color: rgba(255, 255, 255, 0.05) !important;
+                      border: 1px solid rgba(255, 255, 255, 0.1) !important;
+                      border-radius: 8px !important;
+                      color: white !important;
+                      font-size: 13px !important;
+                      padding: 0 10px !important;
+                      margin: 0 !important;
+                    }
+                    .react-tel-input .country-list .search-box:focus {
+                      border-color: rgba(255, 255, 255, 0.2) !important;
+                      outline: none !important;
+                    }
+                    .react-tel-input .country-list .country {
+                      padding: 8px 12px !important;
+                      color: #d4d4d8 !important;
+                      font-size: 13px !important;
+                      display: flex !important;
+                      align-items: center !important;
+                      gap: 8px !important;
+                      text-align: left !important;
+                    }
+                    .react-tel-input .country-list .country:hover,
+                    .react-tel-input .country-list .country.highlight {
+                      background-color: rgba(255, 255, 255, 0.05) !important;
+                      color: white !important;
+                    }
+                    .react-tel-input .country-list .country.active {
+                      background-color: rgba(244, 63, 94, 0.15) !important;
+                      color: #fb7185 !important;
+                    }
+                    .react-tel-input .country-list .country-name {
+                      flex-grow: 1 !important;
+                      text-align: left !important;
+                    }
+                    .react-tel-input .country-list .dial-code {
+                      color: #71717a !important;
+                      font-family: monospace !important;
+                    }
+                  `}</style>
 
                   {/* Payment Method Selector */}
                   {!(appliedCoupon && appliedCoupon.percent === 100) && (

@@ -674,7 +674,7 @@ export async function generateExcelReport(reportData: ReportData): Promise<Buffe
   // ==========================================
   const ordersSheet = workbook.addWorksheet('Orders', { views: [{ showGridLines: true }] });
   const ordersHeader = ordersSheet.addRow([
-    'Order ID', 'Date', 'Customer Name', 'Customer Email', 'Product / Course Name', 'Original Price', 'Discount Amount', 'Final Paid Amount', 'Coupon Code'
+    'Order ID', 'Date', 'Customer Name', 'Customer Email', 'Customer Phone', 'Product / Course Name', 'Original Price', 'Discount Amount', 'Final Paid Amount', 'Coupon Code'
   ]);
   
   ordersHeader.eachCell(cell => {
@@ -705,6 +705,7 @@ export async function generateExcelReport(reportData: ReportData): Promise<Buffe
       new Date(o.created_at).toLocaleString('en-US', { timeZone: 'Africa/Cairo' }),
       o.customer_name || 'Manual Grant',
       o.customer_email,
+      o.customer_phone || '',
       o.product_title,
       originalPrice,
       discountAmount,
@@ -712,9 +713,9 @@ export async function generateExcelReport(reportData: ReportData): Promise<Buffe
       o.coupon_code || ''
     ]);
 
-    row.getCell(6).numFmt = '#,##0.00" EGP"';
     row.getCell(7).numFmt = '#,##0.00" EGP"';
     row.getCell(8).numFmt = '#,##0.00" EGP"';
+    row.getCell(9).numFmt = '#,##0.00" EGP"';
     
     row.eachCell(c => {
       c.border = {
@@ -728,11 +729,11 @@ export async function generateExcelReport(reportData: ReportData): Promise<Buffe
 
   // Totals Row
   const ordersTotalRow = ordersSheet.addRow([
-    'Total', '', '', '', '', totalOriginal, totalDiscounts, totalFinal, ''
+    'Total', '', '', '', '', '', totalOriginal, totalDiscounts, totalFinal, ''
   ]);
   ordersTotalRow.eachCell((c, idx) => {
     c.font = { name: 'Calibri', bold: true };
-    if (idx === 6 || idx === 7 || idx === 8) {
+    if (idx === 7 || idx === 8 || idx === 9) {
       c.numFmt = '#,##0.00" EGP"';
     }
     c.border = {

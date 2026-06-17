@@ -217,7 +217,6 @@ export async function sendOrderTelegramNotification(order: {
   }
   
   message += `💳 <b>طريقة الدفع</b>\n${escapeHtml(paymentMethodArabic)}\n\n`;
-  message += `🧾 <b>رقم الطلب</b>\n<code>${escapeHtml(order.id)}</code>\n\n`;
   message += `🕒 <b>وقت الطلب</b>\n${dateStr}\n`;
 
   return await sendTelegramMessage(message);
