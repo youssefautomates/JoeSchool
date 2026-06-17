@@ -351,6 +351,68 @@ export default function CartCheckoutPage() {
   const [dialCode, setDialCode] = useState("20");
   const [detectedCountry, setDetectedCountry] = useState("eg");
 
+  const [emailStatus, setEmailStatus] = useState<any>(null);
+  const [isCheckingEmail, setIsCheckingEmail] = useState(false);
+
+  const handleEmailBlur = async () => {
+    if (!emailValue) return;
+    
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(emailValue.trim())) return;
+
+    setIsCheckingEmail(true);
+    try {
+      const response = await fetch(`/api/checkout/detect-email?email=${encodeURIComponent(emailValue.trim())}`);
+      const data = await response.json();
+      
+      if (response.ok) {
+        const cartItemIds = items.map(item => item.id);
+        const ownedCartItems = cartItemIds.filter(id => data.ownedCourseIds?.includes(id));
+        const ownsAllItems = cartItemIds.length > 0 && ownedCartItems.length === cartItemIds.length;
+        const ownsSomeItems = ownedCartItems.length > 0;
+
+        let courseSlug = "";
+        if (ownsSomeItems && data.ownedCourseIds?.length > 0) {
+          const firstOwnedId = ownedCartItems[0];
+          const matchedItem = items.find(item => item.id === firstOwnedId);
+          if (matchedItem) {
+            courseSlug = matchedItem.slug || "";
+          }
+        }
+
+        setEmailStatus({
+          checked: true,
+          exists: data.exists,
+          ownedCourseIds: data.ownedCourseIds || [],
+          ownsAllItems,
+          ownsSomeItems,
+          ownsCourse: ownsAllItems,
+          courseSlug,
+        });
+
+        if (ownsAllItems) {
+          setRemovedAllDuplicates(true);
+          setEnrolledCourseSlug(courseSlug || "");
+        } else {
+          if (!user) {
+            setRemovedAllDuplicates(false);
+          }
+        }
+      }
+    } catch (err) {
+      console.error("Error checking email in cart:", err);
+    } finally {
+      setIsCheckingEmail(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!user && emailStatus) {
+      setEmailStatus(null);
+      setRemovedAllDuplicates(false);
+    }
+  }, [emailValue, user]);
+
   useEffect(() => {
     async function detectCountry() {
       try {
@@ -403,7 +465,7 @@ export default function CartCheckoutPage() {
       validateCardFields();
     }
     const passwordVal = getValues("password");
-    if (!user && (!passwordVal || passwordVal.trim() === "")) {
+    if (!user && !emailStatus?.exists && (!passwordVal || passwordVal.trim() === "")) {
       setError("password", { type: "manual", message: "يُرجى إكمال جميع الحقول لإتمام الدفع" });
     }
     toast.error("يُرجى إكمال جميع الحقول لإتمام الدفع");
@@ -432,7 +494,7 @@ export default function CartCheckoutPage() {
       let activeUser = user;
 
       // If user is not logged in, perform Instant Purchase Authentication
-      if (!activeUser) {
+      if (!activeUser && !emailStatus?.exists) {
         if (!data.password) {
           setError("password", { type: "manual", message: "يُرجى إكمال جميع الحقول لإتمام الدفع" });
           toast.error("يُرجى إكمال جميع الحقول لإتمام الدفع");
@@ -586,20 +648,46 @@ export default function CartCheckoutPage() {
     return (
       <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center text-white font-cairo p-4 text-center space-y-6">
         <ShieldAlert className="w-16 h-16 text-red-500 animate-bounce" />
-        <h1 className="text-3xl font-alexandria font-bold mb-2">أنت مشترك بالفعل في هذا الكورس.</h1>
-        <p className="text-zinc-400 text-sm max-w-md mx-auto leading-relaxed">
-          لقد قمت بالاشتراك في الكورسات التي كانت في سلتك مسبقاً، يمكنك البدء في مشاهدتها فوراً من لوحة التحكم.
-        </p>
-        <div className="flex gap-4">
-          <Link href={enrolledCourseSlug ? `/learn/${enrolledCourseSlug}/${firstLessonSlug || ""}` : "/dashboard"} className="h-12 px-8 bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white font-alexandria font-bold text-sm rounded-xl flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 cursor-pointer">
-            <BookOpen className="w-4 h-4" />
-            <span>فتح الكورس</span>
-          </Link>
-          <Link href="/dashboard" className="h-12 px-6 bg-white/5 hover:bg-white/10 text-white font-alexandria font-bold text-sm rounded-xl flex items-center justify-center gap-2 border border-white/10 transition-colors cursor-pointer">
-            <LayoutDashboard className="w-4 h-4 text-zinc-400" />
-            <span>لوحة التحكم</span>
-          </Link>
-        </div>
+        
+        {user ? (
+          <>
+            <h1 className="text-3xl font-alexandria font-bold mb-2">أنت مشترك بالفعل في هذا الكورس.</h1>
+            <p className="text-zinc-400 text-sm max-w-md mx-auto leading-relaxed">
+              لقد قمت بالاشتراك في الكورسات التي كانت في سلتك مسبقاً، يمكنك البدء في مشاهدتها فوراً من لوحة التحكم.
+            </p>
+            <div className="flex gap-4">
+              <Link href={enrolledCourseSlug ? `/learn/${enrolledCourseSlug}/${firstLessonSlug || ""}` : "/dashboard"} className="h-12 px-8 bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white font-alexandria font-bold text-sm rounded-xl flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 cursor-pointer">
+                <BookOpen className="w-4 h-4" />
+                <span>فتح الكورس</span>
+              </Link>
+              <Link href="/dashboard" className="h-12 px-6 bg-white/5 hover:bg-white/10 text-white font-alexandria font-bold text-sm rounded-xl flex items-center justify-center gap-2 border border-white/10 transition-colors cursor-pointer">
+                <LayoutDashboard className="w-4 h-4 text-zinc-400" />
+                <span>لوحة التحكم</span>
+              </Link>
+            </div>
+          </>
+        ) : (
+          <>
+            <h1 className="text-3xl font-alexandria font-bold mb-2">تم العثور على اشتراك سابق لهذا البريد الإلكتروني.</h1>
+            <p className="text-zinc-400 text-sm max-w-md mx-auto leading-relaxed">
+              لقد قمت بشراء هذا الكورس وإنشاء حساب بالفعل. يرجى تسجيل الدخول للوصول إلى محتوى الكورس.
+            </p>
+            <div className="flex gap-4">
+              <Link 
+                href={`/login?redirect=${encodeURIComponent(enrolledCourseSlug ? `/learn/${enrolledCourseSlug}/${firstLessonSlug || ""}` : "/dashboard")}`} 
+                className="h-12 px-8 bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white font-alexandria font-bold text-sm rounded-xl flex items-center justify-center gap-2 shadow-[0_4px_14px_rgba(244,63,94,0.25)] transition-all active:scale-95 cursor-pointer"
+              >
+                <span>🔑 تسجيل الدخول</span>
+              </Link>
+              <Link 
+                href="/login/forgot-password" 
+                className="h-12 px-6 bg-white/5 hover:bg-white/10 text-white font-alexandria font-bold text-sm rounded-xl flex items-center justify-center gap-2 border border-white/10 transition-colors cursor-pointer"
+              >
+                <span>🔒 نسيت كلمة المرور</span>
+              </Link>
+            </div>
+          </>
+        )}
       </div>
     );
   }
@@ -692,13 +780,26 @@ export default function CartCheckoutPage() {
                             : "border-white/5 focus:border-white/20 focus:ring-white/20"
                         )}
                         disabled={isLoading}
-                        {...register("email")}
+                        {...register("email", {
+                          onBlur: handleEmailBlur
+                        })}
                       />
                     </div>
                     {errors.email && <p className="text-xs text-red-400 font-cairo flex items-center gap-1 mt-1"><ShieldAlert className="w-3 h-3" /> {errors.email.message}</p>}
+                    {emailStatus?.exists && !emailStatus?.ownsCourse && (
+                      <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 p-4 rounded-xl flex items-start gap-3 font-cairo text-sm mt-3">
+                        <Sparkles className="w-5 h-5 shrink-0 mt-0.5 animate-pulse" />
+                        <div>
+                          <p className="font-bold">مرحباً بك مجدداً!</p>
+                          <p className="text-zinc-300 text-xs mt-1">
+                            هذا البريد الإلكتروني مسجل لدينا بالفعل. سيتم ربط الكورسات الجديدة بحسابك الحالي فور إتمام الدفع دون الحاجة لإنشاء حساب جديد.
+                          </p>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
-                  {!user && (
+                  {!user && !emailStatus?.exists && (
                     <>
                       <div className="space-y-2">
                         <Label className="font-cairo font-bold text-zinc-400 text-sm">كلمة المرور *</Label>
@@ -729,13 +830,6 @@ export default function CartCheckoutPage() {
                         </div>
                         {errors.password && <p className="text-xs text-red-400 font-cairo flex items-center gap-1 mt-1"><ShieldAlert className="w-3 h-3" /> {errors.password.message}</p>}
                       </div>
-                      
-                      <p className="text-xs text-zinc-500 font-cairo mt-1.5">
-                        لديك حساب بالفعل؟{" "}
-                        <Link href="/login?redirect=/checkout/cart" className="text-rose-400 hover:text-rose-300 underline font-bold transition-all">
-                          اضغط هنا لتسجيل الدخول
-                        </Link>
-                      </p>
                     </>
                   )}
 
@@ -761,6 +855,15 @@ export default function CartCheckoutPage() {
                       />
                     </div>
                   </div>
+
+                  {!user && (
+                    <p className="text-xs text-zinc-500 font-cairo mt-2 text-right">
+                      لديك حساب بالفعل؟{" "}
+                      <Link href="/login?redirect=/checkout/cart" className="text-rose-400 hover:text-rose-300 underline font-bold transition-all">
+                        اضغط هنا لتسجيل الدخول
+                      </Link>
+                    </p>
+                  )}
 
                   <style>{`
                     .react-tel-input {

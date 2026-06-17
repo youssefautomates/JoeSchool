@@ -416,6 +416,73 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
   const [dialCode, setDialCode] = useState("20");
   const [detectedCountry, setDetectedCountry] = useState("eg");
 
+  const [emailStatus, setEmailStatus] = useState<any>(null);
+  const [isCheckingEmail, setIsCheckingEmail] = useState(false);
+
+  const handleEmailBlur = async () => {
+    if (!emailValue) return;
+    
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(emailValue.trim())) return;
+
+    setIsCheckingEmail(true);
+    try {
+      let checkCourseId = resolvedParams.id;
+      if (product && !isCourse) {
+        const { data: coursesList } = await supabaseClient
+          .from("courses")
+          .select("id, title")
+          .order("id", { ascending: true });
+        
+        if (coursesList) {
+          const matched = coursesList.find(c => 
+            c.id === resolvedParams.id ||
+            c.title.toLowerCase().includes(product.title?.toLowerCase()) || 
+            product.title?.toLowerCase().includes(c.title.toLowerCase())
+          );
+          if (matched) {
+            checkCourseId = matched.id;
+          }
+        }
+      }
+
+      const response = await fetch(`/api/checkout/detect-email?email=${encodeURIComponent(emailValue.trim())}&courseId=${checkCourseId}`);
+      const data = await response.json();
+      
+      if (response.ok) {
+        setEmailStatus({
+          checked: true,
+          exists: data.exists,
+          ownsCourse: data.ownsCourse,
+          userId: data.userId,
+          courseSlug: data.courseSlug,
+          firstLessonSlug: data.firstLessonSlug,
+        });
+
+        if (data.ownsCourse) {
+          setIsAlreadyEnrolled(true);
+          setEnrolledCourseSlug(data.courseSlug || "");
+          setFirstLessonSlug(data.firstLessonSlug || "");
+        } else {
+          if (!user) {
+            setIsAlreadyEnrolled(false);
+          }
+        }
+      }
+    } catch (err) {
+      console.error("Error checking email:", err);
+    } finally {
+      setIsCheckingEmail(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!user && emailStatus) {
+      setEmailStatus(null);
+      setIsAlreadyEnrolled(false);
+    }
+  }, [emailValue, user]);
+
   useEffect(() => {
     async function detectCountry() {
       try {
@@ -469,7 +536,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
       validateCardFields();
     }
     const passwordVal = getValues("password");
-    if (!user && (!passwordVal || passwordVal.trim() === "")) {
+    if (!user && !emailStatus?.exists && (!passwordVal || passwordVal.trim() === "")) {
       setError("password", { type: "manual", message: "يُرجى إكمال جميع الحقول لإتمام الدفع" });
     }
     toast.error("يُرجى إكمال جميع الحقول لإتمام الدفع");
@@ -530,7 +597,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
       let activeUser = user;
 
       // If user is not logged in, perform Instant Purchase Authentication
-      if (!activeUser) {
+      if (!activeUser && !emailStatus?.exists) {
         if (!data.password) {
           setError("password", { type: "manual", message: "يُرجى إكمال جميع الحقول لإتمام الدفع" });
           toast.error("يُرجى إكمال جميع الحقول لإتمام الدفع");
@@ -787,36 +854,62 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                 <motion.div 
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="bg-[#0a0a0f]/80 backdrop-blur-2xl rounded-[2rem] p-8 border border-red-500/20 shadow-2xl relative overflow-hidden text-center space-y-6"
+                  className="bg-[#0a0a0f]/80 backdrop-blur-2xl rounded-[2rem] p-8 border border-rose-500/20 shadow-2xl relative overflow-hidden text-center space-y-6"
                 >
-                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-500 to-rose-600" />
+                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-rose-500 to-rose-600" />
                   
-                  <div className="w-20 h-20 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-500 mx-auto">
-                    <ShieldAlert className="w-10 h-10" />
+                  <div className="w-20 h-20 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-500 mx-auto">
+                    <Sparkles className="w-10 h-10 animate-pulse" />
                   </div>
                   
-                  <h2 className="text-2xl font-alexandria font-bold text-white leading-snug">أنت مشترك بالفعل في هذا الكورس.</h2>
-                  <p className="text-zinc-400 text-sm max-w-md mx-auto font-cairo">
-                    لقد قمت بالاشتراك في هذا الكورس مسبقاً، يمكنك البدء في مشاهدة الدروس والمحتوى التعليمي فوراً من خلال صفحة الكورس أو لوحة التحكم الخاصة بك.
-                  </p>
-                  
-                  <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
-                    <Link
-                      href={enrolledCourseSlug ? `/learn/${enrolledCourseSlug}/${firstLessonSlug || ""}` : "/dashboard"}
-                      className="h-12 px-8 bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white font-alexandria font-bold text-sm rounded-xl flex items-center justify-center gap-2 shadow-[0_4px_14px_rgba(239,68,68,0.25)] transition-all active:scale-[0.98] cursor-pointer"
-                    >
-                      <BookOpen className="w-4 h-4" />
-                      <span>فتح الكورس</span>
-                    </Link>
-                    
-                    <Link
-                      href="/dashboard"
-                      className="h-12 px-6 bg-white/5 hover:bg-white/10 text-white font-alexandria font-bold text-sm rounded-xl flex items-center justify-center gap-2 border border-white/10 transition-colors cursor-pointer"
-                    >
-                      <LayoutDashboard className="w-4 h-4 text-zinc-400" />
-                      <span>لوحة التحكم</span>
-                    </Link>
-                  </div>
+                  {user ? (
+                    <>
+                      <h2 className="text-2xl font-alexandria font-bold text-white leading-snug">لقد قمت بشراء هذا الكورس وإنشاء حساب بالفعل.</h2>
+                      <p className="text-zinc-400 text-sm max-w-md mx-auto font-cairo">
+                        يمكنك متابعة التعلم مباشرة.
+                      </p>
+                      
+                      <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
+                        <Link
+                          href={enrolledCourseSlug ? `/learn/${enrolledCourseSlug}/${firstLessonSlug || ""}` : "/dashboard"}
+                          className="h-12 px-8 bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white font-alexandria font-bold text-sm rounded-xl flex items-center justify-center gap-2 shadow-[0_4px_14px_rgba(244,63,94,0.25)] transition-all active:scale-[0.98] cursor-pointer"
+                        >
+                          <span>🎓 اذهب إلى الكورس الآن</span>
+                        </Link>
+                        
+                        <Link
+                          href="/dashboard"
+                          className="h-12 px-6 bg-white/5 hover:bg-white/10 text-white font-alexandria font-bold text-sm rounded-xl flex items-center justify-center gap-2 border border-white/10 transition-colors cursor-pointer"
+                        >
+                          <LayoutDashboard className="w-4 h-4 text-zinc-400" />
+                          <span>لوحة التحكم</span>
+                        </Link>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <h2 className="text-2xl font-alexandria font-bold text-white leading-snug">تم العثور على اشتراك سابق لهذا البريد الإلكتروني.</h2>
+                      <p className="text-zinc-400 text-sm max-w-md mx-auto font-cairo">
+                        لقد قمت بشراء هذا الكورس وإنشاء حساب بالفعل. يرجى تسجيل الدخول للوصول إلى محتوى الكورس.
+                      </p>
+                      
+                      <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
+                        <Link
+                          href={`/login?redirect=${encodeURIComponent(enrolledCourseSlug ? `/learn/${enrolledCourseSlug}/${firstLessonSlug || ""}` : `/checkout/${resolvedParams.id}`)}`}
+                          className="h-12 px-8 bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white font-alexandria font-bold text-sm rounded-xl flex items-center justify-center gap-2 shadow-[0_4px_14px_rgba(244,63,94,0.25)] transition-all active:scale-[0.98] cursor-pointer"
+                        >
+                          <span>🔑 تسجيل الدخول</span>
+                        </Link>
+                        
+                        <Link
+                          href="/login/forgot-password"
+                          className="h-12 px-6 bg-white/5 hover:bg-white/10 text-white font-alexandria font-bold text-sm rounded-xl flex items-center justify-center gap-2 border border-white/10 transition-colors cursor-pointer"
+                        >
+                          <span>🔒 نسيت كلمة المرور</span>
+                        </Link>
+                      </div>
+                    </>
+                  )}
                 </motion.div>
               ) : (
                 <motion.div 
@@ -995,13 +1088,26 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                             : "border-white/5 focus:border-white/20 focus:ring-white/20"
                         )}
                         disabled={isLoading}
-                        {...register("email")}
+                        {...register("email", {
+                          onBlur: handleEmailBlur
+                        })}
                       />
                     </div>
                     {errors.email && <p className="text-xs text-red-400 font-cairo flex items-center gap-1 mt-1"><ShieldAlert className="w-3 h-3" /> {errors.email.message}</p>}
+                    {emailStatus?.exists && !emailStatus?.ownsCourse && (
+                      <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 p-4 rounded-xl flex items-start gap-3 font-cairo text-sm mt-3">
+                        <Sparkles className="w-5 h-5 shrink-0 mt-0.5 animate-pulse" />
+                        <div>
+                          <p className="font-bold">مرحباً بك مجدداً!</p>
+                          <p className="text-zinc-300 text-xs mt-1">
+                            هذا البريد الإلكتروني مسجل لدينا بالفعل. سيتم ربط هذا الكورس بحسابك الحالي فور إتمام الدفع دون الحاجة لإنشاء حساب جديد.
+                          </p>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
-                  {!user && (
+                  {!user && !emailStatus?.exists && (
                     <>
                       <div className="space-y-2">
                         <Label className="font-cairo font-bold text-zinc-400 text-sm">كلمة المرور *</Label>
@@ -1045,13 +1151,6 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                         </div>
                         {errors.password && <p className="text-xs text-red-400 font-cairo flex items-center gap-1 mt-1"><ShieldAlert className="w-3 h-3" /> {errors.password.message}</p>}
                       </div>
-                      
-                      <p className="text-xs text-zinc-500 font-cairo mt-1.5">
-                        لديك حساب بالفعل؟{" "}
-                        <Link href={`/login?redirect=/checkout/${resolvedParams.id}`} className="text-rose-400 hover:text-rose-300 underline font-bold transition-all">
-                          اضغط هنا لتسجيل الدخول
-                        </Link>
-                      </p>
                     </>
                   )}
 

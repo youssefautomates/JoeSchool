@@ -11,13 +11,32 @@ const supabaseAdmin = createClient(
 export async function getOrCreateUser(email: string, name: string, explicitPassword?: string) {
   const emailLower = email.toLowerCase().trim();
 
-  // 1. Check if user exists in auth.users
-  const { data: { users }, error: listError } = await supabaseAdmin.auth.admin.listUsers();
-  if (listError) {
-    console.error("[authHelpers] Error listing users:", listError.message);
+  // 1. Check if user exists in auth.users using a paginated loop
+  let existingUser = null;
+  let page = 1;
+  const perPage = 1000;
+  while (true) {
+    const { data, error: listError } = await supabaseAdmin.auth.admin.listUsers({
+      page,
+      perPage,
+    });
+    if (listError) {
+      console.error("[authHelpers] Error listing users:", listError.message);
+      break;
+    }
+    if (!data?.users || data.users.length === 0) {
+      break;
+    }
+    const found = data.users.find(u => u.email?.toLowerCase().trim() === emailLower);
+    if (found) {
+      existingUser = found;
+      break;
+    }
+    if (data.users.length < perPage) {
+      break;
+    }
+    page++;
   }
-  
-  const existingUser = users?.find(u => u.email?.toLowerCase().trim() === emailLower);
   
   if (existingUser) {
     return {
@@ -55,8 +74,20 @@ export async function getOrCreateUser(email: string, name: string, explicitPassw
     console.error("[authHelpers] Failed to auto-create auth user:", createError.message);
     // If it fails with already in use but we missed it in listUsers, fallback
     if (createError.message.includes("already") || createError.status === 422) {
-      const { data: { users: refetchedUsers } } = await supabaseAdmin.auth.admin.listUsers();
-      const matched = refetchedUsers?.find(u => u.email?.toLowerCase().trim() === emailLower);
+      let matched = null;
+      let page = 1;
+      const perPage = 1000;
+      while (true) {
+        const { data, error: refetchError } = await supabaseAdmin.auth.admin.listUsers({ page, perPage });
+        if (refetchError || !data?.users || data.users.length === 0) break;
+        const found = data.users.find(u => u.email?.toLowerCase().trim() === emailLower);
+        if (found) {
+          matched = found;
+          break;
+        }
+        if (data.users.length < perPage) break;
+        page++;
+      }
       if (matched) {
         return {
           userId: matched.id,
