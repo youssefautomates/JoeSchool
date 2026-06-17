@@ -1000,15 +1000,24 @@ export async function getUserEnrollments(userId: string, userEmail?: string): Pr
           }
         }
         
-        // 2. Sync all completed orders to enrollments table
+        // 2. Sync all completed orders to enrollments table and associate customer_id if null
         const { data: completedOrders } = await supabaseClient
           .from("orders")
-          .select("product_id, product_title, customer_name")
+          .select("id, product_id, product_title, customer_name, customer_id")
           .eq("customer_email", emailLower)
           .eq("status", "completed");
 
         if (completedOrders && completedOrders.length > 0) {
           for (const order of completedOrders) {
+            // Update customer_id in orders table if it is currently null
+            if (!order.customer_id) {
+              await supabaseClient
+                .from("orders")
+                .update({ customer_id: userId })
+                .eq("id", order.id);
+              console.log(`[SYNC_ENROLLMENT] Updated customer_id to ${userId} for order ${order.id}`);
+            }
+
             const isCourse = order.product_id?.startsWith("course-") || 
                              order.product_title?.includes("دورة") || 
                              order.product_title?.includes("كورس");

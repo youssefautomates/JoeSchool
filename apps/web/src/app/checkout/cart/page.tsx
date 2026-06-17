@@ -9,7 +9,7 @@ import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Lock, ShieldCheck, CreditCard, ChevronRight, Loader2, ShieldAlert, Sparkles, CheckCircle2, Package, Mail } from "lucide-react";
+import { Lock, ShieldCheck, CreditCard, ChevronRight, Loader2, ShieldAlert, Sparkles, CheckCircle2, Package, Mail, BookOpen, LayoutDashboard } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -18,6 +18,7 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/context/CartContext";
 import { supabaseClient } from "@/lib/supabaseClient";
+import { getUserEnrollments } from "@/lib/coursesDb";
 
 import { resolveUserCurrency, resolveProductPrice, formatPrice, getUSDtoEGPExchangeRate, type Currency } from "@/lib/pricing";
 
@@ -31,7 +32,7 @@ const checkoutSchema = z.object({
 type CheckoutValues = z.infer<typeof checkoutSchema>;
 
 export default function CartCheckoutPage() {
-  const { items, clearCart } = useCart();
+  const { items, clearCart, removeFromCart } = useCart();
   const hasCourse = items.some(item => 
     item.category === "courses" || 
     item.id.startsWith("course-") || 
@@ -228,6 +229,89 @@ export default function CartCheckoutPage() {
   };
 
   const [user, setUser] = useState<any>(null);
+  const [removedAllDuplicates, setRemovedAllDuplicates] = useState(false);
+  const [enrolledCourseSlug, setEnrolledCourseSlug] = useState("");
+  const [firstLessonSlug, setFirstLessonSlug] = useState("");
+
+  useEffect(() => {
+    async function checkCartEnrollments() {
+      if (!user || items.length === 0) return;
+      try {
+        const userEnrolls = await getUserEnrollments(user.id, user.email);
+        const { data: coursesList } = await supabaseClient
+          .from("courses")
+          .select("id, title, slug");
+        
+        let removedCount = 0;
+        let firstEnrolledSlug = "";
+        let firstEnrolledId = "";
+
+        for (const item of items) {
+          let courseId = item.id;
+          let isEnrolled = false;
+          let courseSlug = "";
+          
+          if (userEnrolls.includes(courseId)) {
+            isEnrolled = true;
+            if (coursesList) {
+              const matched = coursesList.find(c => c.id === item.id);
+              if (matched) courseSlug = matched.slug;
+            }
+          } else if (coursesList) {
+            const matched = coursesList.find(c => 
+              c.id === item.id ||
+              c.title.toLowerCase().includes(item.title?.toLowerCase()) || 
+              item.title?.toLowerCase().includes(c.title.toLowerCase())
+            );
+            if (matched && userEnrolls.includes(matched.id)) {
+              isEnrolled = true;
+              courseId = matched.id;
+              courseSlug = matched.slug;
+            }
+          }
+          
+          if (isEnrolled) {
+            if (!firstEnrolledSlug && courseSlug) {
+              firstEnrolledSlug = courseSlug;
+              firstEnrolledId = courseId;
+            }
+            removeFromCart(item.id);
+            removedCount++;
+            toast.warning(`لقد تم إزالة كورس "${item.title}" من السلة لأنك مشترك فيه بالفعل.`);
+          }
+        }
+        
+        if (removedCount > 0 && removedCount === items.length) {
+          setRemovedAllDuplicates(true);
+          if (firstEnrolledSlug) {
+            setEnrolledCourseSlug(firstEnrolledSlug);
+            const { data: modules } = await supabaseClient
+              .from("course_modules")
+              .select("id")
+              .eq("course_id", firstEnrolledId)
+              .order("sort_order", { ascending: true })
+              .limit(1);
+            
+            if (modules && modules.length > 0) {
+              const { data: lessons } = await supabaseClient
+                .from("course_lessons")
+                .select("slug")
+                .eq("module_id", modules[0].id)
+                .order("sort_order", { ascending: true })
+                .limit(1);
+              
+              if (lessons && lessons.length > 0) {
+                setFirstLessonSlug(lessons[0].slug);
+              }
+            }
+          }
+        }
+      } catch (e) {
+        console.error("Error checking cart enrollments:", e);
+      }
+    }
+    checkCartEnrollments();
+  }, [user, items, removeFromCart]);
 
   const { register, handleSubmit, setValue, trigger, getValues, setError, watch, formState: { errors } } = useForm<CheckoutValues>({
     resolver: zodResolver(checkoutSchema),
@@ -317,38 +401,58 @@ export default function CartCheckoutPage() {
           return;
         }
 
-        // Try to sign up
-        const { data: signUpData, error: signUpError } = await supabaseClient.auth.signUp({
-          email: data.email,
-          password: data.password,
-          options: {
-            data: {
-              full_name: `${data.firstName} ${data.lastName}`,
+        // Try to sign in. If it fails, we proceed without blocking (backend will handle account creation/resolution)
+        try {
+          const { data: signInData, error: signInError } = await supabaseClient.auth.signInWithPassword({
+            email: data.email.toLowerCase().trim(),
+            password: data.password,
+          });
+
+          if (!signInError && signInData?.user) {
+            activeUser = signInData.user;
+            setUser(signInData.user);
+            console.log("[CART] Existing user signed in successfully before payment");
+            
+            // Check if they are already enrolled in any of the cart courses
+            const userEnrolls = await getUserEnrollments(signInData.user.id, signInData.user.email);
+            const { data: coursesList } = await supabaseClient
+              .from("courses")
+              .select("id, title");
+            
+            let hasDuplicate = false;
+            for (const item of items) {
+              let courseId = item.id;
+              let isEnrolled = false;
+              
+              if (userEnrolls.includes(courseId)) {
+                isEnrolled = true;
+              } else if (coursesList) {
+                const matched = coursesList.find(c => 
+                  c.id === item.id ||
+                  c.title.toLowerCase().includes(item.title?.toLowerCase()) || 
+                  item.title?.toLowerCase().includes(c.title.toLowerCase())
+                );
+                if (matched && userEnrolls.includes(matched.id)) {
+                  isEnrolled = true;
+                }
+              }
+              
+              if (isEnrolled) {
+                hasDuplicate = true;
+                removeFromCart(item.id);
+                toast.error(`أنت مشترك بالفعل في كورس "${item.title}". تم إزالته من السلة.`);
+              }
             }
-          }
-        });
-
-        if (signUpError) {
-          // If already registered, try signing in with password automatically
-          if (signUpError.message.includes("already registered") || signUpError.status === 422) {
-            const { data: signInData, error: signInError } = await supabaseClient.auth.signInWithPassword({
-              email: data.email,
-              password: data.password,
-            });
-
-            if (signInError) {
-              toast.error("هذا البريد مسجل بالفعل بكلمة مرور أخرى. يرجى إدخال كلمة المرور الصحيحة لحسابك، أو تسجيل الدخول.");
+            
+            if (hasDuplicate) {
               setIsLoading(false);
               return;
             }
-            activeUser = signInData.user;
           } else {
-            toast.error(`فشل إنشاء الحساب: ${signUpError.message}`);
-            setIsLoading(false);
-            return;
+            console.log("[CART] Sign-in failed or new user. Account creation deferred to payment success.");
           }
-        } else {
-          activeUser = signUpData.user;
+        } catch (e) {
+          console.log("[CART] Deferred sign-in exception:", e);
         }
       }
 
@@ -436,6 +540,28 @@ export default function CartCheckoutPage() {
     } finally {
       setIsLoading(false);
     }
+  }
+
+  if (removedAllDuplicates || (items.length === 0 && removedAllDuplicates)) {
+    return (
+      <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center text-white font-cairo p-4 text-center space-y-6">
+        <ShieldAlert className="w-16 h-16 text-red-500 animate-bounce" />
+        <h1 className="text-3xl font-alexandria font-bold mb-2">أنت مشترك بالفعل في هذا الكورس.</h1>
+        <p className="text-zinc-400 text-sm max-w-md mx-auto leading-relaxed">
+          لقد قمت بالاشتراك في الكورسات التي كانت في سلتك مسبقاً، يمكنك البدء في مشاهدتها فوراً من لوحة التحكم.
+        </p>
+        <div className="flex gap-4">
+          <Link href={enrolledCourseSlug ? `/learn/${enrolledCourseSlug}/${firstLessonSlug || ""}` : "/dashboard"} className="h-12 px-8 bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white font-alexandria font-bold text-sm rounded-xl flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 cursor-pointer">
+            <BookOpen className="w-4 h-4" />
+            <span>فتح الكورس</span>
+          </Link>
+          <Link href="/dashboard" className="h-12 px-6 bg-white/5 hover:bg-white/10 text-white font-alexandria font-bold text-sm rounded-xl flex items-center justify-center gap-2 border border-white/10 transition-colors cursor-pointer">
+            <LayoutDashboard className="w-4 h-4 text-zinc-400" />
+            <span>لوحة التحكم</span>
+          </Link>
+        </div>
+      </div>
+    );
   }
 
   if (items.length === 0) {

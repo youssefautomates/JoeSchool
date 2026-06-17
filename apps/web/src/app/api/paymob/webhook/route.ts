@@ -220,6 +220,14 @@ export async function POST(request: Request) {
             }
           } catch (err: any) {
             console.error(`[PAYMOB_WEBHOOK][${requestId}] ❌ Error in getOrCreateUser:`, err.message || err);
+            // Send Telegram Admin Alert
+            try {
+              const { sendTelegramMessage } = await import("@/lib/telegram");
+              await sendTelegramMessage(`⚠️ تنبيه: فشل إنشاء حساب الطالب تلقائياً للبريد (${customerEmail}) في webhook بعد نجاح الدفع.\nاسم الطالب: ${customerName}\nالخطأ: ${err.message || err}\nتم حفظ الطلب كـ "مكتمل" مع تأجيل إنشاء الحساب وتأجيل التفعيل حتى زيارته لصفحة النجاح أو تسجيل دخوله لاحقاً.`);
+            } catch (teleErr) {
+              console.error(`[PAYMOB_WEBHOOK][${requestId}] Failed to send Telegram alert:`, teleErr);
+            }
+            resolvedUserId = null;
           }
         }
 
@@ -389,14 +397,18 @@ export async function POST(request: Request) {
               ) || coursesList[0];
 
               if (matchedCourse) {
-                const userId = resolvedUserId || ord.customer_id || "usr-student-" + Math.random().toString(36).substring(2, 11);
+                const userId = resolvedUserId || ord.customer_id;
                 
-                console.log(`[PAYMOB_WEBHOOK][${requestId}] 🎓 Enrolling user ${userId} in course: ${matchedCourse.title}`);
-                await enrollUser(userId, matchedCourse.id, {
-                  email: customerEmail,
-                  name: customerName
-                });
-                console.log(`[PAYMOB_WEBHOOK][${requestId}] 🎓 Auto-enrollment successful`);
+                if (userId) {
+                  console.log(`[PAYMOB_WEBHOOK][${requestId}] 🎓 Enrolling user ${userId} in course: ${matchedCourse.title}`);
+                  await enrollUser(userId, matchedCourse.id, {
+                    email: customerEmail,
+                    name: customerName
+                  });
+                  console.log(`[PAYMOB_WEBHOOK][${requestId}] 🎓 Auto-enrollment successful`);
+                } else {
+                  console.warn(`[PAYMOB_WEBHOOK][${requestId}] ⚠️ Skipping LMS enrollment because no valid user ID exists yet (creation failed).`);
+                }
               }
             } catch (enrollErr) {
               console.error(`[PAYMOB_WEBHOOK][${requestId}] ❌ Auto-enrollment error:`, enrollErr);

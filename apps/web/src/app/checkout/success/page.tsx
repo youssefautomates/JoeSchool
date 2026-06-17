@@ -96,6 +96,7 @@ interface OrderData {
   original_amount_usd?: number | null;
   charged_amount_egp?: number | null;
   exchange_rate?: number | null;
+  loginLink?: string | null;
 }
 
 function SuccessContent() {
@@ -158,7 +159,8 @@ function SuccessContent() {
             products: data.products || [],
             original_amount_usd: data.original_amount_usd,
             charged_amount_egp: data.charged_amount_egp,
-            exchange_rate: data.exchange_rate
+            exchange_rate: data.exchange_rate,
+            loginLink: data.loginLink || null
           });
           setPhase("success");
           setTimeout(() => setShowParticles(true), 300);
@@ -483,7 +485,7 @@ function SuccessContent() {
                       يمكنك إعادة تحميل الملفات وتوليد روابط أمنة جديدة في أي وقت لاحقاً من خلال قسم **"ملفاتي الرقمية"** داخل لوحة التحكم.
                     </p>
                     <Link
-                      href="/dashboard"
+                      href={orderData?.loginLink || "/dashboard"}
                       className="mt-4 inline-flex items-center gap-1 text-xs font-bold text-emerald-400 hover:text-emerald-300 transition-colors"
                     >
                       <span>الانتقال إلى لوحة التحميلات الرقمية</span>
@@ -541,7 +543,7 @@ function SuccessContent() {
 
                       <div className="flex flex-col sm:flex-row gap-3">
                         <Link
-                          href="/dashboard"
+                          href={orderData?.loginLink || "/dashboard"}
                           className="flex-1 h-14 bg-gradient-to-r from-[#D6004B] to-orange-500 hover:from-[#b0003d] hover:to-orange-600 text-white font-alexandria font-bold text-base rounded-2xl flex items-center justify-center gap-2 shadow-[0_6px_20px_rgba(214,0,75,0.25)] transition-all active:scale-98"
                         >
                           🚀
@@ -549,7 +551,7 @@ function SuccessContent() {
                         </Link>
                         
                         <Link
-                          href="/dashboard"
+                          href={orderData?.loginLink || "/dashboard"}
                           className="h-14 px-6 bg-white/5 hover:bg-white/10 text-white font-alexandria font-bold text-base rounded-2xl flex items-center justify-center gap-2 border border-white/10 transition-colors"
                         >
                           <LayoutDashboard className="w-5 h-5 text-zinc-400" />
@@ -656,7 +658,7 @@ function SuccessContent() {
                           </div>
 
                           <Link
-                            href="/dashboard"
+                            href={orderData?.loginLink || "/dashboard"}
                             className="h-11 bg-white/5 border border-white/10 hover:bg-rose-600 hover:border-none text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all active:scale-98"
                           >
                             <span>ابدأ مشاهدة المنهج الآن</span>
@@ -678,7 +680,7 @@ function SuccessContent() {
                       يمكنك التحكم بملفاتك الرقمية والوصول المباشر للمحاضرات في أي وقت عبر الانتقال إلى لوحة التحكم الرئيسية الخاصة بك.
                     </p>
                     <Link
-                      href="/dashboard"
+                      href={orderData?.loginLink || "/dashboard"}
                       className="mt-4 h-12 px-6 bg-gradient-to-r from-sky-500 to-emerald-500 text-white font-alexandria font-bold text-xs rounded-xl inline-flex items-center justify-center gap-2 shadow-lg shadow-sky-600/10 active:scale-98 transition-all"
                     >
                       <LayoutDashboard className="w-4 h-4" />

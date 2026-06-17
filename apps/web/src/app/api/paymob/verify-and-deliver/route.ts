@@ -249,8 +249,74 @@ export async function POST(req: Request) {
     // ── 3. Check if all matched orders are already completed ───────
     const allCompleted = orders.every(o => o.status === "completed");
     if (allCompleted) {
-      console.log(`[VERIFY][${requestId}] ✅ All matching orders already marked as completed. Skipping verification.`);
+      console.log(`[VERIFY][${requestId}] ✅ All matching orders already marked as completed. Checking account linkage...`);
       
+      let resolvedUserId = baseOrder.customer_id;
+      let explicitPassword = baseOrder.checkout_password || "";
+      
+      // Auto-retry account creation if customer_id is missing
+      if (!resolvedUserId) {
+        console.log(`[VERIFY][${requestId}] 🔄 Customer ID is missing for completed order. Retrying account creation...`);
+        try {
+          const userAccount = await getOrCreateUser(customerEmail, customerName, explicitPassword || undefined);
+          resolvedUserId = userAccount.userId;
+          
+          // Update orders with the newly resolved customer_id
+          await supabaseAdmin
+            .from("orders")
+            .update({ customer_id: resolvedUserId })
+            .eq("id", baseOrder.id);
+            
+          console.log(`[VERIFY][${requestId}] ✅ Account resolved & linked during success page retry: ${resolvedUserId}`);
+          
+          // Enroll the student
+          for (const order of orders) {
+            const isCourse = order.product_id?.startsWith("course-") || 
+                             order.product_title?.includes("دورة") || 
+                             order.product_title?.includes("كورس");
+            if (isCourse) {
+              const { getCoursesList, enrollUser } = await import("@/lib/coursesDb");
+              const coursesList = await getCoursesList();
+              const matchedCourse = coursesList.find(c => 
+                c.title.toLowerCase().includes(order.product_title?.toLowerCase()) || 
+                order.product_title?.toLowerCase().includes(c.title.toLowerCase())
+              ) || coursesList[0];
+              
+              if (matchedCourse) {
+                await enrollUser(resolvedUserId, matchedCourse.id, {
+                  email: customerEmail,
+                  name: customerName
+                });
+                console.log(`[VERIFY][${requestId}] ✅ Enrolled student during success page retry: ${matchedCourse.title}`);
+              }
+            }
+          }
+        } catch (err: any) {
+          console.error(`[VERIFY][${requestId}] ❌ Account creation retry failed:`, err.message || err);
+        }
+      }
+
+      // Generate an auto-login action link using Supabase Admin SDK
+      let loginLink: string | null = null;
+      if (resolvedUserId) {
+        try {
+          const siteUrl = new URL(req.url).origin;
+          const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
+            type: 'magiclink',
+            email: customerEmail.toLowerCase().trim(),
+            options: {
+              redirectTo: `${siteUrl}/dashboard`
+            }
+          });
+          if (!linkError && linkData?.properties?.action_link) {
+            loginLink = linkData.properties.action_link;
+            console.log(`[VERIFY][${requestId}] Generated magic login link successfully during completed check`);
+          }
+        } catch (e: any) {
+          console.error(`[VERIFY][${requestId}] Magic link generation exception:`, e.message);
+        }
+      }
+
       // Resolve details for success page representation
       const originalAmountUsd = orders.reduce((sum, o) => sum + (Number(o.original_amount_usd) || 0), 0);
       const chargedAmountEgp = orders.reduce((sum, o) => sum + (Number(o.charged_amount_egp) || 0), 0);
@@ -271,7 +337,8 @@ export async function POST(req: Request) {
         products: resolvedProducts,
         original_amount_usd: currency === "USD" ? originalAmountUsd : null,
         charged_amount_egp: chargedAmountEgp,
-        exchange_rate: exchangeRate
+        exchange_rate: exchangeRate,
+        loginLink: loginLink
       });
     }
 
@@ -468,6 +535,14 @@ export async function POST(req: Request) {
         }
       } catch (err: any) {
         console.error(`[VERIFY][${requestId}] ❌ Error in getOrCreateUser:`, err.message || err);
+        // Send Telegram Admin Alert
+        try {
+          const { sendTelegramMessage } = await import("@/lib/telegram");
+          await sendTelegramMessage(`⚠️ تنبيه: فشل إنشاء حساب الطالب تلقائياً للبريد (${customerEmail}) بعد نجاح الدفع.\nاسم الطالب: ${customerName}\nالخطأ: ${err.message || err}\nتم حفظ الطلب كـ "مكتمل" مع تعليق إنشاء الحساب وتأجيل التفعيل حتى زيارته لصفحة النجاح أو تسجيل دخوله لاحقاً.`);
+        } catch (teleErr) {
+          console.error(`[VERIFY][${requestId}] Failed to send Telegram alert:`, teleErr);
+        }
+        resolvedUserId = null;
       }
     }
 
@@ -580,31 +655,35 @@ export async function POST(req: Request) {
             ) || coursesList[0];
 
             if (matchedCourse) {
-              const userId = resolvedUserId || order.customer_id || "usr-student-" + Math.random().toString(36).substring(2, 11);
+              const userId = resolvedUserId || order.customer_id;
 
-              console.log(`[VERIFY][${requestId}] 🎓 Enrolling user ${userId} in course: ${matchedCourse.title}`);
-              await enrollUser(userId, matchedCourse.id, {
-                email: customerEmail,
-                name: customerName
-              });
-              console.log(`[VERIFY][${requestId}] 🎓 Auto-enrollment completed successfully`);
-
-              // Log timeline event for course enrollment
-              try {
-                await supabaseAdmin.from("analytics_events").insert({
-                  event_name: "course_enrolled",
-                  product_id: order.product_id,
-                  product_title: order.product_title,
-                  user_id: userId,
-                  metadata: {
-                    order_id: order.id,
-                    course_id: matchedCourse.id,
-                    description_ar: `تم تفعيل دورة (${matchedCourse.title}) للطالب بنجاح`,
-                    description_en: `Course (${matchedCourse.title}) activated for student successfully`
-                  }
+              if (userId) {
+                console.log(`[VERIFY][${requestId}] 🎓 Enrolling user ${userId} in course: ${matchedCourse.title}`);
+                await enrollUser(userId, matchedCourse.id, {
+                  email: customerEmail,
+                  name: customerName
                 });
-              } catch (analyticsErr) {
-                console.error("Failed to log course_enrolled event:", analyticsErr);
+                console.log(`[VERIFY][${requestId}] 🎓 Auto-enrollment completed successfully`);
+
+                // Log timeline event for course enrollment
+                try {
+                  await supabaseAdmin.from("analytics_events").insert({
+                    event_name: "course_enrolled",
+                    product_id: order.product_id,
+                    product_title: order.product_title,
+                    user_id: userId,
+                    metadata: {
+                      order_id: order.id,
+                      course_id: matchedCourse.id,
+                      description_ar: `تم تفعيل دورة (${matchedCourse.title}) للطالب بنجاح`,
+                      description_en: `Course (${matchedCourse.title}) activated for student successfully`
+                    }
+                  });
+                } catch (analyticsErr) {
+                  console.error("Failed to log course_enrolled event:", analyticsErr);
+                }
+              } else {
+                console.warn(`[VERIFY][${requestId}] ⚠️ Skipping LMS enrollment because no valid user ID exists yet (creation failed).`);
               }
             }
           } catch (enrollErr) {
@@ -733,6 +812,27 @@ export async function POST(req: Request) {
       console.error("[VERIFY] Failed to invoke Server-Side CAPI tracking:", capiErr.message);
     }
 
+    // Generate an auto-login action link using Supabase Admin SDK
+    let loginLink: string | null = null;
+    if (resolvedUserId) {
+      try {
+        const siteUrl = new URL(req.url).origin;
+        const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
+          type: 'magiclink',
+          email: customerEmail.toLowerCase().trim(),
+          options: {
+            redirectTo: `${siteUrl}/dashboard`
+          }
+        });
+        if (!linkError && linkData?.properties?.action_link) {
+          loginLink = linkData.properties.action_link;
+          console.log(`[VERIFY][${requestId}] Generated magic login link successfully`);
+        }
+      } catch (e: any) {
+        console.error(`[VERIFY][${requestId}] Magic link generation exception:`, e.message);
+      }
+    }
+
     return NextResponse.json({ 
       success: true, 
       productTitle: resolvedProducts.map(p => p.title).join(" + "),
@@ -747,7 +847,8 @@ export async function POST(req: Request) {
       products: resolvedProducts,
       original_amount_usd: currency === "USD" ? originalAmountUsd : null,
       charged_amount_egp: chargedAmountEgp,
-      exchange_rate: exchangeRate
+      exchange_rate: exchangeRate,
+      loginLink: loginLink
     });
 
   } catch (error: any) {

@@ -9,7 +9,7 @@ import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Lock, ShieldCheck, CreditCard, ChevronRight, Loader2, ShieldAlert, Sparkles, CheckCircle2, Package, Mail, Eye, EyeOff } from "lucide-react";
+import { Lock, ShieldCheck, CreditCard, ChevronRight, Loader2, ShieldAlert, Sparkles, CheckCircle2, Package, Mail, Eye, EyeOff, BookOpen, LayoutDashboard } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -23,6 +23,7 @@ import { type Product, calcDiscount } from "@/lib/products";
 import { trackEvent } from "@/lib/analytics";
 
 import { resolveUserCurrency, resolveProductPrice, formatPrice, getUSDtoEGPExchangeRate, type Currency } from "@/lib/pricing";
+import { getUserEnrollments } from "@/lib/coursesDb";
 
 const checkoutSchema = z.object({
   firstName: z.string().min(2, { message: "الاسم الأول يجب أن يكون حرفين على الأقل" }),
@@ -68,6 +69,91 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
   const cardNumberRef = useRef<HTMLInputElement>(null);
   const isFirstRender = useRef(true);
   const [showPassword, setShowPassword] = useState(false);
+  const [user, setUser] = useState<any>(null);
+  const [isAlreadyEnrolled, setIsAlreadyEnrolled] = useState(false);
+  const [enrolledCourseSlug, setEnrolledCourseSlug] = useState("");
+  const [firstLessonSlug, setFirstLessonSlug] = useState("");
+
+  useEffect(() => {
+    async function checkEnrollment() {
+      if (!user || !resolvedParams.id) return;
+      try {
+        let courseId = resolvedParams.id;
+        let courseSlug = "";
+        
+        if (product) {
+          if (isCourse) {
+            courseSlug = product.slug || "";
+          } else {
+            const { data: coursesList } = await supabaseClient
+              .from("courses")
+              .select("id, title, slug")
+              .order("id", { ascending: true });
+            
+            if (coursesList) {
+              const matched = coursesList.find(c => 
+                c.id === resolvedParams.id ||
+                c.title.toLowerCase().includes(product.title?.toLowerCase()) || 
+                product.title?.toLowerCase().includes(c.title.toLowerCase())
+              );
+              if (matched) {
+                courseId = matched.id;
+                courseSlug = matched.slug;
+              }
+            }
+          }
+        } else {
+          if (resolvedParams.id.startsWith("course-")) {
+            const { data: cData } = await supabaseClient
+              .from("courses")
+              .select("slug")
+              .eq("id", resolvedParams.id)
+              .maybeSingle();
+            if (cData) {
+              courseSlug = cData.slug;
+            }
+          }
+        }
+        
+        const { data: enroll } = await supabaseClient
+          .from("enrollments")
+          .select("id")
+          .eq("user_id", user.id)
+          .eq("course_id", courseId)
+          .maybeSingle();
+        
+        if (enroll) {
+          setIsAlreadyEnrolled(true);
+          setEnrolledCourseSlug(courseSlug);
+          
+          if (courseSlug) {
+            const { data: modules } = await supabaseClient
+              .from("course_modules")
+              .select("id")
+              .eq("course_id", courseId)
+              .order("sort_order", { ascending: true })
+              .limit(1);
+            
+            if (modules && modules.length > 0) {
+              const { data: lessons } = await supabaseClient
+                .from("course_lessons")
+                .select("slug")
+                .eq("module_id", modules[0].id)
+                .order("sort_order", { ascending: true })
+                .limit(1);
+              
+              if (lessons && lessons.length > 0) {
+                setFirstLessonSlug(lessons[0].slug);
+              }
+            }
+          }
+        }
+      } catch (e) {
+        console.error("Error checking enrollment status:", e);
+      }
+    }
+    checkEnrollment();
+  }, [user, product, isCourse, resolvedParams.id]);
 
   // Auto-focus card number when selected
   useEffect(() => {
@@ -290,7 +376,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
     }
   }
 
-  const [user, setUser] = useState<any>(null);
+
 
   const { register, handleSubmit, setValue, trigger, getValues, setError, clearErrors, watch, formState: { errors } } = useForm<CheckoutValues>({
     resolver: zodResolver(checkoutSchema),
@@ -413,44 +499,53 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
           return;
         }
 
-        if (paymentMethod !== "instapay") {
-          // Try to sign up
-          const { data: signUpData, error: signUpError } = await supabaseClient.auth.signUp({
-            email: data.email,
+        // Try to sign in. If it fails, we proceed without blocking (backend will handle account creation/resolution)
+        try {
+          const { data: signInData, error: signInError } = await supabaseClient.auth.signInWithPassword({
+            email: data.email.toLowerCase().trim(),
             password: data.password,
-            options: {
-              data: {
-                full_name: `${data.firstName} ${data.lastName}`,
-                phone: "",
-              }
-            }
           });
 
-          if (signUpError) {
-            // If already registered, try signing in with password automatically
-            if (signUpError.message.includes("already registered") || signUpError.status === 422) {
-              const { data: signInData, error: signInError } = await supabaseClient.auth.signInWithPassword({
-                email: data.email,
-                password: data.password,
-              });
-
-              if (signInError) {
-                // Email already exists but password doesn't match.
-                // Still proceed with checkout — the backend will resolve the user by email.
-                // Show a helpful warning toast but don't block the purchase.
-                toast.warning("تنبيه: هذا البريد مسجل مسبقاً. سيتم إتمام الشراء وتفعيل الكورس على حسابك الحالي. يمكنك تسجيل الدخول لاحقاً.", { duration: 6000 });
-                activeUser = null; // Backend will resolve user by email
-              } else {
-                activeUser = signInData.user;
+          if (!signInError && signInData?.user) {
+            activeUser = signInData.user;
+            setUser(signInData.user);
+            console.log("[CHECKOUT] Existing user signed in successfully before payment");
+            
+            // Check if they are already enrolled in this course
+            let courseId = resolvedParams.id;
+            if (product && !isCourse) {
+              const { data: coursesList } = await supabaseClient
+                .from("courses")
+                .select("id, title")
+                .order("id", { ascending: true });
+              if (coursesList) {
+                const matched = coursesList.find(c => 
+                  c.id === resolvedParams.id ||
+                  c.title.toLowerCase().includes(product.title?.toLowerCase()) || 
+                  product.title?.toLowerCase().includes(c.title.toLowerCase())
+                );
+                if (matched) courseId = matched.id;
               }
-            } else {
-              toast.error(`فشل إنشاء الحساب: ${signUpError.message}`);
+            }
+            
+            const { data: enroll } = await supabaseClient
+              .from("enrollments")
+              .select("id")
+              .eq("user_id", signInData.user.id)
+              .eq("course_id", courseId)
+              .maybeSingle();
+            
+            if (enroll) {
+              setIsAlreadyEnrolled(true);
+              toast.error("أنت مشترك بالفعل في هذا الكورس.");
               setIsLoading(false);
               return;
             }
           } else {
-            activeUser = signUpData.user;
+            console.log("[CHECKOUT] Sign-in failed or new user. Account creation deferred to payment success.");
           }
+        } catch (e) {
+          console.log("[CHECKOUT] Deferred sign-in exception:", e);
         }
       }
 
@@ -648,16 +743,52 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
             
             {/* Checkout Form */}
             <div className="flex flex-col gap-6">
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="bg-[#0a0a0f]/80 backdrop-blur-2xl rounded-[2rem] p-6 md:p-8 border border-white/5 shadow-2xl relative overflow-hidden"
-              >
-                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#ff0f53] to-[#ff00b3]" />
-                
-                <h2 className="text-xl font-alexandria font-bold text-white mb-6">تفاصيل الطلب</h2>
-                
-                <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="space-y-4" dir="rtl">
+              {isAlreadyEnrolled ? (
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="bg-[#0a0a0f]/80 backdrop-blur-2xl rounded-[2rem] p-8 border border-red-500/20 shadow-2xl relative overflow-hidden text-center space-y-6"
+                >
+                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-500 to-rose-600" />
+                  
+                  <div className="w-20 h-20 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-500 mx-auto">
+                    <ShieldAlert className="w-10 h-10" />
+                  </div>
+                  
+                  <h2 className="text-2xl font-alexandria font-bold text-white leading-snug">أنت مشترك بالفعل في هذا الكورس.</h2>
+                  <p className="text-zinc-400 text-sm max-w-md mx-auto font-cairo">
+                    لقد قمت بالاشتراك في هذا الكورس مسبقاً، يمكنك البدء في مشاهدة الدروس والمحتوى التعليمي فوراً من خلال صفحة الكورس أو لوحة التحكم الخاصة بك.
+                  </p>
+                  
+                  <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
+                    <Link
+                      href={enrolledCourseSlug ? `/learn/${enrolledCourseSlug}/${firstLessonSlug || ""}` : "/dashboard"}
+                      className="h-12 px-8 bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white font-alexandria font-bold text-sm rounded-xl flex items-center justify-center gap-2 shadow-[0_4px_14px_rgba(239,68,68,0.25)] transition-all active:scale-[0.98] cursor-pointer"
+                    >
+                      <BookOpen className="w-4 h-4" />
+                      <span>فتح الكورس</span>
+                    </Link>
+                    
+                    <Link
+                      href="/dashboard"
+                      className="h-12 px-6 bg-white/5 hover:bg-white/10 text-white font-alexandria font-bold text-sm rounded-xl flex items-center justify-center gap-2 border border-white/10 transition-colors cursor-pointer"
+                    >
+                      <LayoutDashboard className="w-4 h-4 text-zinc-400" />
+                      <span>لوحة التحكم</span>
+                    </Link>
+                  </div>
+                </motion.div>
+              ) : (
+                <motion.div 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-[#0a0a0f]/80 backdrop-blur-2xl rounded-[2rem] p-6 md:p-8 border border-white/5 shadow-2xl relative overflow-hidden"
+                >
+                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#ff0f53] to-[#ff00b3]" />
+                  
+                  <h2 className="text-xl font-alexandria font-bold text-white mb-6">تفاصيل الطلب</h2>
+                  
+                  <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="space-y-4" dir="rtl">
 
                   {/* Compact Order Summary Box */}
                   <div className="bg-[#050505]/40 border border-white/5 rounded-2xl p-4 mb-6 space-y-4">
@@ -1163,6 +1294,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                   </div>
                 </form>
               </motion.div>
+            )}
             </div>
           </div>
         </div>
