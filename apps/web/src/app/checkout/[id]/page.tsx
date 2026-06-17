@@ -435,11 +435,14 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
               });
 
               if (signInError) {
-                toast.error("هذا البريد مسجل بالفعل بكلمة مرور أخرى. يرجى إدخال كلمة المرور الصحيحة لحسابك، أو تسجيل الدخول.");
-                setIsLoading(false);
-                return;
+                // Email already exists but password doesn't match.
+                // Still proceed with checkout — the backend will resolve the user by email.
+                // Show a helpful warning toast but don't block the purchase.
+                toast.warning("تنبيه: هذا البريد مسجل مسبقاً. سيتم إتمام الشراء وتفعيل الكورس على حسابك الحالي. يمكنك تسجيل الدخول لاحقاً.", { duration: 6000 });
+                activeUser = null; // Backend will resolve user by email
+              } else {
+                activeUser = signInData.user;
               }
-              activeUser = signInData.user;
             } else {
               toast.error(`فشل إنشاء الحساب: ${signUpError.message}`);
               setIsLoading(false);

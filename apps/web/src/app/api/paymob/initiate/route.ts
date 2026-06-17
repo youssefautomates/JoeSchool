@@ -330,9 +330,11 @@ export async function POST(req: Request) {
 
     if (expectedPriceEGP === 0) {
       // 100% Free Promo Code Flow!
+      // Use unique payment ID per order to avoid DB unique constraint violations
+      const freePaymentId = `FREE-${dbOrder.id}`;
       const { data: updatedOrders } = await supabaseAdmin
         .from("orders")
-        .update({ status: "completed", payment_id: "FREE_COUPON" })
+        .update({ status: "completed", payment_id: freePaymentId })
         .eq("id", dbOrder.id)
         .neq("status", "completed")
         .select();
@@ -345,7 +347,7 @@ export async function POST(req: Request) {
           const fullOrderInfo = {
             ...dbOrder,
             status: "completed",
-            payment_id: "FREE_COUPON"
+            payment_id: freePaymentId
           };
           await sendOrderTelegramNotification(fullOrderInfo);
         } catch (teleErr) {
@@ -437,7 +439,7 @@ export async function POST(req: Request) {
         const orderForEmail = {
           ...dbOrder,
           status: "completed",
-          payment_id: "FREE_COUPON"
+          payment_id: `FREE-${dbOrder.id}`
         };
         console.log(`[PAYMOB_INITIATE] 📧 Sending FREE order activation email to: ${email}`);
         await sendOrderEmail([orderForEmail], email, `${firstName} ${lastName}`, userCurrency, resolvedCredentials);
@@ -661,6 +663,20 @@ export async function POST(req: Request) {
     throw new Error("Invalid Payment Method");
   } catch (error: any) {
     console.error("[PAYMOB_ERROR]", error);
-    return NextResponse.json({ error: `عذراً، حدث خطأ أثناء معالجة الطلب: ${error.message || error}` }, { status: 500 });
+    // Sanitize error messages to hide raw DB/SQL errors from users
+    let userMessage = "عذراً، حدث خطأ أثناء معالجة الطلب. يرجى المحاولة مرة أخرى.";
+    if (error.message) {
+      // Only expose Arabic user-facing error messages, not raw SQL/DB errors
+      const isUserFacingError = /[\u0600-\u06FF]/.test(error.message) &&
+        !error.message.includes("duplicate key") &&
+        !error.message.includes("violates") &&
+        !error.message.includes("constraint") &&
+        !error.message.includes("PGRST") &&
+        !error.message.includes("Payment declined");
+      if (isUserFacingError) {
+        userMessage = error.message;
+      }
+    }
+    return NextResponse.json({ error: userMessage }, { status: 500 });
   }
 }
