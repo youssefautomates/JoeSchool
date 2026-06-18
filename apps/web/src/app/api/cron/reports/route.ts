@@ -25,7 +25,37 @@ export async function GET(request: Request) {
     }
 
     const now = new Date();
-    
+    const force = searchParams.get("force") === "true";
+
+    // 2. Validate timezone-aware local hour (must be exactly 10:00 AM Cairo Local Time)
+    const cairoHourStr = new Intl.DateTimeFormat("en-US", {
+      timeZone: "Africa/Cairo",
+      hour: "numeric",
+      hour12: false
+    }).format(now);
+    const cairoHour = parseInt(cairoHourStr, 10);
+
+    if (cairoHour !== 10 && !force) {
+      const cairoFullTime = new Intl.DateTimeFormat("en-US", {
+        timeZone: "Africa/Cairo",
+        dateStyle: "short",
+        timeStyle: "medium"
+      }).format(now);
+
+      console.log(
+        `[CRON] Skipped execution.\n` +
+        `UTC Time: ${now.toISOString()}\n` +
+        `Cairo Time: ${cairoFullTime}\n` +
+        `Reason: Not Cairo 10 AM.`
+      );
+
+      return NextResponse.json({
+        success: true,
+        executed: false,
+        message: "Skipped execution. Not Cairo 10 AM."
+      });
+    }
+
     // Determine Cairo date properties for scheduling
     const cairoDayOfWeek = new Intl.DateTimeFormat("en-US", {
       timeZone: "Africa/Cairo",
@@ -39,9 +69,6 @@ export async function GET(request: Request) {
     const cairoDayOfMonth = parseInt(cairoDayOfMonthStr, 10); // e.g. 1
 
     console.log(`[CRON_REPORTS] Scheduler invoked. Current UTC: ${now.toISOString()} | Cairo Day: ${cairoDayOfWeek} | Day of Month: ${cairoDayOfMonth}`);
-
-    // For debugging or manual execution, we can bypass scheduling checks using ?force=true
-    const force = searchParams.get("force") === "true";
 
     // Trigger daily report (covers previous day)
     const dailyResult = await runReportWorkflow("daily", now);
