@@ -1,4 +1,6 @@
 import { getKV } from "./kv";
+import { supabaseAdmin } from "./supabaseAdmin";
+import { resolveProductPrice, Currency } from "./pricing";
 
 export function sanitizeMarkdown(text: string): string {
   if (!text) return "";
@@ -134,6 +136,7 @@ export async function sendOrderTelegramNotification(order: {
   customer_name: string;
   customer_email: string;
   customer_phone?: string;
+  product_id?: string;
   product_title: string;
   amount: number;
   currency: string;
@@ -157,19 +160,69 @@ export async function sendOrderTelegramNotification(order: {
       });
 
   const currency = order.currency || "EGP";
-  const originalPrice = order.subtotal_price || order.amount || 0;
+  let basePrice = order.subtotal_price || order.amount || 0;
+  let originalPrice = basePrice;
+  let discountPct = 0;
+
+  // 1. Fetch item prices from DB if product_id is provided
+  if (order.product_id) {
+    try {
+      const { data: product } = await supabaseAdmin
+        .from("products")
+        .select("price_egp, original_price_egp, price_usd, original_price_usd, price, original_price")
+        .eq("id", order.product_id)
+        .maybeSingle();
+
+      let dbItem = product;
+      if (!dbItem) {
+        const { data: course } = await supabaseAdmin
+          .from("courses")
+          .select("price_egp, original_price_egp, price_usd, original_price_usd, price, original_price")
+          .eq("id", order.product_id)
+          .maybeSingle();
+        if (course) {
+          dbItem = course;
+        }
+      }
+
+      if (dbItem) {
+        const resolved = resolveProductPrice(dbItem, currency as Currency);
+        basePrice = resolved.price;
+        originalPrice = resolved.original_price || resolved.price;
+        discountPct = resolved.discount_pct;
+      }
+    } catch (e) {
+      console.error("[Telegram Notification] Error resolving product prices:", e);
+    }
+  }
+
+  // 2. Fetch coupon discount percent
+  let couponDiscountPercent = 0;
+  if (order.coupon_code) {
+    try {
+      const { data: coupon } = await supabaseAdmin
+        .from("coupons")
+        .select("discount_percent")
+        .eq("code", order.coupon_code.trim().toUpperCase())
+        .maybeSingle();
+      if (coupon) {
+        couponDiscountPercent = coupon.discount_percent || 0;
+      }
+    } catch (e) {
+      console.error("[Telegram Notification] Error resolving coupon:", e);
+    }
+  }
+
+  // 3. Pricing arithmetic
+  const courseDiscountAmount = originalPrice > basePrice ? (originalPrice - basePrice) : 0;
+  const couponDiscountAmount = couponDiscountPercent > 0 ? Math.round(basePrice * (couponDiscountPercent / 100)) : 0;
+  const totalDiscountAmount = courseDiscountAmount + couponDiscountAmount;
+
+  const gatewayFee = order.gateway_fee_amount || 0;
   const finalPaid = order.amount || 0;
 
   const hasCoupon = !!(order.coupon_code && order.coupon_code.trim() !== "");
   const isFree = finalPaid === 0 || order.payment_provider === "admin_grant" || order.payment_method === "Admin Manual Grant";
-
-  // Calculate discount based on net net payment compared to subtotal
-  const finalBeforeFee = finalPaid - (order.gateway_fee_amount || 0);
-  const discountAmount = originalPrice > finalBeforeFee ? (originalPrice - finalBeforeFee) : 0;
-  const discountPercentage = originalPrice > 0 ? Math.round((discountAmount / originalPrice) * 100) : 0;
-  
-  // A discount is applied if the discount amount is at least 1 and percentage > 0
-  const hasDiscount = discountAmount >= 1 && discountPercentage > 0;
 
   // Format payment method using existing helper
   const formattedPaymentMethod = formatPaymentMethod(order.payment_method, order.payment_provider, finalPaid);
@@ -215,9 +268,13 @@ export async function sendOrderTelegramNotification(order: {
   message += `💰 <b>تفاصيل السعر</b>\n\n`;
   message += `• <b>السعر الأصلي:</b> ${originalPrice} ${currency}\n\n`;
   
-  if (hasDiscount) {
-    message += `• <b>نسبة الخصم:</b> %${discountPercentage}\n\n`;
-    message += `• <b>قيمة الخصم:</b> ${discountAmount} ${currency}\n\n`;
+  if (totalDiscountAmount > 0) {
+    const totalDiscountPct = Math.round((totalDiscountAmount / originalPrice) * 100);
+    message += `• <b>الخصم:</b> ${totalDiscountAmount} ${currency} (-${totalDiscountPct}%)\n\n`;
+  }
+  
+  if (gatewayFee > 0) {
+    message += `• <b>رسوم الدفع:</b> ${gatewayFee} ${currency}\n\n`;
   }
   
   message += `• <b>المبلغ المدفوع:</b> ${finalPaidText}\n\n`;

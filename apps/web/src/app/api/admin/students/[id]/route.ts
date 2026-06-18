@@ -914,6 +914,7 @@ export async function PATCH(
           id: orderId,
           customer_name: studentName || "عميل جو سكول",
           customer_email: studentEmailVal || "",
+          product_id: productId,
           product_title: productTitle,
           amount: Number(amount) || 0,
           currency: "EGP",
