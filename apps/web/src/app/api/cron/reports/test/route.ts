@@ -3,6 +3,7 @@ import { compileReportData, generateTelegramReportMessage, generateExcelReport, 
 import { sendTelegramMessage } from "@/lib/telegram";
 import * as fs from "fs";
 import * as path from "path";
+import * as os from "os";
 
 /**
  * Test Endpoint (/api/cron/reports/test)
@@ -36,7 +37,7 @@ export async function GET(request: Request) {
       const excelBuffer = await generateExcelReport(reportData);
       
       // Save locally to scratch directory for agent verification
-      const scratchDir = "C:\\Users\\Tagm3tek\\.gemini\\antigravity\\brain\\1bdcd052-614c-4c37-bb03-b44c9a1196fc\\scratch";
+      const scratchDir = os.tmpdir();
       if (!fs.existsSync(scratchDir)) {
         fs.mkdirSync(scratchDir, { recursive: true });
       }

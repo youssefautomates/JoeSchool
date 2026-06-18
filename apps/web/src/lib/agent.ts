@@ -4,6 +4,7 @@ import { getKV, setKV } from "./kv";
 import { callLLM, ChatMessage } from "./llm";
 import * as fs from "fs";
 import * as path from "path";
+import * as os from "os";
 
 // Define the schema for conversation history
 export interface SessionHistory {
@@ -255,7 +256,7 @@ export async function generateCustomExcelReportTool(startDate: string, endDate: 
   const reportData = await compileCustomReportData(startDate, endDate, title);
   const excelBuffer = await generateExcelReport(reportData);
   
-  const scratchDir = "C:\\Users\\Tagm3tek\\.gemini\\antigravity\\brain\\1bdcd052-614c-4c37-bb03-b44c9a1196fc\\scratch";
+  const scratchDir = os.tmpdir();
   if (!fs.existsSync(scratchDir)) {
     fs.mkdirSync(scratchDir, { recursive: true });
   }
