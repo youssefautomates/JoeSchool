@@ -1,5 +1,13 @@
 import { getKV } from "./kv";
 
+export function sanitizeMarkdown(text: string): string {
+  if (!text) return "";
+  return text
+    .replace(/\*\*(.*?)\*\*/g, "$1")
+    .replace(/__(.*?)__/g, "$1")
+    .replace(/^#+\s+(.*?)$/gm, "$1");
+}
+
 export interface TelegramSettings {
   telegramBotToken: string;
   telegramChatId: string;
@@ -24,6 +32,8 @@ export async function getTelegramSettings(): Promise<TelegramSettings> {
 }
 
 export async function sendTelegramMessage(text: string, customChatId?: string): Promise<boolean> {
+  const sanitizedText = sanitizeMarkdown(text);
+
   // 1. Try environment variables first (development/hosting overrides)
   const envToken = process.env.TELEGRAM_BOT_TOKEN;
   const envChatId = process.env.TELEGRAM_CHAT_ID;
@@ -60,7 +70,7 @@ export async function sendTelegramMessage(text: string, customChatId?: string): 
         },
         body: JSON.stringify({
           chat_id: chatId,
-          text: text,
+          text: sanitizedText,
           parse_mode: "HTML",
           disable_web_page_preview: true,
         }),
@@ -290,7 +300,7 @@ export async function sendTelegramDocument(
     formData.append("document", fileBlob, fileName);
     
     if (caption) {
-      formData.append("caption", caption);
+      formData.append("caption", sanitizeMarkdown(caption));
       formData.append("parse_mode", "HTML");
     }
 

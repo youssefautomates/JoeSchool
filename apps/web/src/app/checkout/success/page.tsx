@@ -171,22 +171,41 @@ function SuccessContent() {
           }
 
           // Facebook and TikTok purchase triggers
-          if (!data.alreadyDelivered && typeof window !== "undefined") {
-            // High-Performance Unified Meta Purchase tracking (Pixel + CAPI)
-            trackPurchase(
-              id,
-              data.productTitle || "منتجك الرقمي",
-              [id],
-              Number(data.orderValue) || 0,
-              data.currency || "EGP"
-            );
-            if ((window as any).ttq) {
-              (window as any).ttq.track("CompletePayment", {
-                value: data.orderValue,
-                currency: data.currency,
-                contents: [{ content_id: id, content_name: data.productTitle, quantity: 1 }],
-                content_type: "product",
-              });
+          if (typeof window !== "undefined") {
+            const sessionStorageKey = `purchase_tracked_${id}`;
+            const hasTracked = sessionStorage.getItem(sessionStorageKey);
+            
+            if (!hasTracked) {
+              sessionStorage.setItem(sessionStorageKey, "true");
+              console.log(`[META_TRACKING] Firing client-side Pixel Purchase event for transaction: ${id}`);
+              
+              const productIds = data.products && data.products.length > 0
+                ? data.products.map((p: any) => String(p.id))
+                : [id];
+
+              // High-Performance Unified Meta Purchase tracking (Pixel + CAPI)
+              trackPurchase(
+                id,
+                data.productTitle || "منتجك الرقمي",
+                productIds,
+                Number(data.orderValue) || 0,
+                data.currency || "EGP"
+              );
+
+              if ((window as any).ttq) {
+                (window as any).ttq.track("CompletePayment", {
+                  value: data.orderValue,
+                  currency: data.currency,
+                  contents: productIds.map((pid: string) => ({
+                    content_id: pid,
+                    content_name: data.productTitle || "منتجك الرقمي",
+                    quantity: 1
+                  })),
+                  content_type: "product",
+                });
+              }
+            } else {
+              console.log(`[META_TRACKING] Duplicate visit detected for transaction: ${id}. Client-side Pixel Purchase trigger skipped.`);
             }
           }
           return;

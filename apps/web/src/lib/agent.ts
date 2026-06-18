@@ -2,6 +2,7 @@ import { supabaseAdmin } from "./supabaseAdmin";
 import { compileRawMetricsForRange, generateExcelReport, getUtcDateFromCairoLocal, ReportData, ReportMetrics, CourseSalesData } from "./reports";
 import { getKV, setKV } from "./kv";
 import { callLLM, ChatMessage } from "./llm";
+import { sanitizeMarkdown } from "./telegram";
 import * as fs from "fs";
 import * as path from "path";
 import * as os from "os";
@@ -462,20 +463,30 @@ Never switch to English unless the user uses English.
 RESPONSE FORMAT
 ━━━━━━━━━━━━━━━━━━
 
-Never use:
-- ** (Markdown bolding)
-- ### or ## or # (Markdown headers)
-- Markdown tables
-- Raw JSON
-- Developer language
-- Tool names
-- Internal implementation details
+CRITICAL FORMATTING CONSTRAINT:
+All your outputs must be formatted in plain clean text only.
+Never use any Markdown symbols. Markdown formatting is strictly forbidden because it causes layout crashes.
 
-Never show:
-- getTodayMetrics() or other function names
-- analytics_events
-- Supabase
-- API calls
+Never use:
+* Markdown bold (**)
+* Markdown bold (__)
+* Markdown headers (#, ##, ###)
+* Markdown tables
+* Markdown emphasis
+
+Forbidden examples:
+**تم إنشاء ملف الإكسيل بنجاح**
+**اسم الملف**
+## تقرير المبيعات
+### تفاصيل التقرير
+
+Correct examples:
+✅ تم إنشاء ملف الإكسيل بنجاح
+
+📄 اسم الملف
+JoeSchool_Report.xlsx
+
+📊 تقرير المبيعات
 
 Only present final business results.
 
@@ -509,7 +520,7 @@ When summarizing metrics or writing responses, follow this structure:
 
 [One specific next action]
 
-Ensure clean line spacing and no markdown headers or bolding.
+Ensure clean line spacing and absolutely no markdown headers, bolding, or tables.
 
 ━━━━━━━━━━━━━━━━━━
 DATA RELIABILITY RULES
@@ -642,9 +653,10 @@ export async function runAgent(
     const jsonMatch = responseText.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
       console.warn("[AGENT_LOOP] Output was not JSON. Returning raw content as final response.");
-      messages.push({ role: "assistant", content: responseText });
+      const sanitizedText = sanitizeMarkdown(responseText);
+      messages.push({ role: "assistant", content: sanitizedText });
       await saveHistory(historyKey, messages);
-      return { text: responseText };
+      return { text: sanitizedText, fileAttachment };
     }
 
     let actionObj: any;
@@ -652,15 +664,21 @@ export async function runAgent(
       actionObj = JSON.parse(jsonMatch[0]);
     } catch (err) {
       console.error("[AGENT_LOOP] JSON parse error on match:", jsonMatch[0]);
-      messages.push({ role: "assistant", content: responseText });
+      const sanitizedText = sanitizeMarkdown(responseText);
+      messages.push({ role: "assistant", content: sanitizedText });
       await saveHistory(historyKey, messages);
-      return { text: responseText };
+      return { text: sanitizedText, fileAttachment };
     }
 
     if (actionObj.action === "final_answer") {
-      messages.push({ role: "assistant", content: responseText });
+      const sanitizedAnswer = sanitizeMarkdown(actionObj.answer);
+      const sanitizedResponseText = JSON.stringify({
+        ...actionObj,
+        answer: sanitizedAnswer
+      });
+      messages.push({ role: "assistant", content: sanitizedResponseText });
       await saveHistory(historyKey, messages);
-      return { text: actionObj.answer, fileAttachment };
+      return { text: sanitizedAnswer, fileAttachment };
     }
 
     if (actionObj.action === "call_tool") {
@@ -741,9 +759,10 @@ export async function runAgent(
     }
 
     // Default escape
-    messages.push({ role: "assistant", content: responseText });
+    const sanitizedText = sanitizeMarkdown(responseText);
+    messages.push({ role: "assistant", content: sanitizedText });
     await saveHistory(historyKey, messages);
-    return { text: responseText };
+    return { text: sanitizedText };
   }
 
   // Loop threshold escape

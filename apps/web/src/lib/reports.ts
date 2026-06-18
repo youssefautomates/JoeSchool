@@ -1,5 +1,5 @@
 import { supabaseAdmin } from "./supabaseAdmin";
-import { sendTelegramMessage, getTelegramSettings, sendTelegramDocument } from "./telegram";
+import { sendTelegramMessage, getTelegramSettings, sendTelegramDocument, sanitizeMarkdown } from "./telegram";
 import { Resend } from "resend";
 import ExcelJS from "exceljs";
 
@@ -557,7 +557,7 @@ export function generateTelegramReportMessage(reportData: ReportData): string {
     message += `• ${o}\n`;
   });
 
-  return message;
+  return sanitizeMarkdown(message);
 }
 
 /**

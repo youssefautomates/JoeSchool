@@ -232,6 +232,7 @@ export async function POST(request: Request) {
         }
 
         // Process status changes, LMS enrollments, and sales increments for all matching orders
+        let hasJustCompleted = false;
         for (const ord of allOrders) {
           if (ord.status === "completed") {
             console.log(`[PAYMOB_WEBHOOK][${requestId}] ⚠️ Order ${ord.id} is already completed. Skipping status update.`);
@@ -269,6 +270,7 @@ export async function POST(request: Request) {
 
           const wasUpdated = updatedOrders && updatedOrders.length > 0;
           if (wasUpdated) {
+            hasJustCompleted = true;
             // Send Telegram Notification
             try {
               const { sendOrderTelegramNotification } = await import("@/lib/telegram");
@@ -413,6 +415,50 @@ export async function POST(request: Request) {
             } catch (enrollErr) {
               console.error(`[PAYMOB_WEBHOOK][${requestId}] ❌ Auto-enrollment error:`, enrollErr);
             }
+          }
+        }
+
+        // ── Meta CAPI Purchase Trigger ─────────────────────────────
+        if (hasJustCompleted) {
+          console.log(`[PAYMOB_WEBHOOK][${requestId}] 🚀 Triggering Server-Side Meta CAPI Purchase event...`);
+          try {
+            const baseOrder = allOrders[0];
+            const originalAmountUsd = allOrders.reduce((sum, o) => sum + (Number(o.original_amount_usd) || 0), 0);
+            const chargedAmountEgp = allOrders.reduce((sum, o) => sum + (Number(o.charged_amount_egp) || 0), 0);
+            const orderValue = currency === "USD" ? originalAmountUsd : chargedAmountEgp;
+            const productIds = allOrders.map(o => String(o.product_id));
+            const productTitle = allOrders.map(o => o.product_title || "منتج").join(" + ");
+            const clientIp = baseOrder.ip_address || "127.0.0.1";
+            
+            // Try to resolve user agent from analytics_events
+            let clientUserAgent = "Server Side Trigger";
+            try {
+              const { data: eventData } = await supabaseAdmin
+                .from("analytics_events")
+                .select("user_agent")
+                .eq("event_name", "order_created")
+                .eq("metadata->>order_id", baseOrder.id)
+                .maybeSingle();
+              if (eventData?.user_agent) {
+                clientUserAgent = eventData.user_agent;
+              }
+            } catch (uaErr) {}
+
+            const { trackServerPurchase } = await import("@/lib/metaCapiServer");
+            await trackServerPurchase({
+              transactionId: baseOrder.id,
+              price: Number(orderValue) || 0,
+              currency,
+              productTitle,
+              productIds,
+              customerEmail: customerEmail.toLowerCase().trim(),
+              clientIp: clientIp.split(",")[0].trim(),
+              clientUserAgent,
+              eventSourceUrl: `https://joeschool.com/checkout/success?id=${baseOrder.id}`
+            });
+            console.log(`[PAYMOB_WEBHOOK][${requestId}] ✅ Server-Side Meta CAPI Purchase event sent successfully!`);
+          } catch (capiErr: any) {
+            console.error(`[PAYMOB_WEBHOOK][${requestId}] ❌ Meta CAPI trigger failed:`, capiErr.message || capiErr);
           }
         }
 

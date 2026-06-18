@@ -31,19 +31,19 @@ export async function callLLM(
           answer = `
 يا فندم، ده ملخص شامل لأداء منصة JoeSchool بالكامل:
 
-📊 **النتائج الأساسية (Key Findings)**:
+📊 النتائج الأساسية (Key Findings):
 • إجمالي الكورسات المفعلة على المنصة: 12 كورس.
 • إجمالي الطلاب المسجلين: 1,250 طالب.
 • إجمالي المبيعات المكتملة: 320 طلب.
 • إجمالي الإيرادات التاريخية: 450,000 جنيه مصري.
 
-⚠️ **المخاطر (Risks)**:
+⚠️ المخاطر (Risks):
 • وتيرة نمو الاشتراكات الجديدة قلت شوية في الأسبوعين الأخيرين مقارنة ببداية الشهر.
 
-💡 **الفرص (Opportunities)**:
+💡 الفرص (Opportunities):
 • إمكانية زيادة المبيعات عن طريق إرسال عروض تسويقية للطلاب الحاليين غير المشتركين في كورسات جديدة.
 
-🚀 **الإجراءات المقترحة (Recommended Actions)**:
+🚀 الإجراءات المقترحة (Recommended Actions):
 1. نطلق حملة بريد إلكتروني تنشيطية للطلاب غير النشطين.
 2. ننشر درس مجاني كمعاينة (Free Preview) للكورسات الأكثر مبيعاً لجذب زوار جدد.
           `.trim();
@@ -51,20 +51,20 @@ export async function callLLM(
           answer = `
 يا فندم، ملخص أداء المدرسة النهارده:
 
-📊 **النتائج الأساسية (Key Findings)**:
+📊 النتائج الأساسية (Key Findings):
 • عملنا النهارده مبيعة واحدة بقيمة 0 جنيه (مستخدم فيها كوبون خصم 100%).
 • عدد الطلاب الجدد اللي سجلوا معانا النهارده: 2 طلاب.
 • متوسط قيمة الطلب (AOV): 0 جنيه (عشان الطلب مجاني بكوبون خصم).
 • نسبة التحويل النهارده وصلت لـ 12.5% وده مؤشر ممتاز جداً نسبةً لعدد الزوار.
 
-⚠️ **المخاطر (Risks)**:
+⚠️ المخاطر (Risks):
 • المبيعات كلها جاية من كورس واحد بس ("كورس صناعة فيديوهات الأنيميشن بالذكاء الإصطناعي")، وباقي الكورسات مفيش عليها مبيعات النهارده.
 • نسبة التخلي عن السلة (Cart Abandonment) وصلت لـ 25% النهارده.
 
-💡 **الفرص (Opportunities)**:
+💡 الفرص (Opportunities):
 • بما إن كورس الأنيميشن عليه إقبال كويس، ممكن نعمل باقة (Bundle) تجمع الكورس ده مع كورس تاني بسعر مميز عشان نشجع الطلاب يشتروا أكتر.
 
-🚀 **الإجراءات المقترحة (Recommended Actions)**:
+🚀 الإجراءات المقترحة (Recommended Actions):
 1. نبعت رسائل بريد إلكتروني تلقائية للناس اللي سابت السلة ومكملتش الدفع النهارده (Cart Recovery).
 2. نعمل عرض ترويجي سريع على السوشيال ميديا نروج فيه لباقي الكورسات عشان ننشطها.
           `.trim();
@@ -72,19 +72,19 @@ export async function callLLM(
           answer = `
 يا فندم، ده ملخص أداء الأسبوع ده مقارنة بالأسبوع اللي قبله:
 
-📊 **النتائج الأساسية (Key Findings)**:
+📊 النتائج الأساسية (Key Findings):
 • إجمالي الإيرادات الأسبوع ده عملت 58,000 جنيه مصري (زيادة بنسبة 15% مقارنة بالأسبوع اللي فات).
 • عدد الطلبات المكتملة: 22 مبيعة.
 • الطلاب الجدد: 15 طالب جديد سجل معانا.
 • نسبة التحويل العامة: 1.8%.
 
-⚠️ **المخاطر (Risks)**:
+⚠️ المخاطر (Risks):
 • الدفع عن طريق المحافظ الإلكترونية بيمثل 80% من المبيعات، والدفع بالكروت البنكية قليل شوية، ممكن يكون بسبب مشكلة في بوابة الدفع أو في سلاسة الخطوات.
 
-💡 **الفرص (Opportunities)**:
+💡 الفرص (Opportunities):
 • ممكن نعمل باقة كورسات (Bundle Offer) تجمع الكورسات الأكثر مبيعاً بسعر مخفض لتشجيع الطلاب على الشراء.
 
-🚀 **الإجراءات المقترحة (Recommended Actions)**:
+🚀 الإجراءات المقترحة (Recommended Actions):
 1. نفحص خطوات الدفع بالكروت البنكية للتأكد من إن مفيش مشاكل بتواجه الطلاب.
 2. نطلق باقة الكورسات الجديدة ونروج ليها للطلاب الحاليين.
           `.trim();
@@ -92,64 +92,64 @@ export async function callLLM(
           answer = `
 يا فندم، ده ملخص أداء الشهر ده مقارنة بالشهر اللي فات:
 
-📊 **النتائج الأساسية (Key Findings)**:
+📊 النتائج الأساسية (Key Findings):
 • إجمالي الإيرادات الشهر ده عملت 210,000 جنيه مصري.
 • عدد الطلبات المكتملة: 89 مبيعة.
 • الطلاب الجدد: 65 طالب جديد سجل معانا.
 • نسبة التحويل العامة: 2.4%.
 
-⚠️ **المخاطر (Risks)**:
+⚠️ المخاطر (Risks):
 • استخدام الكوبونات بنسبة خصم 100% مثل 15% من إجمالي الطلبات.
 
-💡 **الفرص (Opportunities)**:
+💡 الفرص (Opportunities):
 • تحويل الطلاب المستفيدين من الكوبونات المجانية إلى طلاب يدفعون لشراء الكورسات المتقدمة.
 
-🚀 **الإجراءات المقترحة (Recommended Actions)**:
+🚀 الإجراءات المقترحة (Recommended Actions):
 1. نبعت رسائل بريد تلقائية بعروض ترقية للطلاب المسجلين بالكوبونات المجانية.
           `.trim();
         } else if (toolOutput.includes("getTopCourses")) {
           answer = `
 يا فندم، ده ترتيب الكورسات الأكثر مبيعاً النهارده:
 
-📊 **النتائج الأساسية (Key Findings)**:
-• كورس **"صناعة فيديوهات الأنيميشن بالذكاء الإصطناعي"** هو الأكثر مبيعاً النهارده (مبيعة واحدة بقيمة 0 جنيه عن طريق كوبون خصم).
-• الكورس التاني في الترتيب من حيث الاهتمام هو كورس **"صناعة المحتوى بالذكاء الاصطناعي"** (زوار كتير دخلوا صفحته بس مفيش مبيعات النهارده).
+📊 النتائج الأساسية (Key Findings):
+• كورس "صناعة فيديوهات الأنيميشن بالذكاء الإصطناعي" هو الأكثر مبيعاً النهارده (مبيعة واحدة بقيمة 0 جنيه عن طريق كوبون خصم).
+• الكورس التاني في الترتيب من حيث الاهتمام هو كورس "صناعة المحتوى بالذكاء الاصطناعي" (زوار كتير دخلوا صفحته بس مفيش مبيعات النهارده).
 
-⚠️ **المخاطر (Risks)**:
+⚠️ المخاطر (Risks):
 • الاعتماد الكامل على كورس واحد لتحقيق المبيعات، وغياب التفاعل مع باقي الكورسات النهارده.
 
-💡 **الفرص (Opportunities)**:
+💡 الفرص (Opportunities):
 • ممكن نعمل عروض مشتركة أو خصومات على الكورسات التانية للطلاب اللي اشتركوا في كورس الأنيميشن.
 
-🚀 **الإجراءات المقترحة (Recommended Actions)**:
+🚀 الإجراءات المقترحة (Recommended Actions):
 1. نبعت إيميل ترويجي بكوبون خصم 15% على الكورسات التانية للطلاب اللي أخذوا كورس الأنيميشن مجاناً النهارده.
           `.trim();
         } else if (toolOutput.includes("generateExcelReport")) {
           answer = `
-📊 **النتائج الأساسية (Key Findings)**:
+📊 النتائج الأساسية (Key Findings):
 • تم استخراج تقرير الإكسيل وحفظه بنجاح على الخادم.
 
-⚠️ **المخاطر (Risks)**:
+⚠️ المخاطر (Risks):
 • مفيش مخاطر مسجلة.
 
-💡 **الفرص (Opportunities)**:
+💡 الفرص (Opportunities):
 • شارك التقرير مع الإدارة المالية للمنصة.
 
-🚀 **الإجراءات المقترحة (Recommended Actions)**:
+🚀 الإجراءات المقترحة (Recommended Actions):
 1. قم بتحميل وعرض ملف الـ .xlsx المرفق في هذه المحادثة.
           `.trim();
         } else {
           answer = `
-📊 **النتائج الأساسية (Key Findings)**:
+📊 النتائج الأساسية (Key Findings):
 • تم تجميع البيانات بنجاح من قاعدة البيانات.
 
-⚠️ **المخاطر (Risks)**:
+⚠️ المخاطر (Risks):
 • مفيش مخاطر ملحوظة.
 
-💡 **الفرص (Opportunities)**:
+💡 الفرص (Opportunities):
 • استمر في مراقبة الأداء.
 
-🚀 **الإجراءات المقترحة (Recommended Actions)**:
+🚀 الإجراءات المقترحة (Recommended Actions):
 1. لا يوجد إجراءات مطلوبة حالياً.
           `.trim();
         }
@@ -157,103 +157,103 @@ export async function callLLM(
         // English responses fallback
         if (toolOutput.includes("getPlatformOverview")) {
           answer = `
-📊 **Key Findings**:
+📊 Key Findings:
 • Total Courses: 12 courses active.
 • Total Students: 1,250 registered students.
 • Total Revenue: 450,000 EGP.
 • Total Completed Orders: 320 orders.
 
-⚠️ **Risks**:
+⚠️ Risks:
 • Student registration growth has slowed down in the last two weeks.
 • High concentration of sales in the top 2 courses.
 
-💡 **Opportunities**:
+💡 Opportunities:
 • Create email re-engagement campaigns for inactive students.
 • Introduce bundle pricing to increase average order value.
 
-🚀 **Recommended Actions**:
+🚀 Recommended Actions:
 1. Launch a discount coupon for course bundles.
 2. Publish free preview lessons to boost traffic conversions.
           `.trim();
         } else if (toolOutput.includes("getTodayMetrics") || toolOutput.includes("getRevenueAnalytics") || toolOutput.includes("getTrafficAnalytics")) {
           answer = `
-📊 **Key Findings**:
+📊 Key Findings:
 • Today's Revenue: 8,500 EGP.
 • Completed Orders: 4 orders.
 • New Registrations: 3 students.
 • Average Order Value: 2,125 EGP.
 • Conversion Rate: 2.1%.
 
-⚠️ **Risks**:
+⚠️ Risks:
 • Cart abandonment rate remains at 25% today.
 
-💡 **Opportunities**:
+💡 Opportunities:
 • Offer instant support on checkout via Telegram bot or WhatsApp chat widgets.
 
-🚀 **Recommended Actions**:
+🚀 Recommended Actions:
 1. Deploy cart abandonment auto-emails.
 2. Verify payment gateway checkout flow stability on mobile.
           `.trim();
         } else if (toolOutput.includes("getWeeklyMetrics")) {
           answer = `
-📊 **Key Findings**:
+📊 Key Findings:
 • This Week's Revenue: 58,000 EGP.
 • Completed Orders: 22 orders.
 • New Registrations: 15 students.
 • Conversion Rate: 1.8%.
 
-⚠️ **Risks**:
+⚠️ Risks:
 • Conversion rate dropped slightly (-0.3% points) compared to last week.
 
-💡 **Opportunities**:
+💡 Opportunities:
 • Target lookalike audiences on Facebook utilizing checkout visits events.
 
-🚀 **Recommended Actions**:
+🚀 Recommended Actions:
 1. Run a retargeting ad campaign for checkout visitors.
           `.trim();
         } else if (toolOutput.includes("getMonthlyMetrics")) {
           answer = `
-📊 **Key Findings**:
+📊 Key Findings:
 • This Month's Revenue: 210,000 EGP.
 • Completed Orders: 89 orders.
 • New Registrations: 65 students.
 • Conversion Rate: 2.4%.
 
-⚠️ **Risks**:
+⚠️ Risks:
 • 100% discount coupons represented 15% of total orders.
 
-💡 **Opportunities**:
+💡 Opportunities:
 • Transition free coupon users to paid advanced courses.
 
-🚀 **Recommended Actions**:
+🚀 Recommended Actions:
 1. Send automated follow-up emails with upsell offers to coupon users.
           `.trim();
         } else if (toolOutput.includes("generateExcelReport") || toolOutput.includes("generateCustomExcelReportTool")) {
           answer = `
-📊 **Key Findings**:
+📊 Key Findings:
 • Excel Spreadsheet report compiled and saved to local server paths.
 
-⚠️ **Risks**:
+⚠️ Risks:
 • None.
 
-💡 **Opportunities**:
+💡 Opportunities:
 • Share the generated spreadsheet file with your financial advisor.
 
-🚀 **Recommended Actions**:
+🚀 Recommended Actions:
 1. Retrieve and view the attached .xlsx file.
           `.trim();
         } else {
           answer = `
-📊 **Key Findings**:
+📊 Key Findings:
 • System metrics compiled successfully.
 
-⚠️ **Risks**:
+⚠️ Risks:
 • None identified.
 
-💡 **Opportunities**:
+💡 Opportunities:
 • Continue tracking platform growth.
 
-🚀 **Recommended Actions**:
+🚀 Recommended Actions:
 1. No immediate action required.
           `.trim();
         }
