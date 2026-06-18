@@ -882,9 +882,32 @@ async function resolvePurchasedProducts(orders: any[]): Promise<any[]> {
         // Look up detailed course stats
         const { data: course } = await supabaseAdmin
           .from("courses")
-          .select("slug, image_url, duration_hours, lessons_count")
+          .select("id, slug, image_url, duration_hours, lessons_count")
           .or(`title.ilike.%${product.title}%,slug.eq.${product.id}`)
           .maybeSingle();
+
+        let firstLessonSlug = null;
+        if (course) {
+          const { data: modules } = await supabaseAdmin
+            .from("course_modules")
+            .select("id")
+            .eq("course_id", course.id)
+            .order("sort_order", { ascending: true });
+
+          if (modules && modules.length > 0) {
+            const moduleIds = modules.map(m => m.id);
+            const { data: lessons } = await supabaseAdmin
+              .from("course_lessons")
+              .select("slug")
+              .in("module_id", moduleIds)
+              .order("sort_order", { ascending: true })
+              .limit(1);
+
+            if (lessons && lessons.length > 0) {
+              firstLessonSlug = lessons[0].slug;
+            }
+          }
+        }
 
         resolved.push({
           id: product.id,
@@ -898,7 +921,8 @@ async function resolvePurchasedProducts(orders: any[]): Promise<any[]> {
           slug: course?.slug || "n8n-masterclass",
           image_url: course?.image_url || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800",
           lessons_count: course?.lessons_count || 12,
-          duration_hours: course?.duration_hours || 14
+          duration_hours: course?.duration_hours || 14,
+          firstLessonSlug: firstLessonSlug
         });
       } else {
         const fileUrl = product.file_url || "";
@@ -928,6 +952,27 @@ async function resolvePurchasedProducts(orders: any[]): Promise<any[]> {
         .maybeSingle();
 
       if (dbCourse) {
+        let firstLessonSlug = null;
+        const { data: modules } = await supabaseAdmin
+          .from("course_modules")
+          .select("id")
+          .eq("course_id", dbCourse.id)
+          .order("sort_order", { ascending: true });
+
+        if (modules && modules.length > 0) {
+          const moduleIds = modules.map(m => m.id);
+          const { data: lessons } = await supabaseAdmin
+            .from("course_lessons")
+            .select("slug")
+            .in("module_id", moduleIds)
+            .order("sort_order", { ascending: true })
+            .limit(1);
+
+          if (lessons && lessons.length > 0) {
+            firstLessonSlug = lessons[0].slug;
+          }
+        }
+
         resolved.push({
           id: dbCourse.id,
           title: dbCourse.title,
@@ -940,12 +985,34 @@ async function resolvePurchasedProducts(orders: any[]): Promise<any[]> {
           slug: dbCourse.slug || "n8n-masterclass",
           image_url: dbCourse.image_url || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800",
           lessons_count: dbCourse.lessons_count || 12,
-          duration_hours: dbCourse.duration_hours || 14
+          duration_hours: dbCourse.duration_hours || 14,
+          firstLessonSlug: firstLessonSlug
         });
       } else {
         const isCourse = order.product_title?.includes("دورة") || order.product_title?.includes("كورس");
         
         if (isCourse) {
+          let firstLessonSlug = null;
+          const { data: modules } = await supabaseAdmin
+            .from("course_modules")
+            .select("id")
+            .eq("course_id", order.product_id || "course-n8n-masterclass")
+            .order("sort_order", { ascending: true });
+
+          if (modules && modules.length > 0) {
+            const moduleIds = modules.map(m => m.id);
+            const { data: lessons } = await supabaseAdmin
+              .from("course_lessons")
+              .select("slug")
+              .in("module_id", moduleIds)
+              .order("sort_order", { ascending: true })
+              .limit(1);
+
+            if (lessons && lessons.length > 0) {
+              firstLessonSlug = lessons[0].slug;
+            }
+          }
+
           resolved.push({
             id: order.product_id,
             title: order.product_title,
@@ -958,24 +1025,25 @@ async function resolvePurchasedProducts(orders: any[]): Promise<any[]> {
             slug: "n8n-masterclass",
             image_url: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800",
             lessons_count: 12,
-            duration_hours: 14
+            duration_hours: 14,
+            firstLessonSlug: firstLessonSlug
           });
         } else {
-        resolved.push({
-          id: order.product_id,
-          title: order.product_title,
-          category: "digital",
-          tags: [],
-          isCourse: false,
-          hasDownload: true,
-          downloadUrl: `/api/download?token=${order.id}`,
-          orderId: order.id,
-          fileName: order.product_title?.replace(/\s+/g, "_") + ".zip",
-          fileType: "ZIP",
-          fileSize: "12.5 MB",
-          remainingDownloads: "غير محدود"
-        });
-      }
+          resolved.push({
+            id: order.product_id,
+            title: order.product_title,
+            category: "digital",
+            tags: [],
+            isCourse: false,
+            hasDownload: true,
+            downloadUrl: `/api/download?token=${order.id}`,
+            orderId: order.id,
+            fileName: order.product_title?.replace(/\s+/g, "_") + ".zip",
+            fileType: "ZIP",
+            fileSize: "12.5 MB",
+            remainingDownloads: "غير محدود"
+          });
+        }
       }
     }
   }

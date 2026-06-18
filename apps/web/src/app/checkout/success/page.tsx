@@ -25,11 +25,11 @@ import {
   FileArchive,
   Info
 } from "lucide-react";
-import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useCart } from "@/context/CartContext";
 import { trackPurchase, trackLead } from "@/lib/metaPixel";
+import { supabaseClient } from "@/lib/supabaseClient";
 
 function FloatingParticle({ delay, x, size }: { delay: number; x: number; size: number }) {
   return (
@@ -77,6 +77,7 @@ interface ProductInfo {
   fileType?: string;
   fileSize?: string;
   remainingDownloads?: string;
+  firstLessonSlug?: string | null;
 }
 
 interface OrderData {
@@ -115,7 +116,36 @@ function SuccessContent() {
   const [copied, setCopied] = useState(false);
   const [showParticles, setShowParticles] = useState(false);
   const [resendingEmail, setResendingEmail] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const hasRun = useRef(false);
+
+  useEffect(() => {
+    supabaseClient.auth.getSession().then(({ data }) => {
+      if (data?.session) {
+        setIsLoggedIn(true);
+      }
+    });
+  }, []);
+
+  function getModifiedLoginLink(baseLink: string | null | undefined, targetPath: string): string {
+    if (isLoggedIn) return targetPath;
+    if (!baseLink) return targetPath;
+    try {
+      const url = new URL(baseLink);
+      url.searchParams.set("redirect_to", `${window.location.origin}${targetPath}`);
+      return url.toString();
+    } catch (e) {
+      console.error("Error modifying login link:", e);
+      return targetPath;
+    }
+  }
+
+  const handleNavigation = (e: React.MouseEvent<HTMLAnchorElement>, targetPath: string) => {
+    if (isLoggedIn) {
+      e.preventDefault();
+      router.push(targetPath);
+    }
+  };
 
   useEffect(() => {
     if (hasRun.current) return;
@@ -357,12 +387,12 @@ function SuccessContent() {
 
       {/* Brand Header */}
       <div className="relative z-10 py-6 px-6 flex justify-start">
-        <Link href="/" className="group inline-flex items-center gap-3">
+        <a href="/" className="group inline-flex items-center gap-3">
           <img src="/logo-text.png" alt="JoeSchool Logo" className="h-10 object-contain group-hover:scale-105 transition-transform duration-300" />
           <div className="flex flex-col text-right justify-center border-r border-white/10 pr-3 h-8">
             <span className="font-cairo text-[10px] text-zinc-500 font-bold tracking-wider uppercase leading-none">Premium Store</span>
           </div>
-        </Link>
+        </a>
       </div>
 
       <main className="relative z-10 pb-24 pt-4">
@@ -503,13 +533,14 @@ function SuccessContent() {
                       لقد قمنا بحفظ هذا المنتج وتراخيص التحميل الخاصة به تلقائياً داخل حساب العميل المربوط ببريدك الإلكتروني. 
                       يمكنك إعادة تحميل الملفات وتوليد روابط أمنة جديدة في أي وقت لاحقاً من خلال قسم **"ملفاتي الرقمية"** داخل لوحة التحكم.
                     </p>
-                    <Link
-                      href={orderData?.loginLink || "/dashboard"}
+                    <a
+                      href={getModifiedLoginLink(orderData?.loginLink, "/dashboard")}
+                      onClick={(e) => handleNavigation(e, "/dashboard")}
                       className="mt-4 inline-flex items-center gap-1 text-xs font-bold text-emerald-400 hover:text-emerald-300 transition-colors"
                     >
                       <span>الانتقال إلى لوحة التحميلات الرقمية</span>
                       <ChevronLeft className="w-4 h-4 rtl:rotate-180" />
-                    </Link>
+                    </a>
                   </div>
                 </div>
               </motion.div>
@@ -561,21 +592,32 @@ function SuccessContent() {
                       </div>
 
                       <div className="flex flex-col sm:flex-row gap-3">
-                        <Link
-                          href={orderData?.loginLink || "/dashboard"}
-                          className="flex-1 h-14 bg-gradient-to-r from-[#D6004B] to-orange-500 hover:from-[#b0003d] hover:to-orange-600 text-white font-alexandria font-bold text-base rounded-2xl flex items-center justify-center gap-2 shadow-[0_6px_20px_rgba(214,0,75,0.25)] transition-all active:scale-98"
-                        >
-                          🚀
-                          <span>ابدأ التعلم الآن</span>
-                        </Link>
-                        
-                        <Link
-                          href={orderData?.loginLink || "/dashboard"}
-                          className="h-14 px-6 bg-white/5 hover:bg-white/10 text-white font-alexandria font-bold text-base rounded-2xl flex items-center justify-center gap-2 border border-white/10 transition-colors"
-                        >
-                          <LayoutDashboard className="w-5 h-5 text-zinc-400" />
-                          <span>لوحة الطلاب</span>
-                        </Link>
+                        {(() => {
+                          const startLearningPath = c.firstLessonSlug 
+                            ? `/learn/${c.slug}/${c.firstLessonSlug}` 
+                            : `/courses/${c.slug}`;
+                          return (
+                            <>
+                              <a
+                                href={getModifiedLoginLink(orderData?.loginLink, startLearningPath)}
+                                onClick={(e) => handleNavigation(e, startLearningPath)}
+                                className="flex-1 h-14 bg-gradient-to-r from-[#D6004B] to-orange-500 hover:from-[#b0003d] hover:to-orange-600 text-white font-alexandria font-bold text-base rounded-2xl flex items-center justify-center gap-2 shadow-[0_6px_20px_rgba(214,0,75,0.25)] transition-all active:scale-98 text-center"
+                              >
+                                🚀
+                                <span>ابدأ التعلم الآن</span>
+                              </a>
+                              
+                              <a
+                                href={getModifiedLoginLink(orderData?.loginLink, "/dashboard")}
+                                onClick={(e) => handleNavigation(e, "/dashboard")}
+                                className="h-14 px-6 bg-white/5 hover:bg-white/10 text-white font-alexandria font-bold text-base rounded-2xl flex items-center justify-center gap-2 border border-white/10 transition-colors text-center"
+                              >
+                                <LayoutDashboard className="w-5 h-5 text-zinc-400" />
+                                <span>لوحة الطلاب</span>
+                              </a>
+                            </>
+                          );
+                        })()}
                       </div>
                     </div>
                   </div>
@@ -676,13 +718,21 @@ function SuccessContent() {
                             </div>
                           </div>
 
-                          <Link
-                            href={orderData?.loginLink || "/dashboard"}
-                            className="h-11 bg-white/5 border border-white/10 hover:bg-rose-600 hover:border-none text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all active:scale-98"
-                          >
-                            <span>ابدأ مشاهدة المنهج الآن</span>
-                            <ChevronLeft className="w-4 h-4 rtl:rotate-180" />
-                          </Link>
+                          {(() => {
+                            const startLearningPath = c.firstLessonSlug 
+                              ? `/learn/${c.slug}/${c.firstLessonSlug}` 
+                              : `/courses/${c.slug}`;
+                            return (
+                              <a
+                                href={getModifiedLoginLink(orderData?.loginLink, startLearningPath)}
+                                onClick={(e) => handleNavigation(e, startLearningPath)}
+                                className="h-11 bg-white/5 border border-white/10 hover:bg-rose-600 hover:border-none text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all active:scale-98 text-center"
+                              >
+                                <span>ابدأ مشاهدة المنهج الآن</span>
+                                <ChevronLeft className="w-4 h-4 rtl:rotate-180" />
+                              </a>
+                            );
+                          })()}
                         </div>
                       </div>
                     ))}
@@ -698,13 +748,14 @@ function SuccessContent() {
                       لقد اشتريت حزمة متكاملة تجمع بين التدريب المعتمد والملفات الجاهزة! تم تسجيل كافة المنتجات في حسابك الدراسي الموحد. 
                       يمكنك التحكم بملفاتك الرقمية والوصول المباشر للمحاضرات في أي وقت عبر الانتقال إلى لوحة التحكم الرئيسية الخاصة بك.
                     </p>
-                    <Link
-                      href={orderData?.loginLink || "/dashboard"}
-                      className="mt-4 h-12 px-6 bg-gradient-to-r from-sky-500 to-emerald-500 text-white font-alexandria font-bold text-xs rounded-xl inline-flex items-center justify-center gap-2 shadow-lg shadow-sky-600/10 active:scale-98 transition-all"
+                    <a
+                      href={getModifiedLoginLink(orderData?.loginLink, "/dashboard")}
+                      onClick={(e) => handleNavigation(e, "/dashboard")}
+                      className="mt-4 h-12 px-6 bg-gradient-to-r from-sky-500 to-emerald-500 text-white font-alexandria font-bold text-xs rounded-xl inline-flex items-center justify-center gap-2 shadow-lg shadow-sky-600/10 active:scale-98 transition-all text-center"
                     >
                       <LayoutDashboard className="w-4 h-4" />
                       <span>الانتقال للوحة التحكم الشاملة</span>
-                    </Link>
+                    </a>
                   </div>
                 </div>
 
@@ -849,13 +900,13 @@ function SuccessContent() {
             transition={{ delay: 0.7 }}
             className="text-center"
           >
-            <Link
+            <a
               href="/"
               className="inline-flex items-center gap-2 font-cairo text-zinc-500 hover:text-white transition-colors text-sm group"
             >
               <span>العودة إلى المتجر الرئيسي</span>
               <ArrowRight className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-            </Link>
+            </a>
           </motion.div>
 
         </div>

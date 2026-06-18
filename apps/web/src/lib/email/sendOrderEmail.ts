@@ -19,6 +19,8 @@ interface ProductInfo {
   hasDownload: boolean;
   downloadUrl: string | null;
   orderId: string;
+  slug?: string;
+  firstLessonSlug?: string | null;
 }
 
 /**
@@ -71,6 +73,40 @@ export async function sendOrderEmail(
           order.product_title?.includes("دورة") || 
           order.product_title?.includes("كورس");
 
+        let courseSlug = "n8n-masterclass";
+        let firstLessonSlug = null;
+
+        if (isCourse) {
+          const { data: course } = await supabaseAdmin
+            .from("courses")
+            .select("id, slug")
+            .or(`title.ilike.%${product.title}%,slug.eq.${product.id}`)
+            .maybeSingle();
+
+          if (course) {
+            courseSlug = course.slug || "n8n-masterclass";
+            const { data: modules } = await supabaseAdmin
+              .from("course_modules")
+              .select("id")
+              .eq("course_id", course.id)
+              .order("sort_order", { ascending: true });
+
+            if (modules && modules.length > 0) {
+              const moduleIds = modules.map(m => m.id);
+              const { data: lessons } = await supabaseAdmin
+                .from("course_lessons")
+                .select("slug")
+                .in("module_id", moduleIds)
+                .order("sort_order", { ascending: true })
+                .limit(1);
+
+              if (lessons && lessons.length > 0) {
+                firstLessonSlug = lessons[0].slug;
+              }
+            }
+          }
+        }
+
         resolvedProducts.push({
           id: product.id,
           title: product.title,
@@ -79,18 +115,57 @@ export async function sendOrderEmail(
           isCourse,
           hasDownload: !!product.file_url,
           downloadUrl: product.file_url ? `https://www.joeschool.com/api/download?token=${order.id}` : null,
-          orderId: order.id
+          orderId: order.id,
+          slug: courseSlug,
+          firstLessonSlug
         });
       } else {
+        const isCourse = !!(order.product_title?.includes("دورة") || order.product_title?.includes("كورس"));
+        let courseSlug = "n8n-masterclass";
+        let firstLessonSlug = null;
+
+        if (isCourse) {
+          const { data: course } = await supabaseAdmin
+            .from("courses")
+            .select("id, slug")
+            .or(`title.ilike.%${order.product_title}%,slug.eq.${order.product_id}`)
+            .maybeSingle();
+
+          if (course) {
+            courseSlug = course.slug || "n8n-masterclass";
+            const { data: modules } = await supabaseAdmin
+              .from("course_modules")
+              .select("id")
+              .eq("course_id", course.id)
+              .order("sort_order", { ascending: true });
+
+            if (modules && modules.length > 0) {
+              const moduleIds = modules.map(m => m.id);
+              const { data: lessons } = await supabaseAdmin
+                .from("course_lessons")
+                .select("slug")
+                .in("module_id", moduleIds)
+                .order("sort_order", { ascending: true })
+                .limit(1);
+
+              if (lessons && lessons.length > 0) {
+                firstLessonSlug = lessons[0].slug;
+              }
+            }
+          }
+        }
+
         resolvedProducts.push({
           id: order.product_id,
           title: order.product_title,
           category: "digital",
           tags: [],
-          isCourse: order.product_title?.includes("دورة") || order.product_title?.includes("كورس"),
+          isCourse,
           hasDownload: false,
           downloadUrl: null,
-          orderId: order.id
+          orderId: order.id,
+          slug: courseSlug,
+          firstLessonSlug
         });
       }
     }
@@ -126,7 +201,11 @@ export async function sendOrderEmail(
     for (const product of resolvedProducts) {
       emailText += `- ${product.title} (${product.isCourse ? 'دورة تدريبية' : 'منتج رقمي للتحميل'})\n`;
       if (product.isCourse) {
-        emailText += `  رابط بدء التعلم: https://www.joeschool.com/login?email=${encodeURIComponent(loginEmail)}&redirect=%2Fdashboard\n`;
+        const redirectPath = product.firstLessonSlug 
+          ? `/learn/${product.slug}/${product.firstLessonSlug}` 
+          : `/courses/${product.slug || "n8n-masterclass"}`;
+        const courseLink = `https://www.joeschool.com/login?email=${encodeURIComponent(loginEmail)}&redirect=${encodeURIComponent(redirectPath)}`;
+        emailText += `  رابط بدء التعلم: ${courseLink}\n`;
       } else if (product.downloadUrl) {
         emailText += `  رابط التحميل المباشر: ${product.downloadUrl}\n`;
       }
@@ -153,7 +232,14 @@ export async function sendOrderEmail(
     let productsBlock = "";
     for (const product of resolvedProducts) {
       const downloadLink = product.downloadUrl;
-      const dashboardLink = `https://www.joeschool.com/login?email=${encodeURIComponent(loginEmail)}&redirect=%2Fdashboard`;
+
+      let courseLink = `https://www.joeschool.com/login?email=${encodeURIComponent(loginEmail)}&redirect=%2Fdashboard`;
+      if (product.isCourse) {
+        const redirectPath = product.firstLessonSlug 
+          ? `/learn/${product.slug}/${product.firstLessonSlug}` 
+          : `/courses/${product.slug || "n8n-masterclass"}`;
+        courseLink = `https://www.joeschool.com/login?email=${encodeURIComponent(loginEmail)}&redirect=${encodeURIComponent(redirectPath)}`;
+      }
 
       if (product.isCourse) {
         productsBlock += `
@@ -161,13 +247,13 @@ export async function sendOrderEmail(
           <td style="padding: 8px 0;">
             <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #fcfcfd; border-radius: 16px; border: 1px solid #eef2f6; direction: rtl;">
               <tr>
-                <td style="padding: 24px; text-align: right;">
+                <td class="inner-padding" style="padding: 24px; text-align: right;">
                   <span style="font-size: 12px; color: #D6004B; font-weight: bold; margin-bottom: 8px; display: inline-block; padding: 4px 10px; background-color: #fff0f5; border-radius: 20px;">🎓 دورة تعليمية معتمدة</span>
                   <h3 style="margin: 0 0 16px 0; font-size: 16px; color: #0f172a; font-weight: bold; line-height: 1.4;">${product.title}</h3>
-                  <table cellpadding="0" cellspacing="0" style="margin-top: 5px;">
+                  <table cellpadding="0" cellspacing="0" class="mobile-btn-container" style="margin-top: 5px;">
                     <tr>
                       <td style="background-color: #D6004B; border-radius: 10px; box-shadow: 0 4px 12px rgba(214, 0, 75, 0.25);">
-                        <a href="${dashboardLink}" style="display: inline-block; padding: 12px 24px; color: #ffffff; text-decoration: none; font-weight: bold; font-size: 14px;">🚀 ابدأ التعلم الآن</a>
+                        <a href="${courseLink}" class="mobile-btn" style="display: inline-block; padding: 12px 24px; color: #ffffff; text-decoration: none; font-weight: bold; font-size: 14px;">🚀 ابدأ التعلم الآن</a>
                       </td>
                     </tr>
                   </table>
@@ -183,13 +269,13 @@ export async function sendOrderEmail(
           <td style="padding: 8px 0;">
             <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #fcfcfd; border-radius: 16px; border: 1px solid #eef2f6; direction: rtl;">
               <tr>
-                <td style="padding: 24px; text-align: right;">
+                <td class="inner-padding" style="padding: 24px; text-align: right;">
                   <span style="font-size: 12px; color: #15803d; font-weight: bold; margin-bottom: 8px; display: inline-block; padding: 4px 10px; background-color: #f0fdf4; border-radius: 20px;">⬇️ منتج رقمي جاهز للتحميل</span>
                   <h3 style="margin: 0 0 16px 0; font-size: 16px; color: #0f172a; font-weight: bold; line-height: 1.4;">${product.title}</h3>
-                  <table cellpadding="0" cellspacing="0" style="margin-top: 5px;">
+                  <table cellpadding="0" cellspacing="0" class="mobile-btn-container" style="margin-top: 5px;">
                     <tr>
                       <td style="background-color: #15803d; border-radius: 10px; box-shadow: 0 4px 12px rgba(21, 128, 61, 0.25);">
-                        <a href="${downloadLink || '#'}" style="display: inline-block; padding: 12px 24px; color: #ffffff; text-decoration: none; font-weight: bold; font-size: 14px;">⬇️ تحميل الملف الرقمي</a>
+                        <a href="${downloadLink || '#'}" class="mobile-btn" style="display: inline-block; padding: 12px 24px; color: #ffffff; text-decoration: none; font-weight: bold; font-size: 14px;">⬇️ تحميل الملف الرقمي</a>
                       </td>
                     </tr>
                   </table>
@@ -204,36 +290,36 @@ export async function sendOrderEmail(
 
     // Build Credentials Card (Always shown now)
     const passwordRow = loginPassword ? `
-      <tr>
-        <td style="padding: 12px 16px; border-bottom: 1px solid #f1f5f9; font-size: 13px; color: #475569; background-color: #f8fafc; width: 120px;"><strong>كلمة المرور:</strong></td>
-        <td style="padding: 12px 16px; border-bottom: 1px solid #f1f5f9; font-size: 13px; color: #0f172a; text-align: left; font-weight: bold; font-family: monospace; direction: ltr;">${loginPassword}</td>
+      <tr class="mobile-row">
+        <td class="mobile-label" style="padding: 12px 16px; border-bottom: 1px solid #f1f5f9; font-size: 13px; color: #475569; background-color: #f8fafc; width: 120px;"><strong>كلمة المرور:</strong></td>
+        <td class="mobile-value" style="padding: 12px 16px; border-bottom: 1px solid #f1f5f9; font-size: 13px; color: #0f172a; text-align: left; font-weight: bold; font-family: monospace; direction: ltr; word-break: break-all; word-wrap: break-word; overflow-wrap: break-word;">${loginPassword}</td>
       </tr>
     ` : `
-      <tr>
-        <td style="padding: 12px 16px; border-bottom: 1px solid #f1f5f9; font-size: 13px; color: #475569; background-color: #f8fafc; width: 120px;"><strong>كلمة المرور:</strong></td>
-        <td style="padding: 12px 16px; border-bottom: 1px solid #f1f5f9; font-size: 13px; color: #64748b; text-align: left; font-style: italic;">استخدم كلمة مرور حسابك الحالية</td>
+      <tr class="mobile-row">
+        <td class="mobile-label" style="padding: 12px 16px; border-bottom: 1px solid #f1f5f9; font-size: 13px; color: #475569; background-color: #f8fafc; width: 120px;"><strong>كلمة المرور:</strong></td>
+        <td class="mobile-value" style="padding: 12px 16px; border-bottom: 1px solid #f1f5f9; font-size: 13px; color: #64748b; text-align: left; font-style: italic;">استخدم كلمة مرور حسابك الحالية</td>
       </tr>
     `;
 
     const credentialsBlock = `
     <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #fcfcfd; border-radius: 16px; border: 1px solid #eef2f6; border-right: 4px solid #D6004B; direction: rtl; text-align: right; margin-bottom: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.02);">
       <tr>
-        <td style="padding: 24px;">
+        <td class="inner-padding" style="padding: 24px;">
           <h3 style="margin: 0 0 8px 0; font-size: 16px; color: #0f172a; font-weight: bold;">🔑 تفاصيل الدخول لحسابك الموحد</h3>
           <p style="margin: 0 0 18px 0; font-size: 13px; color: #475569; line-height: 1.6;">استخدم البيانات التالية لتسجيل الدخول إلى حسابك ومتابعة كورساتك:</p>
           
           <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 20px; overflow: hidden;">
-            <tr>
-              <td style="padding: 12px 16px; border-bottom: 1px solid #f1f5f9; font-size: 13px; color: #475569; background-color: #f8fafc; width: 120px;"><strong>البريد الإلكتروني:</strong></td>
-              <td style="padding: 12px 16px; border-bottom: 1px solid #f1f5f9; font-size: 13px; color: #0f172a; text-align: left; font-weight: bold; font-family: monospace; direction: ltr;">${loginEmail}</td>
+            <tr class="mobile-row">
+              <td class="mobile-label" style="padding: 12px 16px; border-bottom: 1px solid #f1f5f9; font-size: 13px; color: #475569; background-color: #f8fafc; width: 120px;"><strong>البريد الإلكتروني:</strong></td>
+              <td class="mobile-value" style="padding: 12px 16px; border-bottom: 1px solid #f1f5f9; font-size: 13px; color: #0f172a; text-align: left; font-weight: bold; font-family: monospace; direction: ltr; word-break: break-all; word-wrap: break-word; overflow-wrap: break-word;">${loginEmail}</td>
             </tr>
             ${passwordRow}
           </table>
           
-          <table cellpadding="0" cellspacing="0" style="margin: 0 auto;">
+          <table cellpadding="0" cellspacing="0" class="mobile-btn-container" style="margin: 0 auto;">
             <tr>
               <td style="background-color: #D6004B; border-radius: 10px; box-shadow: 0 4px 12px rgba(214, 0, 75, 0.25);">
-                <a href="https://www.joeschool.com/login?email=${encodeURIComponent(loginEmail)}&redirect=%2Fdashboard" style="display: inline-block; padding: 12px 28px; color: #ffffff; text-decoration: none; font-weight: bold; font-size: 14px;">🔑 اضغط هنا لتسجيل الدخول مباشرة</a>
+                <a href="https://www.joeschool.com/login?email=${encodeURIComponent(loginEmail)}&redirect=%2Fdashboard" class="mobile-btn" style="display: inline-block; padding: 12px 28px; color: #ffffff; text-decoration: none; font-weight: bold; font-size: 14px;">🔑 اضغط هنا لتسجيل الدخول مباشرة</a>
               </td>
             </tr>
           </table>
@@ -256,45 +342,105 @@ export async function sendOrderEmail(
     * {
       font-family: 'Cairo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
     }
+    @media only screen and (max-width: 480px) {
+      .wrapper-table {
+        padding: 12px 0 !important;
+      }
+      .main-table {
+        border-radius: 12px !important;
+      }
+      .content-padding {
+        padding: 20px 14px !important;
+      }
+      .inner-padding {
+        padding: 16px !important;
+      }
+      .header-padding {
+        padding: 28px 16px !important;
+      }
+      .header-title {
+        font-size: 20px !important;
+      }
+      .mobile-row {
+        display: block !important;
+        width: 100% !important;
+      }
+      .mobile-label {
+        display: block !important;
+        width: 100% !important;
+        text-align: right !important;
+        background-color: #f8fafc !important;
+        border-bottom: none !important;
+        padding: 10px 12px 4px 12px !important;
+      }
+      .mobile-value {
+        display: block !important;
+        width: 100% !important;
+        text-align: right !important;
+        padding: 4px 12px 10px 12px !important;
+        border-top: none !important;
+      }
+      .mobile-btn-container {
+        width: 100% !important;
+      }
+      .mobile-btn-container td {
+        display: block !important;
+        width: 100% !important;
+      }
+      .mobile-btn {
+        display: block !important;
+        width: 100% !important;
+        text-align: center !important;
+        box-sizing: border-box !important;
+        padding: 14px 16px !important;
+      }
+      .invoice-box {
+        padding: 16px !important;
+        margin-top: 24px !important;
+      }
+      .footer-padding {
+        padding: 24px 16px !important;
+      }
+    }
   </style>
 </head>
 <body style="margin:0;padding:0;background-color:#f5f7fa;direction:rtl;-webkit-text-size-adjust:100%;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f5f7fa;padding:30px 0;">
+  <table width="100%" cellpadding="0" cellspacing="0" class="wrapper-table" style="background-color:#f5f7fa;padding:30px 0;">
     <tr>
       <td align="center">
-        <table width="100%" cellpadding="0" cellspacing="0" style="max-width:580px;background-color:#ffffff;border-radius:20px;overflow:hidden;border: 1px solid #e2e8f0;box-shadow: 0 10px 30px rgba(0,0,0,0.025);">
+        <table width="100%" cellpadding="0" cellspacing="0" class="main-table" style="max-width:580px;background-color:#ffffff;border-radius:20px;overflow:hidden;border: 1px solid #e2e8f0;box-shadow: 0 10px 30px rgba(0,0,0,0.025);">
           <!-- Header block -->
           <tr>
-            <td style="padding:40px 24px;text-align:center;background-color:#060505;border-bottom:4px solid #D6004B;">
-              <h1 style="margin:0;color:#ffffff;font-size:24px;font-weight: 900;line-height: 1.4;">أهلاً ${customerName} 🎉</h1>
+            <td class="header-padding" style="padding:40px 24px;text-align:center;background-color:#060505;border-bottom:4px solid #D6004B;">
+              <h1 class="header-title" style="margin:0;color:#ffffff;font-size:24px;font-weight: 900;line-height: 1.4;">أهلاً ${customerName} 🎉</h1>
               <p style="color:#94a3b8;margin:8px 0 0 0;font-size:14px;line-height: 1.6;">تم تأكيد وتفعيل طلبك بنجاح. دورتك ومنتجاتك التعليمية بانتظارك.</p>
             </td>
           </tr>
           <!-- Products & Credentials Block -->
           <tr>
-            <td style="padding:32px 24px;">
+            <td class="content-padding" style="padding:32px 24px;">
               ${credentialsBlock}
               <table width="100%" cellpadding="0" cellspacing="0">${productsBlock}</table>
               
               <!-- Transaction Summary / Invoice -->
-              <div style="margin-top:32px;padding:24px;background-color:#fcfcfd;border-radius:16px;border: 1px solid #eef2f6;text-align: right; direction: rtl; box-shadow: 0 4px 20px rgba(0,0,0,0.01);">
+              <div class="invoice-box" style="margin-top:32px;padding:24px;background-color:#fcfcfd;border-radius:16px;border: 1px solid #eef2f6;text-align: right; direction: rtl; box-shadow: 0 4px 20px rgba(0,0,0,0.01); word-break: break-all; word-wrap: break-word; overflow-wrap: break-word;">
                 <p style="color:#64748b;font-size:12px;text-transform:uppercase;margin:0 0 12px 0;font-weight: 800;letter-spacing: 0.5px;">🧾 تفاصيل الفاتورة المعتمدة</p>
-                <p style="color:#334155;font-size:14px;margin:6px 0;line-height: 1.5;"><strong>اسم العميل:</strong> ${customerName}</p>
-                <p style="color:#334155;font-size:14px;margin:6px 0;line-height: 1.5;"><strong>رقم الفاتورة:</strong> #${transactionId}</p>
-                <p style="color:#334155;font-size:14px;margin:6px 0;line-height: 1.5;"><strong>التاريخ:</strong> ${new Date().toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                <p style="color:#334155;font-size:14px;margin:6px 0;line-height: 1.5; word-break: break-all; word-wrap: break-word;"><strong>اسم العميل:</strong> ${customerName}</p>
+                <p style="color:#334155;font-size:14px;margin:6px 0;line-height: 1.5; word-break: break-all; word-wrap: break-word;"><strong>رقم الفاتورة:</strong> #${transactionId}</p>
+                <p style="color:#334155;font-size:14px;margin:6px 0;line-height: 1.5; word-break: break-all; word-wrap: break-word;"><strong>التاريخ:</strong> ${new Date().toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
                 ${isUSDOrder ? `
-                  <p style="color:#D6004B;font-size:15px;font-weight:bold;margin:6px 0;line-height: 1.5;"><strong>المبلغ الإجمالي:</strong> $${totalOriginalUsd.toFixed(2)} USD</p>
-                  <p style="color:#475569;font-size:13px;margin:6px 0;line-height: 1.5;"><strong>المبلغ المخصوم فعلياً:</strong> ${totalChargedEgp.toFixed(2)} ج.م</p>
-                  ${firstExchangeRate ? `<p style="color:#64748b;font-size:11px;margin:4px 0;line-height: 1.5;">سعر الصرف المثبت: 1 USD = ${firstExchangeRate.toFixed(4)} ج.م</p>` : ''}
+                  <p style="color:#D6004B;font-size:15px;font-weight:bold;margin:6px 0;line-height: 1.5; word-break: break-all; word-wrap: break-word;"><strong>المبلغ الإجمالي:</strong> $${totalOriginalUsd.toFixed(2)} USD</p>
+                  <p style="color:#475569;font-size:13px;margin:6px 0;line-height: 1.5; word-break: break-all; word-wrap: break-word;"><strong>المبلغ المخصوم فعلياً:</strong> ${totalChargedEgp.toFixed(2)} ج.م</p>
+                  ${firstExchangeRate ? `<p style="color:#64748b;font-size:11px;margin:4px 0;line-height: 1.5; word-break: break-all; word-wrap: break-word;">سعر الصرف المثبت: 1 USD = ${firstExchangeRate.toFixed(4)} ج.م</p>` : ''}
                 ` : `
-                  <p style="color:#D6004B;font-size:15px;font-weight:bold;margin:6px 0;line-height: 1.5;"><strong>المبلغ الإجمالي:</strong> ${totalAmount.toFixed(2)} ج.م</p>
+                  <p style="color:#D6004B;font-size:15px;font-weight:bold;margin:6px 0;line-height: 1.5; word-break: break-all; word-wrap: break-word;"><strong>المبلغ الإجمالي:</strong> ${totalAmount.toFixed(2)} ج.م</p>
                 `}
               </div>
             </td>
           </tr>
           <!-- Footer Block -->
           <tr>
-            <td style="padding:32px 24px;text-align:center;background-color:#060505;border-top: 1px solid #1e293b;">
+            <td class="footer-padding" style="padding:32px 24px;text-align:center;background-color:#060505;border-top: 1px solid #1e293b;">
               <p style="color:#94a3b8;font-size:13px;margin:0 0 12px 0;line-height: 1.6;">
                 استلمت هذا البريد لأنك قمت بالاشتراك في دورتنا التعليمية عبر JoeSchool.<br/>
                 لديك استفسار؟ <a href="https://www.joeschool.com/contact" style="color:#D6004B;text-decoration:underline;font-weight:bold;margin-top:4px;display:inline-block;">اتصل بالدعم الفني للمنصة</a>
