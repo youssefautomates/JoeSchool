@@ -17,7 +17,9 @@ export async function GET() {
     globalGatewayFeePercentage: 3.00,
     telegramBotToken: "",
     telegramChatId: "",
-    telegramEnabled: false
+    telegramEnabled: false,
+    analyticsResetDate: "",
+    analyticsMode: "reset"
   };
   const saved = await getKV(MARKETING_KEY);
   const settings = saved ? { ...defaultSettings, ...saved } : defaultSettings;

@@ -134,6 +134,8 @@ export default function AdminDashboard() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
   const [analyticsEvents, setAnalyticsEvents] = useState<AnalyticsEvent[]>([]);
+  const [resetDate, setResetDate] = useState<string>("");
+  const [analyticsMode, setAnalyticsMode] = useState<"reset" | "lifetime">("reset");
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
@@ -546,11 +548,9 @@ export default function AdminDashboard() {
     setLoading(true);
     await refreshTelemetry();
     setLoading(false);
-  }
-
-  async function refreshTelemetry() {
+  }  async function refreshTelemetry() {
     try {
-      const [ordersRes, productsRes, analyticsRes, enrollmentsRes, coursesRes, reviewsRes] = await Promise.all([
+      const [ordersRes, productsRes, analyticsRes, enrollmentsRes, coursesRes, reviewsRes, settingsRes] = await Promise.all([
         supabase
           .from("orders")
           .select("*")
@@ -573,8 +573,23 @@ export default function AdminDashboard() {
         supabase
           .from("reviews")
           .select("*")
-          .order("created_at", { ascending: false })
+          .order("created_at", { ascending: false }),
+        fetch("/api/admin/settings").then(r => r.json()).catch(err => {
+          console.error("Failed to load settings in dashboard:", err);
+          return null;
+        })
       ]);
+
+      if (settingsRes && !settingsRes.error) {
+        if (settingsRes.analyticsResetDate) {
+          setResetDate(settingsRes.analyticsResetDate);
+        } else {
+          setResetDate("");
+        }
+        if (settingsRes.analyticsMode) {
+          setAnalyticsMode(settingsRes.analyticsMode);
+        }
+      }
 
       if (ordersRes.data) setOrders(ordersRes.data as Order[]);
       if (productsRes.data) setProducts(productsRes.data as Product[]);
@@ -599,8 +614,13 @@ export default function AdminDashboard() {
   // Filtered orders and events based on date cutoff
   const dateCutoff = useMemo(() => {
     const now = new Date();
-    return new Date(now.getTime() - Number(dateRange) * 24 * 60 * 60 * 1000);
-  }, [dateRange]);
+    const rangeCutoff = new Date(now.getTime() - Number(dateRange) * 24 * 60 * 60 * 1000);
+    if (analyticsMode === "reset" && resetDate) {
+      const parsedReset = new Date(resetDate);
+      return new Date(Math.max(rangeCutoff.getTime(), parsedReset.getTime()));
+    }
+    return rangeCutoff;
+  }, [dateRange, analyticsMode, resetDate]);
 
   const filteredOrders = useMemo(() => {
     return orders.filter(o => {
@@ -625,13 +645,32 @@ export default function AdminDashboard() {
   const previousPeriodOrders = useMemo(() => {
     const now = new Date();
     const periodMs = Number(dateRange) * 24 * 60 * 60 * 1000;
-    const startPrev = new Date(now.getTime() - periodMs * 2);
-    const endPrev = dateCutoff;
+    let startPrev = new Date(now.getTime() - periodMs * 2);
+    let endPrev = dateCutoff;
+    if (analyticsMode === "reset" && resetDate) {
+      const parsedReset = new Date(resetDate);
+      if (startPrev < parsedReset) startPrev = parsedReset;
+      if (endPrev < parsedReset) endPrev = parsedReset;
+    }
     return orders.filter(o => {
       const d = new Date(o.created_at);
       return d >= startPrev && d < endPrev;
     });
-  }, [orders, dateRange, dateCutoff]);
+  }, [orders, dateRange, dateCutoff, analyticsMode, resetDate]);
+
+  // Filtered enrollments based on dateCutoff if in reset mode
+  const filteredEnrollments = useMemo(() => {
+    if (analyticsMode === "reset" && resetDate) {
+      const parsedReset = new Date(resetDate);
+      return enrollments.filter(e => new Date(e.enrolled_at) >= parsedReset);
+    }
+    return enrollments;
+  }, [enrollments, analyticsMode, resetDate]);
+
+  // Filtered analytics events based on dateCutoff
+  const filteredAnalyticsEvents = useMemo(() => {
+    return analyticsEvents.filter(e => new Date(e.created_at) >= dateCutoff);
+  }, [analyticsEvents, dateCutoff]);
 
   // Aggregated Marketing KPIs (Today, 7 days, 30 days, 90 days)
   const stats = useMemo(() => {
@@ -956,7 +995,7 @@ export default function AdminDashboard() {
       const failureRate = totalAttempts > 0 ? (failed.length / totalAttempts) * 100 : 0;
 
       // Extract specific views for this product from event logs (strict database values)
-      const finalViews = analyticsEvents.filter(e => e.product_id === p.id && (e.event_name === "product_view" || e.event_name === "page_view")).length;
+      const finalViews = filteredAnalyticsEvents.filter(e => e.product_id === p.id && (e.event_name === "product_view" || e.event_name === "page_view")).length;
       const conversionRate = finalViews > 0 ? (salesUnits / finalViews) * 100 : 0;
 
       return {
@@ -970,7 +1009,7 @@ export default function AdminDashboard() {
         grossRevenue
       };
     });
-  }, [products, filteredOrders, analyticsEvents]);
+  }, [products, filteredOrders, filteredAnalyticsEvents]);
 
   // Compute Granular LMS Course-by-Course Telemetry
   const lmsCoursesAnalytics = useMemo(() => {
@@ -979,7 +1018,7 @@ export default function AdminDashboard() {
     const oneMonthMs = 30 * 24 * 60 * 60 * 1000;
 
     return courses.map(c => {
-      const cEnrollments = enrollments.filter(e => e.course_id === c.id);
+      const cEnrollments = filteredEnrollments.filter(e => e.course_id === c.id);
       const new7d = cEnrollments.filter(e => (now - new Date(e.enrolled_at).getTime()) <= oneWeekMs).length;
       const new30d = cEnrollments.filter(e => (now - new Date(e.enrolled_at).getTime()) <= oneMonthMs).length;
 
@@ -987,8 +1026,8 @@ export default function AdminDashboard() {
       const completed = cOrders.filter(o => o.status === "completed");
       const grossRevenue = completed.reduce((sum, o) => sum + Number(o.amount || 0), 0);
 
-      const views = analyticsEvents.filter(e => e.product_id === c.id && (e.event_name === "product_view" || e.event_name === "page_view")).length;
-      const checkoutStarteds = analyticsEvents.filter(e => e.product_id === c.id && e.event_name === "checkout_started").length;
+      const views = filteredAnalyticsEvents.filter(e => e.product_id === c.id && (e.event_name === "product_view" || e.event_name === "page_view")).length;
+      const checkoutStarteds = filteredAnalyticsEvents.filter(e => e.product_id === c.id && e.event_name === "checkout_started").length;
 
       const finalViews = views;
       const finalCheckouts = checkoutStarteds;
@@ -1011,7 +1050,7 @@ export default function AdminDashboard() {
         grossRevenue
       };
     });
-  }, [courses, enrollments, filteredOrders, analyticsEvents]);
+  }, [courses, filteredEnrollments, filteredOrders, filteredAnalyticsEvents]);
 
   const categoryStats = useMemo(() => {
     const categoriesMap: Record<string, { revenue: number; visits: number; conversion: number }> = {};
@@ -1057,13 +1096,13 @@ export default function AdminDashboard() {
         });
       }
 
-      const visits = analyticsEvents.filter(e => e.product_id && targetIds.has(e.product_id) && (e.event_name === "product_view" || e.event_name === "page_view")).length;
+      const visits = filteredAnalyticsEvents.filter(e => e.product_id && targetIds.has(e.product_id) && (e.event_name === "product_view" || e.event_name === "page_view")).length;
       const conversion = visits > 0 ? (ordersCount / visits) * 100 : 0;
       return { name, revenue: data.revenue, visits, conversion };
     });
 
     return parsed.sort((a, b) => b.revenue - a.revenue);
-  }, [filteredOrders, courses, products, analyticsEvents]);
+  }, [filteredOrders, courses, products, filteredAnalyticsEvents]);
 
   // Alert Center toggles observer event
   useEffect(() => {
@@ -1291,6 +1330,9 @@ export default function AdminDashboard() {
           if (cName && cName !== "Unknown") acc[cName] = true;
           return acc;
         }, {}))}
+        analyticsMode={analyticsMode}
+        setAnalyticsMode={setAnalyticsMode}
+        analyticsResetDate={resetDate}
       />
 
       {/* Desktop view switcher tabs (hidden on mobile) */}

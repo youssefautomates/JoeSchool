@@ -69,32 +69,12 @@ export default function ProductsPage() {
 
   const productCategories = [
     "الكل",
-    ...(dynamicProductCategories.length > 0
-      ? dynamicProductCategories
-      : ["صناعة المحتوى البصري", "الذكاء الاصطناعي التوليدي", "الرسوم المتحركة"])
+    ...dynamicProductCategories
   ];
 
   // Smart product categorizer
   const getProductCategory = (product: Product) => {
-    const categoryField = product.category || "";
-    if (dynamicProductCategories.includes(categoryField)) {
-      return categoryField;
-    }
-    if (categoryField === "صناعة المحتوى البصري" || categoryField === "الذكاء الاصطناعي التوليدي" || categoryField === "الرسوم المتحركة") {
-      return categoryField;
-    }
-    
-    const title = (product.title || "").toLowerCase();
-    const desc = (product.description || "").toLowerCase();
-    const tags = (product.tags || []).map(t => t.toLowerCase());
-    
-    if (categoryField.includes("n8n") || tags.includes("n8n") || title.includes("n8n") || desc.includes("n8n") || categoryField.includes("أتمتة") || categoryField.includes("productivity") || categoryField.includes("إنتاجية") || categoryField.includes("automation") || categoryField.includes("فيديو") || categoryField.includes("video") || title.includes("فيديو")) {
-      return "صناعة المحتوى البصري";
-    }
-    if (categoryField.includes("ai") || categoryField.includes("ذكاء") || tags.includes("ai") || tags.includes("ذكاء") || title.includes("ai") || title.includes("ذكاء") || desc.includes("ai") || desc.includes("ذكاء")) {
-      return "الذكاء الاصطناعي التوليدي";
-    }
-    return "صناعة المحتوى البصري";
+    return product.category || "";
   };
 
   const filteredProducts = productsList.filter((product) => {
@@ -139,24 +119,26 @@ export default function ProductsPage() {
         </section>
 
         {/* Category Filters Tabs */}
-        <section className="container mx-auto px-4 max-w-6xl mb-12">
-          <div className="flex items-center justify-start md:justify-center overflow-x-auto pb-4 gap-2 scrollbar-none snap-x snap-mandatory" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
-            {productCategories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setActiveCategory(cat)}
-                className={cn(
-                  "px-5 py-2.5 rounded-full font-cairo text-xs md:text-sm font-bold transition-all duration-300 shrink-0 select-none cursor-pointer border snap-align-start",
-                  activeCategory === cat
-                    ? "bg-[#D6004B] text-white border-[#D6004B] shadow-[0_4px_15px_rgba(214,0,75,0.3)] scale-105"
-                    : "bg-white/5 text-zinc-400 border-white/5 hover:border-white/10 hover:text-white"
-                )}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
-        </section>
+        {!isLoading && productsList.length > 0 && (
+          <section className="container mx-auto px-4 max-w-6xl mb-12">
+            <div className="flex items-center justify-start md:justify-center overflow-x-auto pb-4 gap-2 scrollbar-none snap-x snap-mandatory" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
+              {productCategories.map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setActiveCategory(cat)}
+                  className={cn(
+                    "px-5 py-2.5 rounded-full font-cairo text-xs md:text-sm font-bold transition-all duration-300 shrink-0 select-none cursor-pointer border snap-align-start",
+                    activeCategory === cat
+                      ? "bg-[#D6004B] text-white border-[#D6004B] shadow-[0_4px_15px_rgba(214,0,75,0.3)] scale-105"
+                      : "bg-white/5 text-zinc-400 border-white/5 hover:border-white/10 hover:text-white"
+                  )}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* Products Cards Grid */}
         <section className="container mx-auto px-4 max-w-6xl flex-1">

@@ -18,10 +18,14 @@ export interface SessionHistory {
  * ----------------------------------------------------
  */
 
-export async function getPlatformOverview() {
-  console.log("[AGENT_TOOL] Executing getPlatformOverview...");
+export async function getPlatformOverview(isLifetime?: boolean) {
+  console.log(`[AGENT_TOOL] Executing getPlatformOverview (isLifetime: ${isLifetime})...`);
   
-  // Total courses count
+  const settings = await getKV<any>("marketing_settings");
+  const analyticsResetDate = settings?.analyticsResetDate;
+  const analyticsMode = settings?.analyticsMode || "reset";
+  
+  // Total courses count - courses are static business data, not reset!
   const { count: totalCourses, error: coursesErr } = await supabaseAdmin
     .from("courses")
     .select("id", { count: "exact", head: true });
@@ -29,11 +33,16 @@ export async function getPlatformOverview() {
   if (coursesErr) console.error("getPlatformOverview courses err:", coursesErr);
 
   // Total completed orders & revenue
-  const { data: orders, error: ordersErr } = await supabaseAdmin
+  let orderQuery = supabaseAdmin
     .from("orders")
-    .select("amount")
+    .select("amount, created_at")
     .eq("status", "completed");
-    
+
+  if (!isLifetime && analyticsMode === "reset" && analyticsResetDate) {
+    orderQuery = orderQuery.gte("created_at", new Date(analyticsResetDate).toISOString());
+  }
+
+  const { data: orders, error: ordersErr } = await orderQuery;
   if (ordersErr) console.error("getPlatformOverview orders err:", ordersErr);
 
   const completedOrders = orders || [];
@@ -44,6 +53,8 @@ export async function getPlatformOverview() {
   let totalStudents = 0;
   let page = 1;
   const perPage = 1000;
+  const resetCutoff = (!isLifetime && analyticsMode === "reset" && analyticsResetDate) ? new Date(analyticsResetDate) : null;
+
   while (true) {
     const { data, error } = await supabaseAdmin.auth.admin.listUsers({ page, perPage });
     if (error) {
@@ -51,7 +62,13 @@ export async function getPlatformOverview() {
       break;
     }
     if (!data?.users || data.users.length === 0) break;
-    totalStudents += data.users.length;
+    
+    let pageUsers = data.users;
+    if (resetCutoff) {
+      pageUsers = pageUsers.filter(u => new Date(u.created_at) >= resetCutoff);
+    }
+
+    totalStudents += pageUsers.length;
     if (data.users.length < perPage) break;
     page++;
   }
@@ -64,8 +81,8 @@ export async function getPlatformOverview() {
   };
 }
 
-export async function getTodayMetrics() {
-  console.log("[AGENT_TOOL] Executing getTodayMetrics...");
+export async function getTodayMetrics(isLifetime?: boolean) {
+  console.log(`[AGENT_TOOL] Executing getTodayMetrics (isLifetime: ${isLifetime})...`);
   const now = new Date();
   const cairoTodayStr = new Intl.DateTimeFormat("en-CA", {
     timeZone: "Africa/Cairo",
@@ -73,11 +90,11 @@ export async function getTodayMetrics() {
   }).format(now);
   
   const start = getUtcDateFromCairoLocal(`${cairoTodayStr}T00:00:00`);
-  return await compileRawMetricsForRange(start, now);
+  return await compileRawMetricsForRange(start, now, isLifetime);
 }
 
-export async function getWeeklyMetrics() {
-  console.log("[AGENT_TOOL] Executing getWeeklyMetrics...");
+export async function getWeeklyMetrics(isLifetime?: boolean) {
+  console.log(`[AGENT_TOOL] Executing getWeeklyMetrics (isLifetime: ${isLifetime})...`);
   const now = new Date();
   
   const cairoDayOfWeek = new Intl.DateTimeFormat("en-US", {
@@ -96,11 +113,11 @@ export async function getWeeklyMetrics() {
   }).format(startOfWeek);
   
   const start = getUtcDateFromCairoLocal(`${cairoStartStr}T00:00:00`);
-  return await compileRawMetricsForRange(start, now);
+  return await compileRawMetricsForRange(start, now, isLifetime);
 }
 
-export async function getMonthlyMetrics() {
-  console.log("[AGENT_TOOL] Executing getMonthlyMetrics...");
+export async function getMonthlyMetrics(isLifetime?: boolean) {
+  console.log(`[AGENT_TOOL] Executing getMonthlyMetrics (isLifetime: ${isLifetime})...`);
   const now = new Date();
   
   const cairoYear = parseInt(new Intl.DateTimeFormat("en-US", { timeZone: "Africa/Cairo", year: "numeric" }).format(now), 10);
@@ -108,15 +125,15 @@ export async function getMonthlyMetrics() {
   
   const startStr = `${cairoYear}-${String(cairoMonth).padStart(2, "0")}-01`;
   const start = getUtcDateFromCairoLocal(`${startStr}T00:00:00`);
-  return await compileRawMetricsForRange(start, now);
+  return await compileRawMetricsForRange(start, now, isLifetime);
 }
 
-export async function getRevenueAnalytics(startDate: string, endDate: string) {
-  console.log(`[AGENT_TOOL] Executing getRevenueAnalytics for range: ${startDate} to ${endDate}`);
+export async function getRevenueAnalytics(startDate: string, endDate: string, isLifetime?: boolean) {
+  console.log(`[AGENT_TOOL] Executing getRevenueAnalytics for range: ${startDate} to ${endDate} (isLifetime: ${isLifetime})`);
   const start = getUtcDateFromCairoLocal(`${startDate}T00:00:00`);
   const end = getUtcDateFromCairoLocal(`${endDate}T23:59:59.999`);
   
-  const metrics = await compileRawMetricsForRange(start, end);
+  const metrics = await compileRawMetricsForRange(start, end, isLifetime);
   return {
     totalRevenue: metrics.revenue,
     completedOrders: metrics.orders,
@@ -126,12 +143,12 @@ export async function getRevenueAnalytics(startDate: string, endDate: string) {
   };
 }
 
-export async function getTrafficAnalytics(startDate: string, endDate: string) {
-  console.log(`[AGENT_TOOL] Executing getTrafficAnalytics for range: ${startDate} to ${endDate}`);
+export async function getTrafficAnalytics(startDate: string, endDate: string, isLifetime?: boolean) {
+  console.log(`[AGENT_TOOL] Executing getTrafficAnalytics for range: ${startDate} to ${endDate} (isLifetime: ${isLifetime})`);
   const start = getUtcDateFromCairoLocal(`${startDate}T00:00:00`);
   const end = getUtcDateFromCairoLocal(`${endDate}T23:59:59.999`);
   
-  const metrics = await compileRawMetricsForRange(start, end);
+  const metrics = await compileRawMetricsForRange(start, end, isLifetime);
   return {
     visits: metrics.visits,
     uniqueVisitors: metrics.uniqueVisitors,
@@ -142,23 +159,23 @@ export async function getTrafficAnalytics(startDate: string, endDate: string) {
   };
 }
 
-export async function getStudentAnalytics(startDate: string, endDate: string) {
-  console.log(`[AGENT_TOOL] Executing getStudentAnalytics for range: ${startDate} to ${endDate}`);
+export async function getStudentAnalytics(startDate: string, endDate: string, isLifetime?: boolean) {
+  console.log(`[AGENT_TOOL] Executing getStudentAnalytics for range: ${startDate} to ${endDate} (isLifetime: ${isLifetime})`);
   const start = getUtcDateFromCairoLocal(`${startDate}T00:00:00`);
   const end = getUtcDateFromCairoLocal(`${endDate}T23:59:59.999`);
   
-  const metrics = await compileRawMetricsForRange(start, end);
+  const metrics = await compileRawMetricsForRange(start, end, isLifetime);
   return {
     newStudents: metrics.newStudents
   };
 }
 
-export async function getTopCourses(startDate: string, endDate: string, limit: number = 5) {
-  console.log(`[AGENT_TOOL] Executing getTopCourses for range: ${startDate} to ${endDate} (Limit: ${limit})`);
+export async function getTopCourses(startDate: string, endDate: string, limit: number = 5, isLifetime?: boolean) {
+  console.log(`[AGENT_TOOL] Executing getTopCourses for range: ${startDate} to ${endDate} (Limit: ${limit}, isLifetime: ${isLifetime})`);
   const start = getUtcDateFromCairoLocal(`${startDate}T00:00:00`);
   const end = getUtcDateFromCairoLocal(`${endDate}T23:59:59.999`);
   
-  const metrics = await compileRawMetricsForRange(start, end);
+  const metrics = await compileRawMetricsForRange(start, end, isLifetime);
   return metrics.coursesPerformance.slice(0, limit);
 }
 
@@ -342,18 +359,25 @@ export async function searchCouponsTool(code?: string) {
   return coupons || [];
 }
 
-export async function getCourseAnalyticsTool() {
-  console.log("[AGENT_TOOL] Executing getCourseAnalytics...");
+export async function getCourseAnalyticsTool(isLifetime?: boolean) {
+  console.log(`[AGENT_TOOL] Executing getCourseAnalytics (isLifetime: ${isLifetime})...`);
+  const settings = await getKV<any>("marketing_settings");
+  const analyticsResetDate = settings?.analyticsResetDate;
+  const analyticsMode = settings?.analyticsMode || "reset";
+  
   const { data: courses, error: coursesErr } = await supabaseAdmin
     .from("courses")
     .select("id, title, slug, sales_count, price, price_egp");
     
   if (coursesErr) console.error("getCourseAnalytics courses err:", coursesErr);
   
-  const { data: enrollments, error: enrollmentsErr } = await supabaseAdmin
+  let enrollQuery = supabaseAdmin
     .from("enrollments")
-    .select("course_id");
-    
+    .select("course_id, enrolled_at");
+  if (!isLifetime && analyticsMode === "reset" && analyticsResetDate) {
+    enrollQuery = enrollQuery.gte("enrolled_at", new Date(analyticsResetDate).toISOString());
+  }
+  const { data: enrollments, error: enrollmentsErr } = await enrollQuery;
   if (enrollmentsErr) console.error("getCourseAnalytics enrollments err:", enrollmentsErr);
   
   const enrollMap: Record<string, number> = {};
@@ -361,11 +385,14 @@ export async function getCourseAnalyticsTool() {
     enrollMap[e.course_id] = (enrollMap[e.course_id] || 0) + 1;
   });
   
-  const { data: orderSums, error: orderErr } = await supabaseAdmin
+  let orderQuery = supabaseAdmin
     .from("orders")
-    .select("product_id, amount")
+    .select("product_id, amount, created_at")
     .eq("status", "completed");
-    
+  if (!isLifetime && analyticsMode === "reset" && analyticsResetDate) {
+    orderQuery = orderQuery.gte("created_at", new Date(analyticsResetDate).toISOString());
+  }
+  const { data: orderSums, error: orderErr } = await orderQuery;
   if (orderErr) console.error("getCourseAnalytics orders err:", orderErr);
   
   const revenueMap: Record<string, number> = {};
@@ -383,16 +410,24 @@ export async function getCourseAnalyticsTool() {
     enrollmentCount: enrollMap[c.id] || 0,
     orderSalesCount: salesMap[c.id] || 0,
     totalRevenue: revenueMap[c.id] || 0,
-    salesCountField: c.sales_count || 0
+    salesCountField: isLifetime ? (c.sales_count || 0) : (salesMap[c.id] || 0)
   }));
 }
 
-export async function getPaymentMethodStatsTool() {
-  console.log("[AGENT_TOOL] Executing getPaymentMethodStats...");
-  const { data: orders, error } = await supabaseAdmin
+export async function getPaymentMethodStatsTool(isLifetime?: boolean) {
+  console.log(`[AGENT_TOOL] Executing getPaymentMethodStats (isLifetime: ${isLifetime})...`);
+  const settings = await getKV<any>("marketing_settings");
+  const analyticsResetDate = settings?.analyticsResetDate;
+  const analyticsMode = settings?.analyticsMode || "reset";
+
+  let query = supabaseAdmin
     .from("orders")
-    .select("status, payment_method, amount");
-    
+    .select("status, payment_method, amount, created_at");
+  if (!isLifetime && analyticsMode === "reset" && analyticsResetDate) {
+    query = query.gte("created_at", new Date(analyticsResetDate).toISOString());
+  }
+
+  const { data: orders, error } = await query;
   if (error) console.error("getPaymentMethodStats err:", error);
   
   const stats: Record<string, { completed: number; failed: number; pending: number; revenue: number }> = {};
@@ -420,8 +455,14 @@ export async function getPaymentMethodStatsTool() {
  * ----------------------------------------------------
  */
 
-const SYSTEM_PROMPT = (cairoDateStr: string) => `
+const SYSTEM_PROMPT = (cairoDateStr: string, resetDate?: string, mode?: string) => `
 # JoeSchool Business Intelligence Manager v2
+
+## Analytics Reset Configuration:
+- Analytics Reset Date: ${resetDate || "None"}
+- Analytics Mode: ${mode || "reset"}
+- DEFAULT REPORTING: For all normal queries (e.g. today, this week, this month, custom ranges, overview), you MUST default to reporting metrics "Since Reset Date" (${resetDate || "None"}).
+- LIFETIME OVERRIDE: If the user explicitly asks for "lifetime", "lifetime statistics", "all time", "since the beginning", "مدى الحياة", "التاريخي", "كل الأوقات", or "من البداية", you MUST pass isLifetime: true to the metrics tools to retrieve and report complete historical totals.
 
 You are the permanent AI Operating System for JoeSchool.
 
@@ -598,20 +639,20 @@ If you have all the information and are ready to provide your final answer, outp
 \`\`\`
 
 AVAILABLE TOOLS:
-1. getPlatformOverview(): Overall metrics (courses, students, total completed orders, total revenue). Arguments: none.
-2. getTodayMetrics(): Cairo today metrics. Arguments: none.
-3. getWeeklyMetrics(): Cairo this week metrics. Arguments: none.
-4. getMonthlyMetrics(): Cairo this month metrics. Arguments: none.
-5. getRevenueAnalytics(startDate: string, endDate: string): Revenue metrics between YYYY-MM-DD.
-6. getTrafficAnalytics(startDate: string, endDate: string): Traffic details between YYYY-MM-DD.
-7. getStudentAnalytics(startDate: string, endDate: string): Student registration count between YYYY-MM-DD.
-8. getTopCourses(startDate: string, endDate: string, limit: number): Course sales rankings.
+1. getPlatformOverview(isLifetime?: boolean): Overall metrics (courses, students, total completed orders, total revenue).
+2. getTodayMetrics(isLifetime?: boolean): Cairo today metrics.
+3. getWeeklyMetrics(isLifetime?: boolean): Cairo this week metrics.
+4. getMonthlyMetrics(isLifetime?: boolean): Cairo this month metrics.
+5. getRevenueAnalytics(startDate: string, endDate: string, isLifetime?: boolean): Revenue metrics between YYYY-MM-DD.
+6. getTrafficAnalytics(startDate: string, endDate: string, isLifetime?: boolean): Traffic details between YYYY-MM-DD.
+7. getStudentAnalytics(startDate: string, endDate: string, isLifetime?: boolean): Student registration count between YYYY-MM-DD.
+8. getTopCourses(startDate: string, endDate: string, limit: number, isLifetime?: boolean): Course sales rankings.
 9. generateExcelReport(startDate: string, endDate: string, title: string): Generates the Excel report.
 10. searchStudents(query: string): Searches students by name or email.
 11. searchOrders(query: string): Searches orders by ID, customer name, email, coupon, or course.
 12. searchCoupons(code?: string): Searches coupons and usage details.
-13. getCourseAnalytics(): Returns detailed course metrics (base price, enrollments, sales, revenue).
-14. getPaymentMethodStats(): Returns aggregated payment method stats (completed/failed/pending/revenue).
+13. getCourseAnalytics(isLifetime?: boolean): Returns detailed course metrics (base price, enrollments, sales, revenue).
+14. getPaymentMethodStats(isLifetime?: boolean): Returns aggregated payment method stats (completed/failed/pending/revenue).
 
 Current local date is: ${cairoDateStr}. (Cairo Time).
 Use this date to compute relative ranges.
@@ -621,6 +662,24 @@ export async function runAgent(
   chatId: string,
   userMessage: string
 ): Promise<{ text: string; fileAttachment?: { path: string; name: string } }> {
+  const settings = await getKV<any>("marketing_settings");
+  const analyticsResetDate = settings?.analyticsResetDate || "";
+  const analyticsMode = settings?.analyticsMode || "reset";
+
+  const lowerMsg = userMessage.toLowerCase().trim();
+  const isLifetimeRequest = 
+    lowerMsg.includes("lifetime") || 
+    lowerMsg.includes("all time") || 
+    lowerMsg.includes("historical") || 
+    lowerMsg.includes("الكل") || 
+    lowerMsg.includes("مدى الحياة") || 
+    lowerMsg.includes("التاريخي") || 
+    lowerMsg.includes("التاريخ الكامل") || 
+    lowerMsg.includes("كل الأوقات") || 
+    lowerMsg.includes("من البداية") || 
+    lowerMsg.includes("الأوقات كلها") || 
+    lowerMsg.includes("تاريخي");
+
   const historyKey = `telegram-history-${chatId}`;
   
   // 1. Retrieve session history from KV store
@@ -635,7 +694,7 @@ export async function runAgent(
     dateStyle: "medium"
   }).format(new Date());
 
-  const systemPrompt = SYSTEM_PROMPT(cairoDateStr);
+  const systemPrompt = SYSTEM_PROMPT(cairoDateStr, analyticsResetDate, analyticsMode);
 
   let fileAttachment: { path: string; name: string } | undefined = undefined;
   let loopCount = 0;
@@ -691,28 +750,28 @@ export async function runAgent(
       try {
         switch (toolName) {
           case "getPlatformOverview":
-            toolResult = await getPlatformOverview();
+            toolResult = await getPlatformOverview(isLifetimeRequest);
             break;
           case "getTodayMetrics":
-            toolResult = await getTodayMetrics();
+            toolResult = await getTodayMetrics(isLifetimeRequest);
             break;
           case "getWeeklyMetrics":
-            toolResult = await getWeeklyMetrics();
+            toolResult = await getWeeklyMetrics(isLifetimeRequest);
             break;
           case "getMonthlyMetrics":
-            toolResult = await getMonthlyMetrics();
+            toolResult = await getMonthlyMetrics(isLifetimeRequest);
             break;
           case "getRevenueAnalytics":
-            toolResult = await getRevenueAnalytics(args.startDate, args.endDate);
+            toolResult = await getRevenueAnalytics(args.startDate, args.endDate, isLifetimeRequest);
             break;
           case "getTrafficAnalytics":
-            toolResult = await getTrafficAnalytics(args.startDate, args.endDate);
+            toolResult = await getTrafficAnalytics(args.startDate, args.endDate, isLifetimeRequest);
             break;
           case "getStudentAnalytics":
-            toolResult = await getStudentAnalytics(args.startDate, args.endDate);
+            toolResult = await getStudentAnalytics(args.startDate, args.endDate, isLifetimeRequest);
             break;
           case "getTopCourses":
-            toolResult = await getTopCourses(args.startDate, args.endDate, args.limit);
+            toolResult = await getTopCourses(args.startDate, args.endDate, args.limit, isLifetimeRequest);
             break;
           case "generateExcelReport":
             const excelRes = await generateCustomExcelReportTool(args.startDate, args.endDate, args.title || "custom_report");
@@ -733,10 +792,10 @@ export async function runAgent(
             toolResult = await searchCouponsTool(args.code);
             break;
           case "getCourseAnalytics":
-            toolResult = await getCourseAnalyticsTool();
+            toolResult = await getCourseAnalyticsTool(isLifetimeRequest);
             break;
           case "getPaymentMethodStats":
-            toolResult = await getPaymentMethodStatsTool();
+            toolResult = await getPaymentMethodStatsTool(isLifetimeRequest);
             break;
           default:
             toolResult = { error: `Tool "${toolName}" is not supported.` };

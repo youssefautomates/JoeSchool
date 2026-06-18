@@ -72,6 +72,11 @@ export default function AdminSettings() {
   const [telegramTesting, setTelegramTesting] = useState(false);
   const [showTelegramToken, setShowTelegramToken] = useState(false);
 
+  // Analytics Reset Settings State
+  const [analyticsResetDate, setAnalyticsResetDate] = useState("");
+  const [analyticsMode, setAnalyticsMode] = useState<"reset" | "lifetime">("reset");
+  const [isBackupConfirmed, setIsBackupConfirmed] = useState(false);
+
   // Load settings on mount
   useEffect(() => {
     async function loadSettings() {
@@ -97,6 +102,8 @@ export default function AdminSettings() {
           setTelegramBotToken(data.telegramBotToken || "");
           setTelegramChatId(data.telegramChatId || "");
           setTelegramEnabled(!!data.telegramEnabled);
+          setAnalyticsResetDate(data.analyticsResetDate || "");
+          setAnalyticsMode(data.analyticsMode || "reset");
 
           const syncedData = {
             metaPixelId: pId,
@@ -199,7 +206,9 @@ export default function AdminSettings() {
           globalGatewayFeePercentage,
           telegramBotToken,
           telegramChatId,
-          telegramEnabled
+          telegramEnabled,
+          analyticsResetDate,
+          analyticsMode
         })
       });
       const resData = await res.json();
@@ -325,6 +334,7 @@ export default function AdminSettings() {
               { id: "tracking", label: "Meta Tracking & CAPI", icon: Code },
               { id: "tiktok", label: "TikTok Pixel Settings", icon: Globe },
               { id: "telegram", label: "Telegram Bot", icon: Send },
+              { id: "analytics", label: "Analytics Reset System", icon: Activity },
               { id: "security", label: "Security & Privacy", icon: Shield },
             ].map((item) => (
               <button 
@@ -1055,6 +1065,142 @@ export default function AdminSettings() {
                       </>
                     )}
                   </Button>
+                </div>
+              </Card>
+            </motion.div>
+          )}
+
+          {/* Analytics Reset Settings Panel */}
+          {activeSubTab === "analytics" && (
+            <motion.div 
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <Card className="border-white/5 bg-[#09090e]/80 rounded-2xl overflow-hidden backdrop-blur-xl p-8 space-y-8 relative">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/5 rounded-full blur-3xl pointer-events-none" />
+                
+                <div className="flex items-center gap-4 pb-4 border-b border-white/5">
+                  <div className="w-12 h-12 rounded-xl bg-rose-500/10 flex items-center justify-center text-rose-500 border border-rose-500/20">
+                    <Activity className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-white">Analytics Reset System</h3>
+                    <p className="text-zinc-500 text-xs">Set a clean analytics baseline date and configure default dashboard display modes.</p>
+                  </div>
+                </div>
+
+                <div className="space-y-6">
+                  {/* Default Analytics Mode Select */}
+                  <div className="space-y-3">
+                    <Label className="text-zinc-400 font-semibold text-xs">Default Analytics Mode</Label>
+                    <select
+                      value={analyticsMode}
+                      onChange={e => setAnalyticsMode(e.target.value as any)}
+                      className="w-full h-12 px-4 bg-white/5 border border-white/10 rounded-xl focus:border-rose-500 text-xs text-white appearance-none cursor-pointer outline-none transition-all"
+                    >
+                      <option value="reset" className="bg-[#09090e] text-white">Since Reset Date (Default - Zero baseline)</option>
+                      <option value="lifetime" className="bg-[#09090e] text-white">Lifetime (Complete historical totals)</option>
+                    </select>
+                  </div>
+
+                  {/* Baseline Reset Date Input */}
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-end">
+                    <div className="md:col-span-8 space-y-3">
+                      <Label className="text-zinc-400 font-semibold text-xs">Analytics Reset Date (Baseline Date)</Label>
+                      <Input
+                        type="date"
+                        value={analyticsResetDate}
+                        onChange={e => setAnalyticsResetDate(e.target.value)}
+                        className="h-12 bg-white/5 border-white/10 rounded-xl focus:border-rose-500 text-xs text-zinc-300"
+                      />
+                    </div>
+                    <div className="md:col-span-4">
+                      <Button
+                        type="button"
+                        onClick={() => {
+                          const now = new Date();
+                          const localDateStr = new Intl.DateTimeFormat("en-CA", {
+                            timeZone: "Africa/Cairo",
+                            year: "numeric", month: "2-digit", day: "2-digit"
+                          }).format(now);
+                          setAnalyticsResetDate(localDateStr);
+                          toast.info(`Set baseline reset date to today: ${localDateStr}`);
+                        }}
+                        className="w-full h-12 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold rounded-xl transition-all text-xs"
+                      >
+                        Set to Today
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Safety Warning and Backup Confirmation */}
+                  <div className="p-5 rounded-2xl bg-amber-500/5 border border-amber-500/10 space-y-4 text-left">
+                    <div className="flex items-start gap-3">
+                      <Shield className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
+                      <div className="space-y-1">
+                        <h4 className="font-bold text-amber-500 text-xs">CRITICAL DATA PROTECTION PROTOCOL</h4>
+                        <p className="text-zinc-400 text-[11px] leading-relaxed">
+                          This action defines a query filter boundary. It will NOT delete or modify student profiles, courses, enrollments, billing records, or any business data. All historical data remains 100% intact and recoverable by selecting "Lifetime" mode.
+                        </p>
+                        <p className="text-zinc-500 text-[10px] leading-relaxed mt-2 font-bold">
+                          Standard data safety protocols require verification that a database backup exists before saving new query baseline configurations.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3 pt-2 border-t border-white/5">
+                      <input
+                        type="checkbox"
+                        id="backup-confirm"
+                        checked={isBackupConfirmed}
+                        onChange={e => setIsBackupConfirmed(e.target.checked)}
+                        className="w-4 h-4 text-rose-600 border-white/10 rounded focus:ring-rose-500 cursor-pointer"
+                      />
+                      <label htmlFor="backup-confirm" className="text-zinc-300 text-xs font-bold cursor-pointer select-none">
+                        I have created a database backup and verified its integrity.
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Save button row */}
+                <div className="pt-6 border-t border-white/5 flex gap-4">
+                  <Button
+                    onClick={handleSaveSettings}
+                    disabled={isLoading || !isBackupConfirmed}
+                    type="button"
+                    className={cn(
+                      "font-bold px-6 h-11 rounded-xl transition-all shadow-md active:scale-98 text-xs flex items-center gap-2",
+                      isBackupConfirmed 
+                        ? "bg-[#D6004B] hover:bg-[#ff0059] text-white cursor-pointer" 
+                        : "bg-zinc-800 text-zinc-500 cursor-not-allowed border border-white/5"
+                    )}
+                  >
+                    {isLoading ? (
+                      <>
+                        <RefreshCw className="w-4 h-4 animate-spin text-white" />
+                        Saving Config...
+                      </>
+                    ) : (
+                      <>
+                        <Save className="w-4 h-4" />
+                        Apply Reset Baseline
+                      </>
+                    )}
+                  </Button>
+                  {analyticsResetDate && (
+                    <Button
+                      type="button"
+                      onClick={async () => {
+                        setAnalyticsResetDate("");
+                        toast.success("Reset date cleared. Platform will default to lifetime logs.");
+                      }}
+                      className="bg-white/5 hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/20 text-white border border-white/10 font-bold px-6 h-11 rounded-xl transition-all text-xs"
+                    >
+                      Clear Reset Date
+                    </Button>
+                  )}
                 </div>
               </Card>
             </motion.div>

@@ -2,6 +2,7 @@ import { supabaseAdmin } from "./supabaseAdmin";
 import { sendTelegramMessage, getTelegramSettings, sendTelegramDocument, sanitizeMarkdown } from "./telegram";
 import { Resend } from "resend";
 import ExcelJS from "exceljs";
+import { getKV } from "./kv";
 
 // Types for compiled report metrics
 export interface ReportMetrics {
@@ -194,13 +195,30 @@ export async function compileReportData(type: 'daily' | 'weekly' | 'monthly', no
 
   // Helper to compile core metrics from Supabase
   const compileRawMetrics = async (start: Date, end: Date) => {
+    let finalStart = start;
+    let finalEnd = end;
+
+    const settings = await getKV<any>("marketing_settings");
+    const analyticsResetDate = settings?.analyticsResetDate;
+    const analyticsMode = settings?.analyticsMode || "reset";
+
+    if (analyticsMode === "reset" && analyticsResetDate) {
+      const resetDate = new Date(analyticsResetDate);
+      if (finalStart < resetDate) {
+        finalStart = resetDate;
+      }
+      if (finalEnd < resetDate) {
+        finalEnd = resetDate;
+      }
+    }
+
     // Fetch completed orders
     const { data: orders, error: ordersError } = await supabaseAdmin
       .from('orders')
       .select('*')
       .eq('status', 'completed')
-      .gte('created_at', start.toISOString())
-      .lte('created_at', end.toISOString());
+      .gte('created_at', finalStart.toISOString())
+      .lte('created_at', finalEnd.toISOString());
 
     if (ordersError) {
       console.error("[REPORTS] Error fetching orders:", ordersError);
@@ -213,7 +231,7 @@ export async function compileReportData(type: 'daily' | 'weekly' | 'monthly', no
     // Count new registrations
     const newStudents = allUsers.filter(u => {
       const created = new Date(u.created_at);
-      return created >= start && created <= end;
+      return created >= finalStart && created <= finalEnd;
     }).length;
     
     const aov = ordersCount > 0 ? revenue / ordersCount : 0;
@@ -222,8 +240,8 @@ export async function compileReportData(type: 'daily' | 'weekly' | 'monthly', no
     const { data: events, error: eventsError } = await supabaseAdmin
       .from('analytics_events')
       .select('session_id, event_name, metadata, created_at')
-      .gte('created_at', start.toISOString())
-      .lte('created_at', end.toISOString());
+      .gte('created_at', finalStart.toISOString())
+      .lte('created_at', finalEnd.toISOString());
       
     if (eventsError) {
       console.error("[REPORTS] Error fetching events:", eventsError);
@@ -244,7 +262,7 @@ export async function compileReportData(type: 'daily' | 'weekly' | 'monthly', no
         .from('analytics_events')
         .select('session_id')
         .in('session_id', uniqueSessionIds)
-        .lt('created_at', start.toISOString());
+        .lt('created_at', finalStart.toISOString());
         
       const oldSessions = new Set((historicalEvents || []).map(h => h.session_id));
       newVisitors = uniqueSessionIds.filter(s => !oldSessions.has(s)).length;
@@ -1197,7 +1215,26 @@ export async function runReportWorkflow(
 /**
  * Generic range-based compiler used by the BI Agent
  */
-export async function compileRawMetricsForRange(start: Date, end: Date) {
+export async function compileRawMetricsForRange(start: Date, end: Date, isLifetime?: boolean) {
+  let finalStart = start;
+  let finalEnd = end;
+
+  if (!isLifetime) {
+    const settings = await getKV<any>("marketing_settings");
+    const analyticsResetDate = settings?.analyticsResetDate;
+    const analyticsMode = settings?.analyticsMode || "reset";
+
+    if (analyticsMode === "reset" && analyticsResetDate) {
+      const resetDate = new Date(analyticsResetDate);
+      if (finalStart < resetDate) {
+        finalStart = resetDate;
+      }
+      if (finalEnd < resetDate) {
+        finalEnd = resetDate;
+      }
+    }
+  }
+
   // 1. Fetch Users
   let allUsers: any[] = [];
   let page = 1;
@@ -1219,8 +1256,8 @@ export async function compileRawMetricsForRange(start: Date, end: Date) {
     .from('orders')
     .select('*')
     .eq('status', 'completed')
-    .gte('created_at', start.toISOString())
-    .lte('created_at', end.toISOString());
+    .gte('created_at', finalStart.toISOString())
+    .lte('created_at', finalEnd.toISOString());
 
   const completedOrders = orders || [];
   const revenue = completedOrders.reduce((sum, o) => sum + (o.amount || 0), 0);
@@ -1239,7 +1276,7 @@ export async function compileRawMetricsForRange(start: Date, end: Date) {
   // Count new registrations
   const newStudents = allUsers.filter(u => {
     const created = new Date(u.created_at);
-    return created >= start && created <= end;
+    return created >= finalStart && created <= finalEnd;
   }).length;
   
   const aov = ordersCount > 0 ? revenue / ordersCount : 0;
@@ -1248,8 +1285,8 @@ export async function compileRawMetricsForRange(start: Date, end: Date) {
   const { data: events, error: eventsError } = await supabaseAdmin
     .from('analytics_events')
     .select('session_id, event_name, metadata, created_at')
-    .gte('created_at', start.toISOString())
-    .lte('created_at', end.toISOString());
+    .gte('created_at', finalStart.toISOString())
+    .lte('created_at', finalEnd.toISOString());
     
   const analytics = events || [];
   const visits = analytics.filter(e => e.event_name === 'page_view').length;
@@ -1266,7 +1303,7 @@ export async function compileRawMetricsForRange(start: Date, end: Date) {
       .from('analytics_events')
       .select('session_id')
       .in('session_id', uniqueSessionIds)
-      .lt('created_at', start.toISOString());
+      .lt('created_at', finalStart.toISOString());
       
     const oldSessions = new Set((historicalEvents || []).map(h => h.session_id));
     newVisitors = uniqueSessionIds.filter(s => !oldSessions.has(s)).length;

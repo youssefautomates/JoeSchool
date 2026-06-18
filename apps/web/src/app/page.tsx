@@ -247,40 +247,12 @@ export default function Home() {
   // Digital product categories filter list
   const productCategories = [
     "الكل",
-    ...(dynamicProductCategories.length > 0
-      ? dynamicProductCategories
-      : ["صناعة المحتوى البصري", "الذكاء الاصطناعي التوليدي", "الرسوم المتحركة"])
+    ...dynamicProductCategories
   ];
 
   // Smart product categorizer
   const getProductCategory = (product: Product) => {
-    const categoryField = product.category || "";
-    
-    // Prioritize exact match from dynamic categories fetched from DB
-    if (dynamicProductCategories.includes(categoryField)) {
-      return categoryField;
-    }
-
-    if (categoryField === "صناعة المحتوى البصري" || categoryField === "الذكاء الاصطناعي التوليدي" || categoryField === "الرسوم المتحركة") {
-      return categoryField;
-    }
-    
-    // Fallback/Legacy mapping based on category value or tags
-    const title = (product.title || "").toLowerCase();
-    const desc = (product.description || "").toLowerCase();
-    const tags = (product.tags || []).map(t => t.toLowerCase());
-    
-    if (categoryField.includes("n8n") || tags.includes("n8n") || title.includes("n8n") || desc.includes("n8n") || categoryField.includes("أتمتة") || categoryField.includes("productivity") || categoryField.includes("إنتاجية") || categoryField.includes("automation") || categoryField.includes("فيديو") || categoryField.includes("video") || title.includes("فيديو")) {
-      return "صناعة المحتوى البصري";
-    }
-    if (categoryField.includes("ai") || categoryField.includes("ذكاء") || tags.includes("ai") || tags.includes("ذكاء") || title.includes("ai") || title.includes("ذكاء") || desc.includes("ai") || desc.includes("ذكاء")) {
-      return "الذكاء الاصطناعي";
-    }
-    if (categoryField.includes("content") || categoryField.includes("صناعة") || categoryField.includes("ميديا") || categoryField.includes("سوشيال") || tags.includes("social") || tags.includes("ميديا") || title.includes("content") || desc.includes("content")) {
-      return "صناعة المحتوى";
-    }
-    
-    return "صناعة المحتوى البصري"; // Default fallback
+    return product.category || "";
   };
 
   // Filter computations
@@ -744,7 +716,8 @@ export default function Home() {
         )}
 
         {/* ── 3. قسم المنتجات الرقمية (DIGITAL PRODUCTS SECTION) ────────────────────────── */}
-        <section id="products" className="py-16 md:py-32 relative">
+        {!isLoading && products.length > 0 && (
+          <section id="products" className="py-16 md:py-32 relative">
           <div className="container mx-auto px-4 max-w-7xl">
             <div className="text-center mb-10 md:mb-16">
               <motion.div
@@ -942,6 +915,7 @@ export default function Home() {
           {/* Subtle Bottom Section Divider */}
           <div className="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
         </section>
+        )}
 
         {/* ── 4. قسم آراء العملاء (REVIEWS SECTION) ──────────────────────────────── */}
         <ReviewsMarquee />

@@ -19,6 +19,9 @@ interface DashboardFiltersProps {
   onRefresh: () => void;
   onExport: () => void;
   hasCountriesData?: string[];
+  analyticsMode?: "reset" | "lifetime";
+  setAnalyticsMode?: (mode: "reset" | "lifetime") => void;
+  analyticsResetDate?: string | null;
 }
 
 export default function DashboardFilters({
@@ -33,7 +36,10 @@ export default function DashboardFilters({
   loading,
   onRefresh,
   onExport,
-  hasCountriesData = ["EG", "SA", "AE", "US"]
+  hasCountriesData = ["EG", "SA", "AE", "US"],
+  analyticsMode = "reset",
+  setAnalyticsMode,
+  analyticsResetDate
 }: DashboardFiltersProps) {
   const [isFullscreen, setIsFullscreen] = useState(false);
 
@@ -68,6 +74,42 @@ export default function DashboardFilters({
   return (
     <div className="flex flex-col gap-4 p-4 rounded-2xl bg-[#09090e]/80 border border-white/5 relative z-30 text-left" dir="ltr">
       
+      {/* Analytics Mode Switcher Row */}
+      {analyticsResetDate && setAnalyticsMode && (
+        <div className="flex items-center justify-between pb-3 border-b border-white/5 flex-wrap gap-3">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
+            <span className="text-[10px] md:text-xs font-bold text-zinc-400">Baseline Filter:</span>
+            <span className="text-[10px] md:text-xs font-mono font-bold text-white bg-white/5 px-2.5 py-1 rounded-lg border border-white/5">
+              Since {analyticsResetDate}
+            </span>
+          </div>
+
+          <div className="flex bg-white/5 border border-white/5 rounded-xl p-1 gap-1 w-full sm:w-auto shrink-0 select-none">
+            <button
+              onClick={() => setAnalyticsMode("reset")}
+              className={`px-4 py-1.5 rounded-lg text-[10px] md:text-xs font-bold transition-all cursor-pointer ${
+                analyticsMode === "reset"
+                  ? "bg-rose-600 text-white shadow-md shadow-rose-600/10"
+                  : "text-zinc-400 hover:text-white"
+              }`}
+            >
+              Since Reset Date
+            </button>
+            <button
+              onClick={() => setAnalyticsMode("lifetime")}
+              className={`px-4 py-1.5 rounded-lg text-[10px] md:text-xs font-bold transition-all cursor-pointer ${
+                analyticsMode === "lifetime"
+                  ? "bg-rose-600 text-white shadow-md shadow-rose-600/10"
+                  : "text-zinc-400 hover:text-white"
+              }`}
+            >
+              Lifetime Statistics
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Top row: Filter Selectors */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {/* Date Range Selector */}
