@@ -20,7 +20,7 @@ import { cn } from "@/lib/utils";
 import { supabase, type Product, calcDiscount, fetchActiveProducts } from "@/lib/products";
 import { useCart } from "@/context/CartContext";
 import { resolveUserCurrency, resolveProductPrice, formatPrice, type Currency } from "@/lib/pricing";
-import { trackViewContent, trackAddToCart, trackInitiateCheckout } from "@/lib/metaPixel";
+import { trackViewContent, trackAddToCart } from "@/lib/metaPixel";
 import { trackEvent } from "@/lib/analytics";
 import { ProductReviews } from "@/components/ProductReviews";
 
@@ -671,7 +671,6 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                   <div className="space-y-3 pt-2">
                     <Link
                       href={`/checkout/${product.id}`}
-                      onClick={() => trackInitiateCheckout(product.id, product.title, productPricing?.price ?? product.price, currency, "product")}
                       className="w-full h-16 inline-flex items-center justify-center gap-2 bg-[#D6004B] hover:bg-[#ff0059] text-white font-alexandria font-black text-base rounded-[1.5rem] transition-all shadow-[0_12px_30px_rgba(214,0,75,0.35)] active:scale-95 group"
                     >
                       <span>تحميل وشراء فوري</span>
@@ -1050,7 +1049,6 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                 {/* CTA Buy Buttons */}
                 <Link
                   href={`/checkout/${product.id}`}
-                  onClick={() => trackInitiateCheckout(product.id, product.title, productPricing?.price ?? product.price, currency, "product")}
                   className="w-full h-14 bg-gradient-to-r from-[#D6004B] via-[#ff1d6b] to-[#D6004B] text-white rounded-xl font-black text-sm sm:text-base shadow-[0_10px_30px_rgba(214,0,75,0.4)] transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer font-cairo animate-pulse-glow"
                 >
                   <span>{discountPct && discountPct > 0 ? `اقتنِه الآن ← خصم ${discountPct}%` : "اقتنِه الآن ←"}</span>
@@ -1321,7 +1319,6 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
             </button>
             <Link
               href={`/checkout/${product.id}`}
-              onClick={() => trackInitiateCheckout(product.id, product.title, productPricing?.price ?? product.price, currency, "product")}
               className="h-10 px-5 bg-[#D6004B] text-white font-alexandria font-black text-xs rounded-xl flex items-center justify-center gap-1.5 active:scale-95 shadow-[0_8px_20px_rgba(214,0,75,0.3)] shrink-0 animate-pulse-glow"
             >
               <span>{discountPct && discountPct > 0 ? `اقتنِه الآن ← خصم ${discountPct}%` : "اقتنِه الآن ←"}</span>

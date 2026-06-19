@@ -404,7 +404,7 @@ export default function AdminDashboard() {
             const daysAgo = Math.floor(Math.random() * 14);
             const eventDate = new Date(now - daysAgo * 24 * 60 * 60 * 1000);
             const sessId = `sess_${Math.floor(100000 + Math.random() * 900000)}`;
-            const eventNames = ["page_view", "product_view", "add_to_cart", "checkout_started"];
+            const eventNames = ["page_view", "product_view", "add_to_cart", "checkout_page_opened", "checkout_started"];
             const randEvent = eventNames[Math.floor(Math.random() * eventNames.length)];
             const targetItemId = allItemIds[Math.floor(Math.random() * allItemIds.length)];
 
@@ -719,9 +719,10 @@ export default function AdminDashboard() {
     const conversionRate = totalSessions > 0 ? (completed.length / totalSessions) * 100 : 0;
 
     // Cart Abandonment Rate (strictly from database events)
+    const checkoutPageOpenedEvents = rangeEvents.filter(e => e.event_name === "checkout_page_opened").length;
     const checkoutStartedEvents = rangeEvents.filter(e => e.event_name === "checkout_started").length;
-    const abandonedCarts = Math.max(0, checkoutStartedEvents - completed.length);
-    const abandonmentRate = (checkoutStartedEvents > 0 || completed.length > 0)
+    const abandonedCarts = Math.max(0, checkoutPageOpenedEvents - completed.length);
+    const abandonmentRate = (checkoutPageOpenedEvents > 0 || completed.length > 0)
       ? (abandonedCarts / (abandonedCarts + completed.length)) * 100
       : 0;
 
@@ -771,8 +772,9 @@ export default function AdminDashboard() {
     const rangeEventsAll = analyticsEvents.filter(e => new Date(e.created_at) >= dateCutoff);
     const totalVisitorsCount = new Set(rangeEventsAll.map(e => e.session_id)).size;
     const addToCartCount = rangeEventsAll.filter(e => e.event_name === "add_to_cart").length;
+    const checkoutPageOpenedCount = rangeEventsAll.filter(e => e.event_name === "checkout_page_opened").length;
     const checkoutStartedCount = rangeEventsAll.filter(e => e.event_name === "checkout_started").length;
-    const abandonedCheckouts = Math.max(0, checkoutStartedCount - completed.length);
+    const abandonedCheckouts = Math.max(0, checkoutPageOpenedCount - completed.length);
 
     return {
       grossRevenue,
@@ -791,6 +793,7 @@ export default function AdminDashboard() {
       sessions: totalSessions,
       totalVisitors: totalVisitorsCount,
       addToCartCount,
+      checkoutPageOpenedCount,
       checkoutStartedCount,
       abandonedCheckouts,
       revenueGrowth,
@@ -949,10 +952,12 @@ export default function AdminDashboard() {
     const visitorsCount = new Set(rangeEvents.map(e => e.session_id)).size;
     const productViews = rangeEvents.filter(e => e.event_name === "product_view" || e.event_name === "page_view").length;
     const addToCarts = rangeEvents.filter(e => e.event_name === "add_to_cart").length;
+    const checkoutPageOpeneds = rangeEvents.filter(e => e.event_name === "checkout_page_opened").length;
     const checkoutStarteds = rangeEvents.filter(e => e.event_name === "checkout_started").length;
 
     const finalPurchases = completedCount;
     const finalCheckouts = checkoutStarteds;
+    const finalCheckoutOpeneds = checkoutPageOpeneds;
     const finalCarts = addToCarts;
     const finalViews = productViews;
     const finalVisitors = visitorsCount;
@@ -961,6 +966,7 @@ export default function AdminDashboard() {
       { name: "Total Visitors", count: finalVisitors, color: "#6366f1", label: "Initial site visits" },
       { name: "Product Views", count: finalViews, color: "#3b82f6", label: "Detail page views" },
       { name: "Add to Cart", count: finalCarts, color: "#a855f7", label: "Expressed purchase intent" },
+      { name: "Checkout Page Opened", count: finalCheckoutOpeneds, color: "#fcd34d", label: "Opened checkout page" },
       { name: "Checkout Started", count: finalCheckouts, color: "#f59e0b", label: "Entered checkout flow" },
       { name: "Purchases", count: finalPurchases, color: "#10b981", label: "Successful payments" }
     ];
@@ -1027,13 +1033,15 @@ export default function AdminDashboard() {
       const grossRevenue = completed.reduce((sum, o) => sum + Number(o.amount || 0), 0);
 
       const views = filteredAnalyticsEvents.filter(e => e.product_id === c.id && (e.event_name === "product_view" || e.event_name === "page_view")).length;
+      const checkoutPageOpeneds = filteredAnalyticsEvents.filter(e => e.product_id === c.id && e.event_name === "checkout_page_opened").length;
       const checkoutStarteds = filteredAnalyticsEvents.filter(e => e.product_id === c.id && e.event_name === "checkout_started").length;
 
       const finalViews = views;
+      const finalCheckoutOpeneds = checkoutPageOpeneds;
       const finalCheckouts = checkoutStarteds;
 
-      const dropOffs = Math.max(0, finalCheckouts - completed.length);
-      const dropOffRate = finalCheckouts > 0 ? (dropOffs / finalCheckouts) * 100 : 0;
+      const dropOffs = Math.max(0, finalCheckoutOpeneds - completed.length);
+      const dropOffRate = finalCheckoutOpeneds > 0 ? (dropOffs / finalCheckoutOpeneds) * 100 : 0;
 
       return {
         id: c.id,
@@ -1043,6 +1051,7 @@ export default function AdminDashboard() {
         newStudentsWeek: new7d,
         newStudentsMonth: new30d,
         views: finalViews,
+        checkoutPageOpeneds: finalCheckoutOpeneds,
         checkoutStarteds: finalCheckouts,
         completedPurchases: completed.length,
         dropOffs,
@@ -1253,10 +1262,22 @@ export default function AdminDashboard() {
    <Column ss:Width="110"/>
    <Column ss:Width="110"/>
    <Column ss:Width="110"/>
+  <Table ss:ExpandedColumnCount="13" ss:ExpandedRowCount="${lmsCoursesAnalytics.length + 3}" x:FullColumns="1" x:FullRows="1">
+   <Column ss:Width="150"/>
+   <Column ss:Width="250"/>
+   <Column ss:Width="100"/>
+   <Column ss:Width="100"/>
+   <Column ss:Width="110"/>
+   <Column ss:Width="110"/>
+   <Column ss:Width="100"/>
+   <Column ss:Width="110"/>
+   <Column ss:Width="110"/>
+   <Column ss:Width="110"/>
+   <Column ss:Width="110"/>
    <Column ss:Width="120"/>
    <Column ss:Width="150"/>
    <Row ss:Height="30" ss:StyleID="TitleHeader">
-    <Cell ss:MergeAcross="11"><Data ss:Type="String">JoeSchool - LMS Academy &amp; Student Enrollment Logs</Data></Cell>
+    <Cell ss:MergeAcross="12"><Data ss:Type="String">JoeSchool - LMS Academy &amp; Student Enrollment Logs</Data></Cell>
    </Row>
    <Row ss:Height="20" ss:StyleID="ColHeader">
     <Cell><Data ss:Type="String">Course ID</Data></Cell>
@@ -1266,6 +1287,7 @@ export default function AdminDashboard() {
     <Cell><Data ss:Type="String">New (Last 7 Days)</Data></Cell>
     <Cell><Data ss:Type="String">New (Last 30 Days)</Data></Cell>
     <Cell><Data ss:Type="String">Page Views</Data></Cell>
+    <Cell><Data ss:Type="String">Checkout Page Opened</Data></Cell>
     <Cell><Data ss:Type="String">Checkout Started</Data></Cell>
     <Cell><Data ss:Type="String">Completed Purchases</Data></Cell>
     <Cell><Data ss:Type="String">Abandoned Carts</Data></Cell>
@@ -1283,6 +1305,7 @@ export default function AdminDashboard() {
     <Cell ss:StyleID="NumberCell"><Data ss:Type="Number">${c.newStudentsWeek}</Data></Cell>
     <Cell ss:StyleID="NumberCell"><Data ss:Type="Number">${c.newStudentsMonth}</Data></Cell>
     <Cell ss:StyleID="NumberCell"><Data ss:Type="Number">${c.views}</Data></Cell>
+    <Cell ss:StyleID="NumberCell"><Data ss:Type="Number">${c.checkoutPageOpeneds}</Data></Cell>
     <Cell ss:StyleID="NumberCell"><Data ss:Type="Number">${c.checkoutStarteds}</Data></Cell>
     <Cell ss:StyleID="NumberCell"><Data ss:Type="Number">${c.completedPurchases}</Data></Cell>
     <Cell ss:StyleID="NumberCell"><Data ss:Type="Number">${c.dropOffs}</Data></Cell>

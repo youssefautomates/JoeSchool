@@ -21,6 +21,7 @@ import { supabase } from "@/lib/supabase";
 import { supabaseClient } from "@/lib/supabaseClient";
 import { type Product, calcDiscount } from "@/lib/products";
 import { trackEvent } from "@/lib/analytics";
+import { trackInitiateCheckout } from "@/lib/metaPixel";
 
 import { resolveUserCurrency, resolveProductPrice, formatPrice, getUSDtoEGPExchangeRate, type Currency } from "@/lib/pricing";
 import { getUserEnrollments } from "@/lib/coursesDb";
@@ -352,8 +353,8 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
       setProduct(mappedProduct);
       setIsCourse(isCourseItem);
       
-      // Track InitiateCheckout in Supabase analytics database
-      trackEvent("checkout_started", mappedProduct.id, mappedProduct.title, {
+      // Track checkout_page_opened in Supabase analytics database
+      trackEvent("checkout_page_opened", mappedProduct.id, mappedProduct.title, {
         price: mappedProduct.price,
         currency: resolvedCurrency,
         type: isCourseItem ? "course" : "product"
@@ -365,27 +366,6 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
         if (instapayPending === "true") {
           setInstapayReturnBanner(true);
           setPaymentMethod("instapay");
-        }
-      }
-      
-      // Track InitiateCheckout
-      if (typeof window !== "undefined") {
-        if ((window as any).fbq) {
-          (window as any).fbq('track', 'InitiateCheckout', {
-            content_name: mappedProduct.title,
-            content_ids: [mappedProduct.id],
-            content_type: isCourseItem ? 'course' : 'product',
-            value: mappedProduct.price,
-            currency: resolvedCurrency
-          });
-        }
-        if ((window as any).ttq) {
-          (window as any).ttq.track('InitiateCheckout', {
-            contents: [{ content_id: mappedProduct.id, content_name: mappedProduct.title, price: mappedProduct.price, quantity: 1 }],
-            content_type: isCourseItem ? 'course' : 'product',
-            value: mappedProduct.price,
-            currency: resolvedCurrency
-          });
         }
       }
     } catch (error: any) {
@@ -693,6 +673,26 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
       };
 
       console.log("[FORM_SUBMIT_DATA] Request body before fetch:", JSON.stringify(payloadBody, null, 2));
+
+      // Track Checkout Started
+      trackEvent("checkout_started", product.id, product.title, {
+        price: finalPriceEGP,
+        currency: "EGP", // Everything is converted to EGP for paymob payload
+        type: isCourse ? "course" : "product",
+        paymentMethod: isFree ? "free" : paymentMethod
+      });
+      
+      if (typeof window !== "undefined") {
+        trackInitiateCheckout(product.id, product.title, finalPriceEGP, "EGP", isCourse ? "course" : "product");
+        if ((window as any).ttq) {
+          (window as any).ttq.track('InitiateCheckout', {
+            contents: [{ content_id: product.id, content_name: product.title, price: finalPriceEGP, quantity: 1 }],
+            content_type: isCourse ? 'course' : 'product',
+            value: finalPriceEGP,
+            currency: 'EGP'
+          });
+        }
+      }
 
       const response = await fetch("/api/paymob/initiate", {
         method: "POST",

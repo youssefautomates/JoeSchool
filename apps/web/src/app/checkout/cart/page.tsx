@@ -21,6 +21,8 @@ import { supabaseClient } from "@/lib/supabaseClient";
 import { getUserEnrollments } from "@/lib/coursesDb";
 
 import { resolveUserCurrency, resolveProductPrice, formatPrice, getUSDtoEGPExchangeRate, type Currency } from "@/lib/pricing";
+import { trackEvent } from "@/lib/analytics";
+import { trackMetaEvent } from "@/lib/metaPixel";
 import { normalizePhoneNumber } from "@/lib/phone";
 import dynamic from "next/dynamic";
 const PhoneInput = dynamic(() => import("react-phone-input-2"), { ssr: false });
@@ -159,31 +161,16 @@ export default function CartCheckoutPage() {
   // Total to charge/display
   const resolvedCartTotal = subtotalCartTotal + (hasSeparatedFeeRow ? displayedFee : totalBundledFees);
 
-  // Track InitiateCheckout on mount/currency load
+  // Track checkout_page_opened on mount
   useEffect(() => {
     if (items.length > 0) {
-      if ((window as any).fbq) {
-        (window as any).fbq('track', 'InitiateCheckout', {
-          content_ids: items.map(i => i.id),
-          content_type: 'product',
-          value: resolvedCartTotal,
-          currency: currency
-        });
-      }
-      if ((window as any).ttq) {
-        (window as any).ttq.track('InitiateCheckout', {
-          contents: items.map(i => ({
-            content_id: i.id,
-            content_name: i.title,
-            quantity: 1,
-            price: i.price
-          })),
-          value: resolvedCartTotal,
-          currency: currency
-        });
-      }
+      trackEvent("checkout_page_opened", "cart", "Cart Checkout", {
+        price: resolvedCartTotal,
+        currency: currency,
+        type: "cart"
+      });
     }
-  }, [currency, resolvedCartTotal]); // eslint-disable-line
+  }, [items.length, currency, resolvedCartTotal]); // eslint-disable-line
 
   // Card Formatting & Validation Handlers
   const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -583,6 +570,35 @@ export default function CartCheckoutPage() {
         password: data.password || undefined,
         instapayScreenshotUrl: paymentMethod === "instapay" ? (instapayScreenshotUrl || undefined) : undefined
       };
+
+      // Track Checkout Started
+      trackEvent("checkout_started", "cart", "Cart Checkout", {
+        price: finalPriceEGP,
+        currency: "EGP", // Everything is converted to EGP for paymob payload
+        type: "cart",
+        paymentMethod: paymentMethod
+      });
+      
+      if (typeof window !== "undefined") {
+        trackMetaEvent('InitiateCheckout', {
+          content_ids: resolvedItems.map(i => i.id),
+          content_type: 'product',
+          value: finalPriceEGP,
+          currency: 'EGP'
+        });
+        if ((window as any).ttq) {
+          (window as any).ttq.track('InitiateCheckout', {
+            contents: resolvedItems.map(i => ({
+              content_id: i.id,
+              content_name: i.title,
+              quantity: 1,
+              price: currency === "USD" ? Math.round(i.price * exchangeRate) : i.price
+            })),
+            value: finalPriceEGP,
+            currency: 'EGP'
+          });
+        }
+      }
 
       const response = await fetch("/api/paymob/initiate-cart", {
         method: "POST",
