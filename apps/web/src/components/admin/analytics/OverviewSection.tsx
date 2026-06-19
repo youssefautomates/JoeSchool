@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { DollarSign, Activity, Globe, ShieldCheck, ShoppingCart, Users, TrendingDown, MousePointerClick, ShoppingBag } from "lucide-react";
+import { DollarSign, Activity, Globe, ShieldCheck, ShoppingCart, Users, TrendingDown, MousePointerClick, ShoppingBag, FileText } from "lucide-react";
 import KPICard from "./KPICard";
 import InsightsSection from "./InsightsSection";
 import CollapsibleSection from "./CollapsibleSection";
@@ -97,8 +97,8 @@ export default function OverviewSection({
         />
       </div>
 
-      {/* Funnel KPI Cards Row 2 */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+      {/* Funnel KPI Cards Row 2 - 6 columns */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
         <KPICard
           label="Unique Visitors"
           value={stats.totalVisitors ?? 0}
@@ -116,6 +116,15 @@ export default function OverviewSection({
           trend={stats.addToCartCount > 0 ? "Purchase intent" : undefined}
           trendUp={true}
           trendNeutral={!stats.addToCartCount}
+        />
+        <KPICard
+          label="Checkout Page Opened"
+          value={stats.checkoutPageOpenedCount ?? 0}
+          desc="Opened registration page"
+          icon={FileText}
+          trend={stats.checkoutPageOpenedCount > 0 ? "Checkout visits" : undefined}
+          trendUp={true}
+          trendNeutral={!stats.checkoutPageOpenedCount}
         />
         <KPICard
           label="Checkout Started"

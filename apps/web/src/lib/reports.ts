@@ -269,13 +269,16 @@ export async function compileReportData(type: 'daily' | 'weekly' | 'monthly', no
       returningVisitors = uniqueSessionIds.filter(s => oldSessions.has(s)).length;
     }
     
-    // Calculate checkout sessions (page views on path starting with /checkout, excluding success/failed)
+    // Calculate checkout sessions (Checkout Page Opened)
     const checkoutSessions = [...new Set(
       analytics
         .filter(e => {
-          if (e.event_name !== 'page_view') return false;
-          const path = e.metadata?.pathname || e.metadata?.path || "";
-          return path.startsWith('/checkout') && !path.includes('/success') && !path.includes('/failed');
+          if (e.event_name === 'checkout_page_opened') return true;
+          if (e.event_name === 'page_view') {
+            const path = e.metadata?.pathname || e.metadata?.path || "";
+            return path.startsWith('/checkout') && !path.includes('/success') && !path.includes('/failed');
+          }
+          return false;
         })
         .map(e => e.session_id)
         .filter(Boolean)
@@ -1310,13 +1313,16 @@ export async function compileRawMetricsForRange(start: Date, end: Date, isLifeti
     returningVisitors = uniqueSessionIds.filter(s => oldSessions.has(s)).length;
   }
   
-  // Calculate checkout sessions (page views on path starting with /checkout, excluding success/failed)
+  // Calculate checkout sessions (Checkout Page Opened)
   const checkoutSessions = [...new Set(
     analytics
       .filter(e => {
-        if (e.event_name !== 'page_view') return false;
-        const path = e.metadata?.pathname || e.metadata?.path || "";
-        return path.startsWith('/checkout') && !path.includes('/success') && !path.includes('/failed');
+        if (e.event_name === 'checkout_page_opened') return true;
+        if (e.event_name === 'page_view') {
+          const path = e.metadata?.pathname || e.metadata?.path || "";
+          return path.startsWith('/checkout') && !path.includes('/success') && !path.includes('/failed');
+        }
+        return false;
       })
       .map(e => e.session_id)
       .filter(Boolean)

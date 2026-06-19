@@ -1002,6 +1002,8 @@ export default function AdminDashboard() {
 
       // Extract specific views for this product from event logs (strict database values)
       const finalViews = filteredAnalyticsEvents.filter(e => e.product_id === p.id && (e.event_name === "product_view" || e.event_name === "page_view")).length;
+      const checkoutPageOpeneds = filteredAnalyticsEvents.filter(e => e.product_id === p.id && e.event_name === "checkout_page_opened").length;
+      const checkoutStarteds = filteredAnalyticsEvents.filter(e => e.product_id === p.id && e.event_name === "checkout_started").length;
       const conversionRate = finalViews > 0 ? (salesUnits / finalViews) * 100 : 0;
 
       return {
@@ -1010,6 +1012,8 @@ export default function AdminDashboard() {
         price: p.price,
         salesUnits,
         views: finalViews,
+        checkoutPageOpeneds,
+        checkoutStarteds,
         conversionRate,
         failureRate,
         grossRevenue

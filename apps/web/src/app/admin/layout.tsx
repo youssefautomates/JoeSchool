@@ -7,7 +7,7 @@ import {
   LayoutDashboard, Package, ShoppingCart, Settings, LogOut,
   Search, Bell, Sparkles, Target, Star, BarChart3, ShieldAlert,
   Flame, Globe, ShieldCheck, BookOpen, Users, Award, Mail, LayoutGrid,
-  Menu, X
+  Menu, X, TrendingUp
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { motion, AnimatePresence } from "framer-motion";
@@ -28,7 +28,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       items: [
         { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
         { name: "AI Assistant", href: "/admin/ai", icon: Sparkles },
-        { name: "Performance Reports", href: "/admin/analytics", icon: BarChart3 }
+        { name: "Performance Reports", href: "/admin/analytics", icon: BarChart3 },
+        { name: "Detailed Analytics", href: "/admin/analytics/performance", icon: TrendingUp }
       ]
     },
     {
