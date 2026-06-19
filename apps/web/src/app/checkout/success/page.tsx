@@ -29,6 +29,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useCart } from "@/context/CartContext";
 import { trackPurchase, trackLead } from "@/lib/metaPixel";
+import { trackEvent } from "@/lib/analytics";
 import { supabaseClient } from "@/lib/supabaseClient";
 
 function FloatingParticle({ delay, x, size }: { delay: number; x: number; size: number }) {
@@ -195,50 +196,61 @@ function SuccessContent() {
           setPhase("success");
           setTimeout(() => setShowParticles(true), 300);
           
-          if (!data.alreadyDelivered) {
+if (!data.alreadyDelivered) {
              clearCart();
              toast.success("تم تأكيد دفعك بنجاح! شكراً لثقتك بنا.");
-          }
+           }
 
-          // Facebook and TikTok purchase triggers
-          if (typeof window !== "undefined") {
-            const sessionStorageKey = `purchase_tracked_${id}`;
-            const hasTracked = sessionStorage.getItem(sessionStorageKey);
-            
-            if (!hasTracked) {
-              sessionStorage.setItem(sessionStorageKey, "true");
-              console.log(`[META_TRACKING] Firing client-side Pixel Purchase event for transaction: ${id}`);
-              
-              const productIds = data.products && data.products.length > 0
-                ? data.products.map((p: any) => String(p.id))
-                : [id];
+           // Facebook and TikTok purchase triggers
+           if (typeof window !== "undefined") {
+             const sessionStorageKey = `purchase_tracked_${id}`;
+             const hasTracked = sessionStorage.getItem(sessionStorageKey);
+             
+             if (!hasTracked) {
+               sessionStorage.setItem(sessionStorageKey, "true");
+               console.log(`[META_TRACKING] Firing client-side Pixel Purchase event for transaction: ${id}`);
+               
+               const productIds = data.products && data.products.length > 0
+                 ? data.products.map((p: any) => String(p.id))
+                 : [id];
 
-              // High-Performance Unified Meta Purchase tracking (Pixel + CAPI)
-              trackPurchase(
-                id,
-                data.productTitle || "منتجك الرقمي",
-                productIds,
-                Number(data.orderValue) || 0,
-                data.currency || "EGP"
-              );
+               // Track purchase in Supabase analytics database
+               const primaryProductId = data.products && data.products.length > 1 ? "cart" : (data.products && data.products.length === 1 ? data.products[0].id : id);
+               const primaryTitle = data.products && data.products.length > 1 ? "Cart Purchase" : (data.productTitle || "Order");
+               trackEvent("purchase", primaryProductId, primaryTitle, {
+                 price: parseFloat(data.orderValue || "0"),
+                 currency: data.currency || "EGP",
+                 orderId: id,
+                 transactionId: data.transactionId || id,
+                 products: data.products
+               });
 
-              if ((window as any).ttq) {
-                (window as any).ttq.track("CompletePayment", {
-                  value: data.orderValue,
-                  currency: data.currency,
-                  contents: productIds.map((pid: string) => ({
-                    content_id: pid,
-                    content_name: data.productTitle || "منتجك الرقمي",
-                    quantity: 1
-                  })),
-                  content_type: "product",
-                });
-              }
-            } else {
-              console.log(`[META_TRACKING] Duplicate visit detected for transaction: ${id}. Client-side Pixel Purchase trigger skipped.`);
-            }
-          }
-          return;
+               // High-Performance Unified Meta Purchase tracking (Pixel + CAPI)
+               trackPurchase(
+                 id,
+                 data.productTitle || "منتجك الرقمي",
+                 productIds,
+                 Number(data.orderValue) || 0,
+                 data.currency || "EGP"
+               );
+
+               if ((window as any).ttq) {
+                 (window as any).ttq.track("CompletePayment", {
+                   value: data.orderValue,
+                   currency: data.currency,
+                   contents: productIds.map((pid: string) => ({
+                     content_id: pid,
+                     content_name: data.productTitle || "منتجك الرقمي",
+                     quantity: 1
+                   })),
+                   content_type: "product",
+                 });
+               }
+             } else {
+               console.log(`[META_TRACKING] Duplicate visit detected for transaction: ${id}. Client-side Pixel Purchase trigger skipped.`);
+             }
+           }
+           return;
         }
 
         if (data.status === "pending" && attempt < maxAttempts) {

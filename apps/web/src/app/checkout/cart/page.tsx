@@ -163,14 +163,11 @@ export default function CartCheckoutPage() {
 
   // Track checkout_page_opened on mount
   useEffect(() => {
-    if (items.length > 0) {
-      trackEvent("checkout_page_opened", "cart", "Cart Checkout", {
-        price: resolvedCartTotal,
-        currency: currency,
-        type: "cart"
-      });
-    }
-  }, [items.length, currency, resolvedCartTotal]); // eslint-disable-line
+    trackEvent("checkout_page_opened", "cart", "Cart Checkout", {
+      type: "cart",
+      pathname: window.location.pathname
+    });
+  }, []); // eslint-disable-line
 
   // Card Formatting & Validation Handlers
   const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {

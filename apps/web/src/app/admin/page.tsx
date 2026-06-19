@@ -721,8 +721,8 @@ export default function AdminDashboard() {
     // Cart Abandonment Rate (strictly from database events)
     const checkoutPageOpenedEvents = rangeEvents.filter(e => e.event_name === "checkout_page_opened").length;
     const checkoutStartedEvents = rangeEvents.filter(e => e.event_name === "checkout_started").length;
-    const abandonedCarts = Math.max(0, checkoutPageOpenedEvents - completed.length);
-    const abandonmentRate = (checkoutPageOpenedEvents > 0 || completed.length > 0)
+    const abandonedCarts = Math.max(0, checkoutStartedEvents - completed.length);
+    const abandonmentRate = (checkoutStartedEvents > 0 || completed.length > 0)
       ? (abandonedCarts / (abandonedCarts + completed.length)) * 100
       : 0;
 
@@ -774,7 +774,7 @@ export default function AdminDashboard() {
     const addToCartCount = rangeEventsAll.filter(e => e.event_name === "add_to_cart").length;
     const checkoutPageOpenedCount = rangeEventsAll.filter(e => e.event_name === "checkout_page_opened").length;
     const checkoutStartedCount = rangeEventsAll.filter(e => e.event_name === "checkout_started").length;
-    const abandonedCheckouts = Math.max(0, checkoutPageOpenedCount - completed.length);
+    const abandonedCheckouts = Math.max(0, checkoutStartedCount - completed.length);
 
     return {
       grossRevenue,

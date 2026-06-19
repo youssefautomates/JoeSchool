@@ -260,6 +260,14 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
   };
 
   useEffect(() => {
+    // Track checkout_page_opened immediately on page mount - don't wait for product fetch
+    trackEvent("checkout_page_opened", resolvedParams.id, "Checkout", {
+      type: "single",
+      pathname: window.location.pathname
+    });
+  }, [resolvedParams.id]);
+
+  useEffect(() => {
     resolveUserCurrency().then(async (detectedCurrency) => {
       setCurrency(detectedCurrency);
       if (detectedCurrency === "USD") {
@@ -352,13 +360,6 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
 
       setProduct(mappedProduct);
       setIsCourse(isCourseItem);
-      
-      // Track checkout_page_opened in Supabase analytics database
-      trackEvent("checkout_page_opened", mappedProduct.id, mappedProduct.title, {
-        price: mappedProduct.price,
-        currency: resolvedCurrency,
-        type: isCourseItem ? "course" : "product"
-      });
       
       // Restore Instapay modal if user is returning from external payment link
       if (typeof window !== "undefined") {
