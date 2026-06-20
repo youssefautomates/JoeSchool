@@ -578,7 +578,7 @@ export default function AdminSettings() {
                         onChange={e => setMetaPixelId(e.target.value)}
                         dir="ltr"
                         placeholder="e.g. 1234567890"
-                        className="h-12 bg-white/5 border-white/10 rounded-xl focus:border-rose-500 transition-all text-xs text-left font-mono" 
+                        className="h-12 bg-white/5 border-white/10 rounded-xl focus:border-rose-500 transition-all text-xs text-left font-mono text-zinc-300" 
                       />
                     </div>
                     <div className="md:col-span-4 space-y-3">
@@ -608,7 +608,7 @@ export default function AdminSettings() {
                           onChange={e => setMetaCapiToken(e.target.value)}
                           dir="ltr"
                           placeholder="EAAG..."
-                          className="h-12 bg-white/5 border-white/10 rounded-xl focus:border-rose-500 transition-all text-xs text-left font-mono pr-12 truncate" 
+                          className="h-12 bg-white/5 border-white/10 rounded-xl focus:border-rose-500 transition-all text-xs text-left font-mono pr-12 truncate text-zinc-300" 
                         />
                         <button 
                           onClick={() => setShowCapiToken(!showCapiToken)}
