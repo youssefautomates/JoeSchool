@@ -7,6 +7,8 @@ import { getKV } from "./kv";
 // Types for compiled report metrics
 export interface ReportMetrics {
   revenue: number;
+  netRevenue: number;
+  processingFees: number;
   orders: number;
   newStudents: number;
   aov: number;
@@ -15,11 +17,16 @@ export interface ReportMetrics {
   newVisitors: number;
   returningVisitors: number;
   checkoutSessions: number;
+  checkoutOpened: number;
+  checkoutStarted: number;
+  purchasingSessions: number;
   conversionRate: number;
   bestSellingCourse: string;
   
   // Growth fields
   revenueGrowth: number;
+  netRevenueGrowth: number;
+  feesGrowth: number;
   ordersGrowth: number;
   studentsGrowth: number;
   visitsGrowth: number;
@@ -27,6 +34,9 @@ export interface ReportMetrics {
   newVisitorsGrowth: number;
   returningVisitorsGrowth: number;
   checkoutGrowth: number;
+  checkoutOpenedGrowth: number;
+  checkoutStartedGrowth: number;
+  purchasingSessionsGrowth: number;
   conversionChange: number; // percentage point difference
   conversionGrowth: number; // percentage rate growth
   aovGrowth: number;
@@ -251,7 +261,6 @@ export async function compileReportData(type: 'daily' | 'weekly' | 'monthly', no
     const visits = analytics.filter(e => e.event_name === 'page_view').length;
     
     const uniqueSessionIds = [...new Set(analytics.map(e => e.session_id).filter(Boolean))];
-    const uniqueVisitors = uniqueSessionIds.length;
     
     // Calculate new vs returning visitors
     let newVisitors = 0;
@@ -269,7 +278,7 @@ export async function compileReportData(type: 'daily' | 'weekly' | 'monthly', no
       returningVisitors = uniqueSessionIds.filter(s => oldSessions.has(s)).length;
     }
     
-    // Calculate checkout sessions (Checkout Page Opened)
+    // Calculate checkout sessions (Checkout Page Opened) - raw for backward compatibility
     const checkoutSessions = [...new Set(
       analytics
         .filter(e => {
@@ -283,8 +292,67 @@ export async function compileReportData(type: 'daily' | 'weekly' | 'monthly', no
         .map(e => e.session_id)
         .filter(Boolean)
     )].length;
+
+    // 1. Resolve purchasing sessions (completed orders mapped to sessions)
+    const purchasingSessionsSet = new Set<string>();
+    const processingFees = completedOrders.reduce((sum, o) => sum + Number(o.gateway_fee_amount || 0), 0);
+    const netRevenue = revenue - processingFees;
     
-    const conversionRate = uniqueVisitors > 0 ? (ordersCount / uniqueVisitors) * 100 : 0;
+    if (completedOrders.length > 0) {
+      const orderIds = completedOrders.map(o => o.id);
+      const { data: orderCreatedEvents } = await supabaseAdmin
+        .from('analytics_events')
+        .select('session_id')
+        .eq('event_name', 'order_created')
+        .in('metadata->>order_id', orderIds);
+        
+      if (orderCreatedEvents) {
+        orderCreatedEvents.forEach(e => {
+          if (e.session_id) purchasingSessionsSet.add(e.session_id);
+        });
+      }
+      
+      analytics
+        .filter(e => e.event_name === 'purchase')
+        .forEach(e => {
+          if (e.session_id) purchasingSessionsSet.add(e.session_id);
+        });
+    }
+    const purchasingSessions = purchasingSessionsSet.size;
+
+    // 2. Resolve checkout started sessions (checkout_started or order_created, backfilled by purchasing)
+    const checkoutStartedSet = new Set<string>();
+    analytics
+      .filter(e => e.event_name === 'checkout_started' || e.event_name === 'order_created')
+      .forEach(e => {
+        if (e.session_id) checkoutStartedSet.add(e.session_id);
+      });
+    purchasingSessionsSet.forEach(s => checkoutStartedSet.add(s));
+    const checkoutStarted = checkoutStartedSet.size;
+
+    // 3. Resolve checkout page opened sessions (checkout_page_opened or page view, backfilled by later stages)
+    const checkoutOpenedSet = new Set<string>();
+    analytics
+      .filter(e => {
+        if (e.event_name === 'checkout_page_opened') return true;
+        if (e.event_name === 'page_view') {
+          const path = e.metadata?.pathname || e.metadata?.path || "";
+          return path.startsWith('/checkout') && !path.includes('/success') && !path.includes('/failed');
+        }
+        return false;
+      })
+      .forEach(e => {
+        if (e.session_id) checkoutOpenedSet.add(e.session_id);
+      });
+    checkoutStartedSet.forEach(s => checkoutOpenedSet.add(s));
+    const checkoutOpened = checkoutOpenedSet.size;
+
+    // 4. Resolve unique visitors (all session IDs, backfilled by all later stages)
+    const uniqueVisitorsSet = new Set<string>(uniqueSessionIds);
+    checkoutOpenedSet.forEach(s => uniqueVisitorsSet.add(s));
+    const uniqueVisitors = uniqueVisitorsSet.size;
+    
+    const conversionRate = uniqueVisitors > 0 ? (purchasingSessions / uniqueVisitors) * 100 : 0;
     
     // Calculate Course Performance
     const courseSalesMap: { [course: string]: CourseSalesData } = {};
@@ -302,6 +370,8 @@ export async function compileReportData(type: 'daily' | 'weekly' | 'monthly', no
     
     return {
       revenue,
+      netRevenue,
+      processingFees,
       orders: ordersCount,
       newStudents,
       aov,
@@ -310,6 +380,9 @@ export async function compileReportData(type: 'daily' | 'weekly' | 'monthly', no
       newVisitors,
       returningVisitors,
       checkoutSessions,
+      checkoutOpened,
+      checkoutStarted,
+      purchasingSessions,
       conversionRate,
       bestSellingCourse,
       coursesPerformance,
@@ -324,6 +397,8 @@ export async function compileReportData(type: 'daily' | 'weekly' | 'monthly', no
   // Compute growths
   const metrics: ReportMetrics = {
     revenue: currentData.revenue,
+    netRevenue: currentData.netRevenue,
+    processingFees: currentData.processingFees,
     orders: currentData.orders,
     newStudents: currentData.newStudents,
     aov: currentData.aov,
@@ -332,10 +407,15 @@ export async function compileReportData(type: 'daily' | 'weekly' | 'monthly', no
     newVisitors: currentData.newVisitors,
     returningVisitors: currentData.returningVisitors,
     checkoutSessions: currentData.checkoutSessions,
+    checkoutOpened: currentData.checkoutOpened,
+    checkoutStarted: currentData.checkoutStarted,
+    purchasingSessions: currentData.purchasingSessions,
     conversionRate: currentData.conversionRate,
     bestSellingCourse: currentData.bestSellingCourse,
     
     revenueGrowth: calculateGrowth(currentData.revenue, prevData.revenue),
+    netRevenueGrowth: calculateGrowth(currentData.netRevenue, prevData.netRevenue),
+    feesGrowth: calculateGrowth(currentData.processingFees, prevData.processingFees),
     ordersGrowth: calculateGrowth(currentData.orders, prevData.orders),
     studentsGrowth: calculateGrowth(currentData.newStudents, prevData.newStudents),
     visitsGrowth: calculateGrowth(currentData.visits, prevData.visits),
@@ -343,6 +423,9 @@ export async function compileReportData(type: 'daily' | 'weekly' | 'monthly', no
     newVisitorsGrowth: calculateGrowth(currentData.newVisitors, prevData.newVisitors),
     returningVisitorsGrowth: calculateGrowth(currentData.returningVisitors, prevData.returningVisitors),
     checkoutGrowth: calculateGrowth(currentData.checkoutSessions, prevData.checkoutSessions),
+    checkoutOpenedGrowth: calculateGrowth(currentData.checkoutOpened, prevData.checkoutOpened),
+    checkoutStartedGrowth: calculateGrowth(currentData.checkoutStarted, prevData.checkoutStarted),
+    purchasingSessionsGrowth: calculateGrowth(currentData.purchasingSessions, prevData.purchasingSessions),
     conversionChange: currentData.conversionRate - prevData.conversionRate,
     conversionGrowth: calculateGrowth(currentData.conversionRate, prevData.conversionRate),
     aovGrowth: calculateGrowth(currentData.aov, prevData.aov)
@@ -350,6 +433,8 @@ export async function compileReportData(type: 'daily' | 'weekly' | 'monthly', no
 
   const prevMetrics: ReportMetrics = {
     revenue: prevData.revenue,
+    netRevenue: prevData.netRevenue,
+    processingFees: prevData.processingFees,
     orders: prevData.orders,
     newStudents: prevData.newStudents,
     aov: prevData.aov,
@@ -358,10 +443,15 @@ export async function compileReportData(type: 'daily' | 'weekly' | 'monthly', no
     newVisitors: prevData.newVisitors,
     returningVisitors: prevData.returningVisitors,
     checkoutSessions: prevData.checkoutSessions,
+    checkoutOpened: prevData.checkoutOpened,
+    checkoutStarted: prevData.checkoutStarted,
+    purchasingSessions: prevData.purchasingSessions,
     conversionRate: prevData.conversionRate,
     bestSellingCourse: prevData.bestSellingCourse,
     
     revenueGrowth: 0,
+    netRevenueGrowth: 0,
+    feesGrowth: 0,
     ordersGrowth: 0,
     studentsGrowth: 0,
     visitsGrowth: 0,
@@ -369,6 +459,9 @@ export async function compileReportData(type: 'daily' | 'weekly' | 'monthly', no
     newVisitorsGrowth: 0,
     returningVisitorsGrowth: 0,
     checkoutGrowth: 0,
+    checkoutOpenedGrowth: 0,
+    checkoutStartedGrowth: 0,
+    purchasingSessionsGrowth: 0,
     conversionChange: 0,
     conversionGrowth: 0,
     aovGrowth: 0
@@ -514,71 +607,49 @@ function totalRevenueSum(courses: CourseSalesData[]): number {
   return courses.reduce((sum, c) => sum + c.revenue, 0);
 }
 
-/**
- * Generates the clean HTML/Text formatted report for Telegram
- */
 export function generateTelegramReportMessage(reportData: ReportData): string {
   const m = reportData.metrics;
-  const tLabel = reportData.type.toUpperCase();
-  const emoji = reportData.type === 'daily' ? '📊' : reportData.type === 'weekly' ? '📈' : '🏆';
+  const typeMap = {
+    daily: "اليومي",
+    weekly: "الأسبوعي",
+    monthly: "الشهري"
+  };
+  const typeAr = typeMap[reportData.type] || "اليومي";
   
-  // Format helpers
-  const formatPct = (val: number) => {
-    return `${val >= 0 ? '🟢 +' : '🔴 '}${val.toFixed(1)}%`;
-  };
-  const formatChangePoint = (val: number) => {
-    return `${val >= 0 ? '🟢 +' : '🔴 '}${val.toFixed(2)}% pts`;
-  };
+  const openPct = m.uniqueVisitors > 0 ? ((m.checkoutOpened / m.uniqueVisitors) * 100).toFixed(1) : "0.0";
+  const startPct = m.checkoutOpened > 0 ? ((m.checkoutStarted / m.checkoutOpened) * 100).toFixed(1) : "0.0";
+  const purchasePct = m.checkoutStarted > 0 ? ((m.purchasingSessions / m.checkoutStarted) * 100).toFixed(1) : "0.0";
 
   let message = "";
+  message += `📊 <b>تقرير أداء جو سكول ${typeAr}</b>\n`;
+  message += `📅 <b>الفترة:</b> ${reportData.periodLabel}\n\n`;
   
-  // Prepend proactive alerts if any
-  if (reportData.alerts && reportData.alerts.length > 0) {
-    message += `⚠️ <b>PROACTIVE BUSINESS ALERT</b>\n`;
-    reportData.alerts.forEach(a => {
-      message += `• ${a}\n`;
-    });
-    message += `------------------------------------\n\n`;
-  }
+  message += `<b>الخلاصة:</b>\n`;
+  message += `• الزوار الفريدين: ${m.uniqueVisitors}\n`;
+  message += `• فتح صفحة الدفع: ${m.checkoutOpened} (${openPct}% من الزوار)\n`;
+  message += `• بدء الدفع: ${m.checkoutStarted} (${startPct}% من فتح صفحة الدفع)\n`;
+  message += `• جلسات الشراء: ${m.purchasingSessions} (${purchasePct}% من بدء الدفع)\n`;
+  message += `• معدل التحويل: ${m.conversionRate.toFixed(1)}%\n\n`;
 
-  message += `${emoji} <b>JOESCHOOL ${tLabel} BUSINESS REPORT</b>\n`;
-  message += `📅 <b>Period:</b> ${reportData.periodLabel}\n\n`;
-  
-  message += `📊 <b>Performance Summary</b>\n`;
-  message += `• <b>Total Revenue:</b> ${m.revenue.toLocaleString()} EGP (${formatPct(m.revenueGrowth)})\n`;
-  message += `• <b>Total Orders:</b> ${m.orders} (${formatPct(m.ordersGrowth)})\n`;
-  message += `• <b>New Students:</b> ${m.newStudents} (${formatPct(m.studentsGrowth)})\n`;
-  message += `• <b>Average Order Value:</b> ${Math.round(m.aov)} EGP (${formatPct(m.aovGrowth)})\n\n`;
+  message += `<b>الإيرادات والمبيعات:</b>\n`;
+  message += `• إجمالي الطلبات: ${m.orders}\n`;
+  message += `• الإيرادات الإجمالية: ${m.revenue.toLocaleString()} جنيه\n`;
+  message += `• رسوم الدفع: ${m.processingFees.toLocaleString()} جنيه\n`;
+  message += `• الإيرادات الصافية: ${m.netRevenue.toLocaleString()} جنيه\n\n`;
 
-  message += `🌐 <b>Traffic & Conversions</b>\n`;
-  message += `• <b>Total Visits:</b> ${m.visits} (${formatPct(m.visitsGrowth)})\n`;
-  message += `• <b>Unique Visitors:</b> ${m.uniqueVisitors} (${formatPct(m.uniqueGrowth)})\n`;
-  message += `• <b>Conversion Rate:</b> ${m.conversionRate.toFixed(2)}% (${formatChangePoint(m.conversionChange)})\n\n`;
-
-  const topLimit = reportData.type === 'daily' ? 5 : 10;
-  message += `🔥 <b>Top Courses (Max ${topLimit})</b>\n`;
+  message += `🎓 <b>أفضل الدورات مبيعاً</b>\n\n`;
   if (reportData.coursesPerformance.length === 0) {
-    message += `• No sales recorded.\n\n`;
+    message += `• لا توجد مبيعات مسجلة.`;
   } else {
+    const topLimit = reportData.type === 'daily' ? 5 : 10;
     reportData.coursesPerformance.slice(0, topLimit).forEach((c, idx) => {
-      message += `${idx + 1}. ${c.courseName} (${c.sales} sales | ${c.revenue.toLocaleString()} EGP)\n`;
+      message += `${idx + 1}. ${c.courseName}\n`;
+      message += `   * المبيعات: ${c.sales}\n`;
+      message += `   * الإيرادات: ${c.revenue.toLocaleString()} جنيه\n\n`;
     });
-    message += `\n`;
   }
 
-  // Business Insights Section as requested by the user
-  message += `💡 <b>Key Insights</b>\n`;
-  reportData.insights.forEach(i => {
-    message += `• ${i}\n`;
-  });
-  message += `\n`;
-
-  message += `🚀 <b>Opportunities</b>\n`;
-  reportData.opportunities.forEach(o => {
-    message += `• ${o}\n`;
-  });
-
-  return sanitizeMarkdown(message);
+  return sanitizeMarkdown(message.trim());
 }
 
 /**
@@ -1295,7 +1366,6 @@ export async function compileRawMetricsForRange(start: Date, end: Date, isLifeti
   const visits = analytics.filter(e => e.event_name === 'page_view').length;
   
   const uniqueSessionIds = [...new Set(analytics.map(e => e.session_id).filter(Boolean))];
-  const uniqueVisitors = uniqueSessionIds.length;
   
   // Calculate new vs returning visitors
   let newVisitors = 0;
@@ -1313,22 +1383,66 @@ export async function compileRawMetricsForRange(start: Date, end: Date, isLifeti
     returningVisitors = uniqueSessionIds.filter(s => oldSessions.has(s)).length;
   }
   
-  // Calculate checkout sessions (Checkout Page Opened)
-  const checkoutSessions = [...new Set(
-    analytics
-      .filter(e => {
-        if (e.event_name === 'checkout_page_opened') return true;
-        if (e.event_name === 'page_view') {
-          const path = e.metadata?.pathname || e.metadata?.path || "";
-          return path.startsWith('/checkout') && !path.includes('/success') && !path.includes('/failed');
-        }
-        return false;
-      })
-      .map(e => e.session_id)
-      .filter(Boolean)
-  )].length;
+  // 1. Resolve purchasing sessions (completed orders mapped to sessions)
+  const purchasingSessionsSet = new Set<string>();
+  const processingFees = completedOrders.reduce((sum, o) => sum + Number(o.gateway_fee_amount || 0), 0);
+  const netRevenue = revenue - processingFees;
   
-  const conversionRate = uniqueVisitors > 0 ? (ordersCount / uniqueVisitors) * 100 : 0;
+  if (completedOrders.length > 0) {
+    const orderIds = completedOrders.map(o => o.id);
+    const { data: orderCreatedEvents } = await supabaseAdmin
+      .from('analytics_events')
+      .select('session_id')
+      .eq('event_name', 'order_created')
+      .in('metadata->>order_id', orderIds);
+      
+    if (orderCreatedEvents) {
+      orderCreatedEvents.forEach(e => {
+        if (e.session_id) purchasingSessionsSet.add(e.session_id);
+      });
+    }
+    
+    analytics
+      .filter(e => e.event_name === 'purchase')
+      .forEach(e => {
+        if (e.session_id) purchasingSessionsSet.add(e.session_id);
+      });
+  }
+  const purchasingSessions = purchasingSessionsSet.size;
+
+  // 2. Resolve checkout started sessions (checkout_started or order_created, backfilled by purchasing)
+  const checkoutStartedSet = new Set<string>();
+  analytics
+    .filter(e => e.event_name === 'checkout_started' || e.event_name === 'order_created')
+    .forEach(e => {
+      if (e.session_id) checkoutStartedSet.add(e.session_id);
+    });
+  purchasingSessionsSet.forEach(s => checkoutStartedSet.add(s));
+  const checkoutStarted = checkoutStartedSet.size;
+
+  // 3. Resolve checkout page opened sessions (checkout_page_opened or page view, backfilled by later stages)
+  const checkoutOpenedSet = new Set<string>();
+  analytics
+    .filter(e => {
+      if (e.event_name === 'checkout_page_opened') return true;
+      if (e.event_name === 'page_view') {
+        const path = e.metadata?.pathname || e.metadata?.path || "";
+        return path.startsWith('/checkout') && !path.includes('/success') && !path.includes('/failed');
+      }
+      return false;
+    })
+    .forEach(e => {
+      if (e.session_id) checkoutOpenedSet.add(e.session_id);
+    });
+  checkoutStartedSet.forEach(s => checkoutOpenedSet.add(s));
+  const checkoutOpened = checkoutOpenedSet.size;
+
+  // 4. Resolve unique visitors (all session IDs, backfilled by all later stages)
+  const uniqueVisitorsSet = new Set<string>(uniqueSessionIds);
+  checkoutOpenedSet.forEach(s => uniqueVisitorsSet.add(s));
+  const uniqueVisitors = uniqueVisitorsSet.size;
+  
+  const conversionRate = uniqueVisitors > 0 ? (purchasingSessions / uniqueVisitors) * 100 : 0;
   
   // Calculate Course Performance
   const courseSalesMap: { [course: string]: CourseSalesData } = {};
@@ -1346,6 +1460,8 @@ export async function compileRawMetricsForRange(start: Date, end: Date, isLifeti
   
   return {
     revenue,
+    netRevenue,
+    processingFees,
     orders: ordersCount,
     freeOrdersCount,
     freeOrdersCoupons,
@@ -1355,7 +1471,10 @@ export async function compileRawMetricsForRange(start: Date, end: Date, isLifeti
     uniqueVisitors,
     newVisitors,
     returningVisitors,
-    checkoutSessions,
+    checkoutSessions: checkoutOpened,
+    checkoutOpened,
+    checkoutStarted,
+    purchasingSessions,
     conversionRate,
     bestSellingCourse,
     coursesPerformance,

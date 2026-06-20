@@ -710,21 +710,58 @@ export default function AdminDashboard() {
 
     // Target total visitor count from session logs
     const rangeEvents = analyticsEvents.filter(e => new Date(e.created_at) >= dateCutoff);
-    const uniqueSessionIds = new Set(rangeEvents.map(e => e.session_id));
-    
+    const completedOrderIds = new Set(completed.map(o => o.id));
+
+    // 1. Purchasing Sessions
+    const purchasingSessionsSet = new Set<string>();
+    rangeEvents.forEach(e => {
+      if (e.session_id) {
+        if (e.event_name === 'purchase') {
+          purchasingSessionsSet.add(e.session_id);
+        }
+        if (e.event_name === 'order_created') {
+          const oid = e.metadata?.order_id || e.metadata?.orderId;
+          if (oid && completedOrderIds.has(oid)) {
+            purchasingSessionsSet.add(e.session_id);
+          }
+        }
+      }
+    });
+
+    // 2. Checkout Started (backfilled by purchasing)
+    const checkoutStartedSet = new Set<string>();
+    rangeEvents.forEach(e => {
+      if (e.session_id && (e.event_name === 'checkout_started' || e.event_name === 'order_created')) {
+        checkoutStartedSet.add(e.session_id);
+      }
+    });
+    purchasingSessionsSet.forEach(s => checkoutStartedSet.add(s));
+
+    // 3. Checkout Page Opened (backfilled by checkout started)
+    const checkoutOpenedSet = new Set<string>();
+    rangeEvents.forEach(e => {
+      if (e.session_id) {
+        if (e.event_name === 'checkout_page_opened') {
+          checkoutOpenedSet.add(e.session_id);
+        } else if (e.event_name === 'page_view') {
+          const path = e.metadata?.pathname || e.metadata?.path || "";
+          if (path.startsWith('/checkout') && !path.includes('/success') && !path.includes('/failed')) {
+            checkoutOpenedSet.add(e.session_id);
+          }
+        }
+      }
+    });
+    checkoutStartedSet.forEach(s => checkoutOpenedSet.add(s));
+
+    // 4. Unique Visitors
+    const uniqueVisitorsSet = new Set<string>(rangeEvents.map(e => e.session_id).filter(Boolean));
+    checkoutOpenedSet.forEach(s => uniqueVisitorsSet.add(s));
+
     // Strictly use actual visitor count from session logs (0 if empty)
-    const totalSessions = uniqueSessionIds.size;
+    const totalSessions = uniqueVisitorsSet.size;
 
     // CR (Conversion Rate)
-    const conversionRate = totalSessions > 0 ? (completed.length / totalSessions) * 100 : 0;
-
-    // Cart Abandonment Rate (strictly from database events)
-    const checkoutPageOpenedEvents = rangeEvents.filter(e => e.event_name === "checkout_page_opened").length;
-    const checkoutStartedEvents = rangeEvents.filter(e => e.event_name === "checkout_started").length;
-    const abandonedCarts = Math.max(0, checkoutStartedEvents - completed.length);
-    const abandonmentRate = (checkoutStartedEvents > 0 || completed.length > 0)
-      ? (abandonedCarts / (abandonedCarts + completed.length)) * 100
-      : 0;
+    const conversionRate = totalSessions > 0 ? (purchasingSessionsSet.size / totalSessions) * 100 : 0;
 
     // Historical Period Comparison Trends
     const prevCompleted = previousPeriodOrders.filter(o => o.status === "completed");
@@ -761,20 +798,69 @@ export default function AdminDashboard() {
       const d = new Date(e.created_at);
       return d >= startPrev && d < endPrev;
     });
-    const prevUniqueSessions = new Set(prevRangeEvents.map(e => e.session_id)).size;
-    const prevSessions = prevUniqueSessions;
-    const prevConversionRate = prevSessions > 0 ? (prevCompleted.length / prevSessions) * 100 : 0;
+
+    const prevCompletedOrderIds = new Set(prevCompleted.map(o => o.id));
+
+    // Previous period Purchasing Sessions
+    const prevPurchasingSessionsSet = new Set<string>();
+    prevRangeEvents.forEach(e => {
+      if (e.session_id) {
+        if (e.event_name === 'purchase') {
+          prevPurchasingSessionsSet.add(e.session_id);
+        }
+        if (e.event_name === 'order_created') {
+          const oid = e.metadata?.order_id || e.metadata?.orderId;
+          if (oid && prevCompletedOrderIds.has(oid)) {
+            prevPurchasingSessionsSet.add(e.session_id);
+          }
+        }
+      }
+    });
+
+    // Previous period Checkout Started
+    const prevCheckoutStartedSet = new Set<string>();
+    prevRangeEvents.forEach(e => {
+      if (e.session_id && (e.event_name === 'checkout_started' || e.event_name === 'order_created')) {
+        prevCheckoutStartedSet.add(e.session_id);
+      }
+    });
+    prevPurchasingSessionsSet.forEach(s => prevCheckoutStartedSet.add(s));
+
+    // Previous period Checkout Opened
+    const prevCheckoutOpenedSet = new Set<string>();
+    prevRangeEvents.forEach(e => {
+      if (e.session_id) {
+        if (e.event_name === 'checkout_page_opened') {
+          prevCheckoutOpenedSet.add(e.session_id);
+        } else if (e.event_name === 'page_view') {
+          const path = e.metadata?.pathname || e.metadata?.path || "";
+          if (path.startsWith('/checkout') && !path.includes('/success') && !path.includes('/failed')) {
+            prevCheckoutOpenedSet.add(e.session_id);
+          }
+        }
+      }
+    });
+    prevCheckoutStartedSet.forEach(s => prevCheckoutOpenedSet.add(s));
+
+    // Previous period Unique Visitors
+    const prevUniqueVisitorsSet = new Set<string>(prevRangeEvents.map(e => e.session_id).filter(Boolean));
+    prevCheckoutOpenedSet.forEach(s => prevUniqueVisitorsSet.add(s));
+
+    const prevSessions = prevUniqueVisitorsSet.size;
+    const prevConversionRate = prevSessions > 0 ? (prevPurchasingSessionsSet.size / prevSessions) * 100 : 0;
     const conversionRateGrowth = prevConversionRate > 0 
       ? ((conversionRate - prevConversionRate) / prevConversionRate) * 100 
       : 0;
 
     // Additional funnel stats for overview cards
-    const rangeEventsAll = analyticsEvents.filter(e => new Date(e.created_at) >= dateCutoff);
-    const totalVisitorsCount = new Set(rangeEventsAll.map(e => e.session_id)).size;
-    const addToCartCount = rangeEventsAll.filter(e => e.event_name === "add_to_cart").length;
-    const checkoutPageOpenedCount = rangeEventsAll.filter(e => e.event_name === "checkout_page_opened").length;
-    const checkoutStartedCount = rangeEventsAll.filter(e => e.event_name === "checkout_started").length;
-    const abandonedCheckouts = Math.max(0, checkoutStartedCount - completed.length);
+    const totalVisitorsCount = totalSessions;
+    const addToCartCount = rangeEvents.filter(e => e.event_name === "add_to_cart").length;
+    const checkoutPageOpenedCount = checkoutOpenedSet.size;
+    const checkoutStartedCount = checkoutStartedSet.size;
+    const abandonedCheckouts = Math.max(0, checkoutStartedCount - purchasingSessionsSet.size);
+    const abandonmentRate = (checkoutStartedCount > 0 || purchasingSessionsSet.size > 0)
+      ? (abandonedCheckouts / (abandonedCheckouts + purchasingSessionsSet.size)) * 100
+      : 0;
 
     return {
       grossRevenue,
@@ -947,28 +1033,79 @@ export default function AdminDashboard() {
   // Sales Conversion Funnel Engine (Direct SQL events clickstreams)
   const funnelMetrics = useMemo(() => {
     const rangeEvents = analyticsEvents.filter(e => new Date(e.created_at) >= dateCutoff);
-    const completedCount = filteredOrders.filter(o => o.status === "completed").length;
+    const completed = filteredOrders.filter(o => o.status === "completed");
+    const orderIds = new Set(completed.map(o => o.id));
 
-    const visitorsCount = new Set(rangeEvents.map(e => e.session_id)).size;
-    const productViews = rangeEvents.filter(e => e.event_name === "product_view" || e.event_name === "page_view").length;
-    const addToCarts = rangeEvents.filter(e => e.event_name === "add_to_cart").length;
-    const checkoutPageOpeneds = rangeEvents.filter(e => e.event_name === "checkout_page_opened").length;
-    const checkoutStarteds = rangeEvents.filter(e => e.event_name === "checkout_started").length;
+    // 1. Purchasing Sessions
+    const purchasingSessionsSet = new Set<string>();
+    rangeEvents.forEach(e => {
+      if (e.session_id) {
+        if (e.event_name === 'purchase') {
+          purchasingSessionsSet.add(e.session_id);
+        }
+        if (e.event_name === 'order_created') {
+          const oid = e.metadata?.order_id || e.metadata?.orderId;
+          if (oid && orderIds.has(oid)) {
+            purchasingSessionsSet.add(e.session_id);
+          }
+        }
+      }
+    });
 
-    const finalPurchases = completedCount;
-    const finalCheckouts = checkoutStarteds;
-    const finalCheckoutOpeneds = checkoutPageOpeneds;
-    const finalCarts = addToCarts;
-    const finalViews = productViews;
-    const finalVisitors = visitorsCount;
+    // 2. Checkout Started (backfilled by purchasing)
+    const checkoutStartedSet = new Set<string>();
+    rangeEvents.forEach(e => {
+      if (e.session_id && (e.event_name === 'checkout_started' || e.event_name === 'order_created')) {
+        checkoutStartedSet.add(e.session_id);
+      }
+    });
+    purchasingSessionsSet.forEach(s => checkoutStartedSet.add(s));
+
+    // 3. Checkout Page Opened (backfilled by checkout started)
+    const checkoutOpenedSet = new Set<string>();
+    rangeEvents.forEach(e => {
+      if (e.session_id) {
+        if (e.event_name === 'checkout_page_opened') {
+          checkoutOpenedSet.add(e.session_id);
+        } else if (e.event_name === 'page_view') {
+          const path = e.metadata?.pathname || e.metadata?.path || "";
+          if (path.startsWith('/checkout') && !path.includes('/success') && !path.includes('/failed')) {
+            checkoutOpenedSet.add(e.session_id);
+          }
+        }
+      }
+    });
+    checkoutStartedSet.forEach(s => checkoutOpenedSet.add(s));
+
+    // 4. Add To Cart (Unique sessions, backfilled by checkout opened)
+    const addToCartSet = new Set<string>();
+    rangeEvents.forEach(e => {
+      if (e.session_id && e.event_name === 'add_to_cart') {
+        addToCartSet.add(e.session_id);
+      }
+    });
+    checkoutOpenedSet.forEach(s => addToCartSet.add(s));
+
+    // 5. Product Views (Unique sessions, backfilled by add to cart)
+    const productViewsSet = new Set<string>();
+    rangeEvents.forEach(e => {
+      if (e.session_id && (e.event_name === 'product_view' || e.event_name === 'page_view')) {
+        productViewsSet.add(e.session_id);
+      }
+    });
+    addToCartSet.forEach(s => productViewsSet.add(s));
+
+    // 6. Total Visitors (Unique sessions, backfilled by product views)
+    const uniqueVisitorsSet = new Set<string>(rangeEvents.map(e => e.session_id).filter(Boolean));
+    productViewsSet.forEach(s => uniqueVisitorsSet.add(s));
 
     const stages = [
-      { name: "Total Visitors", count: finalVisitors, color: "#6366f1", label: "Initial site visits" },
-      { name: "Product Views", count: finalViews, color: "#3b82f6", label: "Detail page views" },
-      { name: "Add to Cart", count: finalCarts, color: "#a855f7", label: "Expressed purchase intent" },
-      { name: "Checkout Page Opened", count: finalCheckoutOpeneds, color: "#fcd34d", label: "Opened checkout page" },
-      { name: "Checkout Started", count: finalCheckouts, color: "#f59e0b", label: "Entered checkout flow" },
-      { name: "Purchases", count: finalPurchases, color: "#10b981", label: "Successful payments" }
+      { name: "Total Visitors", count: uniqueVisitorsSet.size, color: "#6366f1", label: "Initial site visits" },
+      { name: "Product Views", count: productViewsSet.size, color: "#3b82f6", label: "Detail page views" },
+      { name: "Add to Cart", count: addToCartSet.size, color: "#a855f7", label: "Expressed purchase intent" },
+      { name: "Checkout Page Opened", count: checkoutOpenedSet.size, color: "#fcd34d", label: "Opened checkout page" },
+      { name: "Checkout Started", count: checkoutStartedSet.size, color: "#f59e0b", label: "Entered checkout flow" },
+      { name: "Purchases", count: purchasingSessionsSet.size, color: "#10b981", label: "Successful payments" }
     ];
 
     return stages.map((stage, idx) => {
@@ -1001,17 +1138,70 @@ export default function AdminDashboard() {
       const failureRate = totalAttempts > 0 ? (failed.length / totalAttempts) * 100 : 0;
 
       // Extract specific views for this product from event logs (strict database values)
-      const finalViews = filteredAnalyticsEvents.filter(e => e.product_id === p.id && (e.event_name === "product_view" || e.event_name === "page_view")).length;
-      const checkoutPageOpeneds = filteredAnalyticsEvents.filter(e => e.product_id === p.id && e.event_name === "checkout_page_opened").length;
-      const checkoutStarteds = filteredAnalyticsEvents.filter(e => e.product_id === p.id && e.event_name === "checkout_started").length;
-      const conversionRate = finalViews > 0 ? (salesUnits / finalViews) * 100 : 0;
+      const pEvents = filteredAnalyticsEvents.filter(e => e.product_id === p.id);
+      const successfulOrderIds = new Set(successful.map(o => o.id));
+
+      // 1. Purchasing Sessions
+      const purchasingSessionsSet = new Set<string>();
+      pEvents.forEach(e => {
+        if (e.session_id) {
+          if (e.event_name === 'purchase') {
+            purchasingSessionsSet.add(e.session_id);
+          }
+          if (e.event_name === 'order_created') {
+            const oid = e.metadata?.order_id || e.metadata?.orderId;
+            if (oid && successfulOrderIds.has(oid)) {
+              purchasingSessionsSet.add(e.session_id);
+            }
+          }
+        }
+      });
+
+      // 2. Checkout Started (backfilled by purchasing)
+      const checkoutStartedSet = new Set<string>();
+      pEvents.forEach(e => {
+        if (e.session_id && (e.event_name === 'checkout_started' || e.event_name === 'order_created')) {
+          checkoutStartedSet.add(e.session_id);
+        }
+      });
+      purchasingSessionsSet.forEach(s => checkoutStartedSet.add(s));
+
+      // 3. Checkout Page Opened (backfilled by checkout started)
+      const checkoutOpenedSet = new Set<string>();
+      pEvents.forEach(e => {
+        if (e.session_id) {
+          if (e.event_name === 'checkout_page_opened') {
+            checkoutOpenedSet.add(e.session_id);
+          } else if (e.event_name === 'page_view') {
+            const path = e.metadata?.pathname || e.metadata?.path || "";
+            if (path.startsWith('/checkout') && !path.includes('/success') && !path.includes('/failed')) {
+              checkoutOpenedSet.add(e.session_id);
+            }
+          }
+        }
+      });
+      checkoutStartedSet.forEach(s => checkoutOpenedSet.add(s));
+
+      // 4. Product Views / Unique Visitors (backfilled by checkout opened)
+      const viewsSet = new Set<string>();
+      pEvents.forEach(e => {
+        if (e.session_id && (e.event_name === 'product_view' || e.event_name === 'page_view')) {
+          viewsSet.add(e.session_id);
+        }
+      });
+      checkoutOpenedSet.forEach(s => viewsSet.add(s));
+
+      const views = viewsSet.size;
+      const checkoutPageOpeneds = checkoutOpenedSet.size;
+      const checkoutStarteds = checkoutStartedSet.size;
+      const conversionRate = views > 0 ? (purchasingSessionsSet.size / views) * 100 : 0;
 
       return {
         id: p.id,
         title: p.title,
         price: p.price,
         salesUnits,
-        views: finalViews,
+        views,
         checkoutPageOpeneds,
         checkoutStarteds,
         conversionRate,
@@ -1036,16 +1226,66 @@ export default function AdminDashboard() {
       const completed = cOrders.filter(o => o.status === "completed");
       const grossRevenue = completed.reduce((sum, o) => sum + Number(o.amount || 0), 0);
 
-      const views = filteredAnalyticsEvents.filter(e => e.product_id === c.id && (e.event_name === "product_view" || e.event_name === "page_view")).length;
-      const checkoutPageOpeneds = filteredAnalyticsEvents.filter(e => e.product_id === c.id && e.event_name === "checkout_page_opened").length;
-      const checkoutStarteds = filteredAnalyticsEvents.filter(e => e.product_id === c.id && e.event_name === "checkout_started").length;
+      const pEvents = filteredAnalyticsEvents.filter(e => e.product_id === c.id);
+      const successfulOrderIds = new Set(completed.map(o => o.id));
 
-      const finalViews = views;
-      const finalCheckoutOpeneds = checkoutPageOpeneds;
-      const finalCheckouts = checkoutStarteds;
+      // 1. Purchasing Sessions
+      const purchasingSessionsSet = new Set<string>();
+      pEvents.forEach(e => {
+        if (e.session_id) {
+          if (e.event_name === 'purchase') {
+            purchasingSessionsSet.add(e.session_id);
+          }
+          if (e.event_name === 'order_created') {
+            const oid = e.metadata?.order_id || e.metadata?.orderId;
+            if (oid && successfulOrderIds.has(oid)) {
+              purchasingSessionsSet.add(e.session_id);
+            }
+          }
+        }
+      });
 
-      const dropOffs = Math.max(0, finalCheckoutOpeneds - completed.length);
-      const dropOffRate = finalCheckoutOpeneds > 0 ? (dropOffs / finalCheckoutOpeneds) * 100 : 0;
+      // 2. Checkout Started (backfilled by purchasing)
+      const checkoutStartedSet = new Set<string>();
+      pEvents.forEach(e => {
+        if (e.session_id && (e.event_name === 'checkout_started' || e.event_name === 'order_created')) {
+          checkoutStartedSet.add(e.session_id);
+        }
+      });
+      purchasingSessionsSet.forEach(s => checkoutStartedSet.add(s));
+
+      // 3. Checkout Page Opened (backfilled by checkout started)
+      const checkoutOpenedSet = new Set<string>();
+      pEvents.forEach(e => {
+        if (e.session_id) {
+          if (e.event_name === 'checkout_page_opened') {
+            checkoutOpenedSet.add(e.session_id);
+          } else if (e.event_name === 'page_view') {
+            const path = e.metadata?.pathname || e.metadata?.path || "";
+            if (path.startsWith('/checkout') && !path.includes('/success') && !path.includes('/failed')) {
+              checkoutOpenedSet.add(e.session_id);
+            }
+          }
+        }
+      });
+      checkoutStartedSet.forEach(s => checkoutOpenedSet.add(s));
+
+      // 4. Views / Unique Visitors (backfilled by checkout opened)
+      const viewsSet = new Set<string>();
+      pEvents.forEach(e => {
+        if (e.session_id && (e.event_name === 'product_view' || e.event_name === 'page_view')) {
+          viewsSet.add(e.session_id);
+        }
+      });
+      checkoutOpenedSet.forEach(s => viewsSet.add(s));
+
+      const views = viewsSet.size;
+      const checkoutPageOpeneds = checkoutOpenedSet.size;
+      const checkoutStarteds = checkoutStartedSet.size;
+      const purchases = purchasingSessionsSet.size;
+
+      const dropOffs = Math.max(0, checkoutPageOpeneds - completed.length);
+      const dropOffRate = checkoutPageOpeneds > 0 ? (dropOffs / checkoutPageOpeneds) * 100 : 0;
 
       return {
         id: c.id,
@@ -1054,9 +1294,9 @@ export default function AdminDashboard() {
         totalStudents: cEnrollments.length,
         newStudentsWeek: new7d,
         newStudentsMonth: new30d,
-        views: finalViews,
-        checkoutPageOpeneds: finalCheckoutOpeneds,
-        checkoutStarteds: finalCheckouts,
+        views,
+        checkoutPageOpeneds,
+        checkoutStarteds,
         completedPurchases: completed.length,
         dropOffs,
         dropOffRate,

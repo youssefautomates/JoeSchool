@@ -37,6 +37,8 @@ interface DbAnalyticsEvent {
   id: string;
   product_id: string;
   event_name: string;
+  session_id: string;
+  metadata?: any;
   created_at: string;
 }
 
@@ -83,7 +85,7 @@ export default function DetailedAnalyticsPerformance() {
         supabase.from("courses").select("id, title, price, status"),
         supabase.from("products").select("id, title, price, status"),
         supabase.from("orders").select("id, product_id, amount, status, created_at").order("created_at", { ascending: false }),
-        supabase.from("analytics_events").select("id, product_id, event_name, created_at").order("created_at", { ascending: false }).limit(10000)
+        supabase.from("analytics_events").select("id, product_id, event_name, session_id, metadata, created_at").order("created_at", { ascending: false }).limit(10000)
       ]);
 
       if (coursesRes.data) setCourses(coursesRes.data as DbCourse[]);
@@ -116,13 +118,64 @@ export default function DetailedAnalyticsPerformance() {
       const itemOrders = filteredOrders.filter(o => o.product_id === c.id);
       const completed = itemOrders.filter(o => o.status === "completed");
       const revenue = completed.reduce((sum, o) => sum + Number(o.amount || 0), 0);
-      const purchases = completed.length;
-
-      const itemEvents = filteredEvents.filter(e => e.product_id === c.id);
-      const views = itemEvents.filter(e => e.event_name === "product_view" || e.event_name === "page_view").length;
-      const checkoutPageOpeneds = itemEvents.filter(e => e.event_name === "checkout_page_opened").length;
-      const checkoutStarteds = itemEvents.filter(e => e.event_name === "checkout_started").length;
       
+      const itemEvents = filteredEvents.filter(e => e.product_id === c.id);
+      const completedOrderIds = new Set(completed.map(o => o.id));
+
+      // 1. Purchasing Sessions
+      const purchasingSessionsSet = new Set<string>();
+      itemEvents.forEach(e => {
+        if (e.session_id) {
+          if (e.event_name === 'purchase') {
+            purchasingSessionsSet.add(e.session_id);
+          }
+          if (e.event_name === 'order_created') {
+            const oid = e.metadata?.order_id || e.metadata?.orderId;
+            if (oid && completedOrderIds.has(oid)) {
+              purchasingSessionsSet.add(e.session_id);
+            }
+          }
+        }
+      });
+
+      // 2. Checkout Started (backfilled by purchasing)
+      const checkoutStartedSet = new Set<string>();
+      itemEvents.forEach(e => {
+        if (e.session_id && (e.event_name === 'checkout_started' || e.event_name === 'order_created')) {
+          checkoutStartedSet.add(e.session_id);
+        }
+      });
+      purchasingSessionsSet.forEach(s => checkoutStartedSet.add(s));
+
+      // 3. Checkout Page Opened (backfilled by checkout started)
+      const checkoutOpenedSet = new Set<string>();
+      itemEvents.forEach(e => {
+        if (e.session_id) {
+          if (e.event_name === 'checkout_page_opened') {
+            checkoutOpenedSet.add(e.session_id);
+          } else if (e.event_name === 'page_view') {
+            const path = e.metadata?.pathname || e.metadata?.path || "";
+            if (path.startsWith('/checkout') && !path.includes('/success') && !path.includes('/failed')) {
+              checkoutOpenedSet.add(e.session_id);
+            }
+          }
+        }
+      });
+      checkoutStartedSet.forEach(s => checkoutOpenedSet.add(s));
+
+      // 4. Views / Unique Visitors (backfilled by checkout opened)
+      const viewsSet = new Set<string>();
+      itemEvents.forEach(e => {
+        if (e.session_id && (e.event_name === 'product_view' || e.event_name === 'page_view')) {
+          viewsSet.add(e.session_id);
+        }
+      });
+      checkoutOpenedSet.forEach(s => viewsSet.add(s));
+
+      const views = viewsSet.size;
+      const checkoutPageOpeneds = checkoutOpenedSet.size;
+      const checkoutStarteds = checkoutStartedSet.size;
+      const purchases = purchasingSessionsSet.size;
       const conversionRate = views > 0 ? (purchases / views) * 100 : 0;
 
       combined.push({
@@ -145,13 +198,64 @@ export default function DetailedAnalyticsPerformance() {
       const itemOrders = filteredOrders.filter(o => o.product_id === p.id);
       const completed = itemOrders.filter(o => o.status === "completed");
       const revenue = completed.reduce((sum, o) => sum + Number(o.amount || 0), 0);
-      const purchases = completed.length;
 
       const itemEvents = filteredEvents.filter(e => e.product_id === p.id);
-      const views = itemEvents.filter(e => e.event_name === "product_view" || e.event_name === "page_view").length;
-      const checkoutPageOpeneds = itemEvents.filter(e => e.event_name === "checkout_page_opened").length;
-      const checkoutStarteds = itemEvents.filter(e => e.event_name === "checkout_started").length;
+      const completedOrderIds = new Set(completed.map(o => o.id));
 
+      // 1. Purchasing Sessions
+      const purchasingSessionsSet = new Set<string>();
+      itemEvents.forEach(e => {
+        if (e.session_id) {
+          if (e.event_name === 'purchase') {
+            purchasingSessionsSet.add(e.session_id);
+          }
+          if (e.event_name === 'order_created') {
+            const oid = e.metadata?.order_id || e.metadata?.orderId;
+            if (oid && completedOrderIds.has(oid)) {
+              purchasingSessionsSet.add(e.session_id);
+            }
+          }
+        }
+      });
+
+      // 2. Checkout Started (backfilled by purchasing)
+      const checkoutStartedSet = new Set<string>();
+      itemEvents.forEach(e => {
+        if (e.session_id && (e.event_name === 'checkout_started' || e.event_name === 'order_created')) {
+          checkoutStartedSet.add(e.session_id);
+        }
+      });
+      purchasingSessionsSet.forEach(s => checkoutStartedSet.add(s));
+
+      // 3. Checkout Page Opened (backfilled by checkout started)
+      const checkoutOpenedSet = new Set<string>();
+      itemEvents.forEach(e => {
+        if (e.session_id) {
+          if (e.event_name === 'checkout_page_opened') {
+            checkoutOpenedSet.add(e.session_id);
+          } else if (e.event_name === 'page_view') {
+            const path = e.metadata?.pathname || e.metadata?.path || "";
+            if (path.startsWith('/checkout') && !path.includes('/success') && !path.includes('/failed')) {
+              checkoutOpenedSet.add(e.session_id);
+            }
+          }
+        }
+      });
+      checkoutStartedSet.forEach(s => checkoutOpenedSet.add(s));
+
+      // 4. Views / Unique Visitors (backfilled by checkout opened)
+      const viewsSet = new Set<string>();
+      itemEvents.forEach(e => {
+        if (e.session_id && (e.event_name === 'product_view' || e.event_name === 'page_view')) {
+          viewsSet.add(e.session_id);
+        }
+      });
+      checkoutOpenedSet.forEach(s => viewsSet.add(s));
+
+      const views = viewsSet.size;
+      const checkoutPageOpeneds = checkoutOpenedSet.size;
+      const checkoutStarteds = checkoutStartedSet.size;
+      const purchases = purchasingSessionsSet.size;
       const conversionRate = views > 0 ? (purchases / views) * 100 : 0;
 
       combined.push({

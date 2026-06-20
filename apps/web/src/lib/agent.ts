@@ -201,6 +201,8 @@ async function compileCustomReportData(startDate: string, endDate: string, title
   
   const metrics: ReportMetrics = {
     revenue: current.revenue,
+    netRevenue: current.netRevenue,
+    processingFees: current.processingFees,
     orders: current.orders,
     newStudents: current.newStudents,
     aov: current.aov,
@@ -209,10 +211,15 @@ async function compileCustomReportData(startDate: string, endDate: string, title
     newVisitors: current.newVisitors,
     returningVisitors: current.returningVisitors,
     checkoutSessions: current.checkoutSessions,
+    checkoutOpened: current.checkoutOpened,
+    checkoutStarted: current.checkoutStarted,
+    purchasingSessions: current.purchasingSessions,
     conversionRate: current.conversionRate,
     bestSellingCourse: current.bestSellingCourse,
     
     revenueGrowth: calculateGrowth(current.revenue, previous.revenue),
+    netRevenueGrowth: calculateGrowth(current.netRevenue, previous.netRevenue),
+    feesGrowth: calculateGrowth(current.processingFees, previous.processingFees),
     ordersGrowth: calculateGrowth(current.orders, previous.orders),
     studentsGrowth: calculateGrowth(current.newStudents, previous.newStudents),
     visitsGrowth: calculateGrowth(current.visits, previous.visits),
@@ -220,6 +227,9 @@ async function compileCustomReportData(startDate: string, endDate: string, title
     newVisitorsGrowth: calculateGrowth(current.newVisitors, previous.newVisitors),
     returningVisitorsGrowth: calculateGrowth(current.returningVisitors, previous.returningVisitors),
     checkoutGrowth: calculateGrowth(current.checkoutSessions, previous.checkoutSessions),
+    checkoutOpenedGrowth: calculateGrowth(current.checkoutOpened, previous.checkoutOpened),
+    checkoutStartedGrowth: calculateGrowth(current.checkoutStarted, previous.checkoutStarted),
+    purchasingSessionsGrowth: calculateGrowth(current.purchasingSessions, previous.purchasingSessions),
     conversionChange: current.conversionRate - previous.conversionRate,
     conversionGrowth: calculateGrowth(current.conversionRate, previous.conversionRate),
     aovGrowth: calculateGrowth(current.aov, previous.aov)
@@ -227,6 +237,8 @@ async function compileCustomReportData(startDate: string, endDate: string, title
 
   const prevMetrics: ReportMetrics = {
     revenue: previous.revenue,
+    netRevenue: previous.netRevenue,
+    processingFees: previous.processingFees,
     orders: previous.orders,
     newStudents: previous.newStudents,
     aov: previous.aov,
@@ -235,10 +247,15 @@ async function compileCustomReportData(startDate: string, endDate: string, title
     newVisitors: previous.newVisitors,
     returningVisitors: previous.returningVisitors,
     checkoutSessions: previous.checkoutSessions,
+    checkoutOpened: previous.checkoutOpened,
+    checkoutStarted: previous.checkoutStarted,
+    purchasingSessions: previous.purchasingSessions,
     conversionRate: previous.conversionRate,
     bestSellingCourse: previous.bestSellingCourse,
     
     revenueGrowth: 0,
+    netRevenueGrowth: 0,
+    feesGrowth: 0,
     ordersGrowth: 0,
     studentsGrowth: 0,
     visitsGrowth: 0,
@@ -246,6 +263,9 @@ async function compileCustomReportData(startDate: string, endDate: string, title
     newVisitorsGrowth: 0,
     returningVisitorsGrowth: 0,
     checkoutGrowth: 0,
+    checkoutOpenedGrowth: 0,
+    checkoutStartedGrowth: 0,
+    purchasingSessionsGrowth: 0,
     conversionChange: 0,
     conversionGrowth: 0,
     aovGrowth: 0
