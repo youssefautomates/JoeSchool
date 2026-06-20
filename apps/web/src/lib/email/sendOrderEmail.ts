@@ -186,14 +186,25 @@ export async function sendOrderEmail(
 
     // 3. Build bulletproof Plain Text Version (Crucial for Anti-Spam scores)
     let emailText = `أهلاً ${customerName}!\n\n`;
-    emailText += `تم تأكيد وتفعيل طلبك بنجاح. جميع ملفاتك ودوراتك جاهزة لك الآن.\n\n`;
+    emailText += `تم تفعيل اشتراكك بنجاح! 🎉\n\n`;
+    
+    // Primary CTA - Course access
+    const primaryCourse = resolvedProducts.find(p => p.isCourse);
+    if (primaryCourse) {
+      const redirectPath = primaryCourse.firstLessonSlug 
+        ? `/learn/${primaryCourse.slug}/${primaryCourse.firstLessonSlug}` 
+        : `/courses/${primaryCourse.slug || "n8n-masterclass"}`;
+      const courseLink = `https://www.joeschool.com/login?email=${encodeURIComponent(loginEmail)}&redirect=${encodeURIComponent(redirectPath)}`;
+      emailText += `🚀 ابدأ التعلم الآن: ${courseLink}\n\n`;
+    }
     
     emailText += `تفاصيل الدخول لحسابك:\n`;
     emailText += `البريد الإلكتروني: ${loginEmail}\n`;
     if (loginPassword) {
-      emailText += `كلمة المرور: ${loginPassword}\n`;
+      emailText += `كلمة المرور المؤقتة: ${loginPassword}\n`;
+      emailText += `⚠️ يرجى تغيير كلمة المرور بعد أول تسجيل دخول\n`;
     } else {
-      emailText += `كلمة المرور: استخدم كلمة مرور حسابك الحالية التي قمت باختيارها أثناء التسجيل\n`;
+      emailText += `كلمة المرور: استخدم كلمة مرور حسابك الحالية\n`;
     }
     emailText += `رابط تسجيل الدخول: https://www.joeschool.com/login?email=${encodeURIComponent(loginEmail)}&redirect=%2Fdashboard\n\n`;
 

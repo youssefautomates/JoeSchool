@@ -51,11 +51,13 @@ export async function getOrCreateUser(email: string, name: string, explicitPassw
   let isNewGenerated = false;
   if (!password) {
     isNewGenerated = true;
-    const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    password = "YA-";
-    for (let i = 0; i < 8; i++) {
-      password += chars.charAt(Math.floor(Math.random() * chars.length));
+    // Generate user-friendly temporary password: Joeschool#XXXXXX
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // Exclude confusing chars: I, O, 1, 0
+    let randomPart = "";
+    for (let i = 0; i < 6; i++) {
+      randomPart += chars.charAt(Math.floor(Math.random() * chars.length));
     }
+    password = `Joeschool#${randomPart}`;
   }
   
   // 3. Create the user
