@@ -94,7 +94,7 @@ export default function AdminSettings() {
           setMetaPixelEnabled(pEnabled);
           setMetaCapiEnabled(cEnabled);
           setMetaCapiToken(cToken);
-          setMetaCapiTestCode(data.metaCapiTestCode || "TEST4319");
+          setMetaCapiTestCode(data.metaCapiTestCode ?? "TEST4319");
           setTiktokPixelId(data.tiktokPixelId || "");
           setTiktokPixelEnabled(!!data.tiktokPixelEnabled);
           setGlobalGatewayFeeEnabled(data.globalGatewayFeeEnabled !== false);
@@ -111,7 +111,7 @@ export default function AdminSettings() {
             metaPixelEnabled: pEnabled,
             metaCapiEnabled: cEnabled,
             metaCapiToken: cToken,
-            metaCapiTestCode: data.metaCapiTestCode || "TEST4319",
+            metaCapiTestCode: data.metaCapiTestCode ?? "TEST4319",
             tiktokPixelId: data.tiktokPixelId || "",
             tiktokPixelEnabled: !!data.tiktokPixelEnabled
           };
