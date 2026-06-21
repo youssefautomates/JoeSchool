@@ -1632,21 +1632,6 @@ function MobileCourseView({
         }
       `}} />
 
-      {/* Dynamic Urgency / Scarcity Banner */}
-      {!isEnrolled && coursePricing && coursePricing.original_price > coursePricing.price && (
-        <div className="bg-gradient-to-r from-amber-500/20 via-[#D6004B]/20 to-pink-500/20 border border-[#D6004B]/35 rounded-2xl p-3 flex items-center justify-between text-right text-xs text-white gap-2 shadow-[0_0_25px_rgba(214,0,75,0.2)] mt-2 animate-bounce-subtle">
-          <div className="flex items-center gap-2">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
-            </span>
-            <span className="font-bold text-[10px] sm:text-xs">عرض لفترة محدودة: خصم {coursePricing.discount_pct}% مفعل حالياً!</span>
-          </div>
-          <div className="bg-[#D6004B] text-[9px] font-black px-2.5 py-1 rounded-lg uppercase tracking-wider animate-pulse shrink-0">
-            سارع بالاشتراك
-          </div>
-        </div>
-      )}
 
       {/* 1. Title & Marketing Badges */}
       <div className="text-center pt-2 space-y-3">

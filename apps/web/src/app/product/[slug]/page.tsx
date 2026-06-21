@@ -870,23 +870,6 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
               }
             `}} />
 
-            {/* Urgency / Discount Banner */}
-            {discountPct && discountPct > 0 && (
-              <div className="animate-shimmer-sweep border border-[#D6004B]/35 rounded-2xl p-3 flex items-center justify-between text-right text-xs text-white gap-2 shadow-[0_0_25px_rgba(214,0,75,0.2)] mt-2 animate-bounce-subtle">
-                <div className="flex items-center gap-2">
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
-                  </span>
-                  <span className="font-bold text-[10px] sm:text-xs">
-                    عرض لفترة محدودة: خصم {discountPct}% مفعل حالياً! ({timeLeft})
-                  </span>
-                </div>
-                <div className="bg-[#D6004B] text-[9px] font-black px-2.5 py-1 rounded-lg uppercase tracking-wider animate-pulse shrink-0">
-                  سارع بالاقتناء
-                </div>
-              </div>
-            )}
 
             {/* Title Section & Badges */}
             <div className="text-center pt-2 space-y-3">
