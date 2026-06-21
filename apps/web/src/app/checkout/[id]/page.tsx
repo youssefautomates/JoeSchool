@@ -9,7 +9,7 @@ import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Lock, ShieldCheck, CreditCard, ChevronRight, ChevronDown, Loader2, ShieldAlert, Sparkles, CheckCircle2, Package, Mail, Eye, EyeOff, BookOpen, LayoutDashboard } from "lucide-react";
+import { Lock, ShieldCheck, CreditCard, ChevronRight, ChevronDown, Loader2, ShieldAlert, Sparkles, CheckCircle2, Package, Mail, Eye, EyeOff, BookOpen, LayoutDashboard, User, Smartphone, Wallet as WalletIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -61,7 +61,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
   const [isFetching, setIsFetching] = useState(true);
   const [product, setProduct] = useState<Product | null>(null);
   const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null);
-  const [paymentMethod, setPaymentMethod] = useState<"card" | "wallet" | "instapay">("card");
+  const [paymentMethod, setPaymentMethod] = useState<"card" | "wallet" | "instapay" | null>(null);
   const [showInstapayModal, setShowInstapayModal] = useState(false);
   const [instapayReturnBanner, setInstapayReturnBanner] = useState(false);
   const [instapayScreenshot, setInstapayScreenshot] = useState<string | null>(null);
@@ -69,6 +69,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
   const [instapayFile, setInstapayFile] = useState<File | null>(null);
   const [isUploadingScreenshot, setIsUploadingScreenshot] = useState(false);
   const [isCourse, setIsCourse] = useState(false);
+  const [isBundle, setIsBundle] = useState(false);
   const [couponInput, setCouponInput] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; percent: number } | null>(null);
   const [couponError, setCouponError] = useState("");
@@ -296,6 +297,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
     try {
       let data: any = null;
       let isCourseItem = false;
+      let isBundleItem = false;
 
       // Try fetching from courses first if it starts with "course-"
       if (resolvedParams.id.startsWith("course-")) {
@@ -344,6 +346,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
           .maybeSingle();
         if (bundleData) {
           data = bundleData;
+          isBundleItem = true;
         }
       }
 
@@ -360,6 +363,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
 
       setProduct(mappedProduct);
       setIsCourse(isCourseItem);
+      setIsBundle(isBundleItem);
       
       // Restore Instapay modal if user is returning from external payment link
       if (typeof window !== "undefined") {
@@ -392,6 +396,24 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
   const fullNameValue = watch("fullName");
   const emailValue = watch("email");
   const passwordValue = watch("password");
+
+  const isFree = appliedCoupon && appliedCoupon.percent === 100;
+  const isFormValid = !!(
+    fullNameValue?.trim() &&
+    emailValue?.trim() &&
+    !errors.fullName &&
+    !errors.email &&
+    (isFree || !paymentMethod || paymentMethod !== "card" || (
+      cardNumber.replace(/\s/g, "").length === 16 &&
+      expiryDate.length === 5 &&
+      cvv.length >= 3 &&
+      cardHolder.trim().length >= 3 &&
+      !cardErrors.number &&
+      !cardErrors.expiry &&
+      !cardErrors.cvv &&
+      !cardErrors.holder
+    ))
+  );
 
   const [phoneVal, setPhoneVal] = useState("");
   const [dialCode, setDialCode] = useState("20");
@@ -516,10 +538,6 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
     if (paymentMethod === "card") {
       validateCardFields();
     }
-    const passwordVal = getValues("password");
-    if (!user && !emailStatus?.exists && (!passwordVal || passwordVal.trim() === "")) {
-      setError("password", { type: "manual", message: "يُرجى إكمال جميع الحقول لإتمام الدفع" });
-    }
     toast.error("يُرجى إكمال جميع الحقول لإتمام الدفع");
   };
 
@@ -577,15 +595,8 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
     try {
       let activeUser = user;
 
-      // If user is not logged in, perform Instant Purchase Authentication
-      if (!activeUser && !emailStatus?.exists) {
-        if (!data.password) {
-          setError("password", { type: "manual", message: "يُرجى إكمال جميع الحقول لإتمام الدفع" });
-          toast.error("يُرجى إكمال جميع الحقول لإتمام الدفع");
-          setIsLoading(false);
-          return;
-        }
-
+      // If user is not logged in, perform Instant Purchase Authentication (only if password is provided)
+      if (!activeUser && !emailStatus?.exists && data.password) {
         // Try to sign in. If it fails, we proceed without blocking (backend will handle account creation/resolution)
         try {
           const { data: signInData, error: signInError } = await supabaseClient.auth.signInWithPassword({
@@ -792,6 +803,8 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
     ? Number((basePriceAfterCoupon + feeAmountFormatted).toFixed(2))
     : (basePriceAfterCoupon + feeAmountEGP);
 
+
+
   return (
     <div className="min-h-screen bg-[#050505] text-white font-cairo">
       <Navbar />
@@ -832,697 +845,616 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
           </div>
         </motion.div>
       )}
-      
+
       <main className="pt-32 pb-24 relative overflow-hidden">
         {/* Glow Effects */}
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-rose-600/10 rounded-full blur-[100px] pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-sky-500/10 rounded-full blur-[100px] pointer-events-none" />
 
         <div className="container mx-auto px-4 max-w-6xl relative z-10">
-          {/* Header */}
-          <div className="flex flex-col items-center justify-center text-center gap-2 mb-8">
-            <Link href={`/product/${product?.slug || resolvedParams.id}`} className="inline-flex items-center text-zinc-500 hover:text-white font-cairo transition-all group">
+          <div className="flex flex-col items-center justify-center text-center gap-4 mb-8">
+            <Link 
+              href={
+                product?.slug 
+                  ? (isCourse 
+                      ? `/courses/${product.slug}` 
+                      : (isBundle 
+                          ? `/bundles/${product.slug}` 
+                          : `/product/${product.slug}`)) 
+                  : `/checkout/${resolvedParams.id}`
+              } 
+              className="inline-flex items-center text-zinc-500 hover:text-white font-cairo transition-all group text-sm"
+            >
               <ChevronRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
               العودة لتفاصيل المنتج
             </Link>
+            <h1 className="text-3xl font-alexandria font-bold text-white mt-2">إتمـام الطلب</h1>
           </div>
 
-          <div className="max-w-3xl mx-auto w-full">
-            
-            {/* Checkout Form */}
-            <div className="flex flex-col gap-6">
-              {isAlreadyEnrolled ? (
-                <motion.div 
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="bg-[#0a0a0f]/80 backdrop-blur-2xl rounded-[2rem] p-8 border border-rose-500/20 shadow-2xl relative overflow-hidden text-center space-y-6"
-                >
-                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-rose-500 to-rose-600" />
-                  
-                  <div className="w-20 h-20 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-500 mx-auto">
-                    <Sparkles className="w-10 h-10 animate-pulse" />
-                  </div>
-                  
-                  {user ? (
-                    <>
-                      <h2 className="text-2xl font-alexandria font-bold text-white leading-snug">لقد قمت بشراء هذا الكورس وإنشاء حساب بالفعل.</h2>
-                      <p className="text-zinc-400 text-sm max-w-md mx-auto font-cairo">
-                        يمكنك متابعة التعلم مباشرة.
-                      </p>
-                      
-                      <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
-                        <Link
-                          href={enrolledCourseSlug ? `/learn/${enrolledCourseSlug}/${firstLessonSlug || ""}` : "/dashboard"}
-                          className="h-12 px-8 bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white font-alexandria font-bold text-sm rounded-xl flex items-center justify-center gap-2 shadow-[0_4px_14px_rgba(244,63,94,0.25)] transition-all active:scale-[0.98] cursor-pointer"
-                        >
-                          <span>🎓 اذهب إلى الكورس الآن</span>
-                        </Link>
-                        
-                        <Link
-                          href="/dashboard"
-                          className="h-12 px-6 bg-white/5 hover:bg-white/10 text-white font-alexandria font-bold text-sm rounded-xl flex items-center justify-center gap-2 border border-white/10 transition-colors cursor-pointer"
-                        >
-                          <LayoutDashboard className="w-4 h-4 text-zinc-400" />
-                          <span>لوحة التحكم</span>
-                        </Link>
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <h2 className="text-2xl font-alexandria font-bold text-white leading-snug">تم العثور على اشتراك سابق لهذا البريد الإلكتروني.</h2>
-                      <p className="text-zinc-400 text-sm max-w-md mx-auto font-cairo">
-                        لقد قمت بشراء هذا الكورس وإنشاء حساب بالفعل. يرجى تسجيل الدخول للوصول إلى محتوى الكورس.
-                      </p>
-                      
-                      <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
-                        <Link
-                          href={`/login?redirect=${encodeURIComponent(enrolledCourseSlug ? `/learn/${enrolledCourseSlug}/${firstLessonSlug || ""}` : `/checkout/${resolvedParams.id}`)}`}
-                          className="h-12 px-8 bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white font-alexandria font-bold text-sm rounded-xl flex items-center justify-center gap-2 shadow-[0_4px_14px_rgba(244,63,94,0.25)] transition-all active:scale-[0.98] cursor-pointer"
-                        >
-                          <span>🔑 تسجيل الدخول</span>
-                        </Link>
-                        
-                        <Link
-                          href="/login/forgot-password"
-                          className="h-12 px-6 bg-white/5 hover:bg-white/10 text-white font-alexandria font-bold text-sm rounded-xl flex items-center justify-center gap-2 border border-white/10 transition-colors cursor-pointer"
-                        >
-                          <span>🔒 نسيت كلمة المرور</span>
-                        </Link>
-                      </div>
-                    </>
-                  )}
-                </motion.div>
-              ) : (
-                <motion.div 
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="bg-[#0a0a0f]/80 backdrop-blur-2xl rounded-[2rem] p-6 md:p-8 border border-white/5 shadow-2xl relative overflow-hidden"
-                >
-                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#ff0f53] to-[#ff00b3]" />
-                  
-                  <h2 className="text-xl font-alexandria font-bold text-white mb-6">تفاصيل الطلب</h2>
-                  
-                  <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="space-y-4" dir="rtl">
 
-                  {/* Compact Order Summary Box */}
-                  <div className="bg-[#050505]/40 border border-white/5 rounded-2xl p-4 mb-6 space-y-4">
-                    {/* Row 1: Product Image + Title & Coupon Code */}
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                      {/* Product details */}
-                      <div className="flex items-center gap-3">
-                        {product.image_url ? (
-                          <div className="relative w-12 h-12 rounded-xl overflow-hidden border border-white/10 shrink-0">
-                            <Image
-                              src={product.image_url}
-                              alt={product.title}
-                              fill
-                              className="object-cover"
+
+          <div className="w-full">
+            {isAlreadyEnrolled ? (
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="bg-[#0a0a0f]/80 backdrop-blur-2xl rounded-[2rem] p-8 border border-rose-500/20 shadow-2xl relative overflow-hidden text-center space-y-6 max-w-3xl mx-auto"
+              >
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-rose-500 to-rose-600" />
+                
+                <div className="w-20 h-20 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-500 mx-auto">
+                  <Sparkles className="w-10 h-10 animate-pulse" />
+                </div>
+                
+                {user ? (
+                  <>
+                    <h2 className="text-2xl font-alexandria font-bold text-white leading-snug">لقد قمت بشراء هذا الكورس وإنشاء حساب بالفعل.</h2>
+                    <p className="text-zinc-400 text-sm max-w-md mx-auto font-cairo">
+                      يمكنك متابعة التعلم مباشرة.
+                    </p>
+                    
+                    <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
+                      <Link
+                        href={enrolledCourseSlug ? `/learn/${enrolledCourseSlug}/${firstLessonSlug || ""}` : "/dashboard"}
+                        className="h-12 px-8 bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white font-alexandria font-bold text-sm rounded-xl flex items-center justify-center gap-2 shadow-[0_4px_14px_rgba(244,63,94,0.25)] transition-all active:scale-[0.98] cursor-pointer"
+                      >
+                        <span>🎓 اذهب إلى الكورس الآن</span>
+                      </Link>
+                      
+                      <Link
+                        href="/dashboard"
+                        className="h-12 px-6 bg-white/5 hover:bg-white/10 text-white font-alexandria font-bold text-sm rounded-xl flex items-center justify-center gap-2 border border-white/10 transition-colors cursor-pointer"
+                      >
+                        <LayoutDashboard className="w-4 h-4 text-zinc-400" />
+                        <span>لوحة التحكم</span>
+                      </Link>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <h2 className="text-2xl font-alexandria font-bold text-white leading-snug">تم العثور على اشتراك سابق لهذا البريد الإلكتروني.</h2>
+                    <p className="text-zinc-400 text-sm max-w-md mx-auto font-cairo">
+                      لقد قمت بشراء هذا الكورس وإنشاء حساب بالفعل. يرجى تسجيل الدخول للوصول إلى محتوى الكورس.
+                    </p>
+                    
+                    <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
+                      <Link
+                        href={`/login?email=${encodeURIComponent(emailValue || "")}&redirect=${encodeURIComponent(enrolledCourseSlug ? `/learn/${enrolledCourseSlug}/${firstLessonSlug || ""}` : `/checkout/${resolvedParams.id}`)}`}
+                        className="h-12 px-8 bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white font-alexandria font-bold text-sm rounded-xl flex items-center justify-center gap-2 shadow-[0_4px_14px_rgba(244,63,94,0.25)] transition-all active:scale-[0.98] cursor-pointer"
+                      >
+                        <span>🔑 تسجيل الدخول</span>
+                      </Link>
+                      
+                      <Link
+                        href="/login/forgot-password"
+                        className="h-12 px-6 bg-white/5 hover:bg-white/10 text-white font-alexandria font-bold text-sm rounded-xl flex items-center justify-center gap-2 border border-white/10 transition-colors cursor-pointer"
+                      >
+                        <span>🔒 نسيت كلمة المرور</span>
+                      </Link>
+                    </div>
+                  </>
+                )}
+              </motion.div>
+            ) : (
+              <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="w-full">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                  
+                  {/* Right Column (Forms) */}
+                  <div className="lg:col-span-8 space-y-4 md:space-y-6">
+                    
+                    {/* Personal Information */}
+                    <div className="bg-white/[0.015] backdrop-blur-2xl border border-white/5 rounded-3xl p-6 sm:p-8 hover:border-white/10 transition-all duration-300 shadow-[0_8px_32px_rgba(0,0,0,0.37)]">
+                      <div className="flex items-center gap-3 mb-6">
+                        <div className="w-10 h-10 rounded-xl bg-[#ff0f53]/10 flex items-center justify-center text-[#ff0f53] border border-[#ff0f53]/20">
+                          <User className="w-5 h-5" />
+                        </div>
+                        <div className="text-right">
+                          <h3 className="font-alexandria font-bold text-white text-base">بياناتك الشخصية</h3>
+                          <p className="text-[11px] text-zinc-500 mt-0.5">نستخدم بياناتك لتأكيد طلبك وإرسال الوصول للكورس</p>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {/* Full Name */}
+                        <div className="space-y-2">
+                          <Label className="font-cairo font-bold text-zinc-400 text-sm">الاسم بالكامل *</Label>
+                          <Input 
+                            placeholder="الاسم بالكامل" 
+                            className={cn(
+                              "h-12 rounded-lg bg-white/[0.02] border text-white text-sm font-cairo hover:bg-white/[0.05] focus:bg-white/[0.07] focus:ring-1 focus:ring-rose-500/20 focus:border-rose-500/40 transition-all text-right pr-4 pl-4",
+                              fullNameValue && fullNameValue.length > 0
+                                ? (errors.fullName 
+                                    ? "border-red-500/40 focus:border-red-500 focus:ring-red-500/20" 
+                                    : "border-emerald-500/40 focus:border-emerald-500 focus:ring-emerald-500/20")
+                                : "border-white/10 focus:border-white/30"
+                            )}
+                            disabled={isLoading}
+                            {...register("fullName")}
+                          />
+                          {errors.fullName && <p className="text-[10px] text-red-400 font-cairo flex items-center gap-1 mt-1"><ShieldAlert className="w-3 h-3" /> {errors.fullName.message}</p>}
+                        </div>
+
+                        {/* Email */}
+                        <div className="space-y-2">
+                          <Label className="font-cairo font-bold text-zinc-400 text-sm">البريد الإلكتروني *</Label>
+                          <div className="relative">
+                            <Mail 
+                              className={cn(
+                                "absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors",
+                                emailValue && emailValue.length > 0
+                                  ? (errors.email ? "text-red-400" : "text-emerald-400")
+                                  : "text-zinc-500"
+                              )} 
+                            />
+                            <Input 
+                              placeholder="name@email.com" 
+                              type="email"
+                              dir="ltr"
+                              className={cn(
+                                "h-12 rounded-lg bg-white/[0.02] border text-white text-sm font-cairo hover:bg-white/[0.05] focus:bg-white/[0.07] focus:ring-1 focus:ring-rose-500/20 focus:border-rose-500/40 transition-all pl-11",
+                                emailValue && emailValue.length > 0
+                                  ? (errors.email 
+                                      ? "border-red-500/40 focus:border-red-500 focus:ring-red-500/20" 
+                                      : "border-emerald-500/40 focus:border-emerald-500 focus:ring-emerald-500/20")
+                                  : "border-white/10 focus:border-white/30"
+                              )}
+                              disabled={isLoading}
+                              {...register("email", {
+                                onBlur: handleEmailBlur
+                              })}
                             />
                           </div>
-                        ) : (
-                          <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center border border-white/10 shrink-0">
-                            <Package className="w-6 h-6 text-zinc-500" />
-                          </div>
-                        )}
-                        <div>
-                          <h3 className="text-sm font-alexandria font-bold text-white leading-tight">
-                            {product.title}
-                          </h3>
-                          {isCourse && (
-                            <span className="inline-flex items-center gap-1 text-[10px] text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-full mt-1 font-bold">
-                              <Sparkles className="w-2.5 h-2.5 animate-pulse" />
-                              انضمام فوري للقسم
-                            </span>
+                          {errors.email && <p className="text-xs text-red-400 font-cairo flex items-center gap-1 mt-1"><ShieldAlert className="w-3 h-3" /> {errors.email.message}</p>}
+                          {emailStatus?.exists && !emailStatus?.ownsCourse && (
+                            <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 p-4 rounded-xl flex items-start gap-3 font-cairo text-sm mt-3 text-right">
+                              <Sparkles className="w-5 h-5 shrink-0 mt-0.5 animate-pulse" />
+                              <div>
+                                <p className="font-bold">مرحباً بك مجدداً!</p>
+                                <p className="text-zinc-300 text-xs mt-1">
+                                  هذا البريد الإلكتروني مسجل لدينا بالفعل. سيتم ربط هذا الكورس بحسابك الحالي فور إتمام الدفع دون الحاجة لإنشاء حساب جديد.
+                                </p>
+                              </div>
+                            </div>
                           )}
                         </div>
                       </div>
 
-                      {/* Coupon */}
-                      <div className="flex items-center gap-2 max-w-xs w-full md:w-auto">
-                        {appliedCoupon ? (
-                          <div className="flex items-center justify-between bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-xl w-full">
-                            <div className="flex items-center gap-1.5">
-                              <span className="text-xs font-mono font-bold text-emerald-400">{appliedCoupon.code}</span>
-                              <span className="text-[10px] text-emerald-500 bg-emerald-500/15 px-1.5 py-0.5 rounded-full font-bold font-mono">-{appliedCoupon.percent}%</span>
+                      {/* Password and Phone fields removed from UI, state and background values are kept intact */}
+
+                      <style>{`
+                        .react-tel-input {
+                          font-family: var(--font-cairo), sans-serif;
+                          width: 100%;
+                        }
+                        .react-tel-input .form-control {
+                          height: 48px !important;
+                          width: 100% !important;
+                          background-color: rgba(255, 255, 255, 0.05) !important;
+                          border: 1px solid rgba(255, 255, 255, 0.05) !important;
+                          border-radius: 12px !important;
+                          color: white !important;
+                          font-size: 14px !important;
+                          padding-left: 56px !important;
+                          transition: all 0.2s ease !important;
+                        }
+                        .react-tel-input .form-control:focus {
+                          background-color: rgba(255, 255, 255, 0.1) !important;
+                          border-color: rgba(255, 255, 255, 0.2) !important;
+                          box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.2) !important;
+                        }
+                        .react-tel-input .flag-dropdown {
+                          background-color: transparent !important;
+                          border: none !important;
+                          border-radius: 12px 0 0 12px !important;
+                          padding: 0 !important;
+                          height: 46px !important;
+                          top: 1px !important;
+                          left: 1px !important;
+                        }
+                        .react-tel-input .flag-dropdown:hover, 
+                        .react-tel-input .flag-dropdown.open,
+                        .react-tel-input .selected-flag:hover {
+                          background-color: rgba(255, 255, 255, 0.05) !important;
+                          border-radius: 12px 0 0 12px !important;
+                        }
+                        .react-tel-input .selected-flag {
+                          background-color: transparent !important;
+                          padding-left: 12px !important;
+                          width: 48px !important;
+                        }
+                        .react-tel-input .selected-flag .arrow {
+                          border-top-color: #a1a1aa !important;
+                          left: 28px !important;
+                        }
+                        .react-tel-input .selected-flag .arrow.up {
+                          border-bottom-color: #a1a1aa !important;
+                        }
+                        .react-tel-input .country-list {
+                          background-color: #0c0c0e !important;
+                          border: 1px solid rgba(255, 255, 255, 0.1) !important;
+                          border-radius: 12px !important;
+                          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
+                          margin-top: 6px !important;
+                          width: 320px !important;
+                          padding: 6px 0 !important;
+                          z-index: 9999 !important;
+                          max-height: 220px !important;
+                          overflow-y: auto !important;
+                        }
+                        .react-tel-input .country-list::-webkit-scrollbar {
+                          width: 6px;
+                        }
+                        .react-tel-input .country-list::-webkit-scrollbar-thumb {
+                          background-color: rgba(255, 255, 255, 0.1);
+                          border-radius: 3px;
+                        }
+                        .react-tel-input .country-list .search {
+                          padding: 6px 10px !important;
+                          background-color: #0c0c0e !important;
+                          position: sticky !important;
+                          top: 0 !important;
+                          z-index: 10 !important;
+                          border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+                        }
+                        .react-tel-input .country-list .search-box {
+                          width: 100% !important;
+                          height: 36px !important;
+                          background-color: rgba(255, 255, 255, 0.05) !important;
+                          border: 1px solid rgba(255, 255, 255, 0.1) !important;
+                          border-radius: 8px !important;
+                          color: white !important;
+                          font-size: 13px !important;
+                          padding: 0 10px !important;
+                          margin: 0 !important;
+                        }
+                        .react-tel-input .country-list .search-box:focus {
+                          border-color: rgba(255, 255, 255, 0.2) !important;
+                          outline: none !important;
+                        }
+                        }
+                      `}</style>
+                    </div>
+
+                    {/* Payment Method Selector */}
+                    {!(appliedCoupon && appliedCoupon.percent === 100) && (
+                      <div className="bg-white/[0.015] backdrop-blur-2xl border border-white/5 rounded-3xl p-5 md:p-8 hover:border-white/10 transition-all duration-300 shadow-[0_8px_32px_rgba(0,0,0,0.37)]">
+                        <div className="flex items-center justify-start gap-2.5 mb-5 select-none" dir="rtl">
+                          <CreditCard className="w-5 h-5 text-[#ff0f53] shrink-0" />
+                          <h3 className="font-alexandria font-bold text-white text-base">اختر طريقة الدفع</h3>
+                        </div>
+
+                        <div className="flex flex-col gap-3 w-full">
+                          {/* Card Option */}
+                          <motion.div 
+                            whileHover={{ scale: 1.01 }}
+                            whileTap={{ scale: 0.99 }}
+                            onClick={() => setPaymentMethod("card")}
+                            className={cn(
+                              "relative cursor-pointer rounded-xl border transition-all duration-300 select-none",
+                              "flex flex-row items-center justify-between gap-4 h-[70px] px-4 py-3 w-full",
+                              paymentMethod === "card" 
+                                ? "border-[#ff0f53]/50 bg-[#ff0f53]/5 shadow-[0_0_20px_rgba(255,15,83,0.12)]" 
+                                : "border-white/5 bg-white/[0.01] hover:border-white/10 hover:bg-white/[0.02]"
+                            )}
+                            dir="rtl"
+                          >
+                            {/* Right group: Radio + Text */}
+                            <div className="flex items-center gap-3.5">
+                              {/* Radio indicator */}
+                              <div className={cn(
+                                "w-5 h-5 rounded-full border flex items-center justify-center transition-all shrink-0",
+                                paymentMethod === "card" ? "border-[#ff0f53] bg-[#ff0f53]/10" : "border-white/10 bg-white/5"
+                              )}>
+                                {paymentMethod === "card" && <div className="w-2.5 h-2.5 rounded-full bg-[#ff0f53]" />}
+                              </div>
+                              
+                              {/* Text */}
+                              <div className="text-right">
+                                <h4 className={cn("font-bold text-sm sm:text-base transition-colors leading-tight whitespace-nowrap", paymentMethod === "card" ? "text-white" : "text-zinc-300")}>
+                                  البطاقات البنكية
+                                </h4>
+                              </div>
                             </div>
-                            <button
-                              type="button"
-                              onClick={handleRemoveCoupon}
-                              className="text-[11px] text-zinc-500 hover:text-white transition-colors mr-2 cursor-pointer font-bold font-cairo"
-                            >
-                              إلغاء
-                            </button>
-                          </div>
-                        ) : (
-                          <div className="relative flex items-center w-full">
-                            <input
-                              type="text"
-                              placeholder="أدخل كوبون الخصم..."
-                              value={couponInput}
-                              onChange={(e) => setCouponInput(e.target.value)}
-                              disabled={isValidatingCoupon}
-                              className="w-full h-9 rounded-xl bg-white/5 border border-white/5 text-white text-xs font-cairo px-3 pl-16 hover:bg-white/[0.07] focus:bg-white/10 focus:border-white/20 focus:ring-0 outline-none transition-all text-right"
+
+                            {/* Left group: Logos */}
+                            <div className="flex items-center gap-2.5 shrink-0" dir="ltr">
+                              <Image 
+                                src="/payment-logos/visa.svg" 
+                                alt="Visa" 
+                                width={54} 
+                                // aspect ratio is 3.08
+                                height={18} 
+                                className="h-5 sm:h-6 w-auto object-contain opacity-95" 
+                                priority
+                              />
+                              <Image 
+                                src="/payment-logos/mastercard.svg" 
+                                alt="Mastercard" 
+                                width={36} 
+                                // aspect ratio is 1.62
+                                height={22} 
+                                className="h-5.5 sm:h-6.5 w-auto object-contain opacity-95" 
+                                priority
+                              />
+                              <Image 
+                                src="/payment-logos/meeza.svg" 
+                                alt="Meeza" 
+                                width={41} 
+                                // aspect ratio is 2.06
+                                height={20} 
+                                className="h-5 sm:h-6 w-auto object-contain opacity-95" 
+                                priority
+                              />
+                            </div>
+                          </motion.div>
+
+                          {/* Wallet Option */}
+                          {currency === "EGP" && (
+                            <motion.div 
+                              whileHover={{ scale: 1.01 }}
+                              whileTap={{ scale: 0.99 }}
+                              onClick={() => setPaymentMethod("wallet")}
+                              className={cn(
+                                "relative cursor-pointer rounded-xl border transition-all duration-300 select-none",
+                                "flex flex-row items-center justify-between gap-4 h-[70px] px-4 py-3 w-full",
+                                paymentMethod === "wallet" 
+                                  ? "border-emerald-500/50 bg-emerald-500/5 shadow-[0_0_20px_rgba(16,185,129,0.12)]" 
+                                  : "border-white/5 bg-white/[0.01] hover:border-white/10 hover:bg-white/[0.02]"
+                              )}
                               dir="rtl"
-                            />
-                            <button
-                              type="button"
-                              onClick={handleApplyCoupon}
-                              disabled={isValidatingCoupon || !couponInput.trim()}
-                              className="absolute left-1 h-7 px-3 text-xs bg-[#D6004B] hover:bg-[#b0003d] text-white rounded-lg transition-all font-bold cursor-pointer disabled:opacity-50 font-cairo"
                             >
-                              {isValidatingCoupon ? "..." : "تطبيق"}
-                            </button>
+                              {/* Right group: Radio + Text */}
+                              <div className="flex items-center gap-3.5">
+                                {/* Radio indicator */}
+                                <div className={cn(
+                                  "w-5 h-5 rounded-full border flex items-center justify-center transition-all shrink-0",
+                                  paymentMethod === "wallet" ? "border-emerald-500 bg-emerald-500/10" : "border-white/10 bg-white/5"
+                                )}>
+                                  {paymentMethod === "wallet" && <div className="w-2.5 h-2.5 rounded-full bg-emerald-500" />}
+                                </div>
+                                
+                                {/* Text */}
+                                <div className="text-right">
+                                  <h4 className={cn("font-bold text-sm sm:text-base transition-colors leading-tight whitespace-nowrap", paymentMethod === "wallet" ? "text-white" : "text-zinc-300")}>
+                                    المحافظ الإلكترونية
+                                  </h4>
+                                </div>
+                              </div>
+
+                              {/* Left group: Logos */}
+                              <div className="flex flex-row items-center gap-1.5 sm:gap-2 justify-start shrink-0 select-none" dir="ltr">
+                                <Image 
+                                  src="/payment-logos/vodafone-icon.svg" 
+                                  alt="Vodafone Cash" 
+                                  width={24} 
+                                  height={24} 
+                                  className="h-6.5 sm:h-7.5 w-auto object-contain" 
+                                />
+                                <Image 
+                                  src="/payment-logos/orange-cash.svg" 
+                                  alt="Orange Cash" 
+                                  width={20} 
+                                  height={23} 
+                                  className="h-6.5 sm:h-7.5 w-auto object-contain" 
+                                />
+
+                                <Image 
+                                  src="/payment-logos/fawry.svg" 
+                                  alt="Fawry" 
+                                  width={63} 
+                                  height={20} 
+                                  className="h-5.5 sm:h-6 w-auto object-contain" 
+                                />
+                              </div>
+                            </motion.div>
+                          )}
+
+                          {/* Instapay Option */}
+                          {currency === "EGP" && (
+                            <motion.div 
+                              whileHover={{ scale: 1.01 }}
+                              whileTap={{ scale: 0.99 }}
+                              onClick={() => setPaymentMethod("instapay")}
+                              className={cn(
+                                "relative cursor-pointer rounded-xl border transition-all duration-300 select-none",
+                                "flex flex-row items-center justify-between gap-4 h-[70px] px-4 py-3 w-full",
+                                paymentMethod === "instapay" 
+                                  ? "border-purple-500/50 bg-purple-500/5 shadow-[0_0_20px_rgba(168,85,247,0.12)]" 
+                                  : "border-white/5 bg-white/[0.01] hover:border-purple-500/10 hover:bg-purple-500/[0.005] hover:border-white/10"
+                              )}
+                              dir="rtl"
+                            >
+                              {/* Right group: Radio + Text */}
+                              <div className="flex items-center gap-3.5">
+                                {/* Radio indicator */}
+                                <div className={cn(
+                                  "w-5 h-5 rounded-full border flex items-center justify-center transition-all shrink-0",
+                                  paymentMethod === "instapay" ? "border-purple-500 bg-purple-500/10" : "border-white/10 bg-white/5"
+                                )}>
+                                  {paymentMethod === "instapay" && <div className="w-2.5 h-2.5 rounded-full bg-purple-500" />}
+                                </div>
+                                
+                                {/* Text */}
+                                <div className="text-right">
+                                  <h4 className={cn("font-bold text-sm sm:text-base transition-colors leading-tight whitespace-nowrap", paymentMethod === "instapay" ? "text-white" : "text-zinc-300")}>
+                                    إنستاباي - Instapay
+                                  </h4>
+                                </div>
+                              </div>
+
+                              {/* Left group: Logos */}
+                              <div className="flex items-center shrink-0 select-none" dir="ltr">
+                                <Image 
+                                  src="/payment-logos/instapay.svg" 
+                                  alt="Instapay" 
+                                  width={64} 
+                                  height={22} 
+                                  className="h-6 sm:h-7 w-auto object-contain" 
+                                />
+                              </div>
+                            </motion.div>
+                          )}
+                        </div>
+
+                        {/* Inline Card Fields (Animated transition, now merged inside the same parent card) */}
+                        <div className={cn(
+                          "transition-all duration-500 ease-in-out overflow-hidden",
+                          paymentMethod === "card" ? "max-h-[600px] opacity-100 mt-6 pt-6 border-t border-white/5" : "max-h-0 opacity-0 pointer-events-none"
+                        )}>
+                          <div className="space-y-4">
+                            <div className="flex items-center justify-start gap-2.5 mb-1" dir="rtl">
+                              <Lock className="w-5 h-5 text-[#ff0f53] shrink-0" />
+                              <h3 className="font-alexandria font-bold text-white text-base">بيانات البطاقة</h3>
+                            </div>
+                            <p className="text-[11px] text-zinc-500 pr-7 text-right block mb-4">جميع البيانات مشفرة وآمنة</p>
+
+                            <div className="space-y-3">
+                              <div className="space-y-1.5">
+                                <Label className="font-cairo text-xs text-zinc-400 text-right block pr-1">رقم البطاقة</Label>
+                                <div className="relative">
+                                  <Input 
+                                    ref={cardNumberRef}
+                                    value={cardNumber}
+                                    onChange={handleCardNumberChange}
+                                    placeholder="1234 5678 9012 3456" 
+                                    dir="ltr"
+                                    maxLength={19}
+                                    inputMode="numeric"
+                                    className={cn("h-12 rounded-lg bg-white/[0.02] border text-white font-mono text-base tracking-widest hover:bg-white/[0.05] focus:bg-white/[0.07] focus:ring-1 focus:ring-white/20 focus:border-white/30 transition-all pr-12 pl-4", 
+                                      cardErrors.number ? "border-red-500/40 focus:ring-red-500/20" : (cardNumber.length === 19 ? "border-emerald-500/40 focus:ring-emerald-500/20" : "border-white/10")
+                                    )}
+                                    disabled={isLoading}
+                                  />
+                                  <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none flex items-center justify-center">
+                                    {cardNumber.length === 19 && !cardErrors.number ? (
+                                      <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                                    ) : (
+                                      <CreditCard className="w-5 h-5 text-zinc-500" />
+                                    )}
+                                  </div>
+                                </div>
+                                {cardErrors.number && <p className="text-xs text-red-400 font-cairo flex items-center gap-1 mt-1 text-right" dir="rtl"><ShieldAlert className="w-3 h-3 inline ml-1" /> {cardErrors.number}</p>}
+                              </div>
+
+                              <div className="grid grid-cols-2 gap-3">
+                                <div className="space-y-1.5">
+                                  <Label className="font-cairo text-xs text-zinc-400 text-right block pr-1">تاريخ الانتهاء</Label>
+                                  <Input 
+                                    value={expiryDate}
+                                    onChange={handleExpiryChange}
+                                    placeholder="MM/YY" 
+                                    dir="ltr"
+                                    maxLength={5}
+                                    inputMode="numeric"
+                                    className={cn("h-12 rounded-lg bg-white/[0.02] border text-white font-mono text-base text-center hover:bg-white/[0.05] focus:bg-white/[0.07] focus:ring-1 focus:ring-white/20 focus:border-white/30 transition-all", 
+                                      cardErrors.expiry ? "border-red-500/40 focus:ring-red-500/20" : (expiryDate.length === 5 ? "border-emerald-500/40 focus:ring-emerald-500/20" : "border-white/10")
+                                    )}
+                                    disabled={isLoading}
+                                  />
+                                  {cardErrors.expiry && <p className="text-[10px] text-red-400 font-cairo flex items-center gap-1 mt-1 text-right" dir="rtl"><ShieldAlert className="w-3 h-3 inline ml-1" /> {cardErrors.expiry}</p>}
+                                </div>
+                                
+                                <div className="space-y-1.5">
+                                  <Label className="font-cairo text-xs text-zinc-400 text-right block pr-1">رمز التحقق (CVV)</Label>
+                                  <Input 
+                                    value={cvv}
+                                    onChange={handleCvvChange}
+                                    placeholder="123" 
+                                    type="password"
+                                    dir="ltr"
+                                    maxLength={3}
+                                    inputMode="numeric"
+                                    className={cn("h-12 rounded-lg bg-white/[0.02] border text-white font-mono text-base text-center hover:bg-white/[0.05] focus:bg-white/[0.07] focus:ring-1 focus:ring-white/20 focus:border-white/30 transition-all", 
+                                      cardErrors.cvv ? "border-red-500/40 focus:ring-red-500/20" : (cvv.length === 3 ? "border-emerald-500/40 focus:ring-emerald-500/20" : "border-white/10")
+                                    )}
+                                    disabled={isLoading}
+                                  />
+                                  {cardErrors.cvv && <p className="text-xs text-red-400 font-cairo flex items-center gap-1 mt-1 text-right" dir="rtl"><ShieldAlert className="w-3 h-3 inline ml-1" /> {cardErrors.cvv}</p>}
+                                </div>
+                              </div>
+
+                              <div className="space-y-1.5">
+                                <Label className="font-cairo text-xs text-zinc-400 text-right block pr-1">اسم حامل البطاقة</Label>
+                                <Input 
+                                  value={cardHolder}
+                                  onChange={handleCardHolderChange}
+                                  placeholder="كما هو مكتوب على البطاقة" 
+                                  className={cn("h-12 rounded-lg bg-white/[0.02] border text-white text-sm font-cairo hover:bg-white/[0.05] focus:bg-white/[0.07] focus:ring-1 focus:ring-white/20 focus:border-white/30 transition-all text-right pr-4 pl-4", 
+                                    cardErrors.holder ? "border-red-500/40 focus:border-red-500/20" : (cardHolder.length >= 3 ? "border-emerald-500/40 focus:border-emerald-500/20" : "border-white/10")
+                                  )}
+                                  disabled={isLoading}
+                                />
+                                {cardErrors.holder && <p className="text-[10px] text-red-400 font-cairo flex items-center gap-1 mt-1 text-right" dir="rtl"><ShieldAlert className="w-3 h-3 inline ml-1" /> {cardErrors.holder}</p>}
+                              </div>
+                            </div>
                           </div>
-                        )}
-                      </div>
-                    </div>
-                    {couponError && <p className="text-[11px] text-red-400 font-cairo mt-1 text-right" dir="rtl">{couponError}</p>}
-
-                    {/* Row 2: Horizontal Price Breakdown */}
-                    <div className="flex flex-wrap items-center justify-between md:justify-start gap-x-6 gap-y-2 pt-3 border-t border-white/5 text-sm font-cairo">
-                      <div className="flex items-center gap-2">
-                        <span className="text-zinc-500 text-xs">السعر الأصلي:</span>
-                        <span className="text-zinc-400 font-bold line-through">
-                          {formatPrice(product.original_price || product.price, currency)}
-                        </span>
-                      </div>
-
-                      {discountPct !== null && discountPct > 0 && (
-                        <div className="flex items-center gap-2">
-                          <span className="text-emerald-400 text-xs">خصم الدورة ({discountPct}%):</span>
-                          <span className="text-emerald-400 font-bold" dir="ltr">
-                            -{formatPrice(savings, currency)}
-                          </span>
-                        </div>
-                      )}
-
-                      {appliedCoupon && (
-                        <div className="flex items-center gap-2">
-                          <span className="text-emerald-400 text-xs">خصم الكوبون ({appliedCoupon.percent}%):</span>
-                          <span className="text-emerald-400 font-bold" dir="ltr">
-                            -{formatPrice(Math.round(product.price * (appliedCoupon.percent / 100)), currency)}
-                          </span>
-                        </div>
-                      )}
-
-                      {showFeeRowSeparately && (
-                        <div className="flex items-center gap-2">
-                          <span className="text-zinc-500 text-xs">رسوم الدفع:</span>
-                          <span className="text-zinc-400 font-bold">
-                            {formatPrice(feeAmountFormatted, currency)}
-                          </span>
-                        </div>
-                      )}
-
-                      <div className="md:mr-auto flex items-center gap-2 bg-rose-500/10 px-3 py-1 rounded-xl border border-rose-500/20">
-                        <span className="text-rose-400 font-bold text-xs">الإجمالي:</span>
-                        <span className="text-base text-white font-alexandria font-black">
-                          {formatPrice(finalPriceFormatted, currency)}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Full Name */}
-                  <div className="space-y-2">
-                    <Label className="font-cairo font-bold text-zinc-400 text-sm">الاسم بالكامل *</Label>
-                    <div className="relative">
-                      <Input 
-                        placeholder="الاسم بالكامل" 
-                        className={cn(
-                          "h-12 rounded-xl bg-white/5 border text-white text-sm font-cairo hover:bg-white/[0.07] focus:bg-white/10 focus:ring-1 transition-all text-right",
-                          fullNameValue && fullNameValue.length > 0
-                            ? (errors.fullName 
-                                ? "border-red-500/50 focus:border-red-500 focus:ring-red-500" 
-                                : "border-emerald-500/50 focus:border-emerald-500 focus:ring-emerald-500")
-                            : "border-white/5 focus:border-white/20 focus:ring-white/20"
-                        )}
-                        disabled={isLoading}
-                        autoFocus
-                        {...register("fullName")}
-                      />
-                    </div>
-                    {errors.fullName && <p className="text-[10px] text-red-400 font-cairo flex items-center gap-1 mt-1"><ShieldAlert className="w-3 h-3" /> {errors.fullName.message}</p>}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label className="font-cairo font-bold text-zinc-400 text-sm">البريد الإلكتروني *</Label>
-                    <div className="relative">
-                      <Mail 
-                        className={cn(
-                          "absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors",
-                          emailValue && emailValue.length > 0
-                            ? (errors.email ? "text-red-400" : "text-emerald-400")
-                            : "text-zinc-500"
-                        )} 
-                      />
-                      <Input 
-                        placeholder="name@email.com" 
-                        type="email"
-                        dir="ltr"
-                        className={cn(
-                          "h-12 rounded-xl bg-white/5 border text-white text-sm font-cairo hover:bg-white/[0.07] focus:bg-white/10 focus:ring-1 transition-all pl-11",
-                          emailValue && emailValue.length > 0
-                            ? (errors.email 
-                                ? "border-red-500/50 focus:border-red-500 focus:ring-red-500" 
-                                : "border-emerald-500/50 focus:border-emerald-500 focus:ring-emerald-500")
-                            : "border-white/5 focus:border-white/20 focus:ring-white/20"
-                        )}
-                        disabled={isLoading}
-                        {...register("email", {
-                          onBlur: handleEmailBlur
-                        })}
-                      />
-                    </div>
-                    {errors.email && <p className="text-xs text-red-400 font-cairo flex items-center gap-1 mt-1"><ShieldAlert className="w-3 h-3" /> {errors.email.message}</p>}
-                    {emailStatus?.exists && !emailStatus?.ownsCourse && (
-                      <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 p-4 rounded-xl flex items-start gap-3 font-cairo text-sm mt-3">
-                        <Sparkles className="w-5 h-5 shrink-0 mt-0.5 animate-pulse" />
-                        <div>
-                          <p className="font-bold">مرحباً بك مجدداً!</p>
-                          <p className="text-zinc-300 text-xs mt-1">
-                            هذا البريد الإلكتروني مسجل لدينا بالفعل. سيتم ربط هذا الكورس بحسابك الحالي فور إتمام الدفع دون الحاجة لإنشاء حساب جديد.
-                          </p>
                         </div>
                       </div>
                     )}
-                  </div>
 
-                  {!user && !emailStatus?.exists && (
-                    <>
-                      <div className="space-y-2">
-                        <Label className="font-cairo font-bold text-zinc-400 text-sm">كلمة المرور *</Label>
-                        <div className="relative">
-                          <Lock 
-                            className={cn(
-                              "absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors",
-                              passwordValue && passwordValue.length > 0
-                                ? (errors.password ? "text-red-400" : "text-emerald-400")
-                                : "text-zinc-500"
-                            )} 
-                          />
-                          <Input 
-                            placeholder="••••••••" 
-                            type={showPassword ? "text" : "password"}
-                            dir="ltr"
-                            className={cn(
-                              "h-12 rounded-xl bg-white/5 border text-white text-sm font-cairo hover:bg-white/[0.07] focus:bg-white/10 focus:ring-1 transition-all pl-11 pr-11",
-                              passwordValue && passwordValue.length > 0
-                                ? (errors.password 
-                                    ? "border-red-500/50 focus:border-red-500 focus:ring-red-500" 
-                                    : "border-emerald-500/50 focus:border-emerald-500 focus:ring-emerald-500")
-                                : "border-white/5 focus:border-white/20 focus:ring-white/20"
-                            )}
-                            disabled={isLoading}
-                            {...register("password")}
-                          />
-                          <button
-                            type="button"
-                            onClick={() => setShowPassword(prev => !prev)}
-                            className={cn(
-                              "absolute right-3 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center transition-colors rounded-lg hover:bg-white/10 cursor-pointer",
-                              passwordValue && passwordValue.length > 0
-                                ? (errors.password ? "text-red-400 hover:text-red-300" : "text-emerald-400 hover:text-emerald-300")
-                                : "text-zinc-500 hover:text-white"
-                            )}
-                            tabIndex={-1}
-                          >
-                            {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                          </button>
-                        </div>
-                        {errors.password && <p className="text-xs text-red-400 font-cairo flex items-center gap-1 mt-1"><ShieldAlert className="w-3 h-3" /> {errors.password.message}</p>}
-                      </div>
-                    </>
-                  )}
+                    {/* Mobile-only CTA Section (Placed directly under payment fields) */}
+                    <div className="block lg:hidden mt-6 space-y-4">
+                      {/* Submit Button */}
+                      {!(appliedCoupon && appliedCoupon.percent === 100) ? (
+                        <>
+                          {paymentMethod ? (
+                            <Button 
+                              type={paymentMethod === "instapay" ? "button" : "submit"}
+                              onClick={async (e) => {
+                                if (paymentMethod === "instapay") {
+                                  e.preventDefault();
+                                  const fieldsToValidate: ("fullName" | "email")[] = ["fullName", "email"];
+                                  const isValid = await trigger(fieldsToValidate);
 
-                  {/* Phone Number (Optional) */}
-                  <div className="space-y-2">
-                    <Label className="font-cairo font-bold text-zinc-400 text-sm">رقم الهاتف (واتساب) (اختياري)</Label>
-                    <div className="relative w-full" dir="ltr">
-                      <PhoneInput
-                        country={detectedCountry}
-                        value={phoneVal}
-                        onChange={(value, countryData: any) => {
-                          setPhoneVal(value);
-                          setDialCode(countryData.dialCode || "20");
-                        }}
-                        enableSearch={true}
-                        searchPlaceholder="ابحث عن الدولة..."
-                        countryCodeEditable={false}
-                        inputProps={{
-                          name: "phone",
-                          disabled: isLoading,
-                          placeholder: "101 234 5678",
-                        }}
-                      />
-                    </div>
-                  </div>
-
-                  <style>{`
-                    .react-tel-input {
-                      font-family: var(--font-cairo), sans-serif;
-                      width: 100%;
-                    }
-                    .react-tel-input .form-control {
-                      height: 48px !important;
-                      width: 100% !important;
-                      background-color: rgba(255, 255, 255, 0.05) !important;
-                      border: 1px solid rgba(255, 255, 255, 0.05) !important;
-                      border-radius: 12px !important;
-                      color: white !important;
-                      font-size: 14px !important;
-                      padding-left: 56px !important;
-                      transition: all 0.2s ease !important;
-                    }
-                    .react-tel-input .form-control:focus {
-                      background-color: rgba(255, 255, 255, 0.1) !important;
-                      border-color: rgba(255, 255, 255, 0.2) !important;
-                      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.2) !important;
-                    }
-                    .react-tel-input .flag-dropdown {
-                      background-color: transparent !important;
-                      border: none !important;
-                      border-radius: 12px 0 0 12px !important;
-                      padding: 0 !important;
-                      height: 46px !important;
-                      top: 1px !important;
-                      left: 1px !important;
-                    }
-                    .react-tel-input .flag-dropdown:hover, 
-                    .react-tel-input .flag-dropdown.open,
-                    .react-tel-input .selected-flag:hover {
-                      background-color: rgba(255, 255, 255, 0.05) !important;
-                      border-radius: 12px 0 0 12px !important;
-                    }
-                    .react-tel-input .selected-flag {
-                      background-color: transparent !important;
-                      padding-left: 12px !important;
-                      width: 48px !important;
-                    }
-                    .react-tel-input .selected-flag .arrow {
-                      border-top-color: #a1a1aa !important;
-                      left: 28px !important;
-                    }
-                    .react-tel-input .selected-flag .arrow.up {
-                      border-bottom-color: #a1a1aa !important;
-                    }
-                    .react-tel-input .country-list {
-                      background-color: #0c0c0e !important;
-                      border: 1px solid rgba(255, 255, 255, 0.1) !important;
-                      border-radius: 12px !important;
-                      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
-                      margin-top: 6px !important;
-                      width: 320px !important;
-                      padding: 6px 0 !important;
-                      z-index: 9999 !important;
-                      max-height: 220px !important;
-                      overflow-y: auto !important;
-                    }
-                    .react-tel-input .country-list::-webkit-scrollbar {
-                      width: 6px;
-                    }
-                    .react-tel-input .country-list::-webkit-scrollbar-thumb {
-                      background-color: rgba(255, 255, 255, 0.1);
-                      border-radius: 3px;
-                    }
-                    .react-tel-input .country-list .search {
-                      padding: 6px 10px !important;
-                      background-color: #0c0c0e !important;
-                      position: sticky !important;
-                      top: 0 !important;
-                      z-index: 10 !important;
-                      border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
-                    }
-                    .react-tel-input .country-list .search-box {
-                      width: 100% !important;
-                      height: 36px !important;
-                      background-color: rgba(255, 255, 255, 0.05) !important;
-                      border: 1px solid rgba(255, 255, 255, 0.1) !important;
-                      border-radius: 8px !important;
-                      color: white !important;
-                      font-size: 13px !important;
-                      padding: 0 10px !important;
-                      margin: 0 !important;
-                    }
-                    .react-tel-input .country-list .search-box:focus {
-                      border-color: rgba(255, 255, 255, 0.2) !important;
-                      outline: none !important;
-                    }
-                    .react-tel-input .country-list .country {
-                      padding: 8px 12px !important;
-                      color: #d4d4d8 !important;
-                      font-size: 13px !important;
-                      display: flex !important;
-                      align-items: center !important;
-                      gap: 8px !important;
-                      text-align: left !important;
-                    }
-                    .react-tel-input .country-list .country:hover,
-                    .react-tel-input .country-list .country.highlight {
-                      background-color: rgba(255, 255, 255, 0.05) !important;
-                      color: white !important;
-                    }
-                    .react-tel-input .country-list .country.active {
-                      background-color: rgba(244, 63, 94, 0.15) !important;
-                      color: #fb7185 !important;
-                    }
-                    .react-tel-input .country-list .country-name {
-                      flex-grow: 1 !important;
-                      text-align: left !important;
-                    }
-                    .react-tel-input .country-list .dial-code {
-                      color: #71717a !important;
-                      font-family: monospace !important;
-                    }
-                  `}</style>
-
-                  {/* Payment Method Selector */}
-                  {!(appliedCoupon && appliedCoupon.percent === 100) && (
-                    <div className="pt-4 mt-4">
-                      <Label className="font-cairo font-bold text-zinc-400 text-sm mb-3 block">طريقة الدفع</Label>
-                      <div className={cn("grid gap-3", currency === "EGP" ? "grid-cols-1 md:grid-cols-3" : "grid-cols-1")}>
-                        
-                        <div 
-                          onClick={() => setPaymentMethod("card")}
-                          className={cn(
-                            "cursor-pointer border rounded-2xl p-3.5 flex items-center gap-3 transition-all duration-300 hover:scale-[1.01] active:scale-[0.99]",
-                            paymentMethod === "card" 
-                              ? "border-rose-500/50 bg-rose-500/10 shadow-[inset_0_0_30px_rgba(244,63,94,0.1)]" 
-                              : "border-white/5 bg-white/5 hover:border-white/10 hover:shadow-[inset_0_0_20px_rgba(255,255,255,0.02)]"
-                          )}
-                        >
-                          <div className={cn("w-5 h-5 rounded-full border-2 flex items-center justify-center", paymentMethod === "card" ? "border-rose-500" : "border-zinc-500")}>
-                            {paymentMethod === "card" && <div className="w-2.5 h-2.5 rounded-full bg-rose-500" />}
-                          </div>
-                          <CreditCard className={cn("w-6 h-6", paymentMethod === "card" ? "text-rose-400" : "text-zinc-500")} />
-                          <div className="font-cairo">
-                            <p className={cn("font-bold", paymentMethod === "card" ? "text-white" : "text-zinc-300")}>البطاقات البنكية</p>
-                            <p className="text-xs text-zinc-500">Visa / Mastercard / Meeza</p>
-                          </div>
-                        </div>
-
-                        {currency === "EGP" && (
-                          <div 
-                            onClick={() => setPaymentMethod("wallet")}
-                            className={cn(
-                              "cursor-pointer border rounded-2xl p-3.5 flex items-center gap-3 transition-all duration-300 hover:scale-[1.01] active:scale-[0.99]",
-                              paymentMethod === "wallet" 
-                                ? "border-emerald-500/50 bg-emerald-500/10 shadow-[inset_0_0_30px_rgba(16,185,129,0.1)]" 
-                                : "border-white/5 bg-white/5 hover:border-white/10 hover:shadow-[inset_0_0_20px_rgba(255,255,255,0.02)]"
-                            )}
-                          >
-                            <div className={cn("w-5 h-5 rounded-full border-2 flex items-center justify-center", paymentMethod === "wallet" ? "border-emerald-500" : "border-zinc-500")}>
-                              {paymentMethod === "wallet" && <div className="w-2.5 h-2.5 rounded-full bg-emerald-500" />}
-                            </div>
-                            <div className="w-6 h-6 rounded flex items-center justify-center bg-zinc-800 shrink-0">
-                              <span className={cn("text-xs font-black font-sans", paymentMethod === "wallet" ? "text-emerald-400" : "text-zinc-500")}>Pay</span>
-                            </div>
-                            <div className="font-cairo">
-                              <p className={cn("font-bold", paymentMethod === "wallet" ? "text-white" : "text-zinc-300")}>المحافظ الإلكترونية</p>
-                              <p className="text-xs text-zinc-500">فودافون كاش والأخرى</p>
-                            </div>
-                          </div>
-                        )}
-
-                        {currency === "EGP" && (
-                          <div 
-                            onClick={() => {
-                              setPaymentMethod("instapay");
-                            }}
-                            className={cn(
-                              "cursor-pointer border rounded-2xl p-3.5 flex items-center gap-3 transition-all duration-300 hover:scale-[1.01] active:scale-[0.99]",
-                              paymentMethod === "instapay" 
-                                ? "border-purple-500/50 bg-purple-500/10 shadow-[inset_0_0_30px_rgba(147,51,234,0.1)]" 
-                                : "border-white/5 bg-white/5 hover:border-purple-500/30 hover:bg-purple-500/5 hover:shadow-[inset_0_0_20px_rgba(147,51,234,0.05)]"
-                            )}
-                          >
-                            <div className={cn("w-5 h-5 rounded-full border-2 flex items-center justify-center", paymentMethod === "instapay" ? "border-purple-500" : "border-zinc-500")}>
-                              {paymentMethod === "instapay" && <div className="w-2.5 h-2.5 rounded-full bg-purple-500" />}
-                            </div>
-                            <div className="w-6 h-6 rounded flex items-center justify-center bg-purple-900/30 shrink-0">
-                              <span className={cn("text-[8px] font-black font-sans", paymentMethod === "instapay" ? "text-purple-400" : "text-zinc-500")}>IPN</span>
-                            </div>
-                            <div className="font-cairo">
-                              <p className={cn("font-bold", paymentMethod === "instapay" ? "text-white" : "text-zinc-300")}>Instapay تحويل فوري</p>
-                              <p className="text-xs text-zinc-500">تحويل بنكي فوري عبر إنستاباي</p>
-                            </div>
-                          </div>
-                        )}
-
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Inline Card Fields (Animated transition) */}
-                  {!(appliedCoupon && appliedCoupon.percent === 100) && (
-                    <div className={cn(
-                      "transition-all duration-500 ease-in-out overflow-hidden border-t border-white/5",
-                      paymentMethod === "card" ? "max-h-[600px] opacity-100 pt-6 mt-6" : "max-h-0 opacity-0 pt-0 mt-0 border-transparent pointer-events-none"
-                    )}>
-                      <div className="mb-4">
-                        <h3 className="font-cairo font-bold text-white flex items-center gap-2 text-sm">
-                          <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                          بيانات البطاقة
-                        </h3>
-                      </div>
-
-                      <div className="space-y-3">
-                        <div className="space-y-1.5">
-                          <Label className="font-cairo text-xs text-zinc-400 text-right block">رقم البطاقة</Label>
-                          <div className="relative">
-                            <Input 
-                              ref={cardNumberRef}
-                              value={cardNumber}
-                              onChange={handleCardNumberChange}
-                              placeholder="0000 0000 0000 0000" 
-                              dir="ltr"
-                              maxLength={19}
-                              inputMode="numeric"
-                              className={cn("h-14 rounded-xl bg-white/5 border-white/5 text-white font-mono text-lg tracking-widest hover:bg-white/[0.07] focus:bg-white/10 focus:border-white/20 focus:ring-1 focus:ring-white/20 transition-all", 
-                                cardErrors.number ? "border-red-500/50 focus:ring-red-500" : (cardNumber.length === 19 ? "border-emerald-500/50 focus:ring-emerald-500" : "")
-                              )}
-                              disabled={isLoading}
-                            />
-                            {cardNumber.length === 19 && !cardErrors.number && <CheckCircle2 className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-emerald-500" />}
-                          </div>
-                          {cardErrors.number && <p className="text-xs text-red-400 font-cairo flex items-center gap-1 mt-1 text-right" dir="rtl"><ShieldAlert className="w-3 h-3 inline ml-1" /> {cardErrors.number}</p>}
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-3">
-                          <div className="space-y-1.5">
-                            <Label className="font-cairo text-xs text-zinc-400 text-right block">تاريخ الانتهاء</Label>
-                            <Input 
-                              value={expiryDate}
-                              onChange={handleExpiryChange}
-                              placeholder="MM/YY" 
-                              dir="ltr"
-                              maxLength={5}
-                              inputMode="numeric"
-                              className={cn("h-12 rounded-xl bg-white/5 border-white/5 text-white font-mono text-base text-center hover:bg-white/[0.07] focus:bg-white/10 focus:border-white/20 focus:ring-1 focus:ring-white/20 transition-all", 
-                                cardErrors.expiry ? "border-red-500/50 focus:ring-red-500" : (expiryDate.length === 5 ? "border-emerald-500/50 focus:ring-emerald-500" : "")
-                              )}
-                              disabled={isLoading}
-                            />
-                            {cardErrors.expiry && <p className="text-[10px] text-red-400 font-cairo flex items-center gap-1 mt-1 text-right" dir="rtl"><ShieldAlert className="w-3 h-3 inline ml-1" /> {cardErrors.expiry}</p>}
-                          </div>
-                          <div className="space-y-1.5">
-                            <Label className="font-cairo text-xs text-zinc-400 text-right block">رمز الأمان (CVV)</Label>
-                            <Input 
-                              value={cvv}
-                              onChange={handleCvvChange}
-                              placeholder="123" 
-                              type="password"
-                              dir="ltr"
-                              maxLength={3}
-                              inputMode="numeric"
-                              className={cn("h-12 rounded-xl bg-white/5 border-white/5 text-white font-mono text-base text-center hover:bg-white/[0.07] focus:bg-white/10 focus:border-white/20 focus:ring-1 focus:ring-white/20 transition-all", 
-                                cardErrors.cvv ? "border-red-500/50 focus:ring-red-500" : (cvv.length === 3 ? "border-emerald-500/50 focus:ring-emerald-500" : "")
-                              )}
-                              disabled={isLoading}
-                            />
-                            {cardErrors.cvv && <p className="text-xs text-red-400 font-cairo flex items-center gap-1 mt-1 text-right" dir="rtl"><ShieldAlert className="w-3 h-3 inline ml-1" /> {cardErrors.cvv}</p>}
-                          </div>
-                        </div>
-
-                        {/* Card Holder Input */}
-                        <div className="space-y-1.5">
-                          <Label className="font-cairo text-xs text-zinc-400 text-right block">اسم حامل البطاقة</Label>
-                          <Input 
-                            value={cardHolder}
-                            onChange={handleCardHolderChange}
-                            placeholder="الاسم كما هو مكتوب على البطاقة" 
-                            className={cn("h-12 rounded-xl bg-white/5 border-white/5 text-white text-sm font-cairo hover:bg-white/[0.07] focus:bg-white/10 focus:border-white/20 focus:ring-1 focus:ring-white/20 transition-all text-right", 
-                              cardErrors.holder ? "border-red-500/50 focus:ring-red-500" : (cardHolder.length >= 3 ? "border-emerald-500/50 focus:ring-emerald-500" : "")
-                            )}
-                            disabled={isLoading}
-                          />
-                          {cardErrors.holder && <p className="text-[10px] text-red-400 font-cairo flex items-center gap-1 mt-1 text-right" dir="rtl"><ShieldAlert className="w-3 h-3 inline ml-1" /> {cardErrors.holder}</p>}
-                        </div>
-
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="pt-6 border-t border-white/5 mt-8">
-                    {!(appliedCoupon && appliedCoupon.percent === 100) ? (
-                      <>
-                        <Button 
-                          type={paymentMethod === "instapay" ? "button" : "submit"}
-                          onClick={async (e) => {
-                            if (paymentMethod === "instapay") {
-                              e.preventDefault();
-                              const fieldsToValidate: ("fullName" | "email" | "password")[] = ["fullName", "email"];
-                              if (!user) {
-                                fieldsToValidate.push("password");
-                              }
-                              const isValid = await trigger(fieldsToValidate);
-                              const passwordVal = getValues("password");
-                              const isPasswordMissing = !user && (!passwordVal || passwordVal.trim() === "");
-
-                              if (isValid && !isPasswordMissing) {
-                                setShowInstapayModal(true);
-                              } else {
-                                toast.error("يُرجى إكمال جميع الحقول لإتمام الدفع");
-                                if (isPasswordMissing) {
-                                  setError("password", { type: "manual", message: "يُرجى إكمال جميع الحقول لإتمام الدفع" });
+                                  if (isValid) {
+                                    setShowInstapayModal(true);
+                                  } else {
+                                    toast.error("يُرجى إكمال جميع الحقول لإتمام الدفع");
+                                  }
                                 }
-                              }
-                            }
-                          }}
-                          disabled={isLoading}
-                          className={cn(
-                            "w-full h-14 text-white font-alexandria text-lg font-bold rounded-xl transition-all active:scale-[0.98] cursor-pointer",
-                            paymentMethod === "card" 
-                              ? "bg-[#D6004B] hover:bg-[#b0003d] shadow-[0_4px_14px_0_rgba(214,0,75,0.39)] hover:shadow-[0_6px_20px_rgba(214,0,75,0.23)] hover:-translate-y-0.5" 
-                              : paymentMethod === "instapay"
-                                ? "bg-purple-600 hover:bg-purple-500 shadow-[0_4px_14px_0_rgba(147,51,234,0.39)] hover:shadow-[0_6px_20px_rgba(147,51,234,0.23)] hover:-translate-y-0.5"
-                                : "bg-emerald-600 hover:bg-emerald-500 shadow-[0_4px_14px_0_rgba(16,185,129,0.39)] hover:shadow-[0_6px_20px_rgba(16,185,129,0.23)] hover:-translate-y-0.5"
-                          )}
-                        >
-                          {isLoading ? (
-                            <>
-                              <Loader2 className="w-6 h-6 animate-spin ml-2" />
-                              جاري تجهيز الدفع...
-                            </>
-                          ) : (
-                            paymentMethod === "card" ? (
-                              <>إتمام الدفع الآمن <Lock className="w-5 h-5 mr-3 opacity-80" /></>
-                            ) : paymentMethod === "instapay" ? (
-                              <>إتمام الطلب عن طريق إنستاباي</>
-                            ) : (
-                              <>إتمام الطلب بواسطة المحفظة</>
-                            )
-                          )}
-                        </Button>
-                      </>
-                    ) : (
-                      <>
+                              }}
+                              disabled={isLoading}
+                              className={cn(
+                                "w-full h-14 font-alexandria text-lg font-bold rounded-xl transition-all duration-300",
+                                isFormValid
+                                  ? (paymentMethod === "card" 
+                                      ? "bg-[#D6004B] text-white hover:bg-[#b0003d] shadow-[0_4px_20px_0_rgba(214,0,75,0.4)] cursor-pointer active:scale-[0.98]" 
+                                      : paymentMethod === "instapay"
+                                        ? "bg-purple-600 text-white hover:bg-purple-500 shadow-[0_4px_20px_0_rgba(147,51,234,0.4)] cursor-pointer active:scale-[0.98]"
+                                        : "bg-emerald-600 text-white hover:bg-emerald-500 shadow-[0_4px_20px_0_rgba(16,185,129,0.4)] cursor-pointer active:scale-[0.98]")
+                                  : (paymentMethod === "card"
+                                      ? "bg-[#D6004B]/30 text-white/50 cursor-not-allowed shadow-none"
+                                      : paymentMethod === "instapay"
+                                        ? "bg-purple-600/30 text-white/50 cursor-not-allowed shadow-none"
+                                        : "bg-emerald-600/30 text-white/50 cursor-not-allowed shadow-none")
+                              )}
+                            >
+                              {isLoading ? (
+                                <>
+                                  <Loader2 className="w-6 h-6 animate-spin ml-2" />
+                                  جاري تجهيز الدفع...
+                                </>
+                              ) : (
+                                paymentMethod === "card" ? (
+                                  <>إتمام الطلب عن طريق البطاقة <Lock className="w-5 h-5 mr-3 opacity-80" /></>
+                                ) : paymentMethod === "instapay" ? (
+                                  <>إتمام الطلب عن طريق إنستاباي</>
+                                ) : paymentMethod === "wallet" ? (
+                                  <>إتمام الطلب عن طريق المحفظة</>
+                                ) : null
+                              )}
+                            </Button>
+                          ) : null}
+                        </>
+                      ) : (
                         <Button 
                           type="submit" 
                           disabled={isLoading}
                           className={cn(
-                            "w-full h-14 text-white font-alexandria text-lg font-bold rounded-xl transition-all active:scale-[0.98] cursor-pointer",
-                            "bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 shadow-[0_4px_14px_0_rgba(16,185,129,0.39)] hover:shadow-[0_6px_20px_rgba(16,185,129,0.23)] hover:-translate-y-0.5"
+                            "w-full h-14 font-alexandria text-lg font-bold rounded-xl transition-all duration-300",
+                            isFormValid
+                              ? "bg-gradient-to-r from-emerald-500 to-teal-600 text-white hover:from-emerald-600 hover:to-teal-700 shadow-[0_4px_20px_rgba(16,185,129,0.4)] cursor-pointer active:scale-[0.98]"
+                              : "bg-gradient-to-r from-emerald-500/30 to-teal-600/30 text-white/50 cursor-not-allowed shadow-none"
                           )}
                         >
                           {isLoading ? (
@@ -1538,26 +1470,425 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                             )
                           )}
                         </Button>
-                      </>
-                    )}
+                      )}
 
-                    {currency === "USD" && (
-                      <div className="mt-4 p-3 bg-rose-500/10 border border-rose-500/20 text-rose-400 rounded-xl text-xs font-cairo text-center leading-relaxed">
-                        Notice: Final payment will be processed in EGP based on the current exchange rate ($1 = {exchangeRate.toFixed(2)} EGP).
-                        <br />
-                        تنبيه: سيتم معالجة الدفع النهائي بالجنيه المصري (EGP) بناءً على سعر الصرف الحالي ($1 = {exchangeRate.toFixed(2)} ج.م).
+                      {((appliedCoupon && appliedCoupon.percent === 100) || paymentMethod) && (
+                        <p className="text-[10px] text-zinc-500 text-center mt-2 font-cairo leading-relaxed">
+                          بالضغط على الزر أعلاه، أنت توافق على <Link href="/privacy" className="underline hover:text-white transition-colors">الشروط والأحكام</Link> و <Link href="/privacy" className="underline hover:text-white transition-colors">سياسة الخصوصية</Link>
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Mobile-only Order Summary & Invoice Card */}
+                    <div className="block lg:hidden bg-white/[0.015] backdrop-blur-2xl border border-white/5 rounded-3xl p-6 sm:p-8 hover:border-white/10 transition-all duration-300 shadow-[0_8px_32px_rgba(0,0,0,0.37)] space-y-6 mt-6">
+                      <div className="mb-2">
+                        <h3 className="font-alexandria font-bold text-white text-base text-right">ملخص الطلب والفاتورة</h3>
                       </div>
-                    )}
 
+                      {/* Product details */}
+                      <div className="flex items-center gap-4">
+                        {product.image_url ? (
+                          <div className="relative w-16 h-16 rounded-2xl overflow-hidden border border-white/10 shrink-0">
+                            <Image
+                              src={product.image_url}
+                              alt={product.title}
+                              fill
+                              className="object-cover"
+                            />
+                          </div>
+                        ) : (
+                          <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10 shrink-0">
+                            <Package className="w-6 h-6 text-zinc-500" />
+                          </div>
+                        )}
+                        <div className="text-right">
+                          <h3 className="text-sm font-alexandria font-bold text-white leading-relaxed">
+                            {product.title}
+                          </h3>
+                          {isCourse && (
+                            <span className="inline-flex items-center gap-1 text-[10px] text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-full mt-1 font-bold">
+                              <Sparkles className="w-2.5 h-2.5 animate-pulse" />
+                              انضمام فوري للقسم
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Coupon Input */}
+                      <div className="border-t border-white/5 pt-4">
+                        {appliedCoupon ? (
+                          <div className="flex items-center justify-between bg-emerald-500/10 border border-emerald-500/20 px-3 py-2 rounded-xl w-full">
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-xs font-mono font-bold text-emerald-400">{appliedCoupon.code}</span>
+                              <span className="text-[10px] text-emerald-500 bg-emerald-500/15 px-1.5 py-0.5 rounded-full font-bold font-mono">-{appliedCoupon.percent}%</span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={handleRemoveCoupon}
+                              className="text-[11px] text-zinc-400 hover:text-white transition-colors mr-2 cursor-pointer font-bold font-cairo"
+                            >
+                              إلغاء
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="relative flex items-center w-full">
+                            <input
+                              type="text"
+                              placeholder="أدخل كوبون الخصم..."
+                              value={couponInput}
+                              onChange={(e) => setCouponInput(e.target.value)}
+                              disabled={isValidatingCoupon}
+                              className="w-full h-11 rounded-lg bg-white/5 border border-white/5 text-white text-xs font-cairo px-4 pl-16 hover:bg-white/[0.07] focus:bg-white/10 focus:border-white/20 focus:ring-0 outline-none transition-all text-right"
+                              dir="rtl"
+                            />
+                            <button
+                              type="button"
+                              onClick={handleApplyCoupon}
+                              disabled={isValidatingCoupon || !couponInput.trim()}
+                              className="absolute left-1.5 h-8 px-4 text-xs bg-[#D6004B] hover:bg-[#b0003d] text-white rounded-lg transition-all font-bold cursor-pointer disabled:opacity-50 font-cairo"
+                            >
+                              {isValidatingCoupon ? "..." : "تطبيق"}
+                            </button>
+                          </div>
+                        )}
+                        {couponError && <p className="text-[11px] text-red-400 font-cairo mt-1 text-right" dir="rtl">{couponError}</p>}
+                      </div>
+
+                      {/* Pricing Breakdown */}
+                      <div className="border-t border-white/5 pt-4 space-y-3 font-cairo text-sm text-zinc-400">
+                        <div className="flex justify-between items-center">
+                          <span>السعر الأصلي:</span>
+                          <span className="font-bold line-through text-zinc-500">
+                            {formatPrice(product.original_price || product.price, currency)}
+                          </span>
+                        </div>
+
+                        {discountPct !== null && discountPct > 0 && (
+                          <div className="flex justify-between items-center text-emerald-400">
+                            <span>خصم الدورة ({discountPct}%):</span>
+                            <span className="font-bold" dir="ltr">
+                              -{formatPrice(savings, currency)}
+                            </span>
+                          </div>
+                        )}
+
+                        {appliedCoupon && (
+                          <div className="flex justify-between items-center text-emerald-400">
+                            <span>خصم الكوبون ({appliedCoupon.percent}%):</span>
+                            <span className="font-bold" dir="ltr">
+                              -{formatPrice(Math.round(product.price * (appliedCoupon.percent / 100)), currency)}
+                            </span>
+                          </div>
+                        )}
+
+                        {showFeeRowSeparately && (
+                          <div className="flex justify-between items-center">
+                            <span>رسوم الدفع:</span>
+                            <span className="font-bold">
+                              {formatPrice(feeAmountFormatted, currency)}
+                            </span>
+                          </div>
+                        )}
+
+                        <div className="flex justify-between items-center border-t border-white/5 pt-4">
+                          <span className="text-white font-bold">الإجمالي:</span>
+                          <span className="text-lg text-white font-alexandria font-black">
+                            {formatPrice(finalPriceFormatted, currency)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Desktop-only Invoice & Payment Card */}
+                    <div className="hidden lg:block bg-white/[0.015] backdrop-blur-2xl border border-white/5 rounded-3xl p-6 sm:p-8 hover:border-white/10 transition-all duration-300 shadow-[0_8px_32px_rgba(0,0,0,0.37)] space-y-6">
+                      <div className="mb-2">
+                        <h3 className="font-alexandria font-bold text-white text-base text-right">ملخص الفاتورة</h3>
+                      </div>
+
+                      <div className="border-b border-white/5 pb-4 mb-6 space-y-3 font-cairo text-sm text-zinc-400">
+                        <div className="flex justify-between items-center">
+                          <span>السعر الأصلي:</span>
+                          <span className="font-bold line-through text-zinc-500">
+                            {formatPrice(product.original_price || product.price, currency)}
+                          </span>
+                        </div>
+
+                        {discountPct !== null && discountPct > 0 && (
+                          <div className="flex justify-between items-center text-emerald-400">
+                            <span>خصم الدورة ({discountPct}%):</span>
+                            <span className="font-bold" dir="ltr">
+                              -{formatPrice(savings, currency)}
+                            </span>
+                          </div>
+                        )}
+
+                        {appliedCoupon && (
+                          <div className="flex justify-between items-center text-emerald-400">
+                            <span>خصم الكوبون ({appliedCoupon.percent}%):</span>
+                            <span className="font-bold" dir="ltr">
+                              -{formatPrice(Math.round(product.price * (appliedCoupon.percent / 100)), currency)}
+                            </span>
+                          </div>
+                        )}
+
+                        {showFeeRowSeparately && (
+                          <div className="flex justify-between items-center">
+                            <span>رسوم الدفع:</span>
+                            <span className="font-bold">
+                              {formatPrice(feeAmountFormatted, currency)}
+                            </span>
+                          </div>
+                        )}
+
+                        <div className="flex justify-between items-center border-t border-white/5 pt-4">
+                          <span className="text-white font-bold">الإجمالي:</span>
+                          <span className="text-lg text-white font-alexandria font-black">
+                            {formatPrice(finalPriceFormatted, currency)}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Submit Button */}
+                      {!(appliedCoupon && appliedCoupon.percent === 100) ? (
+                        <>
+                          {paymentMethod ? (
+                            <Button 
+                              type={paymentMethod === "instapay" ? "button" : "submit"}
+                              onClick={async (e) => {
+                                if (paymentMethod === "instapay") {
+                                  e.preventDefault();
+                                  const fieldsToValidate: ("fullName" | "email")[] = ["fullName", "email"];
+                                  const isValid = await trigger(fieldsToValidate);
+
+                                  if (isValid) {
+                                    setShowInstapayModal(true);
+                                  } else {
+                                    toast.error("يُرجى إكمال جميع الحقول لإتمام الدفع");
+                                  }
+                                }
+                              }}
+                              disabled={isLoading}
+                              className={cn(
+                                "w-full h-14 font-alexandria text-lg font-bold rounded-xl transition-all duration-300",
+                                isFormValid
+                                  ? (paymentMethod === "card" 
+                                      ? "bg-[#D6004B] text-white hover:bg-[#b0003d] shadow-[0_4px_20px_0_rgba(214,0,75,0.4)] cursor-pointer active:scale-[0.98]" 
+                                      : paymentMethod === "instapay"
+                                        ? "bg-purple-600 text-white hover:bg-purple-500 shadow-[0_4px_20px_0_rgba(147,51,234,0.4)] cursor-pointer active:scale-[0.98]"
+                                        : "bg-emerald-600 text-white hover:bg-emerald-500 shadow-[0_4px_20px_0_rgba(16,185,129,0.4)] cursor-pointer active:scale-[0.98]")
+                                  : (paymentMethod === "card"
+                                      ? "bg-[#D6004B]/30 text-white/50 cursor-not-allowed shadow-none"
+                                      : paymentMethod === "instapay"
+                                        ? "bg-purple-600/30 text-white/50 cursor-not-allowed shadow-none"
+                                        : "bg-emerald-600/30 text-white/50 cursor-not-allowed shadow-none")
+                              )}
+                            >
+                              {isLoading ? (
+                                <>
+                                  <Loader2 className="w-6 h-6 animate-spin ml-2" />
+                                  جاري تجهيز الدفع...
+                                </>
+                              ) : (
+                                paymentMethod === "card" ? (
+                                  <>إتمام الطلب عن طريق البطاقة <Lock className="w-5 h-5 mr-3 opacity-80" /></>
+                                ) : paymentMethod === "instapay" ? (
+                                  <>إتمام الطلب عن طريق إنستاباي</>
+                                ) : paymentMethod === "wallet" ? (
+                                  <>إتمام الطلب عن طريق المحفظة</>
+                                ) : null
+                              )}
+                            </Button>
+                          ) : null}
+                        </>
+                      ) : (
+                        <Button 
+                          type="submit" 
+                          disabled={isLoading}
+                          className={cn(
+                            "w-full h-14 font-alexandria text-lg font-bold rounded-xl transition-all duration-300",
+                            isFormValid
+                              ? "bg-gradient-to-r from-emerald-500 to-teal-600 text-white hover:from-emerald-600 hover:to-teal-700 shadow-[0_4px_20px_rgba(16,185,129,0.4)] cursor-pointer active:scale-[0.98]"
+                              : "bg-gradient-to-r from-emerald-500/30 to-teal-600/30 text-white/50 cursor-not-allowed shadow-none"
+                          )}
+                        >
+                          {isLoading ? (
+                            <>
+                              <Loader2 className="w-6 h-6 animate-spin ml-2" />
+                              جاري تفعيل طلبك...
+                            </>
+                          ) : (
+                            isCourse ? (
+                              <>تفعيل الكورس مجاناً والانضمام فوراً <Sparkles className="w-5 h-5 mr-3 opacity-80" /></>
+                            ) : (
+                              <>تأكيد الطلب والحصول على المنتج مجاناً <Sparkles className="w-5 h-5 mr-3 opacity-80" /></>
+                            )
+                          )}
+                        </Button>
+                      )}
+
+                    {((appliedCoupon && appliedCoupon.percent === 100) || paymentMethod) && (
+                      <p className="text-[10px] text-zinc-500 text-center mt-4 font-cairo leading-relaxed">
+                        بالضغط على الزر أعلاه، أنت توافق على <Link href="/privacy" className="underline hover:text-white transition-colors">الشروط والأحكام</Link> و <Link href="/privacy" className="underline hover:text-white transition-colors">سياسة الخصوصية</Link>
+                      </p>
+                    )}
+                  </div>
+
+
+
+                </div>
+
+                {/* Left Column (Desktop Only Sticky Sidebar) */}
+                <div className="hidden lg:block lg:col-span-4 lg:sticky lg:top-32 space-y-6">
+                  <div className="bg-white/[0.015] backdrop-blur-2xl border border-white/5 rounded-3xl p-6 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] hover:border-white/10 transition-all duration-300">
+                    
+                    {/* Product Image and Title */}
+                    <div className="flex flex-col gap-4 mb-6">
+                      {product.image_url ? (
+                        <div className="relative w-full aspect-video rounded-2xl overflow-hidden border border-white/5">
+                          <Image
+                            src={product.image_url}
+                            alt={product.title}
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
+                      ) : (
+                        <div className="w-full aspect-video rounded-2xl bg-white/5 flex items-center justify-center border border-white/5">
+                          <Package className="w-12 h-12 text-zinc-600" />
+                        </div>
+                      )}
+                      
+                      <div className="text-right">
+                        <h3 className="text-base font-alexandria font-bold text-white leading-relaxed">
+                          {product.title}
+                        </h3>
+                        {isCourse && (
+                          <span className="inline-flex items-center gap-1.5 text-[10px] text-rose-400 bg-rose-500/10 px-3 py-1 rounded-full mt-2 font-bold">
+                            <Sparkles className="w-3 h-3 animate-pulse" />
+                            انضمام فوري للقسم
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Coupon Field inside Sidebar */}
+                    <div className="border-t border-white/5 pt-4 mb-6">
+                      <Label className="font-cairo text-xs text-zinc-400 block mb-2 text-right">كوبون الخصم</Label>
+                      {appliedCoupon ? (
+                        <div className="flex items-center justify-between bg-emerald-500/10 border border-emerald-500/20 px-3 py-2 rounded-2xl w-full">
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-mono font-bold text-emerald-400">{appliedCoupon.code}</span>
+                            <span className="text-[10px] text-emerald-500 bg-emerald-500/15 px-2 py-0.5 rounded-full font-bold font-mono">-{appliedCoupon.percent}%</span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={handleRemoveCoupon}
+                            className="text-xs text-zinc-400 hover:text-white transition-colors mr-2 cursor-pointer font-bold font-cairo"
+                          >
+                            إلغاء
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="relative flex items-center w-full">
+                          <input
+                            type="text"
+                            placeholder="أدخل كوبون الخصم..."
+                            value={couponInput}
+                            onChange={(e) => setCouponInput(e.target.value)}
+                            disabled={isValidatingCoupon}
+                            className="w-full h-11 rounded-lg bg-white/5 border border-white/5 text-white text-xs font-cairo px-4 pl-16 hover:bg-white/[0.04] focus:bg-white/10 focus:border-white/15 focus:ring-0 outline-none transition-all text-right"
+                            dir="rtl"
+                          />
+                          <button
+                            type="button"
+                            onClick={handleApplyCoupon}
+                            disabled={isValidatingCoupon || !couponInput.trim()}
+                            className="absolute left-1.5 h-8 px-4 text-xs bg-[#D6004B] hover:bg-[#b0003d] text-white rounded-lg transition-all font-bold cursor-pointer disabled:opacity-50 font-cairo"
+                          >
+                            {isValidatingCoupon ? "..." : "تطبيق"}
+                          </button>
+                        </div>
+                      )}
+                      {couponError && <p className="text-[11px] text-red-400 font-cairo mt-1.5 text-right" dir="rtl">{couponError}</p>}
+                    </div>
+
+                    {/* Pricing Breakdown inside Sidebar */}
+                    <div className="border-t border-white/5 pt-4 space-y-3 font-cairo text-sm text-zinc-400">
+                      <div className="flex justify-between items-center">
+                        <span>السعر الأصلي:</span>
+                        <span className="font-bold line-through text-zinc-500">
+                          {formatPrice(product.original_price || product.price, currency)}
+                        </span>
+                      </div>
+
+                      {discountPct !== null && discountPct > 0 && (
+                        <div className="flex justify-between items-center text-emerald-400">
+                          <span>خصم الدورة ({discountPct}%):</span>
+                          <span className="font-bold" dir="ltr">
+                            -{formatPrice(savings, currency)}
+                          </span>
+                        </div>
+                      )}
+
+                      {appliedCoupon && (
+                        <div className="flex justify-between items-center text-emerald-400">
+                          <span>خصم الكوبون ({appliedCoupon.percent}%):</span>
+                          <span className="font-bold" dir="ltr">
+                            -{formatPrice(Math.round(product.price * (appliedCoupon.percent / 100)), currency)}
+                          </span>
+                        </div>
+                      )}
+
+                      {showFeeRowSeparately && (
+                        <div className="flex justify-between items-center">
+                          <span>رسوم الدفع:</span>
+                          <span className="font-bold">
+                            {formatPrice(feeAmountFormatted, currency)}
+                          </span>
+                        </div>
+                      )}
+
+                      <div className="flex justify-between items-center border-t border-white/5 pt-4">
+                        <span className="text-white font-bold">الإجمالي:</span>
+                        <span className="text-xl text-white font-alexandria font-black">
+                          {formatPrice(finalPriceFormatted, currency)}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Sidebar trust checklist items */}
+                    <div className="border-t border-white/5 pt-6 mt-6 space-y-4 font-cairo text-xs text-zinc-400 text-right">
+                      <div className="flex items-center gap-2.5 justify-end">
+                        <span>وصول فوري بعد الدفع</span>
+                        <div className="w-5 h-5 rounded-full bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400 shrink-0">
+                          <Sparkles className="w-3 h-3" />
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2.5 justify-end">
+                        <span>ضمان استرجاع 7 أيام</span>
+                        <div className="w-5 h-5 rounded-full bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400 shrink-0">
+                          <ShieldCheck className="w-3 h-3" />
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2.5 justify-end">
+                        <span>دعم فني طوال فترة الكورس</span>
+                        <div className="w-5 h-5 rounded-full bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400 shrink-0">
+                          <ShieldCheck className="w-3 h-3" />
+                        </div>
+                      </div>
+                    </div>
 
                   </div>
-                </form>
-              </motion.div>
-            )}
-            </div>
-          </div>
+                </div>
+
+              </div>
+            </form>
+          )}
         </div>
-      </main>
+
+
+      </div>
+    </main>
 
       {/* Instapay Modal */}
       {showInstapayModal && (
@@ -1574,8 +1905,15 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
 
             <div className="text-center space-y-5">
               <div>
-                <div className="w-14 h-14 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center mx-auto mb-3">
-                  <span className="text-xl font-black font-sans text-purple-400">IPN</span>
+                <div className="mx-auto mb-3.5 flex justify-center">
+                  <Image 
+                    src="/payment-logos/instapay.svg" 
+                    alt="Instapay" 
+                    width={130} 
+                    height={44} 
+                    className="h-10 w-auto object-contain" 
+                    priority
+                  />
                 </div>
                 <h3 className="text-xl font-alexandria font-bold text-white">الدفع عبر Instapay</h3>
                 <p className="text-sm text-zinc-400 font-cairo mt-1">قم بتحويل المبلغ ثم أرسل لقطة الشاشة</p>
@@ -1586,10 +1924,6 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                 <p className="text-3xl font-alexandria font-black text-white">
                   {formatPrice(finalPriceFormatted, currency)}
                 </p>
-              </div>
-
-              <div className="bg-white rounded-2xl p-4 mx-auto max-w-[220px]">
-                <img src="/instapay-qr.png" alt="Instapay QR Code" className="w-full h-auto" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
               </div>
 
               <div className="space-y-3 text-right">
@@ -1607,6 +1941,12 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                     <p className="text-sm text-white font-mono font-bold" dir="ltr">01016748891</p>
                   </div>
                 </div>
+              </div>
+
+              <div className="text-center bg-[#151522]/50 border border-emerald-500/10 rounded-xl p-2.5">
+                <p className="text-xs text-zinc-300 font-cairo leading-normal">
+                  تنويه: سيظهر اسم المستلم باسم <span className="text-emerald-400 font-bold">Youssef.M</span> عند التحويل
+                </p>
               </div>
 
               <a 

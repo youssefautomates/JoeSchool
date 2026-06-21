@@ -1037,7 +1037,7 @@ export default function CartCheckoutPage() {
                             <span className={cn("text-xs font-black font-sans", paymentMethod === "wallet" ? "text-emerald-400" : "text-zinc-500")}>Pay</span>
                           </div>
                           <div className="font-cairo">
-                            <p className={cn("font-bold", paymentMethod === "wallet" ? "text-white" : "text-zinc-300")}>المحافظ الإلكترونية</p>
+                            <p className={cn("font-bold whitespace-nowrap", paymentMethod === "wallet" ? "text-white" : "text-zinc-300")}>المحافظ الإلكترونية</p>
                             <p className="text-xs text-zinc-500">فودافون كاش والأخرى</p>
                           </div>
                         </div>
