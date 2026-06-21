@@ -99,6 +99,8 @@ interface OrderData {
   charged_amount_egp?: number | null;
   exchange_rate?: number | null;
   loginLink?: string | null;
+  isNewStudent?: boolean;
+  temporaryPassword?: string | null;
 }
 
 function SuccessContent() {
@@ -191,7 +193,9 @@ function SuccessContent() {
             original_amount_usd: data.original_amount_usd,
             charged_amount_egp: data.charged_amount_egp,
             exchange_rate: data.exchange_rate,
-            loginLink: data.loginLink || null
+            loginLink: data.loginLink || null,
+            isNewStudent: data.isNewStudent || false,
+            temporaryPassword: data.temporaryPassword || null
           });
           setPhase("success");
           setTimeout(() => setShowParticles(true), 300);
@@ -500,6 +504,71 @@ if (!data.alreadyDelivered) {
               أهلاً <span className="font-alexandria font-bold text-white">{orderData?.customerName}</span>، شكراً لثقتك بنا. تم تسجيل طلبك وتجهيز كافة المحتويات الرقمية الخاصة بك.
             </p>
           </motion.div>
+
+          {/* Account Credentials Card (for newly created accounts only) */}
+          {orderData?.isNewStudent && (
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.35 }}
+              className="bg-gradient-to-br from-rose-950/20 to-orange-950/20 border border-rose-900/40 rounded-3xl p-6 sm:p-8 shadow-[0_20px_50px_rgba(0,0,0,0.3)]"
+            >
+              <div className="flex items-center gap-3 mb-5">
+                <div className="w-10 h-10 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center">
+                  <User className="w-5 h-5 text-rose-400" />
+                </div>
+                <div>
+                  <h3 className="font-alexandria font-bold text-white text-lg leading-snug">بيانات الحساب</h3>
+                  <p className="font-cairo text-zinc-500 text-sm">تم إنشاء حساب جديد لك. استخدم البيانات التالية لتسجيل الدخول</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Email Field */}
+                <div className="bg-white/[0.03] border border-white/5 rounded-2xl p-4 space-y-2">
+                  <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">البريد الإلكتروني</span>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-white font-mono text-sm truncate" dir="ltr">{orderData?.customerEmail}</span>
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(orderData?.customerEmail || "");
+                        toast.success("تم نسخ البريد الإلكتروني");
+                      }}
+                      className="text-zinc-500 hover:text-white transition-colors p-1.5 rounded-lg hover:bg-white/5 active:scale-95 cursor-pointer shrink-0"
+                      title="نسخ البريد الإلكتروني"
+                    >
+                      <Copy className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Password Field */}
+                <div className="bg-white/[0.03] border border-rose-500/10 rounded-2xl p-4 space-y-2">
+                  <span className="text-[10px] text-rose-400 font-bold uppercase tracking-wider">كلمة المرور المؤقتة</span>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-white font-mono text-sm truncate" dir="ltr">{orderData?.temporaryPassword}</span>
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(orderData?.temporaryPassword || "");
+                        toast.success("تم نسخ كلمة المرور");
+                      }}
+                      className="text-zinc-500 hover:text-white transition-colors p-1.5 rounded-lg hover:bg-white/5 active:scale-95 cursor-pointer shrink-0"
+                      title="نسخ كلمة المرور"
+                    >
+                      <Copy className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-4 flex items-start gap-2.5 bg-rose-950/20 border border-rose-900/30 rounded-xl p-4">
+                <Info className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+                <p className="text-zinc-400 text-xs leading-relaxed">
+                  يرجى تغيير كلمة المرور بعد أول تسجيل دخول لحماية حسابك. يمكنك استخدام زر <strong className="text-white font-bold">"نسخ"</strong> أعلاه لنسخ البيانات.
+                </p>
+              </div>
+            </motion.div>
+          )}
 
           {/* Main Context Layout */}
           <div className="space-y-6">

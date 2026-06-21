@@ -669,6 +669,17 @@ export default function AdminStudentsPage() {
     }
   };
 
+  const handleGeneratePasswordForNewStudent = () => {
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    let randomPart = "";
+    for (let i = 0; i < 6; i++) {
+      randomPart += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    const generatedPassword = `Joeschool#${randomPart}`;
+    setNewStudent(prev => ({ ...prev, password: generatedPassword }));
+    toast.success("Temporary password generated! 🔑", { id: "gen-pwd-new" });
+  };
+
   const filteredRows = rows.filter(r => {
     const matchSearch = 
       (r.user_name?.toLowerCase().includes(search.toLowerCase())) || 
@@ -1822,15 +1833,26 @@ export default function AdminStudentsPage() {
               {/* Password */}
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs text-zinc-400 font-bold">Password (min 6 characters)</label>
-                <input 
-                  type="password"
-                  required
-                  minLength={6}
-                  placeholder="••••••••"
-                  value={newStudent.password}
-                  onChange={e => setNewStudent(prev => ({ ...prev, password: e.target.value }))}
-                  className="bg-white/5 border border-white/5 rounded-xl py-3 px-4 text-xs focus:outline-none focus:border-rose-500/50 transition-all font-mono text-zinc-300 w-full"
-                />
+                <div className="flex gap-2">
+                  <input 
+                    type="text"
+                    required
+                    minLength={6}
+                    placeholder="••••••••"
+                    value={newStudent.password}
+                    onChange={e => setNewStudent(prev => ({ ...prev, password: e.target.value }))}
+                    className="flex-1 bg-white/5 border border-white/5 rounded-xl py-3 px-4 text-xs focus:outline-none focus:border-rose-500/50 transition-all font-mono text-zinc-300 w-full"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleGeneratePasswordForNewStudent}
+                    className="h-11 px-4 bg-rose-600/10 border border-rose-500/20 hover:bg-rose-600/20 text-rose-400 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shrink-0 whitespace-nowrap"
+                    title="Generate Temporary Password"
+                  >
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">Generate</span>
+                  </button>
+                </div>
               </div>
 
               {/* Course selection */}

@@ -518,17 +518,21 @@ export async function POST(req: Request) {
 
     let resolvedUserId: string | null = null;
     let resolvedCredentials: { email: string; password?: string } | undefined;
+    let resolvedIsNewStudent = false;
+    let resolvedTemporaryPassword: string | null = null;
 
     if (containsCourses) {
       console.log(`[VERIFY][${requestId}] Course detected in purchase batch. Resolving user account...`);
       try {
         const userAccount = await getOrCreateUser(customerEmail, customerName, explicitPassword || undefined);
         resolvedUserId = userAccount.userId;
-        if (userAccount.isNew && explicitPassword) {
+        if (userAccount.isNew) {
           resolvedCredentials = {
             email: customerEmail,
-            password: explicitPassword
+            password: userAccount.password
           };
+          resolvedIsNewStudent = true;
+          resolvedTemporaryPassword = userAccount.password || null;
           console.log(`[VERIFY][${requestId}] New student account created. Credentials set successfully.`);
         } else {
           console.log(`[VERIFY][${requestId}] Existing student account resolved. No credentials sent.`);
@@ -848,7 +852,9 @@ export async function POST(req: Request) {
       original_amount_usd: currency === "USD" ? originalAmountUsd : null,
       charged_amount_egp: chargedAmountEgp,
       exchange_rate: exchangeRate,
-      loginLink: loginLink
+      loginLink: loginLink,
+      isNewStudent: resolvedIsNewStudent,
+      temporaryPassword: resolvedTemporaryPassword
     });
 
   } catch (error: any) {
