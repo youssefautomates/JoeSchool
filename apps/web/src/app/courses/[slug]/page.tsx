@@ -191,6 +191,87 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
   const [activePreviewLesson, setActivePreviewLesson] = useState<LmsLesson | null>(null);
   const [showcaseUrls, setShowcaseUrls] = useState<Record<string, string>>({});
 
+  // Floating CTA visibility tracking
+  const [isHeroCtaVisible, setIsHeroCtaVisible] = useState(true);
+  const [isAnyModalOpen, setIsAnyModalOpen] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const visibilityMap = new Map<Element, boolean>();
+    const observedElements = new Set<Element>();
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        visibilityMap.set(entry.target, entry.isIntersecting);
+      });
+      const anyVisible = Array.from(visibilityMap.values()).some(v => v);
+      setIsHeroCtaVisible(anyVisible);
+    }, { threshold: 0 });
+
+    const updateObservations = () => {
+      const currentElements = document.querySelectorAll('.primary-hero-cta');
+      
+      // Stop observing elements that are no longer in the DOM
+      observedElements.forEach(el => {
+        if (!document.body.contains(el)) {
+          observer.unobserve(el);
+          visibilityMap.delete(el);
+          observedElements.delete(el);
+        }
+      });
+
+      // Observe new elements
+      currentElements.forEach(el => {
+        if (!observedElements.has(el)) {
+          visibilityMap.set(el, false);
+          observer.observe(el);
+          observedElements.add(el);
+        }
+      });
+
+      // Update visibility state in case some elements were removed
+      const anyVisible = Array.from(visibilityMap.values()).some(v => v);
+      setIsHeroCtaVisible(anyVisible);
+    };
+
+    updateObservations();
+
+    const mutationObserver = new MutationObserver(() => {
+      updateObservations();
+    });
+    mutationObserver.observe(document.body, { childList: true, subtree: true });
+
+    return () => {
+      observer.disconnect();
+      mutationObserver.disconnect();
+    };
+  }, [isLoading]);
+
+  useEffect(() => {
+    const checkModals = () => {
+      if (typeof document === 'undefined') return;
+      const modalElements = document.querySelectorAll(
+        '[role="dialog"], [role="alertdialog"], .modal, .dialog, [class*="modal"], [class*="dialog"]'
+      );
+      let isOpen = false;
+      modalElements.forEach(el => {
+        const role = el.getAttribute('role');
+        if (role === 'dialog' || role === 'alertdialog') {
+          isOpen = true;
+        }
+      });
+      setIsAnyModalOpen(isOpen);
+    };
+
+    checkModals();
+
+    const observer = new MutationObserver(checkModals);
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    return () => observer.disconnect();
+  }, []);
+
   useEffect(() => {
     async function loadData() {
       const { course: c, sections: s } = await getCourseBySlug(slug);
@@ -515,7 +596,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
 
                       <Link
                         href={course.price === 0 ? `/learn/${course.slug}/${firstLessonSlug}` : `/checkout/${course.id}`}
-                        className="w-full h-14 bg-gradient-to-r from-[#D6004B] via-[#ff1d6b] to-[#D6004B] text-white rounded-2xl font-black text-lg shadow-[0_10px_30px_rgba(214,0,75,0.4)] transition-all flex items-center justify-center gap-2.5 active:scale-98 cursor-pointer font-cairo animate-pulse-glow"
+                        className="primary-hero-cta w-full h-14 bg-gradient-to-r from-[#D6004B] via-[#ff1d6b] to-[#D6004B] text-white rounded-2xl font-black text-lg shadow-[0_10px_30px_rgba(214,0,75,0.4)] transition-all flex items-center justify-center gap-2.5 active:scale-98 cursor-pointer font-cairo animate-pulse-glow"
                       >
                         <span>{course.price === 0 ? "ابدأ مجاناً 🎁" : (coursePricing && coursePricing.original_price > coursePricing.price) ? `اشترك الآن - خصم ${coursePricing.discount_pct}%` : "اشترك الآن"}</span>
                         <ArrowLeft className="w-5 h-5 rtl:rotate-180" />
@@ -524,7 +605,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                       {course.price > 0 && (
                         <button
                           onClick={handleAddToCart}
-                          className="w-full mt-2.5 h-14 bg-white/5 hover:bg-white/10 text-white rounded-2xl font-black text-base border border-white/10 transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer font-cairo hover:border-[#D6004B]/30"
+                          className="primary-hero-cta w-full mt-2.5 h-14 bg-white/5 hover:bg-white/10 text-white rounded-2xl font-black text-base border border-white/10 transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer font-cairo hover:border-[#D6004B]/30"
                         >
                           <ShoppingCart className="w-5 h-5 text-zinc-300" />
                           <span>إضافة إلى السلة</span>
@@ -1040,7 +1121,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                     <div className="space-y-4">
                       <Link
                         href={course.price === 0 ? `/learn/${course.slug}/${firstLessonSlug}` : `/checkout/${course.id}`}
-                        className="w-full h-14 bg-gradient-to-r from-[#D6004B] via-[#ff1d6b] to-[#D6004B] text-white rounded-2xl font-black text-lg shadow-[0_10px_30px_rgba(214,0,75,0.4)] transition-all flex items-center justify-center gap-2.5 active:scale-98 cursor-pointer font-cairo animate-pulse-glow"
+                        className="primary-hero-cta w-full h-14 bg-gradient-to-r from-[#D6004B] via-[#ff1d6b] to-[#D6004B] text-white rounded-2xl font-black text-lg shadow-[0_10px_30px_rgba(214,0,75,0.4)] transition-all flex items-center justify-center gap-2.5 active:scale-98 cursor-pointer font-cairo animate-pulse-glow"
                       >
                         <span>{course.price === 0 ? "ابدأ مجاناً 🎁" : (coursePricing && coursePricing.original_price > coursePricing.price) ? `اشترك الآن - خصم ${coursePricing.discount_pct}%` : "اشترك الآن"}</span>
                         <ArrowLeft className="w-5 h-5 rtl:rotate-180" />
@@ -1171,7 +1252,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
 
                 <Link
                   href={course.price === 0 ? `/learn/${course.slug}/${firstLessonSlug}` : `/checkout/${course.id}`}
-                  className="w-full h-12 bg-[#D6004B] hover:bg-[#b0003d] text-white rounded-2xl font-bold text-sm shadow-[0_10px_25px_rgba(214,0,75,0.3)] transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer font-cairo"
+                  className="primary-hero-cta w-full h-12 bg-[#D6004B] hover:bg-[#b0003d] text-white rounded-2xl font-bold text-sm shadow-[0_10px_25px_rgba(214,0,75,0.3)] transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer font-cairo"
                 >
                   <span>سجل في القسم الآن</span>
                   <ArrowLeft className="w-4 h-4 rtl:rotate-180" />
@@ -1179,7 +1260,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                 {course.price > 0 && (
                   <button
                     onClick={handleAddToCart}
-                    className="w-full mt-2 h-12 bg-white/5 hover:bg-white/10 text-white rounded-2xl font-bold text-sm border border-white/10 transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer font-cairo"
+                    className="primary-hero-cta w-full mt-2 h-12 bg-white/5 hover:bg-white/10 text-white rounded-2xl font-bold text-sm border border-white/10 transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer font-cairo"
                   >
                     <ShoppingCart className="w-4 h-4" />
                     <span>إضافة إلى السلة</span>
@@ -1418,32 +1499,46 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
 
       {/* Floating Bottom Purchase Bar (Mobile/Sticky Mode) */}
       {!isEnrolled && (
-        <div className="fixed bottom-0 inset-x-0 bg-zinc-950/90 backdrop-blur-2xl border-t border-white/10 py-3.5 px-5 z-50 flex items-center justify-between lg:hidden transition-all duration-300 gap-3 shadow-[0_-8px_30px_rgba(0,0,0,0.7)]">
-          <div className="flex flex-col shrink-0 text-right">
-            <span className="text-[9px] text-zinc-400 font-bold font-cairo">استثمار الانضمام للدورة</span>
-            <span className="text-base font-alexandria font-black text-[#D6004B]">
-              {coursePricing ? (coursePricing.price === 0 ? "مجاناً" : formatPrice(coursePricing.price, currency)) : ""}
-            </span>
-          </div>
-          <div className="flex gap-2 flex-grow justify-end items-center">
-            <Link
-              href={course.price === 0 ? `/learn/${course.slug}/${firstLessonSlug}` : `/checkout/${course.id}`}
-              className="h-12 px-5 bg-gradient-to-r from-[#D6004B] via-[#ff1d6b] to-[#D6004B] text-white rounded-xl text-xs sm:text-sm font-black flex items-center justify-center gap-1 transition-all shadow-[0_4px_20px_rgba(214,0,75,0.45)] font-cairo flex-grow max-w-[240px] active:scale-95 animate-pulse-glow"
+        <AnimatePresence>
+          {(!isHeroCtaVisible && !isAnyModalOpen) && (
+            <motion.div
+              initial={{ opacity: 0, y: 15, x: "-50%" }}
+              animate={{ opacity: 1, y: 0, x: "-50%" }}
+              exit={{ opacity: 0, y: 15, x: "-50%" }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+              className="fixed bottom-6 left-1/2 w-[92%] max-w-[420px] bg-zinc-950/85 backdrop-blur-xl border border-white/[0.08] py-2.5 pl-3.5 pr-5 z-50 flex items-center justify-between lg:hidden gap-4 shadow-[0_0_30px_rgba(214,0,75,0.12),0_12px_40px_rgba(0,0,0,0.65)] rounded-full"
             >
-              <span>{course.price === 0 ? "ابدأ مجاناً 🎁" : (coursePricing && coursePricing.original_price > coursePricing.price) ? `اشترك الآن - خصم ${coursePricing.discount_pct}%` : "اشترك الآن"}</span>
-              <ArrowLeft className="w-4 h-4 rtl:rotate-180" />
-            </Link>
-            {course.price > 0 && (
-              <button
-                onClick={handleAddToCart}
-                className="h-12 w-12 shrink-0 bg-white/5 border border-white/10 hover:bg-white/10 text-white rounded-xl transition-all flex items-center justify-center active:scale-95 cursor-pointer"
-                title="إضافة إلى السلة"
-              >
-                <ShoppingCart className="w-4.5 h-4.5 text-zinc-300" />
-              </button>
-            )}
-          </div>
-        </div>
+              <div className="flex flex-col shrink-0 text-right">
+                <span className="text-[10px] text-zinc-400 font-bold font-cairo leading-none mb-1">استثمار الانضمام للدورة</span>
+                <div className="flex items-baseline gap-1.5 justify-end">
+                  <span className="text-base font-alexandria font-black text-[#D6004B]">
+                    {coursePricing ? (coursePricing.price === 0 ? "مجاني" : formatPrice(coursePricing.price, currency)) : ""}
+                  </span>
+                  {coursePricing && coursePricing.original_price > coursePricing.price && (
+                    <span className="text-[10px] text-zinc-500 line-through font-normal">
+                      {formatPrice(coursePricing.original_price, currency)}
+                    </span>
+                  )}
+                </div>
+              </div>
+              <div className="flex flex-1 items-center justify-end">
+                <Link
+                  href={course.price === 0 ? `/learn/${course.slug}/${firstLessonSlug}` : `/checkout/${course.id}`}
+                  className="h-11 px-5 bg-gradient-to-r from-[#D6004B] to-[#ff1d6b] hover:from-[#ff1d6b] hover:to-[#D6004B] text-white rounded-full text-xs font-alexandria font-black flex items-center justify-center gap-1.5 transition-all shadow-[0_4px_16px_rgba(214,0,75,0.35)] flex-grow active:scale-95 animate-pulse-glow group"
+                >
+                  <span>
+                    {course.price === 0 
+                      ? "ابدأ مجاناً 🎁" 
+                      : (coursePricing && coursePricing.original_price > coursePricing.price) 
+                        ? `اشترك الآن - خصم ${coursePricing.discount_pct}%` 
+                        : "اشترك الآن"}
+                  </span>
+                  <ArrowLeft className="w-3.5 h-3.5 transition-transform duration-200 group-hover:-translate-x-1" />
+                </Link>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       )}
 
       <div className="hidden md:block">
@@ -1704,7 +1799,7 @@ function MobileCourseView({
 
              <Link
                href={course.price === 0 ? `/learn/${course.slug}/${firstLessonSlug}` : `/checkout/${course.id}`}
-               className="w-full h-14 bg-gradient-to-r from-[#D6004B] via-[#ff1d6b] to-[#D6004B] text-white rounded-xl font-black text-base sm:text-lg shadow-[0_10px_30px_rgba(214,0,75,0.4)] transition-all flex items-center justify-center gap-2.5 active:scale-98 cursor-pointer font-cairo animate-pulse-glow"
+               className="primary-hero-cta w-full h-14 bg-gradient-to-r from-[#D6004B] via-[#ff1d6b] to-[#D6004B] text-white rounded-xl font-black text-base sm:text-lg shadow-[0_10px_30px_rgba(214,0,75,0.4)] transition-all flex items-center justify-center gap-2.5 active:scale-98 cursor-pointer font-cairo animate-pulse-glow"
              >
                <span>{course.price === 0 ? "ابدأ مجاناً 🎁" : (coursePricing && coursePricing.original_price > coursePricing.price) ? `اشترك الآن - خصم ${coursePricing.discount_pct}%` : "اشترك الآن"}</span>
                <ArrowLeft className="w-4 h-4 rtl:rotate-180" />
@@ -1712,7 +1807,7 @@ function MobileCourseView({
               {course.price > 0 && onAddToCart && (
                 <button
                   onClick={onAddToCart}
-                  className="w-full mt-2 h-11 bg-white/5 hover:bg-white/10 text-white rounded-xl font-bold text-xs border border-white/10 transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer font-cairo"
+                  className="primary-hero-cta w-full mt-2 h-11 bg-white/5 hover:bg-white/10 text-white rounded-xl font-bold text-xs border border-white/10 transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer font-cairo"
                 >
                   <ShoppingCart className="w-4 h-4" />
                   <span>إضافة إلى السلة</span>
@@ -2150,7 +2245,7 @@ function MobileCourseView({
            
            <Link
              href={course.price === 0 ? `/learn/${course.slug}/${firstLessonSlug}` : `/checkout/${course.id}`}
-             className="w-full h-13 bg-gradient-to-r from-[#D6004B] via-[#ff1d6b] to-[#D6004B] text-white rounded-xl font-black text-sm sm:text-base shadow-[0_10px_25px_rgba(214,0,75,0.35)] transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer font-cairo animate-pulse-glow"
+             className="primary-hero-cta w-full h-13 bg-gradient-to-r from-[#D6004B] via-[#ff1d6b] to-[#D6004B] text-white rounded-xl font-black text-sm sm:text-base shadow-[0_10px_25px_rgba(214,0,75,0.35)] transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer font-cairo animate-pulse-glow"
            >
               <span>{course.price === 0 ? "ابدأ مجاناً 🎁" : (coursePricing && coursePricing.original_price > coursePricing.price) ? `اشترك الآن - خصم ${coursePricing.discount_pct}%` : "اشترك الآن"}</span>
              <ArrowLeft className="w-4 h-4 rtl:rotate-180" />
@@ -2183,31 +2278,6 @@ function MobileCourseView({
          </div>
       </footer>
 
-      {/* Sticky Mobile CTA */}
-      {!isEnrolled && (
-        <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 p-4 bg-black/80 backdrop-blur-xl border-t border-white/10 shadow-[0_-10px_40px_rgba(0,0,0,0.5)] flex items-center justify-between gap-4 animate-fade-in">
-          <div className="flex flex-col">
-            <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest font-alexandria">السعر الحالي</span>
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-lg font-alexandria font-black text-white">
-                {coursePricing ? (coursePricing.price === 0 ? "مجاني" : formatPrice(coursePricing.price, currency)) : ""}
-              </span>
-              {coursePricing && coursePricing.original_price > 0 && (
-                <span className="text-[10px] text-zinc-500 line-through font-alexandria">
-                  {formatPrice(coursePricing.original_price, currency)}
-                </span>
-              )}
-            </div>
-          </div>
-          <Link
-            href={course.price === 0 ? `/learn/${course.slug}/${firstLessonSlug}` : `/checkout/${course.id}`}
-            className="flex-1 h-12 bg-gradient-to-r from-[#D6004B] via-[#ff1d6b] to-[#D6004B] text-white rounded-xl font-black text-sm shadow-[0_5px_15px_rgba(214,0,75,0.4)] transition-all flex items-center justify-center gap-2 active:scale-95 cursor-pointer font-cairo animate-pulse-glow"
-          >
-            <span>{course.price === 0 ? "مجاناً الان" : "اشترك الآن"}</span>
-            <ArrowLeft className="w-4 h-4 rtl:rotate-180" />
-          </Link>
-        </div>
-      )}
     </div>
   );
 }

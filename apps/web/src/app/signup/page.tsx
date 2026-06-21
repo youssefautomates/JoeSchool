@@ -141,7 +141,7 @@ export default function SignupPage() {
       </div>
       <div className="w-full max-w-lg relative z-10">
         {/* Logo and Brand Header */}
-        <div className="text-center mb-8 flex justify-center">
+        <div className="text-center mb-2 flex justify-center">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -149,7 +149,7 @@ export default function SignupPage() {
             className="inline-block"
           >
             <Link href="/" className="group inline-block">
-              <img src="/logo-text.png" alt="JoeSchool Logo" className="h-14 sm:h-16 object-contain group-hover:scale-105 transition-transform duration-300" />
+              <img src="/logo-text.png" alt="JoeSchool Logo" className="h-28 sm:h-32 object-contain group-hover:scale-105 transition-transform duration-300" />
             </Link>
           </motion.div>
         </div>

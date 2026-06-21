@@ -97,9 +97,9 @@ export default function ResetPasswordPage() {
 
       <div className="w-full max-w-lg relative z-10">
         {/* Logo and Brand Header */}
-        <div className="text-center mb-8 flex justify-center">
+        <div className="text-center mb-2 flex justify-center">
           <Link href="/" className="group inline-block">
-            <img src="/logo-text.png" alt="JoeSchool Logo" className="h-14 sm:h-16 object-contain group-hover:scale-105 transition-transform duration-300" />
+            <img src="/logo-text.png" alt="JoeSchool Logo" className="h-28 sm:h-32 object-contain group-hover:scale-105 transition-transform duration-300" />
           </Link>
         </div>
 

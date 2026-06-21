@@ -99,22 +99,112 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
   
   const { addToCart } = useCart();
 
-  // Floating CTA visibility scroll states
-  const [showFloatingBar, setShowFloatingBar] = useState(true);
-  const lastScrollY = useRef(0);
+  // Floating CTA visibility tracking
+  const [isHeroCtaVisible, setIsHeroCtaVisible] = useState(true);
+  const [isAnyModalOpen, setIsAnyModalOpen] = useState(false);
+  const [isOwned, setIsOwned] = useState(false);
+
   useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      if (currentScrollY > lastScrollY.current && currentScrollY > 100) {
-        setShowFloatingBar(false);
-      } else {
-        setShowFloatingBar(true);
-      }
-      lastScrollY.current = currentScrollY;
+    if (typeof window === 'undefined') return;
+
+    const visibilityMap = new Map<Element, boolean>();
+    const observedElements = new Set<Element>();
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        visibilityMap.set(entry.target, entry.isIntersecting);
+      });
+      const anyVisible = Array.from(visibilityMap.values()).some(v => v);
+      setIsHeroCtaVisible(anyVisible);
+    }, { threshold: 0 });
+
+    const updateObservations = () => {
+      const currentElements = document.querySelectorAll('.primary-hero-cta');
+      
+      // Stop observing elements that are no longer in the DOM
+      observedElements.forEach(el => {
+        if (!document.body.contains(el)) {
+          observer.unobserve(el);
+          visibilityMap.delete(el);
+          observedElements.delete(el);
+        }
+      });
+
+      // Observe new elements
+      currentElements.forEach(el => {
+        if (!observedElements.has(el)) {
+          visibilityMap.set(el, false);
+          observer.observe(el);
+          observedElements.add(el);
+        }
+      });
+
+      // Update visibility state in case some elements were removed
+      const anyVisible = Array.from(visibilityMap.values()).some(v => v);
+      setIsHeroCtaVisible(anyVisible);
     };
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
+
+    updateObservations();
+
+    const mutationObserver = new MutationObserver(() => {
+      updateObservations();
+    });
+    mutationObserver.observe(document.body, { childList: true, subtree: true });
+
+    return () => {
+      observer.disconnect();
+      mutationObserver.disconnect();
+    };
+  }, [isLoading]);
+
+  useEffect(() => {
+    const checkModals = () => {
+      if (typeof document === 'undefined') return;
+      const modalElements = document.querySelectorAll(
+        '[role="dialog"], [role="alertdialog"], .modal, .dialog, [class*="modal"], [class*="dialog"]'
+      );
+      let isOpen = false;
+      modalElements.forEach(el => {
+        const role = el.getAttribute('role');
+        if (role === 'dialog' || role === 'alertdialog') {
+          isOpen = true;
+        }
+      });
+      setIsAnyModalOpen(isOpen);
+    };
+
+    checkModals();
+
+    const observer = new MutationObserver(checkModals);
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    return () => observer.disconnect();
   }, []);
+
+  useEffect(() => {
+    async function checkOwnership() {
+      if (!product) return;
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user?.email) {
+          const { data, error } = await supabase
+            .from("orders")
+            .select("id")
+            .eq("customer_email", session.user.email)
+            .eq("product_id", product.id)
+            .eq("status", "completed")
+            .limit(1);
+          
+          if (!error && data && data.length > 0) {
+            setIsOwned(true);
+          }
+        }
+      } catch (err) {
+        console.error("Error checking product ownership:", err);
+      }
+    }
+    checkOwnership();
+  }, [product]);
 
   // Swipe gesture coords
   const touchStartX = useRef<number | null>(null);
@@ -671,7 +761,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                   <div className="space-y-3 pt-2">
                     <Link
                       href={`/checkout/${product.id}`}
-                      className="w-full h-16 inline-flex items-center justify-center gap-2 bg-[#D6004B] hover:bg-[#ff0059] text-white font-alexandria font-black text-base rounded-[1.5rem] transition-all shadow-[0_12px_30px_rgba(214,0,75,0.35)] active:scale-95 group"
+                      className="primary-hero-cta w-full h-16 inline-flex items-center justify-center gap-2 bg-[#D6004B] hover:bg-[#ff0059] text-white font-alexandria font-black text-base rounded-[1.5rem] transition-all shadow-[0_12px_30px_rgba(214,0,75,0.35)] active:scale-95 group"
                     >
                       <span>تحميل وشراء فوري</span>
                       <ArrowLeft className="w-5 h-5 rtl:rotate-180 group-hover:-translate-x-1.5 transition-transform" />
@@ -687,7 +777,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                         } as any);
                         trackAddToCart(product.id, product.title, price, currency, "product");
                       }}
-                      className="w-full h-14 inline-flex items-center justify-center gap-2.5 bg-white/5 hover:bg-white/10 text-white font-alexandria font-black text-sm rounded-[1.25rem] border border-white/10 transition-all active:scale-95"
+                      className="primary-hero-cta w-full h-14 inline-flex items-center justify-center gap-2.5 bg-white/5 hover:bg-white/10 text-white font-alexandria font-black text-sm rounded-[1.25rem] border border-white/10 transition-all active:scale-95"
                     >
                       <ShoppingCart className="w-4 h-4 text-zinc-300" />
                       <span>إضافة إلى السلة</span>
@@ -1049,7 +1139,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                 {/* CTA Buy Buttons */}
                 <Link
                   href={`/checkout/${product.id}`}
-                  className="w-full h-14 bg-gradient-to-r from-[#D6004B] via-[#ff1d6b] to-[#D6004B] text-white rounded-xl font-black text-sm sm:text-base shadow-[0_10px_30px_rgba(214,0,75,0.4)] transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer font-cairo animate-pulse-glow"
+                  className="primary-hero-cta w-full h-14 bg-gradient-to-r from-[#D6004B] via-[#ff1d6b] to-[#D6004B] text-white rounded-xl font-black text-sm sm:text-base shadow-[0_10px_30px_rgba(214,0,75,0.4)] transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer font-cairo animate-pulse-glow"
                 >
                   <span>{discountPct && discountPct > 0 ? `اقتنِه الآن ← خصم ${discountPct}%` : "اقتنِه الآن ←"}</span>
                   <ArrowLeft className="w-4 h-4 rtl:rotate-180" />
@@ -1065,7 +1155,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                     } as any);
                     trackAddToCart(product.id, product.title, price, currency, "product");
                   }}
-                  className="w-full h-11 bg-white/5 hover:bg-white/10 text-white rounded-xl font-bold text-xs border border-white/10 transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer font-cairo"
+                  className="primary-hero-cta w-full h-11 bg-white/5 hover:bg-white/10 text-white rounded-xl font-bold text-xs border border-white/10 transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer font-cairo"
                 >
                   <span>أضف إلى السلة 🛒</span>
                 </button>
@@ -1281,51 +1371,43 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
 
         </section>
 
-        {/* Floating Bottom CTA Bar */}
-        <div 
-          style={{ 
-            paddingBottom: 'calc(env(safe-area-inset-bottom) + 12px)',
-            backdropFilter: 'blur(24px)',
-            WebkitBackdropFilter: 'blur(24px)'
-          }}
-          className={cn(
-            "lg:hidden fixed bottom-0 left-0 right-0 bg-black/85 backdrop-blur-xl border-t border-white/10 p-3 z-50 flex items-center justify-between gap-3 shadow-[0_-15px_40px_rgba(0,0,0,0.85)] transition-transform duration-300 ease-in-out will-change-transform",
-            showFloatingBar ? "translate-y-0" : "translate-y-full"
-          )}
-        >
-          <div className="flex flex-col pl-2 shrink-0 justify-center text-right">
-            <span className="text-base font-alexandria font-black text-white leading-none tracking-tight">
-              {productPricing ? (productPricing.price === 0 ? "مجاني" : formatPrice(productPricing.price, currency)) : ""}
-            </span>
-            {productPricing && productPricing.original_price > 0 && (
-              <span className="text-[9px] text-zinc-400 line-through mt-1">بدلاً من {formatPrice(productPricing.original_price, currency)}</span>
-            )}
-          </div>
+        {!isOwned && (
+          <AnimatePresence>
+            {(!isHeroCtaVisible && !isAnyModalOpen) && (
+              <motion.div
+                initial={{ opacity: 0, y: 15, x: "-50%" }}
+                animate={{ opacity: 1, y: 0, x: "-50%" }}
+                exit={{ opacity: 0, y: 15, x: "-50%" }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+                className="fixed bottom-6 left-1/2 w-[92%] max-w-[420px] bg-zinc-950/85 backdrop-blur-xl border border-white/[0.08] py-2.5 pl-3.5 pr-5 z-50 flex items-center justify-between lg:hidden gap-4 shadow-[0_0_30px_rgba(214,0,75,0.12),0_12px_40px_rgba(0,0,0,0.65)] rounded-full"
+              >
+                <div className="flex flex-col shrink-0 text-right">
+                  <span className="text-[10px] text-zinc-400 font-bold font-cairo leading-none mb-1">استثمار الحصول عليه</span>
+                  <div className="flex items-baseline gap-1.5 justify-end">
+                    <span className="text-base font-alexandria font-black text-[#D6004B]">
+                      {productPricing ? (productPricing.price === 0 ? "مجاني" : formatPrice(productPricing.price, currency)) : ""}
+                    </span>
+                    {productPricing && productPricing.original_price > productPricing.price && (
+                      <span className="text-[10px] text-zinc-500 line-through font-normal">
+                        {formatPrice(productPricing.original_price, currency)}
+                      </span>
+                    )}
+                  </div>
+                </div>
 
-          <div className="flex gap-2 flex-1 items-center justify-end">
-            <button
-              onClick={() => {
-                const price = productPricing?.price ?? product.price;
-                addToCart({
-                  ...product,
-                  price: price,
-                  original_price: productPricing?.original_price ?? product.original_price,
-                } as any);
-                trackAddToCart(product.id, product.title, price, currency, "product");
-              }}
-              className="h-10 w-10 bg-white/5 border border-white/10 text-white rounded-xl flex items-center justify-center active:scale-90 shrink-0 transition-colors"
-            >
-              <ShoppingCart className="w-4 h-4 text-zinc-300" />
-            </button>
-            <Link
-              href={`/checkout/${product.id}`}
-              className="h-10 px-5 bg-[#D6004B] text-white font-alexandria font-black text-xs rounded-xl flex items-center justify-center gap-1.5 active:scale-95 shadow-[0_8px_20px_rgba(214,0,75,0.3)] shrink-0 animate-pulse-glow"
-            >
-              <span>{discountPct && discountPct > 0 ? `اقتنِه الآن ← خصم ${discountPct}%` : "اقتنِه الآن ←"}</span>
-              <ArrowLeft className="w-3.5 h-3.5 rtl:rotate-180" />
-            </Link>
-          </div>
-        </div>
+                <div className="flex flex-1 items-center justify-end">
+                  <Link
+                    href={`/checkout/${product.id}`}
+                    className="h-11 px-5 bg-gradient-to-r from-[#D6004B] to-[#ff1d6b] hover:from-[#ff1d6b] hover:to-[#D6004B] text-white rounded-full text-xs font-alexandria font-black flex items-center justify-center gap-1.5 active:scale-95 shadow-[0_4px_16px_rgba(214,0,75,0.35)] flex-1 animate-pulse-glow group"
+                  >
+                    <span>{discountPct && discountPct > 0 ? `اقتنِه الآن - خصم ${discountPct}%` : "اقتنِه الآن"}</span>
+                    <ArrowLeft className="w-3.5 h-3.5 transition-transform duration-200 group-hover:-translate-x-1" />
+                  </Link>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        )}
 
       </main>
 
