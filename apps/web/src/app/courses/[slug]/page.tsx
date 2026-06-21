@@ -1874,9 +1874,9 @@ function MobileCourseView({
                >
                  {/* Course Description */}
                  {course.description ? (
-                   <div className="text-zinc-300 font-alexandria text-xs leading-[1.7] [&_p]:mb-3 [&_p]:leading-[1.7]" dangerouslySetInnerHTML={{ __html: course.description }} />
+                   <div className="text-zinc-300 font-cairo text-xs leading-[1.7] [&_p]:mb-3 [&_p]:leading-[1.7]" dangerouslySetInnerHTML={{ __html: course.description }} />
                  ) : (
-                   <p className="text-zinc-400 font-alexandria text-xs leading-[1.8]">هذا المسار يحتوي على شرح مفصل وتطبيق شامل لمهارات صناعة المحتوى بالذكاء الاصطناعي وإنتاج الفيديو الإبداعي بأقوى الأدوات الرقمية.</p>
+                   <p className="text-zinc-400 font-cairo text-xs leading-[1.8]">هذا المسار يحتوي على شرح مفصل وتطبيق شامل لمهارات صناعة المحتوى بالذكاء الاصطناعي وإنتاج الفيديو الإبداعي بأقوى الأدوات الرقمية.</p>
                  )}
 
                  {/* Checklist: What You'll Learn */}
