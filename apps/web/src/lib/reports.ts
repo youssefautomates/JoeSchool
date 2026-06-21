@@ -1238,9 +1238,9 @@ export async function runReportWorkflow(
     console.log(`[REPORT_WORKFLOW] Compiling data for ${type} report...`);
     const reportData = await compileReportData(type, executionTime);
     
-    console.log(`[REPORT_WORKFLOW] Formatting and sending Telegram notification...`);
+    console.log(`[REPORT_WORKFLOW] Formatting Telegram notification (Skipping send per user request)...`);
     const telegramMessage = generateTelegramReportMessage(reportData);
-    await sendTelegramMessage(telegramMessage);
+    // await sendTelegramMessage(telegramMessage);
 
     if (type === 'monthly') {
       console.log(`[REPORT_WORKFLOW] Generating Excel workbook attachment...`);
@@ -1249,13 +1249,13 @@ export async function runReportWorkflow(
       console.log(`[REPORT_WORKFLOW] Dispatching Monthly report email...`);
       await sendMonthlyExcelReportEmail(reportData, excelBuffer);
 
-      console.log(`[REPORT_WORKFLOW] Dispatching Excel report to Telegram...`);
-      const settings = await getTelegramSettings();
-      const chatId = settings.telegramChatId || process.env.TELEGRAM_CHAT_ID;
-      if (chatId) {
-        const fileName = `JoeSchool_Report_${reportData.periodLabel.replace(' ', '_')}.xlsx`;
-        await sendTelegramDocument(chatId, excelBuffer, fileName, `🏆 <b>JoeSchool Monthly Excel Report - ${reportData.periodLabel}</b>`);
-      }
+      console.log(`[REPORT_WORKFLOW] Dispatching Excel report to Telegram (Skipped)...`);
+      // const settings = await getTelegramSettings();
+      // const chatId = settings.telegramChatId || process.env.TELEGRAM_CHAT_ID;
+      // if (chatId) {
+      //   const fileName = `JoeSchool_Report_${reportData.periodLabel.replace(' ', '_')}.xlsx`;
+      //   await sendTelegramDocument(chatId, excelBuffer, fileName, `🏆 <b>JoeSchool Monthly Excel Report - ${reportData.periodLabel}</b>`);
+      // }
     }
 
     // Log success in DB to prevent duplicates
