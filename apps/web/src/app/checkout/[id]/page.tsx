@@ -1157,14 +1157,14 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                             </div>
 
                             {/* Left group: Logos */}
-                            <div className="flex items-center gap-2.5 shrink-0" dir="ltr">
+                            <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0" dir="ltr">
                               <Image 
                                 src="/payment-logos/visa.svg" 
                                 alt="Visa" 
                                 width={54} 
                                 // aspect ratio is 3.08
                                 height={18} 
-                                className="h-5 sm:h-6 w-auto object-contain opacity-95" 
+                                className="h-3.5 sm:h-5 w-auto object-contain opacity-95" 
                                 priority
                               />
                               <Image 
@@ -1173,7 +1173,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                                 width={36} 
                                 // aspect ratio is 1.62
                                 height={22} 
-                                className="h-5.5 sm:h-6.5 w-auto object-contain opacity-95" 
+                                className="h-4 sm:h-5.5 w-auto object-contain opacity-95" 
                                 priority
                               />
                               <Image 
@@ -1182,7 +1182,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                                 width={41} 
                                 // aspect ratio is 2.06
                                 height={20} 
-                                className="h-5 sm:h-6 w-auto object-contain opacity-95" 
+                                className="h-3.5 sm:h-5 w-auto object-contain opacity-95" 
                                 priority
                               />
                             </div>
@@ -1228,14 +1228,14 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                                   alt="Vodafone Cash" 
                                   width={24} 
                                   height={24} 
-                                  className="h-6.5 sm:h-7.5 w-auto object-contain" 
+                                  className="h-4.5 sm:h-6.5 w-auto object-contain" 
                                 />
                                 <Image 
                                   src="/payment-logos/orange-cash.svg" 
                                   alt="Orange Cash" 
                                   width={20} 
                                   height={23} 
-                                  className="h-6.5 sm:h-7.5 w-auto object-contain" 
+                                  className="h-4.5 sm:h-6.5 w-auto object-contain" 
                                 />
 
                                 <Image 
@@ -1243,7 +1243,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                                   alt="Fawry" 
                                   width={63} 
                                   height={20} 
-                                  className="h-5.5 sm:h-6 w-auto object-contain" 
+                                  className="h-4 sm:h-5.5 w-auto object-contain" 
                                 />
                               </div>
                             </motion.div>
@@ -1289,7 +1289,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                                   alt="Instapay" 
                                   width={64} 
                                   height={22} 
-                                  className="h-6 sm:h-7 w-auto object-contain" 
+                                  className="h-4.5 sm:h-6 w-auto object-contain" 
                                 />
                               </div>
                             </motion.div>
