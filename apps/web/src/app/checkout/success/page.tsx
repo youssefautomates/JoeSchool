@@ -135,7 +135,8 @@ function SuccessContent() {
     if (!baseLink) return targetPath;
     try {
       const url = new URL(baseLink);
-      url.searchParams.set("redirect_to", `${window.location.origin}${targetPath}`);
+      const callbackUrl = `${window.location.origin}/auth/callback?next=${encodeURIComponent(targetPath)}`;
+      url.searchParams.set("redirect_to", callbackUrl);
       return url.toString();
     } catch (e) {
       console.error("Error modifying login link:", e);

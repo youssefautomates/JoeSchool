@@ -209,13 +209,20 @@ export async function POST(request: Request) {
           try {
             const userAccount = await getOrCreateUser(customerEmail, customerName, explicitPassword || undefined);
             resolvedUserId = userAccount.userId;
-            if (explicitPassword) {
+            if (userAccount.isNew) {
+              resolvedCredentials = {
+                email: customerEmail,
+                password: userAccount.password
+              };
+              console.log(`[PAYMOB_WEBHOOK][${requestId}] New student account created. Credentials set successfully.`);
+            } else if (explicitPassword) {
               resolvedCredentials = {
                 email: customerEmail,
                 password: explicitPassword
               };
               console.log(`[PAYMOB_WEBHOOK][${requestId}] Student account credentials set (checkout password present).`);
             } else {
+              resolvedCredentials = undefined;
               console.log(`[PAYMOB_WEBHOOK][${requestId}] Existing student account resolved. No explicit password found.`);
             }
           } catch (err: any) {

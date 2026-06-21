@@ -253,6 +253,8 @@ export async function POST(req: Request) {
       
       let resolvedUserId = baseOrder.customer_id;
       let explicitPassword = baseOrder.checkout_password || "";
+      let isNewStudent = false;
+      let temporaryPassword: string | null = null;
       
       // Auto-retry account creation if customer_id is missing
       if (!resolvedUserId) {
@@ -260,6 +262,10 @@ export async function POST(req: Request) {
         try {
           const userAccount = await getOrCreateUser(customerEmail, customerName, explicitPassword || undefined);
           resolvedUserId = userAccount.userId;
+          if (userAccount.isNew) {
+            isNewStudent = true;
+            temporaryPassword = userAccount.password || null;
+          }
           
           // Update orders with the newly resolved customer_id
           await supabaseAdmin
@@ -296,6 +302,26 @@ export async function POST(req: Request) {
         }
       }
 
+      // Check if this completed user account was created as part of this checkout transaction
+      if (resolvedUserId && !isNewStudent) {
+        try {
+          const { data: userData, error: userError } = await supabaseAdmin.auth.admin.getUserById(resolvedUserId);
+          if (!userError && userData?.user) {
+            const user = userData.user;
+            const userCreatedAt = new Date(user.created_at).getTime();
+            const orderCreatedAt = new Date(baseOrder.created_at).getTime();
+            
+            // If user was created within 60s of order creation, it's a new student
+            if (userCreatedAt >= orderCreatedAt - 60000) {
+              isNewStudent = true;
+              temporaryPassword = explicitPassword || user.user_metadata?.clear_password || null;
+            }
+          }
+        } catch (e: any) {
+          console.error(`[VERIFY][${requestId}] Error checking existing user timestamp:`, e.message);
+        }
+      }
+
       // Generate an auto-login action link using Supabase Admin SDK
       let loginLink: string | null = null;
       if (resolvedUserId) {
@@ -305,7 +331,7 @@ export async function POST(req: Request) {
             type: 'magiclink',
             email: customerEmail.toLowerCase().trim(),
             options: {
-              redirectTo: `${siteUrl}/dashboard`
+              redirectTo: `${siteUrl}/auth/callback?next=/dashboard`
             }
           });
           if (!linkError && linkData?.properties?.action_link) {
@@ -338,7 +364,9 @@ export async function POST(req: Request) {
         original_amount_usd: currency === "USD" ? originalAmountUsd : null,
         charged_amount_egp: chargedAmountEgp,
         exchange_rate: exchangeRate,
-        loginLink: loginLink
+        loginLink: loginLink,
+        isNewStudent: isNewStudent,
+        temporaryPassword: temporaryPassword
       });
     }
 
@@ -825,7 +853,7 @@ export async function POST(req: Request) {
           type: 'magiclink',
           email: customerEmail.toLowerCase().trim(),
           options: {
-            redirectTo: `${siteUrl}/dashboard`
+            redirectTo: `${siteUrl}/auth/callback?next=/dashboard`
           }
         });
         if (!linkError && linkData?.properties?.action_link) {
