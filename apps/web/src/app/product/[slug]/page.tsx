@@ -1139,7 +1139,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                 {/* CTA Buy Buttons */}
                 <Link
                   href={`/checkout/${product.id}`}
-                  className="primary-hero-cta w-full h-14 bg-gradient-to-r from-[#D6004B] via-[#ff1d6b] to-[#D6004B] text-white rounded-xl font-black text-sm sm:text-base shadow-[0_10px_30px_rgba(214,0,75,0.4)] transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer font-cairo animate-pulse-glow"
+                  className="primary-hero-cta w-full h-14 bg-gradient-to-r from-[#D6004B] via-[#ff1d6b] to-[#D6004B] text-white rounded-xl font-black text-sm sm:text-base shadow-[0_10px_30px_rgba(214,0,75,0.4)] transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer font-alexandria animate-pulse-glow"
                 >
                   <span>{discountPct && discountPct > 0 ? `اقتنِه الآن ← خصم ${discountPct}%` : "اقتنِه الآن ←"}</span>
                   <ArrowLeft className="w-4 h-4 rtl:rotate-180" />
@@ -1155,7 +1155,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                     } as any);
                     trackAddToCart(product.id, product.title, price, currency, "product");
                   }}
-                  className="primary-hero-cta w-full h-11 bg-white/5 hover:bg-white/10 text-white rounded-xl font-bold text-xs border border-white/10 transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer font-cairo"
+                  className="primary-hero-cta w-full h-11 bg-white/5 hover:bg-white/10 text-white rounded-xl font-bold text-xs border border-white/10 transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer font-alexandria"
                 >
                   <span>أضف إلى السلة 🛒</span>
                 </button>
@@ -1395,14 +1395,30 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                   </div>
                 </div>
 
-                <div className="flex flex-1 items-center justify-end">
+                <div className="flex flex-1 items-center justify-end gap-2">
                   <Link
                     href={`/checkout/${product.id}`}
-                    className="h-11 px-5 bg-gradient-to-r from-[#D6004B] to-[#ff1d6b] hover:from-[#ff1d6b] hover:to-[#D6004B] text-white rounded-full text-xs font-alexandria font-black flex items-center justify-center gap-1.5 active:scale-95 shadow-[0_4px_16px_rgba(214,0,75,0.35)] flex-1 animate-pulse-glow group"
+                    className="h-11 px-5 bg-gradient-to-r from-[#D6004B] to-[#ff1d6b] hover:from-[#ff1d6b] hover:to-[#D6004B] text-white rounded-full text-xs font-alexandria font-black flex items-center justify-center active:scale-95 shadow-[0_4px_16px_rgba(214,0,75,0.35)] flex-1 animate-pulse-glow"
                   >
-                    <span>{discountPct && discountPct > 0 ? `اقتنِه الآن - خصم ${discountPct}%` : "اقتنِه الآن"}</span>
-                    <ArrowLeft className="w-3.5 h-3.5 transition-transform duration-200 group-hover:-translate-x-1" />
+                    <span>{discountPct && discountPct > 0 ? "أحصل على الخصم" : "اقتنِه الآن"}</span>
                   </Link>
+                  {product.price > 0 && (
+                    <button
+                      onClick={() => {
+                        const price = productPricing?.price ?? product.price;
+                        addToCart({
+                          ...product,
+                          price: price,
+                          original_price: productPricing?.original_price ?? product.original_price,
+                        } as any);
+                        trackAddToCart(product.id, product.title, price, currency, "product");
+                      }}
+                      className="h-11 w-11 shrink-0 bg-white/5 hover:bg-white/10 text-white rounded-full border border-white/10 transition-all flex items-center justify-center active:scale-95 hover:border-[#D6004B]/30 cursor-pointer"
+                      title="إضافة إلى السلة"
+                    >
+                      <ShoppingCart className="w-4 h-4 text-zinc-300" />
+                    </button>
+                  )}
                 </div>
               </motion.div>
             )}

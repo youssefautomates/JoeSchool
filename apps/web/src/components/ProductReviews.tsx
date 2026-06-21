@@ -76,7 +76,7 @@ const MARQUEE_CSS = `
   flex-wrap: nowrap;
   width: max-content;
   will-change: transform;
-  animation: pr-marquee-ltr 120s linear infinite;
+  animation: pr-marquee-ltr 180s linear infinite;
 }
 .pr-marquee-track:hover {
   animation-play-state: paused;
@@ -188,8 +188,8 @@ export function ProductReviews({ productId, initialReviews, courseTitle, product
       {/* Marquee viewport */}
       <div className="relative w-full overflow-hidden" dir="ltr">
         {/* Fade edges */}
-        <div className="absolute left-0 top-0 bottom-0 w-16 md:w-24 bg-gradient-to-r from-[#050505] via-[#050505]/80 to-transparent z-10 pointer-events-none" />
-        <div className="absolute right-0 top-0 bottom-0 w-16 md:w-24 bg-gradient-to-l from-[#050505] via-[#050505]/80 to-transparent z-10 pointer-events-none" />
+        <div className="absolute left-0 top-0 bottom-0 w-10 md:w-14 bg-gradient-to-r from-[#050505] to-transparent z-10 pointer-events-none" />
+        <div className="absolute right-0 top-0 bottom-0 w-10 md:w-14 bg-gradient-to-l from-[#050505] to-transparent z-10 pointer-events-none" />
 
         {/* Animated track */}
         <div className="pr-marquee-track gap-4 md:gap-5 py-3">

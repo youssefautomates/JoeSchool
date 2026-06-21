@@ -563,7 +563,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                       </div>
                       <Link
                         href={`/learn/${course.slug}/${firstLessonSlug}`}
-                        className="w-full h-14 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-bold text-base shadow-[0_10px_30px_rgba(16,185,129,0.3)] transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer font-cairo"
+                        className="w-full h-14 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-bold text-base shadow-[0_10px_30px_rgba(16,185,129,0.3)] transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer font-alexandria"
                       >
                         <span>ادخل مشغل الدروس الفنية</span>
                         <ArrowLeft className="w-5 h-5 rtl:rotate-180" />
@@ -596,7 +596,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
 
                       <Link
                         href={course.price === 0 ? `/learn/${course.slug}/${firstLessonSlug}` : `/checkout/${course.id}`}
-                        className="primary-hero-cta w-full h-14 bg-gradient-to-r from-[#D6004B] via-[#ff1d6b] to-[#D6004B] text-white rounded-2xl font-black text-lg shadow-[0_10px_30px_rgba(214,0,75,0.4)] transition-all flex items-center justify-center gap-2.5 active:scale-98 cursor-pointer font-cairo animate-pulse-glow"
+                        className="primary-hero-cta w-full h-14 bg-gradient-to-r from-[#D6004B] via-[#ff1d6b] to-[#D6004B] text-white rounded-2xl font-black text-lg shadow-[0_10px_30px_rgba(214,0,75,0.4)] transition-all flex items-center justify-center gap-2.5 active:scale-98 cursor-pointer font-alexandria animate-pulse-glow"
                       >
                         <span>{course.price === 0 ? "ابدأ مجاناً 🎁" : (coursePricing && coursePricing.original_price > coursePricing.price) ? `اشترك الآن - خصم ${coursePricing.discount_pct}%` : "اشترك الآن"}</span>
                         <ArrowLeft className="w-5 h-5 rtl:rotate-180" />
@@ -605,7 +605,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                       {course.price > 0 && (
                         <button
                           onClick={handleAddToCart}
-                          className="primary-hero-cta w-full mt-2.5 h-14 bg-white/5 hover:bg-white/10 text-white rounded-2xl font-black text-base border border-white/10 transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer font-cairo hover:border-[#D6004B]/30"
+                          className="primary-hero-cta w-full mt-2.5 h-14 bg-white/5 hover:bg-white/10 text-white rounded-2xl font-black text-base border border-white/10 transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer font-alexandria hover:border-[#D6004B]/30"
                         >
                           <ShoppingCart className="w-5 h-5 text-zinc-300" />
                           <span>إضافة إلى السلة</span>
@@ -1087,7 +1087,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
 
                     <Link
                       href={`/learn/${course.slug}/${firstLessonSlug}`}
-                      className="w-full h-14 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-bold text-base shadow-[0_10px_30px_rgba(16,185,129,0.3)] transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer font-cairo"
+                      className="w-full h-14 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-bold text-base shadow-[0_10px_30px_rgba(16,185,129,0.3)] transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer font-alexandria"
                     >
                       <span>ادخل مشغل الدروس الفنية</span>
                       <ArrowLeft className="w-5 h-5 rtl:rotate-180" />
@@ -1121,7 +1121,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                     <div className="space-y-4">
                       <Link
                         href={course.price === 0 ? `/learn/${course.slug}/${firstLessonSlug}` : `/checkout/${course.id}`}
-                        className="primary-hero-cta w-full h-14 bg-gradient-to-r from-[#D6004B] via-[#ff1d6b] to-[#D6004B] text-white rounded-2xl font-black text-lg shadow-[0_10px_30px_rgba(214,0,75,0.4)] transition-all flex items-center justify-center gap-2.5 active:scale-98 cursor-pointer font-cairo animate-pulse-glow"
+                        className="primary-hero-cta w-full h-14 bg-gradient-to-r from-[#D6004B] via-[#ff1d6b] to-[#D6004B] text-white rounded-2xl font-black text-lg shadow-[0_10px_30px_rgba(214,0,75,0.4)] transition-all flex items-center justify-center gap-2.5 active:scale-98 cursor-pointer font-alexandria animate-pulse-glow"
                       >
                         <span>{course.price === 0 ? "ابدأ مجاناً 🎁" : (coursePricing && coursePricing.original_price > coursePricing.price) ? `اشترك الآن - خصم ${coursePricing.discount_pct}%` : "اشترك الآن"}</span>
                         <ArrowLeft className="w-5 h-5 rtl:rotate-180" />
@@ -1252,7 +1252,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
 
                 <Link
                   href={course.price === 0 ? `/learn/${course.slug}/${firstLessonSlug}` : `/checkout/${course.id}`}
-                  className="primary-hero-cta w-full h-12 bg-[#D6004B] hover:bg-[#b0003d] text-white rounded-2xl font-bold text-sm shadow-[0_10px_25px_rgba(214,0,75,0.3)] transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer font-cairo"
+                  className="primary-hero-cta w-full h-12 bg-[#D6004B] hover:bg-[#b0003d] text-white rounded-2xl font-bold text-sm shadow-[0_10px_25px_rgba(214,0,75,0.3)] transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer font-alexandria"
                 >
                   <span>سجل في القسم الآن</span>
                   <ArrowLeft className="w-4 h-4 rtl:rotate-180" />
@@ -1260,7 +1260,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                 {course.price > 0 && (
                   <button
                     onClick={handleAddToCart}
-                    className="primary-hero-cta w-full mt-2 h-12 bg-white/5 hover:bg-white/10 text-white rounded-2xl font-bold text-sm border border-white/10 transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer font-cairo"
+                    className="primary-hero-cta w-full mt-2 h-12 bg-white/5 hover:bg-white/10 text-white rounded-2xl font-bold text-sm border border-white/10 transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer font-alexandria"
                   >
                     <ShoppingCart className="w-4 h-4" />
                     <span>إضافة إلى السلة</span>
@@ -1361,7 +1361,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                               )}
                             </div>
                             
-                            <div className="h-8 px-3.5 bg-[#D6004B]/10 hover:bg-[#D6004B] border border-[#D6004B]/20 hover:border-[#D6004B] text-[#D6004B] hover:text-white rounded-lg text-[10px] font-bold flex items-center justify-center gap-1 transition-all font-cairo">
+                            <div className="h-8 px-3.5 bg-[#D6004B]/10 hover:bg-[#D6004B] border border-[#D6004B]/20 hover:border-[#D6004B] text-[#D6004B] hover:text-white rounded-lg text-[10px] font-bold flex items-center justify-center gap-1 transition-all font-alexandria">
                               <span>عرض التفاصيل</span>
                               <ArrowLeft className="w-3 h-3 rtl:rotate-180" />
                             </div>
@@ -1521,20 +1521,28 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                   )}
                 </div>
               </div>
-              <div className="flex flex-1 items-center justify-end">
+              <div className="flex flex-1 items-center justify-end gap-2">
                 <Link
                   href={course.price === 0 ? `/learn/${course.slug}/${firstLessonSlug}` : `/checkout/${course.id}`}
-                  className="h-11 px-5 bg-gradient-to-r from-[#D6004B] to-[#ff1d6b] hover:from-[#ff1d6b] hover:to-[#D6004B] text-white rounded-full text-xs font-alexandria font-black flex items-center justify-center gap-1.5 transition-all shadow-[0_4px_16px_rgba(214,0,75,0.35)] flex-grow active:scale-95 animate-pulse-glow group"
+                  className="h-11 px-5 bg-gradient-to-r from-[#D6004B] to-[#ff1d6b] hover:from-[#ff1d6b] hover:to-[#D6004B] text-white rounded-full text-xs font-alexandria font-black flex items-center justify-center transition-all shadow-[0_4px_16px_rgba(214,0,75,0.35)] flex-grow active:scale-95 animate-pulse-glow"
                 >
                   <span>
                     {course.price === 0 
                       ? "ابدأ مجاناً 🎁" 
                       : (coursePricing && coursePricing.original_price > coursePricing.price) 
-                        ? `اشترك الآن - خصم ${coursePricing.discount_pct}%` 
+                        ? "أحصل على الخصم" 
                         : "اشترك الآن"}
                   </span>
-                  <ArrowLeft className="w-3.5 h-3.5 transition-transform duration-200 group-hover:-translate-x-1" />
                 </Link>
+                {course.price > 0 && (
+                  <button
+                    onClick={handleAddToCart}
+                    className="h-11 w-11 shrink-0 bg-white/5 hover:bg-white/10 text-white rounded-full border border-white/10 transition-all flex items-center justify-center active:scale-95 hover:border-[#D6004B]/30 cursor-pointer"
+                    title="إضافة إلى السلة"
+                  >
+                    <ShoppingCart className="w-4 h-4 text-zinc-300" />
+                  </button>
+                )}
               </div>
             </motion.div>
           )}
@@ -1768,7 +1776,7 @@ function MobileCourseView({
              </div>
              <Link
                href={`/learn/${course.slug}/${firstLessonSlug}`}
-               className="w-full h-13 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm shadow-[0_8px_20px_rgba(16,185,129,0.2)] transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer font-cairo"
+               className="w-full h-13 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm shadow-[0_8px_20px_rgba(16,185,129,0.2)] transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer font-alexandria"
              >
                <span>ادخل مشغل الدروس الفنية</span>
                <ArrowLeft className="w-5 h-5 rtl:rotate-180" />
@@ -1799,7 +1807,7 @@ function MobileCourseView({
 
              <Link
                href={course.price === 0 ? `/learn/${course.slug}/${firstLessonSlug}` : `/checkout/${course.id}`}
-               className="primary-hero-cta w-full h-14 bg-gradient-to-r from-[#D6004B] via-[#ff1d6b] to-[#D6004B] text-white rounded-xl font-black text-base sm:text-lg shadow-[0_10px_30px_rgba(214,0,75,0.4)] transition-all flex items-center justify-center gap-2.5 active:scale-98 cursor-pointer font-cairo animate-pulse-glow"
+               className="primary-hero-cta w-full h-14 bg-gradient-to-r from-[#D6004B] via-[#ff1d6b] to-[#D6004B] text-white rounded-xl font-black text-base sm:text-lg shadow-[0_10px_30px_rgba(214,0,75,0.4)] transition-all flex items-center justify-center gap-2.5 active:scale-98 cursor-pointer font-alexandria animate-pulse-glow"
              >
                <span>{course.price === 0 ? "ابدأ مجاناً 🎁" : (coursePricing && coursePricing.original_price > coursePricing.price) ? `اشترك الآن - خصم ${coursePricing.discount_pct}%` : "اشترك الآن"}</span>
                <ArrowLeft className="w-4 h-4 rtl:rotate-180" />
@@ -1807,14 +1815,14 @@ function MobileCourseView({
               {course.price > 0 && onAddToCart && (
                 <button
                   onClick={onAddToCart}
-                  className="primary-hero-cta w-full mt-2 h-11 bg-white/5 hover:bg-white/10 text-white rounded-xl font-bold text-xs border border-white/10 transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer font-cairo"
+                  className="primary-hero-cta w-full mt-2 h-11 bg-white/5 hover:bg-white/10 text-white rounded-xl font-bold text-xs border border-white/10 transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer font-alexandria"
                 >
                   <ShoppingCart className="w-4 h-4" />
                   <span>إضافة إلى السلة</span>
                 </button>
               )}
 
-             <div className="flex justify-around pt-2 border-t border-white/5 text-[8.5px] text-zinc-400 font-bold font-cairo">
+             <div className="flex justify-around pt-2 border-t border-white/5 text-[8.5px] text-zinc-400 font-bold font-alexandria">
                <div className="flex items-center gap-1">
                  <CheckCircle2 className="w-3.5 h-3.5 text-[#D6004B]" />
                  <span>تحديثات مستمرة</span>
@@ -1881,9 +1889,9 @@ function MobileCourseView({
                >
                  {/* Course Description */}
                  {course.description ? (
-                   <div className="text-zinc-300 font-cairo text-xs leading-[1.7] [&_p]:mb-3 [&_p]:leading-[1.7]" dangerouslySetInnerHTML={{ __html: course.description }} />
+                   <div className="text-zinc-300 font-alexandria text-xs leading-[1.7] [&_p]:mb-3 [&_p]:leading-[1.7]" dangerouslySetInnerHTML={{ __html: course.description }} />
                  ) : (
-                   <p className="text-zinc-400 font-cairo text-xs leading-[1.8]">هذا المسار يحتوي على شرح مفصل وتطبيق شامل لمهارات صناعة المحتوى بالذكاء الاصطناعي وإنتاج الفيديو الإبداعي بأقوى الأدوات الرقمية.</p>
+                   <p className="text-zinc-400 font-alexandria text-xs leading-[1.8]">هذا المسار يحتوي على شرح مفصل وتطبيق شامل لمهارات صناعة المحتوى بالذكاء الاصطناعي وإنتاج الفيديو الإبداعي بأقوى الأدوات الرقمية.</p>
                  )}
 
                  {/* Checklist: What You'll Learn */}
@@ -2054,7 +2062,7 @@ function MobileCourseView({
                    <Award className="w-4 h-4 text-[#D6004B]" />
                    <h3 className="text-xs font-alexandria font-bold text-white">الشهادة المهنية المعتمدة</h3>
                  </div>
-                 <p className="text-zinc-400 text-xs leading-relaxed font-cairo">
+                 <p className="text-zinc-400 text-xs leading-relaxed font-alexandria">
                    بمجرد إنتهائك من سماعك جميع محاضرات الدورة ستحصل على شهادة احترافية بإسمك من "جو سكول"، بحيث تعزز من فرص قبولك في أفضل الوظائف.
                  </p>
 
@@ -2138,10 +2146,10 @@ function MobileCourseView({
                      <div className="space-y-0.5 text-center">
                        <span className="text-[8px] text-[#D6004B] font-black uppercase tracking-widest font-alexandria">مؤسس الأكاديمية</span>
                        <h3 className="text-base font-alexandria font-black text-white">يوسف مصطفى</h3>
-                       <p className="text-[10px] text-zinc-400 font-bold font-cairo">خبير وصانع محتوى بالذكاء الاصطناعي</p>
+                       <p className="text-[10px] text-zinc-400 font-bold font-alexandria">خبير وصانع محتوى بالذكاء الاصطناعي</p>
                      </div>
                      
-                     <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3.5 text-zinc-300 font-cairo text-xs leading-[1.8] text-right">
+                     <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3.5 text-zinc-300 font-alexandria text-xs leading-[1.8] text-right">
                        <p>
                          خبير ومتخصص في صناعة المحتوى بالذكاء الاصطناعي لأكثر من 3 سنوات ومؤسس أكاديمية جو سكول التعليمية.
                        </p>
@@ -2154,11 +2162,11 @@ function MobileCourseView({
                      <div className="grid grid-cols-2 gap-3 pt-1">
                        <div className="bg-white/[0.01] border border-white/5 rounded-lg p-2.5 text-center">
                          <span className="block text-[#D6004B] font-alexandria font-black text-sm">3+ سنوات</span>
-                         <span className="text-[8px] text-zinc-500 font-bold font-cairo">الخبرة العملية</span>
+                         <span className="text-[8px] text-zinc-500 font-bold font-alexandria">الخبرة العملية</span>
                        </div>
                        <div className="bg-white/[0.01] border border-white/5 rounded-lg p-2.5 text-center">
                          <span className="block text-[#D6004B] font-alexandria font-black text-sm">2000+</span>
-                         <span className="text-[8px] text-zinc-500 font-bold font-cairo">طالب متدرب</span>
+                         <span className="text-[8px] text-zinc-500 font-bold font-alexandria">طالب متدرب</span>
                        </div>
                      </div>
                    </div>
@@ -2182,15 +2190,15 @@ function MobileCourseView({
                  <div className="space-y-2.5">
                    <div className="bg-[#050508] border border-white/5 rounded-xl p-4 space-y-1.5">
                      <h4 className="font-alexandria font-bold text-white text-[11px]">هل الكورس مسجل أم بث مباشر؟</h4>
-                     <p className="text-zinc-400 text-[10px] leading-relaxed">المحتوى بأكمله مسجل مسبقاً بجودة سينمائية فائقة حتى تتمكن من الدراسة والمراجعة في أي وقت وبالسرعة التي تفضلها مدى الحياة.</p>
+                     <p className="text-zinc-400 text-[10px] leading-relaxed font-alexandria">المحتوى بأكمله مسجل مسبقاً بجودة سينمائية فائقة حتى تتمكن من الدراسة والمراجعة في أي وقت وبالسرعة التي تفضلها مدى الحياة.</p>
                    </div>
                    <div className="bg-[#050508] border border-white/5 rounded-xl p-4 space-y-1.5">
                      <h4 className="font-alexandria font-bold text-white text-[11px]">هل سأحصل على ملفات وقوالب العمل الجاهزة؟</h4>
-                     <p className="text-zinc-400 text-[10px] leading-relaxed">نعم بالكامل! كل محاضرة فنية تطبيقية تشتمل على الملفات الجاهزة للتنزيل والتصدير للعمل بها فوراً في مشاريعك الخاصة.</p>
+                     <p className="text-zinc-400 text-[10px] leading-relaxed font-alexandria">نعم بالكامل! كل محاضرة فنية تطبيقية تشتمل على الملفات الجاهزة للتنزيل والتصدير للعمل بها فوراً في مشاريعك الخاصة.</p>
                    </div>
                    <div className="bg-[#050508] border border-white/5 rounded-xl p-4 space-y-1.5">
                      <h4 className="font-alexandria font-bold text-white text-[11px]">كيف يمكنني التواصل مع المحاضر في حال واجهتني مشكلة؟</h4>
-                     <p className="text-zinc-400 text-[10px] leading-relaxed">يوجد مجتمع مخصص للطلاب تحت كل درس ومجموعات مجتمع الدعم الفني المباشر لحل المشاكل والإجابة على أي استفسار.</p>
+                     <p className="text-zinc-400 text-[10px] leading-relaxed font-alexandria">يوجد مجتمع مخصص للطلاب تحت كل درس ومجموعات مجتمع الدعم الفني المباشر لحل المشاكل والإجابة على أي استفسار.</p>
                    </div>
                  </div>
                </motion.div>
@@ -2236,7 +2244,7 @@ function MobileCourseView({
            </span>
            
            <h3 className="text-sm font-alexandria font-black text-white leading-tight">
-             الخصم المتاح خصم مؤقت وقد يتغير السعر في أي لحظة!
+             الخصم مؤقت وسيرجع الكورس لسعره الأصلي قريباً
            </h3>
            
            <p className="text-zinc-400 text-[10px] font-cairo leading-relaxed">
@@ -2245,11 +2253,21 @@ function MobileCourseView({
            
            <Link
              href={course.price === 0 ? `/learn/${course.slug}/${firstLessonSlug}` : `/checkout/${course.id}`}
-             className="primary-hero-cta w-full h-13 bg-gradient-to-r from-[#D6004B] via-[#ff1d6b] to-[#D6004B] text-white rounded-xl font-black text-sm sm:text-base shadow-[0_10px_25px_rgba(214,0,75,0.35)] transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer font-cairo animate-pulse-glow"
+             className="primary-hero-cta w-full h-13 bg-gradient-to-r from-[#D6004B] via-[#ff1d6b] to-[#D6004B] text-white rounded-xl font-black text-sm sm:text-base shadow-[0_10px_25px_rgba(214,0,75,0.35)] transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer font-alexandria animate-pulse-glow"
            >
               <span>{course.price === 0 ? "ابدأ مجاناً 🎁" : (coursePricing && coursePricing.original_price > coursePricing.price) ? `اشترك الآن - خصم ${coursePricing.discount_pct}%` : "اشترك الآن"}</span>
              <ArrowLeft className="w-4 h-4 rtl:rotate-180" />
            </Link>
+
+           {course.price > 0 && onAddToCart && (
+             <button
+               onClick={onAddToCart}
+               className="primary-hero-cta w-full mt-2.5 h-13 bg-white/5 hover:bg-white/10 text-white rounded-xl font-black text-sm border border-white/10 transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer font-alexandria"
+             >
+               <ShoppingCart className="w-4 h-4 text-zinc-300" />
+               <span>إضافة إلى السلة</span>
+             </button>
+           )}
         </div>
       )}
 
