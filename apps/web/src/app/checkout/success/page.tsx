@@ -314,40 +314,60 @@ if (!data.alreadyDelivered) {
 
   if (phase === "loading") {
     return (
-      <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center gap-8">
+      <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center gap-10 px-6">
         <motion.div
           className="relative"
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
         >
-          <div className="w-28 h-28 rounded-full border border-rose-500/20 flex items-center justify-center">
-            <div className="w-20 h-20 rounded-full border border-rose-500/40 flex items-center justify-center">
+          <div className="w-32 h-32 rounded-full border border-emerald-500/20 flex items-center justify-center">
+            <div className="w-24 h-24 rounded-full border border-emerald-500/30 flex items-center justify-center">
               <motion.div
-                className="w-14 h-14 rounded-full border-2 border-emerald-500 border-t-transparent"
+                className="w-16 h-16 rounded-full border-3 border-emerald-400 border-t-transparent"
                 animate={{ rotate: 360 }}
-                transition={{ duration: 1.2, repeat: Infinity, ease: "linear" }}
+                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
               />
             </div>
           </div>
           <motion.div
             className="absolute inset-0 rounded-full bg-emerald-500/10"
-            animate={{ scale: [1, 1.3, 1], opacity: [0.5, 0, 0.5] }}
-            transition={{ duration: 2, repeat: Infinity }}
+            animate={{ scale: [1, 1.4, 1], opacity: [0.4, 0, 0.4] }}
+            transition={{ duration: 2.5, repeat: Infinity }}
+          />
+          <motion.div
+            className="absolute inset-0 rounded-full bg-emerald-500/5"
+            animate={{ scale: [1, 1.6, 1], opacity: [0.2, 0, 0.2] }}
+            transition={{ duration: 3, repeat: Infinity, delay: 0.5 }}
           />
         </motion.div>
 
         <motion.div
-          className="text-center animate-pulse"
-          initial={{ opacity: 0, y: 10 }}
+          className="text-center"
+          initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
+          transition={{ delay: 0.3 }}
         >
-          <p className="font-alexandria text-white text-xl font-bold mb-2">
-            جاري تأكيد وتفعيل مشترياتك بأمان...
+          <p className="font-alexandria text-white text-2xl md:text-3xl font-bold mb-3 tracking-tight">
+            جاري تأكيد وتفعيل مشترياتك
           </p>
-          <p className="font-cairo text-zinc-500 text-sm">
-            يرجى الانتظار، لا تغلق هذه الصفحة
+          <p className="font-cairo text-zinc-500 text-base md:text-lg max-w-md mx-auto leading-relaxed">
+            نتحقق من دفعتك بأمان ونجهز محتوياتك الرقمية. يرجى عدم إغلاق هذه الصفحة.
           </p>
+          <motion.div
+            className="mt-8 flex items-center justify-center gap-1.5"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.6 }}
+          >
+            {[1, 2, 3].map((i) => (
+              <motion.div
+                key={i}
+                className="w-2 h-2 rounded-full bg-emerald-500"
+                animate={{ scale: [1, 1.5, 1], opacity: [0.4, 1, 0.4] }}
+                transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.15 }}
+              />
+            ))}
+          </motion.div>
         </motion.div>
       </div>
     );
@@ -415,54 +435,60 @@ if (!data.alreadyDelivered) {
             className="flex justify-center mb-6"
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            transition={{ type: "spring", stiffness: 250, damping: 18, delay: 0.1 }}
+            transition={{ type: "spring", stiffness: 280, damping: 20, delay: 0.1 }}
           >
             <div className="relative">
               <motion.div
-                className="absolute inset-0 rounded-full border border-emerald-500/20"
+                className="absolute inset-0 rounded-full border border-emerald-500/30"
                 initial={{ scale: 0.5, opacity: 0 }}
-                animate={{ scale: 1.6, opacity: 0 }}
-                transition={{ duration: 1.5, repeat: Infinity, delay: 0.5 }}
+                animate={{ scale: 1.8, opacity: 0 }}
+                transition={{ duration: 2, repeat: Infinity, delay: 0.3 }}
               />
-              <div className="w-24 h-24 rounded-[1.8rem] bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-[0_0_50px_rgba(16,185,129,0.25)] rotate-3">
-                <CheckCircle2 className="w-12 h-12 text-white" />
+              <motion.div
+                className="absolute inset-0 rounded-full border border-emerald-500/15"
+                initial={{ scale: 0.7, opacity: 0 }}
+                animate={{ scale: 2, opacity: 0 }}
+                transition={{ duration: 2.5, repeat: Infinity, delay: 1 }}
+              />
+              <div className="w-28 h-28 rounded-[2rem] bg-gradient-to-br from-emerald-500 via-teal-500 to-emerald-600 flex items-center justify-center shadow-[0_0_60px_rgba(16,185,129,0.35),0_20px_40px_rgba(16,185,129,0.2)] rotate-3 relative">
+                <CheckCircle2 className="w-14 h-14 text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]" />
               </div>
             </div>
           </motion.div>
 
           {/* Dynamic Header Block based on Purchase Type */}
           <motion.div
-            className="text-center mb-8"
+            className="text-center mb-10"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.25 }}
           >
             <motion.div
-              className="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-4"
+              className="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest mb-5"
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.35 }}
             >
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
               تم التحقق والتفعيل الفوري
             </motion.div>
 
             {isHybrid ? (
-              <h1 className="font-alexandria font-black text-3xl md:text-5xl text-white tracking-tight leading-tight mb-3">
+              <h1 className="font-alexandria font-black text-3xl md:text-5xl lg:text-6xl text-white tracking-tight leading-[1.15] mb-4">
                 تهانينا! تم تفعيل وتوصيل<br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-sky-400">
-                  طلبك المختلط بنجاح ⚡
+                  طلبك المتكامل بنجاح ⚡
                 </span>
               </h1>
             ) : hasCourses ? (
-              <h1 className="font-alexandria font-black text-3xl md:text-5xl text-white tracking-tight leading-tight mb-3">
+              <h1 className="font-alexandria font-black text-3xl md:text-5xl lg:text-6xl text-white tracking-tight leading-[1.15] mb-4">
                 تهانينا! تم تفعيل اشتراكك<br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-400 via-orange-400 to-amber-400">
                   بالدورة التدريبية 🎓
                 </span>
               </h1>
             ) : (
-              <h1 className="font-alexandria font-black text-3xl md:text-5xl text-white tracking-tight leading-tight mb-3">
+              <h1 className="font-alexandria font-black text-3xl md:text-5xl lg:text-6xl text-white tracking-tight leading-[1.15] mb-4">
                 تهانينا! ملفاتك الرقمية<br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-sky-400">
                   جاهزة للتحميل الفوري ⬇️
@@ -470,8 +496,8 @@ if (!data.alreadyDelivered) {
               </h1>
             )}
 
-            <p className="font-cairo text-zinc-400 text-base md:text-lg leading-relaxed max-w-lg mx-auto">
-              أهلاً **{orderData?.customerName}**، شكراً لثقتك بنا. تم تسجيل طلبك وتجهيز كافة المحتويات الرقمية الخاصة بك.
+            <p className="font-cairo text-zinc-400 text-lg md:text-xl leading-relaxed max-w-2xl mx-auto">
+              أهلاً <span className="font-alexandria font-bold text-white">{orderData?.customerName}</span>، شكراً لثقتك بنا. تم تسجيل طلبك وتجهيز كافة المحتويات الرقمية الخاصة بك.
             </p>
           </motion.div>
 
@@ -484,41 +510,41 @@ if (!data.alreadyDelivered) {
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
-                className="space-y-4"
+                className="space-y-5"
               >
                 {digitalProducts.map((p) => (
                   <div 
                     key={p.id}
-                    className="bg-[#0b0b12] border border-white/5 rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden group hover:border-emerald-500/20 transition-all duration-300"
+                    className="bg-gradient-to-br from-[#0b0b12] to-[#0a0a0f] border border-white/5 rounded-3xl p-6 sm:p-8 shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative overflow-hidden group hover:border-emerald-500/30 transition-all duration-300"
                   >
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full blur-2xl pointer-events-none" />
+                    <div className="absolute top-0 right-0 w-40 h-40 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
                     
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 relative z-10">
                       <div className="flex items-start gap-4">
-                        <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0">
-                          <FileArchive className="w-7 h-7" />
+                        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-teal-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0 shadow-[0_8px_24px_rgba(16,185,129,0.15)]">
+                          <FileArchive className="w-8 h-8" />
                         </div>
-                        <div className="space-y-1">
-                          <span className="text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded font-bold uppercase tracking-wider">
+                        <div className="space-y-1.5">
+                          <span className="text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-1 rounded font-bold uppercase tracking-wider">
                             ملف رقمي أصلي
                           </span>
-                          <h3 className="text-lg font-alexandria font-bold text-white leading-snug">{p.title}</h3>
+                          <h3 className="text-xl font-alexandria font-black text-white leading-snug">{p.title}</h3>
                           
                           {/* File Details Grid */}
-                          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 pt-2 text-xs text-zinc-500 font-medium">
-                            <span className="flex items-center gap-1">
-                              <span className="text-zinc-400">نوع الملف:</span>
+                          <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5 pt-2 text-sm text-zinc-400 font-medium">
+                            <span className="flex items-center gap-1.5">
+                              <span className="text-zinc-500">نوع الملف:</span>
                               <span className="text-white font-bold">{p.fileType}</span>
                             </span>
                             <span className="text-white/10">•</span>
-                            <span className="flex items-center gap-1">
-                              <span className="text-zinc-400">حجم الملف:</span>
+                            <span className="flex items-center gap-1.5">
+                              <span className="text-zinc-500">حجم الملف:</span>
                               <span className="text-white font-bold">{p.fileSize}</span>
                             </span>
                             <span className="text-white/10">•</span>
-                            <span className="flex items-center gap-1 text-emerald-400/80">
-                              <span className="text-zinc-400">التحميل المتبقي:</span>
-                              <span>{p.remainingDownloads}</span>
+                            <span className="flex items-center gap-1.5 text-emerald-400/90">
+                              <span className="text-zinc-500">التحميل المتبقي:</span>
+                              <span className="font-bold text-white">{p.remainingDownloads}</span>
                             </span>
                           </div>
                         </div>
@@ -527,9 +553,9 @@ if (!data.alreadyDelivered) {
                       {/* Direct Secure Download CTA */}
                       <a
                         href={p.downloadUrl || "#"}
-                        className="w-full sm:w-auto h-14 px-8 bg-emerald-500 hover:bg-emerald-600 text-white font-alexandria font-black rounded-2xl flex items-center justify-center gap-2.5 transition-all shadow-[0_8px_25px_rgba(16,185,129,0.25)] active:scale-98 cursor-pointer shrink-0"
+                        className="w-full sm:w-auto h-14 px-8 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-alexandria font-black rounded-2xl flex items-center justify-center gap-2.5 transition-all shadow-[0_8px_30px_rgba(16,185,129,0.35)] active:scale-98 cursor-pointer shrink-0 group"
                       >
-                        <Download className="w-5 h-5 animate-bounce" />
+                        <Download className="w-5 h-5 group-hover:animate-bounce transition-transform" />
                         <span>تحميل الملف الآن</span>
                       </a>
                     </div>
@@ -537,18 +563,20 @@ if (!data.alreadyDelivered) {
                 ))}
 
                 {/* Database Save Confirmation Block */}
-                <div className="bg-emerald-950/20 border border-emerald-900/30 rounded-2.5xl p-6 flex items-start gap-4">
-                  <Info className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+                <div className="bg-gradient-to-r from-emerald-950/30 to-teal-950/20 border border-emerald-900/40 rounded-3xl p-6 flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shrink-0">
+                    <Info className="w-5 h-5 text-emerald-400" />
+                  </div>
                   <div>
-                    <h4 className="font-alexandria font-bold text-emerald-400 text-sm">تم الحفظ تلقائياً في حسابك</h4>
-                    <p className="text-zinc-400 text-xs sm:text-sm mt-1.5 leading-relaxed">
+                    <h4 className="font-alexandria font-bold text-emerald-400 text-base">تم الحفظ تلقائياً في حسابك</h4>
+                    <p className="text-zinc-400 text-sm mt-2 leading-relaxed">
                       لقد قمنا بحفظ هذا المنتج وتراخيص التحميل الخاصة به تلقائياً داخل حساب العميل المربوط ببريدك الإلكتروني. 
                       يمكنك إعادة تحميل الملفات وتوليد روابط أمنة جديدة في أي وقت لاحقاً من خلال قسم **"ملفاتي الرقمية"** داخل لوحة التحكم.
                     </p>
                     <a
                       href={getModifiedLoginLink(orderData?.loginLink, "/dashboard")}
                       onClick={(e) => handleNavigation(e, "/dashboard")}
-                      className="mt-4 inline-flex items-center gap-1 text-xs font-bold text-emerald-400 hover:text-emerald-300 transition-colors"
+                      className="mt-4 inline-flex items-center gap-1.5 text-sm font-bold text-emerald-400 hover:text-emerald-300 transition-colors"
                     >
                       <span>الانتقال إلى لوحة التحميلات الرقمية</span>
                       <ChevronLeft className="w-4 h-4 rtl:rotate-180" />
@@ -564,28 +592,28 @@ if (!data.alreadyDelivered) {
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
-                className="space-y-4"
+                className="space-y-5"
               >
                 {courses.map((c) => (
                   <div 
                     key={c.id}
-                    className="bg-[#0b0b12] border border-white/5 rounded-3xl overflow-hidden shadow-2xl hover:border-rose-500/20 transition-all duration-300"
+                    className="bg-gradient-to-br from-[#0b0b12] to-[#0a0a0f] border border-white/5 rounded-3xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] hover:border-rose-500/30 transition-all duration-300"
                   >
-                    <div className="relative h-48 bg-zinc-900 overflow-hidden flex items-center justify-center border-b border-white/5">
+                    <div className="relative h-56 bg-zinc-900 overflow-hidden flex items-center justify-center border-b border-white/5">
                       <img 
                         src={c.image_url} 
                         alt={c.title}
-                        className="absolute inset-0 w-full h-full object-cover opacity-40"
+                        className="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:scale-105 transition-transform duration-500"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-[#0b0b12] to-transparent" />
-                      <div className="absolute w-32 h-32 bg-rose-600/20 rounded-full blur-3xl pointer-events-none" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#0b0b12]/95 via-transparent to-transparent" />
+                      <div className="absolute w-40 h-40 bg-rose-600/15 rounded-full blur-3xl pointer-events-none" />
                       
                       <div className="absolute bottom-5 right-5 z-10 flex flex-wrap items-center gap-2">
-                        <span className="bg-black/60 border border-white/10 text-white text-[10px] px-3 py-1 rounded-md font-bold flex items-center gap-1.5">
+                        <span className="bg-black/70 border border-white/10 text-white text-[10px] px-3 py-1 rounded-md font-bold flex items-center gap-1.5">
                           <BookOpen className="w-3.5 h-3.5 text-rose-400" />
                           <span>{c.lessons_count} درس تدريبي</span>
                         </span>
-                        <span className="bg-black/60 border border-white/10 text-white text-[10px] px-3 py-1 rounded-md font-bold flex items-center gap-1.5">
+                        <span className="bg-black/70 border border-white/10 text-white text-[10px] px-3 py-1 rounded-md font-bold flex items-center gap-1.5">
                           <Clock className="w-3.5 h-3.5 text-orange-400" />
                           <span>{c.duration_hours} ساعة متابعة</span>
                         </span>
@@ -594,11 +622,11 @@ if (!data.alreadyDelivered) {
 
                     <div className="p-6 sm:p-8 space-y-6">
                       <div className="space-y-2">
-                        <span className="text-[10px] bg-rose-600/10 text-rose-400 border border-rose-500/20 px-2 py-0.5 rounded font-bold uppercase tracking-wider">
+                        <span className="text-[10px] bg-rose-600/10 text-rose-400 border border-rose-500/20 px-2.5 py-1 rounded font-bold uppercase tracking-wider">
                           دورة تعليمية معتمدة
                         </span>
-                        <h3 className="text-xl sm:text-2xl font-alexandria font-black text-white leading-tight">{c.title}</h3>
-                        <p className="text-zinc-400 text-sm leading-relaxed">
+                        <h3 className="text-2xl font-alexandria font-black text-white leading-tight">{c.title}</h3>
+                        <p className="text-zinc-400 text-base leading-relaxed">
                           تم قيد حسابك الدراسي بنجاح في الدورة. المنهج التعليمي، الاختبارات، والشهادة المعتمدة أصبحت جاهزة لك بالكامل.
                         </p>
                       </div>
@@ -613,9 +641,9 @@ if (!data.alreadyDelivered) {
                               <a
                                 href={getModifiedLoginLink(orderData?.loginLink, startLearningPath)}
                                 onClick={(e) => handleNavigation(e, startLearningPath)}
-                                className="flex-1 h-14 bg-gradient-to-r from-[#D6004B] to-orange-500 hover:from-[#b0003d] hover:to-orange-600 text-white font-alexandria font-bold text-base rounded-2xl flex items-center justify-center gap-2 shadow-[0_6px_20px_rgba(214,0,75,0.25)] transition-all active:scale-98 text-center"
+                                className="flex-1 h-14 bg-gradient-to-r from-[#D6004B] to-orange-500 hover:from-[#b0003d] hover:to-orange-600 text-white font-alexandria font-bold text-base rounded-2xl flex items-center justify-center gap-2 shadow-[0_8px_30px_rgba(214,0,75,0.35)] transition-all active:scale-98 text-center group"
                               >
-                                🚀
+                                <span className="group-hover:animate-bounce">🚀</span>
                                 <span>ابدأ التعلم الآن</span>
                               </a>
                               
@@ -636,11 +664,13 @@ if (!data.alreadyDelivered) {
                 ))}
 
                 {/* Course Enrollment Save Confirmation Block */}
-                <div className="bg-rose-950/20 border border-rose-900/30 rounded-2.5xl p-6 flex items-start gap-4">
-                  <Info className="w-5 h-5 text-rose-400 shrink-0 mt-0.5" />
+                <div className="bg-gradient-to-r from-rose-950/30 to-orange-950/20 border border-rose-900/40 rounded-3xl p-6 flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center shrink-0">
+                    <Info className="w-5 h-5 text-rose-400" />
+                  </div>
                   <div>
-                    <h4 className="font-alexandria font-bold text-rose-400 text-sm">تم تسجيل دورتك تلقائياً</h4>
-                    <p className="text-zinc-400 text-xs sm:text-sm mt-1.5 leading-relaxed">
+                    <h4 className="font-alexandria font-bold text-rose-400 text-base">تم تسجيل دورتك تلقائياً</h4>
+                    <p className="text-zinc-400 text-sm mt-2 leading-relaxed">
                       تم ربط وتسجيل هذه الدورة بحساب الطالب الموحد الخاص بك. يمكنك الوصول المباشر لكافة أقسامك، ومتابعة تقدم الدراسة، وحفظ تقدم مشاهدة المحاضرات، 
                       وطباعة فواتير الشراء، بالإضافة لتوثيق وتحميل شهادتك فور الوصول لنسبة إنجاز 100%.
                     </p>
@@ -659,9 +689,11 @@ if (!data.alreadyDelivered) {
               >
                 
                 {/* Digital Downloads Section inside Hybrid */}
-                <div className="space-y-3">
-                  <h3 className="font-alexandria font-bold text-emerald-400 text-base flex items-center gap-2 border-b border-white/5 pb-2">
-                    <Download className="w-5 h-5" />
+                <div className="space-y-4">
+                  <h3 className="font-alexandria font-bold text-emerald-400 text-lg flex items-center gap-2.5 border-b border-white/5 pb-3">
+                    <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+                      <Download className="w-4 h-4" />
+                    </div>
                     <span>تحميل ملفاتك الرقمية</span>
                   </h3>
                   
@@ -669,14 +701,14 @@ if (!data.alreadyDelivered) {
                     {digitalProducts.map((p) => (
                       <div 
                         key={p.id}
-                        className="bg-[#0b0b12] border border-white/5 rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-emerald-500/20 transition-all duration-300"
+                        className="bg-[#0b0b12] border border-white/5 rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-emerald-500/30 hover:shadow-[0_4px_20px_rgba(16,185,129,0.1)] transition-all duration-300"
                       >
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0">
-                            <FileArchive className="w-5 h-5" />
+                          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500/20 to-teal-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
+                            <FileArchive className="w-6 h-6" />
                           </div>
                           <div>
-                            <h4 className="font-alexandria font-bold text-white text-sm md:text-base leading-snug">{p.title}</h4>
+                            <h4 className="font-alexandria font-bold text-white text-base leading-snug">{p.title}</h4>
                             <div className="flex items-center gap-3 text-xs text-zinc-500 font-medium mt-1">
                               <span>نوع الملف: <strong className="text-white">{p.fileType}</strong></span>
                               <span>•</span>
@@ -687,7 +719,7 @@ if (!data.alreadyDelivered) {
 
                         <a
                           href={p.downloadUrl || "#"}
-                          className="h-11 px-5 bg-emerald-500 hover:bg-emerald-600 text-white font-alexandria font-bold text-xs rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md"
+                          className="h-12 px-6 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-alexandria font-bold text-xs rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md shrink-0"
                         >
                           <Download className="w-4 h-4" />
                           <span>تحميل الملف</span>
@@ -698,9 +730,11 @@ if (!data.alreadyDelivered) {
                 </div>
 
                 {/* Courses Section inside Hybrid */}
-                <div className="space-y-3 pt-2">
-                  <h3 className="font-alexandria font-bold text-rose-400 text-base flex items-center gap-2 border-b border-white/5 pb-2">
-                    <BookOpen className="w-5 h-5" />
+                <div className="space-y-4 pt-2">
+                  <h3 className="font-alexandria font-bold text-rose-400 text-lg flex items-center gap-2.5 border-b border-white/5 pb-3">
+                    <div className="w-8 h-8 rounded-lg bg-rose-500/10 border border-rose-500/20 flex items-center justify-center">
+                      <BookOpen className="w-4 h-4" />
+                    </div>
                     <span>الدورات التعليمية المسجلة</span>
                   </h3>
                   
@@ -708,7 +742,7 @@ if (!data.alreadyDelivered) {
                     {courses.map((c) => (
                       <div 
                         key={c.id}
-                        className="bg-[#0b0b12] border border-white/5 rounded-2.5xl overflow-hidden flex flex-col sm:flex-row hover:border-rose-500/20 transition-all duration-300"
+                        className="bg-[#0b0b12] border border-white/5 rounded-2.5xl overflow-hidden flex flex-col sm:flex-row hover:border-rose-500/30 hover:shadow-[0_4px_20px_rgba(214,0,75,0.1)] transition-all duration-300"
                       >
                         <div className="w-full sm:w-44 h-32 bg-zinc-900 shrink-0 relative">
                           <img src={c.image_url} alt={c.title} className="absolute inset-0 w-full h-full object-cover opacity-55" />
@@ -738,7 +772,7 @@ if (!data.alreadyDelivered) {
                               <a
                                 href={getModifiedLoginLink(orderData?.loginLink, startLearningPath)}
                                 onClick={(e) => handleNavigation(e, startLearningPath)}
-                                className="h-11 bg-white/5 border border-white/10 hover:bg-rose-600 hover:border-none text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all active:scale-98 text-center"
+                                className="h-11 bg-white/5 border border-white/10 hover:bg-gradient-to-r hover:from-rose-600 hover:to-orange-500 hover:border-none text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all active:scale-98 text-center"
                               >
                                 <span>ابدأ مشاهدة المنهج الآن</span>
                                 <ChevronLeft className="w-4 h-4 rtl:rotate-180" />
@@ -752,18 +786,20 @@ if (!data.alreadyDelivered) {
                 </div>
 
                 {/* Hybrid Overview Dashboard Link */}
-                <div className="bg-sky-950/20 border border-sky-900/30 rounded-2.5xl p-6 flex items-start gap-4">
-                  <Info className="w-5 h-5 text-sky-400 shrink-0 mt-0.5" />
+                <div className="bg-gradient-to-r from-sky-950/30 to-emerald-950/20 border border-sky-900/40 rounded-3xl p-6 flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center shrink-0">
+                    <Info className="w-5 h-5 text-sky-400" />
+                  </div>
                   <div>
-                    <h4 className="font-alexandria font-bold text-sky-400 text-sm">إدارة متكاملة لمشترياتك</h4>
-                    <p className="text-zinc-400 text-xs sm:text-sm mt-1.5 leading-relaxed">
+                    <h4 className="font-alexandria font-bold text-sky-400 text-base">إدارة متكاملة لمشترياتك</h4>
+                    <p className="text-zinc-400 text-sm mt-2 leading-relaxed">
                       لقد اشتريت حزمة متكاملة تجمع بين التدريب المعتمد والملفات الجاهزة! تم تسجيل كافة المنتجات في حسابك الدراسي الموحد. 
                       يمكنك التحكم بملفاتك الرقمية والوصول المباشر للمحاضرات في أي وقت عبر الانتقال إلى لوحة التحكم الرئيسية الخاصة بك.
                     </p>
                     <a
                       href={getModifiedLoginLink(orderData?.loginLink, "/dashboard")}
                       onClick={(e) => handleNavigation(e, "/dashboard")}
-                      className="mt-4 h-12 px-6 bg-gradient-to-r from-sky-500 to-emerald-500 text-white font-alexandria font-bold text-xs rounded-xl inline-flex items-center justify-center gap-2 shadow-lg shadow-sky-600/10 active:scale-98 transition-all text-center"
+                      className="mt-4 h-12 px-6 bg-gradient-to-r from-sky-500 to-emerald-500 hover:from-sky-600 hover:to-emerald-600 text-white font-alexandria font-bold text-xs rounded-xl inline-flex items-center justify-center gap-2 shadow-lg shadow-sky-600/10 active:scale-98 transition-all text-center"
                     >
                       <LayoutDashboard className="w-4 h-4" />
                       <span>الانتقال للوحة التحكم الشاملة</span>
@@ -779,62 +815,84 @@ if (!data.alreadyDelivered) {
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
-              className="bg-white/[0.01] border border-white/5 rounded-3xl p-6 sm:p-8 space-y-6 shadow-xl backdrop-blur-sm"
+              className="bg-gradient-to-br from-white/[0.02] to-white/[0.01] border border-white/5 rounded-3xl p-6 sm:p-8 space-y-6 shadow-xl backdrop-blur-sm"
             >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-medium text-zinc-500 border-b border-white/5 pb-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5 text-sm font-medium text-zinc-500 border-b border-white/5 pb-6">
                 
                 {/* Meta details list */}
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3 text-zinc-400 text-sm">
-                    <User className="w-4 h-4 text-zinc-600 shrink-0" />
-                    <span className="font-medium">اسم المشغل:</span>
-                    <span className="text-white font-bold">{orderData?.customerName}</span>
+                <div className="space-y-5">
+                  <div className="flex items-center gap-3 text-zinc-400">
+                    <div className="w-9 h-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
+                      <User className="w-4 h-4 text-zinc-400" />
+                    </div>
+                    <div>
+                      <span className="text-zinc-600 text-xs block mb-0.5">اسم العميل</span>
+                      <span className="text-white font-bold">{orderData?.customerName}</span>
+                    </div>
                   </div>
 
-                  <div className="flex items-center gap-3 text-zinc-400 text-sm">
-                    <Mail className="w-4 h-4 text-zinc-600 shrink-0" />
-                    <span className="font-medium">البريد الإلكتروني:</span>
-                    <span className="text-white font-mono text-xs">{orderData?.customerEmail}</span>
+                  <div className="flex items-center gap-3 text-zinc-400">
+                    <div className="w-9 h-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
+                      <Mail className="w-4 h-4 text-zinc-400" />
+                    </div>
+                    <div>
+                      <span className="text-zinc-600 text-xs block mb-0.5">البريد الإلكتروني</span>
+                      <span className="text-white font-mono text-sm">{orderData?.customerEmail}</span>
+                    </div>
                   </div>
 
-                  <div className="flex items-center gap-3 text-zinc-400 text-sm">
-                    <Calendar className="w-4 h-4 text-zinc-600 shrink-0" />
-                    <span className="font-medium">تاريخ المعاملة:</span>
-                    <span className="text-white font-bold">{purchaseDate}</span>
+                  <div className="flex items-center gap-3 text-zinc-400">
+                    <div className="w-9 h-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
+                      <Calendar className="w-4 h-4 text-zinc-400" />
+                    </div>
+                    <div>
+                      <span className="text-zinc-600 text-xs block mb-0.5">تاريخ المعاملة</span>
+                      <span className="text-white font-bold">{purchaseDate}</span>
+                    </div>
                   </div>
                 </div>
 
                 {/* Status & Pricing list */}
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3 text-zinc-400 text-sm">
-                    <CreditCard className="w-4 h-4 text-zinc-600 shrink-0" />
-                    <span className="font-medium">بوابة الدفع:</span>
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                      دفع معتمد آمن (Paymob)
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-3 text-zinc-400 text-sm">
-                    <ShieldCheck className="w-4 h-4 text-zinc-600 shrink-0" />
-                    <span className="font-medium">رقم العملية المعتمد:</span>
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-white font-mono text-xs truncate max-w-[130px]" dir="ltr">#{orderId}</span>
-                      <button onClick={copyOrderId} className="text-zinc-500 hover:text-white transition-colors cursor-pointer" title="نسخ المرجع">
-                        <Copy className="w-3.5 h-3.5" />
-                      </button>
+                <div className="space-y-5">
+                  <div className="flex items-center gap-3 text-zinc-400">
+                    <div className="w-9 h-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
+                      <CreditCard className="w-4 h-4 text-zinc-400" />
+                    </div>
+                    <div>
+                      <span className="text-zinc-600 text-xs block mb-0.5">بوابة الدفع</span>
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                        دفع معتمد آمن (Paymob)
+                      </span>
                     </div>
                   </div>
 
-                  <div className="flex items-start gap-3 text-zinc-400 text-sm">
-                    <Sparkles className="w-4 h-4 text-zinc-600 shrink-0 mt-1" />
-                    <div className="space-y-1">
-                      <span className="font-medium block">المبلغ الإجمالي المدفوع:</span>
+                  <div className="flex items-center gap-3 text-zinc-400">
+                    <div className="w-9 h-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
+                      <ShieldCheck className="w-4 h-4 text-zinc-400" />
+                    </div>
+                    <div>
+                      <span className="text-zinc-600 text-xs block mb-0.5">رقم العملية المعتمد</span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-white font-mono text-sm truncate max-w-[160px]" dir="ltr">#{orderId}</span>
+                        <button onClick={copyOrderId} className="text-zinc-500 hover:text-white transition-colors cursor-pointer p-1 rounded-md hover:bg-white/5 active:scale-95" title="نسخ المرجع">
+                          <Copy className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3 text-zinc-400">
+                    <div className="w-9 h-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center shrink-0 mt-0.5">
+                      <Sparkles className="w-4 h-4 text-zinc-400" />
+                    </div>
+                    <div>
+                      <span className="text-zinc-600 text-xs block mb-1">المبلغ الإجمالي المدفوع</span>
                       {orderData?.currency === "USD" || (orderData?.original_amount_usd && orderData.original_amount_usd > 0) ? (
                         <div className="space-y-1">
-                          <span className="text-emerald-400 font-alexandria font-black text-base block" dir="ltr">
+                          <span className="text-emerald-400 font-alexandria font-black text-lg block" dir="ltr">
                             ${Number(orderData.original_amount_usd).toFixed(2)} <span className="text-[10px] font-cairo font-normal text-zinc-500">USD</span>
                           </span>
-                          <span className="text-zinc-400 font-alexandria font-medium text-xs block animate-pulse" dir="ltr">
+                          <span className="text-zinc-400 font-alexandria font-medium text-xs block" dir="ltr">
                             ({Number(orderData.charged_amount_egp).toFixed(2)} ج.م)
                           </span>
                           {orderData.exchange_rate && (
@@ -844,7 +902,7 @@ if (!data.alreadyDelivered) {
                           )}
                         </div>
                       ) : (
-                        <span className="text-emerald-400 font-alexandria font-black text-base block" dir="ltr">
+                        <span className="text-emerald-400 font-alexandria font-black text-lg block" dir="ltr">
                           {Number(orderData?.charged_amount_egp || orderData?.amount || 0).toFixed(2)} <span className="text-[10px] font-cairo font-normal text-zinc-500">ج.م</span>
                         </span>
                       )}
@@ -855,14 +913,14 @@ if (!data.alreadyDelivered) {
               </div>
 
               {/* Email Delivery Control Block */}
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-5">
                 <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0 mt-0.5">
-                    <Mail className="w-5 h-5 text-zinc-400" />
+                  <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 flex items-center justify-center shrink-0 mt-0.5">
+                    <Mail className="w-5 h-5 text-emerald-400" />
                   </div>
                   <div>
-                    <h4 className="font-alexandria font-bold text-white text-sm leading-snug">وصلتك رسالة التسليم الفنية!</h4>
-                    <p className="font-cairo text-zinc-500 text-xs leading-relaxed mt-1">
+                    <h4 className="font-alexandria font-bold text-white text-base leading-snug">وصلتك رسالة التسليم الفنية!</h4>
+                    <p className="font-cairo text-zinc-500 text-sm leading-relaxed mt-1">
                       قمنا بإرسال فواتير الشراء المستقلة وتراخيص المنتجات إلى بريدك الإلكتروني. تفقد صندوق الوارد أو البريد المزعج (Spam).
                     </p>
                   </div>
@@ -871,12 +929,12 @@ if (!data.alreadyDelivered) {
                 <button
                   onClick={handleResendEmail}
                   disabled={resendingEmail}
-                  className="w-full sm:w-auto h-11 px-5 bg-white/5 hover:bg-white/10 text-white font-alexandria font-bold text-xs rounded-xl transition-all border border-white/10 flex items-center justify-center gap-2 disabled:opacity-50 select-none cursor-pointer shrink-0"
+                  className="w-full sm:w-auto h-12 px-6 bg-gradient-to-r from-white/10 to-white/5 hover:from-white/15 hover:to-white/10 text-white font-alexandria font-bold text-xs rounded-xl transition-all border border-white/10 flex items-center justify-center gap-2 disabled:opacity-50 select-none cursor-pointer shrink-0"
                 >
                   {resendingEmail ? (
                     <RefreshCw className="w-4 h-4 animate-spin" />
                   ) : (
-                    <Send className="w-4 h-4 text-zinc-400" />
+                    <Send className="w-4 h-4" />
                   )}
                   <span>إعادة إرسال الفاتورة والبريد</span>
                 </button>
@@ -891,15 +949,17 @@ if (!data.alreadyDelivered) {
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6 }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-4 my-8"
+            className="flex flex-col sm:flex-row items-center justify-center gap-6 my-8 py-6 border-y border-white/5"
           >
             {[
               { icon: ShieldCheck, label: "حماية مشفرة 256-bit SSL" },
               { icon: Sparkles, label: "توصيل فوري وتفعيل مباشر" },
               { icon: Package, label: "تراخيص وتحميل مدى الحياة" },
             ].map(({ icon: Icon, label }) => (
-              <div key={label} className="flex items-center gap-2 text-zinc-500 font-cairo text-xs">
-                <Icon className="w-3.5 h-3.5 text-zinc-600" />
+              <div key={label} className="flex items-center gap-2 text-zinc-500 font-cairo text-xs hover:text-zinc-400 transition-colors">
+                <div className="w-7 h-7 rounded-lg bg-white/5 border border-white/[0.08] flex items-center justify-center">
+                  <Icon className="w-3.5 h-3.5 text-zinc-500" />
+                </div>
                 <span>{label}</span>
               </div>
             ))}
@@ -914,7 +974,7 @@ if (!data.alreadyDelivered) {
           >
             <a
               href="/"
-              className="inline-flex items-center gap-2 font-cairo text-zinc-500 hover:text-white transition-colors text-sm group"
+              className="inline-flex items-center gap-2 font-cairo text-zinc-500 hover:text-white transition-colors text-base group"
             >
               <span>العودة إلى المتجر الرئيسي</span>
               <ArrowRight className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
@@ -931,14 +991,17 @@ export default function CheckoutSuccessPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-[#050505] flex items-center justify-center">
-          <div className="flex flex-col items-center gap-6">
+        <div className="min-h-screen bg-[#050505] flex items-center justify-center px-6">
+          <div className="flex flex-col items-center gap-8">
             <motion.div
-              className="w-16 h-16 rounded-full border-2 border-emerald-500 border-t-transparent"
+              className="w-20 h-20 rounded-full border-2 border-emerald-500 border-t-transparent"
               animate={{ rotate: 360 }}
               transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
             />
-            <p className="font-cairo text-zinc-500 text-sm">جاري تحميل صفحة تفعيل المشتريات...</p>
+            <div className="text-center">
+              <p className="font-alexandria text-white text-lg font-bold mb-2">جاري تحميل صفحة التفعيل...</p>
+              <p className="font-cairo text-zinc-500 text-sm px-4">سيتم توجيهك إلى نتيجة الدفع في لحظات</p>
+            </div>
           </div>
         </div>
       }
