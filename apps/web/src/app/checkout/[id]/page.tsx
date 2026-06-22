@@ -849,6 +849,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
       <main className="pt-32 pb-24 relative overflow-hidden">
         {/* Glow Effects */}
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-rose-600/10 rounded-full blur-[100px] pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-sky-500/10 rounded-full blur-[100px] pointer-events-none" />
 
         <div className="container mx-auto px-4 max-w-6xl relative z-10">
           <div className="flex flex-col items-center justify-center text-center gap-4 mb-8">
@@ -943,6 +944,8 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                     
                     {/* Personal Information */}
                     <div className="bg-white/[0.015] backdrop-blur-2xl border border-white/5 rounded-3xl p-6 sm:p-8 hover:border-white/10 transition-all duration-300 shadow-[0_8px_32px_rgba(0,0,0,0.37)]">
+
+
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {/* Full Name */}
                         <div className="space-y-2">
