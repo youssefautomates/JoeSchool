@@ -671,10 +671,11 @@ export async function POST(req: Request) {
         !error.message.includes("duplicate key") &&
         !error.message.includes("violates") &&
         !error.message.includes("constraint") &&
-        !error.message.includes("PGRST") &&
-        !error.message.includes("Payment declined");
+        !error.message.includes("PGRST");
       if (isUserFacingError) {
         userMessage = error.message;
+      } else if (error.message.includes("Payment declined")) {
+        userMessage = "تم رفض البطاقة — تأكد من الرصيد أو جرّب بطاقة أخرى.";
       }
     }
     return NextResponse.json({ error: userMessage }, { status: 500 });

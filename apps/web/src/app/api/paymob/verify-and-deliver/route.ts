@@ -324,6 +324,7 @@ export async function POST(req: Request) {
 
       // Generate an auto-login action link using Supabase Admin SDK
       let loginLink: string | null = null;
+      let emailOtp: string | null = null;
       if (resolvedUserId) {
         try {
           const siteUrl = new URL(req.url).origin;
@@ -336,6 +337,7 @@ export async function POST(req: Request) {
           });
           if (!linkError && linkData?.properties?.action_link) {
             loginLink = linkData.properties.action_link;
+            emailOtp = linkData.properties.email_otp || null;
             console.log(`[VERIFY][${requestId}] Generated magic login link successfully during completed check`);
           }
         } catch (e: any) {
@@ -365,6 +367,7 @@ export async function POST(req: Request) {
         charged_amount_egp: chargedAmountEgp,
         exchange_rate: exchangeRate,
         loginLink: loginLink,
+        emailOtp: emailOtp,
         isNewStudent: isNewStudent,
         temporaryPassword: temporaryPassword
       });
@@ -846,6 +849,7 @@ export async function POST(req: Request) {
 
     // Generate an auto-login action link using Supabase Admin SDK
     let loginLink: string | null = null;
+    let emailOtp: string | null = null;
     if (resolvedUserId) {
       try {
         const siteUrl = new URL(req.url).origin;
@@ -858,6 +862,7 @@ export async function POST(req: Request) {
         });
         if (!linkError && linkData?.properties?.action_link) {
           loginLink = linkData.properties.action_link;
+          emailOtp = linkData.properties.email_otp || null;
           console.log(`[VERIFY][${requestId}] Generated magic login link successfully`);
         }
       } catch (e: any) {
@@ -881,6 +886,7 @@ export async function POST(req: Request) {
       charged_amount_egp: chargedAmountEgp,
       exchange_rate: exchangeRate,
       loginLink: loginLink,
+      emailOtp: emailOtp,
       isNewStudent: resolvedIsNewStudent,
       temporaryPassword: resolvedTemporaryPassword
     });

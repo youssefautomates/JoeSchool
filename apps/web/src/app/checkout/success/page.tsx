@@ -30,7 +30,7 @@ import { toast } from "sonner";
 import { useCart } from "@/context/CartContext";
 import { trackPurchase, trackLead } from "@/lib/metaPixel";
 import { trackEvent } from "@/lib/analytics";
-import { supabaseClient } from "@/lib/supabaseClient";
+import { supabaseClient, syncSessionToCookie } from "@/lib/supabaseClient";
 
 function FloatingParticle({ delay, x, size }: { delay: number; x: number; size: number }) {
   return (
@@ -101,6 +101,7 @@ interface OrderData {
   loginLink?: string | null;
   isNewStudent?: boolean;
   temporaryPassword?: string | null;
+  emailOtp?: string | null;
 }
 
 function SuccessContent() {
@@ -196,8 +197,52 @@ function SuccessContent() {
             exchange_rate: data.exchange_rate,
             loginLink: data.loginLink || null,
             isNewStudent: data.isNewStudent || false,
-            temporaryPassword: data.temporaryPassword || null
+            temporaryPassword: data.temporaryPassword || null,
+            emailOtp: data.emailOtp || null
           });
+
+          // Programmatic Auto-Login in the background
+          supabaseClient.auth.getSession().then(({ data: sessionData }) => {
+            if (!sessionData?.session) {
+              const email = data.customerEmail;
+              const tempPassword = data.temporaryPassword;
+              const otp = data.emailOtp;
+
+              if (data.isNewStudent && tempPassword) {
+                console.log("[AUTO_LOGIN] Attempting background sign-in for new student...");
+                supabaseClient.auth.signInWithPassword({
+                  email: email,
+                  password: tempPassword
+                }).then(({ data: authData, error }) => {
+                  if (!error && authData?.session) {
+                    console.log("[AUTO_LOGIN] Background sign-in successful!");
+                    setIsLoggedIn(true);
+                    syncSessionToCookie(authData.session);
+                  } else {
+                    console.error("[AUTO_LOGIN] Background sign-in failed:", error?.message);
+                  }
+                });
+              } else if (otp) {
+                console.log("[AUTO_LOGIN] Attempting background OTP verification for existing student...");
+                supabaseClient.auth.verifyOtp({
+                  email: email,
+                  token: otp,
+                  type: 'magiclink'
+                }).then(({ data: authData, error }) => {
+                  if (!error && authData?.session) {
+                    console.log("[AUTO_LOGIN] Background OTP verification successful!");
+                    setIsLoggedIn(true);
+                    syncSessionToCookie(authData.session);
+                  } else {
+                    console.error("[AUTO_LOGIN] Background OTP verification failed:", error?.message);
+                  }
+                });
+              }
+            } else {
+              setIsLoggedIn(true);
+            }
+          });
+
           setPhase("success");
           setTimeout(() => setShowParticles(true), 300);
           

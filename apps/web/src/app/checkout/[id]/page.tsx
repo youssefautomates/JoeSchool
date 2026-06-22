@@ -61,7 +61,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
   const [isFetching, setIsFetching] = useState(true);
   const [product, setProduct] = useState<Product | null>(null);
   const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null);
-  const [paymentMethod, setPaymentMethod] = useState<"card" | "wallet" | "instapay" | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<"card" | "wallet" | "instapay" | null>("card");
   const [showInstapayModal, setShowInstapayModal] = useState(false);
   const [instapayReturnBanner, setInstapayReturnBanner] = useState(false);
   const [instapayScreenshot, setInstapayScreenshot] = useState<string | null>(null);

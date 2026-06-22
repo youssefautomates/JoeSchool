@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { motion } from "framer-motion";
 import { XCircle, ArrowRight, RefreshCcw, ShieldAlert, MessageCircle, Home } from "lucide-react";
@@ -78,7 +78,7 @@ function FailedContent() {
                 <ShieldAlert className="w-4 h-4" />
                 <span>دفع آمن ومشفر 100%</span>
               </div>
-              <Link href="https://wa.me/message/YOUR_WHATSAPP" className="flex items-center gap-2 text-rose-500 font-cairo text-sm hover:underline font-bold transition-all">
+              <Link href="https://wa.me/201107099196" className="flex items-center gap-2 text-rose-500 font-cairo text-sm hover:underline font-bold transition-all">
                 <MessageCircle className="w-4 h-4" />
                 تواصل مع الدعم الفني للمساعدة
               </Link>
