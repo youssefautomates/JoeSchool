@@ -943,17 +943,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                   <div className="lg:col-span-8 space-y-4 md:space-y-6">
                     
                     {/* Personal Information */}
-                    <div className="bg-white/[0.015] backdrop-blur-2xl border border-white/5 rounded-3xl p-6 sm:p-8 hover:border-white/10 transition-all duration-300 shadow-[0_8px_32px_rgba(0,0,0,0.37)]">
-                      <div className="flex items-center gap-3 mb-6">
-                        <div className="w-10 h-10 rounded-xl bg-[#ff0f53]/10 flex items-center justify-center text-[#ff0f53] border border-[#ff0f53]/20">
-                          <User className="w-5 h-5" />
-                        </div>
-                        <div className="text-right">
-                          <h3 className="font-alexandria font-bold text-white text-base">بياناتك الشخصية</h3>
-                          <p className="text-[11px] text-zinc-500 mt-0.5">نستخدم بياناتك لتأكيد طلبك وإرسال الوصول للكورس</p>
-                        </div>
-                      </div>
-
+                    <div className="bg-white/[0.012] backdrop-blur-2xl border border-white/[0.03] rounded-3xl p-6 sm:p-8 transition-all duration-300 shadow-[0_8px_32px_rgba(0,0,0,0.37)]">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {/* Full Name */}
                         <div className="space-y-2">
@@ -1117,7 +1107,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
 
                     {/* Payment Method Selector */}
                     {!(appliedCoupon && appliedCoupon.percent === 100) && (
-                      <div className="bg-white/[0.015] backdrop-blur-2xl border border-white/5 rounded-3xl p-5 md:p-8 hover:border-white/10 transition-all duration-300 shadow-[0_8px_32px_rgba(0,0,0,0.37)]">
+                      <div className="bg-white/[0.012] backdrop-blur-2xl border border-white/[0.03] rounded-3xl p-5 md:p-8 transition-all duration-300 shadow-[0_8px_32px_rgba(0,0,0,0.37)]">
                         <div className="flex items-center justify-start gap-2.5 mb-5 select-none" dir="rtl">
                           <CreditCard className="w-5 h-5 text-[#ff0f53] shrink-0" />
                           <h3 className="font-alexandria font-bold text-white text-base">اختر طريقة الدفع</h3>
@@ -1134,7 +1124,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                               "flex flex-row items-center justify-between gap-4 h-[70px] px-4 py-3 w-full",
                               paymentMethod === "card" 
                                 ? "border-[#ff0f53]/50 bg-[#ff0f53]/5 shadow-[0_0_20px_rgba(255,15,83,0.12)]" 
-                                : "border-white/5 bg-white/[0.01] hover:border-white/10 hover:bg-white/[0.02]"
+                                : "border-white/[0.03] bg-white/[0.005]"
                             )}
                             dir="rtl"
                           >
@@ -1199,7 +1189,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                                 "flex flex-row items-center justify-between gap-4 h-[70px] px-4 py-3 w-full",
                                 paymentMethod === "wallet" 
                                   ? "border-emerald-500/50 bg-emerald-500/5 shadow-[0_0_20px_rgba(16,185,129,0.12)]" 
-                                  : "border-white/5 bg-white/[0.01] hover:border-white/10 hover:bg-white/[0.02]"
+                                  : "border-white/[0.03] bg-white/[0.005]"
                               )}
                               dir="rtl"
                             >
@@ -1260,7 +1250,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                                 "flex flex-row items-center justify-between gap-4 h-[70px] px-4 py-3 w-full",
                                 paymentMethod === "instapay" 
                                   ? "border-purple-500/50 bg-purple-500/5 shadow-[0_0_20px_rgba(168,85,247,0.12)]" 
-                                  : "border-white/5 bg-white/[0.01] hover:border-purple-500/10 hover:bg-purple-500/[0.005] hover:border-white/10"
+                                  : "border-white/[0.03] bg-white/[0.005]"
                               )}
                               dir="rtl"
                             >
@@ -1480,7 +1470,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                     </div>
 
                     {/* Mobile-only Order Summary & Invoice Card */}
-                    <div className="block lg:hidden bg-white/[0.015] backdrop-blur-2xl border border-white/5 rounded-3xl p-6 sm:p-8 hover:border-white/10 transition-all duration-300 shadow-[0_8px_32px_rgba(0,0,0,0.37)] space-y-6 mt-6">
+                    <div className="block lg:hidden bg-white/[0.012] backdrop-blur-2xl border border-white/[0.03] rounded-3xl p-6 sm:p-8 transition-all duration-300 shadow-[0_8px_32px_rgba(0,0,0,0.37)] space-y-6 mt-6">
                       <div className="mb-2">
                         <h3 className="font-alexandria font-bold text-white text-base text-right">ملخص الطلب والفاتورة</h3>
                       </div>
@@ -1600,7 +1590,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                     </div>
 
                     {/* Desktop-only Invoice & Payment Card */}
-                    <div className="hidden lg:block bg-white/[0.015] backdrop-blur-2xl border border-white/5 rounded-3xl p-6 sm:p-8 hover:border-white/10 transition-all duration-300 shadow-[0_8px_32px_rgba(0,0,0,0.37)] space-y-6">
+                    <div className="hidden lg:block bg-white/[0.012] backdrop-blur-2xl border border-white/[0.03] rounded-3xl p-6 sm:p-8 transition-all duration-300 shadow-[0_8px_32px_rgba(0,0,0,0.37)] space-y-6">
                       <div className="mb-2">
                         <h3 className="font-alexandria font-bold text-white text-base text-right">ملخص الفاتورة</h3>
                       </div>
@@ -1739,7 +1729,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
 
                 {/* Left Column (Desktop Only Sticky Sidebar) */}
                 <div className="hidden lg:block lg:col-span-4 lg:sticky lg:top-32 space-y-6">
-                  <div className="bg-white/[0.015] backdrop-blur-2xl border border-white/5 rounded-3xl p-6 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] hover:border-white/10 transition-all duration-300">
+                  <div className="bg-white/[0.012] backdrop-blur-2xl border border-white/[0.03] rounded-3xl p-6 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] transition-all duration-300">
                     
                     {/* Product Image and Title */}
                     <div className="flex flex-col gap-4 mb-6">
