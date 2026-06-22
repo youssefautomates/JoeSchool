@@ -276,11 +276,13 @@ if (!data.alreadyDelivered) {
                });
 
                // High-Performance Unified Meta Purchase tracking (Pixel + CAPI)
+               const purchaseValue = Number(data.orderValue) || 0;
+               console.log(`[META_PURCHASE_CLIENT] transactionId=${id} | value=${purchaseValue} | currency=${data.currency || "EGP"} | productTitle=${data.productTitle || "منتجك الرقمي"}`);
                trackPurchase(
                  id,
                  data.productTitle || "منتجك الرقمي",
                  productIds,
-                 Number(data.orderValue) || 0,
+                 purchaseValue,
                  data.currency || "EGP"
                );
 
