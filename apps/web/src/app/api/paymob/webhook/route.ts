@@ -209,12 +209,16 @@ export async function POST(request: Request) {
           try {
             const userAccount = await getOrCreateUser(customerEmail, customerName, explicitPassword || undefined);
             resolvedUserId = userAccount.userId;
-            if (userAccount.isNew) {
+            if (userAccount.password) {
               resolvedCredentials = {
                 email: customerEmail,
                 password: userAccount.password
               };
-              console.log(`[PAYMOB_WEBHOOK][${requestId}] New student account created. Credentials set successfully.`);
+              if (userAccount.isNew) {
+                console.log(`[PAYMOB_WEBHOOK][${requestId}] New student account created. Credentials set successfully.`);
+              } else {
+                console.log(`[PAYMOB_WEBHOOK][${requestId}] Existing student account resolved with credentials from metadata.`);
+              }
             } else if (explicitPassword) {
               resolvedCredentials = {
                 email: customerEmail,

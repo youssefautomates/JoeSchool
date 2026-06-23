@@ -563,16 +563,20 @@ export async function POST(req: Request) {
       try {
         const userAccount = await getOrCreateUser(customerEmail, customerName, explicitPassword || undefined);
         resolvedUserId = userAccount.userId;
-        if (userAccount.isNew) {
+        if (userAccount.password) {
           resolvedCredentials = {
             email: customerEmail,
             password: userAccount.password
           };
-          resolvedIsNewStudent = true;
-          resolvedTemporaryPassword = userAccount.password || null;
-          console.log(`[VERIFY][${requestId}] New student account created. Credentials set successfully.`);
+          if (userAccount.isNew) {
+            resolvedIsNewStudent = true;
+            resolvedTemporaryPassword = userAccount.password || null;
+            console.log(`[VERIFY][${requestId}] New student account created. Credentials set successfully.`);
+          } else {
+            console.log(`[VERIFY][${requestId}] Existing student account resolved with credentials from metadata.`);
+          }
         } else {
-          console.log(`[VERIFY][${requestId}] Existing student account resolved. No credentials sent.`);
+          console.log(`[VERIFY][${requestId}] Existing student account resolved. No credentials found.`);
         }
       } catch (err: any) {
         console.error(`[VERIFY][${requestId}] ❌ Error in getOrCreateUser:`, err.message || err);
