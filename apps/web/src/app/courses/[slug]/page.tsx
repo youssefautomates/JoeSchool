@@ -178,9 +178,14 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
   };
 
   const handleInitiateCheckout = () => {
-    if (!course || course.price === 0) return;
+    if (!course) return;
     const coursePricing = resolveProductPrice(course as any, currency);
     const price = coursePricing ? coursePricing.price : (course.price || 0);
+    if (price === 0) {
+      console.log('[CTA_CLICKED] Course resolved price is 0, skipping InitiateCheckout tracking');
+      return;
+    }
+    console.log('[CTA_CLICKED] Course CTA clicked. Dispatching tracking...');
     console.log(`[META_INITIATE_CHECKOUT]\n${course.id}\n${course.title}\n${price}`);
     try {
       trackInitiateCheckout(
@@ -616,7 +621,10 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
 
                       <Link
                         href={course.price === 0 ? `/learn/${course.slug}/${firstLessonSlug}` : `/checkout/${course.id}`}
-                        onClick={handleInitiateCheckout}
+                        onClick={(e) => {
+                          console.log('[CTA_CLICKED]');
+                          handleInitiateCheckout();
+                        }}
                         className="primary-hero-cta w-full h-14 bg-gradient-to-r from-[#D6004B] via-[#ff1d6b] to-[#D6004B] text-white rounded-2xl font-black text-lg shadow-[0_10px_30px_rgba(214,0,75,0.4)] transition-all flex items-center justify-center gap-2.5 active:scale-98 cursor-pointer font-alexandria animate-pulse-glow"
                       >
                         <span>{course.price === 0 ? "ابدأ مجاناً 🎁" : (coursePricing && coursePricing.original_price > coursePricing.price) ? `اشترك الآن - خصم ${coursePricing.discount_pct}%` : "اشترك الآن"}</span>
@@ -1142,7 +1150,10 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                     <div className="space-y-4">
                       <Link
                         href={course.price === 0 ? `/learn/${course.slug}/${firstLessonSlug}` : `/checkout/${course.id}`}
-                        onClick={handleInitiateCheckout}
+                        onClick={(e) => {
+                          console.log('[CTA_CLICKED]');
+                          handleInitiateCheckout();
+                        }}
                         className="primary-hero-cta w-full h-14 bg-gradient-to-r from-[#D6004B] via-[#ff1d6b] to-[#D6004B] text-white rounded-2xl font-black text-lg shadow-[0_10px_30px_rgba(214,0,75,0.4)] transition-all flex items-center justify-center gap-2.5 active:scale-98 cursor-pointer font-alexandria animate-pulse-glow"
                       >
                         <span>{course.price === 0 ? "ابدأ مجاناً 🎁" : (coursePricing && coursePricing.original_price > coursePricing.price) ? `اشترك الآن - خصم ${coursePricing.discount_pct}%` : "اشترك الآن"}</span>
@@ -1274,7 +1285,10 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
 
                 <Link
                   href={course.price === 0 ? `/learn/${course.slug}/${firstLessonSlug}` : `/checkout/${course.id}`}
-                  onClick={handleInitiateCheckout}
+                  onClick={(e) => {
+                    console.log('[CTA_CLICKED]');
+                    handleInitiateCheckout();
+                  }}
                   className="primary-hero-cta w-full h-12 bg-[#D6004B] hover:bg-[#b0003d] text-white rounded-2xl font-bold text-sm shadow-[0_10px_25px_rgba(214,0,75,0.3)] transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer font-alexandria"
                 >
                   <span>سجل في القسم الآن</span>
@@ -1548,7 +1562,10 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
               <div className="flex flex-1 items-center justify-end gap-2">
                 <Link
                   href={course.price === 0 ? `/learn/${course.slug}/${firstLessonSlug}` : `/checkout/${course.id}`}
-                  onClick={handleInitiateCheckout}
+                  onClick={(e) => {
+                    console.log('[CTA_CLICKED]');
+                    handleInitiateCheckout();
+                  }}
                   className="h-11 px-5 bg-gradient-to-r from-[#D6004B] to-[#ff1d6b] hover:from-[#ff1d6b] hover:to-[#D6004B] text-white rounded-full text-xs font-alexandria font-black flex items-center justify-center transition-all shadow-[0_4px_16px_rgba(214,0,75,0.35)] flex-grow active:scale-95 animate-pulse-glow"
                 >
                   <span>
@@ -1819,7 +1836,10 @@ function MobileCourseView({
 
              <Link
                href={course.price === 0 ? `/learn/${course.slug}/${firstLessonSlug}` : `/checkout/${course.id}`}
-               onClick={onInitiateCheckout}
+               onClick={(e) => {
+                 console.log('[CTA_CLICKED]');
+                 onInitiateCheckout && onInitiateCheckout();
+               }}
                className="primary-hero-cta w-full h-14 bg-gradient-to-r from-[#D6004B] via-[#ff1d6b] to-[#D6004B] text-white rounded-xl font-black text-base sm:text-lg shadow-[0_10px_30px_rgba(214,0,75,0.4)] transition-all flex items-center justify-center gap-2.5 active:scale-98 cursor-pointer font-alexandria animate-pulse-glow"
              >
                <span>{course.price === 0 ? "ابدأ مجاناً 🎁" : (coursePricing && coursePricing.original_price > coursePricing.price) ? `اشترك الآن - خصم ${coursePricing.discount_pct}%` : "اشترك الآن"}</span>
@@ -2266,7 +2286,10 @@ function MobileCourseView({
            
            <Link
              href={course.price === 0 ? `/learn/${course.slug}/${firstLessonSlug}` : `/checkout/${course.id}`}
-             onClick={onInitiateCheckout}
+             onClick={(e) => {
+               console.log('[CTA_CLICKED]');
+               onInitiateCheckout && onInitiateCheckout();
+             }}
              className="primary-hero-cta w-full h-13 bg-gradient-to-r from-[#D6004B] via-[#ff1d6b] to-[#D6004B] text-white rounded-xl font-black text-sm sm:text-base shadow-[0_10px_25px_rgba(214,0,75,0.35)] transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer font-alexandria animate-pulse-glow"
            >
               <span>{course.price === 0 ? "ابدأ مجاناً 🎁" : (coursePricing && coursePricing.original_price > coursePricing.price) ? `اشترك الآن - خصم ${coursePricing.discount_pct}%` : "اشترك الآن"}</span>

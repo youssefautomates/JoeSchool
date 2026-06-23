@@ -229,6 +229,11 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
   const handleInitiateCheckout = () => {
     if (!product) return;
     const price = productPricing ? productPricing.price : (product.price || 0);
+    if (price === 0) {
+      console.log('[CTA_CLICKED] Product resolved price is 0, skipping InitiateCheckout tracking');
+      return;
+    }
+    console.log('[CTA_CLICKED] Product CTA clicked. Dispatching tracking...');
     console.log(`[META_INITIATE_CHECKOUT]\n${product.id}\n${product.title}\n${price}`);
     try {
       trackInitiateCheckout(
@@ -778,7 +783,10 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                   <div className="space-y-3 pt-2">
                     <Link
                       href={`/checkout/${product.id}`}
-                      onClick={handleInitiateCheckout}
+                      onClick={(e) => {
+                        console.log('[CTA_CLICKED]');
+                        handleInitiateCheckout();
+                      }}
                       className="primary-hero-cta w-full h-16 inline-flex items-center justify-center gap-2 bg-[#D6004B] hover:bg-[#ff0059] text-white font-alexandria font-black text-base rounded-[1.5rem] transition-all shadow-[0_12px_30px_rgba(214,0,75,0.35)] active:scale-95 group"
                     >
                       <span>تحميل وشراء فوري</span>
@@ -1140,7 +1148,10 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                 {/* CTA Buy Buttons */}
                 <Link
                   href={`/checkout/${product.id}`}
-                  onClick={handleInitiateCheckout}
+                  onClick={(e) => {
+                    console.log('[CTA_CLICKED]');
+                    handleInitiateCheckout();
+                  }}
                   className="primary-hero-cta w-full h-14 bg-gradient-to-r from-[#D6004B] via-[#ff1d6b] to-[#D6004B] text-white rounded-xl font-black text-sm sm:text-base shadow-[0_10px_30px_rgba(214,0,75,0.4)] transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer font-alexandria animate-pulse-glow"
                 >
                   <span>{discountPct && discountPct > 0 ? `اقتنِه الآن ← خصم ${discountPct}%` : "اقتنِه الآن ←"}</span>
@@ -1400,7 +1411,10 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                 <div className="flex flex-1 items-center justify-end gap-2">
                   <Link
                     href={`/checkout/${product.id}`}
-                    onClick={handleInitiateCheckout}
+                    onClick={(e) => {
+                      console.log('[CTA_CLICKED]');
+                      handleInitiateCheckout();
+                    }}
                     className="h-11 px-5 bg-gradient-to-r from-[#D6004B] to-[#ff1d6b] hover:from-[#ff1d6b] hover:to-[#D6004B] text-white rounded-full text-xs font-alexandria font-black flex items-center justify-center active:scale-95 shadow-[0_4px_16px_rgba(214,0,75,0.35)] flex-1 animate-pulse-glow"
                   >
                     <span>{discountPct && discountPct > 0 ? "أحصل على الخصم" : "اقتنِه الآن"}</span>
