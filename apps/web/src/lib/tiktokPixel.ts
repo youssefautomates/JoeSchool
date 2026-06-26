@@ -34,7 +34,11 @@ export function initTiktokPixel(settings: any) {
         const next = queuedEvents.shift();
         if (next) {
           console.log(`[TikTok Pixel] Firing queued event: ${next.event} with ID: ${next.eventId}`);
-          window.ttq.track(next.event, next.params, { event_id: next.eventId });
+          if (next.event === "PageView") {
+            window.ttq.page({ event_id: next.eventId });
+          } else {
+            window.ttq.track(next.event, next.params, { event_id: next.eventId });
+          }
         }
       }
     }
@@ -77,7 +81,11 @@ if (typeof window !== "undefined") {
         const next = queuedEvents.shift();
         if (next) {
           console.log(`[TikTok Pixel] Firing queued event: ${next.event} with ID: ${next.eventId}`);
-          window.ttq.track(next.event, next.params, { event_id: next.eventId });
+          if (next.event === "PageView") {
+            window.ttq.page({ event_id: next.eventId });
+          } else {
+            window.ttq.track(next.event, next.params, { event_id: next.eventId });
+          }
           
           logEventToDiagnostics({
             event: next.event,
@@ -170,7 +178,11 @@ export async function trackTiktokEvent(event: string, params: any = {}, dedupeKe
   if (pixelEnabled && pixelIdActive) {
     if (window.ttq && typeof window.ttq.track === "function") {
       try {
-        window.ttq.track(event, trackingParams, { event_id: eventId });
+        if (event === "PageView") {
+          window.ttq.page({ event_id: eventId });
+        } else {
+          window.ttq.track(event, trackingParams, { event_id: eventId });
+        }
         browserStatus = "success";
       } catch (err) {
         browserStatus = "failed";
