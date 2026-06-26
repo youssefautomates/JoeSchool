@@ -23,6 +23,7 @@ import { getUserEnrollments } from "@/lib/coursesDb";
 import { resolveUserCurrency, resolveProductPrice, formatPrice, getUSDtoEGPExchangeRate, type Currency } from "@/lib/pricing";
 import { trackEvent } from "@/lib/analytics";
 import { trackMetaEvent } from "@/lib/metaPixel";
+import { trackTiktokEvent } from "@/lib/tiktokPixel";
 import { normalizePhoneNumber } from "@/lib/phone";
 import dynamic from "next/dynamic";
 const PhoneInput = dynamic(() => import("react-phone-input-2"), { ssr: false });
@@ -583,18 +584,17 @@ export default function CartCheckoutPage() {
           value: finalPriceEGP,
           currency: 'EGP'
         });
-        if ((window as any).ttq) {
-          (window as any).ttq.track('InitiateCheckout', {
-            contents: resolvedItems.map(i => ({
-              content_id: i.id,
-              content_name: i.title,
-              quantity: 1,
-              price: currency === "USD" ? Math.round(i.price * exchangeRate) : i.price
-            })),
-            value: finalPriceEGP,
-            currency: 'EGP'
-          });
-        }
+        trackTiktokEvent('InitiateCheckout', {
+          contents: resolvedItems.map(i => ({
+            content_id: String(i.id),
+            content_name: i.title,
+            content_type: "product",
+            quantity: 1,
+            price: currency === "USD" ? Math.round(i.price * exchangeRate) : i.price
+          })),
+          value: finalPriceEGP,
+          currency: 'EGP'
+        }, `initiate_checkout_cart_${resolvedItems.map(i => i.id).join("_")}`);
       }
 
       const response = await fetch("/api/paymob/initiate-cart", {

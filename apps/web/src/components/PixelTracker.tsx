@@ -24,11 +24,14 @@ export function PixelTracker({ initialSettings }: { initialSettings?: any }) {
     (window as any).metaTrackingSettings = settings;
   }
 
-  // Sync settings with metaPixel module reactive tracking layer
+  // Sync settings with metaPixel and tiktokPixel modules reactive tracking layer
   useEffect(() => {
     if (settings) {
       import("@/lib/metaPixel").then(mod => {
         mod.initMetaPixel(settings);
+      });
+      import("@/lib/tiktokPixel").then(mod => {
+        mod.initTiktokPixel(settings);
       });
     }
   }, [settings]);
@@ -52,21 +55,27 @@ export function PixelTracker({ initialSettings }: { initialSettings?: any }) {
     initSession();
   }, []);
 
+  const envTiktokId = process.env.NEXT_PUBLIC_TIKTOK_PIXEL_ID ? String(process.env.NEXT_PUBLIC_TIKTOK_PIXEL_ID).trim() : "";
+  const activeTiktokId = envTiktokId || (settings?.tiktokPixelId ? String(settings.tiktokPixelId).trim() : "");
+  const isTiktokEnabled = envTiktokId ? true : (settings ? (!!settings.tiktokPixelEnabled && !!activeTiktokId) : false);
+
   // 2. Track global database PageView & pixel page views on route changes
   useEffect(() => {
     // Database Clickstream PageView Ingestion
     trackEvent("page_view", null, null, { path: pathname });
 
-    if (!settings) return;
-
-    // Track Meta & TikTok PageViews on route change (without window.fbq guard to let queue work)
-    if (settings.metaPixelEnabled && settings.metaPixelId) {
+    // Track Meta PageViews on route change (without window.fbq guard to let queue work)
+    if (settings && settings.metaPixelEnabled && settings.metaPixelId) {
       trackMetaEvent("PageView");
     }
-    if (settings.tiktokPixelEnabled && settings.tiktokPixelId && (window as any).ttq) {
-      (window as any).ttq.page();
+    
+    // Track TikTok PageViews on route change (using tiktokPixel module)
+    if (isTiktokEnabled && activeTiktokId) {
+      import("@/lib/tiktokPixel").then(mod => {
+        mod.trackTiktokPageView();
+      });
     }
-  }, [pathname, searchParams, settings]);
+  }, [pathname, searchParams, settings, isTiktokEnabled, activeTiktokId]);
 
   // 3. Visitor Type Tracker (First Time vs. Returning)
   useEffect(() => {
@@ -246,7 +255,7 @@ export function PixelTracker({ initialSettings }: { initialSettings?: any }) {
       )}
       
       {/* TikTok Pixel */}
-      {settings.tiktokPixelEnabled && settings.tiktokPixelId && (
+      {isTiktokEnabled && activeTiktokId && (
         <Script
           id="tiktok-pixel-base"
           strategy="afterInteractive"
@@ -254,7 +263,7 @@ export function PixelTracker({ initialSettings }: { initialSettings?: any }) {
             __html: `
               !function (w, d, t) {
                 w.TiktokAnalyticsObject=t;var ttq=w[t]=w[t]||[];ttq.methods=["page","track","identify","instances","debug","on","off","once","ready","alias","group","enableCookie","disableCookie"],ttq.setAndDefer=function(t,e){t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}};for(var i=0;i<ttq.methods.length;i++)ttq.setAndDefer(ttq,ttq.methods[i]);ttq.instance=function(t){for(var e=ttq._i[t]||[],n=0;n<ttq.methods.length;n++)ttq.setAndDefer(e,ttq.methods[n]);return e},ttq.load=function(e,n){var i="https://analytics.tiktok.com/i18n/pixel/events.js";ttq._i=ttq._i||{},ttq._i[e]=[],ttq._i[e]._u=i,ttq._t=ttq._t||{},ttq._t[e]=+new Date,ttq._o=ttq._o||{},ttq._o[e]=n||{};var o=document.createElement("script");o.type="text/javascript",o.async=!0,o.src=i+"?sdkid="+e+"&lib="+t;var a=document.getElementsByTagName("script")[0];a.parentNode.insertBefore(o,a)};
-                ttq.load('${settings.tiktokPixelId}');
+                ttq.load('${activeTiktokId}');
                 ttq.page();
               }(window, document, 'ttq');
             `,

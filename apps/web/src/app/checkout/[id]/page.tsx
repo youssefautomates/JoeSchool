@@ -22,6 +22,7 @@ import { supabaseClient } from "@/lib/supabaseClient";
 import { type Product, calcDiscount } from "@/lib/products";
 import { trackEvent } from "@/lib/analytics";
 import { trackInitiateCheckout } from "@/lib/metaPixel";
+import { trackTiktokInitiateCheckout } from "@/lib/tiktokPixel";
 
 import { resolveUserCurrency, resolveProductPrice, formatPrice, getUSDtoEGPExchangeRate, type Currency } from "@/lib/pricing";
 import { getUserEnrollments } from "@/lib/coursesDb";
@@ -696,14 +697,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
       
       if (typeof window !== "undefined") {
         trackInitiateCheckout(product.id, product.title, finalPriceEGP, "EGP", isCourse ? "course" : "product");
-        if ((window as any).ttq) {
-          (window as any).ttq.track('InitiateCheckout', {
-            contents: [{ content_id: product.id, content_name: product.title, price: finalPriceEGP, quantity: 1 }],
-            content_type: isCourse ? 'course' : 'product',
-            value: finalPriceEGP,
-            currency: 'EGP'
-          });
-        }
+        trackTiktokInitiateCheckout(product.id, product.title, finalPriceEGP, "EGP", isCourse ? "course" : "product");
       }
 
       const response = await fetch("/api/paymob/initiate", {

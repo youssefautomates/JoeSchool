@@ -4,6 +4,7 @@ import { createContext, useContext, useState, useEffect, ReactNode } from "react
 import { Product } from "@/lib/products";
 import { toast } from "sonner";
 import { trackAddToCart } from "@/lib/metaPixel";
+import { trackTiktokAddToCart } from "@/lib/tiktokPixel";
 import { trackEvent } from "@/lib/analytics";
 
 interface CartItem extends Product {
@@ -62,15 +63,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
       // Track AddToCart in Supabase analytics database
       trackEvent("add_to_cart", product.id, product.title, { price: product.price });
 
-      // TikTok AddToCart
-      if (typeof window !== "undefined" && (window as any).ttq) {
-        (window as any).ttq.track('AddToCart', {
-          contents: [{ content_id: product.id, content_name: product.title, price: product.price, quantity: 1 }],
-          content_type: 'product',
-          value: product.price,
-          currency: 'EGP'
-        });
-      }
+      // Track AddToCart (TikTok)
+      trackTiktokAddToCart(product.id, product.title, product.price, "EGP", "product");
       
       return [...prev, { ...product, quantity: 1 }];
     });

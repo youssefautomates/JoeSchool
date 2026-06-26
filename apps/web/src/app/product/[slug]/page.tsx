@@ -21,6 +21,7 @@ import { supabase, type Product, calcDiscount, fetchActiveProducts } from "@/lib
 import { useCart } from "@/context/CartContext";
 import { resolveUserCurrency, resolveProductPrice, formatPrice, type Currency } from "@/lib/pricing";
 import { trackViewContent, trackAddToCart } from "@/lib/metaPixel";
+import { trackTiktokViewContent, trackTiktokAddToCart } from "@/lib/tiktokPixel";
 import { trackEvent } from "@/lib/analytics";
 import { ProductReviews } from "@/components/ProductReviews";
 
@@ -351,6 +352,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
         const pricing = resolveProductPrice(data as any, currency);
         const price = pricing ? pricing.price : unpacked.price;
         trackViewContent(unpacked.id, unpacked.title, price, currency, "product");
+        trackTiktokViewContent(unpacked.id, unpacked.title, price, currency, "product");
         // Track product view in Supabase analytics database
         trackEvent("product_view", unpacked.id, unpacked.title, { price, currency });
       }
@@ -776,6 +778,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                           original_price: productPricing?.original_price ?? product.original_price,
                         } as any);
                         trackAddToCart(product.id, product.title, price, currency, "product");
+                        trackTiktokAddToCart(product.id, product.title, price, currency, "product");
                       }}
                       className="primary-hero-cta w-full h-14 inline-flex items-center justify-center gap-2.5 bg-white/5 hover:bg-white/10 text-white font-alexandria font-black text-sm rounded-[1.25rem] border border-white/10 transition-all active:scale-95"
                     >
@@ -1137,6 +1140,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                       original_price: productPricing?.original_price ?? product.original_price,
                     } as any);
                     trackAddToCart(product.id, product.title, price, currency, "product");
+                    trackTiktokAddToCart(product.id, product.title, price, currency, "product");
                   }}
                   className="primary-hero-cta w-full h-11 bg-white/5 hover:bg-white/10 text-white rounded-xl font-bold text-xs border border-white/10 transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer font-alexandria"
                 >
@@ -1395,6 +1399,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                           original_price: productPricing?.original_price ?? product.original_price,
                         } as any);
                         trackAddToCart(product.id, product.title, price, currency, "product");
+                        trackTiktokAddToCart(product.id, product.title, price, currency, "product");
                       }}
                       className="h-11 w-11 shrink-0 bg-white/5 hover:bg-white/10 text-white rounded-full border border-white/10 transition-all flex items-center justify-center active:scale-95 hover:border-[#D6004B]/30 cursor-pointer"
                       title="إضافة إلى السلة"

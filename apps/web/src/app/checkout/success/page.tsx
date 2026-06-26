@@ -29,6 +29,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useCart } from "@/context/CartContext";
 import { trackPurchase, trackLead } from "@/lib/metaPixel";
+import { trackTiktokCompletePayment } from "@/lib/tiktokPixel";
 import { trackEvent } from "@/lib/analytics";
 import { supabaseClient, syncSessionToCookie } from "@/lib/supabaseClient";
 
@@ -284,18 +285,14 @@ if (!data.alreadyDelivered) {
                  data.currency || "EGP"
                );
 
-               if ((window as any).ttq) {
-                 (window as any).ttq.track("CompletePayment", {
-                   value: data.orderValue,
-                   currency: data.currency,
-                   contents: productIds.map((pid: string) => ({
-                     content_id: pid,
-                     content_name: data.productTitle || "منتجك الرقمي",
-                     quantity: 1
-                   })),
-                   content_type: "product",
-                 });
-               }
+               // High-Performance Unified TikTok Purchase tracking (Pixel)
+               trackTiktokCompletePayment(
+                 id,
+                 data.productTitle || "منتجك الرقمي",
+                 productIds,
+                 Number(data.orderValue) || 0,
+                 data.currency || "EGP"
+               );
              } else {
                console.log(`[META_TRACKING] Duplicate visit detected for transaction: ${id}. Client-side Pixel Purchase trigger skipped.`);
              }
