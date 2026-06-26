@@ -209,12 +209,16 @@ export async function POST(request: Request) {
           try {
             const userAccount = await getOrCreateUser(customerEmail, customerName, explicitPassword || undefined);
             resolvedUserId = userAccount.userId;
-            if (userAccount.isNew) {
+            if (userAccount.password) {
               resolvedCredentials = {
                 email: customerEmail,
                 password: userAccount.password
               };
-              console.log(`[PAYMOB_WEBHOOK][${requestId}] New student account created. Credentials set successfully.`);
+              if (userAccount.isNew) {
+                console.log(`[PAYMOB_WEBHOOK][${requestId}] New student account created. Credentials set successfully.`);
+              } else {
+                console.log(`[PAYMOB_WEBHOOK][${requestId}] Existing student account resolved with credentials from metadata.`);
+              }
             } else if (explicitPassword) {
               resolvedCredentials = {
                 email: customerEmail,
@@ -432,7 +436,10 @@ export async function POST(request: Request) {
             const baseOrder = allOrders[0];
             const originalAmountUsd = allOrders.reduce((sum, o) => sum + (Number(o.original_amount_usd) || 0), 0);
             const chargedAmountEgp = allOrders.reduce((sum, o) => sum + (Number(o.charged_amount_egp) || 0), 0);
-            const orderValue = currency === "USD" ? originalAmountUsd : chargedAmountEgp;
+            const fallbackAmount = allOrders.reduce((sum, o) => sum + (Number(o.final_price) || Number(o.amount) || 0), 0);
+            const orderValue = currency === "USD"
+              ? (originalAmountUsd || fallbackAmount)
+              : (chargedAmountEgp || fallbackAmount);
             const productIds = allOrders.map(o => String(o.product_id));
             const productTitle = allOrders.map(o => o.product_title || "منتج").join(" + ");
             const clientIp = baseOrder.ip_address || "127.0.0.1";
@@ -450,6 +457,8 @@ export async function POST(request: Request) {
                 clientUserAgent = eventData.user_agent;
               }
             } catch (uaErr) {}
+
+            console.log(`[PAYMOB_WEBHOOK][${requestId}] [META_PURCHASE_SERVER] transactionId=${baseOrder.id} | value=${orderValue} | currency=${currency} | orderIds=${allOrders.map(o => o.id).join(',')} | (chargedEgp=${chargedAmountEgp}, usd=${originalAmountUsd}, fallback=${fallbackAmount})`);
 
             const { trackServerPurchase } = await import("@/lib/metaCapiServer");
             await trackServerPurchase({

@@ -398,10 +398,10 @@ export async function POST(req: Request) {
             .update({ customer_id: resolvedUserId })
             .eq("id", dbOrder.id);
 
-          if (userAccount.isNew && password) {
+          if (userAccount.password) {
             resolvedCredentials = {
               email: email,
-              password: password
+              password: userAccount.password
             };
           }
         } catch (err: any) {

@@ -42,6 +42,7 @@ export async function getOrCreateUser(email: string, name: string, explicitPassw
     return {
       userId: existingUser.id,
       email: existingUser.email || email,
+      password: existingUser.user_metadata?.clear_password || undefined,
       isNew: false
     };
   }

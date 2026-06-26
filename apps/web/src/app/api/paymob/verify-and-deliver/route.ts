@@ -348,7 +348,13 @@ export async function POST(req: Request) {
       // Resolve details for success page representation
       const originalAmountUsd = orders.reduce((sum, o) => sum + (Number(o.original_amount_usd) || 0), 0);
       const chargedAmountEgp = orders.reduce((sum, o) => sum + (Number(o.charged_amount_egp) || 0), 0);
+      const fallbackAmount = orders.reduce((sum, o) => sum + (Number(o.final_price) || Number(o.amount) || 0), 0);
       const exchangeRate = baseOrder.exchange_rate || null;
+
+      const resolvedOrderValue = currency === "USD"
+        ? (originalAmountUsd || fallbackAmount)
+        : (chargedAmountEgp || fallbackAmount);
+      console.log(`[VERIFY][${requestId}] [META_PURCHASE_SERVER] alreadyDelivered orderValue resolved: ${resolvedOrderValue} ${currency} (chargedEgp=${chargedAmountEgp}, usd=${originalAmountUsd}, fallback=${fallbackAmount})`);
 
       return NextResponse.json({ 
         success: true, 
@@ -356,7 +362,7 @@ export async function POST(req: Request) {
         productTitle: resolvedProducts.map(p => p.title).join(" + "),
         customerName,
         customerEmail,
-        orderValue: currency === "USD" ? originalAmountUsd : chargedAmountEgp,
+        orderValue: resolvedOrderValue,
         currency,
         downloadToken: baseOrder.id,
         downloadUrl: firstProduct.downloadUrl || null,
@@ -557,16 +563,20 @@ export async function POST(req: Request) {
       try {
         const userAccount = await getOrCreateUser(customerEmail, customerName, explicitPassword || undefined);
         resolvedUserId = userAccount.userId;
-        if (userAccount.isNew) {
+        if (userAccount.password) {
           resolvedCredentials = {
             email: customerEmail,
             password: userAccount.password
           };
-          resolvedIsNewStudent = true;
-          resolvedTemporaryPassword = userAccount.password || null;
-          console.log(`[VERIFY][${requestId}] New student account created. Credentials set successfully.`);
+          if (userAccount.isNew) {
+            resolvedIsNewStudent = true;
+            resolvedTemporaryPassword = userAccount.password || null;
+            console.log(`[VERIFY][${requestId}] New student account created. Credentials set successfully.`);
+          } else {
+            console.log(`[VERIFY][${requestId}] Existing student account resolved with credentials from metadata.`);
+          }
         } else {
-          console.log(`[VERIFY][${requestId}] Existing student account resolved. No credentials sent.`);
+          console.log(`[VERIFY][${requestId}] Existing student account resolved. No credentials found.`);
         }
       } catch (err: any) {
         console.error(`[VERIFY][${requestId}] ❌ Error in getOrCreateUser:`, err.message || err);
@@ -818,17 +828,22 @@ export async function POST(req: Request) {
 
     const originalAmountUsd = orders.reduce((sum, o) => sum + (Number(o.original_amount_usd) || 0), 0);
     const chargedAmountEgp = orders.reduce((sum, o) => sum + (Number(o.charged_amount_egp) || 0), 0);
+    const fallbackAmount = orders.reduce((sum, o) => sum + (Number(o.final_price) || Number(o.amount) || 0), 0);
     const exchangeRate = baseOrder.exchange_rate || null;
 
     // Dispatch Unified Server-Side Meta CAPI Purchase event in parallel
     try {
-      const orderValue = currency === "USD" ? originalAmountUsd : chargedAmountEgp;
+      const orderValue = currency === "USD"
+        ? (originalAmountUsd || fallbackAmount)
+        : (chargedAmountEgp || fallbackAmount);
       const productIds = resolvedProducts.map(p => String(p.id));
       const productTitle = resolvedProducts.map(p => p.title).join(" + ");
       
       const clientIp = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "127.0.0.1";
       const clientUserAgent = req.headers.get("user-agent") || "";
       
+      console.log(`[VERIFY][${requestId}] [META_PURCHASE_SERVER] transactionId=${baseOrder.id} | value=${orderValue} | currency=${currency} | orderIds=${orders.map(o => o.id).join(',')} | (chargedEgp=${chargedAmountEgp}, usd=${originalAmountUsd}, fallback=${fallbackAmount})`);
+
       // Fire backend CAPI conversion event asynchronously
       import("@/lib/metaCapiServer").then(({ trackServerPurchase }) => {
         trackServerPurchase({
@@ -875,7 +890,7 @@ export async function POST(req: Request) {
       productTitle: resolvedProducts.map(p => p.title).join(" + "),
       customerName,
       customerEmail,
-      orderValue: currency === "USD" ? originalAmountUsd : chargedAmountEgp,
+      orderValue: currency === "USD" ? (originalAmountUsd || fallbackAmount) : (chargedAmountEgp || fallbackAmount),
       currency,
       downloadToken: baseOrder.id,
       downloadUrl: firstProduct.downloadUrl || null,
