@@ -1590,7 +1590,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                     console.log('[CTA_CLICKED]');
                     handleInitiateCheckout();
                   }}
-                  className="h-11 px-5 bg-gradient-to-r from-[#D6004B] to-[#ff1d6b] hover:from-[#ff1d6b] hover:to-[#D6004B] text-white rounded-full text-xs font-alexandria font-black flex items-center justify-center transition-all shadow-[0_4px_16px_rgba(214,0,75,0.35)] flex-grow active:scale-95 animate-pulse-glow"
+                  className="h-11 px-4 bg-gradient-to-r from-[#D6004B] to-[#ff1d6b] hover:from-[#ff1d6b] hover:to-[#D6004B] text-white rounded-full text-[11px] font-alexandria font-black flex items-center justify-center transition-all shadow-[0_4px_16px_rgba(214,0,75,0.35)] flex-grow active:scale-95 animate-pulse-glow whitespace-nowrap"
                 >
                   <span>
                     {course.price === 0 

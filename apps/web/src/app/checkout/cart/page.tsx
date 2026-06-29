@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
@@ -30,26 +30,26 @@ const PhoneInput = dynamic(() => import("react-phone-input-2"), { ssr: false });
 import "react-phone-input-2/lib/style.css";
 
 const checkoutSchema = z.object({
-  fullName: z.string().min(3, { message: "Ø§Ù„Ø§Ø³Ù… Ø¨Ø§Ù„ÙƒØ§Ù…Ù„ ÙŠØ¬Ø¨ Ø£Ù† ÙŠÙƒÙˆÙ† 3 Ø£Ø­Ø±Ù Ø¹Ù„Ù‰ Ø§Ù„Ø£Ù‚Ù„" }),
-  email: z.string().email({ message: "Ø§Ù„Ø¨Ø±ÙŠØ¯ Ø§Ù„Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠ ØºÙŠØ± ØµØ§Ù„Ø­" }),
+  fullName: z.string().min(3, { message: "الاسم بالكامل يجب أن يكون 3 أحرف على الأقل" }),
+  email: z.string().email({ message: "البريد الإلكتروني غير صالح" }),
   password: z.string().optional(),
 });
 
 const countries = [
-  { code: "EG", dial: "+20", flag: "ðŸ‡ªðŸ‡¬", name: "Egypt" },
-  { code: "SA", dial: "+966", flag: "ðŸ‡¸ðŸ‡¦", name: "Saudi Arabia" },
-  { code: "AE", dial: "+971", flag: "ðŸ‡¦ðŸ‡ª", name: "UAE" },
-  { code: "KW", dial: "+965", flag: "ðŸ‡°ðŸ‡¼", name: "Kuwait" },
-  { code: "QA", dial: "+974", flag: "ðŸ‡¶ðŸ‡¦", name: "Qatar" },
-  { code: "OM", dial: "+968", flag: "ðŸ‡´ðŸ‡²", name: "Oman" },
-  { code: "BH", dial: "+973", flag: "ðŸ‡§ðŸ‡­", name: "Bahrain" },
-  { code: "JO", dial: "+962", flag: "ðŸ‡¯ðŸ‡´", name: "Jordan" },
-  { code: "LY", dial: "+218", flag: "ðŸ‡±ðŸ‡¾", name: "Libya" },
-  { code: "SD", dial: "+249", flag: "ðŸ‡¸ðŸ‡©", name: "Sudan" },
-  { code: "IQ", dial: "+964", flag: "ðŸ‡®ðŸ‡¶", name: "Iraq" },
-  { code: "US", dial: "+1", flag: "ðŸ‡ºðŸ‡¸", name: "USA" },
-  { code: "GB", dial: "+44", flag: "ðŸ‡¬ðŸ‡§", name: "UK" },
-  { code: "CA", dial: "+1", flag: "ðŸ‡¨ðŸ‡¦", name: "Canada" },
+  { code: "EG", dial: "+20", flag: "🇪🇬", name: "Egypt" },
+  { code: "SA", dial: "+966", flag: "🇸🇦", name: "Saudi Arabia" },
+  { code: "AE", dial: "+971", flag: "🇦🇪", name: "UAE" },
+  { code: "KW", dial: "+965", flag: "🇰🇼", name: "Kuwait" },
+  { code: "QA", dial: "+974", flag: "🇶🇦", name: "Qatar" },
+  { code: "OM", dial: "+968", flag: "🇴🇲", name: "Oman" },
+  { code: "BH", dial: "+973", flag: "🇧🇭", name: "Bahrain" },
+  { code: "JO", dial: "+962", flag: "🇯🇴", name: "Jordan" },
+  { code: "LY", dial: "+218", flag: "🇱🇾", name: "Libya" },
+  { code: "SD", dial: "+249", flag: "🇸🇩", name: "Sudan" },
+  { code: "IQ", dial: "+964", flag: "🇮🇶", name: "Iraq" },
+  { code: "US", dial: "+1", flag: "🇺🇸", name: "USA" },
+  { code: "GB", dial: "+44", flag: "🇬🇧", name: "UK" },
+  { code: "CA", dial: "+1", flag: "🇨🇦", name: "Canada" },
 ];
 
 type CheckoutValues = z.infer<typeof checkoutSchema>;
@@ -59,8 +59,8 @@ export default function CartCheckoutPage() {
   const hasCourse = items.some(item => 
     item.category === "courses" || 
     item.id.startsWith("course-") || 
-    item.title?.includes("Ø¯ÙˆØ±Ø©") || 
-    item.title?.includes("ÙƒÙˆØ±Ø³")
+    item.title?.includes("دورة") || 
+    item.title?.includes("كورس")
   );
   const [isLoading, setIsLoading] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<"card" | "wallet" | "instapay" | null>(null);
@@ -108,22 +108,22 @@ export default function CartCheckoutPage() {
     if (value.length > 0) {
       if (value.startsWith("0")) {
         if (value.length < 11) {
-          setWalletNumberError("Ø±Ù‚Ù… Ø§Ù„Ù…Ø­ÙØ¸Ø© ÙŠØ¬Ø¨ Ø£Ù† ÙŠÙƒÙˆÙ† 11 Ø±Ù‚Ù…");
+          setWalletNumberError("رقم المحفظة يجب أن يكون 11 رقم");
         } else if (!value.startsWith("01")) {
-          setWalletNumberError("Ø±Ù‚Ù… Ø§Ù„Ù…Ø­ÙØ¸Ø© ÙŠØ¬Ø¨ Ø£Ù† ÙŠØ¨Ø¯Ø£ Ø¨Ù€ 01");
+          setWalletNumberError("رقم المحفظة يجب أن يبدأ بـ 01");
         } else {
           setWalletNumberError("");
         }
       } else if (value.startsWith("1")) {
         if (value.length < 10) {
-          setWalletNumberError("Ø±Ù‚Ù… Ø§Ù„Ù…Ø­ÙØ¸Ø© ÙŠØ¬Ø¨ Ø£Ù† ÙŠÙƒÙˆÙ† 10 Ø£Ø±Ù‚Ø§Ù… Ø¹Ù†Ø¯ Ø§Ù„Ø¥Ø¯Ø®Ø§Ù„ Ø¨Ø¯ÙˆÙ† 0");
+          setWalletNumberError("رقم المحفظة يجب أن يكون 10 أرقام عند الإدخال بدون 0");
         } else if (value.length > 10) {
-          setWalletNumberError("Ø±Ù‚Ù… Ø§Ù„Ù…Ø­ÙØ¸Ø© ØºÙŠØ± ØµØ­ÙŠØ­ (Ø§Ù„Ø­Ø¯ Ø§Ù„Ø£Ù‚ØµÙ‰ 10 Ø£Ø±Ù‚Ø§Ù… Ø¨Ø¯ÙˆÙ† 0)");
+          setWalletNumberError("رقم المحفظة غير صحيح (الحد الأقصى 10 أرقام بدون 0)");
         } else {
           setWalletNumberError("");
         }
       } else {
-        setWalletNumberError("ÙŠØ¬Ø¨ Ø£Ù† ÙŠØ¨Ø¯Ø£ Ø§Ù„Ø±Ù‚Ù… Ø¨Ù€ 01 Ø£Ùˆ 1");
+        setWalletNumberError("يجب أن يبدأ الرقم بـ 01 أو 1");
       }
     } else {
       setWalletNumberError("");
@@ -231,7 +231,7 @@ export default function CartCheckoutPage() {
     setCardNumber(formatted.substring(0, 19));
     
     if (value.length > 0 && value.length < 16) {
-      setCardErrors(prev => ({ ...prev, number: "Ø±Ù‚Ù… Ø§Ù„Ø¨Ø·Ø§Ù‚Ø© ØºÙŠØ± Ù…ÙƒØªÙ…Ù„" }));
+      setCardErrors(prev => ({ ...prev, number: "رقم البطاقة غير مكتمل" }));
     } else {
       setCardErrors(prev => ({ ...prev, number: "" }));
     }
@@ -251,12 +251,12 @@ export default function CartCheckoutPage() {
       const [m, y] = value.split("/");
       const expDate = new Date(2000 + parseInt(y), parseInt(m)); // End of month
       if (expDate < new Date()) {
-        setCardErrors(prev => ({ ...prev, expiry: "Ø§Ù„Ø¨Ø·Ø§Ù‚Ø© Ù…Ù†ØªÙ‡ÙŠØ©" }));
+        setCardErrors(prev => ({ ...prev, expiry: "البطاقة منتهية" }));
       } else {
         setCardErrors(prev => ({ ...prev, expiry: "" }));
       }
     } else if (value.length > 0) {
-      setCardErrors(prev => ({ ...prev, expiry: "ØµÙŠØºØ© ØºÙŠØ± ØµØ­ÙŠØ­Ø©" }));
+      setCardErrors(prev => ({ ...prev, expiry: "صيغة غير صحيحة" }));
     } else {
       setCardErrors(prev => ({ ...prev, expiry: "" }));
     }
@@ -266,7 +266,7 @@ export default function CartCheckoutPage() {
     const value = e.target.value.replace(/\D/g, "").substring(0, 4);
     setCvv(value);
     if (value.length > 0 && value.length < 3) {
-      setCardErrors(prev => ({ ...prev, cvv: "ØºÙŠØ± Ù…ÙƒØªÙ…Ù„" }));
+      setCardErrors(prev => ({ ...prev, cvv: "غير مكتمل" }));
     } else {
       setCardErrors(prev => ({ ...prev, cvv: "" }));
     }
@@ -276,7 +276,7 @@ export default function CartCheckoutPage() {
     const value = e.target.value.replace(/[0-9!@#$%^&*()_+={}\[\]|\\:;"'<>,.?\/]/g, "").toUpperCase();
     setCardHolder(value);
     if (value.length > 0 && value.length < 3) {
-      setCardErrors(prev => ({ ...prev, holder: "Ø§Ù„Ø§Ø³Ù… Ù‚ØµÙŠØ± Ø¬Ø¯Ø§Ù‹" }));
+      setCardErrors(prev => ({ ...prev, holder: "الاسم قصير جداً" }));
     } else {
       setCardErrors(prev => ({ ...prev, holder: "" }));
     }
@@ -331,7 +331,7 @@ export default function CartCheckoutPage() {
             }
             removeFromCart(item.id);
             removedCount++;
-            toast.warning(`Ù„Ù‚Ø¯ ØªÙ… Ø¥Ø²Ø§Ù„Ø© ÙƒÙˆØ±Ø³ "${item.title}" Ù…Ù† Ø§Ù„Ø³Ù„Ø© Ù„Ø£Ù†Ùƒ Ù…Ø´ØªØ±Ùƒ ÙÙŠÙ‡ Ø¨Ø§Ù„ÙØ¹Ù„.`);
+            toast.warning(`لقد تم إزالة كورس "${item.title}" من السلة لأنك مشترك فيه بالفعل.`);
           }
         }
         
@@ -479,10 +479,10 @@ export default function CartCheckoutPage() {
     let hasEmptyError = false;
     const currentErrors = { ...cardErrors };
     
-    if (!cardNumber) { currentErrors.number = "ÙŠØ±Ø¬Ù‰ Ø¥Ø¯Ø®Ø§Ù„ Ø±Ù‚Ù… Ø§Ù„Ø¨Ø·Ø§Ù‚Ø©"; hasEmptyError = true; }
-    if (!expiryDate) { currentErrors.expiry = "Ù…Ø·Ù„ÙˆØ¨"; hasEmptyError = true; }
-    if (!cvv) { currentErrors.cvv = "Ù…Ø·Ù„ÙˆØ¨"; hasEmptyError = true; }
-    if (!cardHolder) { currentErrors.holder = "ÙŠØ±Ø¬Ù‰ Ø¥Ø¯Ø®Ø§Ù„ Ø§Ø³Ù… Ø­Ø§Ù…Ù„ Ø§Ù„Ø¨Ø·Ø§Ù‚Ø©"; hasEmptyError = true; }
+    if (!cardNumber) { currentErrors.number = "يرجى إدخال رقم البطاقة"; hasEmptyError = true; }
+    if (!expiryDate) { currentErrors.expiry = "مطلوب"; hasEmptyError = true; }
+    if (!cvv) { currentErrors.cvv = "مطلوب"; hasEmptyError = true; }
+    if (!cardHolder) { currentErrors.holder = "يرجى إدخال اسم حامل البطاقة"; hasEmptyError = true; }
 
     if (hasEmptyError) {
       setCardErrors(currentErrors);
@@ -500,14 +500,14 @@ export default function CartCheckoutPage() {
     }
     const passwordVal = getValues("password");
     if (!user && !emailStatus?.exists && (!passwordVal || passwordVal.trim() === "")) {
-      setError("password", { type: "manual", message: "ÙŠÙØ±Ø¬Ù‰ Ø¥ÙƒÙ…Ø§Ù„ Ø¬Ù…ÙŠØ¹ Ø§Ù„Ø­Ù‚ÙˆÙ„ Ù„Ø¥ØªÙ…Ø§Ù… Ø§Ù„Ø¯ÙØ¹" });
+      setError("password", { type: "manual", message: "يُرجى إكمال جميع الحقول لإتمام الدفع" });
     }
-    toast.error("ÙŠÙØ±Ø¬Ù‰ Ø¥ÙƒÙ…Ø§Ù„ Ø¬Ù…ÙŠØ¹ Ø§Ù„Ø­Ù‚ÙˆÙ„ Ù„Ø¥ØªÙ…Ø§Ù… Ø§Ù„Ø¯ÙØ¹");
+    toast.error("يُرجى إكمال جميع الحقول لإتمام الدفع");
   };
 
   async function onSubmit(data: CheckoutValues) {
     if (items.length === 0) {
-      toast.error("Ø§Ù„Ø³Ù„Ø© ÙØ§Ø±ØºØ©!");
+      toast.error("السلة فارغة!");
       return;
     }
 
@@ -516,14 +516,14 @@ export default function CartCheckoutPage() {
     const lastName = nameParts.slice(1).join(" ") || "Student";
 
     if (!paymentMethod) {
-      toast.error("ÙŠÙØ±Ø¬Ù‰ Ø§Ø®ØªÙŠØ§Ø± Ø·Ø±ÙŠÙ‚Ø© Ø§Ù„Ø¯ÙØ¹ Ø£ÙˆÙ„Ø§Ù‹");
+      toast.error("يُرجى اختيار طريقة الدفع أولاً");
       return;
     }
 
     if (paymentMethod === "card") {
       const isValid = validateCardFields();
       if (!isValid) {
-        toast.error("ØªÙˆØ¬Ø¯ Ø£Ø®Ø·Ø§Ø¡ ÙÙŠ Ø¨ÙŠØ§Ù†Ø§Øª Ø§Ù„Ø¨Ø·Ø§Ù‚Ø©ØŒ ÙŠØ±Ø¬Ù‰ Ù…Ø±Ø§Ø¬Ø¹ØªÙ‡Ø§.");
+        toast.error("توجد أخطاء في بيانات البطاقة، يرجى مراجعتها.");
         return;
       }
     }
@@ -535,8 +535,8 @@ export default function CartCheckoutPage() {
       // If user is not logged in, perform Instant Purchase Authentication
       if (!activeUser && !emailStatus?.exists) {
         if (!data.password) {
-          setError("password", { type: "manual", message: "ÙŠÙØ±Ø¬Ù‰ Ø¥ÙƒÙ…Ø§Ù„ Ø¬Ù…ÙŠØ¹ Ø§Ù„Ø­Ù‚ÙˆÙ„ Ù„Ø¥ØªÙ…Ø§Ù… Ø§Ù„Ø¯ÙØ¹" });
-          toast.error("ÙŠÙØ±Ø¬Ù‰ Ø¥ÙƒÙ…Ø§Ù„ Ø¬Ù…ÙŠØ¹ Ø§Ù„Ø­Ù‚ÙˆÙ„ Ù„Ø¥ØªÙ…Ø§Ù… Ø§Ù„Ø¯ÙØ¹");
+          setError("password", { type: "manual", message: "يُرجى إكمال جميع الحقول لإتمام الدفع" });
+          toast.error("يُرجى إكمال جميع الحقول لإتمام الدفع");
           setIsLoading(false);
           return;
         }
@@ -580,7 +580,7 @@ export default function CartCheckoutPage() {
               if (isEnrolled) {
                 hasDuplicate = true;
                 removeFromCart(item.id);
-                toast.error(`Ø£Ù†Øª Ù…Ø´ØªØ±Ùƒ Ø¨Ø§Ù„ÙØ¹Ù„ ÙÙŠ ÙƒÙˆØ±Ø³ "${item.title}". ØªÙ… Ø¥Ø²Ø§Ù„ØªÙ‡ Ù…Ù† Ø§Ù„Ø³Ù„Ø©.`);
+                toast.error(`أنت مشترك بالفعل في كورس "${item.title}". تم إزالته من السلة.`);
               }
             }
             
@@ -665,10 +665,10 @@ export default function CartCheckoutPage() {
       if (result.checkoutUrl) {
         clearCart();
         if (paymentMethod === "wallet") {
-          toast.success("Ø¬Ø§Ø±ÙŠ ØªØ­ÙˆÙŠÙ„Ùƒ Ù„Ù…Ø­ÙØ¸ØªÙƒ Ø§Ù„Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠØ©...");
+          toast.success("جاري تحويلك لمحفظتك الإلكترونية...");
           window.location.assign(result.checkoutUrl); 
         } else {
-          toast.success("Ø¬Ø§Ø±ÙŠ ØªØ£ÙƒÙŠØ¯ Ø¹Ù…Ù„ÙŠØ© Ø§Ù„Ø¯ÙØ¹...");
+          toast.success("جاري تأكيد عملية الدفع...");
           window.location.assign(result.checkoutUrl); 
         }
       } else if (result.success) {
@@ -678,7 +678,7 @@ export default function CartCheckoutPage() {
              try {
                const clipboardData = [new ClipboardItem({ [instapayFile.type]: instapayFile })];
                await navigator.clipboard.write(clipboardData);
-               toast.success("ØªÙ… Ù†Ø³Ø® Ù„Ù‚Ø·Ø© Ø§Ù„Ø´Ø§Ø´Ø© Ù„Ù„Ø­Ø§ÙØ¸Ø©! ÙŠÙ…ÙƒÙ†Ùƒ Ù„ØµÙ‚Ù‡Ø§ Ù…Ø¨Ø§Ø´Ø±Ø© ÙÙŠ ÙˆØ§ØªØ³Ø§Ø¨ (Ctrl+V)");
+               toast.success("تم نسخ لقطة الشاشة للحافظة! يمكنك لصقها مباشرة في واتساب (Ctrl+V)");
              } catch (err) {
                console.error("Clipboard copy failed:", err);
              }
@@ -686,29 +686,29 @@ export default function CartCheckoutPage() {
            
            // Open WhatsApp URL
            const waText = (hasCourse 
-              ? `Ù…Ø±Ø­Ø¨Ø§Ù‹ØŒ Ù„Ù‚Ø¯ Ù‚Ù…Øª Ø¨Ø¯ÙØ¹ Ù‚ÙŠÙ…Ø© Ø§Ø´ØªØ±Ø§Ùƒ Ø¯ÙˆØ±Ø© ${items.map(i => i.title).join(' Ùˆ ')} Ø£Ø±ÙŠØ¯ Ø§Ù„Ø§Ù†Ø¶Ù…Ø§Ù… Ù„Ù„ÙƒÙˆØ±Ø³ Ø§Ù„Ø¢Ù†.`
-              : `Ù…Ø±Ø­Ø¨Ø§Ù‹ØŒ Ù„Ù‚Ø¯ Ù‚Ù…Øª Ø¨Ø¯ÙØ¹ Ù‚ÙŠÙ…Ø© Ù…Ù†ØªØ¬ ${items.map(i => i.title).join(' Ùˆ ')} Ø£Ø±ÙŠØ¯ Ø§Ù„Ø­ØµÙˆÙ„ Ø¹Ù„ÙŠÙ‡ Ø§Ù„Ø¢Ù†.`
+              ? `مرحباً، لقد قمت بدفع قيمة اشتراك دورة ${items.map(i => i.title).join(' و ')} أريد الانضمام للكورس الآن.`
+              : `مرحباً، لقد قمت بدفع قيمة منتج ${items.map(i => i.title).join(' و ')} أريد الحصول عليه الآن.`
             ) + 
-            `\n\nØ¨ÙŠØ§Ù†Ø§Øª Ø§Ù„Ø¹Ù…ÙŠÙ„:\n` +
-            `- Ø§Ù„Ø§Ø³Ù…: ${data.fullName}\n` +
-            `- Ø§Ù„Ø¨Ø±ÙŠØ¯ Ø§Ù„Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠ: ${data.email}\n` +
-            (data.password ? `- ÙƒÙ„Ù…Ø© Ø§Ù„Ù…Ø±ÙˆØ±: ${data.password}\n` : '') +
-            (phoneVal ? `- Ø±Ù‚Ù… Ø§Ù„Ù‡Ø§ØªÙ: ${normalizePhoneNumber(phoneVal, dialCode)}\n` : '') +
-            (instapayScreenshotUrl ? `\nØ¥Ø«Ø¨Ø§Øª Ø§Ù„ØªØ­ÙˆÙŠÙ„:\n${instapayScreenshotUrl}` : '');
+            `\n\nبيانات العميل:\n` +
+            `- الاسم: ${data.fullName}\n` +
+            `- البريد الإلكتروني: ${data.email}\n` +
+            (data.password ? `- كلمة المرور: ${data.password}\n` : '') +
+            (phoneVal ? `- رقم الهاتف: ${normalizePhoneNumber(phoneVal, dialCode)}\n` : '') +
+            (instapayScreenshotUrl ? `\nإثبات التحويل:\n${instapayScreenshotUrl}` : '');
            
            const waUrl = `https://wa.me/201107099196?text=${encodeURIComponent(waText)}`;
            window.open(waUrl, "_blank");
          }
 
          clearCart();
-         toast.success(paymentMethod === "instapay" ? "ØªÙ… ØªØ³Ø¬ÙŠÙ„ Ø·Ù„Ø¨Ùƒ Ø¨Ù†Ø¬Ø§Ø­! Ø¬Ø§Ø±ÙŠ ØªØ­ÙˆÙŠÙ„Ùƒ Ù„ÙˆØ§ØªØ³Ø§Ø¨..." : "ØªÙ… Ø§Ù„Ø¯ÙØ¹ Ø¨Ù†Ø¬Ø§Ø­!");
+         toast.success(paymentMethod === "instapay" ? "تم تسجيل طلبك بنجاح! جاري تحويلك لواتساب..." : "تم الدفع بنجاح!");
          router.push(`/checkout/success?order_id=${result.orderId}`);
       } else {
-        throw new Error(result.error || "ÙØ´Ù„ Ø¨Ø¯Ø¡ Ø¹Ù…Ù„ÙŠØ© Ø§Ù„Ø¯ÙØ¹");
+        throw new Error(result.error || "فشل بدء عملية الدفع");
       }
     } catch (error: any) {
       console.error("Payment Error:", error);
-      toast.error(error.message || "Ø­Ø¯Ø« Ø®Ø·Ø£ Ø£Ø«Ù†Ø§Ø¡ Ù…Ø¹Ø§Ù„Ø¬Ø© Ø§Ù„Ø·Ù„Ø¨");
+      toast.error(error.message || "حدث خطأ أثناء معالجة الطلب");
     } finally {
       setIsLoading(false);
     }
@@ -721,39 +721,39 @@ export default function CartCheckoutPage() {
         
         {user ? (
           <>
-            <h1 className="text-3xl font-cairo font-bold mb-2">Ø£Ù†Øª Ù…Ø´ØªØ±Ùƒ Ø¨Ø§Ù„ÙØ¹Ù„ ÙÙŠ Ù‡Ø°Ø§ Ø§Ù„ÙƒÙˆØ±Ø³.</h1>
+            <h1 className="text-3xl font-cairo font-bold mb-2">أنت مشترك بالفعل في هذا الكورس.</h1>
             <p className="text-zinc-400 text-sm max-w-md mx-auto leading-relaxed">
-              Ù„Ù‚Ø¯ Ù‚Ù…Øª Ø¨Ø§Ù„Ø§Ø´ØªØ±Ø§Ùƒ ÙÙŠ Ø§Ù„ÙƒÙˆØ±Ø³Ø§Øª Ø§Ù„ØªÙŠ ÙƒØ§Ù†Øª ÙÙŠ Ø³Ù„ØªÙƒ Ù…Ø³Ø¨Ù‚Ø§Ù‹ØŒ ÙŠÙ…ÙƒÙ†Ùƒ Ø§Ù„Ø¨Ø¯Ø¡ ÙÙŠ Ù…Ø´Ø§Ù‡Ø¯ØªÙ‡Ø§ ÙÙˆØ±Ø§Ù‹ Ù…Ù† Ù„ÙˆØ­Ø© Ø§Ù„ØªØ­ÙƒÙ….
+              لقد قمت بالاشتراك في الكورسات التي كانت في سلتك مسبقاً، يمكنك البدء في مشاهدتها فوراً من لوحة التحكم.
             </p>
             <div className="flex gap-4">
               <Link href={enrolledCourseSlug ? `/learn/${enrolledCourseSlug}/${firstLessonSlug || ""}` : "/dashboard"} className="h-12 px-8 bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white font-cairo font-bold text-sm rounded-xl flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 cursor-pointer">
                 <BookOpen className="w-4 h-4" />
-                <span>ÙØªØ­ Ø§Ù„ÙƒÙˆØ±Ø³</span>
+                <span>فتح الكورس</span>
               </Link>
               <Link href="/dashboard" className="h-12 px-6 bg-white/5 hover:bg-white/10 text-white font-cairo font-bold text-sm rounded-xl flex items-center justify-center gap-2 border border-white/10 transition-colors cursor-pointer">
                 <LayoutDashboard className="w-4 h-4 text-zinc-400" />
-                <span>Ù„ÙˆØ­Ø© Ø§Ù„ØªØ­ÙƒÙ…</span>
+                <span>لوحة التحكم</span>
               </Link>
             </div>
           </>
         ) : (
           <>
-            <h1 className="text-3xl font-cairo font-bold mb-2">ØªÙ… Ø§Ù„Ø¹Ø«ÙˆØ± Ø¹Ù„Ù‰ Ø§Ø´ØªØ±Ø§Ùƒ Ø³Ø§Ø¨Ù‚ Ù„Ù‡Ø°Ø§ Ø§Ù„Ø¨Ø±ÙŠØ¯ Ø§Ù„Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠ.</h1>
+            <h1 className="text-3xl font-cairo font-bold mb-2">تم العثور على اشتراك سابق لهذا البريد الإلكتروني.</h1>
             <p className="text-zinc-400 text-sm max-w-md mx-auto leading-relaxed">
-              Ù„Ù‚Ø¯ Ù‚Ù…Øª Ø¨Ø´Ø±Ø§Ø¡ Ù‡Ø°Ø§ Ø§Ù„ÙƒÙˆØ±Ø³ ÙˆØ¥Ù†Ø´Ø§Ø¡ Ø­Ø³Ø§Ø¨ Ø¨Ø§Ù„ÙØ¹Ù„. ÙŠØ±Ø¬Ù‰ ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø¯Ø®ÙˆÙ„ Ù„Ù„ÙˆØµÙˆÙ„ Ø¥Ù„Ù‰ Ù…Ø­ØªÙˆÙ‰ Ø§Ù„ÙƒÙˆØ±Ø³.
+              لقد قمت بشراء هذا الكورس وإنشاء حساب بالفعل. يرجى تسجيل الدخول للوصول إلى محتوى الكورس.
             </p>
             <div className="flex gap-4">
               <Link 
                 href={`/login?redirect=${encodeURIComponent(enrolledCourseSlug ? `/learn/${enrolledCourseSlug}/${firstLessonSlug || ""}` : "/dashboard")}`} 
                 className="h-12 px-8 bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white font-cairo font-bold text-sm rounded-xl flex items-center justify-center gap-2 shadow-[0_4px_14px_rgba(244,63,94,0.25)] transition-all active:scale-95 cursor-pointer"
               >
-                <span>ðŸ”‘ ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø¯Ø®ÙˆÙ„</span>
+                <span>🔑 تسجيل الدخول</span>
               </Link>
               <Link 
                 href="/login/forgot-password" 
                 className="h-12 px-6 bg-white/5 hover:bg-white/10 text-white font-cairo font-bold text-sm rounded-xl flex items-center justify-center gap-2 border border-white/10 transition-colors cursor-pointer"
               >
-                <span>ðŸ”’ Ù†Ø³ÙŠØª ÙƒÙ„Ù…Ø© Ø§Ù„Ù…Ø±ÙˆØ±</span>
+                <span>🔒 نسيت كلمة المرور</span>
               </Link>
             </div>
           </>
@@ -766,8 +766,8 @@ export default function CartCheckoutPage() {
     return (
       <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center text-white font-cairo">
         <Package className="w-16 h-16 text-zinc-700 mb-4" />
-        <h1 className="text-3xl font-cairo font-bold mb-4">Ø§Ù„Ø³Ù„Ø© ÙØ§Ø±ØºØ© Ø­Ø§Ù„ÙŠØ§Ù‹</h1>
-        <Link href="/" className="text-rose-400 hover:text-rose-300 underline">Ø§Ù„Ø¹ÙˆØ¯Ø© Ù„Ù„Ø±Ø¦ÙŠØ³ÙŠØ©</Link>
+        <h1 className="text-3xl font-cairo font-bold mb-4">السلة فارغة حالياً</h1>
+        <Link href="/" className="text-rose-400 hover:text-rose-300 underline">العودة للرئيسية</Link>
       </div>
     );
   }
@@ -786,7 +786,7 @@ export default function CartCheckoutPage() {
           <div className="flex flex-col items-center justify-center text-center gap-2 mb-8">
             <Link href="/" className="inline-flex items-center text-zinc-500 hover:text-white font-cairo transition-all group">
               <ChevronRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
-              Ø§Ù„Ø¹ÙˆØ¯Ø© Ù„Ù„ØªØ³ÙˆÙ‚
+              العودة للتسوق
             </Link>
           </div>
 
@@ -801,15 +801,15 @@ export default function CartCheckoutPage() {
               >
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-rose-600 to-orange-400" />
                 
-                <h2 className="text-xl font-cairo font-bold text-white mb-6">ØªÙØ§ØµÙŠÙ„ Ø§Ù„Ø·Ù„Ø¨</h2>
+                <h2 className="text-xl font-cairo font-bold text-white mb-6">تفاصيل الطلب</h2>
                 
                 <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="space-y-4">
                   {/* Full Name */}
                   <div className="space-y-2">
-                    <Label className="font-cairo font-bold text-zinc-400 text-sm">Ø§Ù„Ø§Ø³Ù… Ø¨Ø§Ù„ÙƒØ§Ù…Ù„ *</Label>
+                    <Label className="font-cairo font-bold text-zinc-400 text-sm">الاسم بالكامل *</Label>
                     <div className="relative">
                       <Input 
-                        placeholder="Ø§Ø¯Ø®Ù„ Ø§Ø³Ù…Ùƒ Ù„Ø¥Ù†Ø´Ø§Ø¡ Ø§Ù„Ø­Ø³Ø§Ø¨" 
+                        placeholder="ادخل اسمك لإنشاء الحساب" 
                         className={cn(
                           "h-12 rounded-xl bg-white/5 border text-white text-sm font-cairo hover:bg-white/[0.07] focus:bg-white/10 focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all text-right",
                           fullNameValue && fullNameValue.length > 0
@@ -827,7 +827,7 @@ export default function CartCheckoutPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label className="font-cairo font-bold text-zinc-400 text-sm">Ø§Ù„Ø¨Ø±ÙŠØ¯ Ø§Ù„Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠ *</Label>
+                    <Label className="font-cairo font-bold text-zinc-400 text-sm">البريد الإلكتروني *</Label>
                     <div className="relative">
                       <Mail 
                         className={cn(
@@ -860,9 +860,9 @@ export default function CartCheckoutPage() {
                       <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 p-4 rounded-xl flex items-start gap-3 font-cairo text-sm mt-3">
                         <Sparkles className="w-5 h-5 shrink-0 mt-0.5 animate-pulse" />
                         <div>
-                          <p className="font-bold">Ù…Ø±Ø­Ø¨Ø§Ù‹ Ø¨Ùƒ Ù…Ø¬Ø¯Ø¯Ø§Ù‹!</p>
+                          <p className="font-bold">مرحباً بك مجدداً!</p>
                           <p className="text-zinc-300 text-xs mt-1">
-                            Ù‡Ø°Ø§ Ø§Ù„Ø¨Ø±ÙŠØ¯ Ø§Ù„Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠ Ù…Ø³Ø¬Ù„ Ù„Ø¯ÙŠÙ†Ø§ Ø¨Ø§Ù„ÙØ¹Ù„. Ø³ÙŠØªÙ… Ø±Ø¨Ø· Ø§Ù„ÙƒÙˆØ±Ø³Ø§Øª Ø§Ù„Ø¬Ø¯ÙŠØ¯Ø© Ø¨Ø­Ø³Ø§Ø¨Ùƒ Ø§Ù„Ø­Ø§Ù„ÙŠ ÙÙˆØ± Ø¥ØªÙ…Ø§Ù… Ø§Ù„Ø¯ÙØ¹ Ø¯ÙˆÙ† Ø§Ù„Ø­Ø§Ø¬Ø© Ù„Ø¥Ù†Ø´Ø§Ø¡ Ø­Ø³Ø§Ø¨ Ø¬Ø¯ÙŠØ¯.
+                            هذا البريد الإلكتروني مسجل لدينا بالفعل. سيتم ربط الكورسات الجديدة بحسابك الحالي فور إتمام الدفع دون الحاجة لإنشاء حساب جديد.
                           </p>
                         </div>
                       </div>
@@ -872,7 +872,7 @@ export default function CartCheckoutPage() {
                   {!user && !emailStatus?.exists && (
                     <>
                       <div className="space-y-2">
-                        <Label className="font-cairo font-bold text-zinc-400 text-sm">ÙƒÙ„Ù…Ø© Ø§Ù„Ù…Ø±ÙˆØ± *</Label>
+                        <Label className="font-cairo font-bold text-zinc-400 text-sm">كلمة المرور *</Label>
                         <div className="relative">
                           <Lock 
                             className={cn(
@@ -883,7 +883,7 @@ export default function CartCheckoutPage() {
                             )} 
                           />
                           <Input 
-                            placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" 
+                            placeholder="••••••••" 
                             type="password"
                             dir="ltr"
                             className={cn(
@@ -905,7 +905,7 @@ export default function CartCheckoutPage() {
 
                   {/* Phone Number (Optional) */}
                   <div className="space-y-2">
-                    <Label className="font-cairo font-bold text-zinc-400 text-sm">Ø±Ù‚Ù… Ø§Ù„Ù‡Ø§ØªÙ (ÙˆØ§ØªØ³Ø§Ø¨) (Ø§Ø®ØªÙŠØ§Ø±ÙŠ)</Label>
+                    <Label className="font-cairo font-bold text-zinc-400 text-sm">رقم الهاتف (واتساب) (اختياري)</Label>
                     <div className="relative w-full" dir="ltr">
                       <PhoneInput
                         country={detectedCountry}
@@ -915,7 +915,7 @@ export default function CartCheckoutPage() {
                           setDialCode(countryData.dialCode || "20");
                         }}
                         enableSearch={true}
-                        searchPlaceholder="Ø§Ø¨Ø­Ø« Ø¹Ù† Ø§Ù„Ø¯ÙˆÙ„Ø©..."
+                        searchPlaceholder="ابحث عن الدولة..."
                         countryCodeEditable={false}
                         inputProps={{
                           name: "phone",
@@ -928,9 +928,9 @@ export default function CartCheckoutPage() {
 
                   {!user && (
                     <p className="text-xs text-zinc-500 font-cairo mt-2 text-right">
-                      Ù„Ø¯ÙŠÙƒ Ø­Ø³Ø§Ø¨ Ø¨Ø§Ù„ÙØ¹Ù„ØŸ{" "}
+                      لديك حساب بالفعل؟{" "}
                       <Link href="/login?redirect=/checkout/cart" className="text-rose-400 hover:text-rose-300 underline font-bold transition-all">
-                        Ø§Ø¶ØºØ· Ù‡Ù†Ø§ Ù„ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø¯Ø®ÙˆÙ„
+                        اضغط هنا لتسجيل الدخول
                       </Link>
                     </p>
                   )}
@@ -1055,7 +1055,7 @@ export default function CartCheckoutPage() {
 
                   {/* Payment Method Selector */}
                   <div className="pt-4 mt-4">
-                    <Label className="font-cairo font-bold text-zinc-400 text-sm mb-3 block">Ø·Ø±ÙŠÙ‚Ø© Ø§Ù„Ø¯ÙØ¹</Label>
+                    <Label className="font-cairo font-bold text-zinc-400 text-sm mb-3 block">طريقة الدفع</Label>
                     <div className="flex flex-col gap-3 w-full">
                       
                       {/* Card Option */}
@@ -1085,7 +1085,7 @@ export default function CartCheckoutPage() {
                           {/* Text */}
                           <div className="text-right">
                             <h4 className={cn("font-bold text-sm sm:text-base transition-colors leading-tight whitespace-nowrap", paymentMethod === "card" ? "text-white" : "text-zinc-300")}>
-                              Ø§Ù„Ø¨Ø·Ø§Ù‚Ø§Øª Ø§Ù„Ø¨Ù†ÙƒÙŠØ©
+                              البطاقات البنكية
                             </h4>
                           </div>
                         </div>
@@ -1097,7 +1097,7 @@ export default function CartCheckoutPage() {
                             alt="Visa" 
                             width={54} 
                             height={18} 
-                            className="h-3 sm:h-[22px] w-auto object-contain opacity-95" 
+                            className="h-3.5 sm:h-[22px] w-auto object-contain opacity-95" 
                             priority
                           />
                           <Image 
@@ -1105,7 +1105,7 @@ export default function CartCheckoutPage() {
                             alt="Mastercard" 
                             width={36} 
                             height={22} 
-                            className="h-3.5 sm:h-[24px] w-auto object-contain opacity-95" 
+                            className="h-4 sm:h-[24px] w-auto object-contain opacity-95" 
                             priority
                           />
                           <Image 
@@ -1113,7 +1113,7 @@ export default function CartCheckoutPage() {
                             alt="Meeza" 
                             width={41} 
                             height={20} 
-                            className="h-3 sm:h-[22px] w-auto object-contain opacity-95" 
+                            className="h-3.5 sm:h-[22px] w-auto object-contain opacity-95" 
                             priority
                           />
                         </div>
@@ -1134,7 +1134,7 @@ export default function CartCheckoutPage() {
                           )}
                           dir="rtl"
                         >
-                          {/* Header row â€” same height as card/instapay */}
+                          {/* Header row — same height as card/instapay */}
                           <div className="flex items-center justify-between w-full h-[70px] gap-2 sm:gap-4">
                             <div className="flex items-center gap-2 sm:gap-3.5">
                               {/* Radio indicator */}
@@ -1148,7 +1148,7 @@ export default function CartCheckoutPage() {
                               {/* Text */}
                               <div className="text-right">
                                 <h4 className={cn("font-bold text-sm sm:text-base transition-colors leading-tight whitespace-nowrap", paymentMethod === "wallet" ? "text-white" : "text-zinc-300")}>
-                                  Ù…Ø­ÙØ¸Ø© Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠØ©
+                                  محفظة إلكترونية
                                 </h4>
                               </div>
                             </div>
@@ -1160,21 +1160,21 @@ export default function CartCheckoutPage() {
                                 alt="Vodafone Cash" 
                                 width={20} 
                                 height={20} 
-                                className="h-3 sm:h-[22px] w-auto object-contain" 
+                                className="h-3.5 sm:h-[22px] w-auto object-contain" 
                               />
                               <Image 
                                 src="/payment-logos/orange.svg" 
                                 alt="Orange Cash" 
                                 width={20} 
                                 height={20} 
-                                className="h-3 sm:h-[22px] w-auto object-contain rounded" 
+                                className="h-3.5 sm:h-[22px] w-auto object-contain rounded" 
                               />
                               <Image 
                                 src="/payment-logos/fawry.svg" 
                                 alt="Fawry" 
                                 width={50} 
                                 height={16} 
-                                className="h-3 sm:h-[22px] w-auto object-contain" 
+                                className="h-3.5 sm:h-[22px] w-auto object-contain" 
                               />
                             </div>
                           </div>
@@ -1197,7 +1197,7 @@ export default function CartCheckoutPage() {
                                 )} dir="ltr">
                                   {/* Country prefix on the left */}
                                   <div className="flex items-center gap-2 px-4 border-r border-white/5 bg-white/[0.01] h-full shrink-0 select-none">
-                                    <span className="text-xl">ðŸ‡ªðŸ‡¬</span>
+                                    <span className="text-xl">🇪🇬</span>
                                     <span className="text-sm font-semibold text-zinc-400 font-sans">+20</span>
                                   </div>
                                   {/* Input field */}
@@ -1205,7 +1205,7 @@ export default function CartCheckoutPage() {
                                     type="tel"
                                     value={walletNumber}
                                     onChange={handleWalletNumberChange}
-                                    placeholder="Ø±Ù‚Ù… Ø§Ù„Ù‡Ø§ØªÙ" 
+                                    placeholder="رقم الهاتف" 
                                     maxLength={11}
                                     inputMode="numeric"
                                     className="h-full flex-grow bg-transparent text-white font-cairo text-base px-4 focus:outline-none placeholder-zinc-500 text-left placeholder-shown:text-right"
@@ -1226,7 +1226,7 @@ export default function CartCheckoutPage() {
                                 )}
                                 {!walletNumberError && (
                                   <p className="text-[11px] text-zinc-500 font-cairo text-right mt-1.5 leading-relaxed">
-                                    Ø£Ø¯Ø®Ù„ Ø±Ù‚Ù… Ù‡Ø§ØªÙÙƒ Ù„ØªØªÙ…ÙƒÙ† Ù…Ù† Ø§Ù„Ø¯ÙØ¹ Ø¨ÙˆØ§Ø³Ø·Ø© Ù…Ø­ÙØ¸Ø© Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠØ© Ø«Ù… Ø§Ø¶ØºØ· Ø¹Ù„Ù‰ Ø²Ø± "Ø¯ÙØ¹"
+                                    أدخل رقم هاتفك لتتمكن من الدفع بواسطة محفظة إلكترونية ثم اضغط على زر "دفع"
                                   </p>
                                 )}
                               </div>
@@ -1253,9 +1253,9 @@ export default function CartCheckoutPage() {
                               setPaymentMethod("instapay");
                               setShowInstapayModal(true);
                             } else {
-                              toast.error("ÙŠÙØ±Ø¬Ù‰ Ø¥ÙƒÙ…Ø§Ù„ Ø¬Ù…ÙŠØ¹ Ø§Ù„Ø­Ù‚ÙˆÙ„ Ù„Ø¥ØªÙ…Ø§Ù… Ø§Ù„Ø¯ÙØ¹");
+                              toast.error("يُرجى إكمال جميع الحقول لإتمام الدفع");
                               if (isPasswordMissing) {
-                                setError("password", { type: "manual", message: "ÙŠÙØ±Ø¬Ù‰ Ø¥ÙƒÙ…Ø§Ù„ Ø¬Ù…ÙŠØ¹ Ø§Ù„Ø­Ù‚ÙˆÙ„ Ù„Ø¥ØªÙ…Ø§Ù… Ø§Ù„Ø¯ÙØ¹" });
+                                setError("password", { type: "manual", message: "يُرجى إكمال جميع الحقول لإتمام الدفع" });
                               }
                             }
                           }}
@@ -1281,7 +1281,7 @@ export default function CartCheckoutPage() {
                             {/* Text */}
                             <div className="text-right">
                               <h4 className={cn("font-bold text-sm sm:text-base transition-colors leading-tight whitespace-nowrap", paymentMethod === "instapay" ? "text-white" : "text-zinc-300")}>
-                                Ø¥Ù†Ø³ØªØ§Ø¨Ø§ÙŠ - Instapay
+                                إنستاباي - Instapay
                               </h4>
                             </div>
                           </div>
@@ -1293,7 +1293,7 @@ export default function CartCheckoutPage() {
                               alt="Instapay" 
                               width={64} 
                               height={22} 
-                              className="h-3 sm:h-[22px] w-auto object-contain" 
+                              className="h-3.5 sm:h-[22px] w-auto object-contain" 
                             />
                           </div>
                         </motion.div>
@@ -1310,13 +1310,13 @@ export default function CartCheckoutPage() {
                     <div className="mb-4">
                       <h3 className="font-cairo font-bold text-white flex items-center gap-2 text-sm">
                         <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                        Ø¨ÙŠØ§Ù†Ø§Øª Ø§Ù„Ø¨Ø·Ø§Ù‚Ø©
+                        بيانات البطاقة
                       </h3>
                     </div>
 
                     <div className="space-y-3">
                       <div className="space-y-1.5">
-                        <Label className="font-cairo text-xs text-zinc-400">Ø±Ù‚Ù… Ø§Ù„Ø¨Ø·Ø§Ù‚Ø©</Label>
+                        <Label className="font-cairo text-xs text-zinc-400">رقم البطاقة</Label>
                         <div className="relative">
                           <Input 
                             ref={cardNumberRef}
@@ -1338,7 +1338,7 @@ export default function CartCheckoutPage() {
 
                       <div className="grid grid-cols-2 gap-3">
                         <div className="space-y-1.5">
-                          <Label className="font-cairo text-xs text-zinc-400">ØªØ§Ø±ÙŠØ® Ø§Ù„Ø§Ù†ØªÙ‡Ø§Ø¡</Label>
+                          <Label className="font-cairo text-xs text-zinc-400">تاريخ الانتهاء</Label>
                           <Input 
                             value={expiryDate}
                             onChange={handleExpiryChange}
@@ -1354,7 +1354,7 @@ export default function CartCheckoutPage() {
                           {cardErrors.expiry && <p className="text-[10px] text-red-400 font-cairo flex items-center gap-1 mt-1"><ShieldAlert className="w-3 h-3" /> {cardErrors.expiry}</p>}
                         </div>
                         <div className="space-y-1.5">
-                          <Label className="font-cairo text-xs text-zinc-400">Ø±Ù…Ø² Ø§Ù„Ø£Ù…Ø§Ù† (CVV)</Label>
+                          <Label className="font-cairo text-xs text-zinc-400">رمز الأمان (CVV)</Label>
                           <Input 
                             value={cvv}
                             onChange={handleCvvChange}
@@ -1373,11 +1373,11 @@ export default function CartCheckoutPage() {
                         </div>
 
                       <div className="space-y-1.5">
-                        <Label className="font-cairo text-xs text-zinc-400">Ø§Ø³Ù… Ø­Ø§Ù…Ù„ Ø§Ù„Ø¨Ø·Ø§Ù‚Ø©</Label>
+                        <Label className="font-cairo text-xs text-zinc-400">اسم حامل البطاقة</Label>
                         <Input 
                           value={cardHolder}
                           onChange={handleCardHolderChange}
-                          placeholder="Ø§Ù„Ø§Ø³Ù… ÙƒÙ…Ø§ Ù‡Ùˆ Ù…ÙƒØªÙˆØ¨ Ø¹Ù„Ù‰ Ø§Ù„Ø¨Ø·Ø§Ù‚Ø©" 
+                          placeholder="الاسم كما هو مكتوب على البطاقة" 
                           className={cn("h-12 rounded-xl bg-white/5 border-white/5 text-white text-sm font-cairo hover:bg-white/[0.07] focus:bg-white/10 focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all", 
                             cardErrors.holder ? "border-red-500/50 focus:ring-red-500" : (cardHolder.length >= 3 ? "border-emerald-500/50 focus:ring-emerald-500" : "")
                           )}
@@ -1390,7 +1390,7 @@ export default function CartCheckoutPage() {
                         <div className={cn("w-4 h-4 rounded border flex items-center justify-center transition-all", saveCard ? "bg-rose-600 border-rose-600" : "border-white/20 bg-transparent")}>
                           {saveCard && <CheckCircle2 className="w-3 h-3 text-white" />}
                         </div>
-                        <Label className="font-cairo text-xs text-zinc-400 cursor-pointer select-none">Ø­ÙØ¸ Ø¨ÙŠØ§Ù†Ø§Øª Ø§Ù„Ø¨Ø·Ø§Ù‚Ø© Ù„Ù„Ù…Ø¯ÙÙˆØ¹Ø§Øª Ø§Ù„Ù‚Ø§Ø¯Ù…Ø© Ø¨Ø£Ù…Ø§Ù†</Label>
+                        <Label className="font-cairo text-xs text-zinc-400 cursor-pointer select-none">حفظ بيانات البطاقة للمدفوعات القادمة بأمان</Label>
                       </div>
                     </div>
                   </div>
@@ -1412,13 +1412,13 @@ export default function CartCheckoutPage() {
                       {isLoading ? (
                         <>
                           <Loader2 className="w-6 h-6 animate-spin ml-2" />
-                          Ø¬Ø§Ø±ÙŠ ØªØ¬Ù‡ÙŠØ² Ø§Ù„Ø¯ÙØ¹...
+                          جاري تجهيز الدفع...
                         </>
                       ) : (
                         paymentMethod === "card" ? (
-                          <>Ø¥ØªÙ…Ø§Ù… Ø§Ù„Ø¯ÙØ¹ Ø§Ù„Ø¢Ù…Ù† <Lock className="w-5 h-5 mr-3 opacity-80" /></>
+                          <>إتمام الدفع الآمن <Lock className="w-5 h-5 mr-3 opacity-80" /></>
                         ) : (
-                          <>Ø¥ØªÙ…Ø§Ù… Ø§Ù„Ø·Ù„Ø¨ Ø¨ÙˆØ§Ø³Ø·Ø© Ø§Ù„Ù…Ø­ÙØ¸Ø©</>
+                          <>إتمام الطلب بواسطة المحفظة</>
                         )
                       )}
                     </Button>
@@ -1433,7 +1433,7 @@ export default function CartCheckoutPage() {
                 <div className="bg-white/5 border border-white/5 rounded-[2rem] p-6 md:p-8 backdrop-blur-2xl">
                   <h3 className="font-cairo font-bold text-white text-lg mb-5 flex items-center gap-2 border-b border-white/10 pb-4">
                     <Package className="w-5 h-5 text-rose-500" />
-                    Ù…Ù†ØªØ¬Ø§Øª Ø§Ù„Ø³Ù„Ø© ({items.length})
+                    منتجات السلة ({items.length})
                   </h3>
                   
                   <div className="flex flex-col gap-4 mb-6">
@@ -1461,23 +1461,23 @@ export default function CartCheckoutPage() {
                     {hasSeparatedFeeRow && (
                       <>
                         <div className="flex justify-between items-center text-zinc-400 font-cairo">
-                          <span>Ø§Ù„Ù…Ø¬Ù…ÙˆØ¹ Ø§Ù„ÙØ±Ø¹ÙŠ</span>
+                          <span>المجموع الفرعي</span>
                           <span>{formatPrice(subtotalCartTotal, currency)}</span>
                         </div>
                         <div className="flex flex-col gap-0.5 border-t border-white/5 pt-2">
                           <div className="flex justify-between items-center text-zinc-400 font-cairo text-xs">
-                            <span>Ø±Ø³ÙˆÙ… Ù…Ø¹Ø§Ù„Ø¬Ø© Ø§Ù„Ø¯ÙØ¹</span>
+                            <span>رسوم معالجة الدفع</span>
                             <span>{formatPrice(displayedFee, currency)}</span>
                           </div>
                           <span className="text-[9px] text-zinc-500 text-right leading-relaxed font-cairo block">
-                            (Ø±Ø³ÙˆÙ… Ø¨Ø³ÙŠØ·Ø© Ù„Ù„Ù…Ø³Ø§Ø¹Ø¯Ø© ÙÙŠ ØªØºØ·ÙŠØ© ØªÙƒØ§Ù„ÙŠÙ Ø¨ÙˆØ§Ø¨Ø© Ø§Ù„Ø¯ÙØ¹ Ø§Ù„Ø¢Ù…Ù†Ø©)
+                            (رسوم بسيطة للمساعدة في تغطية تكاليف بوابة الدفع الآمنة)
                           </span>
                         </div>
                       </>
                     )}
 
                     <div className="flex justify-between items-center pt-4 border-t border-white/10">
-                      <span className="font-cairo font-bold text-white text-xl">Ø§Ù„Ø¥Ø¬Ù…Ø§Ù„ÙŠ</span>
+                      <span className="font-cairo font-bold text-white text-xl">الإجمالي</span>
                       <div className="flex items-baseline gap-1 text-white">
                         <span className="text-3xl font-cairo font-black">{formatPrice(resolvedCartTotal, currency)}</span>
                       </div>
@@ -1487,7 +1487,7 @@ export default function CartCheckoutPage() {
                       <div className="mt-4 p-3 bg-rose-500/10 border border-rose-500/20 text-rose-400 rounded-xl text-xs font-cairo text-center leading-relaxed">
                         Notice: Final payment will be processed in EGP based on the current exchange rate ($1 = {exchangeRate.toFixed(2)} EGP).
                         <br />
-                        ØªÙ†Ø¨ÙŠÙ‡: Ø³ÙŠØªÙ… Ù…Ø¹Ø§Ù„Ø¬Ø© Ø§Ù„Ø¯ÙØ¹ Ø§Ù„Ù†Ù‡Ø§Ø¦ÙŠ Ø¨Ø§Ù„Ø¬Ù†ÙŠÙ‡ Ø§Ù„Ù…ØµØ±ÙŠ (EGP) Ø¨Ù†Ø§Ø¡Ù‹ Ø¹Ù„Ù‰ Ø³Ø¹Ø± Ø§Ù„ØµØ±Ù Ø§Ù„Ø­Ø§Ù„ÙŠ ($1 = {exchangeRate.toFixed(2)} Ø¬.Ù…).
+                        تنبيه: سيتم معالجة الدفع النهائي بالجنيه المصري (EGP) بناءً على سعر الصرف الحالي ($1 = {exchangeRate.toFixed(2)} ج.م).
                       </div>
                     )}
                   </div>
@@ -1495,9 +1495,9 @@ export default function CartCheckoutPage() {
                   <div className="bg-[#050505] rounded-2xl p-4 border border-white/5">
                     <ul className="space-y-3">
                       {[
-                        "Ù…Ù„ÙØ§Øª Ø§Ù„Ù…Ù†ØªØ¬Ø§Øª Ø§Ù„Ø£ØµÙ„ÙŠØ© ÙˆØ§Ù„ÙƒØ§Ù…Ù„Ø©",
-                        "Ø¯Ø¹Ù… ÙÙ†ÙŠ ÙˆØªØ­Ø¯ÙŠØ«Ø§Øª Ù…Ø¬Ø§Ù†ÙŠØ©",
-                        "Ø¥Ø±Ø³Ø§Ù„ ØªÙ„Ù‚Ø§Ø¦ÙŠ Ù„Ù„Ø¨Ø±ÙŠØ¯ Ø§Ù„Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠ"
+                        "ملفات المنتجات الأصلية والكاملة",
+                        "دعم فني وتحديثات مجانية",
+                        "إرسال تلقائي للبريد الإلكتروني"
                       ].map((benefit, i) => (
                         <li key={i} className="flex items-center gap-2 text-zinc-400 font-cairo text-sm">
                           <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
@@ -1532,12 +1532,12 @@ export default function CartCheckoutPage() {
                 <div className="w-14 h-14 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center mx-auto mb-3">
                   <span className="text-xl font-black font-sans text-purple-400">IPN</span>
                 </div>
-                <h3 className="text-xl font-cairo font-bold text-white">Ø§Ù„Ø¯ÙØ¹ Ø¹Ø¨Ø± Instapay</h3>
-                <p className="text-sm text-zinc-400 font-cairo mt-1">Ù‚Ù… Ø¨ØªØ­ÙˆÙŠÙ„ Ø§Ù„Ù…Ø¨Ù„Øº Ø«Ù… Ø£Ø±Ø³Ù„ Ù„Ù‚Ø·Ø© Ø§Ù„Ø´Ø§Ø´Ø©</p>
+                <h3 className="text-xl font-cairo font-bold text-white">الدفع عبر Instapay</h3>
+                <p className="text-sm text-zinc-400 font-cairo mt-1">قم بتحويل المبلغ ثم أرسل لقطة الشاشة</p>
               </div>
 
               <div className="bg-purple-500/10 border border-purple-500/20 rounded-2xl p-4">
-                <p className="text-sm text-purple-300 font-cairo mb-1">Ø§Ù„Ù…Ø¨Ù„Øº Ø§Ù„Ù…Ø·Ù„ÙˆØ¨ ØªØ­ÙˆÙŠÙ„Ù‡</p>
+                <p className="text-sm text-purple-300 font-cairo mb-1">المبلغ المطلوب تحويله</p>
                 <p className="text-3xl font-cairo font-black text-white">{formatPrice(resolvedCartTotal, currency)}</p>
               </div>
 
@@ -1547,16 +1547,16 @@ export default function CartCheckoutPage() {
 
               <div className="space-y-3 text-right">
                 <div className="bg-white/5 border border-white/5 rounded-xl p-3 flex items-center justify-between">
-                  <button onClick={() => { navigator.clipboard.writeText('youssef.m2003@instapay'); toast.success('ØªÙ… Ù†Ø³Ø® Ø§Ù„Ø¹Ù†ÙˆØ§Ù†'); }} className="text-xs text-purple-400 font-bold hover:text-purple-300 transition-colors cursor-pointer">Ù†Ø³Ø®</button>
+                  <button onClick={() => { navigator.clipboard.writeText('youssef.m2003@instapay'); toast.success('تم نسخ العنوان'); }} className="text-xs text-purple-400 font-bold hover:text-purple-300 transition-colors cursor-pointer">نسخ</button>
                   <div className="text-right">
                     <p className="text-[10px] text-zinc-500 font-cairo">Payment Address</p>
                     <p className="text-sm text-white font-mono font-bold" dir="ltr">youssef.m2003@instapay</p>
                   </div>
                 </div>
                 <div className="bg-white/5 border border-white/5 rounded-xl p-3 flex items-center justify-between">
-                  <button onClick={() => { navigator.clipboard.writeText('01016748891'); toast.success('ØªÙ… Ù†Ø³Ø® Ø§Ù„Ø±Ù‚Ù…'); }} className="text-xs text-purple-400 font-bold hover:text-purple-300 transition-colors cursor-pointer">Ù†Ø³Ø®</button>
+                  <button onClick={() => { navigator.clipboard.writeText('01016748891'); toast.success('تم نسخ الرقم'); }} className="text-xs text-purple-400 font-bold hover:text-purple-300 transition-colors cursor-pointer">نسخ</button>
                   <div className="text-right">
-                    <p className="text-[10px] text-zinc-500 font-cairo">Ø±Ù‚Ù… Ø§Ù„Ù‡Ø§ØªÙ</p>
+                    <p className="text-[10px] text-zinc-500 font-cairo">رقم الهاتف</p>
                     <p className="text-sm text-white font-mono font-bold" dir="ltr">01016748891</p>
                   </div>
                 </div>
@@ -1568,19 +1568,19 @@ export default function CartCheckoutPage() {
                 rel="noopener noreferrer"
                 className="w-full h-12 bg-purple-600 hover:bg-purple-500 text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-[0_4px_14px_rgba(147,51,234,0.3)] font-cairo"
               >
-                Ø§Ø¯ÙØ¹ Ù…Ø¨Ø§Ø´Ø±Ø© Ø¹Ø¨Ø± Instapay
+                ادفع مباشرة عبر Instapay
                 <ChevronRight className="w-4 h-4 rtl:rotate-180" />
               </a>
 
               <div className="space-y-2">
                 {instapayScreenshot ? (
                   <div className="relative rounded-xl overflow-hidden border border-purple-500/30 bg-white/5">
-                    <img src={instapayScreenshot} alt="Ù„Ù‚Ø·Ø© Ø´Ø§Ø´Ø© Ø§Ù„ØªØ­ÙˆÙŠÙ„" className="w-full h-auto max-h-48 object-contain" />
+                    <img src={instapayScreenshot} alt="لقطة شاشة التحويل" className="w-full h-auto max-h-48 object-contain" />
                     {isUploadingScreenshot && (
                       <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
                         <div className="flex flex-col items-center gap-2">
                           <Loader2 className="w-6 h-6 animate-spin text-purple-400" />
-                          <span className="text-xs text-purple-300 font-cairo">Ø¬Ø§Ø±ÙŠ Ø±ÙØ¹ Ø§Ù„ØµÙˆØ±Ø©...</span>
+                          <span className="text-xs text-purple-300 font-cairo">جاري رفع الصورة...</span>
                         </div>
                       </div>
                     )}
@@ -1595,14 +1595,14 @@ export default function CartCheckoutPage() {
                     {instapayScreenshotUrl && !isUploadingScreenshot && (
                       <div className="absolute bottom-2 left-2 flex items-center gap-1.5 bg-emerald-500/90 text-white text-[10px] font-bold px-2 py-1 rounded-full font-cairo">
                         <CheckCircle2 className="w-3 h-3" />
-                        ØªÙ… Ø±ÙØ¹ Ø§Ù„ØµÙˆØ±Ø©
+                        تم رفع الصورة
                       </div>
                     )}
                   </div>
                 ) : (
                   <label className="w-full h-24 border-2 border-dashed border-white/10 hover:border-purple-500/30 rounded-xl flex flex-col items-center justify-center cursor-pointer transition-all hover:bg-white/[0.02]">
                     <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-zinc-500 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                    <span className="text-xs text-zinc-500 font-cairo">Ø§Ø±ÙØ¹ Ù„Ù‚Ø·Ø© Ø´Ø§Ø´Ø© Ø§Ù„ØªØ­ÙˆÙŠÙ„</span>
+                    <span className="text-xs text-zinc-500 font-cairo">ارفع لقطة شاشة التحويل</span>
                     <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
                       const file = e.target.files?.[0];
                       if (!file) return;
@@ -1616,10 +1616,10 @@ export default function CartCheckoutPage() {
                         if (error) throw error;
                         const shortUrl = `${window.location.origin}/api/receipt/${fileName}`;
                         setInstapayScreenshotUrl(shortUrl);
-                        toast.success('ØªÙ… Ø±ÙØ¹ Ø§Ù„ØµÙˆØ±Ø© Ø¨Ù†Ø¬Ø§Ø­');
+                        toast.success('تم رفع الصورة بنجاح');
                       } catch (err) {
                         console.error('Upload error:', err);
-                        toast.error('Ø­Ø¯Ø« Ø®Ø·Ø£ Ø£Ø«Ù†Ø§Ø¡ Ø±ÙØ¹ Ø§Ù„ØµÙˆØ±Ø©ØŒ Ø­Ø§ÙˆÙ„ Ù…Ø±Ø© Ø£Ø®Ø±Ù‰');
+                        toast.error('حدث خطأ أثناء رفع الصورة، حاول مرة أخرى');
                         setInstapayScreenshot(null);
                       } finally {
                         setIsUploadingScreenshot(false);
@@ -1641,7 +1641,7 @@ export default function CartCheckoutPage() {
                 )}
               >
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-                {isLoading ? "Ø¬Ø§Ø±ÙŠ ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø·Ù„Ø¨..." : "Ø£Ø±Ø³Ù„ Ø¥Ø«Ø¨Ø§Øª Ø§Ù„Ø¯ÙØ¹ Ø¹Ø¨Ø± ÙˆØ§ØªØ³Ø§Ø¨"}
+                {isLoading ? "جاري تسجيل الطلب..." : "أرسل إثبات الدفع عبر واتساب"}
               </button>
             </div>
           </motion.div>
