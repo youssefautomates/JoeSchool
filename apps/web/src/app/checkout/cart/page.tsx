@@ -63,7 +63,7 @@ export default function CartCheckoutPage() {
     item.title?.includes("كورس")
   );
   const [isLoading, setIsLoading] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<"card" | "wallet" | "instapay">("card");
+  const [paymentMethod, setPaymentMethod] = useState<"card" | "wallet" | "instapay" | null>(null);
   const [showInstapayModal, setShowInstapayModal] = useState(false);
   const [instapayScreenshot, setInstapayScreenshot] = useState<string | null>(null);
   const [instapayScreenshotUrl, setInstapayScreenshotUrl] = useState<string | null>(null);
@@ -86,6 +86,55 @@ export default function CartCheckoutPage() {
   const [saveCard, setSaveCard] = useState(true);
   const cardNumberRef = useRef<HTMLInputElement>(null);
   const isFirstRender = useRef(true);
+
+  // Wallet Fields State
+  const [walletNumber, setWalletNumber] = useState("");
+  const [walletNumberError, setWalletNumberError] = useState("");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const savedWallet = localStorage.getItem("joeschool_wallet_number") || "";
+      setWalletNumber(savedWallet);
+    }
+  }, []);
+
+  const handleWalletNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/\D/g, "").substring(0, 11);
+    setWalletNumber(value);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("joeschool_wallet_number", value);
+    }
+    
+    if (value.length > 0) {
+      if (value.startsWith("0")) {
+        if (value.length < 11) {
+          setWalletNumberError("رقم المحفظة يجب أن يكون 11 رقم");
+        } else if (!value.startsWith("01")) {
+          setWalletNumberError("رقم المحفظة يجب أن يبدأ بـ 01");
+        } else {
+          setWalletNumberError("");
+        }
+      } else if (value.startsWith("1")) {
+        if (value.length < 10) {
+          setWalletNumberError("رقم المحفظة يجب أن يكون 10 أرقام عند الإدخال بدون 0");
+        } else if (value.length > 10) {
+          setWalletNumberError("رقم المحفظة غير صحيح (الحد الأقصى 10 أرقام بدون 0)");
+        } else {
+          setWalletNumberError("");
+        }
+      } else {
+        setWalletNumberError("يجب أن يبدأ الرقم بـ 01 أو 1");
+      }
+    } else {
+      setWalletNumberError("");
+    }
+  };
+
+  const isWalletValid = 
+    !walletNumberError && (
+      (walletNumber.length === 11 && walletNumber.startsWith("01")) ||
+      (walletNumber.length === 10 && walletNumber.startsWith("1"))
+    );
 
   // Auto-focus card number when selected
   useEffect(() => {
@@ -466,6 +515,11 @@ export default function CartCheckoutPage() {
     const firstName = nameParts[0] || "";
     const lastName = nameParts.slice(1).join(" ") || "Student";
 
+    if (!paymentMethod) {
+      toast.error("يُرجى اختيار طريقة الدفع أولاً");
+      return;
+    }
+
     if (paymentMethod === "card") {
       const isValid = validateCardFields();
       if (!isValid) {
@@ -565,6 +619,9 @@ export default function CartCheckoutPage() {
           cvv,
           cardHolder
         } : undefined,
+        walletNumber: paymentMethod === "wallet" 
+          ? (walletNumber.startsWith("1") ? `0${walletNumber}` : walletNumber) 
+          : undefined,
         password: data.password || undefined,
         instapayScreenshotUrl: paymentMethod === "instapay" ? (instapayScreenshotUrl || undefined) : undefined
       };
@@ -664,16 +721,16 @@ export default function CartCheckoutPage() {
         
         {user ? (
           <>
-            <h1 className="text-3xl font-alexandria font-bold mb-2">أنت مشترك بالفعل في هذا الكورس.</h1>
+            <h1 className="text-3xl font-cairo font-bold mb-2">أنت مشترك بالفعل في هذا الكورس.</h1>
             <p className="text-zinc-400 text-sm max-w-md mx-auto leading-relaxed">
               لقد قمت بالاشتراك في الكورسات التي كانت في سلتك مسبقاً، يمكنك البدء في مشاهدتها فوراً من لوحة التحكم.
             </p>
             <div className="flex gap-4">
-              <Link href={enrolledCourseSlug ? `/learn/${enrolledCourseSlug}/${firstLessonSlug || ""}` : "/dashboard"} className="h-12 px-8 bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white font-alexandria font-bold text-sm rounded-xl flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 cursor-pointer">
+              <Link href={enrolledCourseSlug ? `/learn/${enrolledCourseSlug}/${firstLessonSlug || ""}` : "/dashboard"} className="h-12 px-8 bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white font-cairo font-bold text-sm rounded-xl flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 cursor-pointer">
                 <BookOpen className="w-4 h-4" />
                 <span>فتح الكورس</span>
               </Link>
-              <Link href="/dashboard" className="h-12 px-6 bg-white/5 hover:bg-white/10 text-white font-alexandria font-bold text-sm rounded-xl flex items-center justify-center gap-2 border border-white/10 transition-colors cursor-pointer">
+              <Link href="/dashboard" className="h-12 px-6 bg-white/5 hover:bg-white/10 text-white font-cairo font-bold text-sm rounded-xl flex items-center justify-center gap-2 border border-white/10 transition-colors cursor-pointer">
                 <LayoutDashboard className="w-4 h-4 text-zinc-400" />
                 <span>لوحة التحكم</span>
               </Link>
@@ -681,20 +738,20 @@ export default function CartCheckoutPage() {
           </>
         ) : (
           <>
-            <h1 className="text-3xl font-alexandria font-bold mb-2">تم العثور على اشتراك سابق لهذا البريد الإلكتروني.</h1>
+            <h1 className="text-3xl font-cairo font-bold mb-2">تم العثور على اشتراك سابق لهذا البريد الإلكتروني.</h1>
             <p className="text-zinc-400 text-sm max-w-md mx-auto leading-relaxed">
               لقد قمت بشراء هذا الكورس وإنشاء حساب بالفعل. يرجى تسجيل الدخول للوصول إلى محتوى الكورس.
             </p>
             <div className="flex gap-4">
               <Link 
                 href={`/login?redirect=${encodeURIComponent(enrolledCourseSlug ? `/learn/${enrolledCourseSlug}/${firstLessonSlug || ""}` : "/dashboard")}`} 
-                className="h-12 px-8 bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white font-alexandria font-bold text-sm rounded-xl flex items-center justify-center gap-2 shadow-[0_4px_14px_rgba(244,63,94,0.25)] transition-all active:scale-95 cursor-pointer"
+                className="h-12 px-8 bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white font-cairo font-bold text-sm rounded-xl flex items-center justify-center gap-2 shadow-[0_4px_14px_rgba(244,63,94,0.25)] transition-all active:scale-95 cursor-pointer"
               >
                 <span>🔑 تسجيل الدخول</span>
               </Link>
               <Link 
                 href="/login/forgot-password" 
-                className="h-12 px-6 bg-white/5 hover:bg-white/10 text-white font-alexandria font-bold text-sm rounded-xl flex items-center justify-center gap-2 border border-white/10 transition-colors cursor-pointer"
+                className="h-12 px-6 bg-white/5 hover:bg-white/10 text-white font-cairo font-bold text-sm rounded-xl flex items-center justify-center gap-2 border border-white/10 transition-colors cursor-pointer"
               >
                 <span>🔒 نسيت كلمة المرور</span>
               </Link>
@@ -709,7 +766,7 @@ export default function CartCheckoutPage() {
     return (
       <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center text-white font-cairo">
         <Package className="w-16 h-16 text-zinc-700 mb-4" />
-        <h1 className="text-3xl font-alexandria font-bold mb-4">السلة فارغة حالياً</h1>
+        <h1 className="text-3xl font-cairo font-bold mb-4">السلة فارغة حالياً</h1>
         <Link href="/" className="text-rose-400 hover:text-rose-300 underline">العودة للرئيسية</Link>
       </div>
     );
@@ -744,7 +801,7 @@ export default function CartCheckoutPage() {
               >
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-rose-600 to-orange-400" />
                 
-                <h2 className="text-xl font-alexandria font-bold text-white mb-6">تفاصيل الطلب</h2>
+                <h2 className="text-xl font-cairo font-bold text-white mb-6">تفاصيل الطلب</h2>
                 
                 <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="space-y-4">
                   {/* Full Name */}
@@ -752,14 +809,14 @@ export default function CartCheckoutPage() {
                     <Label className="font-cairo font-bold text-zinc-400 text-sm">الاسم بالكامل *</Label>
                     <div className="relative">
                       <Input 
-                        placeholder="الاسم بالكامل" 
+                        placeholder="ادخل اسمك لإنشاء الحساب" 
                         className={cn(
-                          "h-12 rounded-xl bg-white/5 border text-white text-sm font-cairo hover:bg-white/[0.07] focus:bg-white/10 focus:ring-1 transition-all text-right",
+                          "h-12 rounded-xl bg-white/5 border text-white text-sm font-cairo hover:bg-white/[0.07] focus:bg-white/10 focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all text-right",
                           fullNameValue && fullNameValue.length > 0
                             ? (errors.fullName 
                                 ? "border-red-500/50 focus:border-red-500 focus:ring-red-500" 
                                 : "border-emerald-500/50 focus:border-emerald-500 focus:ring-emerald-500")
-                            : "border-white/5 focus:border-white/20 focus:ring-white/20"
+                            : "border-white/5"
                         )}
                         disabled={isLoading}
                         autoFocus
@@ -785,12 +842,12 @@ export default function CartCheckoutPage() {
                         type="email"
                         dir="ltr"
                         className={cn(
-                          "h-12 rounded-xl bg-white/5 border text-white text-sm font-cairo hover:bg-white/[0.07] focus:bg-white/10 focus:ring-1 transition-all pl-11",
+                          "h-12 rounded-xl bg-white/5 border text-white text-sm font-cairo hover:bg-white/[0.07] focus:bg-white/10 focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all pl-11",
                           emailValue && emailValue.length > 0
                             ? (errors.email 
                                 ? "border-red-500/50 focus:border-red-500 focus:ring-red-500" 
                                 : "border-emerald-500/50 focus:border-emerald-500 focus:ring-emerald-500")
-                            : "border-white/5 focus:border-white/20 focus:ring-white/20"
+                            : "border-white/5"
                         )}
                         disabled={isLoading}
                         {...register("email", {
@@ -830,12 +887,12 @@ export default function CartCheckoutPage() {
                             type="password"
                             dir="ltr"
                             className={cn(
-                              "h-12 rounded-xl bg-white/5 border text-white text-sm font-cairo hover:bg-white/[0.07] focus:bg-white/10 focus:ring-1 transition-all pl-11",
+                              "h-12 rounded-xl bg-white/5 border text-white text-sm font-cairo hover:bg-white/[0.07] focus:bg-white/10 focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all pl-11",
                               passwordValue && passwordValue.length > 0
                                 ? (errors.password 
                                     ? "border-red-500/50 focus:border-red-500 focus:ring-red-500" 
                                     : "border-emerald-500/50 focus:border-emerald-500 focus:ring-emerald-500")
-                                : "border-white/5 focus:border-white/20 focus:ring-white/20"
+                                : "border-white/5"
                             )}
                             disabled={isLoading}
                             {...register("password")}
@@ -999,52 +1056,190 @@ export default function CartCheckoutPage() {
                   {/* Payment Method Selector */}
                   <div className="pt-4 mt-4">
                     <Label className="font-cairo font-bold text-zinc-400 text-sm mb-3 block">طريقة الدفع</Label>
-                    <div className={cn("grid gap-3", currency === "EGP" ? "grid-cols-1 md:grid-cols-3" : "grid-cols-1")}>
+                    <div className="flex flex-col gap-3 w-full">
                       
-                      <div 
+                      {/* Card Option */}
+                      <motion.div 
+                        whileHover={{ scale: 1.01 }}
+                        whileTap={{ scale: 0.99 }}
                         onClick={() => setPaymentMethod("card")}
                         className={cn(
-                          "cursor-pointer border rounded-2xl p-3.5 flex items-center gap-3 transition-all duration-300 hover:scale-[1.01] active:scale-[0.99]",
+                          "relative cursor-pointer rounded-xl border transition-all duration-300 select-none",
+                          "flex flex-row items-center justify-between gap-4 h-[70px] px-4 py-3 w-full",
                           paymentMethod === "card" 
-                            ? "border-rose-500/50 bg-rose-500/10 shadow-[inset_0_0_30px_rgba(59,130,246,0.1)]" 
-                            : "border-white/5 bg-white/5 hover:border-white/10 hover:shadow-[inset_0_0_20px_rgba(255,255,255,0.02)]"
+                            ? "border-[#D6004B] bg-[#D6004B]/5 shadow-[0_0_20px_rgba(214,0,75,0.12)]" 
+                            : "border-white/5 bg-white/[0.01] hover:border-white/10 hover:bg-white/[0.02]"
                         )}
+                        dir="rtl"
                       >
-                        <div className={cn("w-5 h-5 rounded-full border-2 flex items-center justify-center", paymentMethod === "card" ? "border-rose-500" : "border-zinc-500")}>
-                          {paymentMethod === "card" && <div className="w-2.5 h-2.5 rounded-full bg-rose-500" />}
+                        {/* Right group: Radio + Text */}
+                        <div className="flex items-center gap-3.5">
+                          {/* Radio indicator */}
+                          <div className={cn(
+                            "w-5 h-5 rounded-full border flex items-center justify-center transition-all shrink-0",
+                            paymentMethod === "card" ? "border-[#D6004B] bg-[#D6004B]/10" : "border-white/10 bg-white/5"
+                          )}>
+                            {paymentMethod === "card" && <div className="w-2.5 h-2.5 rounded-full bg-[#D6004B]" />}
+                          </div>
+                          
+                          {/* Text */}
+                          <div className="text-right">
+                            <h4 className={cn("font-bold text-sm sm:text-base transition-colors leading-tight whitespace-nowrap", paymentMethod === "card" ? "text-white" : "text-zinc-300")}>
+                              البطاقات البنكية
+                            </h4>
+                          </div>
                         </div>
-                        <CreditCard className={cn("w-6 h-6", paymentMethod === "card" ? "text-rose-400" : "text-zinc-500")} />
-                        <div className="font-cairo">
-                          <p className={cn("font-bold", paymentMethod === "card" ? "text-white" : "text-zinc-300")}>البطاقات البنكية</p>
-                          <p className="text-xs text-zinc-500">Visa / Mastercard / Meeza</p>
-                        </div>
-                      </div>
 
+                        {/* Left group: Logos */}
+                        <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0" dir="ltr">
+                          <Image 
+                            src="/payment-logos/visa.svg" 
+                            alt="Visa" 
+                            width={54} 
+                            height={18} 
+                            className="h-5 sm:h-6 w-auto object-contain opacity-95" 
+                            priority
+                          />
+                          <Image 
+                            src="/payment-logos/mastercard.svg" 
+                            alt="Mastercard" 
+                            width={36} 
+                            height={22} 
+                            className="h-5 sm:h-6 w-auto object-contain opacity-95" 
+                            priority
+                          />
+                          <Image 
+                            src="/payment-logos/meeza.svg" 
+                            alt="Meeza" 
+                            width={41} 
+                            height={20} 
+                            className="h-5 sm:h-6 w-auto object-contain opacity-95" 
+                            priority
+                          />
+                        </div>
+                      </motion.div>
+
+                      {/* Wallet Option */}
                       {currency === "EGP" && (
-                        <div 
+                        <motion.div 
+                          whileHover={{ scale: 1.01 }}
+                          whileTap={{ scale: 0.99 }}
                           onClick={() => setPaymentMethod("wallet")}
                           className={cn(
-                            "cursor-pointer border rounded-2xl p-3.5 flex items-center gap-3 transition-all duration-300 hover:scale-[1.01] active:scale-[0.99]",
+                            "relative cursor-pointer rounded-xl border transition-all duration-300 select-none",
+                            "flex flex-col w-full px-4 py-0",
                             paymentMethod === "wallet" 
-                              ? "border-emerald-500/50 bg-emerald-500/10 shadow-[inset_0_0_30px_rgba(16,185,129,0.1)]" 
-                              : "border-white/5 bg-white/5 hover:border-white/10 hover:shadow-[inset_0_0_20px_rgba(255,255,255,0.02)]"
+                              ? "border-[#D6004B] bg-[#D6004B]/5 shadow-[0_0_20px_rgba(214,0,75,0.12)]" 
+                              : "border-white/5 bg-white/[0.01] hover:border-white/10 hover:bg-white/[0.02]"
                           )}
+                          dir="rtl"
                         >
-                          <div className={cn("w-5 h-5 rounded-full border-2 flex items-center justify-center", paymentMethod === "wallet" ? "border-emerald-500" : "border-zinc-500")}>
-                            {paymentMethod === "wallet" && <div className="w-2.5 h-2.5 rounded-full bg-emerald-500" />}
+                          {/* Header row — same height as card/instapay */}
+                          <div className="flex items-center justify-between w-full h-[70px]">
+                            <div className="flex items-center gap-3.5">
+                              {/* Radio indicator */}
+                              <div className={cn(
+                                "w-5 h-5 rounded-full border flex items-center justify-center transition-all shrink-0",
+                                paymentMethod === "wallet" ? "border-[#D6004B] bg-[#D6004B]/10" : "border-white/10 bg-white/5"
+                              )}>
+                                {paymentMethod === "wallet" && <div className="w-2.5 h-2.5 rounded-full bg-[#D6004B]" />}
+                              </div>
+                              
+                              {/* Text */}
+                              <div className="text-right">
+                                <h4 className={cn("font-bold text-sm sm:text-base transition-colors leading-tight whitespace-nowrap", paymentMethod === "wallet" ? "text-white" : "text-zinc-300")}>
+                                  محفظة إلكترونية
+                                </h4>
+                              </div>
+                            </div>
+
+                            {/* Left group: Logos */}
+                            <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0" dir="ltr">
+                              <Image 
+                                src="/payment-logos/vodafone.svg" 
+                                alt="Vodafone Cash" 
+                                width={20} 
+                                height={20} 
+                                className="h-5 sm:h-6 w-auto object-contain" 
+                              />
+                              <Image 
+                                src="/payment-logos/orange.svg" 
+                                alt="Orange Cash" 
+                                width={20} 
+                                height={20} 
+                                className="h-5 sm:h-6 w-auto object-contain rounded" 
+                              />
+                              <Image 
+                                src="/payment-logos/fawry.svg" 
+                                alt="Fawry" 
+                                width={50} 
+                                height={16} 
+                                className="h-5 sm:h-6 w-auto object-contain" 
+                              />
+                            </div>
                           </div>
-                          <div className="w-6 h-6 rounded flex items-center justify-center bg-zinc-800 shrink-0">
-                            <span className={cn("text-xs font-black font-sans", paymentMethod === "wallet" ? "text-emerald-400" : "text-zinc-500")}>Pay</span>
+
+                          {/* Expandable Inner Content (Input & Helper Text) */}
+                          <div className={cn(
+                            "transition-all duration-500 ease-in-out overflow-hidden w-full",
+                            paymentMethod === "wallet" ? "max-h-[200px] opacity-100 pb-4 pt-4 border-t border-white/5" : "max-h-0 opacity-0 pointer-events-none"
+                          )}>
+                            <div className="space-y-4">
+                              <div className="space-y-2">
+                                <div className={cn(
+                                  "relative flex items-center rounded-xl bg-white/[0.02] border transition-all h-14 w-full overflow-hidden", 
+                                  walletNumberError 
+                                    ? "border-red-500/40 focus-within:ring-2 focus-within:ring-red-500/10 focus-within:border-red-500" 
+                                    : (isWalletValid 
+                                        ? "border-emerald-500/40 focus-within:ring-2 focus-within:ring-emerald-500/10 focus-within:border-emerald-500" 
+                                        : "border-white/10 focus-within:border-[#D6004B] focus-within:ring-2 focus-within:ring-[#D6004B]/10 hover:border-white/20"
+                                      )
+                                )} dir="ltr">
+                                  {/* Country prefix on the left */}
+                                  <div className="flex items-center gap-2 px-4 border-r border-white/5 bg-white/[0.01] h-full shrink-0 select-none">
+                                    <span className="text-xl">🇪🇬</span>
+                                    <span className="text-sm font-semibold text-zinc-400 font-sans">+20</span>
+                                  </div>
+                                  {/* Input field */}
+                                  <input 
+                                    type="tel"
+                                    value={walletNumber}
+                                    onChange={handleWalletNumberChange}
+                                    placeholder="رقم الهاتف" 
+                                    maxLength={11}
+                                    inputMode="numeric"
+                                    className="h-full flex-grow bg-transparent text-white font-cairo text-base px-4 focus:outline-none placeholder-zinc-500 text-left placeholder-shown:text-right"
+                                    dir="ltr"
+                                    disabled={isLoading}
+                                  />
+                                  {/* Checkmark on the right */}
+                                  {isWalletValid && (
+                                    <div className="pr-3 shrink-0 flex items-center justify-center">
+                                      <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                                    </div>
+                                  )}
+                                </div>
+                                {walletNumberError && (
+                                  <p className="text-xs text-red-400 font-cairo flex items-center gap-1 mt-1 text-right" dir="rtl">
+                                    <ShieldAlert className="w-3 h-3 inline ml-1" /> {walletNumberError}
+                                  </p>
+                                )}
+                                {!walletNumberError && (
+                                  <p className="text-[11px] text-zinc-500 font-cairo text-right mt-1.5 leading-relaxed">
+                                    أدخل رقم هاتفك لتتمكن من الدفع بواسطة محفظة إلكترونية ثم اضغط على زر "دفع"
+                                  </p>
+                                )}
+                              </div>
+                            </div>
                           </div>
-                          <div className="font-cairo">
-                            <p className={cn("font-bold whitespace-nowrap", paymentMethod === "wallet" ? "text-white" : "text-zinc-300")}>المحافظ الإلكترونية</p>
-                            <p className="text-xs text-zinc-500">فودافون كاش والأخرى</p>
-                          </div>
-                        </div>
+                        </motion.div>
                       )}
 
+                      {/* Instapay Option */}
                       {currency === "EGP" && (
-                        <div 
+                        <motion.div 
+                          whileHover={{ scale: 1.01 }}
+                          whileTap={{ scale: 0.99 }}
                           onClick={async () => {
                             const fieldsToValidate: ("fullName" | "email" | "password")[] = ["fullName", "email"];
                             if (!user) {
@@ -1065,23 +1260,43 @@ export default function CartCheckoutPage() {
                             }
                           }}
                           className={cn(
-                            "cursor-pointer border rounded-2xl p-3.5 flex items-center gap-3 transition-all duration-300 hover:scale-[1.01] active:scale-[0.99]",
+                            "relative cursor-pointer rounded-xl border transition-all duration-300 select-none",
+                            "flex flex-row items-center justify-between gap-4 h-[70px] px-4 py-3 w-full",
                             paymentMethod === "instapay" 
-                              ? "border-purple-500/50 bg-purple-500/10 shadow-[inset_0_0_30px_rgba(147,51,234,0.1)]" 
-                              : "border-white/5 bg-white/5 hover:border-purple-500/30 hover:bg-purple-500/5 hover:shadow-[inset_0_0_20px_rgba(147,51,234,0.05)]"
+                              ? "border-[#D6004B] bg-[#D6004B]/5 shadow-[0_0_20px_rgba(214,0,75,0.12)]" 
+                              : "border-white/5 bg-white/[0.01] hover:border-purple-500/10 hover:bg-purple-500/[0.005] hover:border-white/10"
                           )}
+                          dir="rtl"
                         >
-                          <div className={cn("w-5 h-5 rounded-full border-2 flex items-center justify-center", paymentMethod === "instapay" ? "border-purple-500" : "border-zinc-500")}>
-                            {paymentMethod === "instapay" && <div className="w-2.5 h-2.5 rounded-full bg-purple-500" />}
+                          {/* Right group: Radio + Text */}
+                          <div className="flex items-center gap-3.5">
+                            {/* Radio indicator */}
+                            <div className={cn(
+                              "w-5 h-5 rounded-full border flex items-center justify-center transition-all shrink-0",
+                              paymentMethod === "instapay" ? "border-[#D6004B] bg-[#D6004B]/10" : "border-white/10 bg-white/5"
+                            )}>
+                              {paymentMethod === "instapay" && <div className="w-2.5 h-2.5 rounded-full bg-[#D6004B]" />}
+                            </div>
+                            
+                            {/* Text */}
+                            <div className="text-right">
+                              <h4 className={cn("font-bold text-sm sm:text-base transition-colors leading-tight whitespace-nowrap", paymentMethod === "instapay" ? "text-white" : "text-zinc-300")}>
+                                إنستاباي - Instapay
+                              </h4>
+                            </div>
                           </div>
-                          <div className="w-6 h-6 rounded flex items-center justify-center bg-purple-900/30 shrink-0">
-                            <span className={cn("text-[8px] font-black font-sans", paymentMethod === "instapay" ? "text-purple-400" : "text-zinc-500")}>IPN</span>
+
+                          {/* Left group: Logos */}
+                          <div className="flex items-center shrink-0 select-none" dir="ltr">
+                            <Image 
+                              src="/payment-logos/instapay.svg" 
+                              alt="Instapay" 
+                              width={64} 
+                              height={22} 
+                              className="h-5 sm:h-6 w-auto object-contain" 
+                            />
                           </div>
-                          <div className="font-cairo">
-                            <p className={cn("font-bold", paymentMethod === "instapay" ? "text-white" : "text-zinc-300")}>Instapay تحويل فوري</p>
-                            <p className="text-xs text-zinc-500">تحويل بنكي فوري عبر إنستاباي</p>
-                          </div>
-                        </div>
+                        </motion.div>
                       )}
 
                     </div>
@@ -1111,14 +1326,14 @@ export default function CartCheckoutPage() {
                             dir="ltr"
                             maxLength={19}
                             inputMode="numeric"
-                            className={cn("h-14 rounded-xl bg-white/5 border-white/5 text-white font-mono text-lg tracking-widest hover:bg-white/[0.07] focus:bg-white/10 focus:border-white/20 focus:ring-1 focus:ring-white/20 transition-all", 
+                            className={cn("h-14 rounded-xl bg-white/5 border-white/5 text-white font-mono text-lg tracking-widest hover:bg-white/[0.07] focus:bg-white/10 focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all", 
                               cardErrors.number ? "border-red-500/50 focus:ring-red-500" : (cardNumber.length === 19 ? "border-emerald-500/50 focus:ring-emerald-500" : "")
                             )}
                               disabled={isLoading}
                             />
                             {cardNumber.length === 19 && !cardErrors.number && <CheckCircle2 className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-emerald-500" />}
                           </div>
-                          {cardErrors.number && <p className="text-xs text-red-400 font-cairo flex items-center gap-1 mt-1"><ShieldAlert className="w-3 h-3" /> {cardErrors.number}</p>}
+                              {cardErrors.number && <p className="text-xs text-red-400 font-cairo flex items-center gap-1 mt-1"><ShieldAlert className="w-3 h-3" /> {cardErrors.number}</p>}
                         </div>
 
                       <div className="grid grid-cols-2 gap-3">
@@ -1131,8 +1346,8 @@ export default function CartCheckoutPage() {
                             dir="ltr"
                             maxLength={5}
                             inputMode="numeric"
-                            className={cn("h-12 rounded-xl bg-white/5 border-white/5 text-white font-mono text-base text-center hover:bg-white/[0.07] focus:bg-white/10 focus:border-white/20 focus:ring-1 focus:ring-white/20 transition-all", 
-                              cardErrors.expiry ? "border-red-500/50 focus:ring-red-500" : (expiryDate.length === 5 ? "border-emerald-500/50 focus:ring-emerald-500" : "")
+                            className={cn("h-12 rounded-xl bg-white/5 border-white/5 text-white font-mono text-base text-center hover:bg-white/[0.07] focus:bg-white/10 focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all", 
+                              cardErrors.expiry ? "border-red-500/50 focus:ring-red-500" : (expiryDate.length === 5 ? "border-emerald-500/40 focus:ring-emerald-500/20" : "")
                             )}
                             disabled={isLoading}
                           />
@@ -1148,11 +1363,11 @@ export default function CartCheckoutPage() {
                             dir="ltr"
                             maxLength={3}
                             inputMode="numeric"
-                            className={cn("h-12 rounded-xl bg-white/5 border-white/5 text-white font-mono text-base text-center hover:bg-white/[0.07] focus:bg-white/10 focus:border-white/20 focus:ring-1 focus:ring-white/20 transition-all", 
-                              cardErrors.cvv ? "border-red-500/50 focus:ring-red-500" : (cvv.length === 3 ? "border-emerald-500/50 focus:ring-emerald-500" : "")
+                            className={cn("h-12 rounded-xl bg-white/5 border-white/5 text-white font-mono text-base text-center hover:bg-white/[0.07] focus:bg-white/10 focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all", 
+                              cardErrors.cvv ? "border-red-500/50 focus:ring-red-500" : (cvv.length === 3 ? "border-emerald-500/40 focus:ring-emerald-500/20" : "")
                             )}
-                              disabled={isLoading}
-                            />
+                            disabled={isLoading}
+                          />
                             {cardErrors.cvv && <p className="text-xs text-red-400 font-cairo flex items-center gap-1 mt-1"><ShieldAlert className="w-3 h-3" /> {cardErrors.cvv}</p>}
                           </div>
                         </div>
@@ -1163,7 +1378,7 @@ export default function CartCheckoutPage() {
                           value={cardHolder}
                           onChange={handleCardHolderChange}
                           placeholder="الاسم كما هو مكتوب على البطاقة" 
-                          className={cn("h-12 rounded-xl bg-white/5 border-white/5 text-white text-sm font-cairo hover:bg-white/[0.07] focus:bg-white/10 focus:border-white/20 focus:ring-1 focus:ring-white/20 transition-all", 
+                          className={cn("h-12 rounded-xl bg-white/5 border-white/5 text-white text-sm font-cairo hover:bg-white/[0.07] focus:bg-white/10 focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all", 
                             cardErrors.holder ? "border-red-500/50 focus:ring-red-500" : (cardHolder.length >= 3 ? "border-emerald-500/50 focus:ring-emerald-500" : "")
                           )}
                           disabled={isLoading}
@@ -1192,12 +1407,7 @@ export default function CartCheckoutPage() {
                     <Button 
                       type="submit" 
                       disabled={isLoading}
-                      className={cn(
-                        "w-full h-14 text-white font-alexandria text-lg font-bold rounded-xl transition-all active:scale-[0.98]",
-                        paymentMethod === "card" 
-                          ? "bg-[#D6004B] hover:bg-[#b0003d] shadow-[0_4px_14px_0_rgba(214,0,75,0.39)] hover:shadow-[0_6px_20px_rgba(214,0,75,0.23)] hover:-translate-y-0.5" 
-                          : "bg-emerald-600 hover:bg-emerald-500 shadow-[0_4px_14px_0_rgba(16,185,129,0.39)] hover:shadow-[0_6px_20px_rgba(16,185,129,0.23)] hover:-translate-y-0.5"
-                      )}
+                      className="w-full h-14 text-white font-cairo text-lg font-bold rounded-xl transition-all active:scale-[0.98] bg-[#D6004B] hover:bg-[#b0003d] shadow-[0_4px_14px_0_rgba(214,0,75,0.39)] hover:shadow-[0_6px_20px_rgba(214,0,75,0.23)] hover:-translate-y-0.5"
                     >
                       {isLoading ? (
                         <>
@@ -1221,7 +1431,7 @@ export default function CartCheckoutPage() {
             <div className="lg:col-span-5">
               <div className="sticky top-24 space-y-6">
                 <div className="bg-white/5 border border-white/5 rounded-[2rem] p-6 md:p-8 backdrop-blur-2xl">
-                  <h3 className="font-alexandria font-bold text-white text-lg mb-5 flex items-center gap-2 border-b border-white/10 pb-4">
+                  <h3 className="font-cairo font-bold text-white text-lg mb-5 flex items-center gap-2 border-b border-white/10 pb-4">
                     <Package className="w-5 h-5 text-rose-500" />
                     منتجات السلة ({items.length})
                   </h3>
@@ -1267,9 +1477,9 @@ export default function CartCheckoutPage() {
                     )}
 
                     <div className="flex justify-between items-center pt-4 border-t border-white/10">
-                      <span className="font-alexandria font-bold text-white text-xl">الإجمالي</span>
+                      <span className="font-cairo font-bold text-white text-xl">الإجمالي</span>
                       <div className="flex items-baseline gap-1 text-white">
-                        <span className="text-3xl font-alexandria font-black">{formatPrice(resolvedCartTotal, currency)}</span>
+                        <span className="text-3xl font-cairo font-black">{formatPrice(resolvedCartTotal, currency)}</span>
                       </div>
                     </div>
 
@@ -1322,13 +1532,13 @@ export default function CartCheckoutPage() {
                 <div className="w-14 h-14 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center mx-auto mb-3">
                   <span className="text-xl font-black font-sans text-purple-400">IPN</span>
                 </div>
-                <h3 className="text-xl font-alexandria font-bold text-white">الدفع عبر Instapay</h3>
+                <h3 className="text-xl font-cairo font-bold text-white">الدفع عبر Instapay</h3>
                 <p className="text-sm text-zinc-400 font-cairo mt-1">قم بتحويل المبلغ ثم أرسل لقطة الشاشة</p>
               </div>
 
               <div className="bg-purple-500/10 border border-purple-500/20 rounded-2xl p-4">
                 <p className="text-sm text-purple-300 font-cairo mb-1">المبلغ المطلوب تحويله</p>
-                <p className="text-3xl font-alexandria font-black text-white">{formatPrice(resolvedCartTotal, currency)}</p>
+                <p className="text-3xl font-cairo font-black text-white">{formatPrice(resolvedCartTotal, currency)}</p>
               </div>
 
               <div className="bg-white rounded-2xl p-4 mx-auto max-w-[220px]">

@@ -62,7 +62,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
   const [isFetching, setIsFetching] = useState(true);
   const [product, setProduct] = useState<Product | null>(null);
   const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null);
-  const [paymentMethod, setPaymentMethod] = useState<"card" | "wallet" | "instapay" | null>("card");
+  const [paymentMethod, setPaymentMethod] = useState<"card" | "wallet" | "instapay" | null>(null);
   const [showInstapayModal, setShowInstapayModal] = useState(false);
   const [instapayReturnBanner, setInstapayReturnBanner] = useState(false);
   const [instapayScreenshot, setInstapayScreenshot] = useState<string | null>(null);
@@ -82,6 +82,55 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
   const [globalFeeEnabled, setGlobalFeeEnabled] = useState(true);
   const [globalFeePercentage, setGlobalFeePercentage] = useState(3.00);
   
+  // Wallet Fields State
+  const [walletNumber, setWalletNumber] = useState("");
+  const [walletNumberError, setWalletNumberError] = useState("");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const savedWallet = localStorage.getItem("joeschool_wallet_number") || "";
+      setWalletNumber(savedWallet);
+    }
+  }, []);
+
+  const handleWalletNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/\D/g, "").substring(0, 11);
+    setWalletNumber(value);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("joeschool_wallet_number", value);
+    }
+    
+    if (value.length > 0) {
+      if (value.startsWith("0")) {
+        if (value.length < 11) {
+          setWalletNumberError("رقم المحفظة يجب أن يكون 11 رقم");
+        } else if (!value.startsWith("01")) {
+          setWalletNumberError("رقم المحفظة يجب أن يبدأ بـ 01");
+        } else {
+          setWalletNumberError("");
+        }
+      } else if (value.startsWith("1")) {
+        if (value.length < 10) {
+          setWalletNumberError("رقم المحفظة يجب أن يكون 10 أرقام عند الإدخال بدون 0");
+        } else if (value.length > 10) {
+          setWalletNumberError("رقم المحفظة غير صحيح (الحد الأقصى 10 أرقام بدون 0)");
+        } else {
+          setWalletNumberError("");
+        }
+      } else {
+        setWalletNumberError("يجب أن يبدأ الرقم بـ 01 أو 1");
+      }
+    } else {
+      setWalletNumberError("");
+    }
+  };
+
+  const isWalletValid = 
+    !walletNumberError && (
+      (walletNumber.length === 11 && walletNumber.startsWith("01")) ||
+      (walletNumber.length === 10 && walletNumber.startsWith("1"))
+    );
+
   // Card Fields State
   const [cardNumber, setCardNumber] = useState("");
   const [expiryDate, setExpiryDate] = useState("");
@@ -89,6 +138,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
   const [cardHolder, setCardHolder] = useState("");
   const [cardErrors, setCardErrors] = useState({ number: "", expiry: "", cvv: "", holder: "" });
   const [cardType, setCardType] = useState<"visa" | "mastercard" | "meeza" | null>(null);
+  const [saveCard, setSaveCard] = useState(true);
   const cardNumberRef = useRef<HTMLInputElement>(null);
   const isFirstRender = useRef(true);
   const [showPassword, setShowPassword] = useState(false);
@@ -584,10 +634,23 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
 
     const isFree = appliedCoupon && appliedCoupon.percent === 100;
 
+    if (!isFree && !paymentMethod) {
+      toast.error("يُرجى اختيار طريقة الدفع أولاً");
+      return;
+    }
+
     if (!isFree && paymentMethod === "card") {
       const isValid = validateCardFields();
       if (!isValid) {
         toast.error("توجد أخطاء في بيانات البطاقة، يرجى مراجعتها.");
+        return;
+      }
+    }
+
+    if (!isFree && paymentMethod === "wallet") {
+      if (!isWalletValid) {
+        setWalletNumberError(walletNumber.length === 0 ? "رقم الهاتف مطلوب للدفع بالمحفظة" : "يرجى إدخال رقم محفظة صحيح مكون من 11 رقم يبدأ بـ 01");
+        toast.error("يرجى إدخال رقم محفظة إلكترونية صحيح");
         return;
       }
     }
@@ -677,6 +740,9 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
           cvv,
           cardHolder
         } : undefined,
+        walletNumber: (!isFree && paymentMethod === "wallet") 
+          ? (walletNumber.startsWith("1") ? `0${walletNumber}` : walletNumber) 
+          : undefined,
         gatewayFeeEnabled: isFeeActive,
         gatewayFeeAmount,
         subtotalPrice: subtotalEGP,
@@ -772,7 +838,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
     return (
       <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center text-white font-cairo">
         <Package className="w-16 h-16 text-zinc-700 mb-4" />
-        <h1 className="text-3xl font-alexandria font-bold mb-4">عذراً، المنتج غير متاح للcheckout</h1>
+        <h1 className="text-3xl font-cairo font-bold mb-4">عذراً، المنتج غير متاح للcheckout</h1>
         <Link href="/" className="text-rose-400 hover:text-rose-300 underline">العودة للرئيسية</Link>
       </div>
     );
@@ -861,7 +927,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
               <ChevronRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
               العودة لتفاصيل المنتج
             </Link>
-            <h1 className="text-3xl font-alexandria font-bold text-white mt-2">إتمـام الطلب</h1>
+            <h1 className="text-xl sm:text-2xl font-cairo font-bold text-white mt-2">إتمـام الطلب</h1>
           </div>
 
 
@@ -881,7 +947,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                 
                 {user ? (
                   <>
-                    <h2 className="text-2xl font-alexandria font-bold text-white leading-snug">لقد قمت بشراء هذا الكورس وإنشاء حساب بالفعل.</h2>
+                    <h2 className="text-2xl font-cairo font-bold text-white leading-snug">لقد قمت بشراء هذا الكورس وإنشاء حساب بالفعل.</h2>
                     <p className="text-zinc-400 text-sm max-w-md mx-auto font-cairo">
                       يمكنك متابعة التعلم مباشرة.
                     </p>
@@ -889,14 +955,14 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                     <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
                       <Link
                         href={enrolledCourseSlug ? `/learn/${enrolledCourseSlug}/${firstLessonSlug || ""}` : "/dashboard"}
-                        className="h-12 px-8 bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white font-alexandria font-bold text-sm rounded-xl flex items-center justify-center gap-2 shadow-[0_4px_14px_rgba(244,63,94,0.25)] transition-all active:scale-[0.98] cursor-pointer"
+                        className="h-12 px-8 bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white font-cairo font-bold text-sm rounded-xl flex items-center justify-center gap-2 shadow-[0_4px_14px_rgba(244,63,94,0.25)] transition-all active:scale-[0.98] cursor-pointer"
                       >
                         <span>🎓 اذهب إلى الكورس الآن</span>
                       </Link>
                       
                       <Link
                         href="/dashboard"
-                        className="h-12 px-6 bg-white/5 hover:bg-white/10 text-white font-alexandria font-bold text-sm rounded-xl flex items-center justify-center gap-2 border border-white/10 transition-colors cursor-pointer"
+                        className="h-12 px-6 bg-white/5 hover:bg-white/10 text-white font-cairo font-bold text-sm rounded-xl flex items-center justify-center gap-2 border border-white/10 transition-colors cursor-pointer"
                       >
                         <LayoutDashboard className="w-4 h-4 text-zinc-400" />
                         <span>لوحة التحكم</span>
@@ -905,7 +971,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                   </>
                 ) : (
                   <>
-                    <h2 className="text-2xl font-alexandria font-bold text-white leading-snug">تم العثور على اشتراك سابق لهذا البريد الإلكتروني.</h2>
+                    <h2 className="text-2xl font-cairo font-bold text-white leading-snug">تم العثور على اشتراك سابق لهذا البريد الإلكتروني.</h2>
                     <p className="text-zinc-400 text-sm max-w-md mx-auto font-cairo">
                       لقد قمت بشراء هذا الكورس وإنشاء حساب بالفعل. يرجى تسجيل الدخول للوصول إلى محتوى الكورس.
                     </p>
@@ -913,14 +979,14 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                     <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
                       <Link
                         href={`/login?email=${encodeURIComponent(emailValue || "")}&redirect=${encodeURIComponent(enrolledCourseSlug ? `/learn/${enrolledCourseSlug}/${firstLessonSlug || ""}` : `/checkout/${resolvedParams.id}`)}`}
-                        className="h-12 px-8 bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white font-alexandria font-bold text-sm rounded-xl flex items-center justify-center gap-2 shadow-[0_4px_14px_rgba(244,63,94,0.25)] transition-all active:scale-[0.98] cursor-pointer"
+                        className="h-12 px-8 bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white font-cairo font-bold text-sm rounded-xl flex items-center justify-center gap-2 shadow-[0_4px_14px_rgba(244,63,94,0.25)] transition-all active:scale-[0.98] cursor-pointer"
                       >
                         <span>🔑 تسجيل الدخول</span>
                       </Link>
                       
                       <Link
                         href="/login/forgot-password"
-                        className="h-12 px-6 bg-white/5 hover:bg-white/10 text-white font-alexandria font-bold text-sm rounded-xl flex items-center justify-center gap-2 border border-white/10 transition-colors cursor-pointer"
+                        className="h-12 px-6 bg-white/5 hover:bg-white/10 text-white font-cairo font-bold text-sm rounded-xl flex items-center justify-center gap-2 border border-white/10 transition-colors cursor-pointer"
                       >
                         <span>🔒 نسيت كلمة المرور</span>
                       </Link>
@@ -937,22 +1003,13 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                     
                     {/* Personal Information */}
                     <div className="bg-white/[0.015] backdrop-blur-2xl border border-white/5 rounded-3xl p-6 sm:p-8 hover:border-white/10 transition-all duration-300 shadow-[0_8px_32px_rgba(0,0,0,0.37)]">
-                      <div className="flex items-center gap-3 mb-6">
-                        <div className="w-10 h-10 rounded-xl bg-[#ff0f53]/10 flex items-center justify-center text-[#ff0f53] border border-[#ff0f53]/20">
-                          <User className="w-5 h-5" />
-                        </div>
-                        <div className="text-right">
-                          <h3 className="font-alexandria font-bold text-white text-base">بياناتك الشخصية</h3>
-                          <p className="text-[11px] text-zinc-500 mt-0.5">نستخدم بياناتك لتأكيد طلبك وإرسال الوصول للكورس</p>
-                        </div>
-                      </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {/* Full Name */}
                         <div className="space-y-2">
                           <Label className="font-cairo font-bold text-zinc-400 text-sm">الاسم بالكامل *</Label>
                           <Input 
-                            placeholder="الاسم بالكامل" 
+                            placeholder="ادخل اسمك لإنشاء الحساب" 
                             className={cn(
                               "h-12 rounded-lg bg-white/[0.02] border text-white text-sm font-cairo hover:bg-white/[0.05] focus:bg-white/[0.07] focus:ring-1 focus:ring-rose-500/20 focus:border-rose-500/40 transition-all text-right pr-4 pl-4",
                               fullNameValue && fullNameValue.length > 0
@@ -1113,7 +1170,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                       <div className="bg-white/[0.015] backdrop-blur-2xl border border-white/5 rounded-3xl p-5 md:p-8 hover:border-white/10 transition-all duration-300 shadow-[0_8px_32px_rgba(0,0,0,0.37)]">
                         <div className="flex items-center justify-start gap-2.5 mb-5 select-none" dir="rtl">
                           <CreditCard className="w-5 h-5 text-[#ff0f53] shrink-0" />
-                          <h3 className="font-alexandria font-bold text-white text-base">اختر طريقة الدفع</h3>
+                          <h3 className="font-cairo font-bold text-white text-base">اختر طريقة الدفع</h3>
                         </div>
 
                         <div className="flex flex-col gap-3 w-full">
@@ -1126,7 +1183,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                               "relative cursor-pointer rounded-xl border transition-all duration-300 select-none",
                               "flex flex-row items-center justify-between gap-4 h-[70px] px-4 py-3 w-full",
                               paymentMethod === "card" 
-                                ? "border-[#ff0f53]/50 bg-[#ff0f53]/5 shadow-[0_0_20px_rgba(255,15,83,0.12)]" 
+                                ? "border-[#D6004B] bg-[#D6004B]/5 shadow-[0_0_20px_rgba(214,0,75,0.12)]" 
                                 : "border-white/5 bg-white/[0.01] hover:border-white/10 hover:bg-white/[0.02]"
                             )}
                             dir="rtl"
@@ -1136,9 +1193,9 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                               {/* Radio indicator */}
                               <div className={cn(
                                 "w-5 h-5 rounded-full border flex items-center justify-center transition-all shrink-0",
-                                paymentMethod === "card" ? "border-[#ff0f53] bg-[#ff0f53]/10" : "border-white/10 bg-white/5"
+                                paymentMethod === "card" ? "border-[#D6004B] bg-[#D6004B]/10" : "border-white/10 bg-white/5"
                               )}>
-                                {paymentMethod === "card" && <div className="w-2.5 h-2.5 rounded-full bg-[#ff0f53]" />}
+                                {paymentMethod === "card" && <div className="w-2.5 h-2.5 rounded-full bg-[#D6004B]" />}
                               </div>
                               
                               {/* Text */}
@@ -1155,27 +1212,24 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                                 src="/payment-logos/visa.svg" 
                                 alt="Visa" 
                                 width={54} 
-                                // aspect ratio is 3.08
                                 height={18} 
-                                className="h-3.5 sm:h-5 w-auto object-contain opacity-95" 
+                                className="h-5 sm:h-6 w-auto object-contain opacity-95" 
                                 priority
                               />
                               <Image 
                                 src="/payment-logos/mastercard.svg" 
                                 alt="Mastercard" 
                                 width={36} 
-                                // aspect ratio is 1.62
                                 height={22} 
-                                className="h-4 sm:h-5.5 w-auto object-contain opacity-95" 
+                                className="h-5 sm:h-6 w-auto object-contain opacity-95" 
                                 priority
                               />
                               <Image 
                                 src="/payment-logos/meeza.svg" 
                                 alt="Meeza" 
                                 width={41} 
-                                // aspect ratio is 2.06
                                 height={20} 
-                                className="h-3.5 sm:h-5 w-auto object-contain opacity-95" 
+                                className="h-5 sm:h-6 w-auto object-contain opacity-95" 
                                 priority
                               />
                             </div>
@@ -1189,55 +1243,110 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                               onClick={() => setPaymentMethod("wallet")}
                               className={cn(
                                 "relative cursor-pointer rounded-xl border transition-all duration-300 select-none",
-                                "flex flex-row items-center justify-between gap-4 h-[70px] px-4 py-3 w-full",
+                                "flex flex-col w-full px-4 py-0",
                                 paymentMethod === "wallet" 
-                                  ? "border-emerald-500/50 bg-emerald-500/5 shadow-[0_0_20px_rgba(16,185,129,0.12)]" 
+                                  ? "border-[#D6004B] bg-[#D6004B]/5 shadow-[0_0_20px_rgba(214,0,75,0.12)]" 
                                   : "border-white/5 bg-white/[0.01] hover:border-white/10 hover:bg-white/[0.02]"
                               )}
                               dir="rtl"
                             >
-                              {/* Right group: Radio + Text */}
-                              <div className="flex items-center gap-3.5">
-                                {/* Radio indicator */}
-                                <div className={cn(
-                                  "w-5 h-5 rounded-full border flex items-center justify-center transition-all shrink-0",
-                                  paymentMethod === "wallet" ? "border-emerald-500 bg-emerald-500/10" : "border-white/10 bg-white/5"
-                                )}>
-                                  {paymentMethod === "wallet" && <div className="w-2.5 h-2.5 rounded-full bg-emerald-500" />}
+                              {/* Header row — same height as card/instapay */}
+                              <div className="flex items-center justify-between w-full h-[70px]">
+                                <div className="flex items-center gap-3.5">
+                                  {/* Radio indicator */}
+                                  <div className={cn(
+                                    "w-5 h-5 rounded-full border flex items-center justify-center transition-all shrink-0",
+                                    paymentMethod === "wallet" ? "border-[#D6004B] bg-[#D6004B]/10" : "border-white/10 bg-white/5"
+                                  )}>
+                                    {paymentMethod === "wallet" && <div className="w-2.5 h-2.5 rounded-full bg-[#D6004B]" />}
+                                  </div>
+                                  
+                                  {/* Text */}
+                                  <div className="text-right">
+                                    <h4 className={cn("font-bold text-sm sm:text-base transition-colors leading-tight whitespace-nowrap", paymentMethod === "wallet" ? "text-white" : "text-zinc-300")}>
+                                      محفظة إلكترونية
+                                    </h4>
+                                  </div>
                                 </div>
-                                
-                                {/* Text */}
-                                <div className="text-right">
-                                  <h4 className={cn("font-bold text-sm sm:text-base transition-colors leading-tight whitespace-nowrap", paymentMethod === "wallet" ? "text-white" : "text-zinc-300")}>
-                                    المحافظ الإلكترونية
-                                  </h4>
+
+                                {/* Left group: Logos */}
+                                <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0" dir="ltr">
+                                  <Image 
+                                    src="/payment-logos/vodafone.svg" 
+                                    alt="Vodafone Cash" 
+                                    width={20} 
+                                    height={20} 
+                                    className="h-5 sm:h-6 w-auto object-contain" 
+                                  />
+                                  <Image 
+                                    src="/payment-logos/orange.svg" 
+                                    alt="Orange Cash" 
+                                    width={20} 
+                                    height={20} 
+                                    className="h-5 sm:h-6 w-auto object-contain rounded" 
+                                  />
+                                  <Image 
+                                    src="/payment-logos/fawry.svg" 
+                                    alt="Fawry" 
+                                    width={50} 
+                                    height={16} 
+                                    className="h-5 sm:h-6 w-auto object-contain" 
+                                  />
                                 </div>
                               </div>
 
-                              {/* Left group: Logos */}
-                              <div className="flex flex-row items-center gap-1.5 sm:gap-2 justify-start shrink-0 select-none" dir="ltr">
-                                <Image 
-                                  src="/payment-logos/vodafone-icon.svg" 
-                                  alt="Vodafone Cash" 
-                                  width={24} 
-                                  height={24} 
-                                  className="h-4.5 sm:h-6.5 w-auto object-contain" 
-                                />
-                                <Image 
-                                  src="/payment-logos/orange-cash.svg" 
-                                  alt="Orange Cash" 
-                                  width={20} 
-                                  height={23} 
-                                  className="h-4.5 sm:h-6.5 w-auto object-contain" 
-                                />
-
-                                <Image 
-                                  src="/payment-logos/fawry.svg" 
-                                  alt="Fawry" 
-                                  width={63} 
-                                  height={20} 
-                                  className="h-4 sm:h-5.5 w-auto object-contain" 
-                                />
+                              {/* Expandable Inner Content (Input & Helper Text) */}
+                              <div className={cn(
+                                "transition-all duration-500 ease-in-out overflow-hidden w-full",
+                                paymentMethod === "wallet" ? "max-h-[200px] opacity-100 pb-4 pt-4 border-t border-white/5" : "max-h-0 opacity-0 pointer-events-none"
+                              )}>
+                                <div className="space-y-4">
+                                  <div className="space-y-2">
+                                    <div className={cn(
+                                      "relative flex items-center rounded-xl bg-white/[0.02] border transition-all h-14 w-full overflow-hidden", 
+                                      walletNumberError 
+                                        ? "border-red-500/40 focus-within:ring-2 focus-within:ring-red-500/10 focus-within:border-red-500" 
+                                        : (isWalletValid 
+                                            ? "border-emerald-500/40 focus-within:ring-2 focus-within:ring-emerald-500/10 focus-within:border-emerald-500" 
+                                            : "border-white/10 focus-within:border-[#D6004B] focus-within:ring-2 focus-within:ring-[#D6004B]/10 hover:border-white/20"
+                                          )
+                                    )} dir="ltr">
+                                      {/* Country prefix on the left */}
+                                      <div className="flex items-center gap-2 px-4 border-r border-white/5 bg-white/[0.01] h-full shrink-0 select-none">
+                                        <span className="text-xl">🇪🇬</span>
+                                        <span className="text-sm font-semibold text-zinc-400 font-sans">+20</span>
+                                      </div>
+                                      {/* Input field */}
+                                      <input 
+                                        type="tel"
+                                        value={walletNumber}
+                                        onChange={handleWalletNumberChange}
+                                        placeholder="رقم الهاتف" 
+                                        maxLength={11}
+                                        inputMode="numeric"
+                                        className="h-full flex-grow bg-transparent text-white font-cairo text-base px-4 focus:outline-none placeholder-zinc-500 text-left placeholder-shown:text-right"
+                                        dir="ltr"
+                                        disabled={isLoading}
+                                      />
+                                      {/* Checkmark on the right */}
+                                      {isWalletValid && (
+                                        <div className="pr-3 shrink-0 flex items-center justify-center">
+                                          <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                                        </div>
+                                      )}
+                                    </div>
+                                    {walletNumberError && (
+                                      <p className="text-xs text-red-400 font-cairo flex items-center gap-1 mt-1 text-right" dir="rtl">
+                                        <ShieldAlert className="w-3 h-3 inline ml-1" /> {walletNumberError}
+                                      </p>
+                                    )}
+                                    {!walletNumberError && (
+                                      <p className="text-[11px] text-zinc-500 font-cairo text-right mt-1.5 leading-relaxed">
+                                        سيتم استخدام هذا الرقم لإرسال طلب الدفع إلى محفظتك الإلكترونية.
+                                      </p>
+                                    )}
+                                  </div>
+                                </div>
                               </div>
                             </motion.div>
                           )}
@@ -1252,7 +1361,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                                 "relative cursor-pointer rounded-xl border transition-all duration-300 select-none",
                                 "flex flex-row items-center justify-between gap-4 h-[70px] px-4 py-3 w-full",
                                 paymentMethod === "instapay" 
-                                  ? "border-purple-500/50 bg-purple-500/5 shadow-[0_0_20px_rgba(168,85,247,0.12)]" 
+                                  ? "border-[#D6004B] bg-[#D6004B]/5 shadow-[0_0_20px_rgba(214,0,75,0.12)]" 
                                   : "border-white/5 bg-white/[0.01] hover:border-purple-500/10 hover:bg-purple-500/[0.005] hover:border-white/10"
                               )}
                               dir="rtl"
@@ -1262,9 +1371,9 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                                 {/* Radio indicator */}
                                 <div className={cn(
                                   "w-5 h-5 rounded-full border flex items-center justify-center transition-all shrink-0",
-                                  paymentMethod === "instapay" ? "border-purple-500 bg-purple-500/10" : "border-white/10 bg-white/5"
+                                  paymentMethod === "instapay" ? "border-[#D6004B] bg-[#D6004B]/10" : "border-white/10 bg-white/5"
                                 )}>
-                                  {paymentMethod === "instapay" && <div className="w-2.5 h-2.5 rounded-full bg-purple-500" />}
+                                  {paymentMethod === "instapay" && <div className="w-2.5 h-2.5 rounded-full bg-[#D6004B]" />}
                                 </div>
                                 
                                 {/* Text */}
@@ -1282,7 +1391,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                                   alt="Instapay" 
                                   width={64} 
                                   height={22} 
-                                  className="h-4.5 sm:h-6 w-auto object-contain" 
+                                  className="h-5 sm:h-6 w-auto object-contain" 
                                 />
                               </div>
                             </motion.div>
@@ -1297,7 +1406,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                           <div className="space-y-4">
                             <div className="flex items-center justify-start gap-2.5 mb-1" dir="rtl">
                               <Lock className="w-5 h-5 text-[#ff0f53] shrink-0" />
-                              <h3 className="font-alexandria font-bold text-white text-base">بيانات البطاقة</h3>
+                              <h3 className="font-cairo font-bold text-white text-base">بيانات البطاقة</h3>
                             </div>
                             <p className="text-[11px] text-zinc-500 pr-7 text-right block mb-4">جميع البيانات مشفرة وآمنة</p>
 
@@ -1379,6 +1488,26 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                                 />
                                 {cardErrors.holder && <p className="text-[10px] text-red-400 font-cairo flex items-center gap-1 mt-1 text-right" dir="rtl"><ShieldAlert className="w-3 h-3 inline ml-1" /> {cardErrors.holder}</p>}
                               </div>
+
+                              {/* Save Card Checkbox */}
+                              <label className="flex items-center gap-3 cursor-pointer select-none group mt-1" dir="rtl">
+                                <div 
+                                  onClick={() => setSaveCard(!saveCard)}
+                                  className={cn(
+                                    "w-5 h-5 rounded-md border flex items-center justify-center transition-all shrink-0",
+                                    saveCard 
+                                      ? "bg-[#D6004B] border-[#D6004B] shadow-[0_0_8px_rgba(214,0,75,0.3)]" 
+                                      : "border-white/15 bg-white/5 group-hover:border-white/25"
+                                  )}
+                                >
+                                  {saveCard && (
+                                    <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                  )}
+                                </div>
+                                <span className="text-xs text-zinc-400 group-hover:text-zinc-300 transition-colors font-cairo">حفظ بيانات البطاقة لعمليات الشراء القادمة</span>
+                              </label>
                             </div>
                           </div>
                         </div>
@@ -1408,18 +1537,10 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                               }}
                               disabled={isLoading}
                               className={cn(
-                                "w-full h-14 font-alexandria text-lg font-bold rounded-xl transition-all duration-300",
+                                "w-full h-14 font-cairo text-lg font-bold rounded-xl transition-all duration-300",
                                 isFormValid
-                                  ? (paymentMethod === "card" 
-                                      ? "bg-[#D6004B] text-white hover:bg-[#b0003d] shadow-[0_4px_20px_0_rgba(214,0,75,0.4)] cursor-pointer active:scale-[0.98]" 
-                                      : paymentMethod === "instapay"
-                                        ? "bg-purple-600 text-white hover:bg-purple-500 shadow-[0_4px_20px_0_rgba(147,51,234,0.4)] cursor-pointer active:scale-[0.98]"
-                                        : "bg-emerald-600 text-white hover:bg-emerald-500 shadow-[0_4px_20px_0_rgba(16,185,129,0.4)] cursor-pointer active:scale-[0.98]")
-                                  : (paymentMethod === "card"
-                                      ? "bg-[#D6004B]/30 text-white/50 cursor-not-allowed shadow-none"
-                                      : paymentMethod === "instapay"
-                                        ? "bg-purple-600/30 text-white/50 cursor-not-allowed shadow-none"
-                                        : "bg-emerald-600/30 text-white/50 cursor-not-allowed shadow-none")
+                                  ? "bg-[#D6004B] text-white hover:bg-[#b0003d] shadow-[0_4px_20px_0_rgba(214,0,75,0.4)] cursor-pointer active:scale-[0.98]"
+                                  : "bg-[#D6004B]/30 text-white/50 cursor-not-allowed shadow-none"
                               )}
                             >
                               {isLoading ? (
@@ -1428,13 +1549,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                                   جاري تجهيز الدفع...
                                 </>
                               ) : (
-                                paymentMethod === "card" ? (
-                                  <>إتمام الطلب عن طريق البطاقة <Lock className="w-5 h-5 mr-3 opacity-80" /></>
-                                ) : paymentMethod === "instapay" ? (
-                                  <>إتمام الطلب عن طريق إنستاباي</>
-                                ) : paymentMethod === "wallet" ? (
-                                  <>إتمام الطلب عن طريق المحفظة</>
-                                ) : null
+                                <>إتمام الدفع - {formatPrice(finalPriceFormatted, currency)}</>
                               )}
                             </Button>
                           ) : null}
@@ -1444,7 +1559,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                           type="submit" 
                           disabled={isLoading}
                           className={cn(
-                            "w-full h-14 font-alexandria text-lg font-bold rounded-xl transition-all duration-300",
+                            "w-full h-14 font-cairo text-lg font-bold rounded-xl transition-all duration-300",
                             isFormValid
                               ? "bg-gradient-to-r from-emerald-500 to-teal-600 text-white hover:from-emerald-600 hover:to-teal-700 shadow-[0_4px_20px_rgba(16,185,129,0.4)] cursor-pointer active:scale-[0.98]"
                               : "bg-gradient-to-r from-emerald-500/30 to-teal-600/30 text-white/50 cursor-not-allowed shadow-none"
@@ -1474,41 +1589,9 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
 
                     {/* Mobile-only Order Summary & Invoice Card */}
                     <div className="block lg:hidden bg-white/[0.015] backdrop-blur-2xl border border-white/5 rounded-3xl p-6 sm:p-8 hover:border-white/10 transition-all duration-300 shadow-[0_8px_32px_rgba(0,0,0,0.37)] space-y-6 mt-6">
-                      <div className="mb-2">
-                        <h3 className="font-alexandria font-bold text-white text-base text-right">ملخص الطلب والفاتورة</h3>
-                      </div>
-
-                      {/* Product details */}
-                      <div className="flex items-center gap-4">
-                        {product.image_url ? (
-                          <div className="relative w-16 h-16 rounded-2xl overflow-hidden border border-white/10 shrink-0">
-                            <Image
-                              src={product.image_url}
-                              alt={product.title}
-                              fill
-                              className="object-cover"
-                            />
-                          </div>
-                        ) : (
-                          <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10 shrink-0">
-                            <Package className="w-6 h-6 text-zinc-500" />
-                          </div>
-                        )}
-                        <div className="text-right">
-                          <h3 className="text-sm font-alexandria font-bold text-white leading-relaxed">
-                            {product.title}
-                          </h3>
-                          {isCourse && (
-                            <span className="inline-flex items-center gap-1 text-[10px] text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-full mt-1 font-bold">
-                              <Sparkles className="w-2.5 h-2.5 animate-pulse" />
-                              انضمام فوري للقسم
-                            </span>
-                          )}
-                        </div>
-                      </div>
 
                       {/* Coupon Input */}
-                      <div className="border-t border-white/5 pt-4">
+                      <div>
                         {appliedCoupon ? (
                           <div className="flex items-center justify-between bg-emerald-500/10 border border-emerald-500/20 px-3 py-2 rounded-xl w-full">
                             <div className="flex items-center gap-1.5">
@@ -1585,18 +1668,44 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
 
                         <div className="flex justify-between items-center border-t border-white/5 pt-4">
                           <span className="text-white font-bold">الإجمالي:</span>
-                          <span className="text-lg text-white font-alexandria font-black">
+                          <span className="text-lg text-white font-cairo font-black">
                             {formatPrice(finalPriceFormatted, currency)}
                           </span>
+                        </div>
+                      </div>
+
+                      {/* Product details */}
+                      <div className="flex items-center gap-4 border-t border-white/5 pt-4">
+                        {product.image_url ? (
+                          <div className="relative w-16 h-16 rounded-2xl overflow-hidden border border-white/10 shrink-0">
+                            <Image
+                              src={product.image_url}
+                              alt={product.title}
+                              fill
+                              className="object-cover"
+                            />
+                          </div>
+                        ) : (
+                          <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10 shrink-0">
+                            <Package className="w-6 h-6 text-zinc-500" />
+                          </div>
+                        )}
+                        <div className="text-right">
+                          <h3 className="text-sm font-cairo font-bold text-white leading-relaxed">
+                            {product.title}
+                          </h3>
+                          {isCourse && (
+                            <span className="inline-flex items-center gap-1 text-[10px] text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-full mt-1 font-bold">
+                              <Sparkles className="w-2.5 h-2.5 animate-pulse" />
+                              انضمام فوري للقسم
+                            </span>
+                          )}
                         </div>
                       </div>
                     </div>
 
                     {/* Desktop-only Invoice & Payment Card */}
                     <div className="hidden lg:block bg-white/[0.015] backdrop-blur-2xl border border-white/5 rounded-3xl p-6 sm:p-8 hover:border-white/10 transition-all duration-300 shadow-[0_8px_32px_rgba(0,0,0,0.37)] space-y-6">
-                      <div className="mb-2">
-                        <h3 className="font-alexandria font-bold text-white text-base text-right">ملخص الفاتورة</h3>
-                      </div>
 
                       <div className="border-b border-white/5 pb-4 mb-6 space-y-3 font-cairo text-sm text-zinc-400">
                         <div className="flex justify-between items-center">
@@ -1635,7 +1744,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
 
                         <div className="flex justify-between items-center border-t border-white/5 pt-4">
                           <span className="text-white font-bold">الإجمالي:</span>
-                          <span className="text-lg text-white font-alexandria font-black">
+                          <span className="text-lg text-white font-cairo font-black">
                             {formatPrice(finalPriceFormatted, currency)}
                           </span>
                         </div>
@@ -1662,18 +1771,10 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                               }}
                               disabled={isLoading}
                               className={cn(
-                                "w-full h-14 font-alexandria text-lg font-bold rounded-xl transition-all duration-300",
+                                "w-full h-14 font-cairo text-lg font-bold rounded-xl transition-all duration-300",
                                 isFormValid
-                                  ? (paymentMethod === "card" 
-                                      ? "bg-[#D6004B] text-white hover:bg-[#b0003d] shadow-[0_4px_20px_0_rgba(214,0,75,0.4)] cursor-pointer active:scale-[0.98]" 
-                                      : paymentMethod === "instapay"
-                                        ? "bg-purple-600 text-white hover:bg-purple-500 shadow-[0_4px_20px_0_rgba(147,51,234,0.4)] cursor-pointer active:scale-[0.98]"
-                                        : "bg-emerald-600 text-white hover:bg-emerald-500 shadow-[0_4px_20px_0_rgba(16,185,129,0.4)] cursor-pointer active:scale-[0.98]")
-                                  : (paymentMethod === "card"
-                                      ? "bg-[#D6004B]/30 text-white/50 cursor-not-allowed shadow-none"
-                                      : paymentMethod === "instapay"
-                                        ? "bg-purple-600/30 text-white/50 cursor-not-allowed shadow-none"
-                                        : "bg-emerald-600/30 text-white/50 cursor-not-allowed shadow-none")
+                                  ? "bg-[#D6004B] text-white hover:bg-[#b0003d] shadow-[0_4px_20px_0_rgba(214,0,75,0.4)] cursor-pointer active:scale-[0.98]"
+                                  : "bg-[#D6004B]/30 text-white/50 cursor-not-allowed shadow-none"
                               )}
                             >
                               {isLoading ? (
@@ -1682,13 +1783,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                                   جاري تجهيز الدفع...
                                 </>
                               ) : (
-                                paymentMethod === "card" ? (
-                                  <>إتمام الطلب عن طريق البطاقة <Lock className="w-5 h-5 mr-3 opacity-80" /></>
-                                ) : paymentMethod === "instapay" ? (
-                                  <>إتمام الطلب عن طريق إنستاباي</>
-                                ) : paymentMethod === "wallet" ? (
-                                  <>إتمام الطلب عن طريق المحفظة</>
-                                ) : null
+                                <>إتمام الدفع - {formatPrice(finalPriceFormatted, currency)}</>
                               )}
                             </Button>
                           ) : null}
@@ -1698,7 +1793,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                           type="submit" 
                           disabled={isLoading}
                           className={cn(
-                            "w-full h-14 font-alexandria text-lg font-bold rounded-xl transition-all duration-300",
+                            "w-full h-14 font-cairo text-lg font-bold rounded-xl transition-all duration-300",
                             isFormValid
                               ? "bg-gradient-to-r from-emerald-500 to-teal-600 text-white hover:from-emerald-600 hover:to-teal-700 shadow-[0_4px_20px_rgba(16,185,129,0.4)] cursor-pointer active:scale-[0.98]"
                               : "bg-gradient-to-r from-emerald-500/30 to-teal-600/30 text-white/50 cursor-not-allowed shadow-none"
@@ -1734,38 +1829,8 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                 <div className="hidden lg:block lg:col-span-4 lg:sticky lg:top-32 space-y-6">
                   <div className="bg-white/[0.015] backdrop-blur-2xl border border-white/5 rounded-3xl p-6 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] hover:border-white/10 transition-all duration-300">
                     
-                    {/* Product Image and Title */}
-                    <div className="flex flex-col gap-4 mb-6">
-                      {product.image_url ? (
-                        <div className="relative w-full aspect-video rounded-2xl overflow-hidden border border-white/5">
-                          <Image
-                            src={product.image_url}
-                            alt={product.title}
-                            fill
-                            className="object-cover"
-                          />
-                        </div>
-                      ) : (
-                        <div className="w-full aspect-video rounded-2xl bg-white/5 flex items-center justify-center border border-white/5">
-                          <Package className="w-12 h-12 text-zinc-600" />
-                        </div>
-                      )}
-                      
-                      <div className="text-right">
-                        <h3 className="text-base font-alexandria font-bold text-white leading-relaxed">
-                          {product.title}
-                        </h3>
-                        {isCourse && (
-                          <span className="inline-flex items-center gap-1.5 text-[10px] text-rose-400 bg-rose-500/10 px-3 py-1 rounded-full mt-2 font-bold">
-                            <Sparkles className="w-3 h-3 animate-pulse" />
-                            انضمام فوري للقسم
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
                     {/* Coupon Field inside Sidebar */}
-                    <div className="border-t border-white/5 pt-4 mb-6">
+                    <div className="mb-6">
                       <Label className="font-cairo text-xs text-zinc-400 block mb-2 text-right">كوبون الخصم</Label>
                       {appliedCoupon ? (
                         <div className="flex items-center justify-between bg-emerald-500/10 border border-emerald-500/20 px-3 py-2 rounded-2xl w-full">
@@ -1843,9 +1908,39 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
 
                       <div className="flex justify-between items-center border-t border-white/5 pt-4">
                         <span className="text-white font-bold">الإجمالي:</span>
-                        <span className="text-xl text-white font-alexandria font-black">
+                        <span className="text-xl text-white font-cairo font-black">
                           {formatPrice(finalPriceFormatted, currency)}
                         </span>
+                      </div>
+                    </div>
+
+                    {/* Product Image and Title */}
+                    <div className="flex flex-col gap-4 border-t border-white/5 pt-6 mt-6">
+                      {product.image_url ? (
+                        <div className="relative w-full aspect-video rounded-2xl overflow-hidden border border-white/5">
+                          <Image
+                            src={product.image_url}
+                            alt={product.title}
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
+                      ) : (
+                        <div className="w-full aspect-video rounded-2xl bg-white/5 flex items-center justify-center border border-white/5">
+                          <Package className="w-12 h-12 text-zinc-600" />
+                        </div>
+                      )}
+                      
+                      <div className="text-right">
+                        <h3 className="text-base font-cairo font-bold text-white leading-relaxed font-cairo">
+                          {product.title}
+                        </h3>
+                        {isCourse && (
+                          <span className="inline-flex items-center gap-1.5 text-[10px] text-rose-400 bg-rose-500/10 px-3 py-1 rounded-full mt-2 font-bold">
+                            <Sparkles className="w-3 h-3 animate-pulse" />
+                            انضمام فوري للقسم
+                          </span>
+                        )}
                       </div>
                     </div>
 
@@ -1908,13 +2003,13 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                     priority
                   />
                 </div>
-                <h3 className="text-xl font-alexandria font-bold text-white">الدفع عبر Instapay</h3>
+                <h3 className="text-xl font-cairo font-bold text-white">الدفع عبر Instapay</h3>
                 <p className="text-sm text-zinc-400 font-cairo mt-1">قم بتحويل المبلغ ثم أرسل لقطة الشاشة</p>
               </div>
 
               <div className="bg-purple-500/10 border border-purple-500/20 rounded-2xl p-4">
                 <p className="text-sm text-purple-300 font-cairo mb-1">المبلغ المطلوب تحويله</p>
-                <p className="text-3xl font-alexandria font-black text-white">
+                <p className="text-3xl font-cairo font-black text-white">
                   {formatPrice(finalPriceFormatted, currency)}
                 </p>
               </div>
