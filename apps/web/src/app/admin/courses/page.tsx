@@ -729,7 +729,9 @@ export default function AdminCoursesPage() {
     certificate_course_x: 50, certificate_course_y: 55,
     certificate_date_x: 50, certificate_date_y: 70, certificate_date_size: 14,
     showcase_videos: [],
-    promo_video_id: ""
+    promo_video_id: "",
+    cta_text: "",
+    cta_secondary_text: ""
   });
 
   const [categories, setCategories] = useState<string[]>([]);
@@ -773,7 +775,9 @@ export default function AdminCoursesPage() {
       tags: [], requirements: [], what_will_learn: [], who_is_for: [],
       certificate_bg_url: "", certificate_text_color: "#000000",
       certificate_name_x: 50, certificate_name_y: 40, certificate_name_size: 24, certificate_course_x: 50, certificate_course_y: 55, certificate_date_x: 50, certificate_date_y: 70, certificate_date_size: 14,
-      showcase_videos: []
+      showcase_videos: [],
+      cta_text: "",
+      cta_secondary_text: ""
     });
     setView("form");
   };
@@ -800,7 +804,9 @@ export default function AdminCoursesPage() {
       certificate_date_y: course.certificate_date_y || 70,
       certificate_date_size: course.certificate_date_size || 14,
       showcase_videos: course.showcase_videos || [],
-      promo_video_id: course.promo_video_id || ""
+      promo_video_id: course.promo_video_id || "",
+      cta_text: course.cta_text || "",
+      cta_secondary_text: course.cta_secondary_text || ""
     });
     
     // Load curriculum & students
@@ -1537,6 +1543,29 @@ export default function AdminCoursesPage() {
                 )}
               </div>
               
+
+              {/* CTA Customization */}
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-bold text-violet-400">🎯 CTA Primary Button Text</label>
+                <input
+                  value={courseForm.cta_text || ""}
+                  onChange={e => setCourseForm({ ...courseForm, cta_text: e.target.value })}
+                  placeholder='e.g. "اشترك الآن" (leave empty for default)'
+                  className="bg-white/5 border border-violet-500/20 focus:border-violet-500/50 rounded-xl py-3 px-4 text-sm text-zinc-300 placeholder:text-zinc-600"
+                />
+                <p className="text-[10px] text-zinc-500">The main enroll button text. Supports Arabic. Leave empty to use the dynamic default (free/discount text).</p>
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-bold text-violet-400">🛒 CTA Secondary Button Text (Add to Cart)</label>
+                <input
+                  value={courseForm.cta_secondary_text || ""}
+                  onChange={e => setCourseForm({ ...courseForm, cta_secondary_text: e.target.value })}
+                  placeholder='e.g. "إضافة إلى السلة" (leave empty to hide or use default)'
+                  className="bg-white/5 border border-violet-500/20 focus:border-violet-500/50 rounded-xl py-3 px-4 text-sm text-zinc-300 placeholder:text-zinc-600"
+                />
+                <p className="text-[10px] text-zinc-500">The secondary add-to-cart button text. Leave empty to use default text.</p>
+              </div>
+
               <div className="flex flex-col gap-4 py-2 justify-center">
                 <div className="flex items-center gap-3 select-none">
                   <input type="checkbox" id="isFreeCheckbox" checked={courseForm.is_free || false} onChange={e => setCourseForm({ ...courseForm, is_free: e.target.checked })} className="w-4 h-4 rounded accent-rose-600 cursor-pointer" />

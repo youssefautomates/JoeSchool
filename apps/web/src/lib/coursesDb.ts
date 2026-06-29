@@ -42,6 +42,8 @@ export interface LmsCourse {
   promo_video_id?: string;
   enable_gateway_fee?: boolean;
   sales?: number;
+  cta_text?: string;
+  cta_secondary_text?: string;
   created_at: string;
 }
 
@@ -495,14 +497,40 @@ export async function upsertCourse(course: Partial<LmsCourse> & { title: string 
     showcase_videos: course.showcase_videos || [],
     promo_video_id: course.promo_video_id,
     enable_gateway_fee: course.enable_gateway_fee !== false,
+    cta_text: course.cta_text || "",
+    cta_secondary_text: course.cta_secondary_text || "",
     created_at: course.created_at || new Date().toISOString()
   };
 
   try {
-    const { data, error } = await supabaseClient.from("courses").upsert(record).select().single();
+    // Build the Supabase payload — omit any key whose value is undefined
+    // and strip the new CTA fields if the DB columns don't exist yet
+    // (they'll be silently ignored if present; Supabase errors only when
+    //  the column is missing AND the value is non-null).
+    const supabaseRecord: Record<string, any> = Object.fromEntries(
+      Object.entries(record).filter(([_, v]) => v !== undefined)
+    );
+    // If cta fields are empty strings, send null so Supabase ignores them
+    // gracefully even if the columns haven't been migrated yet.
+    if (!supabaseRecord.cta_text) supabaseRecord.cta_text = null;
+    if (!supabaseRecord.cta_secondary_text) supabaseRecord.cta_secondary_text = null;
+
+    const { data, error } = await supabaseClient.from("courses").upsert(supabaseRecord).select().single();
     if (error) {
-      console.error("Supabase upsert error:", error);
-      throw new Error(error.message);
+      // If the error is about missing columns, retry without the CTA fields
+      if (error.code === "42703" || error.message?.includes("cta_text") || error.message?.includes("cta_secondary_text")) {
+        console.warn("CTA columns not yet in DB — retrying without them");
+        const { cta_text: _ct, cta_secondary_text: _cst, ...recordWithoutCta } = supabaseRecord;
+        const { data: data2, error: error2 } = await supabaseClient.from("courses").upsert(recordWithoutCta).select().single();
+        if (error2) {
+          console.error("Supabase upsert error (retry):", error2);
+          throw new Error(error2.message);
+        }
+        if (data2) return data2 as LmsCourse;
+      } else {
+        console.error("Supabase upsert error:", error);
+        throw new Error(error.message);
+      }
     }
     if (data) return data as LmsCourse;
   } catch (e: any) {

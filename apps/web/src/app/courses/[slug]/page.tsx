@@ -487,6 +487,17 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
     marqueeVideos = [...repeated, ...repeated];
   }
 
+  // ── CTA Text Resolution ──────────────────────────────────────────────────
+  // Use admin-configured text when set, otherwise fall back to smart defaults
+  const defaultCtaPrimary = course.price === 0
+    ? "ابدأ مجاناً 🎁"
+    : (coursePricing && coursePricing.original_price > coursePricing.price)
+      ? `اشترك الآن - خصم ${coursePricing.discount_pct}%`
+      : "اشترك الآن";
+  const ctaPrimary = (course.cta_text && course.cta_text.trim()) ? course.cta_text.trim() : defaultCtaPrimary;
+  const ctaSecondary = (course.cta_secondary_text && course.cta_secondary_text.trim()) ? course.cta_secondary_text.trim() : "إضافة إلى السلة";
+  // ─────────────────────────────────────────────────────────────────────────
+
   return (
     <div className="min-h-screen bg-[#050505] text-white selection:bg-[#D6004B]/30 font-cairo overflow-x-hidden">
       <Navbar />
@@ -640,7 +651,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                         }}
                         className="primary-hero-cta w-full h-14 bg-gradient-to-r from-[#D6004B] via-[#ff1d6b] to-[#D6004B] text-white rounded-2xl font-black text-lg shadow-[0_10px_30px_rgba(214,0,75,0.4)] transition-all flex items-center justify-center gap-2.5 active:scale-98 cursor-pointer font-alexandria animate-pulse-glow"
                       >
-                        <span>{course.price === 0 ? "ابدأ مجاناً 🎁" : (coursePricing && coursePricing.original_price > coursePricing.price) ? `اشترك الآن - خصم ${coursePricing.discount_pct}%` : "اشترك الآن"}</span>
+                        <span>{ctaPrimary}</span>
                         <ArrowLeft className="w-5 h-5 rtl:rotate-180" />
                       </Link>
 
@@ -650,7 +661,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                           className="primary-hero-cta w-full mt-2.5 h-14 bg-white/5 hover:bg-white/10 text-white rounded-2xl font-black text-base border border-white/10 transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer font-alexandria hover:border-[#D6004B]/30"
                         >
                           <ShoppingCart className="w-5 h-5 text-zinc-300" />
-                          <span>إضافة إلى السلة</span>
+                          <span>{ctaSecondary}</span>
                         </button>
                       )}
                     </div>
@@ -1169,7 +1180,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                         }}
                         className="primary-hero-cta w-full h-14 bg-gradient-to-r from-[#D6004B] via-[#ff1d6b] to-[#D6004B] text-white rounded-2xl font-black text-lg shadow-[0_10px_30px_rgba(214,0,75,0.4)] transition-all flex items-center justify-center gap-2.5 active:scale-98 cursor-pointer font-alexandria animate-pulse-glow"
                       >
-                        <span>{course.price === 0 ? "ابدأ مجاناً 🎁" : (coursePricing && coursePricing.original_price > coursePricing.price) ? `اشترك الآن - خصم ${coursePricing.discount_pct}%` : "اشترك الآن"}</span>
+                        <span>{ctaPrimary}</span>
                         <ArrowLeft className="w-5 h-5 rtl:rotate-180" />
                       </Link>
 
@@ -1304,7 +1315,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                   }}
                   className="primary-hero-cta w-full h-12 bg-[#D6004B] hover:bg-[#b0003d] text-white rounded-2xl font-bold text-sm shadow-[0_10px_25px_rgba(214,0,75,0.3)] transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer font-alexandria"
                 >
-                  <span>سجل في القسم الآن</span>
+                  <span>{ctaPrimary}</span>
                   <ArrowLeft className="w-4 h-4 rtl:rotate-180" />
                 </Link>
                 {course.price > 0 && (
@@ -1313,7 +1324,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                     className="primary-hero-cta w-full mt-2 h-12 bg-white/5 hover:bg-white/10 text-white rounded-2xl font-bold text-sm border border-white/10 transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer font-alexandria"
                   >
                     <ShoppingCart className="w-4 h-4" />
-                    <span>إضافة إلى السلة</span>
+                    <span>{ctaSecondary}</span>
                   </button>
                 )}
               </div>
@@ -1670,6 +1681,15 @@ function MobileCourseView({
 }: MobileCourseViewProps) {
   const coursePricing = resolveProductPrice(course as any, currency);
 
+  // CTA text resolution (mirrors logic in main CourseDetailPage)
+  const defaultCtaPrimary = course.price === 0
+    ? "ابدأ مجاناً 🎁"
+    : (coursePricing && coursePricing.original_price > coursePricing.price)
+      ? `اشترك الآن - خصم ${coursePricing.discount_pct}%`
+      : "اشترك الآن";
+  const ctaPrimary = (course.cta_text && course.cta_text.trim()) ? course.cta_text.trim() : defaultCtaPrimary;
+  const ctaSecondary = (course.cta_secondary_text && course.cta_secondary_text.trim()) ? course.cta_secondary_text.trim() : "إضافة إلى السلة";
+
   return (
     <div className="block md:hidden space-y-6 px-4 pb-0">
       <style dangerouslySetInnerHTML={{ __html: `
@@ -1855,7 +1875,7 @@ function MobileCourseView({
                }}
                className="primary-hero-cta w-full h-14 bg-gradient-to-r from-[#D6004B] via-[#ff1d6b] to-[#D6004B] text-white rounded-xl font-black text-base sm:text-lg shadow-[0_10px_30px_rgba(214,0,75,0.4)] transition-all flex items-center justify-center gap-2.5 active:scale-98 cursor-pointer font-alexandria animate-pulse-glow"
              >
-               <span>{course.price === 0 ? "ابدأ مجاناً 🎁" : (coursePricing && coursePricing.original_price > coursePricing.price) ? `اشترك الآن - خصم ${coursePricing.discount_pct}%` : "اشترك الآن"}</span>
+               <span>{ctaPrimary}</span>
                <ArrowLeft className="w-4 h-4 rtl:rotate-180" />
              </Link>
               {course.price > 0 && onAddToCart && (
@@ -1864,7 +1884,7 @@ function MobileCourseView({
                   className="primary-hero-cta w-full mt-2 h-11 bg-white/5 hover:bg-white/10 text-white rounded-xl font-bold text-xs border border-white/10 transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer font-alexandria"
                 >
                   <ShoppingCart className="w-4 h-4" />
-                  <span>إضافة إلى السلة</span>
+                  <span>{ctaSecondary}</span>
                 </button>
               )}
 
@@ -2305,7 +2325,7 @@ function MobileCourseView({
              }}
              className="primary-hero-cta w-full h-13 bg-gradient-to-r from-[#D6004B] via-[#ff1d6b] to-[#D6004B] text-white rounded-xl font-black text-sm sm:text-base shadow-[0_10px_25px_rgba(214,0,75,0.35)] transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer font-alexandria animate-pulse-glow"
            >
-              <span>{course.price === 0 ? "ابدأ مجاناً 🎁" : (coursePricing && coursePricing.original_price > coursePricing.price) ? `اشترك الآن - خصم ${coursePricing.discount_pct}%` : "اشترك الآن"}</span>
+              <span>{ctaPrimary}</span>
              <ArrowLeft className="w-4 h-4 rtl:rotate-180" />
            </Link>
 
@@ -2315,7 +2335,7 @@ function MobileCourseView({
                className="primary-hero-cta w-full mt-2.5 h-13 bg-white/5 hover:bg-white/10 text-white rounded-xl font-black text-sm border border-white/10 transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer font-alexandria"
              >
                <ShoppingCart className="w-4 h-4 text-zinc-300" />
-               <span>إضافة إلى السلة</span>
+               <span>{ctaSecondary}</span>
              </button>
            )}
         </div>

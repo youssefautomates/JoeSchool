@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, use, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
@@ -32,26 +32,26 @@ const PhoneInput = dynamic(() => import("react-phone-input-2"), { ssr: false });
 import "react-phone-input-2/lib/style.css";
 
 const checkoutSchema = z.object({
-  fullName: z.string().min(3, { message: "الاسم بالكامل يجب أن يكون 3 أحرف على الأقل" }),
-  email: z.string().email({ message: "البريد الإلكتروني غير صالح" }),
+  fullName: z.string().min(3, { message: "Ø§Ù„Ø§Ø³Ù… Ø¨Ø§Ù„ÙƒØ§Ù…Ù„ ÙŠØ¬Ø¨ Ø£Ù† ÙŠÙƒÙˆÙ† 3 Ø£Ø­Ø±Ù Ø¹Ù„Ù‰ Ø§Ù„Ø£Ù‚Ù„" }),
+  email: z.string().email({ message: "Ø§Ù„Ø¨Ø±ÙŠØ¯ Ø§Ù„Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠ ØºÙŠØ± ØµØ§Ù„Ø­" }),
   password: z.string().optional(),
 });
 
 const countries = [
-  { code: "EG", dial: "+20", flag: "🇪🇬", name: "Egypt" },
-  { code: "SA", dial: "+966", flag: "🇸🇦", name: "Saudi Arabia" },
-  { code: "AE", dial: "+971", flag: "🇦🇪", name: "UAE" },
-  { code: "KW", dial: "+965", flag: "🇰🇼", name: "Kuwait" },
-  { code: "QA", dial: "+974", flag: "🇶🇦", name: "Qatar" },
-  { code: "OM", dial: "+968", flag: "🇴🇲", name: "Oman" },
-  { code: "BH", dial: "+973", flag: "🇧🇭", name: "Bahrain" },
-  { code: "JO", dial: "+962", flag: "🇯🇴", name: "Jordan" },
-  { code: "LY", dial: "+218", flag: "🇱🇾", name: "Libya" },
-  { code: "SD", dial: "+249", flag: "🇸🇩", name: "Sudan" },
-  { code: "IQ", dial: "+964", flag: "🇮🇶", name: "Iraq" },
-  { code: "US", dial: "+1", flag: "🇺🇸", name: "USA" },
-  { code: "GB", dial: "+44", flag: "🇬🇧", name: "UK" },
-  { code: "CA", dial: "+1", flag: "🇨🇦", name: "Canada" },
+  { code: "EG", dial: "+20", flag: "ðŸ‡ªðŸ‡¬", name: "Egypt" },
+  { code: "SA", dial: "+966", flag: "ðŸ‡¸ðŸ‡¦", name: "Saudi Arabia" },
+  { code: "AE", dial: "+971", flag: "ðŸ‡¦ðŸ‡ª", name: "UAE" },
+  { code: "KW", dial: "+965", flag: "ðŸ‡°ðŸ‡¼", name: "Kuwait" },
+  { code: "QA", dial: "+974", flag: "ðŸ‡¶ðŸ‡¦", name: "Qatar" },
+  { code: "OM", dial: "+968", flag: "ðŸ‡´ðŸ‡²", name: "Oman" },
+  { code: "BH", dial: "+973", flag: "ðŸ‡§ðŸ‡­", name: "Bahrain" },
+  { code: "JO", dial: "+962", flag: "ðŸ‡¯ðŸ‡´", name: "Jordan" },
+  { code: "LY", dial: "+218", flag: "ðŸ‡±ðŸ‡¾", name: "Libya" },
+  { code: "SD", dial: "+249", flag: "ðŸ‡¸ðŸ‡©", name: "Sudan" },
+  { code: "IQ", dial: "+964", flag: "ðŸ‡®ðŸ‡¶", name: "Iraq" },
+  { code: "US", dial: "+1", flag: "ðŸ‡ºðŸ‡¸", name: "USA" },
+  { code: "GB", dial: "+44", flag: "ðŸ‡¬ðŸ‡§", name: "UK" },
+  { code: "CA", dial: "+1", flag: "ðŸ‡¨ðŸ‡¦", name: "Canada" },
 ];
 
 type CheckoutValues = z.infer<typeof checkoutSchema>;
@@ -103,22 +103,22 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
     if (value.length > 0) {
       if (value.startsWith("0")) {
         if (value.length < 11) {
-          setWalletNumberError("رقم المحفظة يجب أن يكون 11 رقم");
+          setWalletNumberError("Ø±Ù‚Ù… Ø§Ù„Ù…Ø­ÙØ¸Ø© ÙŠØ¬Ø¨ Ø£Ù† ÙŠÙƒÙˆÙ† 11 Ø±Ù‚Ù…");
         } else if (!value.startsWith("01")) {
-          setWalletNumberError("رقم المحفظة يجب أن يبدأ بـ 01");
+          setWalletNumberError("Ø±Ù‚Ù… Ø§Ù„Ù…Ø­ÙØ¸Ø© ÙŠØ¬Ø¨ Ø£Ù† ÙŠØ¨Ø¯Ø£ Ø¨Ù€ 01");
         } else {
           setWalletNumberError("");
         }
       } else if (value.startsWith("1")) {
         if (value.length < 10) {
-          setWalletNumberError("رقم المحفظة يجب أن يكون 10 أرقام عند الإدخال بدون 0");
+          setWalletNumberError("Ø±Ù‚Ù… Ø§Ù„Ù…Ø­ÙØ¸Ø© ÙŠØ¬Ø¨ Ø£Ù† ÙŠÙƒÙˆÙ† 10 Ø£Ø±Ù‚Ø§Ù… Ø¹Ù†Ø¯ Ø§Ù„Ø¥Ø¯Ø®Ø§Ù„ Ø¨Ø¯ÙˆÙ† 0");
         } else if (value.length > 10) {
-          setWalletNumberError("رقم المحفظة غير صحيح (الحد الأقصى 10 أرقام بدون 0)");
+          setWalletNumberError("Ø±Ù‚Ù… Ø§Ù„Ù…Ø­ÙØ¸Ø© ØºÙŠØ± ØµØ­ÙŠØ­ (Ø§Ù„Ø­Ø¯ Ø§Ù„Ø£Ù‚ØµÙ‰ 10 Ø£Ø±Ù‚Ø§Ù… Ø¨Ø¯ÙˆÙ† 0)");
         } else {
           setWalletNumberError("");
         }
       } else {
-        setWalletNumberError("يجب أن يبدأ الرقم بـ 01 أو 1");
+        setWalletNumberError("ÙŠØ¬Ø¨ Ø£Ù† ÙŠØ¨Ø¯Ø£ Ø§Ù„Ø±Ù‚Ù… Ø¨Ù€ 01 Ø£Ùˆ 1");
       }
     } else {
       setWalletNumberError("");
@@ -260,7 +260,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
     setCardNumber(formatted.substring(0, 19));
     
     if (value.length > 0 && value.length < 16) {
-      setCardErrors(prev => ({ ...prev, number: "رقم البطاقة غير مكتمل" }));
+      setCardErrors(prev => ({ ...prev, number: "Ø±Ù‚Ù… Ø§Ù„Ø¨Ø·Ø§Ù‚Ø© ØºÙŠØ± Ù…ÙƒØªÙ…Ù„" }));
     } else {
       setCardErrors(prev => ({ ...prev, number: "" }));
     }
@@ -280,12 +280,12 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
       const [m, y] = value.split("/");
       const expDate = new Date(2000 + parseInt(y), parseInt(m)); // End of month
       if (expDate < new Date()) {
-        setCardErrors(prev => ({ ...prev, expiry: "البطاقة منتهية" }));
+        setCardErrors(prev => ({ ...prev, expiry: "Ø§Ù„Ø¨Ø·Ø§Ù‚Ø© Ù…Ù†ØªÙ‡ÙŠØ©" }));
       } else {
         setCardErrors(prev => ({ ...prev, expiry: "" }));
       }
     } else if (value.length > 0) {
-      setCardErrors(prev => ({ ...prev, expiry: "صيغة غير صحيحة" }));
+      setCardErrors(prev => ({ ...prev, expiry: "ØµÙŠØºØ© ØºÙŠØ± ØµØ­ÙŠØ­Ø©" }));
     } else {
       setCardErrors(prev => ({ ...prev, expiry: "" }));
     }
@@ -295,7 +295,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
     const value = e.target.value.replace(/\D/g, "").substring(0, 4);
     setCvv(value);
     if (value.length > 0 && value.length < 3) {
-      setCardErrors(prev => ({ ...prev, cvv: "غير مكتمل" }));
+      setCardErrors(prev => ({ ...prev, cvv: "ØºÙŠØ± Ù…ÙƒØªÙ…Ù„" }));
     } else {
       setCardErrors(prev => ({ ...prev, cvv: "" }));
     }
@@ -305,7 +305,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
     const value = e.target.value.replace(/[0-9!@#$%^&*()_+={}\[\]|\\:;"'<>,.?\/]/g, "").toUpperCase();
     setCardHolder(value);
     if (value.length > 0 && value.length < 3) {
-      setCardErrors(prev => ({ ...prev, holder: "الاسم قصير جداً" }));
+      setCardErrors(prev => ({ ...prev, holder: "Ø§Ù„Ø§Ø³Ù… Ù‚ØµÙŠØ± Ø¬Ø¯Ø§Ù‹" }));
     } else {
       setCardErrors(prev => ({ ...prev, holder: "" }));
     }
@@ -401,7 +401,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
         }
       }
 
-      if (!data) throw new Error("المحتوى المطلوب غير متوفر حالياً");
+      if (!data) throw new Error("Ø§Ù„Ù…Ø­ØªÙˆÙ‰ Ø§Ù„Ù…Ø·Ù„ÙˆØ¨ ØºÙŠØ± Ù…ØªÙˆÙØ± Ø­Ø§Ù„ÙŠØ§Ù‹");
       
       // Resolve prices depending on resolvedCurrency
       const resolvedPricing = resolveProductPrice(data, resolvedCurrency);
@@ -426,7 +426,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
       }
     } catch (error: any) {
       console.error("Error fetching product:", error);
-      toast.error(error.message || "فشل تحميل تفاصيل المنتج للcheckout");
+      toast.error(error.message || "ÙØ´Ù„ ØªØ­Ù…ÙŠÙ„ ØªÙØ§ØµÙŠÙ„ Ø§Ù„Ù…Ù†ØªØ¬ Ù„Ù„checkout");
     } finally {
       setIsFetching(false);
     }
@@ -570,10 +570,10 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
     let hasEmptyError = false;
     const currentErrors = { ...cardErrors };
     
-    if (!cardNumber) { currentErrors.number = "يرجى إدخال رقم البطاقة"; hasEmptyError = true; }
-    if (!expiryDate) { currentErrors.expiry = "مطلوب"; hasEmptyError = true; }
-    if (!cvv) { currentErrors.cvv = "مطلوب"; hasEmptyError = true; }
-    if (!cardHolder) { currentErrors.holder = "يرجى إدخال اسم حامل البطاقة"; hasEmptyError = true; }
+    if (!cardNumber) { currentErrors.number = "ÙŠØ±Ø¬Ù‰ Ø¥Ø¯Ø®Ø§Ù„ Ø±Ù‚Ù… Ø§Ù„Ø¨Ø·Ø§Ù‚Ø©"; hasEmptyError = true; }
+    if (!expiryDate) { currentErrors.expiry = "Ù…Ø·Ù„ÙˆØ¨"; hasEmptyError = true; }
+    if (!cvv) { currentErrors.cvv = "Ù…Ø·Ù„ÙˆØ¨"; hasEmptyError = true; }
+    if (!cardHolder) { currentErrors.holder = "ÙŠØ±Ø¬Ù‰ Ø¥Ø¯Ø®Ø§Ù„ Ø§Ø³Ù… Ø­Ø§Ù…Ù„ Ø§Ù„Ø¨Ø·Ø§Ù‚Ø©"; hasEmptyError = true; }
 
     if (hasEmptyError) {
       setCardErrors(currentErrors);
@@ -589,7 +589,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
     if (paymentMethod === "card") {
       validateCardFields();
     }
-    toast.error("يُرجى إكمال جميع الحقول لإتمام الدفع");
+    toast.error("ÙŠÙØ±Ø¬Ù‰ Ø¥ÙƒÙ…Ø§Ù„ Ø¬Ù…ÙŠØ¹ Ø§Ù„Ø­Ù‚ÙˆÙ„ Ù„Ø¥ØªÙ…Ø§Ù… Ø§Ù„Ø¯ÙØ¹");
   };
 
   const handleApplyCoupon = async () => {
@@ -605,14 +605,14 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
           percent: data.discount_percent
         });
         setCouponError("");
-        toast.success(`تم تطبيق الكوبون بنجاح بخصم ${data.discount_percent}%`);
+        toast.success(`ØªÙ… ØªØ·Ø¨ÙŠÙ‚ Ø§Ù„ÙƒÙˆØ¨ÙˆÙ† Ø¨Ù†Ø¬Ø§Ø­ Ø¨Ø®ØµÙ… ${data.discount_percent}%`);
       } else {
-        setCouponError(data.error || "كود الخصم غير صالح");
+        setCouponError(data.error || "ÙƒÙˆØ¯ Ø§Ù„Ø®ØµÙ… ØºÙŠØ± ØµØ§Ù„Ø­");
         setAppliedCoupon(null);
       }
     } catch (err) {
       console.error(err);
-      setCouponError("فشل التحقق من الكوبون");
+      setCouponError("ÙØ´Ù„ Ø§Ù„ØªØ­Ù‚Ù‚ Ù…Ù† Ø§Ù„ÙƒÙˆØ¨ÙˆÙ†");
       setAppliedCoupon(null);
     } finally {
       setIsValidatingCoupon(false);
@@ -635,22 +635,22 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
     const isFree = appliedCoupon && appliedCoupon.percent === 100;
 
     if (!isFree && !paymentMethod) {
-      toast.error("يُرجى اختيار طريقة الدفع أولاً");
+      toast.error("ÙŠÙØ±Ø¬Ù‰ Ø§Ø®ØªÙŠØ§Ø± Ø·Ø±ÙŠÙ‚Ø© Ø§Ù„Ø¯ÙØ¹ Ø£ÙˆÙ„Ø§Ù‹");
       return;
     }
 
     if (!isFree && paymentMethod === "card") {
       const isValid = validateCardFields();
       if (!isValid) {
-        toast.error("توجد أخطاء في بيانات البطاقة، يرجى مراجعتها.");
+        toast.error("ØªÙˆØ¬Ø¯ Ø£Ø®Ø·Ø§Ø¡ ÙÙŠ Ø¨ÙŠØ§Ù†Ø§Øª Ø§Ù„Ø¨Ø·Ø§Ù‚Ø©ØŒ ÙŠØ±Ø¬Ù‰ Ù…Ø±Ø§Ø¬Ø¹ØªÙ‡Ø§.");
         return;
       }
     }
 
     if (!isFree && paymentMethod === "wallet") {
       if (!isWalletValid) {
-        setWalletNumberError(walletNumber.length === 0 ? "رقم الهاتف مطلوب للدفع بالمحفظة" : "يرجى إدخال رقم محفظة صحيح مكون من 11 رقم يبدأ بـ 01");
-        toast.error("يرجى إدخال رقم محفظة إلكترونية صحيح");
+        setWalletNumberError(walletNumber.length === 0 ? "Ø±Ù‚Ù… Ø§Ù„Ù‡Ø§ØªÙ Ù…Ø·Ù„ÙˆØ¨ Ù„Ù„Ø¯ÙØ¹ Ø¨Ø§Ù„Ù…Ø­ÙØ¸Ø©" : "ÙŠØ±Ø¬Ù‰ Ø¥Ø¯Ø®Ø§Ù„ Ø±Ù‚Ù… Ù…Ø­ÙØ¸Ø© ØµØ­ÙŠØ­ Ù…ÙƒÙˆÙ† Ù…Ù† 11 Ø±Ù‚Ù… ÙŠØ¨Ø¯Ø£ Ø¨Ù€ 01");
+        toast.error("ÙŠØ±Ø¬Ù‰ Ø¥Ø¯Ø®Ø§Ù„ Ø±Ù‚Ù… Ù…Ø­ÙØ¸Ø© Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠØ© ØµØ­ÙŠØ­");
         return;
       }
     }
@@ -699,7 +699,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
             
             if (enroll) {
               setIsAlreadyEnrolled(true);
-              toast.error("أنت مشترك بالفعل في هذا الكورس.");
+              toast.error("Ø£Ù†Øª Ù…Ø´ØªØ±Ùƒ Ø¨Ø§Ù„ÙØ¹Ù„ ÙÙŠ Ù‡Ø°Ø§ Ø§Ù„ÙƒÙˆØ±Ø³.");
               setIsLoading(false);
               return;
             }
@@ -776,10 +776,10 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
 
       if (result.checkoutUrl) {
         if (paymentMethod === "wallet") {
-          toast.success("جاري تحويلك لمحفظتك الإلكترونية...");
+          toast.success("Ø¬Ø§Ø±ÙŠ ØªØ­ÙˆÙŠÙ„Ùƒ Ù„Ù…Ø­ÙØ¸ØªÙƒ Ø§Ù„Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠØ©...");
           window.location.assign(result.checkoutUrl); 
         } else {
-          toast.success("جاري تأكيد عملية الدفع...");
+          toast.success("Ø¬Ø§Ø±ÙŠ ØªØ£ÙƒÙŠØ¯ Ø¹Ù…Ù„ÙŠØ© Ø§Ù„Ø¯ÙØ¹...");
           window.location.assign(result.checkoutUrl); 
         }
       } else if (result.success) {
@@ -789,7 +789,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
              try {
                const data = [new ClipboardItem({ [instapayFile.type]: instapayFile })];
                await navigator.clipboard.write(data);
-               toast.success("تم نسخ لقطة الشاشة للحافظة! يمكنك لصقها مباشرة في واتساب (Ctrl+V)");
+               toast.success("ØªÙ… Ù†Ø³Ø® Ù„Ù‚Ø·Ø© Ø§Ù„Ø´Ø§Ø´Ø© Ù„Ù„Ø­Ø§ÙØ¸Ø©! ÙŠÙ…ÙƒÙ†Ùƒ Ù„ØµÙ‚Ù‡Ø§ Ù…Ø¨Ø§Ø´Ø±Ø© ÙÙŠ ÙˆØ§ØªØ³Ø§Ø¨ (Ctrl+V)");
              } catch (err) {
                console.error("Clipboard copy failed:", err);
              }
@@ -797,30 +797,30 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
            
            // Open WhatsApp URL
            const waText = (isCourse 
-             ? `مرحباً، لقد قمت بدفع قيمة اشتراك دورة ${product?.title || ''} أريد الانضمام للكورس الآن.`
-             : `مرحباً، لقد قمت بدفع قيمة منتج ${product?.title || ''} أريد الحصول عليه الآن.`
+             ? `Ù…Ø±Ø­Ø¨Ø§Ù‹ØŒ Ù„Ù‚Ø¯ Ù‚Ù…Øª Ø¨Ø¯ÙØ¹ Ù‚ÙŠÙ…Ø© Ø§Ø´ØªØ±Ø§Ùƒ Ø¯ÙˆØ±Ø© ${product?.title || ''} Ø£Ø±ÙŠØ¯ Ø§Ù„Ø§Ù†Ø¶Ù…Ø§Ù… Ù„Ù„ÙƒÙˆØ±Ø³ Ø§Ù„Ø¢Ù†.`
+             : `Ù…Ø±Ø­Ø¨Ø§Ù‹ØŒ Ù„Ù‚Ø¯ Ù‚Ù…Øª Ø¨Ø¯ÙØ¹ Ù‚ÙŠÙ…Ø© Ù…Ù†ØªØ¬ ${product?.title || ''} Ø£Ø±ÙŠØ¯ Ø§Ù„Ø­ØµÙˆÙ„ Ø¹Ù„ÙŠÙ‡ Ø§Ù„Ø¢Ù†.`
             ) + 
-            `\n\nبيانات العميل:\n` +
-            `- الاسم: ${data.fullName}\n` +
-            `- البريد الإلكتروني: ${data.email}\n` +
-            (data.password ? `- كلمة المرور: ${data.password}\n` : '') +
-            (phoneVal ? `- رقم الهاتف: ${normalizePhoneNumber(phoneVal, dialCode)}\n` : '') +
-            (instapayScreenshotUrl ? `\nإثبات التحويل:\n${instapayScreenshotUrl}` : '');
+            `\n\nØ¨ÙŠØ§Ù†Ø§Øª Ø§Ù„Ø¹Ù…ÙŠÙ„:\n` +
+            `- Ø§Ù„Ø§Ø³Ù…: ${data.fullName}\n` +
+            `- Ø§Ù„Ø¨Ø±ÙŠØ¯ Ø§Ù„Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠ: ${data.email}\n` +
+            (data.password ? `- ÙƒÙ„Ù…Ø© Ø§Ù„Ù…Ø±ÙˆØ±: ${data.password}\n` : '') +
+            (phoneVal ? `- Ø±Ù‚Ù… Ø§Ù„Ù‡Ø§ØªÙ: ${normalizePhoneNumber(phoneVal, dialCode)}\n` : '') +
+            (instapayScreenshotUrl ? `\nØ¥Ø«Ø¨Ø§Øª Ø§Ù„ØªØ­ÙˆÙŠÙ„:\n${instapayScreenshotUrl}` : '');
            
            const waUrl = `https://wa.me/201107099196?text=${encodeURIComponent(waText)}`;
            window.open(waUrl, "_blank");
          }
 
-         toast.success(isFree ? "تم تفعيل الكورس بنجاح!" : (paymentMethod === "instapay" ? "تم تسجيل طلبك بنجاح! جاري تحويلك لواتساب..." : "تم الدفع بنجاح!"));
+         toast.success(isFree ? "ØªÙ… ØªÙØ¹ÙŠÙ„ Ø§Ù„ÙƒÙˆØ±Ø³ Ø¨Ù†Ø¬Ø§Ø­!" : (paymentMethod === "instapay" ? "ØªÙ… ØªØ³Ø¬ÙŠÙ„ Ø·Ù„Ø¨Ùƒ Ø¨Ù†Ø¬Ø§Ø­! Ø¬Ø§Ø±ÙŠ ØªØ­ÙˆÙŠÙ„Ùƒ Ù„ÙˆØ§ØªØ³Ø§Ø¨..." : "ØªÙ… Ø§Ù„Ø¯ÙØ¹ Ø¨Ù†Ø¬Ø§Ø­!"));
          // Clear the instapay pending flag on successful completion
          sessionStorage.removeItem(`instapay_pending_${resolvedParams.id}`);
          router.push(`/checkout/success?order_id=${result.orderId}`);
       } else {
-        throw new Error(result.error || "فشل بدء عملية الدفع");
+        throw new Error(result.error || "ÙØ´Ù„ Ø¨Ø¯Ø¡ Ø¹Ù…Ù„ÙŠØ© Ø§Ù„Ø¯ÙØ¹");
       }
     } catch (error: any) {
       console.error("Payment Error:", error);
-      toast.error(error.message || "حدث خطأ أثناء معالجة الطلب");
+      toast.error(error.message || "Ø­Ø¯Ø« Ø®Ø·Ø£ Ø£Ø«Ù†Ø§Ø¡ Ù…Ø¹Ø§Ù„Ø¬Ø© Ø§Ù„Ø·Ù„Ø¨");
     } finally {
       setIsLoading(false);
     }
@@ -838,8 +838,8 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
     return (
       <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center text-white font-cairo">
         <Package className="w-16 h-16 text-zinc-700 mb-4" />
-        <h1 className="text-3xl font-cairo font-bold mb-4">عذراً، المنتج غير متاح للcheckout</h1>
-        <Link href="/" className="text-rose-400 hover:text-rose-300 underline">العودة للرئيسية</Link>
+        <h1 className="text-3xl font-cairo font-bold mb-4">Ø¹Ø°Ø±Ø§Ù‹ØŒ Ø§Ù„Ù…Ù†ØªØ¬ ØºÙŠØ± Ù…ØªØ§Ø­ Ù„Ù„checkout</h1>
+        <Link href="/" className="text-rose-400 hover:text-rose-300 underline">Ø§Ù„Ø¹ÙˆØ¯Ø© Ù„Ù„Ø±Ø¦ÙŠØ³ÙŠØ©</Link>
       </div>
     );
   }
@@ -882,7 +882,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-purple-400"></span>
               </span>
-              هل أكملت التحويل عبر Instapay؟ ارفع صورة إثبات الدفع لإتمام طلبك!
+              Ù‡Ù„ Ø£ÙƒÙ…Ù„Øª Ø§Ù„ØªØ­ÙˆÙŠÙ„ Ø¹Ø¨Ø± InstapayØŸ Ø§Ø±ÙØ¹ ØµÙˆØ±Ø© Ø¥Ø«Ø¨Ø§Øª Ø§Ù„Ø¯ÙØ¹ Ù„Ø¥ØªÙ…Ø§Ù… Ø·Ù„Ø¨Ùƒ!
             </div>
             <button
               onClick={() => {
@@ -891,7 +891,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
               }}
               className="bg-purple-500 hover:bg-purple-400 text-white text-xs font-bold px-4 py-1.5 rounded-lg transition-all cursor-pointer"
             >
-              رفع إثبات الدفع الآن
+              Ø±ÙØ¹ Ø¥Ø«Ø¨Ø§Øª Ø§Ù„Ø¯ÙØ¹ Ø§Ù„Ø¢Ù†
             </button>
             <button
               onClick={() => {
@@ -900,7 +900,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
               }}
               className="text-purple-400 hover:text-white text-xs transition-colors cursor-pointer"
             >
-              ✕
+              âœ•
             </button>
           </div>
         </motion.div>
@@ -925,9 +925,14 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
               className="inline-flex items-center text-zinc-500 hover:text-white font-cairo transition-all group text-sm"
             >
               <ChevronRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
-              العودة لتفاصيل المنتج
+              Ø§Ù„Ø¹ÙˆØ¯Ø© Ù„ØªÙØ§ØµÙŠÙ„ Ø§Ù„Ù…Ù†ØªØ¬
             </Link>
-            <h1 className="text-xl sm:text-2xl font-cairo font-bold text-white mt-2">إتمـام الطلب</h1>
+            <span className="text-[10px] font-black tracking-wider text-rose-500 bg-rose-500/10 border border-rose-500/20 px-3 py-1 rounded-full mb-1 select-none font-cairo">
+              ðŸ”’ Ø¯ÙØ¹ Ø¢Ù…Ù† ÙˆÙ…Ø´ÙØ± 100%
+            </span>
+            <h1 className="text-3xl sm:text-4xl font-cairo font-black text-transparent bg-clip-text bg-gradient-to-r from-[#ff0f53] via-[#ff2d6b] to-white mt-1 drop-shadow-[0_2px_15px_rgba(255,15,83,0.2)] select-none">
+              Ø¥ØªÙ…Ù€Ø§Ù… Ø§Ù„Ø·Ù„Ø¨
+            </h1>
           </div>
 
 
@@ -947,9 +952,9 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                 
                 {user ? (
                   <>
-                    <h2 className="text-2xl font-cairo font-bold text-white leading-snug">لقد قمت بشراء هذا الكورس وإنشاء حساب بالفعل.</h2>
+                    <h2 className="text-2xl font-cairo font-bold text-white leading-snug">Ù„Ù‚Ø¯ Ù‚Ù…Øª Ø¨Ø´Ø±Ø§Ø¡ Ù‡Ø°Ø§ Ø§Ù„ÙƒÙˆØ±Ø³ ÙˆØ¥Ù†Ø´Ø§Ø¡ Ø­Ø³Ø§Ø¨ Ø¨Ø§Ù„ÙØ¹Ù„.</h2>
                     <p className="text-zinc-400 text-sm max-w-md mx-auto font-cairo">
-                      يمكنك متابعة التعلم مباشرة.
+                      ÙŠÙ…ÙƒÙ†Ùƒ Ù…ØªØ§Ø¨Ø¹Ø© Ø§Ù„ØªØ¹Ù„Ù… Ù…Ø¨Ø§Ø´Ø±Ø©.
                     </p>
                     
                     <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
@@ -957,7 +962,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                         href={enrolledCourseSlug ? `/learn/${enrolledCourseSlug}/${firstLessonSlug || ""}` : "/dashboard"}
                         className="h-12 px-8 bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white font-cairo font-bold text-sm rounded-xl flex items-center justify-center gap-2 shadow-[0_4px_14px_rgba(244,63,94,0.25)] transition-all active:scale-[0.98] cursor-pointer"
                       >
-                        <span>🎓 اذهب إلى الكورس الآن</span>
+                        <span>ðŸŽ“ Ø§Ø°Ù‡Ø¨ Ø¥Ù„Ù‰ Ø§Ù„ÙƒÙˆØ±Ø³ Ø§Ù„Ø¢Ù†</span>
                       </Link>
                       
                       <Link
@@ -965,15 +970,15 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                         className="h-12 px-6 bg-white/5 hover:bg-white/10 text-white font-cairo font-bold text-sm rounded-xl flex items-center justify-center gap-2 border border-white/10 transition-colors cursor-pointer"
                       >
                         <LayoutDashboard className="w-4 h-4 text-zinc-400" />
-                        <span>لوحة التحكم</span>
+                        <span>Ù„ÙˆØ­Ø© Ø§Ù„ØªØ­ÙƒÙ…</span>
                       </Link>
                     </div>
                   </>
                 ) : (
                   <>
-                    <h2 className="text-2xl font-cairo font-bold text-white leading-snug">تم العثور على اشتراك سابق لهذا البريد الإلكتروني.</h2>
+                    <h2 className="text-2xl font-cairo font-bold text-white leading-snug">ØªÙ… Ø§Ù„Ø¹Ø«ÙˆØ± Ø¹Ù„Ù‰ Ø§Ø´ØªØ±Ø§Ùƒ Ø³Ø§Ø¨Ù‚ Ù„Ù‡Ø°Ø§ Ø§Ù„Ø¨Ø±ÙŠØ¯ Ø§Ù„Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠ.</h2>
                     <p className="text-zinc-400 text-sm max-w-md mx-auto font-cairo">
-                      لقد قمت بشراء هذا الكورس وإنشاء حساب بالفعل. يرجى تسجيل الدخول للوصول إلى محتوى الكورس.
+                      Ù„Ù‚Ø¯ Ù‚Ù…Øª Ø¨Ø´Ø±Ø§Ø¡ Ù‡Ø°Ø§ Ø§Ù„ÙƒÙˆØ±Ø³ ÙˆØ¥Ù†Ø´Ø§Ø¡ Ø­Ø³Ø§Ø¨ Ø¨Ø§Ù„ÙØ¹Ù„. ÙŠØ±Ø¬Ù‰ ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø¯Ø®ÙˆÙ„ Ù„Ù„ÙˆØµÙˆÙ„ Ø¥Ù„Ù‰ Ù…Ø­ØªÙˆÙ‰ Ø§Ù„ÙƒÙˆØ±Ø³.
                     </p>
                     
                     <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
@@ -981,14 +986,14 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                         href={`/login?email=${encodeURIComponent(emailValue || "")}&redirect=${encodeURIComponent(enrolledCourseSlug ? `/learn/${enrolledCourseSlug}/${firstLessonSlug || ""}` : `/checkout/${resolvedParams.id}`)}`}
                         className="h-12 px-8 bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white font-cairo font-bold text-sm rounded-xl flex items-center justify-center gap-2 shadow-[0_4px_14px_rgba(244,63,94,0.25)] transition-all active:scale-[0.98] cursor-pointer"
                       >
-                        <span>🔑 تسجيل الدخول</span>
+                        <span>ðŸ”‘ ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø¯Ø®ÙˆÙ„</span>
                       </Link>
                       
                       <Link
                         href="/login/forgot-password"
                         className="h-12 px-6 bg-white/5 hover:bg-white/10 text-white font-cairo font-bold text-sm rounded-xl flex items-center justify-center gap-2 border border-white/10 transition-colors cursor-pointer"
                       >
-                        <span>🔒 نسيت كلمة المرور</span>
+                        <span>ðŸ”’ Ù†Ø³ÙŠØª ÙƒÙ„Ù…Ø© Ø§Ù„Ù…Ø±ÙˆØ±</span>
                       </Link>
                     </div>
                   </>
@@ -1007,9 +1012,9 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {/* Full Name */}
                         <div className="space-y-2">
-                          <Label className="font-cairo font-bold text-zinc-400 text-sm">الاسم بالكامل *</Label>
+                          <Label className="font-cairo font-bold text-zinc-400 text-sm">Ø§Ù„Ø§Ø³Ù… Ø¨Ø§Ù„ÙƒØ§Ù…Ù„ *</Label>
                           <Input 
-                            placeholder="ادخل اسمك لإنشاء الحساب" 
+                            placeholder="Ø§Ø¯Ø®Ù„ Ø§Ø³Ù…Ùƒ Ù„Ø¥Ù†Ø´Ø§Ø¡ Ø§Ù„Ø­Ø³Ø§Ø¨" 
                             className={cn(
                               "h-12 rounded-lg bg-white/[0.02] border text-white text-sm font-cairo hover:bg-white/[0.05] focus:bg-white/[0.07] focus:ring-1 focus:ring-rose-500/20 focus:border-rose-500/40 transition-all text-right pr-4 pl-4",
                               fullNameValue && fullNameValue.length > 0
@@ -1026,7 +1031,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
 
                         {/* Email */}
                         <div className="space-y-2">
-                          <Label className="font-cairo font-bold text-zinc-400 text-sm">البريد الإلكتروني *</Label>
+                          <Label className="font-cairo font-bold text-zinc-400 text-sm">Ø§Ù„Ø¨Ø±ÙŠØ¯ Ø§Ù„Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠ *</Label>
                           <div className="relative">
                             <Mail 
                               className={cn(
@@ -1059,9 +1064,9 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                             <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 p-4 rounded-xl flex items-start gap-3 font-cairo text-sm mt-3 text-right">
                               <Sparkles className="w-5 h-5 shrink-0 mt-0.5 animate-pulse" />
                               <div>
-                                <p className="font-bold">مرحباً بك مجدداً!</p>
+                                <p className="font-bold">Ù…Ø±Ø­Ø¨Ø§Ù‹ Ø¨Ùƒ Ù…Ø¬Ø¯Ø¯Ø§Ù‹!</p>
                                 <p className="text-zinc-300 text-xs mt-1">
-                                  هذا البريد الإلكتروني مسجل لدينا بالفعل. سيتم ربط هذا الكورس بحسابك الحالي فور إتمام الدفع دون الحاجة لإنشاء حساب جديد.
+                                  Ù‡Ø°Ø§ Ø§Ù„Ø¨Ø±ÙŠØ¯ Ø§Ù„Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠ Ù…Ø³Ø¬Ù„ Ù„Ø¯ÙŠÙ†Ø§ Ø¨Ø§Ù„ÙØ¹Ù„. Ø³ÙŠØªÙ… Ø±Ø¨Ø· Ù‡Ø°Ø§ Ø§Ù„ÙƒÙˆØ±Ø³ Ø¨Ø­Ø³Ø§Ø¨Ùƒ Ø§Ù„Ø­Ø§Ù„ÙŠ ÙÙˆØ± Ø¥ØªÙ…Ø§Ù… Ø§Ù„Ø¯ÙØ¹ Ø¯ÙˆÙ† Ø§Ù„Ø­Ø§Ø¬Ø© Ù„Ø¥Ù†Ø´Ø§Ø¡ Ø­Ø³Ø§Ø¨ Ø¬Ø¯ÙŠØ¯.
                                 </p>
                               </div>
                             </div>
@@ -1170,7 +1175,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                       <div className="bg-white/[0.015] backdrop-blur-2xl border border-white/5 rounded-3xl p-5 md:p-8 hover:border-white/10 transition-all duration-300 shadow-[0_8px_32px_rgba(0,0,0,0.37)]">
                         <div className="flex items-center justify-start gap-2.5 mb-5 select-none" dir="rtl">
                           <CreditCard className="w-5 h-5 text-[#ff0f53] shrink-0" />
-                          <h3 className="font-cairo font-bold text-white text-base">اختر طريقة الدفع</h3>
+                          <h3 className="font-cairo font-bold text-white text-base">Ø§Ø®ØªØ± Ø·Ø±ÙŠÙ‚Ø© Ø§Ù„Ø¯ÙØ¹</h3>
                         </div>
 
                         <div className="flex flex-col gap-3 w-full">
@@ -1181,7 +1186,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                             onClick={() => setPaymentMethod("card")}
                             className={cn(
                               "relative cursor-pointer rounded-xl border transition-all duration-300 select-none",
-                              "flex flex-row items-center justify-between gap-4 h-[70px] px-4 py-3 w-full",
+                              "flex flex-row items-center justify-between gap-2 sm:gap-4 h-[70px] px-3 sm:px-4 py-3 w-full",
                               paymentMethod === "card" 
                                 ? "border-[#D6004B] bg-[#D6004B]/5 shadow-[0_0_20px_rgba(214,0,75,0.12)]" 
                                 : "border-white/5 bg-white/[0.01] hover:border-white/10 hover:bg-white/[0.02]"
@@ -1189,7 +1194,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                             dir="rtl"
                           >
                             {/* Right group: Radio + Text */}
-                            <div className="flex items-center gap-3.5">
+                            <div className="flex items-center gap-2 sm:gap-3.5">
                               {/* Radio indicator */}
                               <div className={cn(
                                 "w-5 h-5 rounded-full border flex items-center justify-center transition-all shrink-0",
@@ -1201,19 +1206,19 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                               {/* Text */}
                               <div className="text-right">
                                 <h4 className={cn("font-bold text-sm sm:text-base transition-colors leading-tight whitespace-nowrap", paymentMethod === "card" ? "text-white" : "text-zinc-300")}>
-                                  البطاقات البنكية
+                                  Ø§Ù„Ø¨Ø·Ø§Ù‚Ø§Øª Ø§Ù„Ø¨Ù†ÙƒÙŠØ©
                                 </h4>
                               </div>
                             </div>
 
                             {/* Left group: Logos */}
-                            <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0" dir="ltr">
+                            <div className="flex items-center gap-1 sm:gap-2 shrink-0" dir="ltr">
                               <Image 
                                 src="/payment-logos/visa.svg" 
                                 alt="Visa" 
                                 width={54} 
                                 height={18} 
-                                className="h-5 sm:h-6 w-auto object-contain opacity-95" 
+                                className="h-3 sm:h-[22px] w-auto object-contain opacity-95" 
                                 priority
                               />
                               <Image 
@@ -1221,7 +1226,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                                 alt="Mastercard" 
                                 width={36} 
                                 height={22} 
-                                className="h-5 sm:h-6 w-auto object-contain opacity-95" 
+                                className="h-3.5 sm:h-[24px] w-auto object-contain opacity-95" 
                                 priority
                               />
                               <Image 
@@ -1229,7 +1234,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                                 alt="Meeza" 
                                 width={41} 
                                 height={20} 
-                                className="h-5 sm:h-6 w-auto object-contain opacity-95" 
+                                className="h-3 sm:h-[22px] w-auto object-contain opacity-95" 
                                 priority
                               />
                             </div>
@@ -1243,16 +1248,16 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                               onClick={() => setPaymentMethod("wallet")}
                               className={cn(
                                 "relative cursor-pointer rounded-xl border transition-all duration-300 select-none",
-                                "flex flex-col w-full px-4 py-0",
+                                "flex flex-col w-full px-3 sm:px-4 py-0",
                                 paymentMethod === "wallet" 
                                   ? "border-[#D6004B] bg-[#D6004B]/5 shadow-[0_0_20px_rgba(214,0,75,0.12)]" 
                                   : "border-white/5 bg-white/[0.01] hover:border-white/10 hover:bg-white/[0.02]"
                               )}
                               dir="rtl"
                             >
-                              {/* Header row — same height as card/instapay */}
-                              <div className="flex items-center justify-between w-full h-[70px]">
-                                <div className="flex items-center gap-3.5">
+                              {/* Header row â€” same height as card/instapay */}
+                              <div className="flex items-center justify-between w-full h-[70px] gap-2 sm:gap-4">
+                                <div className="flex items-center gap-2 sm:gap-3.5">
                                   {/* Radio indicator */}
                                   <div className={cn(
                                     "w-5 h-5 rounded-full border flex items-center justify-center transition-all shrink-0",
@@ -1264,33 +1269,33 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                                   {/* Text */}
                                   <div className="text-right">
                                     <h4 className={cn("font-bold text-sm sm:text-base transition-colors leading-tight whitespace-nowrap", paymentMethod === "wallet" ? "text-white" : "text-zinc-300")}>
-                                      محفظة إلكترونية
+                                      Ù…Ø­ÙØ¸Ø© Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠØ©
                                     </h4>
                                   </div>
                                 </div>
 
                                 {/* Left group: Logos */}
-                                <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0" dir="ltr">
+                                <div className="flex items-center gap-1 sm:gap-2 shrink-0" dir="ltr">
                                   <Image 
                                     src="/payment-logos/vodafone.svg" 
                                     alt="Vodafone Cash" 
                                     width={20} 
                                     height={20} 
-                                    className="h-5 sm:h-6 w-auto object-contain" 
+                                    className="h-3 sm:h-[22px] w-auto object-contain" 
                                   />
                                   <Image 
                                     src="/payment-logos/orange.svg" 
                                     alt="Orange Cash" 
                                     width={20} 
                                     height={20} 
-                                    className="h-5 sm:h-6 w-auto object-contain rounded" 
+                                    className="h-3 sm:h-[22px] w-auto object-contain rounded" 
                                   />
                                   <Image 
                                     src="/payment-logos/fawry.svg" 
                                     alt="Fawry" 
                                     width={50} 
                                     height={16} 
-                                    className="h-5 sm:h-6 w-auto object-contain" 
+                                    className="h-3 sm:h-[22px] w-auto object-contain" 
                                   />
                                 </div>
                               </div>
@@ -1313,7 +1318,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                                     )} dir="ltr">
                                       {/* Country prefix on the left */}
                                       <div className="flex items-center gap-2 px-4 border-r border-white/5 bg-white/[0.01] h-full shrink-0 select-none">
-                                        <span className="text-xl">🇪🇬</span>
+                                        <span className="text-xl">ðŸ‡ªðŸ‡¬</span>
                                         <span className="text-sm font-semibold text-zinc-400 font-sans">+20</span>
                                       </div>
                                       {/* Input field */}
@@ -1321,7 +1326,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                                         type="tel"
                                         value={walletNumber}
                                         onChange={handleWalletNumberChange}
-                                        placeholder="رقم الهاتف" 
+                                        placeholder="Ø±Ù‚Ù… Ø§Ù„Ù‡Ø§ØªÙ" 
                                         maxLength={11}
                                         inputMode="numeric"
                                         className="h-full flex-grow bg-transparent text-white font-cairo text-base px-4 focus:outline-none placeholder-zinc-500 text-left placeholder-shown:text-right"
@@ -1342,7 +1347,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                                     )}
                                     {!walletNumberError && (
                                       <p className="text-[11px] text-zinc-500 font-cairo text-right mt-1.5 leading-relaxed">
-                                        سيتم استخدام هذا الرقم لإرسال طلب الدفع إلى محفظتك الإلكترونية.
+                                        Ø³ÙŠØªÙ… Ø§Ø³ØªØ®Ø¯Ø§Ù… Ù‡Ø°Ø§ Ø§Ù„Ø±Ù‚Ù… Ù„Ø¥Ø±Ø³Ø§Ù„ Ø·Ù„Ø¨ Ø§Ù„Ø¯ÙØ¹ Ø¥Ù„Ù‰ Ù…Ø­ÙØ¸ØªÙƒ Ø§Ù„Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠØ©.
                                       </p>
                                     )}
                                   </div>
@@ -1359,7 +1364,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                               onClick={() => setPaymentMethod("instapay")}
                               className={cn(
                                 "relative cursor-pointer rounded-xl border transition-all duration-300 select-none",
-                                "flex flex-row items-center justify-between gap-4 h-[70px] px-4 py-3 w-full",
+                                "flex flex-row items-center justify-between gap-2 sm:gap-4 h-[70px] px-3 sm:px-4 py-3 w-full",
                                 paymentMethod === "instapay" 
                                   ? "border-[#D6004B] bg-[#D6004B]/5 shadow-[0_0_20px_rgba(214,0,75,0.12)]" 
                                   : "border-white/5 bg-white/[0.01] hover:border-purple-500/10 hover:bg-purple-500/[0.005] hover:border-white/10"
@@ -1367,7 +1372,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                               dir="rtl"
                             >
                               {/* Right group: Radio + Text */}
-                              <div className="flex items-center gap-3.5">
+                              <div className="flex items-center gap-2 sm:gap-3.5">
                                 {/* Radio indicator */}
                                 <div className={cn(
                                   "w-5 h-5 rounded-full border flex items-center justify-center transition-all shrink-0",
@@ -1379,7 +1384,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                                 {/* Text */}
                                 <div className="text-right">
                                   <h4 className={cn("font-bold text-sm sm:text-base transition-colors leading-tight whitespace-nowrap", paymentMethod === "instapay" ? "text-white" : "text-zinc-300")}>
-                                    إنستاباي - Instapay
+                                    Ø¥Ù†Ø³ØªØ§Ø¨Ø§ÙŠ - Instapay
                                   </h4>
                                 </div>
                               </div>
@@ -1391,7 +1396,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                                   alt="Instapay" 
                                   width={64} 
                                   height={22} 
-                                  className="h-5 sm:h-6 w-auto object-contain" 
+                                  className="h-3 sm:h-[22px] w-auto object-contain" 
                                 />
                               </div>
                             </motion.div>
@@ -1406,13 +1411,13 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                           <div className="space-y-4">
                             <div className="flex items-center justify-start gap-2.5 mb-1" dir="rtl">
                               <Lock className="w-5 h-5 text-[#ff0f53] shrink-0" />
-                              <h3 className="font-cairo font-bold text-white text-base">بيانات البطاقة</h3>
+                              <h3 className="font-cairo font-bold text-white text-base">Ø¨ÙŠØ§Ù†Ø§Øª Ø§Ù„Ø¨Ø·Ø§Ù‚Ø©</h3>
                             </div>
-                            <p className="text-[11px] text-zinc-500 pr-7 text-right block mb-4">جميع البيانات مشفرة وآمنة</p>
+                            <p className="text-[11px] text-zinc-500 pr-7 text-right block mb-4">Ø¬Ù…ÙŠØ¹ Ø§Ù„Ø¨ÙŠØ§Ù†Ø§Øª Ù…Ø´ÙØ±Ø© ÙˆØ¢Ù…Ù†Ø©</p>
 
                             <div className="space-y-3">
                               <div className="space-y-1.5">
-                                <Label className="font-cairo text-xs text-zinc-400 text-right block pr-1">رقم البطاقة</Label>
+                                <Label className="font-cairo text-xs text-zinc-400 text-right block pr-1">Ø±Ù‚Ù… Ø§Ù„Ø¨Ø·Ø§Ù‚Ø©</Label>
                                 <div className="relative">
                                   <Input 
                                     ref={cardNumberRef}
@@ -1440,7 +1445,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
 
                               <div className="grid grid-cols-2 gap-3">
                                 <div className="space-y-1.5">
-                                  <Label className="font-cairo text-xs text-zinc-400 text-right block pr-1">تاريخ الانتهاء</Label>
+                                  <Label className="font-cairo text-xs text-zinc-400 text-right block pr-1">ØªØ§Ø±ÙŠØ® Ø§Ù„Ø§Ù†ØªÙ‡Ø§Ø¡</Label>
                                   <Input 
                                     value={expiryDate}
                                     onChange={handleExpiryChange}
@@ -1457,7 +1462,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                                 </div>
                                 
                                 <div className="space-y-1.5">
-                                  <Label className="font-cairo text-xs text-zinc-400 text-right block pr-1">رمز التحقق (CVV)</Label>
+                                  <Label className="font-cairo text-xs text-zinc-400 text-right block pr-1">Ø±Ù…Ø² Ø§Ù„ØªØ­Ù‚Ù‚ (CVV)</Label>
                                   <Input 
                                     value={cvv}
                                     onChange={handleCvvChange}
@@ -1476,11 +1481,11 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                               </div>
 
                               <div className="space-y-1.5">
-                                <Label className="font-cairo text-xs text-zinc-400 text-right block pr-1">اسم حامل البطاقة</Label>
+                                <Label className="font-cairo text-xs text-zinc-400 text-right block pr-1">Ø§Ø³Ù… Ø­Ø§Ù…Ù„ Ø§Ù„Ø¨Ø·Ø§Ù‚Ø©</Label>
                                 <Input 
                                   value={cardHolder}
                                   onChange={handleCardHolderChange}
-                                  placeholder="كما هو مكتوب على البطاقة" 
+                                  placeholder="ÙƒÙ…Ø§ Ù‡Ùˆ Ù…ÙƒØªÙˆØ¨ Ø¹Ù„Ù‰ Ø§Ù„Ø¨Ø·Ø§Ù‚Ø©" 
                                   className={cn("h-12 rounded-lg bg-white/[0.02] border text-white text-sm font-cairo hover:bg-white/[0.05] focus:bg-white/[0.07] focus:ring-1 focus:ring-white/20 focus:border-white/30 transition-all text-right pr-4 pl-4", 
                                     cardErrors.holder ? "border-red-500/40 focus:border-red-500/20" : (cardHolder.length >= 3 ? "border-emerald-500/40 focus:border-emerald-500/20" : "border-white/10")
                                   )}
@@ -1506,7 +1511,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                                     </svg>
                                   )}
                                 </div>
-                                <span className="text-xs text-zinc-400 group-hover:text-zinc-300 transition-colors font-cairo">حفظ بيانات البطاقة لعمليات الشراء القادمة</span>
+                                <span className="text-xs text-zinc-400 group-hover:text-zinc-300 transition-colors font-cairo">Ø­ÙØ¸ Ø¨ÙŠØ§Ù†Ø§Øª Ø§Ù„Ø¨Ø·Ø§Ù‚Ø© Ù„Ø¹Ù…Ù„ÙŠØ§Øª Ø§Ù„Ø´Ø±Ø§Ø¡ Ø§Ù„Ù‚Ø§Ø¯Ù…Ø©</span>
                               </label>
                             </div>
                           </div>
@@ -1531,7 +1536,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                                   if (isValid) {
                                     setShowInstapayModal(true);
                                   } else {
-                                    toast.error("يُرجى إكمال جميع الحقول لإتمام الدفع");
+                                    toast.error("ÙŠÙØ±Ø¬Ù‰ Ø¥ÙƒÙ…Ø§Ù„ Ø¬Ù…ÙŠØ¹ Ø§Ù„Ø­Ù‚ÙˆÙ„ Ù„Ø¥ØªÙ…Ø§Ù… Ø§Ù„Ø¯ÙØ¹");
                                   }
                                 }
                               }}
@@ -1546,10 +1551,10 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                               {isLoading ? (
                                 <>
                                   <Loader2 className="w-6 h-6 animate-spin ml-2" />
-                                  جاري تجهيز الدفع...
+                                  Ø¬Ø§Ø±ÙŠ ØªØ¬Ù‡ÙŠØ² Ø§Ù„Ø¯ÙØ¹...
                                 </>
                               ) : (
-                                <>إتمام الدفع - {formatPrice(finalPriceFormatted, currency)}</>
+                                <>Ø¥ØªÙ…Ø§Ù… Ø§Ù„Ø¯ÙØ¹ - {formatPrice(finalPriceFormatted, currency)}</>
                               )}
                             </Button>
                           ) : null}
@@ -1568,13 +1573,13 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                           {isLoading ? (
                             <>
                               <Loader2 className="w-6 h-6 animate-spin ml-2" />
-                              جاري تفعيل طلبك...
+                              Ø¬Ø§Ø±ÙŠ ØªÙØ¹ÙŠÙ„ Ø·Ù„Ø¨Ùƒ...
                             </>
                           ) : (
                             isCourse ? (
-                              <>تفعيل الكورس مجاناً والانضمام فوراً <Sparkles className="w-5 h-5 mr-3 opacity-80" /></>
+                              <>ØªÙØ¹ÙŠÙ„ Ø§Ù„ÙƒÙˆØ±Ø³ Ù…Ø¬Ø§Ù†Ø§Ù‹ ÙˆØ§Ù„Ø§Ù†Ø¶Ù…Ø§Ù… ÙÙˆØ±Ø§Ù‹ <Sparkles className="w-5 h-5 mr-3 opacity-80" /></>
                             ) : (
-                              <>تأكيد الطلب والحصول على المنتج مجاناً <Sparkles className="w-5 h-5 mr-3 opacity-80" /></>
+                              <>ØªØ£ÙƒÙŠØ¯ Ø§Ù„Ø·Ù„Ø¨ ÙˆØ§Ù„Ø­ØµÙˆÙ„ Ø¹Ù„Ù‰ Ø§Ù„Ù…Ù†ØªØ¬ Ù…Ø¬Ø§Ù†Ø§Ù‹ <Sparkles className="w-5 h-5 mr-3 opacity-80" /></>
                             )
                           )}
                         </Button>
@@ -1582,7 +1587,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
 
                       {((appliedCoupon && appliedCoupon.percent === 100) || paymentMethod) && (
                         <p className="text-[10px] text-zinc-500 text-center mt-2 font-cairo leading-relaxed">
-                          بالضغط على الزر أعلاه، أنت توافق على <Link href="/privacy" className="underline hover:text-white transition-colors">الشروط والأحكام</Link> و <Link href="/privacy" className="underline hover:text-white transition-colors">سياسة الخصوصية</Link>
+                          Ø¨Ø§Ù„Ø¶ØºØ· Ø¹Ù„Ù‰ Ø§Ù„Ø²Ø± Ø£Ø¹Ù„Ø§Ù‡ØŒ Ø£Ù†Øª ØªÙˆØ§ÙÙ‚ Ø¹Ù„Ù‰ <Link href="/privacy" className="underline hover:text-white transition-colors">Ø§Ù„Ø´Ø±ÙˆØ· ÙˆØ§Ù„Ø£Ø­ÙƒØ§Ù…</Link> Ùˆ <Link href="/privacy" className="underline hover:text-white transition-colors">Ø³ÙŠØ§Ø³Ø© Ø§Ù„Ø®ØµÙˆØµÙŠØ©</Link>
                         </p>
                       )}
                     </div>
@@ -1603,14 +1608,14 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                               onClick={handleRemoveCoupon}
                               className="text-[11px] text-zinc-400 hover:text-white transition-colors mr-2 cursor-pointer font-bold font-cairo"
                             >
-                              إلغاء
+                              Ø¥Ù„ØºØ§Ø¡
                             </button>
                           </div>
                         ) : (
                           <div className="relative flex items-center w-full">
                             <input
                               type="text"
-                              placeholder="أدخل كوبون الخصم..."
+                              placeholder="Ø£Ø¯Ø®Ù„ ÙƒÙˆØ¨ÙˆÙ† Ø§Ù„Ø®ØµÙ…..."
                               value={couponInput}
                               onChange={(e) => setCouponInput(e.target.value)}
                               disabled={isValidatingCoupon}
@@ -1623,7 +1628,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                               disabled={isValidatingCoupon || !couponInput.trim()}
                               className="absolute left-1.5 h-8 px-4 text-xs bg-[#D6004B] hover:bg-[#b0003d] text-white rounded-lg transition-all font-bold cursor-pointer disabled:opacity-50 font-cairo"
                             >
-                              {isValidatingCoupon ? "..." : "تطبيق"}
+                              {isValidatingCoupon ? "..." : "ØªØ·Ø¨ÙŠÙ‚"}
                             </button>
                           </div>
                         )}
@@ -1633,7 +1638,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                       {/* Pricing Breakdown */}
                       <div className="border-t border-white/5 pt-4 space-y-3 font-cairo text-sm text-zinc-400">
                         <div className="flex justify-between items-center">
-                          <span>السعر الأصلي:</span>
+                          <span>Ø§Ù„Ø³Ø¹Ø± Ø§Ù„Ø£ØµÙ„ÙŠ:</span>
                           <span className="font-bold line-through text-zinc-500">
                             {formatPrice(product.original_price || product.price, currency)}
                           </span>
@@ -1641,7 +1646,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
 
                         {discountPct !== null && discountPct > 0 && (
                           <div className="flex justify-between items-center text-emerald-400">
-                            <span>خصم الدورة ({discountPct}%):</span>
+                            <span>Ø®ØµÙ… Ø§Ù„Ø¯ÙˆØ±Ø© ({discountPct}%):</span>
                             <span className="font-bold" dir="ltr">
                               -{formatPrice(savings, currency)}
                             </span>
@@ -1650,7 +1655,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
 
                         {appliedCoupon && (
                           <div className="flex justify-between items-center text-emerald-400">
-                            <span>خصم الكوبون ({appliedCoupon.percent}%):</span>
+                            <span>Ø®ØµÙ… Ø§Ù„ÙƒÙˆØ¨ÙˆÙ† ({appliedCoupon.percent}%):</span>
                             <span className="font-bold" dir="ltr">
                               -{formatPrice(Math.round(product.price * (appliedCoupon.percent / 100)), currency)}
                             </span>
@@ -1659,7 +1664,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
 
                         {showFeeRowSeparately && (
                           <div className="flex justify-between items-center">
-                            <span>رسوم الدفع:</span>
+                            <span>Ø±Ø³ÙˆÙ… Ø§Ù„Ø¯ÙØ¹:</span>
                             <span className="font-bold">
                               {formatPrice(feeAmountFormatted, currency)}
                             </span>
@@ -1667,7 +1672,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                         )}
 
                         <div className="flex justify-between items-center border-t border-white/5 pt-4">
-                          <span className="text-white font-bold">الإجمالي:</span>
+                          <span className="text-white font-bold">Ø§Ù„Ø¥Ø¬Ù…Ø§Ù„ÙŠ:</span>
                           <span className="text-lg text-white font-cairo font-black">
                             {formatPrice(finalPriceFormatted, currency)}
                           </span>
@@ -1697,7 +1702,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                           {isCourse && (
                             <span className="inline-flex items-center gap-1 text-[10px] text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-full mt-1 font-bold">
                               <Sparkles className="w-2.5 h-2.5 animate-pulse" />
-                              انضمام فوري للقسم
+                              Ø§Ù†Ø¶Ù…Ø§Ù… ÙÙˆØ±ÙŠ Ù„Ù„Ù‚Ø³Ù…
                             </span>
                           )}
                         </div>
@@ -1709,7 +1714,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
 
                       <div className="border-b border-white/5 pb-4 mb-6 space-y-3 font-cairo text-sm text-zinc-400">
                         <div className="flex justify-between items-center">
-                          <span>السعر الأصلي:</span>
+                          <span>Ø§Ù„Ø³Ø¹Ø± Ø§Ù„Ø£ØµÙ„ÙŠ:</span>
                           <span className="font-bold line-through text-zinc-500">
                             {formatPrice(product.original_price || product.price, currency)}
                           </span>
@@ -1717,7 +1722,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
 
                         {discountPct !== null && discountPct > 0 && (
                           <div className="flex justify-between items-center text-emerald-400">
-                            <span>خصم الدورة ({discountPct}%):</span>
+                            <span>Ø®ØµÙ… Ø§Ù„Ø¯ÙˆØ±Ø© ({discountPct}%):</span>
                             <span className="font-bold" dir="ltr">
                               -{formatPrice(savings, currency)}
                             </span>
@@ -1726,7 +1731,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
 
                         {appliedCoupon && (
                           <div className="flex justify-between items-center text-emerald-400">
-                            <span>خصم الكوبون ({appliedCoupon.percent}%):</span>
+                            <span>Ø®ØµÙ… Ø§Ù„ÙƒÙˆØ¨ÙˆÙ† ({appliedCoupon.percent}%):</span>
                             <span className="font-bold" dir="ltr">
                               -{formatPrice(Math.round(product.price * (appliedCoupon.percent / 100)), currency)}
                             </span>
@@ -1735,7 +1740,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
 
                         {showFeeRowSeparately && (
                           <div className="flex justify-between items-center">
-                            <span>رسوم الدفع:</span>
+                            <span>Ø±Ø³ÙˆÙ… Ø§Ù„Ø¯ÙØ¹:</span>
                             <span className="font-bold">
                               {formatPrice(feeAmountFormatted, currency)}
                             </span>
@@ -1743,7 +1748,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                         )}
 
                         <div className="flex justify-between items-center border-t border-white/5 pt-4">
-                          <span className="text-white font-bold">الإجمالي:</span>
+                          <span className="text-white font-bold">Ø§Ù„Ø¥Ø¬Ù…Ø§Ù„ÙŠ:</span>
                           <span className="text-lg text-white font-cairo font-black">
                             {formatPrice(finalPriceFormatted, currency)}
                           </span>
@@ -1765,7 +1770,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                                   if (isValid) {
                                     setShowInstapayModal(true);
                                   } else {
-                                    toast.error("يُرجى إكمال جميع الحقول لإتمام الدفع");
+                                    toast.error("ÙŠÙØ±Ø¬Ù‰ Ø¥ÙƒÙ…Ø§Ù„ Ø¬Ù…ÙŠØ¹ Ø§Ù„Ø­Ù‚ÙˆÙ„ Ù„Ø¥ØªÙ…Ø§Ù… Ø§Ù„Ø¯ÙØ¹");
                                   }
                                 }
                               }}
@@ -1780,10 +1785,10 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                               {isLoading ? (
                                 <>
                                   <Loader2 className="w-6 h-6 animate-spin ml-2" />
-                                  جاري تجهيز الدفع...
+                                  Ø¬Ø§Ø±ÙŠ ØªØ¬Ù‡ÙŠØ² Ø§Ù„Ø¯ÙØ¹...
                                 </>
                               ) : (
-                                <>إتمام الدفع - {formatPrice(finalPriceFormatted, currency)}</>
+                                <>Ø¥ØªÙ…Ø§Ù… Ø§Ù„Ø¯ÙØ¹ - {formatPrice(finalPriceFormatted, currency)}</>
                               )}
                             </Button>
                           ) : null}
@@ -1802,13 +1807,13 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                           {isLoading ? (
                             <>
                               <Loader2 className="w-6 h-6 animate-spin ml-2" />
-                              جاري تفعيل طلبك...
+                              Ø¬Ø§Ø±ÙŠ ØªÙØ¹ÙŠÙ„ Ø·Ù„Ø¨Ùƒ...
                             </>
                           ) : (
                             isCourse ? (
-                              <>تفعيل الكورس مجاناً والانضمام فوراً <Sparkles className="w-5 h-5 mr-3 opacity-80" /></>
+                              <>ØªÙØ¹ÙŠÙ„ Ø§Ù„ÙƒÙˆØ±Ø³ Ù…Ø¬Ø§Ù†Ø§Ù‹ ÙˆØ§Ù„Ø§Ù†Ø¶Ù…Ø§Ù… ÙÙˆØ±Ø§Ù‹ <Sparkles className="w-5 h-5 mr-3 opacity-80" /></>
                             ) : (
-                              <>تأكيد الطلب والحصول على المنتج مجاناً <Sparkles className="w-5 h-5 mr-3 opacity-80" /></>
+                              <>ØªØ£ÙƒÙŠØ¯ Ø§Ù„Ø·Ù„Ø¨ ÙˆØ§Ù„Ø­ØµÙˆÙ„ Ø¹Ù„Ù‰ Ø§Ù„Ù…Ù†ØªØ¬ Ù…Ø¬Ø§Ù†Ø§Ù‹ <Sparkles className="w-5 h-5 mr-3 opacity-80" /></>
                             )
                           )}
                         </Button>
@@ -1816,7 +1821,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
 
                     {((appliedCoupon && appliedCoupon.percent === 100) || paymentMethod) && (
                       <p className="text-[10px] text-zinc-500 text-center mt-4 font-cairo leading-relaxed">
-                        بالضغط على الزر أعلاه، أنت توافق على <Link href="/privacy" className="underline hover:text-white transition-colors">الشروط والأحكام</Link> و <Link href="/privacy" className="underline hover:text-white transition-colors">سياسة الخصوصية</Link>
+                        Ø¨Ø§Ù„Ø¶ØºØ· Ø¹Ù„Ù‰ Ø§Ù„Ø²Ø± Ø£Ø¹Ù„Ø§Ù‡ØŒ Ø£Ù†Øª ØªÙˆØ§ÙÙ‚ Ø¹Ù„Ù‰ <Link href="/privacy" className="underline hover:text-white transition-colors">Ø§Ù„Ø´Ø±ÙˆØ· ÙˆØ§Ù„Ø£Ø­ÙƒØ§Ù…</Link> Ùˆ <Link href="/privacy" className="underline hover:text-white transition-colors">Ø³ÙŠØ§Ø³Ø© Ø§Ù„Ø®ØµÙˆØµÙŠØ©</Link>
                       </p>
                     )}
                   </div>
@@ -1831,7 +1836,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                     
                     {/* Coupon Field inside Sidebar */}
                     <div className="mb-6">
-                      <Label className="font-cairo text-xs text-zinc-400 block mb-2 text-right">كوبون الخصم</Label>
+                      <Label className="font-cairo text-xs text-zinc-400 block mb-2 text-right">ÙƒÙˆØ¨ÙˆÙ† Ø§Ù„Ø®ØµÙ…</Label>
                       {appliedCoupon ? (
                         <div className="flex items-center justify-between bg-emerald-500/10 border border-emerald-500/20 px-3 py-2 rounded-2xl w-full">
                           <div className="flex items-center gap-2">
@@ -1843,14 +1848,14 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                             onClick={handleRemoveCoupon}
                             className="text-xs text-zinc-400 hover:text-white transition-colors mr-2 cursor-pointer font-bold font-cairo"
                           >
-                            إلغاء
+                            Ø¥Ù„ØºØ§Ø¡
                           </button>
                         </div>
                       ) : (
                         <div className="relative flex items-center w-full">
                           <input
                             type="text"
-                            placeholder="أدخل كوبون الخصم..."
+                            placeholder="Ø£Ø¯Ø®Ù„ ÙƒÙˆØ¨ÙˆÙ† Ø§Ù„Ø®ØµÙ…..."
                             value={couponInput}
                             onChange={(e) => setCouponInput(e.target.value)}
                             disabled={isValidatingCoupon}
@@ -1863,7 +1868,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                             disabled={isValidatingCoupon || !couponInput.trim()}
                             className="absolute left-1.5 h-8 px-4 text-xs bg-[#D6004B] hover:bg-[#b0003d] text-white rounded-lg transition-all font-bold cursor-pointer disabled:opacity-50 font-cairo"
                           >
-                            {isValidatingCoupon ? "..." : "تطبيق"}
+                            {isValidatingCoupon ? "..." : "ØªØ·Ø¨ÙŠÙ‚"}
                           </button>
                         </div>
                       )}
@@ -1873,7 +1878,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                     {/* Pricing Breakdown inside Sidebar */}
                     <div className="border-t border-white/5 pt-4 space-y-3 font-cairo text-sm text-zinc-400">
                       <div className="flex justify-between items-center">
-                        <span>السعر الأصلي:</span>
+                        <span>Ø§Ù„Ø³Ø¹Ø± Ø§Ù„Ø£ØµÙ„ÙŠ:</span>
                         <span className="font-bold line-through text-zinc-500">
                           {formatPrice(product.original_price || product.price, currency)}
                         </span>
@@ -1881,7 +1886,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
 
                       {discountPct !== null && discountPct > 0 && (
                         <div className="flex justify-between items-center text-emerald-400">
-                          <span>خصم الدورة ({discountPct}%):</span>
+                          <span>Ø®ØµÙ… Ø§Ù„Ø¯ÙˆØ±Ø© ({discountPct}%):</span>
                           <span className="font-bold" dir="ltr">
                             -{formatPrice(savings, currency)}
                           </span>
@@ -1890,7 +1895,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
 
                       {appliedCoupon && (
                         <div className="flex justify-between items-center text-emerald-400">
-                          <span>خصم الكوبون ({appliedCoupon.percent}%):</span>
+                          <span>Ø®ØµÙ… Ø§Ù„ÙƒÙˆØ¨ÙˆÙ† ({appliedCoupon.percent}%):</span>
                           <span className="font-bold" dir="ltr">
                             -{formatPrice(Math.round(product.price * (appliedCoupon.percent / 100)), currency)}
                           </span>
@@ -1899,7 +1904,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
 
                       {showFeeRowSeparately && (
                         <div className="flex justify-between items-center">
-                          <span>رسوم الدفع:</span>
+                          <span>Ø±Ø³ÙˆÙ… Ø§Ù„Ø¯ÙØ¹:</span>
                           <span className="font-bold">
                             {formatPrice(feeAmountFormatted, currency)}
                           </span>
@@ -1907,7 +1912,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                       )}
 
                       <div className="flex justify-between items-center border-t border-white/5 pt-4">
-                        <span className="text-white font-bold">الإجمالي:</span>
+                        <span className="text-white font-bold">Ø§Ù„Ø¥Ø¬Ù…Ø§Ù„ÙŠ:</span>
                         <span className="text-xl text-white font-cairo font-black">
                           {formatPrice(finalPriceFormatted, currency)}
                         </span>
@@ -1938,7 +1943,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                         {isCourse && (
                           <span className="inline-flex items-center gap-1.5 text-[10px] text-rose-400 bg-rose-500/10 px-3 py-1 rounded-full mt-2 font-bold">
                             <Sparkles className="w-3 h-3 animate-pulse" />
-                            انضمام فوري للقسم
+                            Ø§Ù†Ø¶Ù…Ø§Ù… ÙÙˆØ±ÙŠ Ù„Ù„Ù‚Ø³Ù…
                           </span>
                         )}
                       </div>
@@ -1947,19 +1952,19 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                     {/* Sidebar trust checklist items */}
                     <div className="border-t border-white/5 pt-6 mt-6 space-y-4 font-cairo text-xs text-zinc-400 text-right">
                       <div className="flex items-center gap-2.5 justify-end">
-                        <span>وصول فوري بعد الدفع</span>
+                        <span>ÙˆØµÙˆÙ„ ÙÙˆØ±ÙŠ Ø¨Ø¹Ø¯ Ø§Ù„Ø¯ÙØ¹</span>
                         <div className="w-5 h-5 rounded-full bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400 shrink-0">
                           <Sparkles className="w-3 h-3" />
                         </div>
                       </div>
                       <div className="flex items-center gap-2.5 justify-end">
-                        <span>ضمان استرجاع 7 أيام</span>
+                        <span>Ø¶Ù…Ø§Ù† Ø§Ø³ØªØ±Ø¬Ø§Ø¹ 7 Ø£ÙŠØ§Ù…</span>
                         <div className="w-5 h-5 rounded-full bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400 shrink-0">
                           <ShieldCheck className="w-3 h-3" />
                         </div>
                       </div>
                       <div className="flex items-center gap-2.5 justify-end">
-                        <span>دعم فني طوال فترة الكورس</span>
+                        <span>Ø¯Ø¹Ù… ÙÙ†ÙŠ Ø·ÙˆØ§Ù„ ÙØªØ±Ø© Ø§Ù„ÙƒÙˆØ±Ø³</span>
                         <div className="w-5 h-5 rounded-full bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400 shrink-0">
                           <ShieldCheck className="w-3 h-3" />
                         </div>
@@ -2003,12 +2008,12 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                     priority
                   />
                 </div>
-                <h3 className="text-xl font-cairo font-bold text-white">الدفع عبر Instapay</h3>
-                <p className="text-sm text-zinc-400 font-cairo mt-1">قم بتحويل المبلغ ثم أرسل لقطة الشاشة</p>
+                <h3 className="text-xl font-cairo font-bold text-white">Ø§Ù„Ø¯ÙØ¹ Ø¹Ø¨Ø± Instapay</h3>
+                <p className="text-sm text-zinc-400 font-cairo mt-1">Ù‚Ù… Ø¨ØªØ­ÙˆÙŠÙ„ Ø§Ù„Ù…Ø¨Ù„Øº Ø«Ù… Ø£Ø±Ø³Ù„ Ù„Ù‚Ø·Ø© Ø§Ù„Ø´Ø§Ø´Ø©</p>
               </div>
 
               <div className="bg-purple-500/10 border border-purple-500/20 rounded-2xl p-4">
-                <p className="text-sm text-purple-300 font-cairo mb-1">المبلغ المطلوب تحويله</p>
+                <p className="text-sm text-purple-300 font-cairo mb-1">Ø§Ù„Ù…Ø¨Ù„Øº Ø§Ù„Ù…Ø·Ù„ÙˆØ¨ ØªØ­ÙˆÙŠÙ„Ù‡</p>
                 <p className="text-3xl font-cairo font-black text-white">
                   {formatPrice(finalPriceFormatted, currency)}
                 </p>
@@ -2016,16 +2021,16 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
 
               <div className="space-y-3 text-right">
                 <div className="bg-white/5 border border-white/5 rounded-xl p-3 flex items-center justify-between">
-                  <button onClick={() => { navigator.clipboard.writeText('youssef.m2003@instapay'); toast.success('تم نسخ العنوان'); }} className="text-xs text-purple-400 font-bold hover:text-purple-300 transition-colors cursor-pointer">نسخ</button>
+                  <button onClick={() => { navigator.clipboard.writeText('youssef.m2003@instapay'); toast.success('ØªÙ… Ù†Ø³Ø® Ø§Ù„Ø¹Ù†ÙˆØ§Ù†'); }} className="text-xs text-purple-400 font-bold hover:text-purple-300 transition-colors cursor-pointer">Ù†Ø³Ø®</button>
                   <div className="text-right">
                     <p className="text-[10px] text-zinc-500 font-cairo">Payment Address</p>
                     <p className="text-sm text-white font-mono font-bold" dir="ltr">youssef.m2003@instapay</p>
                   </div>
                 </div>
                 <div className="bg-white/5 border border-white/5 rounded-xl p-3 flex items-center justify-between">
-                  <button onClick={() => { navigator.clipboard.writeText('01016748891'); toast.success('تم نسخ الرقم'); }} className="text-xs text-purple-400 font-bold hover:text-purple-300 transition-colors cursor-pointer">نسخ</button>
+                  <button onClick={() => { navigator.clipboard.writeText('01016748891'); toast.success('ØªÙ… Ù†Ø³Ø® Ø§Ù„Ø±Ù‚Ù…'); }} className="text-xs text-purple-400 font-bold hover:text-purple-300 transition-colors cursor-pointer">Ù†Ø³Ø®</button>
                   <div className="text-right">
-                    <p className="text-[10px] text-zinc-500 font-cairo">رقم الهاتف</p>
+                    <p className="text-[10px] text-zinc-500 font-cairo">Ø±Ù‚Ù… Ø§Ù„Ù‡Ø§ØªÙ</p>
                     <p className="text-sm text-white font-mono font-bold" dir="ltr">01016748891</p>
                   </div>
                 </div>
@@ -2033,7 +2038,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
 
               <div className="text-center bg-[#151522]/50 border border-emerald-500/10 rounded-xl p-2.5">
                 <p className="text-xs text-zinc-300 font-cairo leading-normal">
-                  تنويه: سيظهر اسم المستلم باسم <span className="text-emerald-400 font-bold">Youssef.M</span> عند التحويل
+                  ØªÙ†ÙˆÙŠÙ‡: Ø³ÙŠØ¸Ù‡Ø± Ø§Ø³Ù… Ø§Ù„Ù…Ø³ØªÙ„Ù… Ø¨Ø§Ø³Ù… <span className="text-emerald-400 font-bold">Youssef.M</span> Ø¹Ù†Ø¯ Ø§Ù„ØªØ­ÙˆÙŠÙ„
                 </p>
               </div>
 
@@ -2049,19 +2054,19 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                 }}
                 className="w-full h-12 bg-purple-600 hover:bg-purple-500 text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-[0_4px_14px_rgba(147,51,234,0.3)] font-cairo"
               >
-                ادفع مباشرة عبر Instapay
+                Ø§Ø¯ÙØ¹ Ù…Ø¨Ø§Ø´Ø±Ø© Ø¹Ø¨Ø± Instapay
                 <ChevronRight className="w-4 h-4 rtl:rotate-180" />
               </a>
 
               <div className="space-y-2">
                 {instapayScreenshot ? (
                   <div className="relative rounded-xl overflow-hidden border border-purple-500/30 bg-white/5">
-                    <img src={instapayScreenshot} alt="لقطة شاشة التحويل" className="w-full h-auto max-h-48 object-contain" />
+                    <img src={instapayScreenshot} alt="Ù„Ù‚Ø·Ø© Ø´Ø§Ø´Ø© Ø§Ù„ØªØ­ÙˆÙŠÙ„" className="w-full h-auto max-h-48 object-contain" />
                     {isUploadingScreenshot && (
                       <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
                         <div className="flex flex-col items-center gap-2">
                           <Loader2 className="w-6 h-6 animate-spin text-purple-400" />
-                          <span className="text-xs text-purple-300 font-cairo">جاري رفع الصورة...</span>
+                          <span className="text-xs text-purple-300 font-cairo">Ø¬Ø§Ø±ÙŠ Ø±ÙØ¹ Ø§Ù„ØµÙˆØ±Ø©...</span>
                         </div>
                       </div>
                     )}
@@ -2076,14 +2081,14 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                     {instapayScreenshotUrl && !isUploadingScreenshot && (
                       <div className="absolute bottom-2 left-2 flex items-center gap-1.5 bg-emerald-500/90 text-white text-[10px] font-bold px-2 py-1 rounded-full font-cairo">
                         <CheckCircle2 className="w-3 h-3" />
-                        تم رفع الصورة
+                        ØªÙ… Ø±ÙØ¹ Ø§Ù„ØµÙˆØ±Ø©
                       </div>
                     )}
                   </div>
                 ) : (
                   <label className="w-full h-24 border-2 border-dashed border-white/10 hover:border-purple-500/30 rounded-xl flex flex-col items-center justify-center cursor-pointer transition-all hover:bg-white/[0.02]">
                     <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-zinc-500 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                    <span className="text-xs text-zinc-500 font-cairo">ارفع لقطة شاشة التحويل</span>
+                    <span className="text-xs text-zinc-500 font-cairo">Ø§Ø±ÙØ¹ Ù„Ù‚Ø·Ø© Ø´Ø§Ø´Ø© Ø§Ù„ØªØ­ÙˆÙŠÙ„</span>
                     <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
                       const file = e.target.files?.[0];
                       if (!file) return;
@@ -2098,10 +2103,10 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                         if (error) throw error;
                         const shortUrl = `${window.location.origin}/api/receipt/${fileName}`;
                         setInstapayScreenshotUrl(shortUrl);
-                        toast.success('تم رفع الصورة بنجاح');
+                        toast.success('ØªÙ… Ø±ÙØ¹ Ø§Ù„ØµÙˆØ±Ø© Ø¨Ù†Ø¬Ø§Ø­');
                       } catch (err) {
                         console.error('Upload error:', err);
-                        toast.error('حدث خطأ أثناء رفع الصورة، حاول مرة أخرى');
+                        toast.error('Ø­Ø¯Ø« Ø®Ø·Ø£ Ø£Ø«Ù†Ø§Ø¡ Ø±ÙØ¹ Ø§Ù„ØµÙˆØ±Ø©ØŒ Ø­Ø§ÙˆÙ„ Ù…Ø±Ø© Ø£Ø®Ø±Ù‰');
                         setInstapayScreenshot(null);
                       } finally {
                         setIsUploadingScreenshot(false);
@@ -2123,7 +2128,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                 )}
               >
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-                {isLoading ? "جاري تسجيل الطلب..." : "أرسل إثبات الدفع عبر واتساب"}
+                {isLoading ? "Ø¬Ø§Ø±ÙŠ ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø·Ù„Ø¨..." : "Ø£Ø±Ø³Ù„ Ø¥Ø«Ø¨Ø§Øª Ø§Ù„Ø¯ÙØ¹ Ø¹Ø¨Ø± ÙˆØ§ØªØ³Ø§Ø¨"}
               </button>
             </div>
           </motion.div>
@@ -2136,3 +2141,4 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
     </div>
   );
 }
+
