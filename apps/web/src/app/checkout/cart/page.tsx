@@ -219,6 +219,30 @@ export default function CartCheckoutPage() {
     });
   }, []); // eslint-disable-line
 
+  // Track Meta Pixel InitiateCheckout on page load once cart is available
+  useEffect(() => {
+    if (cart.length > 0 && typeof window !== "undefined") {
+      const productIds = cart.map(p => String(p.id));
+      const contentName = cart.map(p => p.title).join(" + ");
+      
+      trackMetaEvent('InitiateCheckout', {
+        content_name: contentName,
+        content_ids: productIds,
+        content_type: 'product',
+        value: subtotalCartTotal,
+        currency: 'EGP'
+      });
+      
+      trackTiktokEvent('InitiateCheckout', {
+        content_name: contentName,
+        content_ids: productIds,
+        content_type: 'product',
+        value: subtotalCartTotal,
+        currency: 'EGP'
+      });
+    }
+  }, [cart, subtotalCartTotal]);
+
   // Card Formatting & Validation Handlers
   const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/\D/g, "");

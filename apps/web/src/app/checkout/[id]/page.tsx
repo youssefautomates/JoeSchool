@@ -319,6 +319,16 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
     });
   }, [resolvedParams.id]);
 
+  // Track Meta Pixel InitiateCheckout on page load once product is available
+  useEffect(() => {
+    if (product && typeof window !== "undefined") {
+      const isFree = product.price === 0 || product.price === null || product.price === undefined;
+      const finalPriceEGP = isFree ? 0 : Number(product.price);
+      trackInitiateCheckout(product.id, product.title, finalPriceEGP, "EGP", isCourse ? "course" : "product");
+      trackTiktokInitiateCheckout(product.id, product.title, finalPriceEGP, "EGP", isCourse ? "course" : "product");
+    }
+  }, [product, isCourse]);
+
   useEffect(() => {
     resolveUserCurrency().then(async (detectedCurrency) => {
       setCurrency(detectedCurrency);
