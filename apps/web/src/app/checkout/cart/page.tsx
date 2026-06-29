@@ -221,9 +221,9 @@ export default function CartCheckoutPage() {
 
   // Track Meta Pixel InitiateCheckout on page load once cart is available
   useEffect(() => {
-    if (cart.length > 0 && typeof window !== "undefined") {
-      const productIds = cart.map(p => String(p.id));
-      const contentName = cart.map(p => p.title).join(" + ");
+    if (items.length > 0 && typeof window !== "undefined") {
+      const productIds = items.map(p => String(p.id));
+      const contentName = items.map(p => p.title).join(" + ");
       
       trackMetaEvent('InitiateCheckout', {
         content_name: contentName,
@@ -241,7 +241,7 @@ export default function CartCheckoutPage() {
         currency: 'EGP'
       });
     }
-  }, [cart, subtotalCartTotal]);
+  }, [items, subtotalCartTotal]);
 
   // Card Formatting & Validation Handlers
   const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
