@@ -48,12 +48,22 @@ export const viewport: Viewport = {
   maximumScale: 1,
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const settings = await getKV("marketing_settings");
+  let settings: any = null;
+  try {
+    settings = await getKV("marketing_settings");
+  } catch (err) {
+    console.error("[RootLayout] Failed to fetch marketing settings:", err);
+  }
+
+  const cleanPixelId = settings?.metaPixelId ? String(settings.metaPixelId).trim() : "";
+  const isPixelEnabled = settings?.metaPixelEnabled && cleanPixelId && /^\d+$/.test(cleanPixelId);
 
   return (
     <html
@@ -61,6 +71,36 @@ export default async function RootLayout({
       dir="rtl"
       className={`${cairo.variable} ${alexandria.variable} scroll-smooth`}
     >
+      <head>
+        {isPixelEnabled && (
+          <>
+            <script
+              dangerouslySetInnerHTML={{
+                __html: `
+                  !function(f,b,e,v,n,t,s)
+                  {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+                  n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+                  if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+                  n.queue=[];t=b.createElement(e);t.async=!0;
+                  t.src=v;s=b.getElementsByTagName(e)[0];
+                  s.parentNode.insertBefore(t,s)}(window, document,'script',
+                  'https://connect.facebook.net/en_US/fbevents.js');
+                  fbq('init', '${cleanPixelId}');
+                  fbq('track', 'PageView');
+                `,
+              }}
+            />
+            <noscript>
+              <img
+                height="1"
+                width="1"
+                style={{ display: "none" }}
+                src={`https://www.facebook.com/tr?id=${cleanPixelId}&ev=PageView&noscript=1`}
+              />
+            </noscript>
+          </>
+        )}
+      </head>
       <body className="min-h-screen bg-white text-zinc-900 font-cairo flex flex-col antialiased selection:bg-rose-600/10 selection:text-rose-600">
         <Providers>
           <Suspense fallback={null}>
@@ -70,7 +110,6 @@ export default async function RootLayout({
           <Toaster theme="light" position="top-center" closeButton richColors />
         </Providers>
       </body>
-
     </html>
   );
 }

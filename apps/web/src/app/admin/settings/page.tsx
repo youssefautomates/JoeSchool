@@ -84,17 +84,17 @@ export default function AdminSettings() {
         const res = await fetch("/api/admin/settings");
         const data = await res.json();
         if (data && !data.error) {
-          const pId = data.metaPixelId && data.metaPixelId !== "1234567890" ? data.metaPixelId : "26928253836844726";
+          const pId = data.metaPixelId && data.metaPixelId !== "1234567890" ? data.metaPixelId : "26144977705179312";
           const pEnabled = data.metaPixelId ? !!data.metaPixelEnabled : true;
-          const cEnabled = data.metaCapiToken ? !!data.metaCapiEnabled : true;
-          const cToken = data.metaCapiToken && data.metaCapiToken !== "placeholder" ? data.metaCapiToken : "EAAgiivlidyEBRqjAV1oZADaQZABqaOULEY6altW1dg7kZCC2Jb9H7tOZA2pml3MWUtVDZCpupq4AwXoDj0O4DZBfOCluF6iB1qtkc4Mzmz9XTvYyo4Jp7moLhOnSFdjDAU0lMbjpaVlmGceYNdRNB5J2LLBZCfHq5pSoHTsfM8RMRyDrbGju6HoOlfrYywF6QZDZD";
+          const cEnabled = false; // Disable CAPI completely
+          const cToken = "";
           
           setMetaPixelId(pId);
           setMetaPixelRawCode(data.metaPixelRawCode || pId);
           setMetaPixelEnabled(pEnabled);
           setMetaCapiEnabled(cEnabled);
           setMetaCapiToken(cToken);
-          setMetaCapiTestCode(data.metaCapiTestCode ?? "TEST4319");
+          setMetaCapiTestCode(data.metaCapiTestCode ?? "");
           setTiktokPixelId(data.tiktokPixelId || "");
           setTiktokPixelEnabled(!!data.tiktokPixelEnabled);
           setGlobalGatewayFeeEnabled(data.globalGatewayFeeEnabled !== false);
@@ -111,7 +111,7 @@ export default function AdminSettings() {
             metaPixelEnabled: pEnabled,
             metaCapiEnabled: cEnabled,
             metaCapiToken: cToken,
-            metaCapiTestCode: data.metaCapiTestCode ?? "TEST4319",
+            metaCapiTestCode: data.metaCapiTestCode ?? "",
             tiktokPixelId: data.tiktokPixelId || "",
             tiktokPixelEnabled: !!data.tiktokPixelEnabled
           };

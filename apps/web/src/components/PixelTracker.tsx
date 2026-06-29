@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import Script from "next/script";
 import { initSession, trackEvent } from "@/lib/analytics";
@@ -18,6 +18,7 @@ export function PixelTracker({ initialSettings }: { initialSettings?: any }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [settings, setSettings] = useState<any>(initialSettings || null);
+  const isFirstMount = useRef(true);
 
   // Synchronously write settings to window for early/static loads
   if (typeof window !== "undefined" && settings) {
@@ -64,16 +65,21 @@ export function PixelTracker({ initialSettings }: { initialSettings?: any }) {
     // Database Clickstream PageView Ingestion
     trackEvent("page_view", null, null, { path: pathname });
 
-    // Track Meta PageViews on route change (without window.fbq guard to let queue work)
-    if (settings && settings.metaPixelEnabled && settings.metaPixelId) {
-      trackMetaEvent("PageView");
-    }
-    
-    // Track TikTok PageViews on route change (using tiktokPixel module)
-    if (isTiktokEnabled && activeTiktokId) {
-      import("@/lib/tiktokPixel").then(mod => {
-        mod.trackTiktokPageView();
-      });
+    if (isFirstMount.current) {
+      isFirstMount.current = false;
+      console.log("[PixelTracker] Initial mount: skipped duplicate PageView tracking (fired via HTML script)");
+    } else {
+      // Track Meta PageViews on subsequent route changes
+      if (settings && settings.metaPixelEnabled && settings.metaPixelId) {
+        trackMetaEvent("PageView");
+      }
+      
+      // Track TikTok PageViews on subsequent route changes
+      if (isTiktokEnabled && activeTiktokId) {
+        import("@/lib/tiktokPixel").then(mod => {
+          mod.trackTiktokPageView();
+        });
+      }
     }
   }, [pathname, searchParams, settings, isTiktokEnabled, activeTiktokId]);
 
@@ -226,34 +232,6 @@ export function PixelTracker({ initialSettings }: { initialSettings?: any }) {
 
   return (
     <>
-      {/* Meta Pixel */}
-      {isPixelEnabled && (
-        <>
-          <Script id="meta-pixel-base" strategy="afterInteractive">
-            {`
-              !function(f,b,e,v,n,t,s)
-              {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-              n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-              if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-              n.queue=[];t=b.createElement(e);t.async=!0;
-              t.src=v;s=b.getElementsByTagName(e)[0];
-              s.parentNode.insertBefore(t,s)}(window, document,'script',
-              'https://connect.facebook.net/en_US/fbevents.js');
-              fbq('init', '${cleanPixelId}');
-              fbq('track', 'PageView');
-            `}
-          </Script>
-          <noscript>
-            <img 
-              height="1" 
-              width="1" 
-              style={{ display: 'none' }}
-              src={`https://www.facebook.com/tr?id=${cleanPixelId}&ev=PageView&noscript=1`}
-            />
-          </noscript>
-        </>
-      )}
-      
       {/* TikTok Pixel */}
       {isTiktokEnabled && activeTiktokId && (
         <Script

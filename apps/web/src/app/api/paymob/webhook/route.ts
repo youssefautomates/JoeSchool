@@ -430,53 +430,7 @@ export async function POST(request: Request) {
         }
 
         // ── Meta CAPI Purchase Trigger ─────────────────────────────
-        if (hasJustCompleted) {
-          console.log(`[PAYMOB_WEBHOOK][${requestId}] 🚀 Triggering Server-Side Meta CAPI Purchase event...`);
-          try {
-            const baseOrder = allOrders[0];
-            const originalAmountUsd = allOrders.reduce((sum, o) => sum + (Number(o.original_amount_usd) || 0), 0);
-            const chargedAmountEgp = allOrders.reduce((sum, o) => sum + (Number(o.charged_amount_egp) || 0), 0);
-            const fallbackAmount = allOrders.reduce((sum, o) => sum + (Number(o.final_price) || Number(o.amount) || 0), 0);
-            const orderValue = currency === "USD"
-              ? (originalAmountUsd || fallbackAmount)
-              : (chargedAmountEgp || fallbackAmount);
-            const productIds = allOrders.map(o => String(o.product_id));
-            const productTitle = allOrders.map(o => o.product_title || "منتج").join(" + ");
-            const clientIp = baseOrder.ip_address || "127.0.0.1";
-            
-            // Try to resolve user agent from analytics_events
-            let clientUserAgent = "Server Side Trigger";
-            try {
-              const { data: eventData } = await supabaseAdmin
-                .from("analytics_events")
-                .select("user_agent")
-                .eq("event_name", "order_created")
-                .eq("metadata->>order_id", baseOrder.id)
-                .maybeSingle();
-              if (eventData?.user_agent) {
-                clientUserAgent = eventData.user_agent;
-              }
-            } catch (uaErr) {}
-
-            console.log(`[PAYMOB_WEBHOOK][${requestId}] [META_PURCHASE_SERVER] transactionId=${baseOrder.id} | value=${orderValue} | currency=${currency} | orderIds=${allOrders.map(o => o.id).join(',')} | (chargedEgp=${chargedAmountEgp}, usd=${originalAmountUsd}, fallback=${fallbackAmount})`);
-
-            const { trackServerPurchase } = await import("@/lib/metaCapiServer");
-            await trackServerPurchase({
-              transactionId: baseOrder.id,
-              price: Number(orderValue) || 0,
-              currency,
-              productTitle,
-              productIds,
-              customerEmail: customerEmail.toLowerCase().trim(),
-              clientIp: clientIp.split(",")[0].trim(),
-              clientUserAgent,
-              eventSourceUrl: `https://joeschool.com/checkout/success?id=${baseOrder.id}`
-            });
-            console.log(`[PAYMOB_WEBHOOK][${requestId}] ✅ Server-Side Meta CAPI Purchase event sent successfully!`);
-          } catch (capiErr: any) {
-            console.error(`[PAYMOB_WEBHOOK][${requestId}] ❌ Meta CAPI trigger failed:`, capiErr.message || capiErr);
-          }
-        }
+        // Server-Side CAPI tracking is disabled in favor of browser pixel
 
         // ── 5. Safe Decoupled Email Trigger (Resend Service) ─────────
         try {

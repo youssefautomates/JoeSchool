@@ -211,52 +211,7 @@ export async function trackMetaEvent(event: string, params: any = {}, dedupeKey?
     params: trackingParams
   });
 
-  // 4. Server-side Conversion API (CAPI) proxy invocation
-  if (currentSettings?.metaCapiEnabled && currentSettings?.metaCapiToken) {
-    try {
-      const response = await fetch("/api/tracking/capi", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          eventName: event,
-          eventId,
-          eventTime: Math.floor(Date.now() / 1000),
-          eventSourceUrl: window.location.href,
-          params: trackingParams,
-          metaPixelId: currentSettings.metaPixelId,
-          metaCapiToken: currentSettings.metaCapiToken,
-          metaCapiTestCode: currentSettings.metaCapiTestCode,
-          metaCapiEnabled: currentSettings.metaCapiEnabled
-        })
-      });
-
-      const capiResult = await response.json();
-      
-      logEventToDiagnostics({
-        event,
-        eventId,
-        timestamp: new Date().toISOString(),
-        browserStatus,
-        capiStatus: capiResult.success ? "success" : "failed",
-        deduplicated: capiResult.success && browserStatus === "success",
-        params: trackingParams,
-        metaCapiResponse: capiResult.raw_response
-      } as any);
-    } catch (capiErr: any) {
-      logEventToDiagnostics({
-        event,
-        eventId,
-        timestamp: new Date().toISOString(),
-        browserStatus,
-        capiStatus: "failed",
-        deduplicated: false,
-        params: trackingParams,
-        metaCapiResponse: { error: capiErr.message }
-      } as any);
-    }
-  }
+  // 4. Server-side Conversion API (CAPI) proxy invocation has been disabled
 }
 
 /**

@@ -831,36 +831,7 @@ export async function POST(req: Request) {
     const fallbackAmount = orders.reduce((sum, o) => sum + (Number(o.final_price) || Number(o.amount) || 0), 0);
     const exchangeRate = baseOrder.exchange_rate || null;
 
-    // Dispatch Unified Server-Side Meta CAPI Purchase event in parallel
-    try {
-      const orderValue = currency === "USD"
-        ? (originalAmountUsd || fallbackAmount)
-        : (chargedAmountEgp || fallbackAmount);
-      const productIds = resolvedProducts.map(p => String(p.id));
-      const productTitle = resolvedProducts.map(p => p.title).join(" + ");
-      
-      const clientIp = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "127.0.0.1";
-      const clientUserAgent = req.headers.get("user-agent") || "";
-      
-      console.log(`[VERIFY][${requestId}] [META_PURCHASE_SERVER] transactionId=${baseOrder.id} | value=${orderValue} | currency=${currency} | orderIds=${orders.map(o => o.id).join(',')} | (chargedEgp=${chargedAmountEgp}, usd=${originalAmountUsd}, fallback=${fallbackAmount})`);
-
-      // Fire backend CAPI conversion event asynchronously
-      import("@/lib/metaCapiServer").then(({ trackServerPurchase }) => {
-        trackServerPurchase({
-          transactionId: baseOrder.id,
-          price: Number(orderValue) || 0,
-          currency,
-          productTitle,
-          productIds,
-          customerEmail: customerEmail.toLowerCase().trim(),
-          clientIp: clientIp.split(",")[0].trim(),
-          clientUserAgent,
-          eventSourceUrl: req.url
-        }).catch(err => console.error("[VERIFY] Server CAPI trigger promise rejection:", err));
-      });
-    } catch (capiErr: any) {
-      console.error("[VERIFY] Failed to invoke Server-Side CAPI tracking:", capiErr.message);
-    }
+    // Server-Side CAPI tracking is disabled in favor of browser pixel
 
     // Generate an auto-login action link using Supabase Admin SDK
     let loginLink: string | null = null;
