@@ -53,8 +53,10 @@ export async function sendMetaEvent(options: CapiEventOptions, attempt = 1): Pro
     const token = process.env.META_ACCESS_TOKEN || settings?.metaCapiToken;
     const isCapiEnabled = settings?.metaCapiEnabled !== false; // Enable by default if not set, or read from DB
 
+    console.log(`[META_CAPI_PRE_CHECK] Event: ${options.eventName}, isCapiEnabled: ${isCapiEnabled}, hasToken: ${!!token}, hasPixelId: ${!!pixelId}`);
+
     if (!isCapiEnabled || !token || !pixelId) {
-      console.log(`[META_CAPI] CAPI is disabled or credentials missing (Event: ${options.eventName}). Skipping.`);
+      console.log(`[META_CAPI] ❌ CAPI is disabled or credentials missing (Event: ${options.eventName}). Skipping.`);
       return { success: false, status: "disabled" };
     }
 

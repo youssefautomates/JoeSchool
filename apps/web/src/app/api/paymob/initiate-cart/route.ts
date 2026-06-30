@@ -221,6 +221,7 @@ export async function POST(req: Request) {
 
     if (checkoutEventId) {
       try {
+        console.log(`[PAYMOB_CART_INITIATE_DEBUG] 🛒 Calling trackServerInitiateCheckout (eventId: ${checkoutEventId})`);
         const { trackServerInitiateCheckout } = await import("@/lib/meta-capi");
         trackServerInitiateCheckout({
           checkoutEventId,

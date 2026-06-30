@@ -467,6 +467,7 @@ export async function POST(request: Request) {
 
             console.log(`[PAYMOB_WEBHOOK][${requestId}] [META_PURCHASE_SERVER] transactionId=${baseOrder.id} | value=${orderValue} | currency=${currency} | orderIds=${allOrders.map(o => o.id).join(',')} | (chargedEgp=${chargedAmountEgp}, usd=${originalAmountUsd}, fallback=${fallbackAmount})`);
 
+            console.log(`[PAYMOB_WEBHOOK_DEBUG][${requestId}] 🚀 Calling trackServerPurchase for transactionId: ${baseOrder.id}`);
             const { trackServerPurchase } = await import("@/lib/meta-capi");
             // Do not await, fire asynchronously so it doesn't block the webhook response
             trackServerPurchase({
