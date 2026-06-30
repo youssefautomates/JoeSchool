@@ -62,6 +62,7 @@ export async function sendMetaEvent(options: CapiEventOptions, attempt = 1): Pro
 
     if (!isCapiEnabled || !token || !pixelId) {
       console.log(`[META_CAPI] ❌ CAPI is disabled or credentials missing (Event: ${options.eventName}). Skipping.`);
+      console.log('[EARLY_RETURN_CAPI_DISABLED]');
       return { success: false, status: "disabled" };
     }
 
@@ -191,6 +192,7 @@ export async function trackServerPurchase({
   fbc?: string;
   eventSourceUrl?: string;
 }) {
+  console.log('[META_CAPI_FUNCTION_ENTERED]');
   return sendMetaEvent({
     eventName: "Purchase",
     eventId: `purchase_${transactionId}`,

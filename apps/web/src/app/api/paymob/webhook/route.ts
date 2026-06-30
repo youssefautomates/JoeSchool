@@ -41,6 +41,7 @@ function getCountryNameByCode(code: string | null): string {
 }
 
 export async function POST(request: Request) {
+  console.log('[WEBHOOK_ROUTE_ENTERED]');
   const requestId = Math.random().toString(36).substring(7);
   console.log(`[PRODUCTION_PAYMENT_ROUTE_REACHED] ${request.url}`);
   console.log(`[PAYMOB_WEBHOOK][${requestId}] ===== Received new Paymob webhook =====`);
@@ -69,6 +70,7 @@ export async function POST(request: Request) {
     const transaction = body.obj;
     if (!transaction || !transaction.order) {
       console.error(`[PAYMOB_WEBHOOK][${requestId}] ❌ Missing transaction or order object`);
+      console.log('[EARLY_RETURN_NO_TRANSACTION]');
       return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
     }
 

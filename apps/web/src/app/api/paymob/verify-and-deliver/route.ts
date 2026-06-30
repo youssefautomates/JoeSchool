@@ -20,6 +20,7 @@ const supabaseAdmin = createClient(
  * Splits mixed purchases into separate dedicated transactional emails.
  */
 export async function POST(req: Request) {
+  console.log('[VERIFY_ROUTE_ENTERED]');
   const requestId = Math.random().toString(36).substring(7);
   console.log(`[VERIFY][${requestId}] Verifying transaction...`);
 
@@ -186,6 +187,7 @@ export async function POST(req: Request) {
 
     if (orders.length === 0) {
       console.error(`[VERIFY][${requestId}] ❌ Order not found in DB for orderId=${orderId}, paymobOrderId=${paymobOrderId}`);
+      console.log('[EARLY_RETURN_NO_ORDER]');
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
@@ -355,6 +357,23 @@ export async function POST(req: Request) {
         ? (originalAmountUsd || fallbackAmount)
         : (chargedAmountEgp || fallbackAmount);
       console.log(`[VERIFY][${requestId}] [META_PURCHASE_SERVER] alreadyDelivered orderValue resolved: ${resolvedOrderValue} ${currency} (chargedEgp=${chargedAmountEgp}, usd=${originalAmountUsd}, fallback=${fallbackAmount})`);
+
+      console.log('[EARLY_RETURN_ALREADY_DELIVERED]');
+      console.log('[TRACK_SERVER_PURCHASE_CALLED]');
+      try {
+        const { trackServerPurchase } = await import("@/lib/meta-capi");
+        trackServerPurchase({
+          transactionId: baseOrder.id,
+          price: Number(resolvedOrderValue) || 0,
+          currency,
+          productTitle: resolvedProducts.map(p => p.title).join(" + "),
+          productIds: orders.map(o => String(o.product_id)),
+          clientIp: baseOrder.ip_address || "127.0.0.1",
+          clientUserAgent: "Server Side Trigger"
+        });
+      } catch (e) {
+        console.error("Failed to trigger CAPI before early return", e);
+      }
 
       return NextResponse.json({ 
         success: true, 
