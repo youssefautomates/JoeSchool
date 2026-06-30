@@ -446,15 +446,22 @@ export async function POST(request: Request) {
             
             // Try to resolve user agent from analytics_events
             let clientUserAgent = "Server Side Trigger";
+            let fbp: string | undefined;
+            let fbc: string | undefined;
             try {
               const { data: eventData } = await supabaseAdmin
                 .from("analytics_events")
-                .select("user_agent")
+                .select("user_agent, metadata")
                 .eq("event_name", "order_created")
                 .eq("metadata->>order_id", baseOrder.id)
                 .maybeSingle();
               if (eventData?.user_agent) {
                 clientUserAgent = eventData.user_agent;
+              }
+              if (eventData?.metadata) {
+                const metadata = eventData.metadata as any;
+                if (metadata.fbp) fbp = metadata.fbp;
+                if (metadata.fbc) fbc = metadata.fbc;
               }
             } catch (uaErr) {}
 
@@ -471,6 +478,8 @@ export async function POST(request: Request) {
               customerEmail: customerEmail.toLowerCase().trim(),
               clientIp: clientIp.split(",")[0].trim(),
               clientUserAgent,
+              fbp,
+              fbc,
               eventSourceUrl: `https://joeschool.com/checkout/success?id=${baseOrder.id}`
             }).then(() => console.log(`[PAYMOB_WEBHOOK][${requestId}] ✅ Server-Side Meta CAPI Purchase event dispatched successfully!`))
               .catch(capiErr => console.error(`[PAYMOB_WEBHOOK][${requestId}] ❌ Meta CAPI trigger failed:`, capiErr.message || capiErr));

@@ -41,6 +41,14 @@ export async function POST(req: Request) {
     console.log("[BACKEND_REQUEST_BODY] Received:", JSON.stringify(body, null, 2));
     const { amount, email, firstName, lastName, phone, productId, paymentMethod, cardData, couponCode, password, instapayScreenshotUrl, walletNumber, checkoutEventId } = body;
 
+    const cookieHeader = req.headers.get('cookie') || "";
+    const getCookieValue = (name: string) => {
+      const match = cookieHeader.match(new RegExp(`(^|;\\s*)(${name})=([^;]*)`));
+      return match ? decodeURIComponent(match[3]) : undefined;
+    };
+    const fbp = getCookieValue("_fbp");
+    const fbc = getCookieValue("_fbc");
+
     // --- Geolocation Currency Resolver & Tracking ---
     let headersList: any;
     try {
@@ -284,6 +292,8 @@ export async function POST(req: Request) {
           customerEmail: email,
           clientIp: ipAddress,
           clientUserAgent: userAgent,
+          fbp,
+          fbc,
           eventSourceUrl: `https://joeschool.com/checkout/${dbItem.id}`
         }).then(() => console.log(`[PAYMOB_INITIATE] ✅ Server CAPI InitiateCheckout dispatched (eventId: ${checkoutEventId})`))
           .catch(e => console.error("[PAYMOB_INITIATE] ❌ CAPI Exception:", e));
@@ -338,7 +348,9 @@ export async function POST(req: Request) {
         metadata: {
           order_id: dbOrder.id,
           description_ar: "تم إنشاء الطلب بنجاح بانتظار الدفع",
-          description_en: "Order created successfully, awaiting payment"
+          description_en: "Order created successfully, awaiting payment",
+          fbp,
+          fbc
         }
       });
     } catch (analyticsErr) {

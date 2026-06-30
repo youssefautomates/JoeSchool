@@ -162,6 +162,8 @@ export async function trackServerPurchase({
   customerEmail,
   clientIp,
   clientUserAgent,
+  fbp,
+  fbc,
   eventSourceUrl
 }: {
   transactionId: string;
@@ -169,9 +171,11 @@ export async function trackServerPurchase({
   currency?: string;
   productTitle: string;
   productIds: string[];
-  customerEmail: string;
+  customerEmail?: string;
   clientIp?: string;
   clientUserAgent?: string;
+  fbp?: string;
+  fbc?: string;
   eventSourceUrl?: string;
 }) {
   return sendMetaEvent({
@@ -180,6 +184,8 @@ export async function trackServerPurchase({
     customerEmail,
     clientIp,
     clientUserAgent,
+    fbp,
+    fbc,
     eventSourceUrl,
     customData: {
       currency,
@@ -204,6 +210,8 @@ export async function trackServerInitiateCheckout({
   customerEmail,
   clientIp,
   clientUserAgent,
+  fbp,
+  fbc,
   eventSourceUrl
 }: {
   checkoutEventId: string;
@@ -214,6 +222,8 @@ export async function trackServerInitiateCheckout({
   customerEmail?: string;
   clientIp?: string;
   clientUserAgent?: string;
+  fbp?: string;
+  fbc?: string;
   eventSourceUrl?: string;
 }) {
   return sendMetaEvent({
@@ -222,6 +232,8 @@ export async function trackServerInitiateCheckout({
     customerEmail,
     clientIp,
     clientUserAgent,
+    fbp,
+    fbc,
     eventSourceUrl,
     customData: {
       currency,
