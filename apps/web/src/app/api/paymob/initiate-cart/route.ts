@@ -38,7 +38,7 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
     console.log("[CART_BACKEND_REQUEST_BODY] Received:", JSON.stringify(body, null, 2));
-    const { amount, email, firstName, lastName, phone, items, paymentMethod, cardData, password, instapayScreenshotUrl, walletNumber } = body;
+    const { amount, email, firstName, lastName, phone, items, paymentMethod, cardData, password, instapayScreenshotUrl, walletNumber, checkoutEventId } = body;
 
     // --- Geolocation Currency Resolver & Tracking ---
     const headersList = await headers();
@@ -210,6 +210,24 @@ export async function POST(req: Request) {
     const year = new Date().getFullYear();
     const uniqueSuffix = Math.random().toString(36).substring(2, 8).toUpperCase();
     const invoiceId = `JS-${year}-${uniqueSuffix}`;
+
+    if (checkoutEventId) {
+      try {
+        const { trackServerInitiateCheckout } = await import("@/lib/meta-capi");
+        trackServerInitiateCheckout({
+          checkoutEventId,
+          price: totalExpectedEGP,
+          currency: "EGP",
+          productTitle: verifiedItems.map(i => i.title).join(" + "),
+          productIds: verifiedItems.map(i => i.id),
+          customerEmail: email,
+          clientIp: ipAddress,
+          clientUserAgent: userAgent,
+          eventSourceUrl: `https://joeschool.com/checkout/cart`
+        }).then(() => console.log(`[PAYMOB_CART_INITIATE] ✅ Server CAPI InitiateCheckout dispatched (eventId: ${checkoutEventId})`))
+          .catch(e => console.error("[PAYMOB_CART_INITIATE] ❌ CAPI Exception:", e));
+      } catch (capiErr) {}
+    }
 
     // 2. Create Orders in Supabase locally first (One per item - Logging snapshots)
     const dbOrders = [];

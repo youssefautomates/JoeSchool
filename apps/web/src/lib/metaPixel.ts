@@ -232,14 +232,14 @@ export function trackViewContent(id: string, name: string, price: number, curren
   }, `view_${type}_${id}`);
 }
 
-export function trackInitiateCheckout(id: string, name: string, price: number, currency: string = "EGP", type: string = "product") {
+export function trackInitiateCheckout(id: string, name: string, price: number, currency: string = "EGP", type: string = "product", eventId?: string) {
   trackMetaEvent("InitiateCheckout", {
     content_name: name,
     content_ids: [id],
     content_type: type,
     value: price,
     currency: currency
-  }, `initiate_checkout_${type}_${id}`);
+  }, eventId || `initiate_checkout_${type}_${id}`);
 }
 
 export function trackAddToCart(id: string, name: string, price: number, currency: string = "EGP", type: string = "product") {

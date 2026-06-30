@@ -86,6 +86,9 @@ export default function CartCheckoutPage() {
   const [saveCard, setSaveCard] = useState(true);
   const cardNumberRef = useRef<HTMLInputElement>(null);
   const isFirstRender = useRef(true);
+  
+  // Deduplication Event ID for Meta CAPI
+  const checkoutEventId = useRef(`checkout_cart_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`);
 
   // Wallet Fields State
   const [walletNumber, setWalletNumber] = useState("");
@@ -231,7 +234,7 @@ export default function CartCheckoutPage() {
         content_type: 'product',
         value: subtotalCartTotal,
         currency: 'EGP'
-      });
+      }, checkoutEventId.current);
       
       trackTiktokEvent('InitiateCheckout', {
         content_name: contentName,
@@ -647,7 +650,8 @@ export default function CartCheckoutPage() {
           ? (walletNumber.startsWith("1") ? `0${walletNumber}` : walletNumber) 
           : undefined,
         password: data.password || undefined,
-        instapayScreenshotUrl: paymentMethod === "instapay" ? (instapayScreenshotUrl || undefined) : undefined
+        instapayScreenshotUrl: paymentMethod === "instapay" ? (instapayScreenshotUrl || undefined) : undefined,
+        checkoutEventId: checkoutEventId.current
       };
 
       // Track Checkout Started

@@ -82,6 +82,9 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
   const [globalFeeEnabled, setGlobalFeeEnabled] = useState(true);
   const [globalFeePercentage, setGlobalFeePercentage] = useState(3.00);
   
+  // Deduplication Event ID for Meta CAPI
+  const checkoutEventId = useRef(`checkout_${resolvedParams.id}_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`);
+  
   // Wallet Fields State
   const [walletNumber, setWalletNumber] = useState("");
   const [walletNumberError, setWalletNumberError] = useState("");
@@ -324,7 +327,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
     if (product && typeof window !== "undefined") {
       const isFree = product.price === 0 || product.price === null || product.price === undefined;
       const finalPriceEGP = isFree ? 0 : Number(product.price);
-      trackInitiateCheckout(product.id, product.title, finalPriceEGP, "EGP", isCourse ? "course" : "product");
+      trackInitiateCheckout(product.id, product.title, finalPriceEGP, "EGP", isCourse ? "course" : "product", checkoutEventId.current);
       trackTiktokInitiateCheckout(product.id, product.title, finalPriceEGP, "EGP", isCourse ? "course" : "product");
     }
   }, [product, isCourse]);
@@ -758,7 +761,8 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
         subtotalPrice: subtotalEGP,
         gateway_fee_percentage: isFeeActive ? globalFeePercentage : 0,
         password: data.password || undefined,
-        instapayScreenshotUrl: paymentMethod === "instapay" ? (instapayScreenshotUrl || undefined) : undefined
+        instapayScreenshotUrl: paymentMethod === "instapay" ? (instapayScreenshotUrl || undefined) : undefined,
+        checkoutEventId: checkoutEventId.current
       };
 
       console.log("[FORM_SUBMIT_DATA] Request body before fetch:", JSON.stringify(payloadBody, null, 2));
