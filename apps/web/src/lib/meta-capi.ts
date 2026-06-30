@@ -118,6 +118,10 @@ export async function sendMetaEvent(options: CapiEventOptions, attempt = 1): Pro
 
     const metaUrl = `https://graph.facebook.com/v19.0/${pixelId}/events?access_token=${token}`;
     
+    console.log(`[META_CAPI_DEBUG] 🚀 Sending ${options.eventName} to CAPI...`);
+    console.log(`[META_CAPI_DEBUG] URL: https://graph.facebook.com/v19.0/${pixelId}/events`);
+    console.log(`[META_CAPI_DEBUG] Payload:`, JSON.stringify(payload, null, 2));
+
     // Fetch with Timeout (10 seconds max) to prevent hanging
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 10000);
@@ -132,6 +136,9 @@ export async function sendMetaEvent(options: CapiEventOptions, attempt = 1): Pro
     clearTimeout(timeoutId);
 
     const result = await response.json();
+    
+    console.log(`[META_CAPI_DEBUG] Response Status: ${response.status}`);
+    console.log(`[META_CAPI_DEBUG] Response Body:`, JSON.stringify(result, null, 2));
     
     if (result.error) {
       throw new Error(result.error.message || "Meta API Error");
