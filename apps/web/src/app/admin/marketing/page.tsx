@@ -42,7 +42,8 @@ export default function MarketingPage() {
     metaPixelId: "",
     metaPixelEnabled: false,
     tiktokPixelId: "",
-    tiktokPixelEnabled: false
+    tiktokPixelEnabled: false,
+    metaCapiTestCode: ""
   });
 
   // Coupons State
@@ -628,6 +629,18 @@ export default function MarketingPage() {
                     className="h-12 bg-white/5 border-white/10 text-white font-mono text-left focus:border-blue-500 focus:ring-blue-500/20"
                     dir="ltr"
                   />
+                </div>
+
+                <div className="space-y-3">
+                  <Label className="text-zinc-300 font-bold">Meta CAPI Test Code</Label>
+                  <Input 
+                    value={settings.metaCapiTestCode || ""}
+                    onChange={(e) => setSettings({...settings, metaCapiTestCode: e.target.value})}
+                    placeholder="e.g. TEST12345 (Leave empty in production)"
+                    className="h-12 bg-white/5 border-white/10 text-white font-mono text-left focus:border-blue-500 focus:ring-blue-500/20"
+                    dir="ltr"
+                  />
+                  <p className="text-xs text-zinc-500">Only used for testing Server-Side events in Events Manager.</p>
                 </div>
                 
                 <div className="bg-blue-500/5 border border-blue-500/10 rounded-xl p-4 flex gap-3">
