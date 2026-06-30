@@ -43,7 +43,8 @@ export default function MarketingPage() {
     metaPixelEnabled: false,
     tiktokPixelId: "",
     tiktokPixelEnabled: false,
-    metaCapiTestCode: ""
+    metaCapiTestCode: "",
+    metaCapiToken: ""
   });
 
   // Coupons State
@@ -629,6 +630,19 @@ export default function MarketingPage() {
                     className="h-12 bg-white/5 border-white/10 text-white font-mono text-left focus:border-blue-500 focus:ring-blue-500/20"
                     dir="ltr"
                   />
+                </div>
+
+                <div className="space-y-3">
+                  <Label className="text-zinc-300 font-bold">Meta Conversions API Token</Label>
+                  <Input 
+                    value={settings.metaCapiToken || ""}
+                    onChange={(e) => setSettings({...settings, metaCapiToken: e.target.value})}
+                    placeholder="EAAB... (Paste your Meta Access Token here)"
+                    className="h-12 bg-white/5 border-white/10 text-white font-mono text-left focus:border-blue-500 focus:ring-blue-500/20"
+                    type="password"
+                    dir="ltr"
+                  />
+                  <p className="text-xs text-zinc-500">Required for Server-Side events to work.</p>
                 </div>
 
                 <div className="space-y-3">
