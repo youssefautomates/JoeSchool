@@ -42,7 +42,9 @@ export async function POST(req: Request) {
     const body = await req.json();
     console.log("[Settings API] Payload:", JSON.stringify(body));
     
-    const success = await setKV(MARKETING_KEY, body);
+    const saved = await getKV(MARKETING_KEY) || {};
+    const updatedSettings = { ...saved, ...body };
+    const success = await setKV(MARKETING_KEY, updatedSettings);
     console.log("[Settings API] setKV result:", success);
     
     if (success) {

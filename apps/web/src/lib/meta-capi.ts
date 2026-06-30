@@ -51,7 +51,14 @@ export async function sendMetaEvent(options: CapiEventOptions, attempt = 1): Pro
     const pixelId = settings?.metaPixelId;
     // Prefer env variable for token, fallback to DB settings
     const token = process.env.META_ACCESS_TOKEN || settings?.metaCapiToken;
-    const isCapiEnabled = settings?.metaCapiEnabled !== false; // Enable by default if not set, or read from DB
+    const isCapiEnabled = settings?.metaCapiEnabled === true || !!settings?.metaCapiToken || !!token;
+
+    console.log('[CAPI_SETTINGS_DEBUG]', {
+      isCapiEnabled,
+      hasToken: !!token,
+      pixelId,
+      rawSettings: settings
+    });
 
     console.log('[META_CAPI_PRE_CHECK]', {
       isCapiEnabled,

@@ -44,7 +44,8 @@ export default function MarketingPage() {
     tiktokPixelId: "",
     tiktokPixelEnabled: false,
     metaCapiTestCode: "",
-    metaCapiToken: ""
+    metaCapiToken: "",
+    metaCapiEnabled: true
   });
 
   // Coupons State
@@ -643,6 +644,18 @@ export default function MarketingPage() {
                     dir="ltr"
                   />
                   <p className="text-xs text-zinc-500">Required for Server-Side events to work.</p>
+                </div>
+
+                <div className="flex items-center justify-between p-4 bg-white/5 border border-white/10 rounded-xl">
+                  <div>
+                    <Label className="text-zinc-300 font-bold">Enable Conversions API (Server-Side)</Label>
+                    <p className="text-xs text-zinc-500 mt-1">Send purchase events directly from the server for 100% accuracy</p>
+                  </div>
+                  <Switch 
+                    checked={settings.metaCapiEnabled}
+                    onCheckedChange={(c) => setSettings({...settings, metaCapiEnabled: c})}
+                    className="data-[state=checked]:bg-blue-500"
+                  />
                 </div>
 
                 <div className="space-y-3">
