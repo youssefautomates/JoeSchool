@@ -86,8 +86,8 @@ export default function AdminSettings() {
         if (data && !data.error) {
           const pId = data.metaPixelId && data.metaPixelId !== "1234567890" ? data.metaPixelId : "26144977705179312";
           const pEnabled = data.metaPixelId ? !!data.metaPixelEnabled : true;
-          const cEnabled = false; // Disable CAPI completely
-          const cToken = "";
+          const cEnabled = data.metaCapiEnabled !== false;
+          const cToken = data.metaCapiToken || "";
           
           setMetaPixelId(pId);
           setMetaPixelRawCode(data.metaPixelRawCode || pId);
