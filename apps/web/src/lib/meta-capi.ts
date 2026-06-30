@@ -53,7 +53,12 @@ export async function sendMetaEvent(options: CapiEventOptions, attempt = 1): Pro
     const token = process.env.META_ACCESS_TOKEN || settings?.metaCapiToken;
     const isCapiEnabled = settings?.metaCapiEnabled !== false; // Enable by default if not set, or read from DB
 
-    console.log(`[META_CAPI_PRE_CHECK] Event: ${options.eventName}, isCapiEnabled: ${isCapiEnabled}, hasToken: ${!!token}, hasPixelId: ${!!pixelId}`);
+    console.log('[META_CAPI_PRE_CHECK]', {
+      isCapiEnabled,
+      hasToken: !!token,
+      hasPixelId: !!pixelId,
+      eventName: options.eventName
+    });
 
     if (!isCapiEnabled || !token || !pixelId) {
       console.log(`[META_CAPI] ❌ CAPI is disabled or credentials missing (Event: ${options.eventName}). Skipping.`);
@@ -121,8 +126,7 @@ export async function sendMetaEvent(options: CapiEventOptions, attempt = 1): Pro
     const metaUrl = `https://graph.facebook.com/v19.0/${pixelId}/events?access_token=${token}`;
     
     console.log(`[META_CAPI_DEBUG] 🚀 Sending ${options.eventName} to CAPI...`);
-    console.log(`[META_CAPI_DEBUG] URL: https://graph.facebook.com/v19.0/${pixelId}/events`);
-    console.log(`[META_CAPI_DEBUG] Payload:`, JSON.stringify(payload, null, 2));
+    console.log('[META_CAPI_PAYLOAD]', JSON.stringify(payload));
 
     // Fetch with Timeout (10 seconds max) to prevent hanging
     const controller = new AbortController();
@@ -139,8 +143,8 @@ export async function sendMetaEvent(options: CapiEventOptions, attempt = 1): Pro
 
     const result = await response.json();
     
-    console.log(`[META_CAPI_DEBUG] Response Status: ${response.status}`);
-    console.log(`[META_CAPI_DEBUG] Response Body:`, JSON.stringify(result, null, 2));
+    console.log('[META_CAPI_RESPONSE_STATUS]', response.status);
+    console.log('[META_CAPI_RESPONSE_BODY]', result);
     
     if (result.error) {
       throw new Error(result.error.message || "Meta API Error");

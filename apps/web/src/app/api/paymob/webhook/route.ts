@@ -42,6 +42,7 @@ function getCountryNameByCode(code: string | null): string {
 
 export async function POST(request: Request) {
   const requestId = Math.random().toString(36).substring(7);
+  console.log(`[PRODUCTION_PAYMENT_ROUTE_REACHED] ${request.url}`);
   console.log(`[PAYMOB_WEBHOOK][${requestId}] ===== Received new Paymob webhook =====`);
 
   try {
@@ -468,6 +469,7 @@ export async function POST(request: Request) {
             console.log(`[PAYMOB_WEBHOOK][${requestId}] [META_PURCHASE_SERVER] transactionId=${baseOrder.id} | value=${orderValue} | currency=${currency} | orderIds=${allOrders.map(o => o.id).join(',')} | (chargedEgp=${chargedAmountEgp}, usd=${originalAmountUsd}, fallback=${fallbackAmount})`);
 
             console.log(`[PAYMOB_WEBHOOK_DEBUG][${requestId}] 🚀 Calling trackServerPurchase for transactionId: ${baseOrder.id}`);
+            console.log('[TRACK_SERVER_PURCHASE_CALLED]');
             const { trackServerPurchase } = await import("@/lib/meta-capi");
             // Do not await, fire asynchronously so it doesn't block the webhook response
             trackServerPurchase({

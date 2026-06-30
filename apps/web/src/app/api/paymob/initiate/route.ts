@@ -36,6 +36,7 @@ function getCountryNameByCode(code: string | null): string {
 }
 
 export async function POST(req: Request) {
+  console.log(`[PRODUCTION_PAYMENT_ROUTE_REACHED] ${req.url}`);
   try {
     const body = await req.json();
     console.log("[BACKEND_REQUEST_BODY] Received:", JSON.stringify(body, null, 2));
@@ -283,6 +284,7 @@ export async function POST(req: Request) {
     if (checkoutEventId) {
       try {
         console.log(`[PAYMOB_INITIATE_DEBUG] 🛒 Calling trackServerInitiateCheckout (eventId: ${checkoutEventId})`);
+        console.log('[TRACK_SERVER_INITIATE_CALLED]');
         const { trackServerInitiateCheckout } = await import("@/lib/meta-capi");
         trackServerInitiateCheckout({
           checkoutEventId,
