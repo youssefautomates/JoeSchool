@@ -52,7 +52,7 @@ export default function NotificationCenter({
         return { icon: CreditCard, color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20" };
       case "failed_payment":
       case "refund":
-        return { icon: ShieldAlert, color: "text-rose-400 bg-rose-500/10 border-rose-500/20" };
+        return { icon: ShieldAlert, color: "text-yellow-500 bg-brand-500/10 border-zinc-200/60" };
       case "new_student":
         return { icon: Award, color: "text-blue-400 bg-blue-500/10 border-blue-500/20" };
       case "new_review":
@@ -60,7 +60,7 @@ export default function NotificationCenter({
       case "suspicious_login":
         return { icon: ShieldAlert, color: "text-red-500 bg-red-600/10 border-red-600/20 animate-pulse" };
       default:
-        return { icon: Bell, color: "text-zinc-400 bg-white/5 border-white/5" };
+        return { icon: Bell, color: "text-zinc-500 bg-zinc-100/40 border-zinc-200/60" };
     }
   };
 
@@ -99,18 +99,18 @@ export default function NotificationCenter({
             animate={{ x: 0 }}
             exit={{ x: "-100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed left-0 top-0 h-screen w-full max-w-sm bg-[#07070b]/98 border-r border-white/5 z-55 flex flex-col shadow-2xl backdrop-blur-lg text-left"
+            className="fixed left-0 top-0 h-screen w-full max-w-sm bg-[#07070b]/98 border-r border-zinc-200/60 z-55 flex flex-col shadow-sm border border-zinc-200/60 backdrop-blur-lg text-left"
             dir="ltr"
           >
             {/* Header */}
-            <div className="p-4 sm:p-5 flex items-center justify-between border-b border-white/5">
+            <div className="p-4 sm:p-5 flex items-center justify-between border-b border-zinc-200/60">
               <div className="flex items-center gap-2">
-                <Bell className="w-5 h-5 text-rose-500" />
-                <h3 className="font-extrabold text-sm text-white uppercase tracking-wider">Notification Center</h3>
+                <Bell className="w-5 h-5 text-yellow-500" />
+                <h3 className="font-extrabold text-sm text-zinc-900 uppercase tracking-wider">Notification Center</h3>
               </div>
               <button
                 onClick={onClose}
-                className="w-8 h-8 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                className="w-8 h-8 rounded-2xl bg-zinc-100/40 border border-zinc-200/60 flex items-center justify-center text-zinc-500 hover:text-zinc-900 transition-colors cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -122,7 +122,7 @@ export default function NotificationCenter({
                 <span>Recent Notifications ({notifications.length})</span>
                 <div className="flex gap-2.5">
                   {notifications.some(n => !n.read) && (
-                    <button onClick={onMarkAllAsRead} className="hover:text-white flex items-center gap-1 transition-colors cursor-pointer">
+                    <button onClick={onMarkAllAsRead} className="hover:text-zinc-900 flex items-center gap-1 transition-colors cursor-pointer">
                       <CheckCircle2 className="w-3 h-3 text-emerald-400" /> Mark all read
                     </button>
                   )}
@@ -147,26 +147,26 @@ export default function NotificationCenter({
                     return (
                       <div
                         key={notif.id}
-                        className={`p-3 rounded-xl border transition-all flex items-start gap-3 relative ${
+                        className={`p-3 rounded-2xl border transition-all flex items-start gap-3 relative ${
                           notif.read 
-                            ? "bg-white/[0.01] border-white/5 hover:border-white/10" 
-                            : "bg-[#D6004B]/5 border-[#D6004B]/10 hover:border-[#D6004B]/20"
+                            ? "bg-zinc-50/40 border-zinc-200/60 hover:border-zinc-200" 
+                            : "bg-[#1D4ED8]/5 border-[#1D4ED8]/10 hover:border-[#1D4ED8]/20"
                         }`}
                       >
-                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center border shrink-0 ${config.color}`}>
+                        <div className={`w-8 h-8 rounded-2xl flex items-center justify-center border shrink-0 ${config.color}`}>
                           <IconComponent className="w-4 h-4" />
                         </div>
                         <div className="min-w-0 flex-1 space-y-0.5 text-left">
                           <div className="flex items-center justify-between gap-1.5">
-                            <span className="text-[10.5px] font-black text-white truncate">{notif.title}</span>
+                            <span className="text-[10.5px] font-black text-zinc-900 truncate">{notif.title}</span>
                             <span className="text-[8px] text-zinc-500 font-mono shrink-0" dir="ltr">
                               {getRelativeTime(notif.created_at)}
                             </span>
                           </div>
-                          <p className="text-[9.5px] text-zinc-400 font-medium leading-normal">{notif.message}</p>
+                          <p className="text-[9.5px] text-zinc-500 font-medium leading-normal">{notif.message}</p>
                         </div>
                         {!notif.read && (
-                          <span className="absolute top-3 right-3 w-1.5 h-1.5 rounded-full bg-[#D6004B]" />
+                          <span className="absolute top-3 right-3 w-1.5 h-1.5 rounded-full bg-[#1D4ED8]" />
                         )}
                       </div>
                     );
@@ -176,12 +176,12 @@ export default function NotificationCenter({
             </div>
 
             {/* Notification settings footer */}
-            <div className="p-4 border-t border-white/5 bg-[#050508]/80">
+            <div className="p-4 border-t border-zinc-200/60 bg-white/80">
               <div className="flex items-center gap-1.5 text-[10px] text-zinc-500 font-bold uppercase tracking-wider mb-3">
                 <Settings className="w-3.5 h-3.5" />
                 <span>System Alert Settings</span>
               </div>
-              <div className="grid grid-cols-1 gap-2.5 text-[10px] font-semibold text-zinc-400">
+              <div className="grid grid-cols-1 gap-2.5 text-[10px] font-semibold text-zinc-500">
                 {[
                   { key: "new_order", label: "New Digital Product Sales" },
                   { key: "failed_payment", label: "Failed & Declined Payments" },
@@ -195,7 +195,7 @@ export default function NotificationCenter({
                       type="checkbox"
                       checked={prefs[pref.key as keyof NotificationPrefs]}
                       onChange={(e) => onUpdatePref(pref.key as keyof NotificationPrefs, e.target.checked)}
-                      className="w-8 h-4 bg-white/10 checked:bg-rose-500 border border-white/10 rounded-full appearance-none relative cursor-pointer before:content-[''] before:absolute before:left-0.5 before:top-0.5 before:w-3 before:h-3 before:bg-white before:rounded-full before:transition-all checked:before:left-4 transition-all focus:outline-none"
+                      className="w-8 h-4 bg-zinc-100/80 checked:bg-brand-500 border border-zinc-200 rounded-full appearance-none relative cursor-pointer before:content-[''] before:absolute before:left-0.5 before:top-0.5 before:w-3 before:h-3 before:bg-white before:rounded-full before:transition-all checked:before:left-4 transition-all focus:outline-none"
                     />
                   </label>
                 ))}

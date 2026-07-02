@@ -300,15 +300,15 @@ export default function AdminSettings() {
 
   return (
     <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700 font-sans text-left" dir="ltr">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-white/5">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-zinc-200/60">
         <div>
-          <h1 className="text-3xl font-black text-white mb-2 tracking-tight">System Settings</h1>
+          <h1 className="text-3xl font-black text-zinc-900 mb-2 tracking-tight">System Settings</h1>
           <p className="text-zinc-500 text-xs">Manage store identity, payment integrations, and advanced security configurations.</p>
         </div>
         <Button 
           onClick={handleSaveSettings}
           disabled={isLoading}
-          className="bg-[#D6004B] hover:bg-[#ff0059] text-white font-bold px-8 h-12 rounded-xl transition-all shadow-xl shadow-[#D6004B]/20 active:scale-95 text-xs border border-transparent"
+          className="bg-[#1D4ED8] hover:bg-[#3B82F6] text-white font-bold px-8 h-12 rounded-2xl transition-all shadow-sm border border-zinc-200/60 shadow-[#1D4ED8]/20 active:scale-95 text-xs border border-transparent"
         >
           {isLoading ? (
             <div className="flex items-center gap-2">
@@ -343,13 +343,13 @@ export default function AdminSettings() {
                 className={cn(
                   "flex items-center gap-4 px-6 py-4 rounded-2xl transition-all duration-300 font-bold text-xs group text-left",
                   activeSubTab === item.id 
-                    ? "bg-rose-500/10 text-rose-500 border border-rose-500/20" 
-                    : "text-zinc-500 hover:text-white hover:bg-white/5 border border-transparent"
+                    ? "bg-brand-500/10 text-yellow-500 border border-zinc-200/60" 
+                    : "text-zinc-500 hover:text-white hover:bg-zinc-100/40 border border-transparent"
                 )}
               >
                 <item.icon className="w-5 h-5 shrink-0" />
                 <span className="flex-1">{item.label}</span>
-                {activeSubTab === item.id && <ChevronRight className="w-4 h-4 text-rose-500 shrink-0" />}
+                {activeSubTab === item.id && <ChevronRight className="w-4 h-4 text-yellow-500 shrink-0" />}
               </button>
             ))}
           </nav>
@@ -364,74 +364,74 @@ export default function AdminSettings() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.3 }}
             >
-              <Card className="border-white/5 bg-[#09090e]/80 rounded-2xl overflow-hidden backdrop-blur-xl p-8 space-y-8">
-                <div className="flex items-center gap-4 pb-4 border-b border-white/5">
-                  <div className="w-12 h-12 rounded-xl bg-rose-500/10 flex items-center justify-center text-rose-500 border border-rose-500/20">
+              <Card className="border-zinc-200/60 bg-slate-50/80 rounded-2xl overflow-hidden backdrop-blur-xl p-8 space-y-8">
+                <div className="flex items-center gap-4 pb-4 border-b border-zinc-200/60">
+                  <div className="w-12 h-12 rounded-2xl bg-brand-500/10 flex items-center justify-center text-yellow-500 border border-zinc-200/60">
                     <Store className="w-6 h-6" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-white">Store Identity</h3>
+                    <h3 className="text-lg font-bold text-zinc-900">Store Identity</h3>
                     <p className="text-zinc-500 text-xs">Primary branding and contact information visible to customers.</p>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-3">
-                    <Label className="text-zinc-400 font-semibold text-xs">Store Name</Label>
+                    <Label className="text-zinc-500 font-semibold text-xs">Store Name</Label>
                     <Input 
                       value={storeName} 
                       onChange={e => setStoreName(e.target.value)}
-                      className="h-12 bg-white/5 border-white/10 rounded-xl focus:border-rose-500 transition-all text-xs" 
+                      className="h-12 bg-zinc-100/40 border-zinc-200 rounded-2xl focus:border-brand-500 transition-all text-xs" 
                     />
                   </div>
                   <div className="space-y-3">
-                    <Label className="text-zinc-400 font-semibold text-xs">Contact Email Address</Label>
+                    <Label className="text-zinc-500 font-semibold text-xs">Contact Email Address</Label>
                     <Input 
                       value={storeEmail} 
                       onChange={e => setStoreEmail(e.target.value)}
                       dir="ltr"
-                      className="h-12 bg-white/5 border-white/10 rounded-xl focus:border-rose-500 transition-all text-xs text-left" 
+                      className="h-12 bg-zinc-100/40 border-zinc-200 rounded-2xl focus:border-brand-500 transition-all text-xs text-left" 
                     />
                   </div>
                 </div>
               </Card>
 
-              <Card className="border-white/5 bg-[#09090e]/80 rounded-2xl overflow-hidden backdrop-blur-xl p-8 space-y-8 mt-6">
-                <div className="flex items-center gap-4 pb-4 border-b border-white/5">
-                  <div className="w-12 h-12 rounded-xl bg-rose-500/10 flex items-center justify-center text-rose-500 border border-rose-500/20">
+              <Card className="border-zinc-200/60 bg-slate-50/80 rounded-2xl overflow-hidden backdrop-blur-xl p-8 space-y-8 mt-6">
+                <div className="flex items-center gap-4 pb-4 border-b border-zinc-200/60">
+                  <div className="w-12 h-12 rounded-2xl bg-brand-500/10 flex items-center justify-center text-yellow-500 border border-zinc-200/60">
                     <CreditCard className="w-6 h-6" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-white">Payment Processing Fee Recovery</h3>
+                    <h3 className="text-lg font-bold text-zinc-900">Payment Processing Fee Recovery</h3>
                     <p className="text-zinc-500 text-xs">Global gateway fee configuration and default toggle settings.</p>
                   </div>
                 </div>
 
                 <div className="flex flex-col gap-6">
                   <div 
-                    className="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/5 select-none cursor-pointer hover:bg-white/[0.07] transition-all" 
+                    className="flex items-center justify-between p-4 rounded-2xl bg-zinc-100/40 border border-zinc-200/60 select-none cursor-pointer hover:bg-white/[0.07] transition-all" 
                     onClick={() => setGlobalGatewayFeeEnabled(!globalGatewayFeeEnabled)}
                   >
                     <div className="space-y-1 text-left">
-                      <p className="text-xs font-bold text-zinc-300">Enable Global Fee Surcharge Recovery</p>
+                      <p className="text-xs font-bold text-zinc-700">Enable Global Fee Surcharge Recovery</p>
                       <p className="text-[10px] text-zinc-500">When active, applies gateway fee surcharge to all products/courses that have fee recovery enabled.</p>
                     </div>
                     <input 
                       type="checkbox"
                       checked={globalGatewayFeeEnabled}
                       onChange={() => {}} // handled by click on card div
-                      className="w-4 h-4 text-rose-600 border-white/10 rounded focus:ring-rose-500 cursor-pointer"
+                      className="w-4 h-4 text-brand-600 border-zinc-200 rounded focus:ring-brand-500 cursor-pointer"
                     />
                   </div>
 
                   <div className="space-y-3">
-                    <Label className="text-zinc-400 font-semibold text-xs">Default Gateway Fee Percentage (%)</Label>
+                    <Label className="text-zinc-500 font-semibold text-xs">Default Gateway Fee Percentage (%)</Label>
                     <Input 
                       type="number"
                       step="0.01"
                       value={globalGatewayFeePercentage} 
                       onChange={e => setGlobalGatewayFeePercentage(parseFloat(e.target.value) || 0)}
-                      className="h-12 bg-white/5 border-white/10 rounded-xl focus:border-rose-500 transition-all text-xs" 
+                      className="h-12 bg-zinc-100/40 border-zinc-200 rounded-2xl focus:border-brand-500 transition-all text-xs" 
                     />
                   </div>
                 </div>
@@ -446,33 +446,33 @@ export default function AdminSettings() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.3 }}
             >
-              <Card className="border-white/5 bg-[#09090e]/80 rounded-2xl overflow-hidden backdrop-blur-xl p-8 space-y-8 relative">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/5 rounded-full blur-3xl pointer-events-none" />
+              <Card className="border-zinc-200/60 bg-slate-50/80 rounded-2xl overflow-hidden backdrop-blur-xl p-8 space-y-8 relative">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-brand-500/5 rounded-full blur-3xl pointer-events-none" />
                 
-                <div className="flex items-center gap-4 pb-4 border-b border-white/5">
-                  <div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-500 border border-amber-500/20">
+                <div className="flex items-center gap-4 pb-4 border-b border-zinc-200/60">
+                  <div className="w-12 h-12 rounded-2xl bg-amber-500/10 flex items-center justify-center text-amber-500 border border-amber-500/20">
                     <CreditCard className="w-6 h-6" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-white">Payment Gateway (Paymob)</h3>
+                    <h3 className="text-lg font-bold text-zinc-900">Payment Gateway (Paymob)</h3>
                     <p className="text-zinc-500 text-xs">API credentials and transaction hooks configuration.</p>
                   </div>
                 </div>
 
                 <div className="space-y-6">
                   <div className="space-y-3">
-                    <Label className="text-zinc-400 font-semibold text-xs">API Secret Key</Label>
+                    <Label className="text-zinc-500 font-semibold text-xs">API Secret Key</Label>
                     <div className="relative">
                       <Input 
                         type={showApiKey ? "text" : "password"}
                         value={paymobApiKey} 
                         onChange={e => setPaymobApiKey(e.target.value)}
                         dir="ltr"
-                        className="h-12 bg-white/5 border-white/10 rounded-xl focus:border-rose-500 transition-all text-xs text-left font-mono pr-12" 
+                        className="h-12 bg-zinc-100/40 border-zinc-200 rounded-2xl focus:border-brand-500 transition-all text-xs text-left font-mono pr-12" 
                       />
                       <button 
                         onClick={() => setShowApiKey(!showApiKey)}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white transition-colors"
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-900 transition-colors"
                       >
                         {showApiKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
@@ -481,22 +481,22 @@ export default function AdminSettings() {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-3">
-                      <Label className="text-zinc-400 font-semibold text-xs">Card Integration ID</Label>
+                      <Label className="text-zinc-500 font-semibold text-xs">Card Integration ID</Label>
                       <Input 
                         value={paymobIntegrationId} 
                         onChange={e => setPaymobIntegrationId(e.target.value)}
                         dir="ltr"
-                        className="h-12 bg-white/5 border-white/10 rounded-xl focus:border-rose-500 transition-all text-xs text-left font-mono" 
+                        className="h-12 bg-zinc-100/40 border-zinc-200 rounded-2xl focus:border-brand-500 transition-all text-xs text-left font-mono" 
                       />
                     </div>
                     <div className="space-y-3">
-                      <Label className="text-zinc-400 font-semibold text-xs">HMAC Callback Secret</Label>
+                      <Label className="text-zinc-500 font-semibold text-xs">HMAC Callback Secret</Label>
                       <Input 
                         type="password"
                         value={paymobHmac} 
                         onChange={e => setPaymobHmac(e.target.value)}
                         dir="ltr"
-                        className="h-12 bg-white/5 border-white/10 rounded-xl focus:border-rose-500 transition-all text-xs text-left font-mono" 
+                        className="h-12 bg-zinc-100/40 border-zinc-200 rounded-2xl focus:border-brand-500 transition-all text-xs text-left font-mono" 
                       />
                     </div>
                   </div>
@@ -512,34 +512,34 @@ export default function AdminSettings() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.3 }}
             >
-              <Card className="border-white/5 bg-[#09090e]/80 rounded-2xl overflow-hidden backdrop-blur-xl p-8 space-y-8">
-                <div className="flex items-center gap-4 pb-4 border-b border-white/5">
-                  <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500 border border-blue-500/20">
+              <Card className="border-zinc-200/60 bg-slate-50/80 rounded-2xl overflow-hidden backdrop-blur-xl p-8 space-y-8">
+                <div className="flex items-center gap-4 pb-4 border-b border-zinc-200/60">
+                  <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-500 border border-blue-500/20">
                     <Mail className="w-6 h-6" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-white">Email Services (Resend)</h3>
+                    <h3 className="text-lg font-bold text-zinc-900">Email Services (Resend)</h3>
                     <p className="text-zinc-500 text-xs">SMTP configurations for student alerts and purchase receipts.</p>
                   </div>
                 </div>
 
                 <div className="space-y-6">
                   <div className="space-y-3">
-                    <Label className="text-zinc-400 font-semibold text-xs">Resend API Key</Label>
+                    <Label className="text-zinc-500 font-semibold text-xs">Resend API Key</Label>
                     <Input 
                       type="password" 
                       value="••••••••••••••••••••••••"
                       disabled
                       dir="ltr"
-                      className="h-12 bg-white/5 border-white/10 rounded-xl text-xs text-left font-mono" 
+                      className="h-12 bg-zinc-100/40 border-zinc-200 rounded-2xl text-xs text-left font-mono" 
                     />
                   </div>
                   <div className="space-y-3">
-                    <Label className="text-zinc-400 font-semibold text-xs">Sender Display Name</Label>
+                    <Label className="text-zinc-500 font-semibold text-xs">Sender Display Name</Label>
                     <Input 
                       value="JoeSchool Academy" 
                       disabled
-                      className="h-12 bg-white/5 border-white/10 rounded-xl text-xs" 
+                      className="h-12 bg-zinc-100/40 border-zinc-200 rounded-2xl text-xs" 
                     />
                   </div>
                 </div>
@@ -555,15 +555,15 @@ export default function AdminSettings() {
               transition={{ duration: 0.3 }}
               className="space-y-8"
             >
-              <Card className="border-white/5 bg-[#09090e]/80 rounded-2xl overflow-hidden backdrop-blur-xl p-8 space-y-8 relative">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/5 rounded-full blur-3xl pointer-events-none" />
+              <Card className="border-zinc-200/60 bg-slate-50/80 rounded-2xl overflow-hidden backdrop-blur-xl p-8 space-y-8 relative">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-brand-500/5 rounded-full blur-3xl pointer-events-none" />
                 
-                <div className="flex items-center gap-4 pb-4 border-b border-white/5">
-                  <div className="w-12 h-12 rounded-xl bg-rose-500/10 flex items-center justify-center text-rose-500 border border-rose-500/20">
+                <div className="flex items-center gap-4 pb-4 border-b border-zinc-200/60">
+                  <div className="w-12 h-12 rounded-2xl bg-brand-500/10 flex items-center justify-center text-yellow-500 border border-zinc-200/60">
                     <Code className="w-6 h-6" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-white">Meta Pixel & Conversion API (CAPI)</h3>
+                    <h3 className="text-lg font-bold text-zinc-900">Meta Pixel & Conversion API (CAPI)</h3>
                     <p className="text-zinc-500 text-xs">Configure high-performance hybrid tracking parameters and test server connection.</p>
                   </div>
                 </div>
@@ -572,24 +572,24 @@ export default function AdminSettings() {
                   {/* Meta Pixel Inputs */}
                   <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
                     <div className="md:col-span-8 space-y-3">
-                      <Label className="text-zinc-400 font-semibold text-xs">Meta Pixel ID</Label>
+                      <Label className="text-zinc-500 font-semibold text-xs">Meta Pixel ID</Label>
                       <Input 
                         value={metaPixelId} 
                         onChange={e => setMetaPixelId(e.target.value)}
                         dir="ltr"
                         placeholder="e.g. 1234567890"
-                        className="h-12 bg-white/5 border-white/10 rounded-xl focus:border-rose-500 transition-all text-xs text-left font-mono text-zinc-300" 
+                        className="h-12 bg-zinc-100/40 border-zinc-200 rounded-2xl focus:border-brand-500 transition-all text-xs text-left font-mono text-zinc-700" 
                       />
                     </div>
                     <div className="md:col-span-4 space-y-3">
-                      <Label className="text-zinc-400 font-semibold text-xs">Pixel State</Label>
+                      <Label className="text-zinc-500 font-semibold text-xs">Pixel State</Label>
                       <button
                         onClick={() => setMetaPixelEnabled(!metaPixelEnabled)}
                         className={cn(
-                          "w-full h-12 rounded-xl font-bold text-xs transition-all border border-white/5 active:scale-95 select-none",
+                          "w-full h-12 rounded-2xl font-bold text-xs transition-all border border-zinc-200/60 active:scale-95 select-none",
                           metaPixelEnabled 
                             ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" 
-                            : "bg-white/5 text-zinc-500 hover:text-white"
+                            : "bg-zinc-100/40 text-zinc-500 hover:text-zinc-900"
                         )}
                       >
                         {metaPixelEnabled ? "Pixel Enabled" : "Pixel Disabled"}
@@ -600,7 +600,7 @@ export default function AdminSettings() {
                   {/* Meta CAPI Inputs */}
                   <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
                     <div className="md:col-span-8 space-y-3">
-                      <Label className="text-zinc-400 font-semibold text-xs">Conversion API Access Token (CAPI)</Label>
+                      <Label className="text-zinc-500 font-semibold text-xs">Conversion API Access Token (CAPI)</Label>
                       <div className="relative">
                         <Input 
                           type={showCapiToken ? "text" : "password"}
@@ -608,25 +608,25 @@ export default function AdminSettings() {
                           onChange={e => setMetaCapiToken(e.target.value)}
                           dir="ltr"
                           placeholder="EAAG..."
-                          className="h-12 bg-white/5 border-white/10 rounded-xl focus:border-rose-500 transition-all text-xs text-left font-mono pr-12 truncate text-zinc-300" 
+                          className="h-12 bg-zinc-100/40 border-zinc-200 rounded-2xl focus:border-brand-500 transition-all text-xs text-left font-mono pr-12 truncate text-zinc-700" 
                         />
                         <button 
                           onClick={() => setShowCapiToken(!showCapiToken)}
-                          className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white transition-colors"
+                          className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-900 transition-colors"
                         >
                           {showCapiToken ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                         </button>
                       </div>
                     </div>
                     <div className="md:col-span-4 space-y-3">
-                      <Label className="text-zinc-400 font-semibold text-xs">CAPI State</Label>
+                      <Label className="text-zinc-500 font-semibold text-xs">CAPI State</Label>
                       <button
                         onClick={() => setMetaCapiEnabled(!metaCapiEnabled)}
                         className={cn(
-                          "w-full h-12 rounded-xl font-bold text-xs transition-all border border-white/5 active:scale-95 select-none",
+                          "w-full h-12 rounded-2xl font-bold text-xs transition-all border border-zinc-200/60 active:scale-95 select-none",
                           metaCapiEnabled 
                             ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" 
-                            : "bg-white/5 text-zinc-500 hover:text-white"
+                            : "bg-zinc-100/40 text-zinc-500 hover:text-zinc-900"
                         )}
                       >
                         {metaCapiEnabled ? "CAPI Enabled" : "CAPI Disabled"}
@@ -636,19 +636,19 @@ export default function AdminSettings() {
 
                   {/* Meta Test Code (CAPI) */}
                   <div className="space-y-3">
-                    <Label className="text-zinc-400 font-semibold text-xs">Sandbox Test Event Code (CAPI)</Label>
+                    <Label className="text-zinc-500 font-semibold text-xs">Sandbox Test Event Code (CAPI)</Label>
                     <Input 
                       value={metaCapiTestCode} 
                       onChange={e => setMetaCapiTestCode(e.target.value)}
                       placeholder="TEST12345"
                       dir="ltr"
-                      className="h-12 bg-white/5 border-white/10 rounded-xl focus:border-rose-500 transition-all text-xs text-left font-mono text-zinc-300" 
+                      className="h-12 bg-zinc-100/40 border-zinc-200 rounded-2xl focus:border-brand-500 transition-all text-xs text-left font-mono text-zinc-700" 
                     />
                   </div>
 
                   {/* Raw Pixel Base Script Input */}
                   <div className="space-y-3 pt-2">
-                    <Label className="text-zinc-400 font-semibold text-xs">Extract Meta Pixel ID from script (Optional)</Label>
+                    <Label className="text-zinc-500 font-semibold text-xs">Extract Meta Pixel ID from script (Optional)</Label>
                     <textarea
                       value={metaPixelRawCode}
                       onChange={e => {
@@ -661,17 +661,17 @@ export default function AdminSettings() {
                       }}
                       placeholder="Paste Meta Pixel script here, we'll auto-extract your Pixel ID..."
                       dir="ltr"
-                      className="w-full h-24 p-3 bg-white/5 border border-white/10 rounded-xl focus:border-rose-500 outline-none text-zinc-300 text-xs font-mono scrollbar-thin focus:ring-0 transition-all"
+                      className="w-full h-24 p-3 bg-zinc-100/40 border border-zinc-200 rounded-2xl focus:border-brand-500 outline-none text-zinc-700 text-xs font-mono scrollbar-thin focus:ring-0 transition-all"
                     />
                   </div>
                 </div>
 
                 {/* Save and connection check button row */}
-                <div className="flex flex-wrap gap-4 pt-6 border-t border-white/5">
+                <div className="flex flex-wrap gap-4 pt-6 border-t border-zinc-200/60">
                   <Button
                     onClick={handleSaveSettings}
                     disabled={isLoading}
-                    className="bg-[#D6004B] hover:bg-[#ff0059] text-white font-bold px-6 h-11 rounded-xl transition-all shadow-md active:scale-98 text-xs shrink-0"
+                    className="bg-[#1D4ED8] hover:bg-[#3B82F6] text-white font-bold px-6 h-11 rounded-2xl transition-all shadow-md active:scale-98 text-xs shrink-0"
                   >
                     {isLoading ? "Saving Settings..." : "Save Unified Config"}
                   </Button>
@@ -679,7 +679,7 @@ export default function AdminSettings() {
                   <Button
                     onClick={handleTestConnection}
                     disabled={testConnectionStatus === "testing"}
-                    className="bg-white/5 hover:bg-white/10 text-white border border-white/10 font-bold px-6 h-11 rounded-xl transition-all active:scale-98 text-xs shrink-0"
+                    className="bg-zinc-100/40 hover:bg-zinc-100/80 text-zinc-900 border border-zinc-200 font-bold px-6 h-11 rounded-2xl transition-all active:scale-98 text-xs shrink-0"
                   >
                     {testConnectionStatus === "testing" ? "Testing..." : "Test Graph Connection"}
                   </Button>
@@ -687,14 +687,14 @@ export default function AdminSettings() {
               </Card>
 
               {/* Real-time Diagnostics Terminal Feed Dashboard */}
-              <Card className="border-white/5 bg-[#09090e]/80 rounded-2xl overflow-hidden backdrop-blur-xl p-8 space-y-6 relative">
-                <div className="flex items-center justify-between pb-4 border-b border-white/5 flex-wrap gap-4">
+              <Card className="border-zinc-200/60 bg-slate-50/80 rounded-2xl overflow-hidden backdrop-blur-xl p-8 space-y-6 relative">
+                <div className="flex items-center justify-between pb-4 border-b border-zinc-200/60 flex-wrap gap-4">
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-rose-500/10 flex items-center justify-center text-rose-500 border border-rose-500/20">
-                      <Terminal className="w-6 h-6 text-rose-500 animate-pulse" />
+                    <div className="w-12 h-12 rounded-2xl bg-brand-500/10 flex items-center justify-center text-yellow-500 border border-zinc-200/60">
+                      <Terminal className="w-6 h-6 text-yellow-500 animate-pulse" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-bold text-white">Live Tracking Diagnostics Terminal</h3>
+                      <h3 className="text-lg font-bold text-zinc-900">Live Tracking Diagnostics Terminal</h3>
                       <p className="text-zinc-500 text-xs">Verify deduplication parameters, Browser Pixel dispatches, and Server CAPI receipts real-time.</p>
                     </div>
                   </div>
@@ -702,7 +702,7 @@ export default function AdminSettings() {
                   <div className="flex items-center gap-2.5">
                     <button 
                       onClick={handleSendTestPurchase}
-                      className="inline-flex items-center gap-1.5 px-4.5 py-2.5 bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-black font-alexandria font-bold text-xs rounded-xl transition-all shadow-[0_0_15px_rgba(16,185,129,0.2)]"
+                      className="inline-flex items-center gap-1.5 px-4.5 py-2.5 bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-black font-sans font-bold text-xs rounded-2xl transition-all shadow-[0_0_15px_rgba(16,185,129,0.2)]"
                     >
                       <Play className="w-3.5 h-3.5 fill-current" />
                       <span>Test Purchase Event</span>
@@ -710,7 +710,7 @@ export default function AdminSettings() {
                     
                     <button 
                       onClick={loadLogs}
-                      className="p-2.5 bg-white/5 hover:bg-white/10 active:scale-95 border border-white/10 text-white rounded-xl transition-all"
+                      className="p-2.5 bg-zinc-100/40 hover:bg-zinc-100/80 active:scale-95 border border-zinc-200 text-zinc-900 rounded-2xl transition-all"
                       title="Refresh Logs"
                     >
                       <RefreshCw className="w-4 h-4" />
@@ -718,7 +718,7 @@ export default function AdminSettings() {
                     
                     <button 
                       onClick={handleClearLogs}
-                      className="p-2.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 rounded-xl transition-all text-xs font-bold"
+                      className="p-2.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 rounded-2xl transition-all text-xs font-bold"
                     >
                       Clear Terminal
                     </button>
@@ -732,7 +732,7 @@ export default function AdminSettings() {
                   const realCapiToken = activeTracking?.metaCapiToken || "";
                   const realCapiEnabled = !!activeTracking?.metaCapiEnabled;
                   return (
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4.5 rounded-2xl bg-white/[0.01] border border-white/5">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4.5 rounded-2xl bg-zinc-50/40 border border-zinc-200/60">
                       <div className="space-y-1">
                         <span className="text-[10px] text-zinc-500 font-bold block uppercase">Pixel status</span>
                         <span className={cn("text-xs font-bold block leading-none", realPixelId && realPixelEnabled ? "text-emerald-400" : "text-zinc-500")}>
@@ -747,7 +747,7 @@ export default function AdminSettings() {
                       </div>
                       <div className="space-y-1">
                         <span className="text-[10px] text-zinc-500 font-bold block uppercase">Active Pixel ID</span>
-                        <span className="text-xs font-mono font-bold text-white block leading-none truncate">{realPixelId || "None"}</span>
+                        <span className="text-xs font-mono font-bold text-zinc-900 block leading-none truncate">{realPixelId || "None"}</span>
                       </div>
                       <div className="space-y-1">
                         <span className="text-[10px] text-zinc-500 font-bold block uppercase">Deduplication</span>
@@ -760,8 +760,8 @@ export default function AdminSettings() {
                 })()}
 
                 {/* Diagnostics scroll feed */}
-                <div className="bg-[#050508] border border-white/5 rounded-2xl p-4.5 font-mono text-xs text-zinc-300 shadow-inner h-80 overflow-y-auto scrollbar-thin flex flex-col gap-2">
-                  <div className="flex items-center justify-between pb-2 border-b border-white/5 text-[10px] font-bold text-zinc-500">
+                <div className="bg-white border border-zinc-200/60 rounded-2xl p-4.5 font-mono text-xs text-zinc-700 shadow-inner h-80 overflow-y-auto scrollbar-thin flex flex-col gap-2">
+                  <div className="flex items-center justify-between pb-2 border-b border-zinc-200/60 text-[10px] font-bold text-zinc-500">
                     <span>EVENT FEED LOGS</span>
                     <span>TOTAL TRACES: {logs.length}</span>
                   </div>
@@ -774,11 +774,11 @@ export default function AdminSettings() {
                     logs.map((log: any, idx: number) => {
                       const timeStr = log.timestamp ? new Date(log.timestamp).toLocaleTimeString() : "";
                       return (
-                        <div key={log.eventId || idx} className="p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.03] transition-all flex flex-col gap-3 text-left">
+                        <div key={log.eventId || idx} className="p-3 rounded-2xl bg-zinc-50/70 border border-zinc-200/60 hover:bg-zinc-100/30 transition-all flex flex-col gap-3 text-left">
                           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                             <div className="space-y-1">
                               <div className="flex items-center gap-2 flex-wrap">
-                                <span className="text-[10px] text-rose-500 font-bold bg-rose-500/10 px-1.5 py-0.5 rounded uppercase font-sans">{log.event}</span>
+                                <span className="text-[10px] text-yellow-500 font-bold bg-brand-500/10 px-1.5 py-0.5 rounded uppercase font-sans">{log.event}</span>
                                 <span className="text-[9px] text-zinc-500 font-sans">ID: {log.eventId}</span>
                               </div>
                             </div>
@@ -790,7 +790,7 @@ export default function AdminSettings() {
                                   "text-[9px] font-bold px-1.5 py-0.5 rounded font-sans uppercase",
                                   log.browserStatus === "success" && "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20",
                                   log.browserStatus === "queued" && "bg-amber-500/10 text-amber-400 border border-amber-500/20",
-                                  log.browserStatus === "disabled" && "bg-zinc-500/10 text-zinc-400 border border-white/5",
+                                  log.browserStatus === "disabled" && "bg-zinc-500/10 text-zinc-500 border border-zinc-200/60",
                                   log.browserStatus === "failed" && "bg-red-500/10 text-red-400 border border-red-500/20"
                                 )}>
                                   Pixel: {log.browserStatus === "success" ? "sent" : log.browserStatus}
@@ -801,7 +801,7 @@ export default function AdminSettings() {
                                   "text-[9px] font-bold px-1.5 py-0.5 rounded font-sans uppercase",
                                   log.capiStatus === "success" && "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20",
                                   log.capiStatus === "pending" && "bg-amber-500/10 text-amber-400 border border-amber-500/20 animate-pulse",
-                                  log.capiStatus === "disabled" && "bg-zinc-500/10 text-zinc-400 border border-white/5",
+                                  log.capiStatus === "disabled" && "bg-zinc-500/10 text-zinc-500 border border-zinc-200/60",
                                   log.capiStatus === "failed" && "bg-red-500/10 text-red-400 border border-red-500/20"
                                 )}>
                                   CAPI: {log.capiStatus === "success" ? "sent" : log.capiStatus}
@@ -814,7 +814,7 @@ export default function AdminSettings() {
                                     Deduplicated
                                   </span>
                                 ) : (
-                                  <span className="bg-zinc-500/10 text-zinc-500 border border-white/5 text-[9px] font-bold px-1.5 py-0.5 rounded font-sans uppercase">
+                                  <span className="bg-zinc-500/10 text-zinc-500 border border-zinc-200/60 text-[9px] font-bold px-1.5 py-0.5 rounded font-sans uppercase">
                                     Single
                                   </span>
                                 )}
@@ -822,8 +822,8 @@ export default function AdminSettings() {
                             </div>
                           </div>
                           {log.metaCapiResponse && (
-                            <div className="text-[9px] text-zinc-500 bg-white/[0.01] p-2.5 rounded border border-white/5 max-h-36 overflow-y-auto w-full">
-                              <span className="font-bold text-zinc-400 block mb-1">Meta API Response Body:</span>
+                            <div className="text-[9px] text-zinc-500 bg-zinc-50/40 p-2.5 rounded border border-zinc-200/60 max-h-36 overflow-y-auto w-full">
+                              <span className="font-bold text-zinc-500 block mb-1">Meta API Response Body:</span>
                               <pre className="whitespace-pre-wrap font-mono text-left" dir="ltr">{JSON.stringify(log.metaCapiResponse, null, 2)}</pre>
                             </div>
                           )}
@@ -843,15 +843,15 @@ export default function AdminSettings() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.3 }}
             >
-              <Card className="border-white/5 bg-[#09090e]/80 rounded-2xl overflow-hidden backdrop-blur-xl p-8 space-y-8 relative">
+              <Card className="border-zinc-200/60 bg-slate-50/80 rounded-2xl overflow-hidden backdrop-blur-xl p-8 space-y-8 relative">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-[#fe2c55]/5 rounded-full blur-3xl pointer-events-none" />
                 
-                <div className="flex items-center gap-4 pb-4 border-b border-white/5">
-                  <div className="w-12 h-12 rounded-xl bg-[#fe2c55]/10 flex items-center justify-center text-[#fe2c55] border border-[#fe2c55]/20">
+                <div className="flex items-center gap-4 pb-4 border-b border-zinc-200/60">
+                  <div className="w-12 h-12 rounded-2xl bg-[#fe2c55]/10 flex items-center justify-center text-[#fe2c55] border border-[#fe2c55]/20">
                     <Globe className="w-6 h-6" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-white">TikTok Pixel Integration</h3>
+                    <h3 className="text-lg font-bold text-zinc-900">TikTok Pixel Integration</h3>
                     <p className="text-zinc-500 text-xs">Configure TikTok Ads Pixel tracking for dynamic events and checkout page performance.</p>
                   </div>
                 </div>
@@ -859,24 +859,24 @@ export default function AdminSettings() {
                 <div className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
                     <div className="md:col-span-8 space-y-3">
-                      <Label className="text-zinc-400 font-semibold text-xs">TikTok Pixel ID</Label>
+                      <Label className="text-zinc-500 font-semibold text-xs">TikTok Pixel ID</Label>
                       <Input 
                         value={tiktokPixelId} 
                         onChange={e => setTiktokPixelId(e.target.value)}
                         placeholder="e.g. C1234567890"
                         dir="ltr"
-                        className="h-12 bg-white/5 border-white/10 rounded-xl focus:border-[#fe2c55]/50 focus:ring-[#fe2c55]/20 transition-all text-xs text-left font-mono" 
+                        className="h-12 bg-zinc-100/40 border-zinc-200 rounded-2xl focus:border-[#fe2c55]/50 focus:ring-[#fe2c55]/20 transition-all text-xs text-left font-mono" 
                       />
                     </div>
                     <div className="md:col-span-4 space-y-3">
-                      <Label className="text-zinc-400 font-semibold text-xs">Tracking State</Label>
+                      <Label className="text-zinc-500 font-semibold text-xs">Tracking State</Label>
                       <button
                         onClick={() => setTiktokPixelEnabled(!tiktokPixelEnabled)}
                         className={cn(
-                          "w-full h-12 rounded-xl font-bold text-xs transition-all border border-white/5 active:scale-95 select-none",
+                          "w-full h-12 rounded-2xl font-bold text-xs transition-all border border-zinc-200/60 active:scale-95 select-none",
                           tiktokPixelEnabled 
                             ? "bg-[#fe2c55]/10 text-[#fe2c55] border-[#fe2c55]/20" 
-                            : "bg-white/5 text-zinc-500 hover:text-white"
+                            : "bg-zinc-100/40 text-zinc-500 hover:text-zinc-900"
                         )}
                       >
                         {tiktokPixelEnabled ? "Active & Firing" : "Disabled"}
@@ -884,8 +884,8 @@ export default function AdminSettings() {
                     </div>
                   </div>
                   
-                  <div className="p-4 rounded-xl bg-[#fe2c55]/5 border border-[#fe2c55]/10 text-zinc-400 text-xs leading-relaxed space-y-2">
-                    <p className="font-bold text-white">💡 How TikTok Tracking Works:</p>
+                  <div className="p-4 rounded-2xl bg-[#fe2c55]/5 border border-[#fe2c55]/10 text-zinc-500 text-xs leading-relaxed space-y-2">
+                    <p className="font-bold text-zinc-900">💡 How TikTok Tracking Works:</p>
                     <p>
                       When active, the platform loads the TikTok Pixel SDK dynamically and fires the standard <code className="text-[#fe2c55] font-bold">PageView</code> event on all routes. On purchase completions, it captures transaction events to help optimize TikTok Ads campaigns.
                     </p>
@@ -893,11 +893,11 @@ export default function AdminSettings() {
                 </div>
 
                 {/* Save button row */}
-                <div className="pt-6 border-t border-white/5">
+                <div className="pt-6 border-t border-zinc-200/60">
                   <Button
                     onClick={handleSaveSettings}
                     disabled={isLoading}
-                    className="bg-[#fe2c55] hover:bg-[#ff4d73] text-white font-bold px-6 h-11 rounded-xl transition-all shadow-md active:scale-98 text-xs shrink-0"
+                    className="bg-[#fe2c55] hover:bg-[#ff4d73] text-zinc-900 font-bold px-6 h-11 rounded-2xl transition-all shadow-md active:scale-98 text-xs shrink-0"
                   >
                     {isLoading ? "Saving Settings..." : "Save TikTok Config"}
                   </Button>
@@ -913,22 +913,22 @@ export default function AdminSettings() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.3 }}
             >
-              <Card className="border-white/5 bg-[#09090e]/80 rounded-2xl overflow-hidden backdrop-blur-xl p-8 space-y-8">
-                <div className="flex items-center gap-4 pb-4 border-b border-white/5">
-                  <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 border border-emerald-500/20">
+              <Card className="border-zinc-200/60 bg-slate-50/80 rounded-2xl overflow-hidden backdrop-blur-xl p-8 space-y-8">
+                <div className="flex items-center gap-4 pb-4 border-b border-zinc-200/60">
+                  <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 border border-emerald-500/20">
                     <Shield className="w-6 h-6" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-white">Security & Privacy</h3>
+                    <h3 className="text-lg font-bold text-zinc-900">Security & Privacy</h3>
                     <p className="text-zinc-500 text-xs">Cryptographic encryptions and session constraints.</p>
                   </div>
                 </div>
 
-                <div className="space-y-6 text-xs text-zinc-400 font-medium leading-relaxed">
+                <div className="space-y-6 text-xs text-zinc-500 font-medium leading-relaxed">
                   <p>
                     All API integration parameters, passwords, and user tokens are dynamically hashed using industry-standard AES-256 GCM cryptographic mechanisms before writing to our persistent Supabase schemas.
                   </p>
-                  <div className="p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/10 text-emerald-400 font-bold flex gap-2 items-center">
+                  <div className="p-4 rounded-2xl bg-emerald-500/5 border border-emerald-500/10 text-emerald-400 font-bold flex gap-2 items-center">
                     <CheckCircle2 className="w-4 h-4" />
                     <span>SSL/TLS Secure Socket Channels Active</span>
                   </div>
@@ -944,13 +944,13 @@ export default function AdminSettings() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.3 }}
             >
-              <Card className="border-white/5 bg-[#09090e]/80 rounded-2xl overflow-hidden backdrop-blur-xl p-8 space-y-8">
-                <div className="flex items-center gap-4 pb-4 border-b border-white/5">
-                  <div className="w-12 h-12 rounded-xl bg-sky-500/10 flex items-center justify-center text-sky-400 border border-sky-500/20">
+              <Card className="border-zinc-200/60 bg-slate-50/80 rounded-2xl overflow-hidden backdrop-blur-xl p-8 space-y-8">
+                <div className="flex items-center gap-4 pb-4 border-b border-zinc-200/60">
+                  <div className="w-12 h-12 rounded-2xl bg-sky-500/10 flex items-center justify-center text-sky-400 border border-sky-500/20">
                     <Send className="w-6 h-6 rotate-[-15deg] translate-x-[-2px] translate-y-[2px]" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-white">Telegram Notifications</h3>
+                    <h3 className="text-lg font-bold text-zinc-900">Telegram Notifications</h3>
                     <p className="text-zinc-500 text-xs">Receive instant Telegram updates for every new order and course subscription.</p>
                   </div>
                 </div>
@@ -959,40 +959,40 @@ export default function AdminSettings() {
                 <div 
                   onClick={() => setTelegramEnabled(!telegramEnabled)}
                   className={cn(
-                    "flex items-center justify-between p-4 rounded-xl border transition-all duration-300 cursor-pointer select-none",
+                    "flex items-center justify-between p-4 rounded-2xl border transition-all duration-300 cursor-pointer select-none",
                     telegramEnabled 
                       ? "bg-sky-500/5 border-sky-500/20 text-sky-400" 
-                      : "bg-white/5 border-white/10 text-zinc-400"
+                      : "bg-zinc-100/40 border-zinc-200 text-zinc-500"
                   )}
                 >
                   <div className="space-y-1 text-left">
-                    <p className="text-xs font-bold text-zinc-300">Enable Telegram Alerts</p>
+                    <p className="text-xs font-bold text-zinc-700">Enable Telegram Alerts</p>
                     <p className="text-[10px] text-zinc-500">When active, notifications are immediately pushed to your specified chat ID.</p>
                   </div>
                   <input 
                     type="checkbox"
                     checked={telegramEnabled}
                     onChange={() => {}} // toggled by click on parent div
-                    className="w-4 h-4 text-sky-600 border-white/10 rounded focus:ring-sky-500 cursor-pointer"
+                    className="w-4 h-4 text-sky-600 border-zinc-200 rounded focus:ring-sky-500 cursor-pointer"
                   />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Bot Token */}
                   <div className="space-y-3 relative">
-                    <Label className="text-zinc-400 font-semibold text-xs">Telegram Bot Token</Label>
+                    <Label className="text-zinc-500 font-semibold text-xs">Telegram Bot Token</Label>
                     <div className="relative">
                       <Input 
                         type={showTelegramToken ? "text" : "password"}
                         value={telegramBotToken} 
                         onChange={e => setTelegramBotToken(e.target.value)}
                         placeholder="e.g. 123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ"
-                        className="h-12 bg-white/5 border-white/10 rounded-xl focus:border-sky-500 transition-all text-xs pr-12" 
+                        className="h-12 bg-zinc-100/40 border-zinc-200 rounded-2xl focus:border-sky-500 transition-all text-xs pr-12" 
                       />
                       <button 
                         type="button"
                         onClick={() => setShowTelegramToken(!showTelegramToken)}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white transition-colors"
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-900 transition-colors"
                       >
                         {showTelegramToken ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
@@ -1001,24 +1001,24 @@ export default function AdminSettings() {
 
                   {/* Chat ID */}
                   <div className="space-y-3">
-                    <Label className="text-zinc-400 font-semibold text-xs">Telegram Chat ID</Label>
+                    <Label className="text-zinc-500 font-semibold text-xs">Telegram Chat ID</Label>
                     <Input 
                       type="text"
                       value={telegramChatId} 
                       onChange={e => setTelegramChatId(e.target.value)}
                       placeholder="e.g. 987654321"
-                      className="h-12 bg-white/5 border-white/10 rounded-xl focus:border-sky-500 transition-all text-xs" 
+                      className="h-12 bg-zinc-100/40 border-zinc-200 rounded-2xl focus:border-sky-500 transition-all text-xs" 
                     />
                   </div>
                 </div>
 
                 {/* Instructions Alert Box */}
-                <div className="p-5 rounded-2xl bg-[#0e1621] border border-sky-500/10 text-zinc-400 space-y-3 text-xs leading-relaxed text-left">
-                  <h4 className="font-bold text-white flex items-center gap-2">
+                <div className="p-5 rounded-2xl bg-[#0e1621] border border-sky-500/10 text-zinc-500 space-y-3 text-xs leading-relaxed text-left">
+                  <h4 className="font-bold text-zinc-900 flex items-center gap-2">
                     <Send className="w-4 h-4 text-sky-400" />
                     How to Set Up Your Telegram Bot:
                   </h4>
-                  <ol className="list-decimal list-inside space-y-2 text-zinc-400 font-semibold pl-2">
+                  <ol className="list-decimal list-inside space-y-2 text-zinc-500 font-semibold pl-2">
                     <li>Open Telegram and search for <a href="https://t.me/BotFather" target="_blank" rel="noreferrer" className="text-sky-400 hover:underline">@BotFather</a>.</li>
                     <li>Send the command <code>/newbot</code> and follow the instructions to get your <b>Bot Token</b>.</li>
                     <li>Search for <a href="https://t.me/GetIDBot" target="_blank" rel="noreferrer" className="text-sky-400 hover:underline">@GetIDBot</a> or <a href="https://t.me/userinfobot" target="_blank" rel="noreferrer" className="text-sky-400 hover:underline">@userinfobot</a> and send them a message to get your <b>Chat ID</b>.</li>
@@ -1027,12 +1027,12 @@ export default function AdminSettings() {
                 </div>
 
                 {/* Button Action Row */}
-                <div className="flex flex-wrap gap-4 pt-6 border-t border-white/5">
+                <div className="flex flex-wrap gap-4 pt-6 border-t border-zinc-200/60">
                   <Button
                     onClick={handleTestTelegramConnection}
                     disabled={telegramTesting}
                     type="button"
-                    className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 font-bold px-6 h-11 rounded-xl transition-all text-xs flex items-center gap-2"
+                    className="bg-zinc-800 hover:bg-zinc-700 text-zinc-800 border border-zinc-700 font-bold px-6 h-11 rounded-2xl transition-all text-xs flex items-center gap-2"
                   >
                     {telegramTesting ? (
                       <>
@@ -1051,11 +1051,11 @@ export default function AdminSettings() {
                     onClick={handleSaveSettings}
                     disabled={isLoading}
                     type="button"
-                    className="bg-[#D6004B] hover:bg-[#ff0059] text-white font-bold px-6 h-11 rounded-xl transition-all shadow-md active:scale-98 text-xs flex items-center gap-2"
+                    className="bg-[#1D4ED8] hover:bg-[#3B82F6] text-white font-bold px-6 h-11 rounded-2xl transition-all shadow-md active:scale-98 text-xs flex items-center gap-2"
                   >
                     {isLoading ? (
                       <>
-                        <RefreshCw className="w-4 h-4 animate-spin text-white" />
+                        <RefreshCw className="w-4 h-4 animate-spin text-zinc-900" />
                         Saving Config...
                       </>
                     ) : (
@@ -1077,15 +1077,15 @@ export default function AdminSettings() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.3 }}
             >
-              <Card className="border-white/5 bg-[#09090e]/80 rounded-2xl overflow-hidden backdrop-blur-xl p-8 space-y-8 relative">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/5 rounded-full blur-3xl pointer-events-none" />
+              <Card className="border-zinc-200/60 bg-slate-50/80 rounded-2xl overflow-hidden backdrop-blur-xl p-8 space-y-8 relative">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-brand-500/5 rounded-full blur-3xl pointer-events-none" />
                 
-                <div className="flex items-center gap-4 pb-4 border-b border-white/5">
-                  <div className="w-12 h-12 rounded-xl bg-rose-500/10 flex items-center justify-center text-rose-500 border border-rose-500/20">
+                <div className="flex items-center gap-4 pb-4 border-b border-zinc-200/60">
+                  <div className="w-12 h-12 rounded-2xl bg-brand-500/10 flex items-center justify-center text-yellow-500 border border-zinc-200/60">
                     <Activity className="w-6 h-6" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-white">Analytics Reset System</h3>
+                    <h3 className="text-lg font-bold text-zinc-900">Analytics Reset System</h3>
                     <p className="text-zinc-500 text-xs">Set a clean analytics baseline date and configure default dashboard display modes.</p>
                   </div>
                 </div>
@@ -1093,26 +1093,26 @@ export default function AdminSettings() {
                 <div className="space-y-6">
                   {/* Default Analytics Mode Select */}
                   <div className="space-y-3">
-                    <Label className="text-zinc-400 font-semibold text-xs">Default Analytics Mode</Label>
+                    <Label className="text-zinc-500 font-semibold text-xs">Default Analytics Mode</Label>
                     <select
                       value={analyticsMode}
                       onChange={e => setAnalyticsMode(e.target.value as any)}
-                      className="w-full h-12 px-4 bg-white/5 border border-white/10 rounded-xl focus:border-rose-500 text-xs text-white appearance-none cursor-pointer outline-none transition-all"
+                      className="w-full h-12 px-4 bg-zinc-100/40 border border-zinc-200 rounded-2xl focus:border-brand-500 text-xs text-zinc-900 appearance-none cursor-pointer outline-none transition-all"
                     >
-                      <option value="reset" className="bg-[#09090e] text-white">Since Reset Date (Default - Zero baseline)</option>
-                      <option value="lifetime" className="bg-[#09090e] text-white">Lifetime (Complete historical totals)</option>
+                      <option value="reset" className="bg-slate-50 text-zinc-900">Since Reset Date (Default - Zero baseline)</option>
+                      <option value="lifetime" className="bg-slate-50 text-zinc-900">Lifetime (Complete historical totals)</option>
                     </select>
                   </div>
 
                   {/* Baseline Reset Date Input */}
                   <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-end">
                     <div className="md:col-span-8 space-y-3">
-                      <Label className="text-zinc-400 font-semibold text-xs">Analytics Reset Date (Baseline Date)</Label>
+                      <Label className="text-zinc-500 font-semibold text-xs">Analytics Reset Date (Baseline Date)</Label>
                       <Input
                         type="date"
                         value={analyticsResetDate}
                         onChange={e => setAnalyticsResetDate(e.target.value)}
-                        className="h-12 bg-white/5 border-white/10 rounded-xl focus:border-rose-500 text-xs text-zinc-300"
+                        className="h-12 bg-zinc-100/40 border-zinc-200 rounded-2xl focus:border-brand-500 text-xs text-zinc-700"
                       />
                     </div>
                     <div className="md:col-span-4">
@@ -1127,7 +1127,7 @@ export default function AdminSettings() {
                           setAnalyticsResetDate(localDateStr);
                           toast.info(`Set baseline reset date to today: ${localDateStr}`);
                         }}
-                        className="w-full h-12 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold rounded-xl transition-all text-xs"
+                        className="w-full h-12 bg-zinc-100/40 hover:bg-zinc-100/80 border border-zinc-200 text-zinc-900 font-bold rounded-2xl transition-all text-xs"
                       >
                         Set to Today
                       </Button>
@@ -1140,7 +1140,7 @@ export default function AdminSettings() {
                       <Shield className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
                       <div className="space-y-1">
                         <h4 className="font-bold text-amber-500 text-xs">CRITICAL DATA PROTECTION PROTOCOL</h4>
-                        <p className="text-zinc-400 text-[11px] leading-relaxed">
+                        <p className="text-zinc-500 text-[11px] leading-relaxed">
                           This action defines a query filter boundary. It will NOT delete or modify student profiles, courses, enrollments, billing records, or any business data. All historical data remains 100% intact and recoverable by selecting "Lifetime" mode.
                         </p>
                         <p className="text-zinc-500 text-[10px] leading-relaxed mt-2 font-bold">
@@ -1149,15 +1149,15 @@ export default function AdminSettings() {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-3 pt-2 border-t border-white/5">
+                    <div className="flex items-center gap-3 pt-2 border-t border-zinc-200/60">
                       <input
                         type="checkbox"
                         id="backup-confirm"
                         checked={isBackupConfirmed}
                         onChange={e => setIsBackupConfirmed(e.target.checked)}
-                        className="w-4 h-4 text-rose-600 border-white/10 rounded focus:ring-rose-500 cursor-pointer"
+                        className="w-4 h-4 text-brand-600 border-zinc-200 rounded focus:ring-brand-500 cursor-pointer"
                       />
-                      <label htmlFor="backup-confirm" className="text-zinc-300 text-xs font-bold cursor-pointer select-none">
+                      <label htmlFor="backup-confirm" className="text-zinc-700 text-xs font-bold cursor-pointer select-none">
                         I have created a database backup and verified its integrity.
                       </label>
                     </div>
@@ -1165,21 +1165,21 @@ export default function AdminSettings() {
                 </div>
 
                 {/* Save button row */}
-                <div className="pt-6 border-t border-white/5 flex gap-4">
+                <div className="pt-6 border-t border-zinc-200/60 flex gap-4">
                   <Button
                     onClick={handleSaveSettings}
                     disabled={isLoading || !isBackupConfirmed}
                     type="button"
                     className={cn(
-                      "font-bold px-6 h-11 rounded-xl transition-all shadow-md active:scale-98 text-xs flex items-center gap-2",
+                      "font-bold px-6 h-11 rounded-2xl transition-all shadow-md active:scale-98 text-xs flex items-center gap-2",
                       isBackupConfirmed 
-                        ? "bg-[#D6004B] hover:bg-[#ff0059] text-white cursor-pointer" 
-                        : "bg-zinc-800 text-zinc-500 cursor-not-allowed border border-white/5"
+                        ? "bg-[#1D4ED8] hover:bg-[#3B82F6] text-white cursor-pointer" 
+                        : "bg-zinc-800 text-zinc-500 cursor-not-allowed border border-zinc-200/60"
                     )}
                   >
                     {isLoading ? (
                       <>
-                        <RefreshCw className="w-4 h-4 animate-spin text-white" />
+                        <RefreshCw className="w-4 h-4 animate-spin text-zinc-900" />
                         Saving Config...
                       </>
                     ) : (
@@ -1196,7 +1196,7 @@ export default function AdminSettings() {
                         setAnalyticsResetDate("");
                         toast.success("Reset date cleared. Platform will default to lifetime logs.");
                       }}
-                      className="bg-white/5 hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/20 text-white border border-white/10 font-bold px-6 h-11 rounded-xl transition-all text-xs"
+                      className="bg-zinc-100/40 hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/20 text-white border border-zinc-200 font-bold px-6 h-11 rounded-2xl transition-all text-xs"
                     >
                       Clear Reset Date
                     </Button>
@@ -1207,17 +1207,17 @@ export default function AdminSettings() {
           )}
 
           {/* Security Status Footer Card */}
-          <div className="bg-gradient-to-br from-[#09090e] to-black border border-white/5 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="bg-gradient-to-br from-white to-slate-50/60 border border-zinc-200/60 border border-zinc-200/60 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-rose-600/10 border border-rose-500/20 rounded-xl flex items-center justify-center text-rose-500 shadow-xl">
+              <div className="w-12 h-12 bg-brand-600/10 border border-zinc-200/60 rounded-2xl flex items-center justify-center text-yellow-500 shadow-sm border border-zinc-200/60">
                 <Shield className="w-6 h-6" />
               </div>
               <div>
-                <h4 className="font-bold text-white text-sm mb-0.5">System Security Fully Armed</h4>
+                <h4 className="font-bold text-zinc-900 text-sm mb-0.5">System Security Fully Armed</h4>
                 <p className="text-zinc-500 text-xs font-semibold">Integrations and settings are locked under dual-layer security validation.</p>
               </div>
             </div>
-            <div className="flex items-center gap-2 px-4 py-2.5 bg-white/5 rounded-xl border border-white/10 text-emerald-400 font-bold text-xs">
+            <div className="flex items-center gap-2 px-4 py-2.5 bg-zinc-100/40 rounded-2xl border border-zinc-200 text-emerald-400 font-bold text-xs">
               <CheckCircle2 className="w-4 h-4 text-emerald-400 animate-pulse" />
               Connection Status: Stable
             </div>

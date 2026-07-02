@@ -18,9 +18,9 @@ const features: Feature[] = [
     title: "تسليم فوري",
     desc: "احصل على ملفاتك فوراً بعد الدفع مباشرة دون انتظار، النظام مؤتمت بالكامل.",
     icon: Zap,
-    color: "from-rose-500 to-pink-500",
+    color: "from-brand-500 to-pink-500",
     glow: "rgba(244,63,94,0.15)",
-    accent: "group-hover:border-rose-500/30"
+    accent: "group-hover:border-zinc-200/60"
   },
   {
     title: "أنظمة جاهزة",
@@ -66,11 +66,11 @@ const features: Feature[] = [
 
 export function FeaturesSection() {
   return (
-    <section id="features" className="py-24 md:py-32 relative bg-[#050505] overflow-hidden select-none">
+    <section id="features" className="py-24 md:py-32 relative bg-white overflow-hidden select-none">
       
       {/* Background glow lines */}
-      <div className="absolute top-0 right-1/4 w-[600px] h-[600px] bg-rose-600/[0.02] rounded-full blur-[150px] pointer-events-none" />
-      <div className="absolute bottom-0 left-1/4 w-[600px] h-[600px] bg-rose-600/[0.02] rounded-full blur-[150px] pointer-events-none" />
+      <div className="absolute top-0 right-1/4 w-[600px] h-[600px] bg-brand-600/[0.02] rounded-full blur-[150px] pointer-events-none" />
+      <div className="absolute bottom-0 left-1/4 w-[600px] h-[600px] bg-brand-600/[0.02] rounded-full blur-[150px] pointer-events-none" />
 
       <div className="container mx-auto px-4 relative z-10">
         
@@ -80,15 +80,15 @@ export function FeaturesSection() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="inline-flex items-center gap-2 bg-rose-500/10 text-rose-400 px-4 py-1.5 rounded-full font-cairo text-sm font-bold mb-6 border border-rose-500/20"
+            className="inline-flex items-center gap-2 bg-brand-500/10 text-yellow-500 px-4 py-1.5 rounded-full font-sans text-sm font-bold mb-6 border border-zinc-200/60"
           >
             <Sparkles className="w-4 h-4" />
             لماذا يختارنا المحترفون؟
           </motion.div>
-          <h2 className="text-3xl md:text-5xl font-alexandria font-black text-white mb-6 tracking-tighter">
+          <h2 className="text-3xl md:text-5xl font-sans font-black text-zinc-900 mb-6 tracking-tighter">
             مميزات تجعلنا خيارك الأول
           </h2>
-          <p className="text-zinc-500 font-cairo text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
+          <p className="text-zinc-500 font-sans text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
             نحن لا نبيع مجرد ملفات، بل نوفر لك أدوات ومسارات تعليمية ترفع كفاءة إنتاجك وتوفر وقتك الثمين.
           </p>
         </div>
@@ -105,7 +105,7 @@ export function FeaturesSection() {
               className="group relative"
             >
               <div className={cn(
-                "h-full bg-[#0a0a0f]/60 backdrop-blur-xl border border-white/5 p-8 rounded-[2.5rem] transition-all duration-500 group-hover:-translate-y-2 relative overflow-hidden",
+                "h-full bg-slate-50/60 backdrop-blur-xl border border-zinc-200/60 p-8 rounded-[2.5rem] transition-all duration-500 group-hover:-translate-y-2 relative overflow-hidden",
                 feature.accent
               )}>
                 
@@ -117,19 +117,19 @@ export function FeaturesSection() {
 
                 {/* Futuristic Icon Frame */}
                 <div className={cn(
-                  "w-14 h-14 rounded-2xl bg-gradient-to-br p-0.5 mb-6 group-hover:scale-110 transition-all duration-500 shadow-lg",
+                  "w-14 h-14 rounded-2xl bg-gradient-to-br p-0.5 mb-6 group-hover:scale-110 transition-all duration-500 shadow-sm border border-zinc-200/60",
                   feature.color
                 )}>
-                  <div className="w-full h-full bg-[#050505] rounded-[0.9rem] flex items-center justify-center group-hover:bg-transparent transition-colors duration-500">
-                    <feature.icon className="w-6 h-6 text-white group-hover:scale-110 transition-transform duration-500" />
+                  <div className="w-full h-full bg-white rounded-[0.9rem] flex items-center justify-center group-hover:bg-transparent transition-colors duration-500">
+                    <feature.icon className="w-6 h-6 text-zinc-900 group-hover:scale-110 transition-transform duration-500" />
                   </div>
                 </div>
 
                 {/* Feature Content */}
-                <h3 className="text-xl font-alexandria font-bold text-white mb-4 group-hover:text-white transition-colors">
+                <h3 className="text-xl font-sans font-bold text-zinc-900 mb-4 group-hover:text-zinc-900 transition-colors">
                   {feature.title}
                 </h3>
-                <p className="text-zinc-400 font-cairo text-sm leading-relaxed group-hover:text-zinc-300 transition-colors">
+                <p className="text-zinc-500 font-sans text-sm leading-relaxed group-hover:text-zinc-700 transition-colors">
                   {feature.desc}
                 </p>
 

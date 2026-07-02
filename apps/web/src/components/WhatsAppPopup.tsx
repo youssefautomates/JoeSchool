@@ -33,7 +33,7 @@ export function WhatsAppPopup() {
                 setIsVisible(false);
                 setIsDismissed(true);
               }}
-              className="absolute -top-2 -right-2 w-6 h-6 bg-[#1a1a1a] border border-white/10 rounded-full flex items-center justify-center text-white/50 hover:text-white z-20 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity shadow-lg"
+              className="absolute -top-2 -right-2 w-6 h-6 bg-[#1a1a1a] border border-zinc-200 rounded-full flex items-center justify-center text-zinc-500 hover:text-zinc-900 z-20 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity shadow-sm border border-zinc-200/60"
             >
               <X className="w-3 h-3" />
             </button>
@@ -42,14 +42,14 @@ export function WhatsAppPopup() {
               href={whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-3 bg-[#25D366] hover:bg-[#128C7E] text-white px-5 py-3 rounded-2xl shadow-[0_10px_40px_rgba(37,211,102,0.4)] transition-all hover:scale-105 active:scale-95 group border border-white/10"
+              className="flex items-center gap-3 bg-[#25D366] hover:bg-[#128C7E] text-zinc-900 px-5 py-3 rounded-2xl shadow-[0_10px_40px_rgba(37,211,102,0.4)] transition-all hover:scale-105 active:scale-95 group border border-zinc-200"
             >
               <div className="relative">
                 <MessageCircle className="w-6 h-6" />
                 <span className="absolute -top-1 -right-1 w-2 h-2 bg-white rounded-full animate-ping" />
               </div>
               <div className="flex flex-col items-start leading-tight">
-                <span className="text-[9px] opacity-80 font-cairo uppercase tracking-wider">هل لديك استفسار؟</span>
+                <span className="text-[9px] opacity-80 font-sans uppercase tracking-wider">هل لديك استفسار؟</span>
                 <span className="text-sm font-bold font-cairo">تواصل واتساب</span>
               </div>
             </a>

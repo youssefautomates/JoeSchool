@@ -144,15 +144,15 @@ export function ReviewModerationTable({
   const getStatusBadge = (status?: string) => {
     switch (status) {
       case "visible":
-        return <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-1 rounded-lg text-[10px] font-bold font-sans shrink-0">🟢 Active</span>;
+        return <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-1 rounded-2xl text-[10px] font-bold font-sans shrink-0">🟢 Active</span>;
       case "hidden":
-        return <span className="bg-red-500/10 text-red-400 border border-red-500/20 px-2.5 py-1 rounded-lg text-[10px] font-bold font-sans shrink-0">🔴 Hidden</span>;
+        return <span className="bg-red-500/10 text-red-400 border border-red-500/20 px-2.5 py-1 rounded-2xl text-[10px] font-bold font-sans shrink-0">🔴 Hidden</span>;
       case "pending":
-        return <span className="bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2.5 py-1 rounded-lg text-[10px] font-bold font-sans shrink-0">⏳ Pending</span>;
+        return <span className="bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2.5 py-1 rounded-2xl text-[10px] font-bold font-sans shrink-0">⏳ Pending</span>;
       case "archived":
-        return <span className="bg-zinc-800 text-zinc-500 border border-zinc-700/50 px-2.5 py-1 rounded-lg text-[10px] font-bold font-sans shrink-0">📁 Archived</span>;
+        return <span className="bg-zinc-800 text-zinc-500 border border-zinc-700/50 px-2.5 py-1 rounded-2xl text-[10px] font-bold font-sans shrink-0">📁 Archived</span>;
       default:
-        return <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-1 rounded-lg text-[10px] font-bold font-sans shrink-0">🟢 Active</span>;
+        return <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-1 rounded-2xl text-[10px] font-bold font-sans shrink-0">🟢 Active</span>;
     }
   };
 
@@ -164,13 +164,13 @@ export function ReviewModerationTable({
       
       {/* Selection Notification Banner */}
       {selectedIds.length > 0 && (
-        <div className="bg-rose-950/20 border border-rose-500/20 p-4 rounded-2xl flex items-center justify-between gap-4 flex-wrap text-xs font-bold font-sans animate-in fade-in slide-in-from-top-2 duration-300">
+        <div className="bg-brand-950/20 border border-zinc-200/60 p-4 rounded-2xl flex items-center justify-between gap-4 flex-wrap text-xs font-bold font-sans animate-in fade-in slide-in-from-top-2 duration-300">
           <div className="flex items-center gap-2">
-            <span className="text-white">Selected <span className="text-rose-500 font-mono text-sm">{selectedIds.length}</span> reviews on this page.</span>
+            <span className="text-zinc-900">Selected <span className="text-yellow-500 font-mono text-sm">{selectedIds.length}</span> reviews on this page.</span>
             {!selectAllAcross && selectedIds.length < reviews.length && (
               <button 
                 onClick={handleSelectAllAcross}
-                className="text-rose-400 hover:text-rose-300 underline cursor-pointer"
+                className="text-yellow-500 hover:text-brand-300 underline cursor-pointer"
               >
                 Select all {reviews.length} reviews matching filters?
               </button>
@@ -181,7 +181,7 @@ export function ReviewModerationTable({
           </div>
           <button 
             onClick={handleClearSelection}
-            className="text-zinc-400 hover:text-white flex items-center gap-1 cursor-pointer"
+            className="text-zinc-500 hover:text-zinc-900 flex items-center gap-1 cursor-pointer"
           >
             <X className="w-3.5 h-3.5" />
             <span>Clear Selection</span>
@@ -190,17 +190,17 @@ export function ReviewModerationTable({
       )}
 
       {/* Main Table Wrapper */}
-      <div className="bg-[#09090e]/60 border border-white/5 rounded-2xl overflow-hidden backdrop-blur-xl">
+      <div className="bg-slate-50/60 border border-zinc-200/60 rounded-2xl overflow-hidden backdrop-blur-xl">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-white/5 bg-white/[0.01] text-zinc-400 font-bold text-xs font-sans">
+              <tr className="border-b border-zinc-200/60 bg-zinc-50/40 text-zinc-500 font-bold text-xs font-sans">
                 <th className="p-4 w-12 text-center">
                   <input
                     type="checkbox"
                     checked={isAllPageSelected}
                     onChange={(e) => handlePageSelectAll(e.target.checked)}
-                    className="rounded border-zinc-700 bg-white/5 text-rose-600 focus:ring-rose-500 cursor-pointer"
+                    className="rounded border-zinc-700 bg-zinc-100/40 text-brand-600 focus:ring-brand-500 cursor-pointer"
                   />
                 </th>
                 <th className="p-4 font-sans">Customer</th>
@@ -212,7 +212,7 @@ export function ReviewModerationTable({
                 <th className="p-4 font-sans text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5 text-xs text-zinc-300">
+            <tbody className="divide-y divide-white/5 text-xs text-zinc-700">
               {paginatedReviews.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="p-20 text-center text-zinc-500 font-bold font-sans">
@@ -223,8 +223,8 @@ export function ReviewModerationTable({
                 paginatedReviews.map(r => (
                   <tr 
                     key={r.id} 
-                    className={`hover:bg-white/[0.01] transition-colors ${
-                      isSelected(r.id) ? "bg-rose-500/[0.02]" : ""
+                    className={`hover:bg-zinc-50/40 transition-colors ${
+                      isSelected(r.id) ? "bg-brand-500/[0.02]" : ""
                     }`}
                   >
                     {/* Checkbox */}
@@ -233,7 +233,7 @@ export function ReviewModerationTable({
                         type="checkbox"
                         checked={isSelected(r.id)}
                         onChange={() => toggleSelect(r.id)}
-                        className="rounded border-zinc-700 bg-white/5 text-rose-600 focus:ring-rose-500 cursor-pointer"
+                        className="rounded border-zinc-700 bg-zinc-100/40 text-brand-600 focus:ring-brand-500 cursor-pointer"
                       />
                     </td>
 
@@ -241,7 +241,7 @@ export function ReviewModerationTable({
                     <td className="p-4">
                       <div className="flex items-center gap-3">
                         <div className="text-left">
-                          <span className="font-bold text-white block">
+                          <span className="font-bold text-zinc-900 block">
                             {r.firstName} {r.lastName ? r.lastName.charAt(0) + "." : ""}
                           </span>
                           <span className="text-[9px] text-zinc-500 font-bold font-sans">
@@ -255,13 +255,13 @@ export function ReviewModerationTable({
                     <td className="p-4">
                       <div className="flex items-center gap-1.5">
                         {renderStars(r.rating)}
-                        <span className="font-mono text-zinc-400 text-[10px] font-bold">({r.rating.toFixed(1)})</span>
+                        <span className="font-mono text-zinc-500 text-[10px] font-bold">({r.rating.toFixed(1)})</span>
                       </div>
                     </td>
 
                     {/* Text snippet */}
                     <td className="p-4 max-w-xs text-left">
-                      <p className="line-clamp-2 text-zinc-400 font-sans italic leading-relaxed" title={r.text}>
+                      <p className="line-clamp-2 text-zinc-500 font-sans italic leading-relaxed" title={r.text}>
                         &ldquo;{r.text}&rdquo;
                       </p>
                       {r.status === "archived" && r.archiveReason && (
@@ -272,7 +272,7 @@ export function ReviewModerationTable({
                     </td>
 
                     {/* Product name */}
-                    <td className="p-4 text-zinc-400 font-sans max-w-[150px] truncate">
+                    <td className="p-4 text-zinc-500 font-sans max-w-[150px] truncate">
                       {getProductName(r.productId)}
                     </td>
 
@@ -292,7 +292,7 @@ export function ReviewModerationTable({
                         {r.status === "archived" ? (
                           <button
                             onClick={() => onStatusChange(r, "pending")}
-                            className="p-1.5 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 transition-colors cursor-pointer"
+                            className="p-1.5 rounded-2xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 transition-colors cursor-pointer"
                             title="Restore from archive"
                           >
                             <RotateCcw className="w-3.5 h-3.5" />
@@ -302,7 +302,7 @@ export function ReviewModerationTable({
                             {r.status !== "visible" && (
                               <button
                                 onClick={() => onStatusChange(r, "visible")}
-                                className="p-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 transition-colors cursor-pointer"
+                                className="p-1.5 rounded-2xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 transition-colors cursor-pointer"
                                 title="Approve & Publish"
                               >
                                 <Eye className="w-3.5 h-3.5" />
@@ -311,7 +311,7 @@ export function ReviewModerationTable({
                             {r.status !== "hidden" && (
                               <button
                                 onClick={() => onStatusChange(r, "hidden")}
-                                className="p-1.5 rounded-lg bg-zinc-800 hover:bg-red-500/15 hover:text-red-400 text-zinc-400 transition-all cursor-pointer"
+                                className="p-1.5 rounded-2xl bg-zinc-800 hover:bg-red-500/15 hover:text-red-400 text-zinc-500 transition-all cursor-pointer"
                                 title="Hide review"
                               >
                                 <EyeOff className="w-3.5 h-3.5" />
@@ -321,7 +321,7 @@ export function ReviewModerationTable({
                         )}
                         <button
                           onClick={() => onEdit(r)}
-                          className="p-1.5 rounded-lg bg-white/5 border border-white/5 hover:border-white/10 text-zinc-400 hover:text-white transition-all cursor-pointer"
+                          className="p-1.5 rounded-2xl bg-zinc-100/40 border border-zinc-200/60 hover:border-zinc-200 text-zinc-500 hover:text-zinc-900 transition-all cursor-pointer"
                           title="Edit review"
                         >
                           <Edit3 className="w-3.5 h-3.5" />
@@ -337,7 +337,7 @@ export function ReviewModerationTable({
                               onDelete(r.id, reason);
                             }
                           }}
-                          className="p-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 transition-colors cursor-pointer"
+                          className="p-1.5 rounded-2xl bg-red-500/10 hover:bg-red-500/20 text-red-400 transition-colors cursor-pointer"
                           title={r.status === "archived" ? "Delete Permanently" : "Archive Review"}
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -372,10 +372,10 @@ export function ReviewModerationTable({
                   }
                   activeOnPageChange(1); // Reset to page 1 on page size change
                 }}
-                className="bg-[#09090e] border border-white/10 rounded-lg text-zinc-400 text-[10px] px-2 py-1 outline-none cursor-pointer focus:border-rose-500/50"
+                className="bg-slate-50 border border-zinc-200 rounded-2xl text-zinc-500 text-[10px] px-2 py-1 outline-none cursor-pointer focus:border-zinc-200/60"
               >
                 {[10, 25, 50, 100].map(size => (
-                  <option key={size} value={size} className="bg-[#09090e] text-white">
+                  <option key={size} value={size} className="bg-slate-50 text-zinc-900">
                     {size}
                   </option>
                 ))}
@@ -388,7 +388,7 @@ export function ReviewModerationTable({
               <button
                 disabled={activePage === 1}
                 onClick={() => activeOnPageChange(activePage - 1)}
-                className="h-9 px-3 bg-white/5 border border-white/5 hover:bg-white/10 text-zinc-400 hover:text-white rounded-lg flex items-center justify-center gap-1 text-xs font-bold transition-all disabled:opacity-30 cursor-pointer"
+                className="h-9 px-3 bg-zinc-100/40 border border-zinc-200/60 hover:bg-zinc-100/80 text-zinc-500 hover:text-zinc-900 rounded-2xl flex items-center justify-center gap-1 text-xs font-bold transition-all disabled:opacity-30 cursor-pointer"
               >
                 <ChevronLeft className="w-3.5 h-3.5" />
                 <span>Previous</span>
@@ -396,7 +396,7 @@ export function ReviewModerationTable({
               <button
                 disabled={activePage === activeTotalPages}
                 onClick={() => activeOnPageChange(activePage + 1)}
-                className="h-9 px-3 bg-white/5 border border-white/5 hover:bg-white/10 text-zinc-400 hover:text-white rounded-lg flex items-center justify-center gap-1 text-xs font-bold transition-all disabled:opacity-30 cursor-pointer"
+                className="h-9 px-3 bg-zinc-100/40 border border-zinc-200/60 hover:bg-zinc-100/80 text-zinc-500 hover:text-zinc-900 rounded-2xl flex items-center justify-center gap-1 text-xs font-bold transition-all disabled:opacity-30 cursor-pointer"
               >
                 <span>Next</span>
                 <ChevronRight className="w-3.5 h-3.5" />
@@ -408,17 +408,17 @@ export function ReviewModerationTable({
 
       {/* STICKY BOTTOM BULK ACTIONS CONTROL PANEL */}
       {selectedIds.length > 0 && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#09090f]/95 border border-rose-500/25 p-4 md:p-5 rounded-2xl flex items-center justify-between gap-6 shadow-[0_15px_40px_rgba(214,0,75,0.2)] backdrop-blur-2xl max-w-xl w-[90%] z-40 animate-in fade-in slide-in-from-bottom-6 duration-300 font-sans">
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#09090f]/95 border border-brand-500/25 p-4 md:p-5 rounded-2xl flex items-center justify-between gap-6 shadow-[0_15px_40px_rgba(29, 78, 216,0.2)] backdrop-blur-2xl max-w-xl w-[90%] z-40 animate-in fade-in slide-in-from-bottom-6 duration-300 font-sans">
           <div className="flex flex-col text-left">
-            <span className="text-white text-xs font-black">Bulk Actions</span>
-            <span className="text-[10px] text-zinc-400 mt-0.5">Selected <span className="text-rose-500 font-mono font-black text-xs">{selectedIds.length}</span> reviews.</span>
+            <span className="text-zinc-900 text-xs font-black">Bulk Actions</span>
+            <span className="text-[10px] text-zinc-500 mt-0.5">Selected <span className="text-yellow-500 font-mono font-black text-xs">{selectedIds.length}</span> reviews.</span>
           </div>
 
           <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
             {hasArchivedSelected ? (
               <button
                 onClick={handleBulkRestore}
-                className="h-9 px-3.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+                className="h-9 px-3.5 bg-indigo-600 hover:bg-indigo-500 text-zinc-900 rounded-2xl text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
                 <span>Restore</span>
@@ -427,21 +427,21 @@ export function ReviewModerationTable({
               <>
                 <button
                   onClick={handleBulkApprove}
-                  className="h-9 px-3.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+                  className="h-9 px-3.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
                 >
                   <Eye className="w-3.5 h-3.5" />
                   <span>Approve</span>
                 </button>
                 <button
                   onClick={handleBulkHide}
-                  className="h-9 px-3.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+                  className="h-9 px-3.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-700 rounded-2xl text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
                 >
                   <EyeOff className="w-3.5 h-3.5" />
                   <span>Hide</span>
                 </button>
                 <button
                   onClick={() => handleBulkFeature(true)}
-                  className="h-9 px-3.5 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+                  className="h-9 px-3.5 bg-brand-600 hover:bg-brand-500 text-white rounded-2xl text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
                 >
                   <Sparkles className="w-3.5 h-3.5 fill-current" />
                   <span>Feature</span>
@@ -450,7 +450,7 @@ export function ReviewModerationTable({
             )}
             <button
               onClick={handleBulkDelete}
-              className="h-9 px-3.5 bg-red-950/40 border border-red-500/20 text-red-400 hover:bg-red-900/30 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+              className="h-9 px-3.5 bg-red-950/40 border border-red-500/20 text-red-400 hover:bg-red-900/30 rounded-2xl text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
             >
               <Trash2 className="w-3.5 h-3.5" />
               <span>{hasArchivedSelected ? "Delete" : "Archive"}</span>

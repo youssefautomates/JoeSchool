@@ -153,7 +153,6 @@ export function Navbar() {
   );
 
   const navLinks = [
-    { href: isHomePage ? "#products" : "/#products", label: "المنتجات الرقمية", section: "products", icon: Package },
     { href: isHomePage ? "#faq" : "/#faq", label: "الأسئلة الشائعة", section: "faq", icon: HelpCircle },
   ];
 
@@ -168,13 +167,13 @@ export function Navbar() {
       >
         <div
           className={cn(
-            "container mx-auto max-w-7xl transition-all duration-500 border border-transparent",
+            "container mx-auto max-w-7xl transition-all duration-500 border rounded-2xl px-6 h-14 md:h-16 flex items-center justify-between",
             scrolled
-              ? "bg-white/5 backdrop-blur-xl border-white/10 rounded-2xl px-6 h-14 md:h-16 shadow-[0_10px_30px_rgba(0,0,0,0.5)]"
-              : "bg-transparent h-16"
+              ? "bg-[rgba(255,255,255,0.82)] backdrop-blur-[16px] border-zinc-200/60 shadow-[0_4px_20px_-4px_rgba(17,24,39,0.03),0_2px_4px_-1px_rgba(17,24,39,0.01)]"
+              : "bg-white/90 border-zinc-200/40 shadow-none"
           )}
         >
-          <div className="flex items-center justify-between h-full">
+          <div className="flex items-center justify-between h-full w-full">
 
             {/* Right Side: Logo & Brand */}
             <div className="md:flex-1 flex items-center justify-start">
@@ -184,18 +183,18 @@ export function Navbar() {
             </div>
 
             {/* Middle: Desktop Nav Links */}
-            <div className="hidden md:flex items-center justify-center gap-6 font-cairo text-[15px] font-medium text-zinc-300 shrink-0">
+            <div className="hidden md:flex items-center justify-center gap-6 font-sans text-[15px] font-medium text-zinc-700 shrink-0">
               <Link
                 href="/"
                 onClick={handleHomeClick}
                 className={cn(
-                  "relative group py-2 transition-all hover:text-rose-500",
-                  isHomePage && activeSection === "" ? "text-white" : ""
+                  "relative group py-2 transition-all hover:text-[#2563EB]",
+                  isHomePage && activeSection === "" ? "text-zinc-900 font-bold" : ""
                 )}
               >
                 الصفحة الرئيسية
                 <span className={cn(
-                  "absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-rose-600 to-orange-400 rounded-full transition-all duration-300",
+                  "absolute bottom-0 left-0 h-0.5 bg-[#2563EB] rounded-full transition-all duration-300",
                   isHomePage && activeSection === "" ? "w-full" : "w-0 group-hover:w-full"
                 )} />
               </Link>
@@ -204,13 +203,13 @@ export function Navbar() {
                 href={isHomePage ? "#courses" : "/courses"}
                 onClick={(e) => handleNavClick(e, isHomePage ? "#courses" : "/courses")}
                 className={cn(
-                  "relative group py-2 transition-all hover:text-rose-500",
-                  (pathname.startsWith("/courses") || (isHomePage && activeSection === "courses")) ? "text-white" : ""
+                  "relative group py-2 transition-all hover:text-[#2563EB]",
+                  (pathname.startsWith("/courses") || (isHomePage && activeSection === "courses")) ? "text-zinc-900 font-bold" : ""
                 )}
               >
                 الدورات التعليمية
                 <span className={cn(
-                  "absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-rose-600 to-orange-400 rounded-full transition-all duration-300",
+                  "absolute bottom-0 left-0 h-0.5 bg-[#2563EB] rounded-full transition-all duration-300",
                   (pathname.startsWith("/courses") || (isHomePage && activeSection === "courses")) ? "w-full" : "w-0 group-hover:w-full"
                 )} />
               </Link>
@@ -221,13 +220,13 @@ export function Navbar() {
                   href={link.href}
                   onClick={(e) => handleNavClick(e, link.href.startsWith("/#") ? `#${link.section}` : link.href)}
                   className={cn(
-                    "relative group py-2 transition-all hover:text-rose-500",
-                    activeSection === link.section ? "text-white" : ""
+                    "relative group py-2 transition-all hover:text-[#2563EB]",
+                    activeSection === link.section ? "text-zinc-900 font-bold" : ""
                   )}
                 >
                   {link.label}
                   <span className={cn(
-                    "absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-rose-600 to-orange-400 rounded-full transition-all duration-300",
+                    "absolute bottom-0 left-0 h-0.5 bg-[#2563EB] rounded-full transition-all duration-300",
                     activeSection === link.section ? "w-full" : "w-0 group-hover:w-full"
                   )} />
                 </Link>
@@ -239,15 +238,15 @@ export function Navbar() {
 
 
 
-               {/* Cart Button */}
+              {/* Cart Button */}
               <button
                 onClick={() => setIsCartOpen(true)}
-                className="relative p-2 text-zinc-400 hover:text-rose-400 transition-all duration-300 hover:scale-110 hover:-translate-y-0.5 active:scale-95 shrink-0"
+                className="relative p-2 text-zinc-500 hover:text-[#2563EB] transition-all duration-300 hover:scale-110 hover:-translate-y-0.5 active:scale-95 shrink-0"
                 style={{ pointerEvents: "auto" }}
               >
-                <ShoppingCart className="w-6 h-6 drop-shadow-lg" />
+                <ShoppingCart className="w-6 h-6 drop-shadow-sm border border-zinc-200/60" />
                 {cartCount > 0 && (
-                  <span className="absolute top-0 right-0 w-4 h-4 bg-red-500 text-white text-[10px] font-bold flex items-center justify-center rounded-full border-2 border-[#0a0a0f] shadow-lg animate-in zoom-in">
+                  <span className="absolute top-0 right-0 w-4 h-4 bg-red-500 text-white text-[10px] font-bold flex items-center justify-center rounded-full border-2 border-[#0a0a0f] shadow-sm border border-zinc-200/60 animate-in zoom-in">
                     {cartCount}
                   </span>
                 )}
@@ -256,12 +255,12 @@ export function Navbar() {
               {/* Favorites (Wishlist) Button - Desktop Only */}
               <button
                 onClick={() => window.dispatchEvent(new Event("wishlist-open"))}
-                className="hidden md:block relative p-2 text-zinc-400 hover:text-rose-400 transition-all duration-300 hover:scale-110 hover:-translate-y-0.5 active:scale-95 shrink-0 cursor-pointer"
+                className="hidden md:block relative p-2 text-zinc-500 hover:text-[#2563EB] transition-all duration-300 hover:scale-110 hover:-translate-y-0.5 active:scale-95 shrink-0 cursor-pointer"
                 style={{ pointerEvents: "auto" }}
               >
-                <Heart className="w-6 h-6 drop-shadow-lg" />
+                <Heart className="w-6 h-6 drop-shadow-sm border border-zinc-200/60" />
                 {wishlistCount > 0 && (
-                  <span className="absolute top-0 right-0 w-4 h-4 bg-red-500 text-white text-[10px] font-bold flex items-center justify-center rounded-full border-2 border-[#0a0a0f] shadow-lg animate-in zoom-in">
+                  <span className="absolute top-0 right-0 w-4 h-4 bg-red-500 text-white text-[10px] font-bold flex items-center justify-center rounded-full border-2 border-[#0a0a0f] shadow-sm border border-zinc-200/60 animate-in zoom-in">
                     {wishlistCount}
                   </span>
                 )}
@@ -273,14 +272,14 @@ export function Navbar() {
               {user ? (
                 <Link
                   href="/dashboard"
-                  className="md:hidden font-cairo text-[11px] xs:text-xs font-bold text-[#D6004B] hover:text-[#ff0055] transition-colors bg-[#D6004B]/5 hover:bg-[#D6004B]/10 px-2.5 py-1.5 rounded-xl shrink-0 cursor-pointer"
+                  className="md:hidden font-sans text-[11px] xs:text-xs font-bold text-[#2563EB] hover:text-[#1D4ED8] transition-colors bg-[#2563EB]/5 hover:bg-[#2563EB]/10 px-2.5 py-1.5 rounded-2xl shrink-0 cursor-pointer"
                 >
                   لوحة التحكم
                 </Link>
               ) : (
                 <Link
                   href="/login"
-                  className="md:hidden font-cairo text-[11px] xs:text-xs font-bold text-white hover:text-white transition-colors bg-[#D6004B] hover:bg-[#b0003d] px-2.5 py-1.5 rounded-xl shrink-0 cursor-pointer"
+                  className="md:hidden font-sans text-[11px] xs:text-xs font-bold text-white hover:text-white transition-colors bg-[#2563EB] hover:bg-[#1D4ED8] px-2.5 py-1.5 rounded-2xl shrink-0 cursor-pointer"
                 >
                   تسجيل الدخول
                 </Link>
@@ -296,42 +295,41 @@ export function Navbar() {
                         src={profileImageUrl} 
                         alt={userName}
                         onError={() => setImgError(true)}
-                        className="w-8 h-8 rounded-full object-cover border border-rose-500/30 shadow-[0_0_10px_rgba(214,0,75,0.25)] hover:scale-105 transition-transform duration-300"
+                        className="w-8 h-8 rounded-full object-cover border border-zinc-200/60 shadow-[0_0_10px_rgba(29, 78, 216,0.25)] hover:scale-105 transition-transform duration-300"
                       />
                     </div>
                   ) : (
-                    <div className="flex flex-col text-right font-cairo select-none shrink-0">
+                    <div className="flex flex-col text-right font-sans select-none shrink-0">
                       <div className="flex items-center gap-1.5 justify-end">
-                        <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[9px] font-bold px-1.5 py-0.5 rounded-md flex items-center gap-1">
+                        <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[9px] font-bold px-1.5 py-0.5 rounded-xl flex items-center gap-1">
                           <span className="w-1 h-1 rounded-full bg-emerald-400 animate-pulse" />
                           مستخدم نشط
                         </span>
-                        <span className="text-xs font-bold text-white leading-tight">{userName}</span>
+                        <span className="text-xs font-bold text-zinc-900 leading-tight">{userName}</span>
                       </div>
                       <span className="text-[9px] text-zinc-500 leading-none mt-0.5" dir="ltr">{user.email}</span>
                     </div>
                   )}
 
-                  <span className="text-white/10 text-xs select-none">|</span>
+                  <span className="text-zinc-900/10 text-xs select-none">|</span>
 
                   {/* Logout link */}
                   <button
                     onClick={handleLogout}
-                    className="font-cairo text-xs font-bold text-zinc-400 hover:text-red-400 transition-colors cursor-pointer"
+                    className="font-sans text-xs font-bold text-zinc-500 hover:text-red-400 transition-colors cursor-pointer"
                   >
                     تسجيل الخروج
                   </button>
 
-                  <span className="text-white/10 text-xs select-none">|</span>
+                  <span className="text-zinc-900/10 text-xs select-none">|</span>
 
                   {/* Dashboard link */}
                   <Link
                     href="/dashboard"
-                    className="relative group overflow-hidden inline-flex items-center gap-2 bg-[#D6004B] hover:bg-[#b0003d] text-white font-cairo text-xs font-bold px-4 py-2 rounded-xl transition-all shadow-[0_0_15px_rgba(214,0,75,0.2)] shrink-0"
+                    className="relative group inline-flex items-center gap-2 bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-sans text-xs font-bold px-4 py-2 rounded-2xl transition-all shadow-none shrink-0"
                   >
-                    <span className="relative z-10">لوحة التحكم</span>
-                    <ChevronLeft className="w-3.5 h-3.5 relative z-10 group-hover:-translate-x-0.5 transition-transform" />
-                    <div className="absolute inset-0 bg-gradient-to-r from-rose-600 to-orange-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+                    <span>لوحة التحكم</span>
+                    <ChevronLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
                   </Link>
                 </div>
               ) : (
@@ -339,7 +337,7 @@ export function Navbar() {
                   {/* Login Link */}
                   <Link
                     href="/login"
-                    className="font-cairo text-xs font-bold text-zinc-300 hover:text-rose-500 transition-colors"
+                    className="font-sans text-xs font-bold text-zinc-700 hover:text-[#2563EB] transition-colors"
                   >
                     تسجيل الدخول
                   </Link>
@@ -347,11 +345,10 @@ export function Navbar() {
                   {/* Signup CTA Button */}
                   <Link
                     href="/signup"
-                    className="relative group overflow-hidden inline-flex items-center gap-2 bg-[#D6004B] hover:bg-[#b0003d] text-white font-cairo text-xs font-bold px-4 py-2.5 rounded-xl transition-all shadow-[0_0_15px_rgba(214,0,75,0.25)] shrink-0"
+                    className="relative group inline-flex items-center gap-2 bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-sans text-xs font-bold px-4 py-2.5 rounded-2xl transition-all shadow-[0_0_15px_rgba(29, 78, 216,0.25)] shrink-0"
                   >
-                    <span className="relative z-10">إنشاء حساب</span>
-                    <ChevronLeft className="w-3.5 h-3.5 relative z-10 group-hover:-translate-x-0.5 transition-transform" />
-                    <div className="absolute inset-0 bg-gradient-to-r from-rose-600 to-orange-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+                    <span>إنشاء حساب</span>
+                    <ChevronLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
                   </Link>
                 </div>
               )}
@@ -360,15 +357,15 @@ export function Navbar() {
               <button
                 onClick={() => setMobileOpen(!mobileOpen)}
                 className={cn(
-                  "md:hidden p-2 rounded-xl transition-all duration-300 shrink-0",
+                  "md:hidden p-2 rounded-2xl transition-all duration-300 shrink-0",
                   scrolled
-                    ? "hover:bg-white/10 text-white"
-                    : "bg-white/5 backdrop-blur-md text-white"
+                    ? "hover:bg-zinc-100/80 text-zinc-900"
+                    : "bg-zinc-100/40 backdrop-blur-md text-zinc-900"
                 )}
                 aria-label="فتح القائمة"
                 style={{ pointerEvents: "auto" }}
               >
-                {mobileOpen ? <X className="w-6 h-6 text-white" /> : <Menu className="w-6 h-6 text-white" />}
+                {mobileOpen ? <X className="w-6 h-6 text-zinc-900" /> : <Menu className="w-6 h-6 text-zinc-900" />}
               </button>
 
             </div>
@@ -387,26 +384,26 @@ export function Navbar() {
               className="absolute top-full left-0 w-full mt-2 md:hidden px-4"
               style={{ pointerEvents: "auto" }}
             >
-              <div className="p-4 rounded-2xl bg-[#0a0a0f]/95 backdrop-blur-xl border border-white/10 shadow-[0_20px_40px_rgba(0,0,0,0.5)]">
+              <div className="p-4 rounded-2xl bg-slate-50/95 backdrop-blur-xl border border-zinc-200 shadow-[0_20px_40px_rgba(0,0,0,0.5)]">
                 <div className="flex flex-col gap-1">
                   {/* Top Profile Card in Mobile Menu */}
                   {user ? (
-                    <div className="p-4 mb-3 rounded-2xl bg-white/[0.02] border border-white/5 relative overflow-hidden group select-none">
-                      <div className="absolute inset-0 bg-gradient-to-tr from-rose-600/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <div className="p-4 mb-3 rounded-2xl bg-zinc-50/70 border border-zinc-200/60 relative overflow-hidden group select-none">
+                      <div className="absolute inset-0 bg-gradient-to-tr from-brand-600/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                       <div className="flex items-center gap-3.5 relative z-10 text-right">
                         {profileImageUrl && !imgError && (
                           <img
                             src={profileImageUrl}
                             alt={userName}
                             onError={() => setImgError(true)}
-                            className="w-12 h-12 rounded-xl object-cover border border-rose-500/30 shadow-md shrink-0"
+                            className="w-12 h-12 rounded-2xl object-cover border border-zinc-200/60 shadow-md shrink-0"
                           />
                         )}
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-alexandria font-bold text-white truncate leading-tight mb-1.5">{userName}</p>
+                          <p className="text-sm font-sans font-bold text-zinc-900 truncate leading-tight mb-1.5">{userName}</p>
                           <p className="text-[10px] text-zinc-500 truncate leading-none mb-2" dir="ltr">{user.email}</p>
                           <div className="flex justify-end">
-                            <span className="inline-flex items-center gap-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[9px] font-bold px-2 py-0.5 rounded-md">
+                            <span className="inline-flex items-center gap-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[9px] font-bold px-2 py-0.5 rounded-xl">
                               <span className="w-1 h-1 rounded-full bg-emerald-400 animate-pulse" />
                               مستخدم نشط
                             </span>
@@ -415,13 +412,13 @@ export function Navbar() {
                       </div>
                     </div>
                   ) : (
-                    <div className="p-4 mb-3 rounded-2xl bg-white/[0.02] border border-white/5 relative overflow-hidden flex items-center gap-3.5 text-right select-none">
-                      <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-zinc-400 shrink-0">
+                    <div className="p-4 mb-3 rounded-2xl bg-zinc-50/70 border border-zinc-200/60 relative overflow-hidden flex items-center gap-3.5 text-right select-none">
+                      <div className="w-10 h-10 rounded-full bg-zinc-100/40 border border-zinc-200 flex items-center justify-center text-zinc-500 shrink-0">
                         <User className="w-5 h-5" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs font-alexandria font-bold text-white leading-tight mb-1">مرحباً بك في جو سكول</p>
-                        <p className="text-[10px] text-zinc-400 font-cairo">سجل دخولك للاستفادة الكاملة</p>
+                        <p className="text-xs font-sans font-bold text-zinc-900 leading-tight mb-1">مرحباً بك في جو سكول</p>
+                        <p className="text-[10px] text-zinc-500 font-alexandria">سجل دخولك للاستفادة الكاملة</p>
                       </div>
                     </div>
                   )}
@@ -431,12 +428,12 @@ export function Navbar() {
                     href="/"
                     onClick={handleHomeClick}
                     className={cn(
-                      "p-3 rounded-xl hover:bg-white/5 font-cairo text-zinc-300 hover:text-white transition-all flex items-center justify-between group",
-                      isHomePage && activeSection === "" ? "text-white bg-white/5" : ""
+                      "p-3 rounded-2xl hover:bg-zinc-100/40 font-sans text-zinc-700 hover:text-zinc-900 transition-all flex items-center justify-between group",
+                      isHomePage && activeSection === "" ? "text-zinc-900 bg-zinc-100/40" : ""
                     )}
                   >
                     <span className="flex items-center gap-2">
-                      <Home className="w-4 h-4 text-rose-500" />
+                      <Home className="w-4 h-4 text-yellow-500" />
                       الصفحة الرئيسية
                     </span>
                     <ChevronLeft className="w-4 h-4 opacity-0 group-hover:opacity-100 group-hover:-translate-x-1 transition-all" />
@@ -446,12 +443,12 @@ export function Navbar() {
                     href={isHomePage ? "#courses" : "/courses"}
                     onClick={(e) => handleNavClick(e, isHomePage ? "#courses" : "/courses")}
                     className={cn(
-                      "p-3 rounded-xl hover:bg-white/5 font-cairo text-zinc-300 hover:text-white transition-all flex items-center justify-between group",
-                      (pathname.startsWith("/courses") || (isHomePage && activeSection === "courses")) ? "text-white bg-white/5" : ""
+                      "p-3 rounded-2xl hover:bg-zinc-100/40 font-sans text-zinc-700 hover:text-zinc-900 transition-all flex items-center justify-between group",
+                      (pathname.startsWith("/courses") || (isHomePage && activeSection === "courses")) ? "text-zinc-900 bg-zinc-100/40" : ""
                     )}
                   >
                     <span className="flex items-center gap-2">
-                      <BookOpen className="w-4 h-4 text-rose-500" />
+                      <BookOpen className="w-4 h-4 text-yellow-500" />
                       الدورات التعليمية
                     </span>
                     <ChevronLeft className="w-4 h-4 opacity-0 group-hover:opacity-100 group-hover:-translate-x-1 transition-all" />
@@ -465,12 +462,12 @@ export function Navbar() {
                         href={link.href}
                         onClick={(e) => handleNavClick(e, link.href.startsWith("/#") ? `#${link.section}` : link.href)}
                         className={cn(
-                          "p-3 rounded-xl hover:bg-white/5 font-cairo text-zinc-300 hover:text-white transition-all flex items-center justify-between group",
-                          activeSection === link.section ? "text-white bg-white/5" : ""
+                          "p-3 rounded-2xl hover:bg-zinc-100/40 font-sans text-zinc-700 hover:text-zinc-900 transition-all flex items-center justify-between group",
+                          activeSection === link.section ? "text-zinc-900 bg-zinc-100/40" : ""
                         )}
                       >
                         <span className="flex items-center gap-2">
-                          <Icon className="w-4 h-4 text-rose-500" />
+                          <Icon className="w-4 h-4 text-yellow-500" />
                           {link.label}
                         </span>
                         <ChevronLeft className="w-4 h-4 opacity-0 group-hover:opacity-100 group-hover:-translate-x-1 transition-all" />
@@ -484,15 +481,15 @@ export function Navbar() {
                       setMobileOpen(false);
                       window.dispatchEvent(new Event("wishlist-open"));
                     }}
-                    className="p-3 rounded-xl hover:bg-white/5 font-cairo text-zinc-300 hover:text-white transition-all flex items-center justify-between group w-full text-right cursor-pointer"
+                    className="p-3 rounded-2xl hover:bg-zinc-100/40 font-sans text-zinc-700 hover:text-zinc-900 transition-all flex items-center justify-between group w-full text-right cursor-pointer"
                   >
                     <span className="flex items-center gap-2">
-                      <Heart className="w-4 h-4 text-rose-500 fill-rose-500/20" />
+                      <Heart className="w-4 h-4 text-yellow-500 fill-brand-500/20" />
                       المفضلة
                     </span>
                     <div className="flex items-center gap-2">
                       {wishlistCount > 0 && (
-                        <span className="bg-[#D6004B] text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full">
+                        <span className="bg-[#1D4ED8] text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full">
                           {wishlistCount}
                         </span>
                       )}
@@ -500,26 +497,18 @@ export function Navbar() {
                     </div>
                   </button>
 
-                  <Link
-                    href={isHomePage ? "#products" : "/#products"}
-                    onClick={(e) => handleNavClick(e, "#products")}
-                    className="w-full mt-2 bg-[#D6004B] hover:bg-[#b0003d] text-white font-cairo font-bold rounded-xl py-3 flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(214,0,75,0.3)] transition-all"
-                  >
-                    تصفح المنتجات الرقمية
-                  </Link>
-
                   {/* Integrated Auth Drawer Actions for Mobile */}
-                  <div className="border-t border-white/5 my-2 pt-2 flex flex-col gap-1">
+                  <div className="border-t border-zinc-200/60 my-2 pt-2 flex flex-col gap-1">
                     {user ? (
                       <>
                         {/* Mobile Dashboard */}
                         <Link
                           href="/dashboard"
                           onClick={() => setMobileOpen(false)}
-                          className="p-3 rounded-xl hover:bg-white/5 font-cairo text-zinc-300 hover:text-white transition-all flex items-center justify-between group"
+                          className="p-3 rounded-2xl hover:bg-zinc-100/40 font-sans text-zinc-700 hover:text-zinc-900 transition-all flex items-center justify-between group"
                         >
                           <span className="flex items-center gap-2.5">
-                            <User className="w-4 h-4 text-rose-500" />
+                            <User className="w-4 h-4 text-yellow-500" />
                             لوحة التحكم الخاصة بي
                           </span>
                           <ChevronLeft className="w-4 h-4 opacity-0 group-hover:opacity-100 group-hover:-translate-x-1 transition-all" />
@@ -528,7 +517,7 @@ export function Navbar() {
                         {/* Mobile Logout */}
                         <button
                           onClick={handleLogout}
-                          className="p-3 rounded-xl hover:bg-red-500/10 font-cairo text-red-400 hover:text-red-300 transition-all flex items-center gap-2.5 text-right w-full cursor-pointer"
+                          className="p-3 rounded-2xl hover:bg-red-500/10 font-sans text-red-400 hover:text-red-300 transition-all flex items-center gap-2.5 text-right w-full cursor-pointer"
                         >
                           <LogOut className="w-4 h-4 text-red-500" />
                           <span>تسجيل الخروج</span>
@@ -540,10 +529,10 @@ export function Navbar() {
                         <Link
                           href="/login"
                           onClick={() => setMobileOpen(false)}
-                          className="p-3 rounded-xl hover:bg-white/5 font-cairo text-zinc-300 hover:text-white transition-all flex items-center justify-between group"
+                          className="p-3 rounded-2xl hover:bg-zinc-100/40 font-sans text-zinc-700 hover:text-zinc-900 transition-all flex items-center justify-between group"
                         >
                           <span className="flex items-center gap-2.5">
-                            <LogIn className="w-4 h-4 text-rose-500" />
+                            <LogIn className="w-4 h-4 text-yellow-500" />
                             تسجيل الدخول للمنصة
                           </span>
                           <ChevronLeft className="w-4 h-4 opacity-0 group-hover:opacity-100 group-hover:-translate-x-1 transition-all" />
@@ -553,7 +542,7 @@ export function Navbar() {
                         <Link
                           href="/signup"
                           onClick={() => setMobileOpen(false)}
-                          className="w-full mt-1 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-cairo font-bold rounded-xl py-3 flex items-center justify-center gap-2 transition-all text-center"
+                          className="w-full mt-1 bg-zinc-100/40 hover:bg-zinc-100/80 border border-zinc-200 text-zinc-900 font-sans font-bold rounded-2xl py-3 flex items-center justify-center gap-2 transition-all text-center"
                         >
                           <span>إنشاء حساب جديد</span>
                         </Link>

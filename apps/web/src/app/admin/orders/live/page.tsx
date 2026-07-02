@@ -171,6 +171,9 @@ export default function LiveOrdersFeed() {
   const [statusFilter, setStatusFilter] = useState<"all" | "completed" | "incomplete">("all");
   const [orderEvents, setOrderEvents] = useState<Record<string, string>>({});
 
+  // Analytics reset date — so Live Orders also zeroes after Reset Statistics
+  const [resetDate, setResetDate] = useState<string>("");
+
   const playSuccessChime = () => {
     if (!soundEnabled) return;
     try {
@@ -196,7 +199,15 @@ export default function LiveOrdersFeed() {
   };
 
   useEffect(() => {
-    loadData();
+    // Fetch reset date first, then load orders filtered by it
+    fetch("/api/admin/settings")
+      .then(r => r.json())
+      .then(settings => {
+        const rd = settings?.analyticsResetDate || "";
+        setResetDate(rd);
+        loadData(rd);
+      })
+      .catch(() => loadData(""));
 
     // Subscribe to new orders insert events via supabase realtime
     const channel = supabase
@@ -269,15 +280,21 @@ export default function LiveOrdersFeed() {
     fetchOriginalPrice();
   }, [selectedOrder]);
 
-  async function loadData() {
+  async function loadData(rd: string = resetDate) {
     setLoading(true);
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from("orders")
         .select("*")
         .order("created_at", { ascending: false })
-        .limit(40);
+        .limit(200);
 
+      // Apply reset date filter so only post-reset orders are shown
+      if (rd) {
+        query = query.gte("created_at", rd);
+      }
+
+      const { data, error } = await query;
       if (data) {
         setOrders(data as Order[]);
         
@@ -408,16 +425,16 @@ export default function LiveOrdersFeed() {
       <style>{`
         .live-orders-feed-container, 
         .live-orders-feed-container *,
-        .font-cairo,
+        .font-sans,
         .font-cairo * {
           font-family: 'Cairo', 'Alexandria', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
         }
       `}</style>
       
       {/* Header */}
-      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6 pb-6 border-b border-white/5">
+      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6 pb-6 border-b border-zinc-200/60">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-white flex items-center gap-3">
+          <h1 className="text-3xl font-extrabold tracking-tight text-zinc-900 flex items-center gap-3">
             Live Sales Feed
             <Flame className="w-8 h-8 text-emerald-400" />
           </h1>
@@ -429,16 +446,16 @@ export default function LiveOrdersFeed() {
         <div className="flex items-center gap-3">
           <button
             onClick={() => setSoundEnabled(!soundEnabled)}
-            className="w-11 h-11 rounded-xl bg-white/5 border border-white/5 flex items-center justify-center text-zinc-400 hover:text-white transition-all cursor-pointer"
+            className="w-11 h-11 rounded-2xl bg-zinc-100/40 border border-zinc-200/60 flex items-center justify-center text-zinc-500 hover:text-zinc-900 transition-all cursor-pointer"
             title={soundEnabled ? "Mute Sound" : "Enable Sound"}
           >
-            {soundEnabled ? <Volume2 className="w-5 h-5 text-rose-500" /> : <VolumeX className="w-5 h-5" />}
+            {soundEnabled ? <Volume2 className="w-5 h-5 text-yellow-500" /> : <VolumeX className="w-5 h-5" />}
           </button>
 
           <button
-            onClick={loadData}
+            onClick={() => loadData()}
             disabled={loading}
-            className="flex items-center gap-2 px-5 h-11 rounded-xl text-xs font-bold transition-all bg-rose-600/10 border border-rose-500/20 hover:bg-rose-600 text-rose-400 hover:text-white cursor-pointer"
+            className="flex items-center gap-2 px-5 h-11 rounded-2xl text-xs font-bold transition-all bg-brand-600/10 border border-zinc-200/60 hover:bg-brand-600 text-yellow-500 hover:text-white cursor-pointer"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
             Refresh Feed
@@ -447,7 +464,7 @@ export default function LiveOrdersFeed() {
       </div>
 
       {/* Filter Tabs */}
-      <div className="flex flex-wrap gap-2 p-1.5 bg-[#09090b]/40 border border-white/5 rounded-2xl w-fit">
+      <div className="flex flex-wrap gap-2 p-1.5 bg-slate-50/40 border border-zinc-200/60 rounded-2xl w-fit">
         {[
           { id: "all", label: "All Orders", count: orders.length },
           { id: "completed", label: "Completed Orders", count: orders.filter(o => o.status === "completed").length },
@@ -456,15 +473,15 @@ export default function LiveOrdersFeed() {
           <button
             key={tab.id}
             onClick={() => setStatusFilter(tab.id as any)}
-            className={`flex items-center gap-2.5 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            className={`flex items-center gap-2.5 px-4 py-2 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
               statusFilter === tab.id
-                ? "bg-rose-600 text-white shadow-lg shadow-rose-600/10"
-                : "text-zinc-400 hover:text-white hover:bg-white/5"
+                ? "bg-brand-600 text-white shadow-sm border border-zinc-200/60 shadow-brand-600/10"
+                : "text-zinc-500 hover:text-white hover:bg-zinc-100/40"
             }`}
           >
             <span>{tab.label}</span>
-            <span className={`text-[10px] font-mono px-2 py-0.5 rounded-md ${
-              statusFilter === tab.id ? "bg-white/20 text-white" : "bg-white/5 text-zinc-500"
+            <span className={`text-[10px] font-mono px-2 py-0.5 rounded-xl ${
+              statusFilter === tab.id ? "bg-zinc-200/80 text-zinc-900" : "bg-zinc-100/40 text-zinc-500"
             }`}>
               {tab.count}
             </span>
@@ -475,11 +492,11 @@ export default function LiveOrdersFeed() {
       {/* Live Feed List */}
       <div className="max-w-4xl mx-auto space-y-4">
         {loading ? (
-          <div className="w-full h-80 flex items-center justify-center bg-[#09090b]/40 rounded-3xl border border-white/5 animate-pulse">
-            <Loader2 className="w-8 h-8 text-rose-500 animate-spin" />
+          <div className="w-full h-80 flex items-center justify-center bg-slate-50/40 rounded-3xl border border-zinc-200/60 animate-pulse">
+            <Loader2 className="w-8 h-8 text-yellow-500 animate-spin" />
           </div>
         ) : filteredOrders.length === 0 ? (
-          <div className="py-20 text-center text-zinc-500 text-sm bg-[#09090b]/20 rounded-3xl border border-white/5">
+          <div className="py-20 text-center text-zinc-500 text-sm bg-slate-50/20 rounded-3xl border border-zinc-200/60">
             No orders match this filter currently.
           </div>
         ) : (
@@ -498,33 +515,33 @@ export default function LiveOrdersFeed() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.3 }}
-                    className="p-6 rounded-3xl bg-[#09090b]/60 border border-white/5 hover:border-white/10 transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-2xl"
+                    className="p-6 rounded-3xl bg-slate-50/60 border border-zinc-200/60 hover:border-zinc-200 transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm border border-zinc-200/60"
                   >
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-rose-600/10 border border-rose-500/20 shrink-0">
-                        <ShoppingCart className="w-5 h-5 text-rose-500" />
+                      <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-brand-600/10 border border-zinc-200/60 shrink-0">
+                        <ShoppingCart className="w-5 h-5 text-yellow-500" />
                       </div>
                       <div className="min-w-0 text-left">
                         <h3 
                           onClick={() => setSelectedOrder(order)}
-                          className="text-sm font-bold text-white truncate cursor-pointer hover:text-rose-500 hover:underline transition-colors inline-block"
+                          className="text-sm font-bold text-zinc-900 truncate cursor-pointer hover:text-yellow-500 hover:underline transition-colors inline-block"
                         >
                           {order.customer_name || "Anonymous Buyer"}
                         </h3>
-                        <p className="text-xs text-zinc-400 mt-1 truncate">{order.product_title}</p>
+                        <p className="text-xs text-zinc-500 mt-1 truncate">{order.product_title}</p>
                         <p className="text-[10px] text-zinc-500 font-mono mt-0.5">{order.customer_email}</p>
                         
                         {/* Last Stage Badge */}
-                        <div className="mt-2.5 flex items-center gap-1.5 bg-white/5 border border-white/5 px-2.5 py-1 rounded-xl w-fit">
-                          <span className="text-[#D6004B] font-bold text-[9px] uppercase tracking-wider">Last Stage:</span>
-                          <span className="text-zinc-300 text-xs font-semibold">{getStageDescription(order, orderEvents[order.id])}</span>
+                        <div className="mt-2.5 flex items-center gap-1.5 bg-zinc-100/40 border border-zinc-200/60 px-2.5 py-1 rounded-2xl w-fit">
+                          <span className="text-[#1D4ED8] font-bold text-[9px] uppercase tracking-wider">Last Stage:</span>
+                          <span className="text-zinc-700 text-xs font-semibold">{getStageDescription(order, orderEvents[order.id])}</span>
                         </div>
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between md:justify-end gap-6 border-t md:border-t-0 pt-4 md:pt-0 border-white/5">
+                    <div className="flex items-center justify-between md:justify-end gap-6 border-t md:border-t-0 pt-4 md:pt-0 border-zinc-200/60">
                       <div className="text-left md:text-right">
-                        <p className="text-sm font-bold text-rose-500">{formatPrice(order.amount, (order.currency as any) || 'EGP').replace("EGP", "L.E")}</p>
+                        <p className="text-sm font-bold text-yellow-500">{formatPrice(order.amount, (order.currency as any) || 'EGP').replace("EGP", "L.E")}</p>
                         <p className="text-[10px] text-zinc-500 mt-0.5">{formatDate(order.created_at)}</p>
                       </div>
                       <div className="flex items-center gap-2">
@@ -559,13 +576,13 @@ export default function LiveOrdersFeed() {
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.96, opacity: 0, y: 15 }}
               transition={{ type: "spring", duration: 0.4 }}
-              className="w-full max-w-lg bg-white rounded-[32px] overflow-hidden shadow-[0_32px_64px_-12px_rgba(0,0,0,0.14)] border border-zinc-100 p-8 relative text-left text-zinc-900 font-cairo"
+              className="w-full max-w-lg bg-white rounded-[32px] overflow-hidden shadow-[0_32px_64px_-12px_rgba(0,0,0,0.14)] border border-zinc-100 p-8 relative text-left text-zinc-900 font-sans"
               dir="ltr"
             >
               {/* Close Button */}
               <button
                 onClick={() => setSelectedOrder(null)}
-                className="absolute top-6 right-6 w-10 h-10 rounded-2xl bg-zinc-50 hover:bg-zinc-100 border border-zinc-100 flex items-center justify-center text-zinc-400 hover:text-zinc-700 transition-all active:scale-95 cursor-pointer shadow-sm z-10"
+                className="absolute top-6 right-6 w-10 h-10 rounded-2xl bg-zinc-50 hover:bg-zinc-100 border border-zinc-100 flex items-center justify-center text-zinc-500 hover:text-zinc-700 transition-all active:scale-95 cursor-pointer shadow-sm z-10"
                 title="Close"
               >
                 <X className="w-5 h-5" />
@@ -574,8 +591,8 @@ export default function LiveOrdersFeed() {
               <div className="space-y-6 mt-4">
                 {/* Header: Product & Status */}
                 <div className="space-y-3">
-                  <div className="inline-flex items-center gap-1.5 bg-rose-50 text-rose-600 px-3 py-1 rounded-full text-[10px] font-extrabold border border-rose-100">
-                    <Sparkles className="w-3.5 h-3.5 text-rose-500" />
+                  <div className="inline-flex items-center gap-1.5 bg-brand-50 text-brand-600 px-3 py-1 rounded-full text-[10px] font-extrabold border border-brand-100">
+                    <Sparkles className="w-3.5 h-3.5 text-yellow-500" />
                     <span>Order & Collection Details</span>
                   </div>
                   
@@ -584,8 +601,8 @@ export default function LiveOrdersFeed() {
                   </h2>
                   
                   <div className="flex flex-wrap items-center gap-3 text-xs text-zinc-500">
-                    <div className="flex items-center gap-1.5 bg-zinc-50 px-2.5 py-1 rounded-lg border border-zinc-100">
-                      <Calendar className="w-3.5 h-3.5 text-zinc-400" />
+                    <div className="flex items-center gap-1.5 bg-zinc-50 px-2.5 py-1 rounded-2xl border border-zinc-100">
+                      <Calendar className="w-3.5 h-3.5 text-zinc-500" />
                       <span className="font-semibold">{formatDate(selectedOrder.created_at)}</span>
                     </div>
 
@@ -594,7 +611,7 @@ export default function LiveOrdersFeed() {
                         ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
                         : selectedOrder.status === 'pending'
                           ? 'bg-amber-50 text-amber-600 border-amber-100'
-                          : 'bg-rose-50 text-rose-600 border-rose-100'
+                          : 'bg-brand-50 text-brand-600 border-brand-100'
                     }`}>
                       {selectedOrder.status === 'completed' && <Check className="w-3.5 h-3.5" />}
                       {selectedOrder.status === 'pending' && <Clock className="w-3.5 h-3.5" />}
@@ -606,11 +623,11 @@ export default function LiveOrdersFeed() {
 
                 {/* Card 1: Last Stage Reached */}
                 <div className="bg-zinc-50/50 border border-zinc-100 rounded-2xl p-4 space-y-2">
-                  <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">Current Order Telemetry</span>
+                  <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider block">Current Order Telemetry</span>
                   {(() => {
                     const stageStyles = getStageStyles(selectedOrder, orderEvents[selectedOrder.id]);
                     return (
-                      <div className={`flex items-center gap-3 p-3.5 rounded-xl ${stageStyles.bg} transition-all`}>
+                      <div className={`flex items-center gap-3 p-3.5 rounded-2xl ${stageStyles.bg} transition-all`}>
                         <div className={`w-3 h-3 rounded-full shrink-0 ${stageStyles.dot}`} />
                         <p className={`text-sm leading-relaxed ${stageStyles.text}`}>{stageStyles.desc}</p>
                       </div>
@@ -623,7 +640,7 @@ export default function LiveOrdersFeed() {
                   {/* Purchase Price Header */}
                   <div className="p-4 bg-zinc-50/80 border-b border-zinc-100 flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <CreditCard className="w-4 h-4 text-rose-500" />
+                      <CreditCard className="w-4 h-4 text-yellow-500" />
                       <span className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Pricing & Settlement Breakdown</span>
                     </div>
                   </div>
@@ -631,13 +648,13 @@ export default function LiveOrdersFeed() {
                   <div className="p-4 space-y-4">
                     {/* Price and Discount */}
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-zinc-400">Product Price</span>
+                      <span className="text-xs font-bold text-zinc-500">Product Price</span>
                       <div className="text-right">
                         {hasDiscount ? (
                           <div className="flex flex-col items-end gap-1">
                             <div className="flex items-center gap-2 text-xs">
-                              <span className="text-zinc-400 line-through font-semibold">{formatPrice(originalPriceVal, selectedOrder.currency as any)}</span>
-                              <span className="text-rose-600 font-bold bg-rose-50 px-2 py-0.5 rounded-lg text-[10px] border border-rose-100">{formatPrice(discountVal, selectedOrder.currency as any)} discount</span>
+                              <span className="text-zinc-500 line-through font-semibold">{formatPrice(originalPriceVal, selectedOrder.currency as any)}</span>
+                              <span className="text-brand-600 font-bold bg-brand-50 px-2 py-0.5 rounded-2xl text-[10px] border border-brand-100">{formatPrice(discountVal, selectedOrder.currency as any)} discount</span>
                             </div>
                             <div className="text-2xl font-black text-zinc-900 leading-none mt-1">
                               {formatPrice(netPaidPriceVal, selectedOrder.currency as any)}
@@ -662,7 +679,7 @@ export default function LiveOrdersFeed() {
                         return (
                           <div className="flex justify-between items-center text-zinc-500 font-semibold border-b border-zinc-100 pb-2 mb-2">
                             <span>Payment Method</span>
-                            <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-lg border ${payMethodInfo.color}`}>
+                            <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-2xl border ${payMethodInfo.color}`}>
                               {payMethodInfo.text}
                             </span>
                           </div>
@@ -676,12 +693,12 @@ export default function LiveOrdersFeed() {
                       
                       <div className="flex justify-between items-center text-zinc-500 font-semibold">
                         <span>Payment Gateway Transaction Fee</span>
-                        <span className="font-bold text-amber-600 bg-amber-50/80 border border-amber-100/50 px-2.5 py-0.5 rounded-lg text-[11px]">{formatPrice(gatewayFee, selectedOrder.currency as any)}</span>
+                        <span className="font-bold text-amber-600 bg-amber-50/80 border border-amber-100/50 px-2.5 py-0.5 rounded-2xl text-[11px]">{formatPrice(gatewayFee, selectedOrder.currency as any)}</span>
                       </div>
 
                       <div className="border-t border-zinc-100 pt-3 mt-3 flex justify-between items-center font-bold text-sm">
                         <span className="text-zinc-800">Net Wallet Settlement</span>
-                        <span className="text-[#D6004B] font-black text-base">{formatPrice(netSettled, selectedOrder.currency as any)}</span>
+                        <span className="text-[#1D4ED8] font-black text-base">{formatPrice(netSettled, selectedOrder.currency as any)}</span>
                       </div>
                     </div>
                   </div>
@@ -690,14 +707,14 @@ export default function LiveOrdersFeed() {
                 {/* Card 3: Customer Card & Login info */}
                 <div className="bg-zinc-50/30 border border-zinc-100 rounded-2xl overflow-hidden shadow-sm">
                   <div className="p-4 bg-zinc-50/80 border-b border-zinc-100 flex items-center gap-2">
-                    <User className="w-4 h-4 text-rose-500" />
+                    <User className="w-4 h-4 text-yellow-500" />
                     <span className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Customer Details & Security</span>
                   </div>
 
                   <div className="p-4 space-y-4">
                     {/* Customer Profile Details */}
                     <div className="flex items-center gap-3.5">
-                      <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-rose-500 to-rose-600 text-white font-black text-base flex items-center justify-center shadow-lg shadow-rose-600/15 shrink-0 select-none">
+                      <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-brand-500 to-brand-600 text-zinc-900 font-black text-base flex items-center justify-center shadow-sm border border-zinc-200/60 shadow-brand-600/15 shrink-0 select-none">
                         {selectedOrder.customer_name ? selectedOrder.customer_name.trim().charAt(0) : "C"}
                       </div>
                       <div className="text-right min-w-0 flex-1">
@@ -711,39 +728,39 @@ export default function LiveOrdersFeed() {
                             navigator.clipboard.writeText(selectedOrder.customer_email);
                             toast.success("Email copied successfully!");
                           }}
-                          className="text-zinc-500 hover:text-rose-600 font-mono text-[11px] flex items-center gap-1.5 mt-1 cursor-pointer transition-colors w-fit group"
+                          className="text-zinc-500 hover:text-brand-600 font-mono text-[11px] flex items-center gap-1.5 mt-1 cursor-pointer transition-colors w-fit group"
                           title="Copy Email"
                         >
-                          <Mail className="w-3.5 h-3.5 shrink-0 text-zinc-400 group-hover:text-rose-500" />
+                          <Mail className="w-3.5 h-3.5 shrink-0 text-zinc-500 group-hover:text-yellow-500" />
                           <span className="select-all truncate">{selectedOrder.customer_email}</span>
-                          <Copy className="w-3 h-3 text-zinc-400 group-hover:text-rose-500 shrink-0" />
+                          <Copy className="w-3 h-3 text-zinc-500 group-hover:text-yellow-500 shrink-0" />
                         </button>
                       </div>
                     </div>
 
                     {/* Location Badge */}
-                    <div className="flex items-center gap-1.5 bg-zinc-100/60 border border-zinc-200/20 px-3 py-1.5 rounded-xl text-xs text-zinc-600 font-medium w-fit">
+                    <div className="flex items-center gap-1.5 bg-zinc-100/60 border border-zinc-200/20 px-3 py-1.5 rounded-2xl text-xs text-zinc-600 font-medium w-fit">
                       <span className="text-base select-none">{getFlagEmoji(selectedOrder.country)}</span>
                       <span className="font-bold">{getLocalizedLocation(selectedOrder.country_name || selectedOrder.country, selectedOrder.city)}</span>
                     </div>
 
                     {/* Password Sub-card */}
                     {selectedOrder.checkout_password && (
-                      <div className="bg-rose-50/30 border border-rose-100/30 p-3.5 rounded-xl flex justify-between items-center text-xs mt-2 transition-all hover:bg-rose-50/50">
+                      <div className="bg-brand-50/30 border border-brand-100/30 p-3.5 rounded-2xl flex justify-between items-center text-xs mt-2 transition-all hover:bg-brand-50/50">
                         <div className="flex items-center gap-2 text-zinc-600">
-                          <Lock className="w-4 h-4 text-rose-500" />
+                          <Lock className="w-4 h-4 text-yellow-500" />
                           <span className="font-bold">Account Password:</span>
                         </div>
                         
                         <div className="flex items-center gap-2 font-mono">
-                          <span className="font-bold text-rose-600 text-sm bg-white border border-rose-100/30 px-3 py-1 rounded-lg select-all shadow-sm">
+                          <span className="font-bold text-brand-600 text-sm bg-white border border-brand-100/30 px-3 py-1 rounded-2xl select-all shadow-sm">
                             {showPassword ? selectedOrder.checkout_password : "••••••••"}
                           </span>
                           
                           <button
                             type="button"
                             onClick={() => setShowPassword(!showPassword)}
-                            className="text-zinc-400 hover:text-rose-600 p-1.5 rounded-lg hover:bg-rose-100/40 transition-all cursor-pointer"
+                            className="text-zinc-500 hover:text-brand-600 p-1.5 rounded-2xl hover:bg-brand-100/40 transition-all cursor-pointer"
                             title={showPassword ? "Hide Password" : "Show Password"}
                           >
                             {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -757,7 +774,7 @@ export default function LiveOrdersFeed() {
                                 toast.success("Password copied successfully!");
                               }
                             }}
-                            className="text-zinc-400 hover:text-rose-600 p-1.5 rounded-lg hover:bg-rose-100/40 transition-all cursor-pointer"
+                            className="text-zinc-500 hover:text-brand-600 p-1.5 rounded-2xl hover:bg-brand-100/40 transition-all cursor-pointer"
                             title="Copy Password"
                           >
                             <Copy className="w-4 h-4" />

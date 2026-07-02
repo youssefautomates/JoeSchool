@@ -681,9 +681,9 @@ export default function SecureVideoPlayer({
     <div className="relative w-full h-full">
       {/* Scroll PiP Placeholder Spacer */}
       {isFloating && (
-        <div className="w-full h-full bg-zinc-950/20 border-2 border-dashed border-zinc-800 rounded-3xl flex flex-col items-center justify-center gap-2 p-6 animate-pulse">
-          <Activity className="w-8 h-8 text-[#D6004B]/60" />
-          <p className="text-xs text-zinc-500 font-cairo">المحاضرة تعمل حالياً في المشغل العائم بالأسفل 📺</p>
+        <div className="w-full h-full bg-zinc-950/20 border-2 border-dashed border-zinc-200/60 rounded-3xl flex flex-col items-center justify-center gap-2 p-6 animate-pulse">
+          <Activity className="w-8 h-8 text-[#1D4ED8]/60" />
+          <p className="text-xs text-zinc-500 font-sans">المحاضرة تعمل حالياً في المشغل العائم بالأسفل 📺</p>
         </div>
       )}
 
@@ -691,8 +691,8 @@ export default function SecureVideoPlayer({
         ref={containerRef}
         onTouchStart={handleTouchStart}
         className={isFloating 
-          ? "fixed bottom-6 left-6 w-80 sm:w-96 aspect-video z-50 shadow-2xl rounded-2xl border border-white/10 overflow-hidden bg-[#030303] animate-fade-in group select-none"
-          : "relative w-full h-full rounded-3xl bg-[#030303] overflow-hidden group select-none shadow-2xl border border-white/5"
+          ? "fixed bottom-6 left-6 w-80 sm:w-96 aspect-video z-50 shadow-sm border border-zinc-200/60 rounded-2xl border border-zinc-200 overflow-hidden bg-[#030303] animate-fade-in group select-none"
+          : "relative w-full h-full rounded-3xl bg-[#030303] overflow-hidden group select-none shadow-sm border border-zinc-200/60 border border-zinc-200/60"
         }
       >
         {/* Close Button on Floating Player */}
@@ -702,7 +702,7 @@ export default function SecureVideoPlayer({
               postPlayerMessage("pause");
               setIsFloating(false);
             }}
-            className="absolute top-2 left-2 z-40 p-1.5 bg-black/80 hover:bg-black border border-white/10 text-white rounded-full transition-colors cursor-pointer"
+            className="absolute top-2 left-2 z-40 p-1.5 bg-black/80 hover:bg-black border border-zinc-200 text-zinc-900 rounded-full transition-colors cursor-pointer"
             title="إيقاف مؤقت وإغلاق المشغل"
           >
             <X className="w-3.5 h-3.5" />
@@ -739,18 +739,18 @@ export default function SecureVideoPlayer({
                 className="absolute inset-0 w-full h-full object-cover group-hover/cover:scale-[1.03] transition-transform duration-700 brightness-[0.4]"
               />
             ) : (
-              <div className="absolute inset-0 w-full h-full bg-[#0a0a0f]" />
+              <div className="absolute inset-0 w-full h-full bg-slate-50" />
             )}
             {/* Dark gradient shadow */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/40 z-0" />
             
             {/* Glowing play button */}
             <button 
-              className="relative z-10 w-20 h-20 bg-[#D6004B] hover:bg-[#ff005a] border-2 border-white/20 rounded-full flex items-center justify-center shadow-[0_0_40px_rgba(214,0,75,0.4)] hover:shadow-[0_0_60px_rgba(214,0,75,0.6)] group-hover/cover:scale-110 active:scale-95 transition-all duration-350 cursor-pointer"
+              className="relative z-10 w-20 h-20 bg-[#1D4ED8] hover:bg-[#ff005a] border-2 border-zinc-200 rounded-full flex items-center justify-center shadow-[0_0_40px_rgba(29, 78, 216,0.4)] hover:shadow-[0_0_60px_rgba(29, 78, 216,0.6)] group-hover/cover:scale-110 active:scale-95 transition-all duration-350 cursor-pointer"
             >
-              <PlayCircle className="w-10 h-10 text-white fill-current" />
+              <PlayCircle className="w-10 h-10 text-zinc-900 fill-current" />
             </button>
-            <span className="relative z-10 text-[10px] sm:text-xs font-bold text-zinc-300 font-alexandria mt-4 bg-black/40 backdrop-blur-md px-4 py-2 rounded-xl border border-white/5 group-hover/cover:text-white transition-colors">
+            <span className="relative z-10 text-[10px] sm:text-xs font-bold text-zinc-700 font-sans mt-4 bg-black/40 backdrop-blur-md px-4 py-2 rounded-2xl border border-zinc-200/60 group-hover/cover:text-zinc-900 transition-colors">
               اضغط لبدء تشغيل المحاضرة الفنية الفخمة
             </span>
           </div>
@@ -765,12 +765,12 @@ export default function SecureVideoPlayer({
               exit={{ opacity: 0 }}
               className="absolute inset-0 bg-black/90 backdrop-blur-md z-45 flex flex-col items-center justify-center gap-4 text-center p-6"
             >
-              <div className="w-16 h-16 rounded-full bg-rose-500/10 border border-rose-500/20 text-[#D6004B] flex items-center justify-center shadow-[0_0_30px_rgba(214,0,75,0.2)] animate-pulse">
+              <div className="w-16 h-16 rounded-full bg-brand-500/10 border border-zinc-200/60 text-[#1D4ED8] flex items-center justify-center shadow-[0_0_30px_rgba(29, 78, 216,0.2)] animate-pulse">
                 <Shield className="w-8 h-8" />
               </div>
               <div className="space-y-2 max-w-sm">
-                <h4 className="font-alexandria font-black text-white text-base">تم إيقاف الفيديو لدواعي الأمان 🔒</h4>
-                <p className="text-zinc-400 text-xs font-cairo leading-relaxed">
+                <h4 className="font-sans font-black text-zinc-900 text-base">تم إيقاف الفيديو لدواعي الأمان 🔒</h4>
+                <p className="text-zinc-500 text-xs font-alexandria leading-relaxed">
                   تم تعتيم الفيديو تلقائياً نظراً لعدم نشاط الصفحة أو محاولة تصوير شاشة العرض. يرجى التركيز في المحاضرة للاستمرار.
                 </p>
               </div>
@@ -785,7 +785,7 @@ export default function SecureVideoPlayer({
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="absolute inset-x-0 top-0 bg-rose-600/90 backdrop-blur-md z-40 text-center py-2.5 px-4 flex items-center justify-center gap-2 text-white text-xs font-bold font-cairo"
+              className="absolute inset-x-0 top-0 bg-brand-600/90 backdrop-blur-md z-40 text-center py-2.5 px-4 flex items-center justify-center gap-2 text-white text-xs font-bold font-sans"
             >
               <WifiOff className="w-4 h-4 animate-bounce" />
               <span>لقد انقطع الاتصال بالإنترنت حالياً. سيتم استئناف التشغيل تلقائياً فور استقرار الشبكة.</span>
@@ -802,8 +802,8 @@ export default function SecureVideoPlayer({
               exit={{ opacity: 0, scale: 0.5 }}
               className="absolute inset-0 bg-black/20 pointer-events-none z-30 flex items-center justify-center"
             >
-              <div className="bg-black/80 backdrop-blur-md px-5 py-3 rounded-full flex items-center gap-2 text-white border border-white/10">
-                <span className="text-xs font-alexandria font-black">
+              <div className="bg-black/80 backdrop-blur-md px-5 py-3 rounded-full flex items-center gap-2 text-zinc-900 border border-zinc-200">
+                <span className="text-xs font-sans font-black">
                   {showSeekIndicator.direction === "forward" ? "تقدم +10 ثوانٍ ⏩" : "رجوع -10 ثوانٍ ⏪"}
                 </span>
               </div>
@@ -814,10 +814,10 @@ export default function SecureVideoPlayer({
         {/* 5. Loading Skeleton Overlay */}
         {loading && (
           <div className="absolute inset-0 bg-[#06060a] z-50 flex flex-col items-center justify-center gap-4">
-            <Loader2 className="w-12 h-12 text-[#D6004B] animate-spin" />
+            <Loader2 className="w-12 h-12 text-[#1D4ED8] animate-spin" />
             <div className="text-center space-y-1">
-              <h4 className="font-alexandria font-bold text-white text-sm">تحميل آمن للمحاضرة</h4>
-              <p className="text-zinc-500 text-xs font-cairo">يتم تحضير مشغل البث المؤمن الموفر من جو سكول...</p>
+              <h4 className="font-sans font-bold text-zinc-900 text-sm">تحميل آمن للمحاضرة</h4>
+              <p className="text-zinc-500 text-xs font-alexandria">يتم تحضير مشغل البث المؤمن الموفر من جو سكول...</p>
             </div>
           </div>
         )}
@@ -825,12 +825,12 @@ export default function SecureVideoPlayer({
         {/* 6. Error Display Panel */}
         {error && (
           <div className="absolute inset-0 bg-[#08080c] z-50 flex flex-col items-center justify-center gap-5 p-6 text-center">
-            <div className="w-16 h-16 rounded-2xl bg-rose-950/20 border border-rose-500/20 flex items-center justify-center text-rose-500">
+            <div className="w-16 h-16 rounded-2xl bg-brand-950/20 border border-zinc-200/60 flex items-center justify-center text-yellow-500">
               <Shield className="w-8 h-8" />
             </div>
             <div className="space-y-2 max-w-md">
-              <h4 className="font-alexandria font-bold text-white text-base">بث غير مصرح به أو رابط منتهي</h4>
-              <p className="text-zinc-500 text-xs leading-relaxed font-cairo">
+              <h4 className="font-sans font-bold text-zinc-900 text-base">بث غير مصرح به أو رابط منتهي</h4>
+              <p className="text-zinc-500 text-xs leading-relaxed font-alexandria">
                 {error === "يجب الاشتراك في هذا الكورس أولاً لمشاهدة الفيديو"
                   ? "عذراً، هذا الكورس مغلق حالياً. يرجى الاشتراك للوصول إلى المحاضرة."
                   : "جلسة العرض غير مصرح بها أو منتهية الصلاحية. يرجى التأكد من تسجيل الدخول وإعادة المحاولة."}
@@ -838,7 +838,7 @@ export default function SecureVideoPlayer({
             </div>
             <button 
               onClick={() => initPlayer()}
-              className="px-5 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl text-xs font-bold font-alexandria transition-all active:scale-95"
+              className="px-5 py-2.5 bg-zinc-100/40 hover:bg-zinc-100/80 border border-zinc-200 text-zinc-900 rounded-2xl text-xs font-bold font-sans transition-all active:scale-95"
             >
               إعادة محاولة التحميل
             </button>
@@ -854,54 +854,54 @@ export default function SecureVideoPlayer({
               initial={{ opacity: 0, x: -50 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -50 }}
-              className="absolute left-4 top-14 w-72 bg-[#09090e]/95 border border-white/10 rounded-2xl p-4 z-20 backdrop-blur-xl shadow-2xl space-y-4"
+              className="absolute left-4 top-14 w-72 bg-slate-50/95 border border-zinc-200 rounded-2xl p-4 z-20 backdrop-blur-xl shadow-sm border border-zinc-200/60 space-y-4"
             >
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-1.5 text-white">
-                  <Activity className="w-4 h-4 text-[#D6004B]" />
-                  <span className="font-alexandria font-bold text-xs">إحصائيات التعلم الذكية</span>
+                <div className="flex items-center gap-1.5 text-zinc-900">
+                  <Activity className="w-4 h-4 text-[#1D4ED8]" />
+                  <span className="font-sans font-bold text-xs">إحصائيات التعلم الذكية</span>
                 </div>
                 <button 
                   onClick={() => setShowAnalyticsPanel(false)}
-                  className="p-1 rounded-lg hover:bg-white/5 text-zinc-400 hover:text-white cursor-pointer"
+                  className="p-1 rounded-2xl hover:bg-zinc-100/40 text-zinc-500 hover:text-zinc-900 cursor-pointer"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
               </div>
 
               <div className="grid grid-cols-2 gap-2.5">
-                <div className="bg-white/5 rounded-xl p-2.5 border border-white/5 space-y-1">
-                  <span className="text-[10px] text-zinc-500 font-cairo">وقت المشاهدة الفعلي</span>
-                  <p className="text-xs font-bold text-white font-mono">{formatTime(totalWatchedSeconds)}</p>
+                <div className="bg-zinc-100/40 rounded-2xl p-2.5 border border-zinc-200/60 space-y-1">
+                  <span className="text-[10px] text-zinc-500 font-sans">وقت المشاهدة الفعلي</span>
+                  <p className="text-xs font-bold text-zinc-900 font-mono">{formatTime(totalWatchedSeconds)}</p>
                 </div>
-                <div className="bg-white/5 rounded-xl p-2.5 border border-white/5 space-y-1">
-                  <span className="text-[10px] text-zinc-500 font-cairo">مرات التوقف المؤقت</span>
-                  <p className="text-xs font-bold text-white font-mono">{pauseCount}</p>
+                <div className="bg-zinc-100/40 rounded-2xl p-2.5 border border-zinc-200/60 space-y-1">
+                  <span className="text-[10px] text-zinc-500 font-sans">مرات التوقف المؤقت</span>
+                  <p className="text-xs font-bold text-zinc-900 font-mono">{pauseCount}</p>
                 </div>
               </div>
 
               {/* Progress completion bar */}
               <div className="space-y-1">
                 <div className="flex items-center justify-between text-[10px] font-bold">
-                  <span className="text-zinc-500 font-cairo">معدل الإكمال الفعلي</span>
-                  <span className="text-[#D6004B] font-mono">{completionPercentage}%</span>
+                  <span className="text-zinc-500 font-sans">معدل الإكمال الفعلي</span>
+                  <span className="text-[#1D4ED8] font-mono">{completionPercentage}%</span>
                 </div>
-                <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
-                  <div style={{ width: `${completionPercentage}%` }} className="h-full bg-[#D6004B] rounded-full transition-all duration-500" />
+                <div className="w-full h-1.5 bg-zinc-100/40 rounded-full overflow-hidden">
+                  <div style={{ width: `${completionPercentage}%` }} className="h-full bg-[#1D4ED8] rounded-full transition-all duration-500" />
                 </div>
               </div>
 
               {/* Watch Heatmap Chart */}
               <div className="space-y-1.5">
-                <span className="text-[10px] text-zinc-500 font-bold font-cairo block">مناطق التركيز والتكرار 🔥</span>
-                <div className="flex items-end gap-0.5 h-12 w-full px-2 bg-black/40 rounded-xl py-1 border border-white/5">
+                <span className="text-[10px] text-zinc-500 font-bold font-sans block">مناطق التركيز والتكرار 🔥</span>
+                <div className="flex items-end gap-0.5 h-12 w-full px-2 bg-black/40 rounded-2xl py-1 border border-zinc-200/60">
                   {heatmapData.map((count, idx) => {
                     const heightPercent = (count / maxZoneCount) * 100;
                     return (
                       <div 
                         key={idx}
                         style={{ height: `${Math.max(10, heightPercent)}%` }}
-                        className={`flex-1 rounded-t transition-all duration-300 ${count > 0 ? "bg-gradient-to-t from-[#D6004B] to-rose-400/40" : "bg-zinc-800/40"}`}
+                        className={`flex-1 rounded-t transition-all duration-300 ${count > 0 ? "bg-gradient-to-t from-[#1D4ED8] to-brand-400/40" : "bg-zinc-800/40"}`}
                         title={`المنطقة ${idx + 1}: تم تشغيلها ${count} مرات`}
                       />
                     );
@@ -924,17 +924,17 @@ export default function SecureVideoPlayer({
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="absolute top-0 right-0 bottom-0 w-80 bg-[#07070c]/95 border-l border-white/10 backdrop-blur-xl z-30 p-4 flex flex-col justify-between"
+              className="absolute top-0 right-0 bottom-0 w-80 bg-[#07070c]/95 border-l border-zinc-200 backdrop-blur-xl z-30 p-4 flex flex-col justify-between"
             >
               <div className="space-y-4 shrink-0">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-white">
-                    <FileText className="w-4 h-4 text-[#D6004B]" />
-                    <span className="font-alexandria font-bold text-xs">ملاحظات المحاضرة</span>
+                  <div className="flex items-center gap-2 text-zinc-900">
+                    <FileText className="w-4 h-4 text-[#1D4ED8]" />
+                    <span className="font-sans font-bold text-xs">ملاحظات المحاضرة</span>
                   </div>
                   <button 
                     onClick={() => setShowNotes(false)}
-                    className="p-1 rounded-lg hover:bg-white/5 text-zinc-400 hover:text-white cursor-pointer"
+                    className="p-1 rounded-2xl hover:bg-zinc-100/40 text-zinc-500 hover:text-zinc-900 cursor-pointer"
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -947,7 +947,7 @@ export default function SecureVideoPlayer({
                     placeholder="ابحث في ملاحظاتك..."
                     value={noteSearch}
                     onChange={(e) => setNoteSearch(e.target.value)}
-                    className="w-full bg-white/5 border border-white/5 rounded-xl py-1.5 pr-8 pl-3 text-[11px] text-white placeholder-zinc-500 focus:outline-none focus:border-[#D6004B] font-cairo"
+                    className="w-full bg-zinc-100/40 border border-zinc-200/60 rounded-2xl py-1.5 pr-8 pl-3 text-[11px] text-zinc-900 placeholder-zinc-500 focus:outline-none focus:border-[#1D4ED8] font-sans"
                   />
                 </div>
               </div>
@@ -956,38 +956,38 @@ export default function SecureVideoPlayer({
                 {filteredNotes.length === 0 ? (
                   <div className="h-full flex flex-col items-center justify-center text-center p-4">
                     <BookOpen className="w-8 h-8 text-zinc-600 mb-2" />
-                    <p className="text-[10px] text-zinc-500 font-cairo">لا توجد ملاحظات مسجلة بعد.</p>
+                    <p className="text-[10px] text-zinc-500 font-sans">لا توجد ملاحظات مسجلة بعد.</p>
                   </div>
                 ) : (
                   filteredNotes.map((note) => (
                     <div 
                       key={note.id}
-                      className="p-2.5 rounded-xl bg-white/5 border border-white/5 hover:border-white/10 transition-colors group/note space-y-1.5 text-right relative"
+                      className="p-2.5 rounded-2xl bg-zinc-100/40 border border-zinc-200/60 hover:border-zinc-200 transition-colors group/note space-y-1.5 text-right relative"
                     >
                       <div className="flex items-center justify-between">
                         <button 
                           onClick={() => handleDeleteNote(note.id)}
-                          className="opacity-0 group-hover/note:opacity-100 text-zinc-500 hover:text-rose-500 transition-opacity p-0.5 rounded cursor-pointer"
+                          className="opacity-0 group-hover/note:opacity-100 text-zinc-500 hover:text-yellow-500 transition-opacity p-0.5 rounded cursor-pointer"
                           title="حذف الملاحظة"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
                         <button 
                           onClick={() => seekVideo(note.timestamp_seconds)}
-                          className="px-2 py-0.5 rounded bg-[#D6004B]/10 hover:bg-[#D6004B]/20 text-[#D6004B] font-mono text-[9px] font-bold cursor-pointer"
+                          className="px-2 py-0.5 rounded bg-[#1D4ED8]/10 hover:bg-[#1D4ED8]/20 text-[#1D4ED8] font-mono text-[9px] font-bold cursor-pointer"
                           title="انتقل إلى هذه الثانية"
                         >
                           {formatTime(note.timestamp_seconds)}
                         </button>
                       </div>
-                      <p className="text-[11px] text-zinc-300 leading-relaxed font-cairo whitespace-pre-wrap">{note.note_content}</p>
+                      <p className="text-[11px] text-zinc-700 leading-relaxed font-sans whitespace-pre-wrap">{note.note_content}</p>
                     </div>
                   ))
                 )}
               </div>
 
-              <form onSubmit={handleAddNote} className="space-y-2 shrink-0 border-t border-white/5 pt-3">
-                <div className="flex items-center justify-between text-[10px] text-zinc-500 font-bold font-cairo">
+              <form onSubmit={handleAddNote} className="space-y-2 shrink-0 border-t border-zinc-200/60 pt-3">
+                <div className="flex items-center justify-between text-[10px] text-zinc-500 font-bold font-sans">
                   <span>عند ثانية: {formatTime(currentTime)}</span>
                   <span>اكتب ملاحظة جديدة</span>
                 </div>
@@ -997,12 +997,12 @@ export default function SecureVideoPlayer({
                     placeholder="سجل فكرتك أو فك الشفرة هنا..."
                     value={noteText}
                     onChange={(e) => setNoteText(e.target.value)}
-                    className="flex-1 bg-white/5 border border-white/5 rounded-xl py-2 px-3 text-[11px] text-white placeholder-zinc-500 focus:outline-none focus:border-[#D6004B] font-cairo"
+                    className="flex-1 bg-zinc-100/40 border border-zinc-200/60 rounded-2xl py-2 px-3 text-[11px] text-zinc-900 placeholder-zinc-500 focus:outline-none focus:border-[#1D4ED8] font-sans"
                   />
                   <button 
                     type="submit"
                     disabled={savingNote || !noteText.trim()}
-                    className="w-9 h-9 shrink-0 bg-[#D6004B] hover:bg-[#ff0059] disabled:bg-zinc-800 disabled:text-zinc-600 text-white rounded-xl flex items-center justify-center cursor-pointer transition-colors active:scale-95"
+                    className="w-9 h-9 shrink-0 bg-[#1D4ED8] hover:bg-[#3B82F6] disabled:bg-zinc-800 disabled:text-zinc-600 text-white rounded-2xl flex items-center justify-center cursor-pointer transition-colors active:scale-95"
                   >
                     {savingNote ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
                   </button>
@@ -1022,7 +1022,7 @@ export default function SecureVideoPlayer({
               className="absolute inset-0 bg-[#06060a]/98 backdrop-blur-md z-40 flex flex-col justify-between p-6 text-center overflow-y-auto"
             >
               {/* Animated Glow */}
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[250px] sm:w-[400px] h-[250px] sm:h-[400px] bg-[#D6004B]/5 rounded-full blur-[90px] pointer-events-none z-0"></div>
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[250px] sm:w-[400px] h-[250px] sm:h-[400px] bg-[#1D4ED8]/5 rounded-full blur-[90px] pointer-events-none z-0"></div>
 
               {/* Header section (Countdown or completion status) */}
               <div className="z-10 space-y-4 pt-4 shrink-0">
@@ -1031,20 +1031,20 @@ export default function SecureVideoPlayer({
                 </div>
 
                 <div className="space-y-1">
-                  <h4 className="font-alexandria font-black text-white text-base">تم إكمال الدرس بنجاح! 🎉</h4>
-                  <p className="text-zinc-400 text-[11px] font-cairo">رائع! لقد أضفت تقدماً جديداً إلى ملفك الشخصي.</p>
+                  <h4 className="font-sans font-black text-zinc-900 text-base">تم إكمال الدرس بنجاح! 🎉</h4>
+                  <p className="text-zinc-500 text-[11px] font-alexandria">رائع! لقد أضفت تقدماً جديداً إلى ملفك الشخصي.</p>
                 </div>
 
                 {onNextLesson && nextLessonTitle && (
-                  <div className="bg-white/5 border border-white/5 rounded-2xl p-3 max-w-sm mx-auto space-y-2.5">
+                  <div className="bg-zinc-100/40 border border-zinc-200/60 rounded-2xl p-3 max-w-sm mx-auto space-y-2.5">
                     <div className="flex items-center justify-between gap-3">
                       <div className="text-right">
-                        <span className="text-[9px] text-[#D6004B] font-bold font-alexandria block uppercase tracking-wider">المحاضرة القادمة</span>
-                        <span className="text-[11px] text-white font-bold font-cairo truncate block max-w-[200px]">{nextLessonTitle}</span>
+                        <span className="text-[9px] text-[#1D4ED8] font-bold font-sans block uppercase tracking-wider">المحاضرة القادمة</span>
+                        <span className="text-[11px] text-zinc-900 font-bold font-alexandria truncate block max-w-[200px]">{nextLessonTitle}</span>
                       </div>
                       
                       {!autoPlayCancelled && (
-                        <div className="w-8 h-8 rounded-full border-2 border-[#D6004B] flex items-center justify-center text-[11px] font-bold text-white font-mono shrink-0 animate-pulse">
+                        <div className="w-8 h-8 rounded-full border-2 border-[#1D4ED8] flex items-center justify-center text-[11px] font-bold text-zinc-900 font-mono shrink-0 animate-pulse">
                           {countdown}
                         </div>
                       )}
@@ -1056,7 +1056,7 @@ export default function SecureVideoPlayer({
                           if (countdownTimerRef.current) clearInterval(countdownTimerRef.current);
                           onNextLesson();
                         }}
-                        className="flex-1 h-8 bg-[#D6004B] hover:bg-[#ff0059] text-white font-alexandria font-black text-[10px] rounded-xl flex items-center justify-center gap-1 active:scale-95 transition-all shadow-md shadow-[#D6004B]/20 cursor-pointer"
+                        className="flex-1 h-8 bg-[#1D4ED8] hover:bg-[#3B82F6] text-white font-sans font-black text-[10px] rounded-2xl flex items-center justify-center gap-1 active:scale-95 transition-all shadow-md shadow-[#1D4ED8]/20 cursor-pointer"
                       >
                         <span>تشغيل الآن</span>
                         <ArrowLeft className="w-3.5 h-3.5 rtl:rotate-180" />
@@ -1069,12 +1069,12 @@ export default function SecureVideoPlayer({
                             if (countdownTimerRef.current) clearInterval(countdownTimerRef.current);
                             toast.info("تم إلغاء التشغيل التلقائي");
                           }}
-                          className="px-3 h-8 bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-300 font-cairo text-[10px] rounded-xl cursor-pointer"
+                          className="px-3 h-8 bg-zinc-100/40 hover:bg-zinc-100/80 border border-zinc-200 text-zinc-700 font-sans text-[10px] rounded-2xl cursor-pointer"
                         >
                           إلغاء
                         </button>
                       ) : (
-                        <span className="px-3 h-8 bg-zinc-900 border border-zinc-800 text-zinc-500 font-cairo text-[10px] rounded-xl flex items-center justify-center">
+                        <span className="px-3 h-8 bg-zinc-900 border border-zinc-200/60 text-zinc-500 font-sans text-[10px] rounded-2xl flex items-center justify-center">
                           التشغيل التلقائي موقوف
                         </span>
                       )}
@@ -1086,7 +1086,7 @@ export default function SecureVideoPlayer({
               {/* Recommendations Section (Courses suggestions) */}
               {recommendedCourses.length > 0 && (
                 <div className="z-10 my-4 shrink-0">
-                  <h5 className="font-alexandria font-bold text-white text-[11px] text-right mb-3 px-1">كورسات أخرى قد تهمك 💡</h5>
+                  <h5 className="font-sans font-bold text-zinc-900 text-[11px] text-right mb-3 px-1">كورسات أخرى قد تهمك 💡</h5>
                   <div className="grid grid-cols-3 gap-3">
                     {recommendedCourses.map(c => (
                       <a 
@@ -1094,15 +1094,15 @@ export default function SecureVideoPlayer({
                         href={`/courses/${c.slug}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="bg-white/5 border border-white/5 rounded-2xl p-2 text-right hover:border-white/10 transition-all flex flex-col gap-1.5 select-none"
+                        className="bg-zinc-100/40 border border-zinc-200/60 rounded-2xl p-2 text-right hover:border-zinc-200 transition-all flex flex-col gap-1.5 select-none"
                       >
                         <img 
                           src={c.image_url} 
                           alt={c.title} 
-                          className="w-full aspect-[16/10] object-cover rounded-xl border border-white/5"
+                          className="w-full aspect-[16/10] object-cover rounded-2xl border border-zinc-200/60"
                         />
-                        <span className="text-[9px] text-zinc-400 font-cairo block truncate font-bold">{c.title}</span>
-                        <span className="text-[9px] text-[#D6004B] font-mono font-bold block">{c.price_egp || c.price ? `${c.price_egp || c.price} EGP` : "ميجاني"}</span>
+                        <span className="text-[9px] text-zinc-500 font-sans block truncate font-bold">{c.title}</span>
+                        <span className="text-[9px] text-[#1D4ED8] font-mono font-bold block">{c.price_egp || c.price ? `${c.price_egp || c.price} EGP` : "ميجاني"}</span>
                       </a>
                     ))}
                   </div>
@@ -1113,7 +1113,7 @@ export default function SecureVideoPlayer({
               <div className="z-10 pb-2 shrink-0">
                 <button 
                   onClick={() => setShowEndedOverlay(false)}
-                  className="px-6 h-8.5 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-alexandria font-bold text-[10px] rounded-xl active:scale-95 transition-all cursor-pointer"
+                  className="px-6 h-8.5 bg-zinc-100/40 hover:bg-zinc-100/80 border border-zinc-200 text-zinc-900 font-sans font-bold text-[10px] rounded-2xl active:scale-95 transition-all cursor-pointer"
                 >
                   إعادة تشغيل المحاضرة الحالية
                 </button>

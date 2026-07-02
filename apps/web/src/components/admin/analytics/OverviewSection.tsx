@@ -9,17 +9,17 @@ import CollapsibleSection from "./CollapsibleSection";
 // Dynamically import charts for optimized initial page load speed
 const RevenueChart = dynamic(() => import("./charts/RevenueChart"), {
   ssr: false,
-  loading: () => <div className="h-48 sm:h-72 w-full animate-pulse bg-white/5 rounded-3xl" />
+  loading: () => <div className="h-48 sm:h-72 w-full animate-pulse bg-zinc-100/40 rounded-3xl" />
 });
 
 const DistributionChart = dynamic(() => import("./charts/DistributionChart"), {
   ssr: false,
-  loading: () => <div className="h-48 sm:h-64 w-full animate-pulse bg-white/5 rounded-3xl" />
+  loading: () => <div className="h-48 sm:h-64 w-full animate-pulse bg-zinc-100/40 rounded-3xl" />
 });
 
 const RevenueHeatmap = dynamic(() => import("./charts/RevenueHeatmap"), {
   ssr: false,
-  loading: () => <div className="h-48 w-full animate-pulse bg-white/5 rounded-3xl" />
+  loading: () => <div className="h-48 w-full animate-pulse bg-zinc-100/40 rounded-3xl" />
 });
 
 interface OverviewSectionProps {
@@ -157,7 +157,7 @@ export default function OverviewSection({
       {/* Main Charts Row */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 sm:gap-8">
         {/* Revenue/Profit area graph */}
-        <div className="xl:col-span-2 rounded-3xl bg-[#09090e]/80 border border-white/5 p-4 sm:p-6 shadow-2xl" dir="ltr">
+        <div className="xl:col-span-2 rounded-3xl bg-slate-50/80 border border-zinc-200/60 p-4 sm:p-6 shadow-sm border border-zinc-200/60" dir="ltr">
           <RevenueChart 
             data={chartData} 
             revenueGrowth={stats.revenueGrowth} 
@@ -166,14 +166,14 @@ export default function OverviewSection({
         </div>
 
         {/* Currency share Donut Chart */}
-        <div className="rounded-3xl bg-[#09090e]/80 border border-white/5 p-4 sm:p-6 shadow-2xl" dir="ltr">
+        <div className="rounded-3xl bg-slate-50/80 border border-zinc-200/60 p-4 sm:p-6 shadow-sm border border-zinc-200/60" dir="ltr">
           <DistributionChart data={currencyData} />
         </div>
       </div>
 
       {/* Hourly Heatmap - Collapsible on Mobile */}
       <CollapsibleSection title="Sales Hourly Heatmap Distribution" defaultExpanded={false}>
-        <div className="rounded-3xl bg-[#09090e]/80 border border-white/5 p-4 sm:p-6 shadow-2xl" dir="ltr">
+        <div className="rounded-3xl bg-slate-50/80 border border-zinc-200/60 p-4 sm:p-6 shadow-sm border border-zinc-200/60" dir="ltr">
           <RevenueHeatmap orders={orders} />
         </div>
       </CollapsibleSection>

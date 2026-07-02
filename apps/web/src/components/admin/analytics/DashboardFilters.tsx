@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { 
-  Calendar, Globe, DollarSign, Download, RefreshCw, 
-  Maximize2, Minimize2, Sun, Moon 
+  Globe, DollarSign, Download, RefreshCw, 
+  Maximize2, Minimize2, Sun, Moon, RotateCcw
 } from "lucide-react";
 
 interface DashboardFiltersProps {
@@ -18,10 +18,8 @@ interface DashboardFiltersProps {
   loading: boolean;
   onRefresh: () => void;
   onExport: () => void;
+  onReset?: () => void;
   hasCountriesData?: string[];
-  analyticsMode?: "reset" | "lifetime";
-  setAnalyticsMode?: (mode: "reset" | "lifetime") => void;
-  analyticsResetDate?: string | null;
 }
 
 export default function DashboardFilters({
@@ -36,10 +34,8 @@ export default function DashboardFilters({
   loading,
   onRefresh,
   onExport,
-  hasCountriesData = ["EG", "SA", "AE", "US"],
-  analyticsMode = "reset",
-  setAnalyticsMode,
-  analyticsResetDate
+  onReset,
+  hasCountriesData = ["EG", "SA", "AE", "US"]
 }: DashboardFiltersProps) {
   const [isFullscreen, setIsFullscreen] = useState(false);
 
@@ -72,48 +68,12 @@ export default function DashboardFilters({
   ];
 
   return (
-    <div className="flex flex-col gap-4 p-4 rounded-2xl bg-[#09090e]/80 border border-white/5 relative z-30 text-left" dir="ltr">
-      
-      {/* Analytics Mode Switcher Row */}
-      {analyticsResetDate && setAnalyticsMode && (
-        <div className="flex items-center justify-between pb-3 border-b border-white/5 flex-wrap gap-3">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
-            <span className="text-[10px] md:text-xs font-bold text-zinc-400">Baseline Filter:</span>
-            <span className="text-[10px] md:text-xs font-mono font-bold text-white bg-white/5 px-2.5 py-1 rounded-lg border border-white/5">
-              Since {analyticsResetDate}
-            </span>
-          </div>
-
-          <div className="flex bg-white/5 border border-white/5 rounded-xl p-1 gap-1 w-full sm:w-auto shrink-0 select-none">
-            <button
-              onClick={() => setAnalyticsMode("reset")}
-              className={`px-4 py-1.5 rounded-lg text-[10px] md:text-xs font-bold transition-all cursor-pointer ${
-                analyticsMode === "reset"
-                  ? "bg-rose-600 text-white shadow-md shadow-rose-600/10"
-                  : "text-zinc-400 hover:text-white"
-              }`}
-            >
-              Since Reset Date
-            </button>
-            <button
-              onClick={() => setAnalyticsMode("lifetime")}
-              className={`px-4 py-1.5 rounded-lg text-[10px] md:text-xs font-bold transition-all cursor-pointer ${
-                analyticsMode === "lifetime"
-                  ? "bg-rose-600 text-white shadow-md shadow-rose-600/10"
-                  : "text-zinc-400 hover:text-white"
-              }`}
-            >
-              Lifetime Statistics
-            </button>
-          </div>
-        </div>
-      )}
+    <div className="flex flex-col gap-4 p-4 rounded-2xl bg-slate-50/80 border border-zinc-200/60 relative z-30 text-left" dir="ltr">
 
       {/* Top row: Filter Selectors */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {/* Date Range Selector */}
-        <div className="flex items-center bg-white/5 border border-white/5 rounded-xl p-1 gap-1">
+        <div className="flex items-center bg-zinc-100/40 border border-zinc-200/60 rounded-2xl p-1 gap-1">
           {[
             { id: "1", label: "Today" },
             { id: "7", label: "7 Days" },
@@ -123,10 +83,10 @@ export default function DashboardFilters({
             <button
               key={range.id}
               onClick={() => setDateRange(range.id)}
-              className={`flex-1 py-1.5 rounded-lg text-[10px] sm:text-xs font-bold transition-all ${
+              className={`flex-1 py-1.5 rounded-2xl text-[10px] sm:text-xs font-bold transition-all ${
                 dateRange === range.id 
-                  ? "bg-rose-600 text-white shadow-md shadow-rose-600/10" 
-                  : "text-zinc-400 hover:text-white"
+                  ? "bg-brand-600 text-white shadow-md shadow-brand-600/10" 
+                  : "text-zinc-500 hover:text-white"
               }`}
             >
               {range.label}
@@ -140,10 +100,10 @@ export default function DashboardFilters({
           <select
             value={country}
             onChange={(e) => setCountry(e.target.value)}
-            className="w-full bg-white/5 border border-white/5 hover:border-white/10 text-xs text-zinc-300 font-bold rounded-xl py-2.5 pl-10 pr-3 focus:outline-none focus:border-rose-500/50 transition-all appearance-none cursor-pointer text-left"
+            className="w-full bg-zinc-100/40 border border-zinc-200/60 hover:border-zinc-200 text-xs text-zinc-700 font-bold rounded-2xl py-2.5 pl-10 pr-3 focus:outline-none focus:border-zinc-200/60 transition-all appearance-none cursor-pointer text-left"
           >
             {countries.map((c) => (
-              <option key={c.id} value={c.id} className="bg-[#09090e] text-white">
+              <option key={c.id} value={c.id} className="bg-slate-50 text-zinc-900">
                 {c.label}
               </option>
             ))}
@@ -156,35 +116,45 @@ export default function DashboardFilters({
           <select
             value={currency}
             onChange={(e) => setCurrency(e.target.value)}
-            className="w-full bg-white/5 border border-white/5 hover:border-white/10 text-xs text-zinc-300 font-bold rounded-xl py-2.5 pl-10 pr-3 focus:outline-none focus:border-rose-500/50 transition-all appearance-none cursor-pointer text-left"
+            className="w-full bg-zinc-100/40 border border-zinc-200/60 hover:border-zinc-200 text-xs text-zinc-700 font-bold rounded-2xl py-2.5 pl-10 pr-3 focus:outline-none focus:border-zinc-200/60 transition-all appearance-none cursor-pointer text-left"
           >
-            <option value="ALL" className="bg-[#09090e] text-white">All Currencies</option>
-            <option value="EGP" className="bg-[#09090e] text-white">🇪🇬 EGP (Egyptian Pound)</option>
-            <option value="USD" className="bg-[#09090e] text-white">🇺🇸 USD (US Dollar)</option>
+            <option value="ALL" className="bg-slate-50 text-zinc-900">All Currencies</option>
+            <option value="EGP" className="bg-slate-50 text-zinc-900">🇪🇬 EGP (Egyptian Pound)</option>
+            <option value="USD" className="bg-slate-50 text-zinc-900">🇺🇸 USD (US Dollar)</option>
           </select>
         </div>
       </div>
 
       {/* Bottom row: Page Actions */}
-      <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-white/5">
+      <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-zinc-200/60">
         
-        {/* Refresh & Excel Export */}
+        {/* Refresh, Export, & Reset */}
         <div className="flex items-center gap-2">
           <button
             onClick={onRefresh}
             disabled={loading}
-            className="flex items-center gap-1.5 px-3 h-8.5 rounded-xl text-[11px] font-black transition-all bg-white/5 hover:bg-white/10 border border-white/5 text-zinc-300 hover:text-white cursor-pointer"
+            className="flex items-center gap-1.5 px-3 h-8.5 rounded-2xl text-[11px] font-black transition-all bg-zinc-100/40 hover:bg-zinc-100/80 border border-zinc-200/60 text-zinc-700 hover:text-zinc-900 cursor-pointer"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
             Refresh Data
           </button>
           <button
             onClick={onExport}
-            className="flex items-center gap-1.5 px-3.5 h-8.5 rounded-xl text-[11px] font-black transition-all bg-rose-600 hover:bg-[#ff0059] text-white shadow-md shadow-rose-600/10 border border-transparent cursor-pointer"
+            className="flex items-center gap-1.5 px-3.5 h-8.5 rounded-2xl text-[11px] font-black transition-all bg-brand-600 hover:bg-[#3B82F6] text-white shadow-md shadow-brand-600/10 border border-transparent cursor-pointer"
           >
             <Download className="w-3.5 h-3.5" />
             Export Excel
           </button>
+          {onReset && (
+            <button
+              onClick={onReset}
+              className="flex items-center gap-1.5 px-3.5 h-8.5 rounded-2xl text-[11px] font-black transition-all bg-amber-950/40 hover:bg-amber-950/70 border border-amber-500/20 text-amber-400 hover:text-amber-300 cursor-pointer"
+              title="تصفير جميع إحصائيات المنصة (الزيارات، المبيعات، إلخ)"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              Reset Statistics
+            </button>
+          )}
         </div>
 
         {/* Theme Toggles & Fullscreen (desktop only) */}
@@ -192,7 +162,7 @@ export default function DashboardFilters({
           {/* Theme Switcher */}
           <button
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="w-8.5 h-8.5 rounded-xl bg-white/5 border border-white/5 flex items-center justify-center text-zinc-400 hover:text-white transition-all cursor-pointer"
+            className="w-8.5 h-8.5 rounded-2xl bg-zinc-100/40 border border-zinc-200/60 flex items-center justify-center text-zinc-500 hover:text-zinc-900 transition-all cursor-pointer"
             title={theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
           >
             {theme === "dark" ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-indigo-400" />}
@@ -201,7 +171,7 @@ export default function DashboardFilters({
           {/* Fullscreen Mode */}
           <button
             onClick={toggleFullscreen}
-            className="w-8.5 h-8.5 rounded-xl bg-white/5 border border-white/5 flex items-center justify-center text-zinc-400 hover:text-white transition-all hidden md:flex cursor-pointer"
+            className="w-8.5 h-8.5 rounded-2xl bg-zinc-100/40 border border-zinc-200/60 flex items-center justify-center text-zinc-500 hover:text-zinc-900 transition-all hidden md:flex cursor-pointer"
             title="Toggle Fullscreen"
           >
             {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}

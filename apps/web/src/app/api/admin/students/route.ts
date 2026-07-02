@@ -119,3 +119,94 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
+
+export async function PATCH(req: Request) {
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("admin_token")?.value;
+    if (!token || token !== "authenticated") {
+      return NextResponse.json({ error: "Unauthorized access" }, { status: 401 });
+    }
+
+    const body = await req.json();
+    const { action, userIds, courseId } = body;
+
+    if (!action || !userIds || !Array.isArray(userIds) || userIds.length === 0) {
+      return NextResponse.json({ error: "Missing required fields: action, userIds" }, { status: 400 });
+    }
+
+    // ── BULK DISENROLL: remove selected students from a specific course ──
+    if (action === "bulk_disenroll") {
+      if (!courseId) {
+        return NextResponse.json({ error: "courseId is required for bulk_disenroll" }, { status: 400 });
+      }
+
+      const errors: string[] = [];
+      let successCount = 0;
+
+      for (const userId of userIds) {
+        try {
+          // Delete enrollment row
+          await supabaseAdmin.from("enrollments").delete().eq("user_id", userId).eq("course_id", courseId);
+          // Delete lesson progress for this course
+          await supabaseAdmin.from("lesson_progress").delete().eq("user_id", userId).eq("course_id", courseId);
+          // Delete watch time for this course
+          await supabaseAdmin.from("watch_time").delete().eq("user_id", userId).eq("course_id", courseId);
+          successCount++;
+        } catch (err: any) {
+          errors.push(`Failed for user ${userId}: ${err.message}`);
+        }
+      }
+
+      return NextResponse.json({
+        success: true,
+        message: `Successfully disenrolled ${successCount} student(s) from the course.`,
+        errors: errors.length > 0 ? errors : undefined
+      });
+    }
+
+    // ── BULK DELETE: permanently remove selected student accounts ──
+    if (action === "bulk_delete") {
+      const errors: string[] = [];
+      let successCount = 0;
+
+      for (const userId of userIds) {
+        try {
+          // Delete all related data first
+          await supabaseAdmin.from("enrollments").delete().eq("user_id", userId);
+          await supabaseAdmin.from("lesson_progress").delete().eq("user_id", userId);
+          await supabaseAdmin.from("watch_time").delete().eq("user_id", userId);
+          await supabaseAdmin.from("certificates").delete().eq("user_id", userId);
+          await supabaseAdmin.from("orders").delete().eq("customer_email",
+            // Get email from auth first
+            (await supabaseAdmin.auth.admin.getUserById(userId)).data.user?.email || ""
+          );
+          await supabaseAdmin.from("active_sessions").delete().eq("user_id", userId);
+          await supabaseAdmin.from("profiles").delete().eq("id", userId);
+
+          // Finally delete the auth user
+          const { error: deleteErr } = await supabaseAdmin.auth.admin.deleteUser(userId);
+          if (deleteErr) {
+            errors.push(`Auth delete failed for ${userId}: ${deleteErr.message}`);
+          } else {
+            successCount++;
+          }
+        } catch (err: any) {
+          errors.push(`Failed for user ${userId}: ${err.message}`);
+        }
+      }
+
+      return NextResponse.json({
+        success: true,
+        message: `Successfully deleted ${successCount} student account(s).`,
+        errors: errors.length > 0 ? errors : undefined
+      });
+    }
+
+    return NextResponse.json({ error: `Unknown bulk action: ${action}` }, { status: 400 });
+
+  } catch (error: any) {
+    console.error("[STUDENTS_BULK_ERROR]:", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
+}

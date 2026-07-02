@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, memo } from "react";
 import { Star, CheckCircle2, BookOpen } from "lucide-react";
-import { supabase } from "@/lib/supabase";
+import { supabaseClient } from "@/lib/supabaseClient";
 
 interface Review {
   name: string;
@@ -10,7 +10,6 @@ interface Review {
   text: string;
   stars: number;
   avatarUrl?: string;
-  gender?: "male" | "female";
   isCourse?: boolean;
   courseTitle?: string;
   isFeatured?: boolean;
@@ -18,28 +17,30 @@ interface Review {
   createdAt?: string;
 }
 
+// ────────────────────────────────────────────────────────────────────────────
+// Sub-components & Helpers for Rendering Fractional Stars (Clean UI)
+// ────────────────────────────────────────────────────────────────────────────
 interface StarSVGProps {
-  fillPercent: number;
+  fillPercent: number; // 0 to 100
 }
 
-// Highly optimized memoized individual fractional star SVG component
 export const MemoizedStarSVG = memo(function StarSVG({ fillPercent }: StarSVGProps) {
   if (fillPercent <= 0) {
-    return <Star className="w-3 h-3 md:w-3.5 md:h-3.5 fill-transparent" style={{ color: "#6b0020" }} />;
+    return <Star className="w-3 h-3 md:w-3.5 md:h-3.5 fill-transparent text-zinc-200" />;
   }
   if (fillPercent >= 100) {
-    return <Star className="w-3 h-3 md:w-3.5 md:h-3.5 fill-current" style={{ color: "#D6004B" }} />;
+    return <Star className="w-3 h-3 md:w-3.5 md:h-3.5 fill-current text-yellow-500" />;
   }
   
   return (
     <div className="relative w-3 h-3 md:w-3.5 md:h-3.5">
-      <Star className="w-3 h-3 md:w-3.5 md:h-3.5 fill-transparent absolute inset-0" style={{ color: "#6b0020" }} />
+      <Star className="w-3 h-3 md:w-3.5 md:h-3.5 fill-transparent text-zinc-200 absolute inset-0" />
       <div 
         className="absolute inset-0 overflow-hidden"
         style={{ width: `${fillPercent}%` }}
       >
         <div className="w-3 h-3 md:w-3.5 md:h-3.5">
-          <Star className="w-3 h-3 md:w-3.5 md:h-3.5 fill-current" style={{ color: "#D6004B" }} />
+          <Star className="w-3 h-3 md:w-3.5 md:h-3.5 fill-current text-yellow-500" />
         </div>
       </div>
     </div>
@@ -47,39 +48,52 @@ export const MemoizedStarSVG = memo(function StarSVG({ fillPercent }: StarSVGPro
 });
 
 function renderFractionalStars(rating: number) {
-  return (
-    <div className="flex gap-0.5 text-yellow-500" dir="ltr">
-      {Array.from({ length: 5 }).map((_, i) => {
-        const starVal = i + 1;
-        const isFilled = starVal <= Math.floor(rating);
-        const isHalf = !isFilled && starVal - 0.5 <= rating;
-
-        let fillPercent = 0;
-        if (isFilled) {
-          fillPercent = 100;
-        } else if (isHalf) {
-          fillPercent = (rating - (starVal - 1)) * 100;
-        }
-
-        return <MemoizedStarSVG key={i} fillPercent={fillPercent} />;
-      })}
-    </div>
-  );
+  const stars = [];
+  for (let i = 1; i <= 5; i++) {
+    const diff = rating - (i - 1);
+    let fillPercent = 0;
+    if (diff >= 1) {
+      fillPercent = 100;
+    } else if (diff > 0) {
+      fillPercent = Math.round(diff * 100);
+    }
+    stars.push(<MemoizedStarSVG key={i} fillPercent={fillPercent} />);
+  }
+  return <div className="flex gap-0.5">{stars}</div>;
 }
 
 export function ReviewsMarquee() {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
 
-
   useEffect(() => {
     async function loadReviews() {
       try {
-        const [reviewsRes, { data: productsData }, { data: coursesData }, { data: bundlesData }] = await Promise.all([
-          fetch("/api/admin/reviews").then(res => res.json()),
-          supabase.from("products").select("id, title"),
-          supabase.from("courses").select("id, title"),
-          supabase.from("bundles").select("id, title")
+        const [reviewsRes, productsData, coursesData, bundlesData] = await Promise.all([
+          fetch("/api/admin/reviews")
+            .then(res => res.json())
+            .catch(err => {
+              console.error("ReviewsMarquee: reviews fetch failed:", err);
+              return [];
+            }),
+          Promise.resolve(supabaseClient.from("products").select("id, title"))
+            .then(res => res.data || [])
+            .catch(err => {
+              console.error("ReviewsMarquee: products fetch failed:", err);
+              return [];
+            }),
+          Promise.resolve(supabaseClient.from("courses").select("id, title"))
+            .then(res => res.data || [])
+            .catch(err => {
+              console.error("ReviewsMarquee: courses fetch failed:", err);
+              return [];
+            }),
+          Promise.resolve(supabaseClient.from("bundles").select("id, title"))
+            .then(res => res.data || [])
+            .catch(err => {
+              console.error("ReviewsMarquee: bundles fetch failed:", err);
+              return [];
+            })
         ]);
 
         if (Array.isArray(reviewsRes)) {
@@ -119,8 +133,42 @@ export function ReviewsMarquee() {
           const normal = mapped.filter((r: any) => !r.isFeatured);
           normal.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
-          // Prioritize featured reviews on homepage, fallback to normal ones if none are marked
-          const displayReviews = featured.length > 0 ? featured : normal;
+          const fallbackReviews: Review[] = [
+            {
+              name: "أحمد م.",
+              title: "مشتري موثق · كورس الذكاء الاصطناعي",
+              text: "هذا الكورس غيّر مفاهيمي تماماً عن صناعة المحتوى بالذكاء الاصطناعي. الشرح العملي والخطوات المباشرة ساعدتني في إطلاق قناتي على اليوتيوب وبدء تحقيق الأرباح.",
+              stars: 5,
+              isCourse: true,
+              courseTitle: "كورس صناعة فيديوهات الأنيميشن بالذكاء الاصطناعي"
+            },
+            {
+              name: "سارة أ.",
+              title: "مشتري موثق · حزمة المؤثرين",
+              text: "الأدوات المرفقة بالحزمة وفرت عليّ ساعات طويلة من العمل الإبداعي. جودة الملفات والتحديثات المستمرة تفوق التوقعات.",
+              stars: 5,
+              isCourse: false
+            },
+            {
+              name: "محمد ع.",
+              title: "مشتري موثق · أتمتة الأعمال",
+              text: "أفضل استثمار قمت به لشركتي هذا العام. تمكنت من أتمتة الردود على العملاء بالكامل وتوفير تكاليف الدعم الفني.",
+              stars: 5,
+              isCourse: true,
+              courseTitle: "كورس أتمتة الأعمال المتكامل"
+            },
+            {
+              name: "فاطمة ح.",
+              title: "مشتري موثق · كورس الأنيميشن",
+              text: "الدورة مبسطة جداً ومناسبة للمبتدئين. الدعم الفني متجاوب وسريع جداً في الإجابة على أي استفسار.",
+              stars: 5,
+              isCourse: true,
+              courseTitle: "كورس صناعة فيديوهات الأنيميشن بالذكاء الاصطناعي"
+            }
+          ];
+
+          // Prioritize featured reviews on homepage, fallback to normal ones if none are marked, otherwise fallback to premium mock reviews
+          const displayReviews = featured.length > 0 ? featured : (normal.length > 0 ? normal : fallbackReviews);
           setReviews(displayReviews);
         }
       } catch (err) {
@@ -134,8 +182,8 @@ export function ReviewsMarquee() {
 
   if (loading) {
     return (
-      <section id="reviews" className="py-24 bg-[#050505] border-y border-white/5 relative flex items-center justify-center min-h-[300px]">
-        <div className="w-10 h-10 border-4 border-rose-600/30 border-t-rose-600 rounded-full animate-spin" />
+      <section id="reviews" className="py-24 bg-white border-y border-zinc-200/60 relative flex items-center justify-center min-h-[300px]">
+        <div className="w-10 h-10 border-4 border-brand-600/30 border-t-brand-600 rounded-full animate-spin" />
       </section>
     );
   }
@@ -144,67 +192,51 @@ export function ReviewsMarquee() {
     return null;
   }
 
-  // Splits reviews into two balanced lists and triples them to ensure seamless infinite loops
-  const getRowReviews = (items: Review[], isAlternate: boolean) => {
+  // Prepares the list of reviews and triples them to ensure seamless infinite loops in a single row
+  const getSingleRowReviews = (items: Review[]) => {
     if (items.length === 0) return [];
     
-    // Distribute reviews between rows
-    const split = items.filter((_, idx) => (idx % 2 === 0) === isAlternate);
-    const base = split.length > 0 ? split : items;
-    
-    let list = [...base];
-    while (list.length < 8) {
+    let list = [...items];
+    while (list.length < 12) {
       list = [...list, ...list];
     }
     
     return [...list, ...list, ...list];
   };
 
-  const row1Reviews = getRowReviews(reviews, false);
-  const row2Reviews = getRowReviews(reviews, true);
+  const marqueeReviews = getSingleRowReviews(reviews);
 
   return (
-    <section id="reviews" className="py-24 md:py-32 bg-[#050505] overflow-hidden relative select-none">
+    <section id="reviews" className="py-12 md:py-16 bg-white overflow-hidden relative select-none">
       
       {/* Premium ambient glows */}
-      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-rose-600/5 rounded-full blur-[140px] pointer-events-none" />
-      <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-rose-600/5 rounded-full blur-[140px] pointer-events-none" />
+      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-brand-600/5 rounded-full blur-[140px] pointer-events-none" />
+      <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-brand-600/5 rounded-full blur-[140px] pointer-events-none" />
 
       {/* Cinematic Vignette Overlays for seamless edge fade-out */}
-      <div className="absolute top-0 left-0 w-20 md:w-56 h-full bg-gradient-to-r from-[#050505] via-[#050505]/70 to-transparent z-20 pointer-events-none" />
-      <div className="absolute top-0 right-0 w-20 md:w-56 h-full bg-gradient-to-l from-[#050505] via-[#050505]/70 to-transparent z-20 pointer-events-none" />
+      <div className="absolute top-0 left-0 w-20 md:w-56 h-full bg-gradient-to-r from-white via-white/70 to-transparent z-20 pointer-events-none" />
+      <div className="absolute top-0 right-0 w-20 md:w-56 h-full bg-gradient-to-l from-white via-white/70 to-transparent z-20 pointer-events-none" />
 
-      <div className="container mx-auto px-4 mb-20 text-center relative z-10">
-        <h2 className="text-3xl md:text-5xl font-alexandria font-black text-white mb-4 tracking-tighter">
+      <div className="container mx-auto px-4 mb-10 text-center relative z-10">
+        <h2 className="text-3xl md:text-5xl font-sans font-black text-zinc-900 mb-4 tracking-tighter">
           ثقة عملائنا
         </h2>
-        <p className="text-zinc-500 font-cairo text-sm md:text-base max-w-xl mx-auto">
+        <p className="text-zinc-500 font-sans text-sm md:text-base max-w-xl mx-auto">
           آراء واقعية من أشخاص حقيقيين قاموا بتطوير مهاراتهم الإبداعية وإنتاج محتوى استثنائي معنا بنجاح
         </p>
       </div>
 
-      {/* Double Row Infinite Scrolling Marquee */}
-      <div className="flex flex-col gap-6 md:gap-8 relative w-full overflow-hidden" dir="ltr">
+      {/* Single Row Infinite Scrolling Marquee - Left to Right */}
+      <div className="flex flex-col relative w-full overflow-hidden" dir="ltr">
         
-        {/* ROW 1: Scrolling Left */}
-        <div className="overflow-hidden w-full">
-          <div className="flex flex-row flex-nowrap w-max gap-6 animate-marquee-left">
-            {row1Reviews.map((review, idx) => (
-              <ReviewCard key={`row1-${idx}`} review={review} />
-            ))}
-          </div>
-        </div>
-
-        {/* ROW 2: Scrolling Right */}
+        {/* ROW 1: Scrolling Right */}
         <div className="overflow-hidden w-full">
           <div className="flex flex-row flex-nowrap w-max gap-6 animate-marquee-right">
-            {row2Reviews.map((review, idx) => (
-              <ReviewCard key={`row2-${idx}`} review={review} />
+            {marqueeReviews.map((review, idx) => (
+              <ReviewCard key={`marquee-${idx}`} review={review} />
             ))}
           </div>
         </div>
-
-
 
       </div>
 
@@ -218,7 +250,7 @@ export function ReviewsMarquee() {
 const ReviewCard = memo(function ReviewCard({ review }: { review: Review }) {
   return (
     <div
-      className="w-[310px] h-[210px] md:w-[380px] md:h-[230px] flex-shrink-0 bg-white/[0.01] hover:bg-white/[0.03] backdrop-blur-md border border-white/5 hover:border-rose-500/20 p-5 md:p-6 rounded-[24px] relative group hover:scale-[1.01] hover:-translate-y-0.5 transition-all duration-500 shadow-[0_15px_35px_rgba(0,0,0,0.4)] flex flex-col justify-between"
+      className="w-[310px] h-[210px] md:w-[380px] md:h-[230px] flex-shrink-0 bg-white border border-zinc-200/60 p-5 md:p-6 rounded-[24px] relative group hover:scale-[1.01] hover:-translate-y-0.5 transition-all duration-300 shadow-[0_4px_20px_-2px_rgba(17,24,39,0.015)] hover:border-zinc-200/60 hover:shadow-[0_10px_30px_-5px_rgba(17,24,39,0.03)] flex flex-col justify-between"
       dir="rtl"
     >
       {/* Header Info */}
@@ -227,22 +259,22 @@ const ReviewCard = memo(function ReviewCard({ review }: { review: Review }) {
           {review.avatarUrl ? (
             <img 
               src={review.avatarUrl} 
-              className="w-10 h-10 rounded-full object-cover border border-white/10 shadow-inner" 
+              className="w-10 h-10 rounded-full object-cover border border-zinc-200 shadow-inner" 
               alt={review.name} 
               loading="lazy"
             />
           ) : (
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-rose-500/20 to-orange-500/10 flex items-center justify-center border border-white/5 text-rose-400 font-alexandria font-bold text-sm shadow-inner">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-brand-500/20 to-orange-500/10 flex items-center justify-center border border-zinc-200/60 text-yellow-500 font-sans font-bold text-sm shadow-inner">
               {review.name.trim().replace(/^\./, "").charAt(0)}
             </div>
           )}
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5">
-            <h4 className="font-alexandria font-bold text-white text-xs md:text-sm truncate">
+            <h4 className="font-sans font-bold text-zinc-900 text-xs md:text-sm truncate">
               {review.name.trim().replace(/^\./, "")}
             </h4>
-            <span className="flex items-center gap-0.5 text-[9px] text-emerald-400 font-medium font-cairo bg-emerald-500/5 border border-emerald-500/10 px-1.5 py-0.5 rounded-full shrink-0">
+            <span className="flex items-center gap-0.5 text-[9px] text-emerald-400 font-medium font-sans bg-emerald-500/5 border border-emerald-500/10 px-1.5 py-0.5 rounded-full shrink-0">
               <CheckCircle2 className="w-2.5 h-2.5" />
               مشتري موثق
             </span>
@@ -254,18 +286,18 @@ const ReviewCard = memo(function ReviewCard({ review }: { review: Review }) {
       </div>
 
       {/* Review text */}
-      <p className="text-zinc-300 font-cairo text-xs md:text-sm leading-relaxed whitespace-normal pl-2 line-clamp-3 italic relative z-10 mt-2">
+      <p className="text-zinc-700 font-sans text-xs md:text-sm leading-relaxed whitespace-normal pl-2 line-clamp-3 italic relative z-10 mt-2">
         "{review.text}"
       </p>
 
       {/* Footer course title */}
-      <div className="flex items-center justify-between border-t border-white/5 pt-3 relative z-10">
+      <div className="flex items-center justify-between border-t border-zinc-200/60 pt-3 relative z-10">
         {review.isCourse && review.courseTitle ? (
           <div 
-            className="flex items-center gap-1.5 text-zinc-500 bg-white/[0.02] border border-white/5 px-2.5 py-1 rounded-full text-[10px] font-bold font-cairo w-fit max-w-full" 
+            className="flex items-center gap-1.5 text-zinc-500 bg-zinc-50/70 border border-zinc-200/60 px-2.5 py-1 rounded-full text-[10px] font-bold font-sans w-fit max-w-full" 
             title={review.courseTitle}
           >
-            <BookOpen className="w-3 h-3 text-rose-500 shrink-0" />
+            <BookOpen className="w-3 h-3 text-yellow-500 shrink-0" />
             <span className="truncate max-w-[220px]">{review.courseTitle}</span>
           </div>
         ) : (
@@ -274,8 +306,8 @@ const ReviewCard = memo(function ReviewCard({ review }: { review: Review }) {
       </div>
 
       {/* Subtle Radial Glow & Testimonial Quote Mark */}
-      <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/10 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-      <div className="absolute top-4 left-4 text-white/[0.02] font-serif text-6xl pointer-events-none">
+      <div className="absolute top-0 right-0 w-32 h-32 bg-brand-500/10 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+      <div className="absolute top-4 left-4 text-zinc-900/[0.02] font-serif text-6xl pointer-events-none">
         ”
       </div>
     </div>

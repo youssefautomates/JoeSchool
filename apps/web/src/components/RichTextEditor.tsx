@@ -333,10 +333,10 @@ export function RichTextEditor({ value, onChange, label, placeholder }: RichText
   };
 
   return (
-    <div className="flex flex-col gap-2 w-full font-cairo">
+    <div className="flex flex-col gap-2 w-full font-sans">
       {label && (
-        <label className="text-xs font-bold text-zinc-400 flex items-center gap-1.5">
-          <Sparkles className="w-3.5 h-3.5 text-rose-500" />
+        <label className="text-xs font-bold text-zinc-500 flex items-center gap-1.5">
+          <Sparkles className="w-3.5 h-3.5 text-yellow-500" />
           <span>{label}</span>
         </label>
       )}
@@ -349,15 +349,15 @@ export function RichTextEditor({ value, onChange, label, placeholder }: RichText
         className="hidden" 
       />
 
-      <div className="bg-[#07070b] border border-white/5 focus-within:border-rose-500/50 rounded-2xl overflow-hidden shadow-2xl transition-all flex flex-col">
+      <div className="bg-[#07070b] border border-zinc-200/60 focus-within:border-zinc-200/60 rounded-2xl overflow-hidden shadow-sm border border-zinc-200/60 transition-all flex flex-col">
         {/* TOOLBAR */}
-        <div className="flex flex-wrap items-center gap-1 p-2 bg-[#0a0a0f] border-b border-white/5 select-none relative z-20">
+        <div className="flex flex-wrap items-center gap-1 p-2 bg-slate-50 border-b border-zinc-200/60 select-none relative z-20">
           
           {/* Format Block Selector */}
           <select 
             onChange={handleFormatChange}
             defaultValue="<p>"
-            className="bg-[#0f0f15] border border-white/5 rounded-lg py-1 px-2 text-xs text-zinc-300 focus:outline-none focus:border-rose-500/30 cursor-pointer h-8 font-bold"
+            className="bg-slate-50 border border-zinc-200/60 rounded-2xl py-1 px-2 text-xs text-zinc-700 focus:outline-none focus:border-zinc-200/60 cursor-pointer h-8 font-bold"
             title="تنسيق الفقرة"
           >
             <option value="<p>">نص عادي (Normal)</option>
@@ -375,7 +375,7 @@ export function RichTextEditor({ value, onChange, label, placeholder }: RichText
               }
             }}
             defaultValue="Cairo"
-            className="bg-[#0f0f15] border border-white/5 rounded-lg py-1 px-2 text-xs text-zinc-300 focus:outline-none focus:border-rose-500/30 cursor-pointer h-8 font-bold"
+            className="bg-slate-50 border border-zinc-200/60 rounded-2xl py-1 px-2 text-xs text-zinc-700 focus:outline-none focus:border-zinc-200/60 cursor-pointer h-8 font-bold"
             title="نوع الخط"
           >
             <option value="Cairo">Cairo (الافتراضي)</option>
@@ -395,7 +395,7 @@ export function RichTextEditor({ value, onChange, label, placeholder }: RichText
               }
             }}
             defaultValue="16px"
-            className="bg-[#0f0f15] border border-white/5 rounded-lg py-1 px-2 text-xs text-zinc-300 focus:outline-none focus:border-rose-500/30 cursor-pointer h-8 font-bold"
+            className="bg-slate-50 border border-zinc-200/60 rounded-2xl py-1 px-2 text-xs text-zinc-700 focus:outline-none focus:border-zinc-200/60 cursor-pointer h-8 font-bold"
             title="حجم الخط"
           >
             <option value="12px">12px</option>
@@ -412,7 +412,7 @@ export function RichTextEditor({ value, onChange, label, placeholder }: RichText
           <button 
             type="button" 
             onClick={() => scaleFontSize("up")} 
-            className="p-2 text-zinc-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors cursor-pointer flex items-center justify-center font-black text-[10px]"
+            className="p-2 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100/40 rounded-2xl transition-colors cursor-pointer flex items-center justify-center font-black text-[10px]"
             title="تكبير الخط"
           >
             A+
@@ -420,19 +420,19 @@ export function RichTextEditor({ value, onChange, label, placeholder }: RichText
           <button 
             type="button" 
             onClick={() => scaleFontSize("down")} 
-            className="p-2 text-zinc-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors cursor-pointer flex items-center justify-center font-black text-[10px]"
+            className="p-2 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100/40 rounded-2xl transition-colors cursor-pointer flex items-center justify-center font-black text-[10px]"
             title="تصغير الخط"
           >
             A-
           </button>
 
-          <div className="w-px h-6 bg-white/5 mx-1 hidden sm:block" />
+          <div className="w-px h-6 bg-zinc-100/40 mx-1 hidden sm:block" />
 
           {/* History */}
           <button 
             type="button" 
             onClick={() => execCmd("undo")} 
-            className="p-2 text-zinc-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors cursor-pointer"
+            className="p-2 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100/40 rounded-2xl transition-colors cursor-pointer"
             title="تراجع"
           >
             <Undo className="w-3.5 h-3.5" />
@@ -440,21 +440,21 @@ export function RichTextEditor({ value, onChange, label, placeholder }: RichText
           <button 
             type="button" 
             onClick={() => execCmd("redo")} 
-            className="p-2 text-zinc-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors cursor-pointer"
+            className="p-2 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100/40 rounded-2xl transition-colors cursor-pointer"
             title="إعادة"
           >
             <Redo className="w-3.5 h-3.5" />
           </button>
 
-          <div className="w-px h-6 bg-white/5 mx-1" />
+          <div className="w-px h-6 bg-zinc-100/40 mx-1" />
 
           {/* Text Styles */}
           <button 
             type="button" 
             onClick={() => execCmd("bold")} 
             className={cn(
-              "p-2 rounded-lg transition-all cursor-pointer",
-              activeStates.bold ? "bg-rose-600 text-white shadow-lg shadow-rose-600/20" : "text-zinc-400 hover:text-white hover:bg-white/5"
+              "p-2 rounded-2xl transition-all cursor-pointer",
+              activeStates.bold ? "bg-brand-600 text-white shadow-sm border border-zinc-200/60 shadow-brand-600/20" : "text-zinc-500 hover:text-white hover:bg-zinc-100/40"
             )}
             title="خط عريض"
           >
@@ -464,8 +464,8 @@ export function RichTextEditor({ value, onChange, label, placeholder }: RichText
             type="button" 
             onClick={() => execCmd("italic")} 
             className={cn(
-              "p-2 rounded-lg transition-all cursor-pointer",
-              activeStates.italic ? "bg-rose-600 text-white shadow-lg shadow-rose-600/20" : "text-zinc-400 hover:text-white hover:bg-white/5"
+              "p-2 rounded-2xl transition-all cursor-pointer",
+              activeStates.italic ? "bg-brand-600 text-white shadow-sm border border-zinc-200/60 shadow-brand-600/20" : "text-zinc-500 hover:text-white hover:bg-zinc-100/40"
             )}
             title="خط مائل"
           >
@@ -475,8 +475,8 @@ export function RichTextEditor({ value, onChange, label, placeholder }: RichText
             type="button" 
             onClick={() => execCmd("underline")} 
             className={cn(
-              "p-2 rounded-lg transition-all cursor-pointer",
-              activeStates.underline ? "bg-rose-600 text-white shadow-lg shadow-rose-600/20" : "text-zinc-400 hover:text-white hover:bg-white/5"
+              "p-2 rounded-2xl transition-all cursor-pointer",
+              activeStates.underline ? "bg-brand-600 text-white shadow-sm border border-zinc-200/60 shadow-brand-600/20" : "text-zinc-500 hover:text-white hover:bg-zinc-100/40"
             )}
             title="تحته خط"
           >
@@ -486,23 +486,23 @@ export function RichTextEditor({ value, onChange, label, placeholder }: RichText
             type="button" 
             onClick={() => execCmd("strikeThrough")} 
             className={cn(
-              "p-2 rounded-lg transition-all cursor-pointer",
-              activeStates.strikethrough ? "bg-rose-600 text-white shadow-lg shadow-rose-600/20" : "text-zinc-400 hover:text-white hover:bg-white/5"
+              "p-2 rounded-2xl transition-all cursor-pointer",
+              activeStates.strikethrough ? "bg-brand-600 text-white shadow-sm border border-zinc-200/60 shadow-brand-600/20" : "text-zinc-500 hover:text-white hover:bg-zinc-100/40"
             )}
             title="يتوسطه خط"
           >
             <Strikethrough className="w-3.5 h-3.5" />
           </button>
 
-          <div className="w-px h-6 bg-white/5 mx-1" />
+          <div className="w-px h-6 bg-zinc-100/40 mx-1" />
 
           {/* Alignments */}
           <button 
             type="button" 
             onClick={() => execCmd("justifyLeft")} 
             className={cn(
-              "p-2 rounded-lg transition-all cursor-pointer",
-              activeStates.justifyLeft ? "bg-rose-600 text-white shadow-lg" : "text-zinc-400 hover:text-white hover:bg-white/5"
+              "p-2 rounded-2xl transition-all cursor-pointer",
+              activeStates.justifyLeft ? "bg-brand-600 text-white shadow-sm border border-zinc-200/60" : "text-zinc-500 hover:text-white hover:bg-zinc-100/40"
             )}
             title="محاذاة لليسار"
           >
@@ -512,8 +512,8 @@ export function RichTextEditor({ value, onChange, label, placeholder }: RichText
             type="button" 
             onClick={() => execCmd("justifyCenter")} 
             className={cn(
-              "p-2 rounded-lg transition-all cursor-pointer",
-              activeStates.justifyCenter ? "bg-rose-600 text-white shadow-lg" : "text-zinc-400 hover:text-white hover:bg-white/5"
+              "p-2 rounded-2xl transition-all cursor-pointer",
+              activeStates.justifyCenter ? "bg-brand-600 text-white shadow-sm border border-zinc-200/60" : "text-zinc-500 hover:text-white hover:bg-zinc-100/40"
             )}
             title="محاذاة للوسط"
           >
@@ -523,8 +523,8 @@ export function RichTextEditor({ value, onChange, label, placeholder }: RichText
             type="button" 
             onClick={() => execCmd("justifyRight")} 
             className={cn(
-              "p-2 rounded-lg transition-all cursor-pointer",
-              activeStates.justifyRight ? "bg-rose-600 text-white shadow-lg" : "text-zinc-400 hover:text-white hover:bg-white/5"
+              "p-2 rounded-2xl transition-all cursor-pointer",
+              activeStates.justifyRight ? "bg-brand-600 text-white shadow-sm border border-zinc-200/60" : "text-zinc-500 hover:text-white hover:bg-zinc-100/40"
             )}
             title="محاذاة لليمين"
           >
@@ -534,23 +534,23 @@ export function RichTextEditor({ value, onChange, label, placeholder }: RichText
             type="button" 
             onClick={() => execCmd("justifyFull")} 
             className={cn(
-              "p-2 rounded-lg transition-all cursor-pointer",
-              activeStates.justifyFull ? "bg-rose-600 text-white shadow-lg" : "text-zinc-400 hover:text-white hover:bg-white/5"
+              "p-2 rounded-2xl transition-all cursor-pointer",
+              activeStates.justifyFull ? "bg-brand-600 text-white shadow-sm border border-zinc-200/60" : "text-zinc-500 hover:text-white hover:bg-zinc-100/40"
             )}
             title="محاذاة كاملة"
           >
             <AlignJustify className="w-3.5 h-3.5" />
           </button>
 
-          <div className="w-px h-6 bg-white/5 mx-1" />
+          <div className="w-px h-6 bg-zinc-100/40 mx-1" />
 
           {/* Lists */}
           <button 
             type="button" 
             onClick={() => execCmd("insertUnorderedList")} 
             className={cn(
-              "p-2 rounded-lg transition-all cursor-pointer",
-              activeStates.insertUnorderedList ? "bg-rose-600 text-white shadow-lg" : "text-zinc-400 hover:text-white hover:bg-white/5"
+              "p-2 rounded-2xl transition-all cursor-pointer",
+              activeStates.insertUnorderedList ? "bg-brand-600 text-white shadow-sm border border-zinc-200/60" : "text-zinc-500 hover:text-white hover:bg-zinc-100/40"
             )}
             title="قائمة نقطية"
           >
@@ -560,33 +560,33 @@ export function RichTextEditor({ value, onChange, label, placeholder }: RichText
             type="button" 
             onClick={() => execCmd("insertOrderedList")} 
             className={cn(
-              "p-2 rounded-lg transition-all cursor-pointer",
-              activeStates.insertOrderedList ? "bg-rose-600 text-white shadow-lg" : "text-zinc-400 hover:text-white hover:bg-white/5"
+              "p-2 rounded-2xl transition-all cursor-pointer",
+              activeStates.insertOrderedList ? "bg-brand-600 text-white shadow-sm border border-zinc-200/60" : "text-zinc-500 hover:text-white hover:bg-zinc-100/40"
             )}
             title="قائمة رقمية"
           >
             <ListOrdered className="w-3.5 h-3.5" />
           </button>
 
-          <div className="w-px h-6 bg-white/5 mx-1" />
+          <div className="w-px h-6 bg-zinc-100/40 mx-1" />
 
           {/* Colors */}
-          <label className="p-2 text-zinc-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors cursor-pointer relative flex items-center justify-center" title="لون النص">
+          <label className="p-2 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100/40 rounded-2xl transition-colors cursor-pointer relative flex items-center justify-center" title="لون النص">
             <Palette className="w-3.5 h-3.5" />
             <input type="color" onChange={handleTextColorChange} className="absolute inset-0 opacity-0 cursor-pointer w-full h-full" />
           </label>
-          <label className="p-2 text-zinc-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors cursor-pointer relative flex items-center justify-center" title="لون خلفية النص">
+          <label className="p-2 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100/40 rounded-2xl transition-colors cursor-pointer relative flex items-center justify-center" title="لون خلفية النص">
             <Highlighter className="w-3.5 h-3.5" />
             <input type="color" onChange={handleBgColorChange} defaultValue="#ffff00" className="absolute inset-0 opacity-0 cursor-pointer w-full h-full" />
           </label>
 
-          <div className="w-px h-6 bg-white/5 mx-1" />
+          <div className="w-px h-6 bg-zinc-100/40 mx-1" />
 
           {/* Insertions */}
           <button 
             type="button" 
             onClick={handleAddLink} 
-            className="p-2 text-zinc-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors cursor-pointer"
+            className="p-2 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100/40 rounded-2xl transition-colors cursor-pointer"
             title="إدراج رابط تشعبي"
           >
             <LinkIcon className="w-3.5 h-3.5" />
@@ -598,8 +598,8 @@ export function RichTextEditor({ value, onChange, label, placeholder }: RichText
               type="button" 
               onClick={() => setShowMediaMenu(!showMediaMenu)} 
               className={cn(
-                "p-2 rounded-lg transition-all cursor-pointer flex items-center justify-center",
-                showMediaMenu ? "bg-rose-600 text-white shadow-lg" : "text-zinc-400 hover:text-white hover:bg-white/5"
+                "p-2 rounded-2xl transition-all cursor-pointer flex items-center justify-center",
+                showMediaMenu ? "bg-brand-600 text-white shadow-sm border border-zinc-200/60" : "text-zinc-500 hover:text-white hover:bg-zinc-100/40"
               )}
               title="إدراج صورة أو فيديو من الجهاز"
             >
@@ -612,19 +612,19 @@ export function RichTextEditor({ value, onChange, label, placeholder }: RichText
                   className="fixed inset-0 z-40" 
                   onClick={() => setShowMediaMenu(false)}
                 />
-                <div className="absolute right-0 top-full mt-1.5 w-48 bg-[#0a0a0f] border border-white/10 rounded-xl shadow-2xl z-50 overflow-hidden flex flex-col p-1 animate-in fade-in slide-in-from-top-1 duration-200">
+                <div className="absolute right-0 top-full mt-1.5 w-48 bg-slate-50 border border-zinc-200 rounded-2xl shadow-sm border border-zinc-200/60 z-50 overflow-hidden flex flex-col p-1 animate-in fade-in slide-in-from-top-1 duration-200">
                   <button
                     type="button"
                     onClick={handleAddImage}
-                    className="flex items-center gap-2 px-3 py-2 text-[11px] text-zinc-300 hover:text-white hover:bg-white/5 rounded-lg transition-colors cursor-pointer text-right w-full font-bold"
+                    className="flex items-center gap-2 px-3 py-2 text-[11px] text-zinc-700 hover:text-zinc-900 hover:bg-zinc-100/40 rounded-2xl transition-colors cursor-pointer text-right w-full font-bold"
                   >
-                    <ImageIcon className="w-3.5 h-3.5 text-rose-500" />
+                    <ImageIcon className="w-3.5 h-3.5 text-yellow-500" />
                     إدراج صورة من رابط
                   </button>
                   <button
                     type="button"
                     onClick={() => triggerFileUpload("image")}
-                    className="flex items-center gap-2 px-3 py-2 text-[11px] text-zinc-300 hover:text-white hover:bg-white/5 rounded-lg transition-colors cursor-pointer text-right w-full font-bold"
+                    className="flex items-center gap-2 px-3 py-2 text-[11px] text-zinc-700 hover:text-zinc-900 hover:bg-zinc-100/40 rounded-2xl transition-colors cursor-pointer text-right w-full font-bold"
                   >
                     <ImageIcon className="w-3.5 h-3.5 text-emerald-500" />
                     رفع صورة من جهازك
@@ -632,7 +632,7 @@ export function RichTextEditor({ value, onChange, label, placeholder }: RichText
                   <button
                     type="button"
                     onClick={() => triggerFileUpload("video")}
-                    className="flex items-center gap-2 px-3 py-2 text-[11px] text-zinc-300 hover:text-white hover:bg-white/5 rounded-lg transition-colors cursor-pointer text-right w-full font-bold"
+                    className="flex items-center gap-2 px-3 py-2 text-[11px] text-zinc-700 hover:text-zinc-900 hover:bg-zinc-100/40 rounded-2xl transition-colors cursor-pointer text-right w-full font-bold"
                   >
                     <VideoIcon className="w-3.5 h-3.5 text-blue-500" />
                     رفع فيديو من جهازك
@@ -646,7 +646,7 @@ export function RichTextEditor({ value, onChange, label, placeholder }: RichText
           <button 
             type="button" 
             onClick={() => execCmd("removeFormat")} 
-            className="p-2 text-zinc-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors cursor-pointer ml-auto"
+            className="p-2 text-zinc-500 hover:text-red-400 hover:bg-red-500/10 rounded-2xl transition-colors cursor-pointer ml-auto"
             title="مسح التنسيقات"
           >
             <Trash2 className="w-3.5 h-3.5" />
@@ -681,25 +681,25 @@ export function RichTextEditor({ value, onChange, label, placeholder }: RichText
             onKeyUp={updateActiveStates}
             onMouseUp={updateActiveStates}
             data-placeholder={placeholder || "اكتب هنا تفاصيل المحتوى الدراسي الفاخر..."}
-            className="rich-editor-content min-h-[160px] max-h-[350px] p-4 text-sm text-zinc-200 outline-none overflow-y-auto scrollbar-thin scrollbar-thumb-rose-600/20 bg-black/25 leading-relaxed text-right w-full font-sans rtl select-text"
+            className="rich-editor-content min-h-[160px] max-h-[350px] p-4 text-sm text-zinc-800 outline-none overflow-y-auto scrollbar-thin scrollbar-thumb-brand-600/20 bg-black/25 leading-relaxed text-right w-full font-sans rtl select-text"
             style={{ direction: 'rtl' }}
           />
 
           {selectedImg && imgStyle && (
             <div 
-              className="image-toolbar-container absolute bg-[#0b0b12]/95 backdrop-blur-md border border-white/10 rounded-xl p-2.5 shadow-2xl flex flex-wrap items-center gap-2 z-30 select-none animate-in fade-in zoom-in-95 duration-150"
+              className="image-toolbar-container absolute bg-white/95 backdrop-blur-md border border-zinc-200 rounded-2xl p-2.5 shadow-sm border border-zinc-200/60 flex flex-wrap items-center gap-2 z-30 select-none animate-in fade-in zoom-in-95 duration-150"
               style={{ 
                 top: `${imgStyle.top}px`, 
                 left: `${imgStyle.left}px`,
                 direction: "rtl"
               }}
             >
-              <span className="text-[10px] text-zinc-400 font-bold px-1.5 border-l border-white/10">تحجيم الصورة:</span>
+              <span className="text-[10px] text-zinc-500 font-bold px-1.5 border-l border-zinc-200">تحجيم الصورة:</span>
               
               <button 
                 type="button" 
                 onClick={() => resizeImage(1.15)} 
-                className="px-2.5 py-1 bg-white/5 hover:bg-rose-600 hover:text-white rounded-lg text-xs font-bold text-zinc-300 transition-colors"
+                className="px-2.5 py-1 bg-zinc-100/40 hover:bg-brand-600 hover:text-white rounded-2xl text-xs font-bold text-white transition-colors"
                 title="تكبير الحجم"
               >
                 تكبير (+)
@@ -708,59 +708,59 @@ export function RichTextEditor({ value, onChange, label, placeholder }: RichText
               <button 
                 type="button" 
                 onClick={() => resizeImage(0.85)} 
-                className="px-2.5 py-1 bg-white/5 hover:bg-rose-600 hover:text-white rounded-lg text-xs font-bold text-zinc-300 transition-colors"
+                className="px-2.5 py-1 bg-zinc-100/40 hover:bg-brand-600 hover:text-white rounded-2xl text-xs font-bold text-white transition-colors"
                 title="تصغير الحجم"
               >
                 تصغير (-)
               </button>
 
-              <div className="w-px h-4 bg-white/10 mx-0.5" />
+              <div className="w-px h-4 bg-zinc-100/80 mx-0.5" />
 
               {/* Slider Resizer */}
               <div className="flex items-center gap-1.5">
-                <span className="text-[10px] text-zinc-400">العرض:</span>
+                <span className="text-[10px] text-zinc-500">العرض:</span>
                 <input 
                   type="range" 
                   min="10" 
                   max="100" 
                   value={getImgWidthPercent()} 
                   onChange={(e) => setImageWidthPercent(Number(e.target.value))}
-                  className="w-20 h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-rose-500" 
+                  className="w-20 h-1 bg-zinc-100/80 rounded-2xl appearance-none cursor-pointer accent-brand-500" 
                 />
-                <span className="text-[9px] text-zinc-400 font-mono w-6 text-left">{getImgWidthPercent()}%</span>
+                <span className="text-[9px] text-zinc-500 font-mono w-6 text-left">{getImgWidthPercent()}%</span>
               </div>
 
-              <div className="w-px h-4 bg-white/10 mx-0.5" />
+              <div className="w-px h-4 bg-zinc-100/80 mx-0.5" />
 
               <button 
                 type="button" 
                 onClick={() => setImageWidthPercent(25)} 
-                className="px-2 py-0.5 bg-white/5 hover:bg-white/10 rounded-md text-[10px] text-zinc-400 hover:text-zinc-200 transition-colors font-mono"
+                className="px-2 py-0.5 bg-zinc-100/40 hover:bg-zinc-100/80 rounded-xl text-[10px] text-zinc-500 hover:text-zinc-800 transition-colors font-mono"
               >
                 25%
               </button>
               <button 
                 type="button" 
                 onClick={() => setImageWidthPercent(50)} 
-                className="px-2 py-0.5 bg-white/5 hover:bg-white/10 rounded-md text-[10px] text-zinc-400 hover:text-zinc-200 transition-colors font-mono"
+                className="px-2 py-0.5 bg-zinc-100/40 hover:bg-zinc-100/80 rounded-xl text-[10px] text-zinc-500 hover:text-zinc-800 transition-colors font-mono"
               >
                 50%
               </button>
               <button 
                 type="button" 
                 onClick={() => setImageWidthPercent(100)} 
-                className="px-2 py-0.5 bg-white/5 hover:bg-white/10 rounded-md text-[10px] text-zinc-400 hover:text-zinc-200 transition-colors font-mono"
+                className="px-2 py-0.5 bg-zinc-100/40 hover:bg-zinc-100/80 rounded-xl text-[10px] text-zinc-500 hover:text-zinc-800 transition-colors font-mono"
               >
                 100%
               </button>
 
-              <div className="w-px h-4 bg-white/10 mx-0.5" />
-              <span className="text-[10px] text-zinc-400 font-bold px-1">المحاذاة:</span>
+              <div className="w-px h-4 bg-zinc-100/80 mx-0.5" />
+              <span className="text-[10px] text-zinc-500 font-bold px-1">المحاذاة:</span>
 
               <button 
                 type="button" 
                 onClick={() => setImageAlign("left")} 
-                className="px-2 py-1 bg-white/5 hover:bg-white/10 rounded-lg text-[10px] text-zinc-300 transition-colors font-bold"
+                className="px-2 py-1 bg-zinc-100/40 hover:bg-zinc-100/80 rounded-2xl text-[10px] text-zinc-700 transition-colors font-bold"
                 title="محاذاة لليسار"
               >
                 يسار
@@ -768,7 +768,7 @@ export function RichTextEditor({ value, onChange, label, placeholder }: RichText
               <button 
                 type="button" 
                 onClick={() => setImageAlign("center")} 
-                className="px-2 py-1 bg-white/5 hover:bg-white/10 rounded-lg text-[10px] text-zinc-300 transition-colors font-bold"
+                className="px-2 py-1 bg-zinc-100/40 hover:bg-zinc-100/80 rounded-2xl text-[10px] text-zinc-700 transition-colors font-bold"
                 title="محاذاة للوسط"
               >
                 وسط
@@ -776,13 +776,13 @@ export function RichTextEditor({ value, onChange, label, placeholder }: RichText
               <button 
                 type="button" 
                 onClick={() => setImageAlign("right")} 
-                className="px-2 py-1 bg-white/5 hover:bg-white/10 rounded-lg text-[10px] text-zinc-300 transition-colors font-bold"
+                className="px-2 py-1 bg-zinc-100/40 hover:bg-zinc-100/80 rounded-2xl text-[10px] text-zinc-700 transition-colors font-bold"
                 title="محاذاة لليمين"
               >
                 يمين
               </button>
 
-              <div className="w-px h-4 bg-white/10 mx-0.5" />
+              <div className="w-px h-4 bg-zinc-100/80 mx-0.5" />
 
               <button 
                 type="button" 
@@ -793,7 +793,7 @@ export function RichTextEditor({ value, onChange, label, placeholder }: RichText
                   handleInput();
                   toast.success("تم حذف الصورة بنجاح.");
                 }} 
-                className="p-1.5 text-red-400 hover:text-white hover:bg-red-600 rounded-lg transition-colors"
+                className="p-1.5 text-red-400 hover:text-zinc-900 hover:bg-red-600 rounded-2xl transition-colors"
                 title="حذف الصورة"
               >
                 <Trash2 className="w-3.5 h-3.5" />

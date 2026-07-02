@@ -842,18 +842,18 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
 
   if (isFetching) {
     return (
-      <div className="min-h-screen bg-[#050505] flex items-center justify-center">
-        <div className="w-12 h-12 border-4 border-rose-600/30 border-t-rose-600 rounded-full animate-spin" />
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="w-12 h-12 border-4 border-brand-600/30 border-t-brand-600 rounded-full animate-spin" />
       </div>
     );
   }
 
   if (!product) {
     return (
-      <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center text-white font-cairo">
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center text-zinc-900 font-sans">
         <Package className="w-16 h-16 text-zinc-700 mb-4" />
-        <h1 className="text-3xl font-cairo font-bold mb-4">عذراً، المنتج غير متاح للcheckout</h1>
-        <Link href="/" className="text-rose-400 hover:text-rose-300 underline">العودة للرئيسية</Link>
+        <h1 className="text-3xl font-sans font-bold mb-4">عذراً، المنتج غير متاح للcheckout</h1>
+        <Link href="/" className="text-yellow-500 hover:text-brand-300 underline">العودة للرئيسية</Link>
       </div>
     );
   }
@@ -880,7 +880,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
 
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white font-cairo">
+    <div className="min-h-screen bg-white text-zinc-900 font-sans">
       <Navbar />
 
       {/* Instapay Return Banner - Shows when user returns from external Instapay payment */}
@@ -888,7 +888,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="fixed top-0 left-0 right-0 z-[200] bg-gradient-to-r from-purple-900/95 to-purple-800/95 border-b border-purple-500/30 backdrop-blur-xl p-3 text-center font-cairo"
+          className="fixed top-0 left-0 right-0 z-[200] bg-gradient-to-r from-purple-900/95 to-purple-800/95 border-b border-purple-500/30 backdrop-blur-xl p-3 text-center font-sans"
         >
           <div className="container mx-auto flex items-center justify-center gap-3 flex-wrap">
             <div className="flex items-center gap-2 text-purple-200 text-sm font-bold">
@@ -903,7 +903,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                 setShowInstapayModal(true);
                 setInstapayReturnBanner(false);
               }}
-              className="bg-purple-500 hover:bg-purple-400 text-white text-xs font-bold px-4 py-1.5 rounded-lg transition-all cursor-pointer"
+              className="bg-purple-500 hover:bg-purple-400 text-zinc-900 text-xs font-bold px-4 py-1.5 rounded-2xl transition-all cursor-pointer"
             >
               رفع إثبات الدفع الآن
             </button>
@@ -912,7 +912,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                 setInstapayReturnBanner(false);
                 sessionStorage.removeItem(`instapay_pending_${resolvedParams.id}`);
               }}
-              className="text-purple-400 hover:text-white text-xs transition-colors cursor-pointer"
+              className="text-purple-400 hover:text-zinc-900 text-xs transition-colors cursor-pointer"
             >
               ✕
             </button>
@@ -922,7 +922,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
 
       <main className="pt-32 pb-24 relative overflow-hidden">
         {/* Glow Effects */}
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-rose-600/10 rounded-full blur-[100px] pointer-events-none" />
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-brand-600/10 rounded-full blur-[100px] pointer-events-none" />
 
         <div className="container mx-auto px-4 max-w-6xl relative z-10">
           <div className="flex flex-col items-center justify-center text-center gap-4 mb-8">
@@ -936,13 +936,13 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                           : `/product/${product.slug}`)) 
                   : `/checkout/${resolvedParams.id}`
               } 
-              className="inline-flex items-center text-zinc-500 hover:text-white font-cairo transition-all group text-sm"
+              className="inline-flex items-center text-zinc-500 hover:text-zinc-900 font-sans transition-all group text-sm"
             >
               <ChevronRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
               العودة لتفاصيل المنتج
             </Link>
 
-            <h1 className="text-3xl sm:text-4xl font-cairo font-black text-transparent bg-clip-text bg-gradient-to-r from-[#ff0f53] via-[#ff2d6b] to-white mt-1 drop-shadow-[0_2px_15px_rgba(255,15,83,0.2)] select-none">
+            <h1 className="text-3xl sm:text-4xl font-sans font-black text-transparent bg-clip-text bg-gradient-to-r from-[#ff0f53] via-[#ff2d6b] to-white mt-1 shadow-none select-none">
               إتمـام الطلب
             </h1>
           </div>
@@ -954,56 +954,56 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
               <motion.div 
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="bg-[#0a0a0f]/80 backdrop-blur-2xl rounded-[2rem] p-8 border border-rose-500/20 shadow-2xl relative overflow-hidden text-center space-y-6 max-w-3xl mx-auto"
+                className="bg-slate-50/80 backdrop-blur-2xl rounded-[2rem] p-8 border border-zinc-200/60 shadow-sm border border-zinc-200/60 relative overflow-hidden text-center space-y-6 max-w-3xl mx-auto"
               >
-                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-rose-500 to-rose-600" />
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-brand-500 to-brand-600" />
                 
-                <div className="w-20 h-20 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-500 mx-auto">
+                <div className="w-20 h-20 rounded-2xl bg-brand-500/10 border border-zinc-200/60 flex items-center justify-center text-yellow-500 mx-auto">
                   <Sparkles className="w-10 h-10 animate-pulse" />
                 </div>
                 
                 {user ? (
                   <>
-                    <h2 className="text-2xl font-cairo font-bold text-white leading-snug">لقد قمت بشراء هذا الكورس وإنشاء حساب بالفعل.</h2>
-                    <p className="text-zinc-400 text-sm max-w-md mx-auto font-cairo">
+                    <h2 className="text-2xl font-sans font-bold text-zinc-900 leading-snug">لقد قمت بشراء هذا الكورس وإنشاء حساب بالفعل.</h2>
+                    <p className="text-zinc-500 text-sm max-w-md mx-auto font-cairo">
                       يمكنك متابعة التعلم مباشرة.
                     </p>
                     
                     <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
                       <Link
                         href={enrolledCourseSlug ? `/learn/${enrolledCourseSlug}/${firstLessonSlug || ""}` : "/dashboard"}
-                        className="h-12 px-8 bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white font-cairo font-bold text-sm rounded-xl flex items-center justify-center gap-2 shadow-[0_4px_14px_rgba(244,63,94,0.25)] transition-all active:scale-[0.98] cursor-pointer"
+                        className="h-12 px-8 bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700 text-white font-sans font-bold text-sm rounded-2xl flex items-center justify-center gap-2 shadow-[0_4px_14px_rgba(244,63,94,0.25)] transition-all active:scale-[0.98] cursor-pointer"
                       >
                         <span>🎓 اذهب إلى الكورس الآن</span>
                       </Link>
                       
                       <Link
                         href="/dashboard"
-                        className="h-12 px-6 bg-white/5 hover:bg-white/10 text-white font-cairo font-bold text-sm rounded-xl flex items-center justify-center gap-2 border border-white/10 transition-colors cursor-pointer"
+                        className="h-12 px-6 bg-zinc-100/40 hover:bg-zinc-100/80 text-zinc-900 font-sans font-bold text-sm rounded-2xl flex items-center justify-center gap-2 border border-zinc-200 transition-colors cursor-pointer"
                       >
-                        <LayoutDashboard className="w-4 h-4 text-zinc-400" />
+                        <LayoutDashboard className="w-4 h-4 text-zinc-500" />
                         <span>لوحة التحكم</span>
                       </Link>
                     </div>
                   </>
                 ) : (
                   <>
-                    <h2 className="text-2xl font-cairo font-bold text-white leading-snug">تم العثور على اشتراك سابق لهذا البريد الإلكتروني.</h2>
-                    <p className="text-zinc-400 text-sm max-w-md mx-auto font-cairo">
+                    <h2 className="text-2xl font-sans font-bold text-zinc-900 leading-snug">تم العثور على اشتراك سابق لهذا البريد الإلكتروني.</h2>
+                    <p className="text-zinc-500 text-sm max-w-md mx-auto font-cairo">
                       لقد قمت بشراء هذا الكورس وإنشاء حساب بالفعل. يرجى تسجيل الدخول للوصول إلى محتوى الكورس.
                     </p>
                     
                     <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
                       <Link
                         href={`/login?email=${encodeURIComponent(emailValue || "")}&redirect=${encodeURIComponent(enrolledCourseSlug ? `/learn/${enrolledCourseSlug}/${firstLessonSlug || ""}` : `/checkout/${resolvedParams.id}`)}`}
-                        className="h-12 px-8 bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white font-cairo font-bold text-sm rounded-xl flex items-center justify-center gap-2 shadow-[0_4px_14px_rgba(244,63,94,0.25)] transition-all active:scale-[0.98] cursor-pointer"
+                        className="h-12 px-8 bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700 text-white font-sans font-bold text-sm rounded-2xl flex items-center justify-center gap-2 shadow-[0_4px_14px_rgba(244,63,94,0.25)] transition-all active:scale-[0.98] cursor-pointer"
                       >
                         <span>🔑 تسجيل الدخول</span>
                       </Link>
                       
                       <Link
                         href="/login/forgot-password"
-                        className="h-12 px-6 bg-white/5 hover:bg-white/10 text-white font-cairo font-bold text-sm rounded-xl flex items-center justify-center gap-2 border border-white/10 transition-colors cursor-pointer"
+                        className="h-12 px-6 bg-zinc-100/40 hover:bg-zinc-100/80 text-zinc-900 font-sans font-bold text-sm rounded-2xl flex items-center justify-center gap-2 border border-zinc-200 transition-colors cursor-pointer"
                       >
                         <span>🔒 نسيت كلمة المرور</span>
                       </Link>
@@ -1019,31 +1019,31 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                   <div className="lg:col-span-8 space-y-4 md:space-y-6">
                     
                     {/* Personal Information */}
-                    <div className="bg-[#0a0a0f]/80 backdrop-blur-2xl border border-white/5 rounded-3xl p-6 sm:p-8 hover:border-white/10 transition-all duration-300 shadow-[0_8px_32px_rgba(0,0,0,0.37)]">
+                    <div className="bg-slate-50/80 backdrop-blur-2xl border border-zinc-200/60 rounded-3xl p-6 sm:p-8 hover:border-zinc-200 transition-all duration-300 shadow-[0_8px_32px_rgba(0,0,0,0.37)]">
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {/* Full Name */}
                         <div className="space-y-2">
-                          <Label className="font-cairo font-bold text-zinc-400 text-sm">الاسم بالكامل *</Label>
+                          <Label className="font-sans font-bold text-zinc-500 text-sm">الاسم بالكامل *</Label>
                           <Input 
                             placeholder="ادخل اسمك لإنشاء الحساب" 
                             className={cn(
-                              "h-12 rounded-lg bg-white/[0.02] border text-white text-sm font-cairo hover:bg-white/[0.05] focus:bg-white/[0.07] focus:ring-1 focus:ring-rose-500/20 focus:border-rose-500/40 transition-all text-right pr-4 pl-4",
+                              "h-12 rounded-2xl bg-zinc-50/70 border text-zinc-900 text-sm font-sans hover:bg-zinc-100/50 focus:bg-white/[0.07] focus:ring-1 focus:ring-brand-500/20 focus:border-zinc-200/60 transition-all text-right pr-4 pl-4",
                               fullNameValue && fullNameValue.length > 0
                                 ? (errors.fullName 
                                     ? "border-red-500/40 focus:border-red-500 focus:ring-red-500/20" 
                                     : "border-emerald-500/40 focus:border-emerald-500 focus:ring-emerald-500/20")
-                                : "border-white/10 focus:border-white/30"
+                                : "border-zinc-200 focus:border-zinc-300"
                             )}
                             disabled={isLoading}
                             {...register("fullName")}
                           />
-                          {errors.fullName && <p className="text-[10px] text-red-400 font-cairo flex items-center gap-1 mt-1"><ShieldAlert className="w-3 h-3" /> {errors.fullName.message}</p>}
+                          {errors.fullName && <p className="text-[10px] text-red-400 font-sans flex items-center gap-1 mt-1"><ShieldAlert className="w-3 h-3" /> {errors.fullName.message}</p>}
                         </div>
 
                         {/* Email */}
                         <div className="space-y-2">
-                          <Label className="font-cairo font-bold text-zinc-400 text-sm">البريد الإلكتروني *</Label>
+                          <Label className="font-sans font-bold text-zinc-500 text-sm">البريد الإلكتروني *</Label>
                           <div className="relative">
                             <Mail 
                               className={cn(
@@ -1058,12 +1058,12 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                               type="email"
                               dir="ltr"
                               className={cn(
-                                "h-12 rounded-lg bg-white/[0.02] border text-white text-sm font-cairo hover:bg-white/[0.05] focus:bg-white/[0.07] focus:ring-1 focus:ring-rose-500/20 focus:border-rose-500/40 transition-all pl-11",
+                                "h-12 rounded-2xl bg-zinc-50/70 border text-zinc-900 text-sm font-sans hover:bg-zinc-100/50 focus:bg-white/[0.07] focus:ring-1 focus:ring-brand-500/20 focus:border-zinc-200/60 transition-all pl-11",
                                 emailValue && emailValue.length > 0
                                   ? (errors.email 
                                       ? "border-red-500/40 focus:border-red-500 focus:ring-red-500/20" 
                                       : "border-emerald-500/40 focus:border-emerald-500 focus:ring-emerald-500/20")
-                                  : "border-white/10 focus:border-white/30"
+                                  : "border-zinc-200 focus:border-zinc-300"
                               )}
                               disabled={isLoading}
                               {...register("email", {
@@ -1071,13 +1071,13 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                               })}
                             />
                           </div>
-                          {errors.email && <p className="text-xs text-red-400 font-cairo flex items-center gap-1 mt-1"><ShieldAlert className="w-3 h-3" /> {errors.email.message}</p>}
+                          {errors.email && <p className="text-xs text-red-400 font-sans flex items-center gap-1 mt-1"><ShieldAlert className="w-3 h-3" /> {errors.email.message}</p>}
                           {emailStatus?.exists && !emailStatus?.ownsCourse && (
-                            <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 p-4 rounded-xl flex items-start gap-3 font-cairo text-sm mt-3 text-right">
+                            <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 p-4 rounded-2xl flex items-start gap-3 font-sans text-sm mt-3 text-right">
                               <Sparkles className="w-5 h-5 shrink-0 mt-0.5 animate-pulse" />
                               <div>
                                 <p className="font-bold">مرحباً بك مجدداً!</p>
-                                <p className="text-zinc-300 text-xs mt-1">
+                                <p className="text-zinc-700 text-xs mt-1">
                                   هذا البريد الإلكتروني مسجل لدينا بالفعل. سيتم ربط هذا الكورس بحسابك الحالي فور إتمام الدفع دون الحاجة لإنشاء حساب جديد.
                                 </p>
                               </div>
@@ -1090,7 +1090,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
 
                       <style>{`
                         .react-tel-input {
-                          font-family: var(--font-cairo), sans-serif;
+                          font-family: var(--font-sans), sans-serif;
                           width: 100%;
                         }
                         .react-tel-input .form-control {
@@ -1184,10 +1184,10 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
 
                     {/* Payment Method Selector */}
                     {!(appliedCoupon && appliedCoupon.percent === 100) && (
-                      <div className="bg-[#0a0a0f]/80 backdrop-blur-2xl border border-white/5 rounded-3xl p-5 md:p-8 hover:border-white/10 transition-all duration-300 shadow-[0_8px_32px_rgba(0,0,0,0.37)]">
+                      <div className="bg-slate-50/80 backdrop-blur-2xl border border-zinc-200/60 rounded-3xl p-5 md:p-8 hover:border-zinc-200 transition-all duration-300 shadow-[0_8px_32px_rgba(0,0,0,0.37)]">
                         <div className="flex items-center justify-start gap-2.5 mb-5 select-none" dir="rtl">
                           <CreditCard className="w-5 h-5 text-[#ff0f53] shrink-0" />
-                          <h3 className="font-cairo font-bold text-white text-base">اختر طريقة الدفع</h3>
+                          <h3 className="font-sans font-bold text-zinc-900 text-base">اختر طريقة الدفع</h3>
                         </div>
 
                         <div className="flex flex-col gap-3 w-full">
@@ -1197,11 +1197,11 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                             whileTap={{ scale: 0.99 }}
                             onClick={() => setPaymentMethod("card")}
                             className={cn(
-                              "relative cursor-pointer rounded-xl border transition-all duration-300 select-none",
+                              "relative cursor-pointer rounded-2xl border transition-all duration-300 select-none",
                               "flex flex-row items-center justify-between gap-2 sm:gap-4 h-[70px] px-3 sm:px-4 py-3 w-full",
                               paymentMethod === "card" 
-                                ? "border-[#D6004B] bg-[#D6004B]/5 shadow-[0_0_20px_rgba(214,0,75,0.12)]" 
-                                : "border-white/5 bg-white/[0.01] hover:border-white/10 hover:bg-white/[0.02]"
+                                ? "border-[#1D4ED8] bg-[#1D4ED8]/5 shadow-[0_0_20px_rgba(29, 78, 216,0.12)]" 
+                                : "border-zinc-200/60 bg-zinc-50/40 hover:border-zinc-200 hover:bg-zinc-50/70"
                             )}
                             dir="rtl"
                           >
@@ -1210,14 +1210,14 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                               {/* Radio indicator */}
                               <div className={cn(
                                 "w-5 h-5 rounded-full border flex items-center justify-center transition-all shrink-0",
-                                paymentMethod === "card" ? "border-[#D6004B] bg-[#D6004B]/10" : "border-white/10 bg-white/5"
+                                paymentMethod === "card" ? "border-[#1D4ED8] bg-[#1D4ED8]/10" : "border-zinc-200 bg-zinc-100/40"
                               )}>
-                                {paymentMethod === "card" && <div className="w-2.5 h-2.5 rounded-full bg-[#D6004B]" />}
+                                {paymentMethod === "card" && <div className="w-2.5 h-2.5 rounded-full bg-[#1D4ED8]" />}
                               </div>
                               
                               {/* Text */}
                               <div className="text-right">
-                                <h4 className={cn("font-bold text-sm sm:text-base transition-colors leading-tight whitespace-nowrap", paymentMethod === "card" ? "text-white" : "text-zinc-300")}>
+                                <h4 className={cn("font-bold text-sm sm:text-base transition-colors leading-tight whitespace-nowrap", paymentMethod === "card" ? "text-zinc-900" : "text-zinc-700")}>
                                   البطاقات البنكية
                                 </h4>
                               </div>
@@ -1259,11 +1259,11 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                               whileTap={{ scale: 0.99 }}
                               onClick={() => setPaymentMethod("wallet")}
                               className={cn(
-                                "relative cursor-pointer rounded-xl border transition-all duration-300 select-none",
+                                "relative cursor-pointer rounded-2xl border transition-all duration-300 select-none",
                                 "flex flex-col w-full px-3 sm:px-4 py-0",
                                 paymentMethod === "wallet" 
-                                  ? "border-[#D6004B] bg-[#D6004B]/5 shadow-[0_0_20px_rgba(214,0,75,0.12)]" 
-                                  : "border-white/5 bg-white/[0.01] hover:border-white/10 hover:bg-white/[0.02]"
+                                  ? "border-[#1D4ED8] bg-[#1D4ED8]/5 shadow-[0_0_20px_rgba(29, 78, 216,0.12)]" 
+                                  : "border-zinc-200/60 bg-zinc-50/40 hover:border-zinc-200 hover:bg-zinc-50/70"
                               )}
                               dir="rtl"
                             >
@@ -1273,14 +1273,14 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                                   {/* Radio indicator */}
                                   <div className={cn(
                                     "w-5 h-5 rounded-full border flex items-center justify-center transition-all shrink-0",
-                                    paymentMethod === "wallet" ? "border-[#D6004B] bg-[#D6004B]/10" : "border-white/10 bg-white/5"
+                                    paymentMethod === "wallet" ? "border-[#1D4ED8] bg-[#1D4ED8]/10" : "border-zinc-200 bg-zinc-100/40"
                                   )}>
-                                    {paymentMethod === "wallet" && <div className="w-2.5 h-2.5 rounded-full bg-[#D6004B]" />}
+                                    {paymentMethod === "wallet" && <div className="w-2.5 h-2.5 rounded-full bg-[#1D4ED8]" />}
                                   </div>
                                   
                                   {/* Text */}
                                   <div className="text-right">
-                                    <h4 className={cn("font-bold text-sm sm:text-base transition-colors leading-tight whitespace-nowrap", paymentMethod === "wallet" ? "text-white" : "text-zinc-300")}>
+                                    <h4 className={cn("font-bold text-sm sm:text-base transition-colors leading-tight whitespace-nowrap", paymentMethod === "wallet" ? "text-zinc-900" : "text-zinc-700")}>
                                       محفظة إلكترونية
                                     </h4>
                                   </div>
@@ -1315,23 +1315,23 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                               {/* Expandable Inner Content (Input & Helper Text) */}
                               <div className={cn(
                                 "transition-all duration-500 ease-in-out overflow-hidden w-full",
-                                paymentMethod === "wallet" ? "max-h-[200px] opacity-100 pb-4 pt-4 border-t border-white/5" : "max-h-0 opacity-0 pointer-events-none"
+                                paymentMethod === "wallet" ? "max-h-[200px] opacity-100 pb-4 pt-4 border-t border-zinc-200/60" : "max-h-0 opacity-0 pointer-events-none"
                               )}>
                                 <div className="space-y-4">
                                   <div className="space-y-2">
                                     <div className={cn(
-                                      "relative flex items-center rounded-xl bg-white/[0.02] border transition-all h-14 w-full overflow-hidden", 
+                                      "relative flex items-center rounded-2xl bg-zinc-50/70 border transition-all h-14 w-full overflow-hidden", 
                                       walletNumberError 
                                         ? "border-red-500/40 focus-within:ring-2 focus-within:ring-red-500/10 focus-within:border-red-500" 
                                         : (isWalletValid 
                                             ? "border-emerald-500/40 focus-within:ring-2 focus-within:ring-emerald-500/10 focus-within:border-emerald-500" 
-                                            : "border-white/10 focus-within:border-[#D6004B] focus-within:ring-2 focus-within:ring-[#D6004B]/10 hover:border-white/20"
+                                            : "border-zinc-200 focus-within:border-[#1D4ED8] focus-within:ring-2 focus-within:ring-[#1D4ED8]/10 hover:border-zinc-200"
                                           )
                                     )} dir="ltr">
                                       {/* Country prefix on the left */}
-                                      <div className="flex items-center gap-2 px-4 border-r border-white/5 bg-white/[0.01] h-full shrink-0 select-none">
+                                      <div className="flex items-center gap-2 px-4 border-r border-zinc-200/60 bg-zinc-50/40 h-full shrink-0 select-none">
                                         <span className="text-xl">🇪🇬</span>
-                                        <span className="text-sm font-semibold text-zinc-400 font-sans">+20</span>
+                                        <span className="text-sm font-semibold text-zinc-500 font-sans">+20</span>
                                       </div>
                                       {/* Input field */}
                                       <input 
@@ -1341,7 +1341,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                                         placeholder="رقم الهاتف" 
                                         maxLength={11}
                                         inputMode="numeric"
-                                        className="h-full flex-grow bg-transparent text-white font-cairo text-base px-4 focus:outline-none placeholder-zinc-500 text-left placeholder-shown:text-right"
+                                        className="h-full flex-grow bg-transparent text-zinc-900 font-sans text-base px-4 focus:outline-none placeholder-zinc-500 text-left placeholder-shown:text-right"
                                         dir="ltr"
                                         disabled={isLoading}
                                       />
@@ -1353,12 +1353,12 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                                       )}
                                     </div>
                                     {walletNumberError && (
-                                      <p className="text-xs text-red-400 font-cairo flex items-center gap-1 mt-1 text-right" dir="rtl">
+                                      <p className="text-xs text-red-400 font-sans flex items-center gap-1 mt-1 text-right" dir="rtl">
                                         <ShieldAlert className="w-3 h-3 inline ml-1" /> {walletNumberError}
                                       </p>
                                     )}
                                     {!walletNumberError && (
-                                      <p className="text-[11px] text-zinc-500 font-cairo text-right mt-1.5 leading-relaxed">
+                                      <p className="text-[11px] text-zinc-500 font-sans text-right mt-1.5 leading-relaxed">
                                         سيتم استخدام هذا الرقم لإرسال طلب الدفع إلى محفظتك الإلكترونية.
                                       </p>
                                     )}
@@ -1375,11 +1375,11 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                               whileTap={{ scale: 0.99 }}
                               onClick={() => setPaymentMethod("instapay")}
                               className={cn(
-                                "relative cursor-pointer rounded-xl border transition-all duration-300 select-none",
+                                "relative cursor-pointer rounded-2xl border transition-all duration-300 select-none",
                                 "flex flex-row items-center justify-between gap-2 sm:gap-4 h-[70px] px-3 sm:px-4 py-3 w-full",
                                 paymentMethod === "instapay" 
-                                  ? "border-[#D6004B] bg-[#D6004B]/5 shadow-[0_0_20px_rgba(214,0,75,0.12)]" 
-                                  : "border-white/5 bg-white/[0.01] hover:border-purple-500/10 hover:bg-purple-500/[0.005] hover:border-white/10"
+                                  ? "border-[#1D4ED8] bg-[#1D4ED8]/5 shadow-[0_0_20px_rgba(29, 78, 216,0.12)]" 
+                                  : "border-zinc-200/60 bg-zinc-50/40 hover:border-purple-500/10 hover:bg-purple-500/[0.005] hover:border-zinc-200"
                               )}
                               dir="rtl"
                             >
@@ -1388,14 +1388,14 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                                 {/* Radio indicator */}
                                 <div className={cn(
                                   "w-5 h-5 rounded-full border flex items-center justify-center transition-all shrink-0",
-                                  paymentMethod === "instapay" ? "border-[#D6004B] bg-[#D6004B]/10" : "border-white/10 bg-white/5"
+                                  paymentMethod === "instapay" ? "border-[#1D4ED8] bg-[#1D4ED8]/10" : "border-zinc-200 bg-zinc-100/40"
                                 )}>
-                                  {paymentMethod === "instapay" && <div className="w-2.5 h-2.5 rounded-full bg-[#D6004B]" />}
+                                  {paymentMethod === "instapay" && <div className="w-2.5 h-2.5 rounded-full bg-[#1D4ED8]" />}
                                 </div>
                                 
                                 {/* Text */}
                                 <div className="text-right">
-                                  <h4 className={cn("font-bold text-sm sm:text-base transition-colors leading-tight whitespace-nowrap", paymentMethod === "instapay" ? "text-white" : "text-zinc-300")}>
+                                  <h4 className={cn("font-bold text-sm sm:text-base transition-colors leading-tight whitespace-nowrap", paymentMethod === "instapay" ? "text-zinc-900" : "text-zinc-700")}>
                                     إنستاباي - Instapay
                                   </h4>
                                 </div>
@@ -1418,18 +1418,18 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                         {/* Inline Card Fields (Animated transition, now merged inside the same parent card) */}
                         <div className={cn(
                           "transition-all duration-500 ease-in-out overflow-hidden",
-                          paymentMethod === "card" ? "max-h-[600px] opacity-100 mt-6 pt-6 border-t border-white/5" : "max-h-0 opacity-0 pointer-events-none"
+                          paymentMethod === "card" ? "max-h-[600px] opacity-100 mt-6 pt-6 border-t border-zinc-200/60" : "max-h-0 opacity-0 pointer-events-none"
                         )}>
                           <div className="space-y-4">
                             <div className="flex items-center justify-start gap-2.5 mb-1" dir="rtl">
                               <Lock className="w-5 h-5 text-[#ff0f53] shrink-0" />
-                              <h3 className="font-cairo font-bold text-white text-base">بيانات البطاقة</h3>
+                              <h3 className="font-sans font-bold text-zinc-900 text-base">بيانات البطاقة</h3>
                             </div>
                             <p className="text-[11px] text-zinc-500 pr-7 text-right block mb-4">جميع البيانات مشفرة وآمنة</p>
 
                             <div className="space-y-3">
                               <div className="space-y-1.5">
-                                <Label className="font-cairo text-xs text-zinc-400 text-right block pr-1">رقم البطاقة</Label>
+                                <Label className="font-sans text-xs text-zinc-500 text-right block pr-1">رقم البطاقة</Label>
                                 <div className="relative">
                                   <Input 
                                     ref={cardNumberRef}
@@ -1439,8 +1439,8 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                                     dir="ltr"
                                     maxLength={19}
                                     inputMode="numeric"
-                                    className={cn("h-12 rounded-lg bg-white/[0.02] border text-white font-mono text-base tracking-widest hover:bg-white/[0.05] focus:bg-white/[0.07] focus:ring-1 focus:ring-white/20 focus:border-white/30 transition-all pr-12 pl-4", 
-                                      cardErrors.number ? "border-red-500/40 focus:ring-red-500/20" : (cardNumber.length === 19 ? "border-emerald-500/40 focus:ring-emerald-500/20" : "border-white/10")
+                                    className={cn("h-12 rounded-2xl bg-zinc-50/70 border text-zinc-900 font-mono text-base tracking-widest hover:bg-zinc-100/50 focus:bg-white/[0.07] focus:ring-1 focus:ring-white/20 focus:border-zinc-300 transition-all pr-12 pl-4", 
+                                      cardErrors.number ? "border-red-500/40 focus:ring-red-500/20" : (cardNumber.length === 19 ? "border-emerald-500/40 focus:ring-emerald-500/20" : "border-zinc-200")
                                     )}
                                     disabled={isLoading}
                                   />
@@ -1452,12 +1452,12 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                                     )}
                                   </div>
                                 </div>
-                                {cardErrors.number && <p className="text-xs text-red-400 font-cairo flex items-center gap-1 mt-1 text-right" dir="rtl"><ShieldAlert className="w-3 h-3 inline ml-1" /> {cardErrors.number}</p>}
+                                {cardErrors.number && <p className="text-xs text-red-400 font-sans flex items-center gap-1 mt-1 text-right" dir="rtl"><ShieldAlert className="w-3 h-3 inline ml-1" /> {cardErrors.number}</p>}
                               </div>
 
                               <div className="grid grid-cols-2 gap-3">
                                 <div className="space-y-1.5">
-                                  <Label className="font-cairo text-xs text-zinc-400 text-right block pr-1">تاريخ الانتهاء</Label>
+                                  <Label className="font-sans text-xs text-zinc-500 text-right block pr-1">تاريخ الانتهاء</Label>
                                   <Input 
                                     value={expiryDate}
                                     onChange={handleExpiryChange}
@@ -1465,16 +1465,16 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                                     dir="ltr"
                                     maxLength={5}
                                     inputMode="numeric"
-                                    className={cn("h-12 rounded-lg bg-white/[0.02] border text-white font-mono text-base text-center hover:bg-white/[0.05] focus:bg-white/[0.07] focus:ring-1 focus:ring-white/20 focus:border-white/30 transition-all", 
-                                      cardErrors.expiry ? "border-red-500/40 focus:ring-red-500/20" : (expiryDate.length === 5 ? "border-emerald-500/40 focus:ring-emerald-500/20" : "border-white/10")
+                                    className={cn("h-12 rounded-2xl bg-zinc-50/70 border text-zinc-900 font-mono text-base text-center hover:bg-zinc-100/50 focus:bg-white/[0.07] focus:ring-1 focus:ring-white/20 focus:border-zinc-300 transition-all", 
+                                      cardErrors.expiry ? "border-red-500/40 focus:ring-red-500/20" : (expiryDate.length === 5 ? "border-emerald-500/40 focus:ring-emerald-500/20" : "border-zinc-200")
                                     )}
                                     disabled={isLoading}
                                   />
-                                  {cardErrors.expiry && <p className="text-[10px] text-red-400 font-cairo flex items-center gap-1 mt-1 text-right" dir="rtl"><ShieldAlert className="w-3 h-3 inline ml-1" /> {cardErrors.expiry}</p>}
+                                  {cardErrors.expiry && <p className="text-[10px] text-red-400 font-sans flex items-center gap-1 mt-1 text-right" dir="rtl"><ShieldAlert className="w-3 h-3 inline ml-1" /> {cardErrors.expiry}</p>}
                                 </div>
                                 
                                 <div className="space-y-1.5">
-                                  <Label className="font-cairo text-xs text-zinc-400 text-right block pr-1">رمز التحقق (CVV)</Label>
+                                  <Label className="font-sans text-xs text-zinc-500 text-right block pr-1">رمز التحقق (CVV)</Label>
                                   <Input 
                                     value={cvv}
                                     onChange={handleCvvChange}
@@ -1483,27 +1483,27 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                                     dir="ltr"
                                     maxLength={3}
                                     inputMode="numeric"
-                                    className={cn("h-12 rounded-lg bg-white/[0.02] border text-white font-mono text-base text-center hover:bg-white/[0.05] focus:bg-white/[0.07] focus:ring-1 focus:ring-white/20 focus:border-white/30 transition-all", 
-                                      cardErrors.cvv ? "border-red-500/40 focus:ring-red-500/20" : (cvv.length === 3 ? "border-emerald-500/40 focus:ring-emerald-500/20" : "border-white/10")
+                                    className={cn("h-12 rounded-2xl bg-zinc-50/70 border text-zinc-900 font-mono text-base text-center hover:bg-zinc-100/50 focus:bg-white/[0.07] focus:ring-1 focus:ring-white/20 focus:border-zinc-300 transition-all", 
+                                      cardErrors.cvv ? "border-red-500/40 focus:ring-red-500/20" : (cvv.length === 3 ? "border-emerald-500/40 focus:ring-emerald-500/20" : "border-zinc-200")
                                     )}
                                     disabled={isLoading}
                                   />
-                                  {cardErrors.cvv && <p className="text-xs text-red-400 font-cairo flex items-center gap-1 mt-1 text-right" dir="rtl"><ShieldAlert className="w-3 h-3 inline ml-1" /> {cardErrors.cvv}</p>}
+                                  {cardErrors.cvv && <p className="text-xs text-red-400 font-sans flex items-center gap-1 mt-1 text-right" dir="rtl"><ShieldAlert className="w-3 h-3 inline ml-1" /> {cardErrors.cvv}</p>}
                                 </div>
                               </div>
 
                               <div className="space-y-1.5">
-                                <Label className="font-cairo text-xs text-zinc-400 text-right block pr-1">اسم حامل البطاقة</Label>
+                                <Label className="font-sans text-xs text-zinc-500 text-right block pr-1">اسم حامل البطاقة</Label>
                                 <Input 
                                   value={cardHolder}
                                   onChange={handleCardHolderChange}
                                   placeholder="كما هو مكتوب على البطاقة" 
-                                  className={cn("h-12 rounded-lg bg-white/[0.02] border text-white text-sm font-cairo hover:bg-white/[0.05] focus:bg-white/[0.07] focus:ring-1 focus:ring-white/20 focus:border-white/30 transition-all text-right pr-4 pl-4", 
-                                    cardErrors.holder ? "border-red-500/40 focus:border-red-500/20" : (cardHolder.length >= 3 ? "border-emerald-500/40 focus:border-emerald-500/20" : "border-white/10")
+                                  className={cn("h-12 rounded-2xl bg-zinc-50/70 border text-zinc-900 text-sm font-sans hover:bg-zinc-100/50 focus:bg-white/[0.07] focus:ring-1 focus:ring-white/20 focus:border-zinc-300 transition-all text-right pr-4 pl-4", 
+                                    cardErrors.holder ? "border-red-500/40 focus:border-red-500/20" : (cardHolder.length >= 3 ? "border-emerald-500/40 focus:border-emerald-500/20" : "border-zinc-200")
                                   )}
                                   disabled={isLoading}
                                 />
-                                {cardErrors.holder && <p className="text-[10px] text-red-400 font-cairo flex items-center gap-1 mt-1 text-right" dir="rtl"><ShieldAlert className="w-3 h-3 inline ml-1" /> {cardErrors.holder}</p>}
+                                {cardErrors.holder && <p className="text-[10px] text-red-400 font-sans flex items-center gap-1 mt-1 text-right" dir="rtl"><ShieldAlert className="w-3 h-3 inline ml-1" /> {cardErrors.holder}</p>}
                               </div>
 
                               {/* Save Card Checkbox */}
@@ -1511,19 +1511,19 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                                 <div 
                                   onClick={() => setSaveCard(!saveCard)}
                                   className={cn(
-                                    "w-5 h-5 rounded-md border flex items-center justify-center transition-all shrink-0",
+                                    "w-5 h-5 rounded-xl border flex items-center justify-center transition-all shrink-0",
                                     saveCard 
-                                      ? "bg-[#D6004B] border-[#D6004B] shadow-[0_0_8px_rgba(214,0,75,0.3)]" 
-                                      : "border-white/15 bg-white/5 group-hover:border-white/25"
+                                      ? "bg-[#1D4ED8] border-[#1D4ED8] shadow-[0_0_8px_rgba(29, 78, 216,0.3)]" 
+                                      : "border-white/15 bg-zinc-100/40 group-hover:border-white/25"
                                   )}
                                 >
                                   {saveCard && (
-                                    <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                    <svg className="w-3 h-3 text-zinc-900" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                                       <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                                     </svg>
                                   )}
                                 </div>
-                                <span className="text-xs text-zinc-400 group-hover:text-zinc-300 transition-colors font-cairo">حفظ بيانات البطاقة لعمليات الشراء القادمة</span>
+                                <span className="text-xs text-zinc-500 group-hover:text-zinc-700 transition-colors font-sans">حفظ بيانات البطاقة لعمليات الشراء القادمة</span>
                               </label>
                             </div>
                           </div>
@@ -1554,10 +1554,10 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                               }}
                               disabled={isLoading}
                               className={cn(
-                                "w-full h-14 font-cairo text-lg font-bold rounded-xl transition-all duration-300",
+                                "w-full h-14 font-sans text-lg font-bold rounded-2xl transition-all duration-300",
                                 isFormValid
-                                  ? "bg-[#D6004B] text-white hover:bg-[#b0003d] shadow-[0_4px_20px_0_rgba(214,0,75,0.4)] cursor-pointer active:scale-[0.98]"
-                                  : "bg-[#D6004B]/30 text-white/50 cursor-not-allowed shadow-none"
+                                  ? "bg-[#1D4ED8] text-white hover:bg-[#b0003d] shadow-[0_4px_20px_0_rgba(29, 78, 216,0.4)] cursor-pointer active:scale-[0.98]"
+                                  : "bg-[#1D4ED8]/30 text-zinc-500 cursor-not-allowed shadow-none"
                               )}
                             >
                               {isLoading ? (
@@ -1576,10 +1576,10 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                           type="submit" 
                           disabled={isLoading}
                           className={cn(
-                            "w-full h-14 font-cairo text-lg font-bold rounded-xl transition-all duration-300",
+                            "w-full h-14 font-sans text-lg font-bold rounded-2xl transition-all duration-300",
                             isFormValid
                               ? "bg-gradient-to-r from-emerald-500 to-teal-600 text-white hover:from-emerald-600 hover:to-teal-700 shadow-[0_4px_20px_rgba(16,185,129,0.4)] cursor-pointer active:scale-[0.98]"
-                              : "bg-gradient-to-r from-emerald-500/30 to-teal-600/30 text-white/50 cursor-not-allowed shadow-none"
+                              : "bg-gradient-to-r from-emerald-500/30 to-teal-600/30 text-zinc-500 cursor-not-allowed shadow-none"
                           )}
                         >
                           {isLoading ? (
@@ -1598,19 +1598,19 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                       )}
 
                       {((appliedCoupon && appliedCoupon.percent === 100) || paymentMethod) && (
-                        <p className="text-[10px] text-zinc-500 text-center mt-2 font-cairo leading-relaxed">
-                          بالضغط على الزر أعلاه، أنت توافق على <Link href="/privacy" className="underline hover:text-white transition-colors">الشروط والأحكام</Link> و <Link href="/privacy" className="underline hover:text-white transition-colors">سياسة الخصوصية</Link>
+                        <p className="text-[10px] text-zinc-500 text-center mt-2 font-sans leading-relaxed">
+                          بالضغط على الزر أعلاه، أنت توافق على <Link href="/privacy" className="underline hover:text-zinc-900 transition-colors">الشروط والأحكام</Link> و <Link href="/privacy" className="underline hover:text-zinc-900 transition-colors">سياسة الخصوصية</Link>
                         </p>
                       )}
                     </div>
 
                     {/* Mobile-only Order Summary & Invoice Card */}
-                    <div className="block lg:hidden bg-white/[0.015] backdrop-blur-2xl border border-white/5 rounded-3xl p-6 sm:p-8 hover:border-white/10 transition-all duration-300 shadow-[0_8px_32px_rgba(0,0,0,0.37)] space-y-6 mt-6">
+                    <div className="block lg:hidden bg-white/[0.015] backdrop-blur-2xl border border-zinc-200/60 rounded-3xl p-6 sm:p-8 hover:border-zinc-200 transition-all duration-300 shadow-[0_8px_32px_rgba(0,0,0,0.37)] space-y-6 mt-6">
 
                       {/* Coupon Input */}
                       <div>
                         {appliedCoupon ? (
-                          <div className="flex items-center justify-between bg-emerald-500/10 border border-emerald-500/20 px-3 py-2 rounded-xl w-full">
+                          <div className="flex items-center justify-between bg-emerald-500/10 border border-emerald-500/20 px-3 py-2 rounded-2xl w-full">
                             <div className="flex items-center gap-1.5">
                               <span className="text-xs font-mono font-bold text-emerald-400">{appliedCoupon.code}</span>
                               <span className="text-[10px] text-emerald-500 bg-emerald-500/15 px-1.5 py-0.5 rounded-full font-bold font-mono">-{appliedCoupon.percent}%</span>
@@ -1618,7 +1618,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                             <button
                               type="button"
                               onClick={handleRemoveCoupon}
-                              className="text-[11px] text-zinc-400 hover:text-white transition-colors mr-2 cursor-pointer font-bold font-cairo"
+                              className="text-[11px] text-zinc-500 hover:text-zinc-900 transition-colors mr-2 cursor-pointer font-bold font-sans"
                             >
                               إلغاء
                             </button>
@@ -1631,24 +1631,24 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                               value={couponInput}
                               onChange={(e) => setCouponInput(e.target.value)}
                               disabled={isValidatingCoupon}
-                              className="w-full h-11 rounded-lg bg-white/5 border border-white/5 text-white text-xs font-cairo px-4 pl-16 hover:bg-white/[0.07] focus:bg-white/10 focus:border-white/20 focus:ring-0 outline-none transition-all text-right"
+                              className="w-full h-11 rounded-2xl bg-zinc-100/40 border border-zinc-200/60 text-zinc-900 text-xs font-sans px-4 pl-16 hover:bg-white/[0.07] focus:bg-zinc-100/80 focus:border-zinc-200 focus:ring-0 outline-none transition-all text-right"
                               dir="rtl"
                             />
                             <button
                               type="button"
                               onClick={handleApplyCoupon}
                               disabled={isValidatingCoupon || !couponInput.trim()}
-                              className="absolute left-1.5 h-8 px-4 text-xs bg-[#D6004B] hover:bg-[#b0003d] text-white rounded-lg transition-all font-bold cursor-pointer disabled:opacity-50 font-cairo"
+                              className="absolute left-1.5 h-8 px-4 text-xs bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-2xl transition-all font-bold cursor-pointer disabled:opacity-50 font-sans"
                             >
                               {isValidatingCoupon ? "..." : "تطبيق"}
                             </button>
                           </div>
                         )}
-                        {couponError && <p className="text-[11px] text-red-400 font-cairo mt-1 text-right" dir="rtl">{couponError}</p>}
+                        {couponError && <p className="text-[11px] text-red-400 font-sans mt-1 text-right" dir="rtl">{couponError}</p>}
                       </div>
 
                       {/* Pricing Breakdown */}
-                      <div className="border-t border-white/5 pt-4 space-y-3 font-cairo text-sm text-zinc-400">
+                      <div className="border-t border-zinc-200/60 pt-4 space-y-3 font-sans text-sm text-zinc-500">
                         <div className="flex justify-between items-center">
                           <span>السعر الأصلي:</span>
                           <span className="font-bold line-through text-zinc-500">
@@ -1683,18 +1683,18 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                           </div>
                         )}
 
-                        <div className="flex justify-between items-center border-t border-white/5 pt-4">
-                          <span className="text-white font-bold">الإجمالي:</span>
-                          <span className="text-lg text-white font-cairo font-black">
+                        <div className="flex justify-between items-center border-t border-zinc-200/60 pt-4">
+                          <span className="text-zinc-900 font-bold">الإجمالي:</span>
+                          <span className="text-lg text-zinc-900 font-sans font-black">
                             {formatPrice(finalPriceFormatted, currency)}
                           </span>
                         </div>
                       </div>
 
                       {/* Product details */}
-                      <div className="flex items-center gap-4 border-t border-white/5 pt-4">
+                      <div className="flex items-center gap-4 border-t border-zinc-200/60 pt-4">
                         {product.image_url ? (
-                          <div className="relative w-16 h-16 rounded-2xl overflow-hidden border border-white/10 shrink-0">
+                          <div className="relative w-16 h-16 rounded-2xl overflow-hidden border border-zinc-200 shrink-0">
                             <Image
                               src={product.image_url}
                               alt={product.title}
@@ -1703,16 +1703,16 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                             />
                           </div>
                         ) : (
-                          <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10 shrink-0">
+                          <div className="w-16 h-16 rounded-2xl bg-zinc-100/40 flex items-center justify-center border border-zinc-200 shrink-0">
                             <Package className="w-6 h-6 text-zinc-500" />
                           </div>
                         )}
                         <div className="text-right">
-                          <h3 className="text-sm font-cairo font-bold text-white leading-relaxed">
+                          <h3 className="text-sm font-sans font-bold text-zinc-900 leading-relaxed">
                             {product.title}
                           </h3>
                           {isCourse && (
-                            <span className="inline-flex items-center gap-1 text-[10px] text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-full mt-1 font-bold">
+                            <span className="inline-flex items-center gap-1 text-[10px] text-yellow-500 bg-brand-500/10 px-2 py-0.5 rounded-full mt-1 font-bold">
                               <Sparkles className="w-2.5 h-2.5 animate-pulse" />
                               انضمام فوري للقسم
                             </span>
@@ -1722,9 +1722,9 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                     </div>
 
                     {/* Desktop-only Invoice & Payment Card */}
-                    <div className="hidden lg:block bg-white/[0.015] backdrop-blur-2xl border border-white/5 rounded-3xl p-6 sm:p-8 hover:border-white/10 transition-all duration-300 shadow-[0_8px_32px_rgba(0,0,0,0.37)] space-y-6">
+                    <div className="hidden lg:block bg-white/[0.015] backdrop-blur-2xl border border-zinc-200/60 rounded-3xl p-6 sm:p-8 hover:border-zinc-200 transition-all duration-300 shadow-[0_8px_32px_rgba(0,0,0,0.37)] space-y-6">
 
-                      <div className="border-b border-white/5 pb-4 mb-6 space-y-3 font-cairo text-sm text-zinc-400">
+                      <div className="border-b border-zinc-200/60 pb-4 mb-6 space-y-3 font-sans text-sm text-zinc-500">
                         <div className="flex justify-between items-center">
                           <span>السعر الأصلي:</span>
                           <span className="font-bold line-through text-zinc-500">
@@ -1759,9 +1759,9 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                           </div>
                         )}
 
-                        <div className="flex justify-between items-center border-t border-white/5 pt-4">
-                          <span className="text-white font-bold">الإجمالي:</span>
-                          <span className="text-lg text-white font-cairo font-black">
+                        <div className="flex justify-between items-center border-t border-zinc-200/60 pt-4">
+                          <span className="text-zinc-900 font-bold">الإجمالي:</span>
+                          <span className="text-lg text-zinc-900 font-sans font-black">
                             {formatPrice(finalPriceFormatted, currency)}
                           </span>
                         </div>
@@ -1788,10 +1788,10 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                               }}
                               disabled={isLoading}
                               className={cn(
-                                "w-full h-14 font-cairo text-lg font-bold rounded-xl transition-all duration-300",
+                                "w-full h-14 font-sans text-lg font-bold rounded-2xl transition-all duration-300",
                                 isFormValid
-                                  ? "bg-[#D6004B] text-white hover:bg-[#b0003d] shadow-[0_4px_20px_0_rgba(214,0,75,0.4)] cursor-pointer active:scale-[0.98]"
-                                  : "bg-[#D6004B]/30 text-white/50 cursor-not-allowed shadow-none"
+                                  ? "bg-[#1D4ED8] text-white hover:bg-[#b0003d] shadow-[0_4px_20px_0_rgba(29, 78, 216,0.4)] cursor-pointer active:scale-[0.98]"
+                                  : "bg-[#1D4ED8]/30 text-zinc-500 cursor-not-allowed shadow-none"
                               )}
                             >
                               {isLoading ? (
@@ -1810,10 +1810,10 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                           type="submit" 
                           disabled={isLoading}
                           className={cn(
-                            "w-full h-14 font-cairo text-lg font-bold rounded-xl transition-all duration-300",
+                            "w-full h-14 font-sans text-lg font-bold rounded-2xl transition-all duration-300",
                             isFormValid
                               ? "bg-gradient-to-r from-emerald-500 to-teal-600 text-white hover:from-emerald-600 hover:to-teal-700 shadow-[0_4px_20px_rgba(16,185,129,0.4)] cursor-pointer active:scale-[0.98]"
-                              : "bg-gradient-to-r from-emerald-500/30 to-teal-600/30 text-white/50 cursor-not-allowed shadow-none"
+                              : "bg-gradient-to-r from-emerald-500/30 to-teal-600/30 text-zinc-500 cursor-not-allowed shadow-none"
                           )}
                         >
                           {isLoading ? (
@@ -1832,8 +1832,8 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                       )}
 
                     {((appliedCoupon && appliedCoupon.percent === 100) || paymentMethod) && (
-                      <p className="text-[10px] text-zinc-500 text-center mt-4 font-cairo leading-relaxed">
-                        بالضغط على الزر أعلاه، أنت توافق على <Link href="/privacy" className="underline hover:text-white transition-colors">الشروط والأحكام</Link> و <Link href="/privacy" className="underline hover:text-white transition-colors">سياسة الخصوصية</Link>
+                      <p className="text-[10px] text-zinc-500 text-center mt-4 font-sans leading-relaxed">
+                        بالضغط على الزر أعلاه، أنت توافق على <Link href="/privacy" className="underline hover:text-zinc-900 transition-colors">الشروط والأحكام</Link> و <Link href="/privacy" className="underline hover:text-zinc-900 transition-colors">سياسة الخصوصية</Link>
                       </p>
                     )}
                   </div>
@@ -1844,11 +1844,11 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
 
                 {/* Left Column (Desktop Only Sticky Sidebar) */}
                 <div className="hidden lg:block lg:col-span-4 lg:sticky lg:top-32 space-y-6">
-                  <div className="bg-white/[0.015] backdrop-blur-2xl border border-white/5 rounded-3xl p-6 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] hover:border-white/10 transition-all duration-300">
+                  <div className="bg-white/[0.015] backdrop-blur-2xl border border-zinc-200/60 rounded-3xl p-6 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] hover:border-zinc-200 transition-all duration-300">
                     
                     {/* Coupon Field inside Sidebar */}
                     <div className="mb-6">
-                      <Label className="font-cairo text-xs text-zinc-400 block mb-2 text-right">كوبون الخصم</Label>
+                      <Label className="font-sans text-xs text-zinc-500 block mb-2 text-right">كوبون الخصم</Label>
                       {appliedCoupon ? (
                         <div className="flex items-center justify-between bg-emerald-500/10 border border-emerald-500/20 px-3 py-2 rounded-2xl w-full">
                           <div className="flex items-center gap-2">
@@ -1858,7 +1858,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                           <button
                             type="button"
                             onClick={handleRemoveCoupon}
-                            className="text-xs text-zinc-400 hover:text-white transition-colors mr-2 cursor-pointer font-bold font-cairo"
+                            className="text-xs text-zinc-500 hover:text-zinc-900 transition-colors mr-2 cursor-pointer font-bold font-sans"
                           >
                             إلغاء
                           </button>
@@ -1871,24 +1871,24 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                             value={couponInput}
                             onChange={(e) => setCouponInput(e.target.value)}
                             disabled={isValidatingCoupon}
-                            className="w-full h-11 rounded-lg bg-white/5 border border-white/5 text-white text-xs font-cairo px-4 pl-16 hover:bg-white/[0.04] focus:bg-white/10 focus:border-white/15 focus:ring-0 outline-none transition-all text-right"
+                            className="w-full h-11 rounded-2xl bg-zinc-100/40 border border-zinc-200/60 text-zinc-900 text-xs font-sans px-4 pl-16 hover:bg-white/[0.04] focus:bg-zinc-100/80 focus:border-white/15 focus:ring-0 outline-none transition-all text-right"
                             dir="rtl"
                           />
                           <button
                             type="button"
                             onClick={handleApplyCoupon}
                             disabled={isValidatingCoupon || !couponInput.trim()}
-                            className="absolute left-1.5 h-8 px-4 text-xs bg-[#D6004B] hover:bg-[#b0003d] text-white rounded-lg transition-all font-bold cursor-pointer disabled:opacity-50 font-cairo"
+                            className="absolute left-1.5 h-8 px-4 text-xs bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-2xl transition-all font-bold cursor-pointer disabled:opacity-50 font-sans"
                           >
                             {isValidatingCoupon ? "..." : "تطبيق"}
                           </button>
                         </div>
                       )}
-                      {couponError && <p className="text-[11px] text-red-400 font-cairo mt-1.5 text-right" dir="rtl">{couponError}</p>}
+                      {couponError && <p className="text-[11px] text-red-400 font-sans mt-1.5 text-right" dir="rtl">{couponError}</p>}
                     </div>
 
                     {/* Pricing Breakdown inside Sidebar */}
-                    <div className="border-t border-white/5 pt-4 space-y-3 font-cairo text-sm text-zinc-400">
+                    <div className="border-t border-zinc-200/60 pt-4 space-y-3 font-sans text-sm text-zinc-500">
                       <div className="flex justify-between items-center">
                         <span>السعر الأصلي:</span>
                         <span className="font-bold line-through text-zinc-500">
@@ -1923,18 +1923,18 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                         </div>
                       )}
 
-                      <div className="flex justify-between items-center border-t border-white/5 pt-4">
-                        <span className="text-white font-bold">الإجمالي:</span>
-                        <span className="text-xl text-white font-cairo font-black">
+                      <div className="flex justify-between items-center border-t border-zinc-200/60 pt-4">
+                        <span className="text-zinc-900 font-bold">الإجمالي:</span>
+                        <span className="text-xl text-zinc-900 font-sans font-black">
                           {formatPrice(finalPriceFormatted, currency)}
                         </span>
                       </div>
                     </div>
 
                     {/* Product Image and Title */}
-                    <div className="flex flex-col gap-4 border-t border-white/5 pt-6 mt-6">
+                    <div className="flex flex-col gap-4 border-t border-zinc-200/60 pt-6 mt-6">
                       {product.image_url ? (
-                        <div className="relative w-full aspect-video rounded-2xl overflow-hidden border border-white/5">
+                        <div className="relative w-full aspect-video rounded-2xl overflow-hidden border border-zinc-200/60">
                           <Image
                             src={product.image_url}
                             alt={product.title}
@@ -1943,17 +1943,17 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                           />
                         </div>
                       ) : (
-                        <div className="w-full aspect-video rounded-2xl bg-white/5 flex items-center justify-center border border-white/5">
+                        <div className="w-full aspect-video rounded-2xl bg-zinc-100/40 flex items-center justify-center border border-zinc-200/60">
                           <Package className="w-12 h-12 text-zinc-600" />
                         </div>
                       )}
                       
                       <div className="text-right">
-                        <h3 className="text-base font-cairo font-bold text-white leading-relaxed font-cairo">
+                        <h3 className="text-base font-sans font-bold text-zinc-900 leading-relaxed font-sans">
                           {product.title}
                         </h3>
                         {isCourse && (
-                          <span className="inline-flex items-center gap-1.5 text-[10px] text-rose-400 bg-rose-500/10 px-3 py-1 rounded-full mt-2 font-bold">
+                          <span className="inline-flex items-center gap-1.5 text-[10px] text-yellow-500 bg-brand-500/10 px-3 py-1 rounded-full mt-2 font-bold">
                             <Sparkles className="w-3 h-3 animate-pulse" />
                             انضمام فوري للقسم
                           </span>
@@ -1962,22 +1962,22 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                     </div>
 
                     {/* Sidebar trust checklist items */}
-                    <div className="border-t border-white/5 pt-6 mt-6 space-y-4 font-cairo text-xs text-zinc-400 text-right">
+                    <div className="border-t border-zinc-200/60 pt-6 mt-6 space-y-4 font-sans text-xs text-zinc-500 text-right">
                       <div className="flex items-center gap-2.5 justify-end">
                         <span>وصول فوري بعد الدفع</span>
-                        <div className="w-5 h-5 rounded-full bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400 shrink-0">
+                        <div className="w-5 h-5 rounded-full bg-brand-500/10 border border-zinc-200/60 flex items-center justify-center text-yellow-500 shrink-0">
                           <Sparkles className="w-3 h-3" />
                         </div>
                       </div>
                       <div className="flex items-center gap-2.5 justify-end">
                         <span>ضمان استرجاع 7 أيام</span>
-                        <div className="w-5 h-5 rounded-full bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400 shrink-0">
+                        <div className="w-5 h-5 rounded-full bg-brand-500/10 border border-zinc-200/60 flex items-center justify-center text-yellow-500 shrink-0">
                           <ShieldCheck className="w-3 h-3" />
                         </div>
                       </div>
                       <div className="flex items-center gap-2.5 justify-end">
                         <span>دعم فني طوال فترة الكورس</span>
-                        <div className="w-5 h-5 rounded-full bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400 shrink-0">
+                        <div className="w-5 h-5 rounded-full bg-brand-500/10 border border-zinc-200/60 flex items-center justify-center text-yellow-500 shrink-0">
                           <ShieldCheck className="w-3 h-3" />
                         </div>
                       </div>
@@ -2002,9 +2002,9 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="relative bg-[#0a0a12] border border-white/10 rounded-3xl p-6 md:p-8 max-w-md w-full max-h-[90vh] overflow-y-auto shadow-2xl z-10"
+            className="relative bg-[#0a0a12] border border-zinc-200 rounded-3xl p-6 md:p-8 max-w-md w-full max-h-[90vh] overflow-y-auto shadow-sm border border-zinc-200/60 z-10"
           >
-            <button onClick={() => setShowInstapayModal(false)} className="absolute top-4 left-4 w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-zinc-400 hover:text-white transition-all">
+            <button onClick={() => setShowInstapayModal(false)} className="absolute top-4 left-4 w-8 h-8 rounded-full bg-zinc-100/40 hover:bg-zinc-100/80 flex items-center justify-center text-zinc-500 hover:text-zinc-900 transition-all">
               <span className="text-lg">&times;</span>
             </button>
 
@@ -2020,36 +2020,36 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                     priority
                   />
                 </div>
-                <h3 className="text-xl font-cairo font-bold text-white">الدفع عبر Instapay</h3>
-                <p className="text-sm text-zinc-400 font-cairo mt-1">قم بتحويل المبلغ ثم أرسل لقطة الشاشة</p>
+                <h3 className="text-xl font-sans font-bold text-zinc-900">الدفع عبر Instapay</h3>
+                <p className="text-sm text-zinc-500 font-cairo mt-1">قم بتحويل المبلغ ثم أرسل لقطة الشاشة</p>
               </div>
 
               <div className="bg-purple-500/10 border border-purple-500/20 rounded-2xl p-4">
-                <p className="text-sm text-purple-300 font-cairo mb-1">المبلغ المطلوب تحويله</p>
-                <p className="text-3xl font-cairo font-black text-white">
+                <p className="text-sm text-purple-300 font-sans mb-1">المبلغ المطلوب تحويله</p>
+                <p className="text-3xl font-cairo font-black text-zinc-900">
                   {formatPrice(finalPriceFormatted, currency)}
                 </p>
               </div>
 
               <div className="space-y-3 text-right">
-                <div className="bg-white/5 border border-white/5 rounded-xl p-3 flex items-center justify-between">
+                <div className="bg-zinc-100/40 border border-zinc-200/60 rounded-2xl p-3 flex items-center justify-between">
                   <button onClick={() => { navigator.clipboard.writeText('youssef.m2003@instapay'); toast.success('تم نسخ العنوان'); }} className="text-xs text-purple-400 font-bold hover:text-purple-300 transition-colors cursor-pointer">نسخ</button>
                   <div className="text-right">
-                    <p className="text-[10px] text-zinc-500 font-cairo">Payment Address</p>
-                    <p className="text-sm text-white font-mono font-bold" dir="ltr">youssef.m2003@instapay</p>
+                    <p className="text-[10px] text-zinc-500 font-sans">Payment Address</p>
+                    <p className="text-sm text-zinc-900 font-mono font-bold" dir="ltr">youssef.m2003@instapay</p>
                   </div>
                 </div>
-                <div className="bg-white/5 border border-white/5 rounded-xl p-3 flex items-center justify-between">
+                <div className="bg-zinc-100/40 border border-zinc-200/60 rounded-2xl p-3 flex items-center justify-between">
                   <button onClick={() => { navigator.clipboard.writeText('01016748891'); toast.success('تم نسخ الرقم'); }} className="text-xs text-purple-400 font-bold hover:text-purple-300 transition-colors cursor-pointer">نسخ</button>
                   <div className="text-right">
-                    <p className="text-[10px] text-zinc-500 font-cairo">رقم الهاتف</p>
-                    <p className="text-sm text-white font-mono font-bold" dir="ltr">01016748891</p>
+                    <p className="text-[10px] text-zinc-500 font-sans">رقم الهاتف</p>
+                    <p className="text-sm text-zinc-900 font-mono font-bold" dir="ltr">01016748891</p>
                   </div>
                 </div>
               </div>
 
-              <div className="text-center bg-[#151522]/50 border border-emerald-500/10 rounded-xl p-2.5">
-                <p className="text-xs text-zinc-300 font-cairo leading-normal">
+              <div className="text-center bg-[#151522]/50 border border-emerald-500/10 rounded-2xl p-2.5">
+                <p className="text-xs text-zinc-700 font-sans leading-normal">
                   تنويه: سيظهر اسم المستلم باسم <span className="text-emerald-400 font-bold">Youssef.M</span> عند التحويل
                 </p>
               </div>
@@ -2064,7 +2064,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                     sessionStorage.setItem(`instapay_pending_${resolvedParams.id}`, "true");
                   }
                 }}
-                className="w-full h-12 bg-purple-600 hover:bg-purple-500 text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-[0_4px_14px_rgba(147,51,234,0.3)] font-cairo"
+                className="w-full h-12 bg-purple-600 hover:bg-purple-500 text-zinc-900 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-[0_4px_14px_rgba(147,51,234,0.3)] font-sans"
               >
                 ادفع مباشرة عبر Instapay
                 <ChevronRight className="w-4 h-4 rtl:rotate-180" />
@@ -2072,13 +2072,13 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
 
               <div className="space-y-2">
                 {instapayScreenshot ? (
-                  <div className="relative rounded-xl overflow-hidden border border-purple-500/30 bg-white/5">
+                  <div className="relative rounded-2xl overflow-hidden border border-purple-500/30 bg-zinc-100/40">
                     <img src={instapayScreenshot} alt="لقطة شاشة التحويل" className="w-full h-auto max-h-48 object-contain" />
                     {isUploadingScreenshot && (
                       <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
                         <div className="flex flex-col items-center gap-2">
                           <Loader2 className="w-6 h-6 animate-spin text-purple-400" />
-                          <span className="text-xs text-purple-300 font-cairo">جاري رفع الصورة...</span>
+                          <span className="text-xs text-purple-300 font-sans">جاري رفع الصورة...</span>
                         </div>
                       </div>
                     )}
@@ -2091,16 +2091,16 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                       </button>
                     )}
                     {instapayScreenshotUrl && !isUploadingScreenshot && (
-                      <div className="absolute bottom-2 left-2 flex items-center gap-1.5 bg-emerald-500/90 text-white text-[10px] font-bold px-2 py-1 rounded-full font-cairo">
+                      <div className="absolute bottom-2 left-2 flex items-center gap-1.5 bg-emerald-500/90 text-white text-[10px] font-bold px-2 py-1 rounded-full font-sans">
                         <CheckCircle2 className="w-3 h-3" />
                         تم رفع الصورة
                       </div>
                     )}
                   </div>
                 ) : (
-                  <label className="w-full h-24 border-2 border-dashed border-white/10 hover:border-purple-500/30 rounded-xl flex flex-col items-center justify-center cursor-pointer transition-all hover:bg-white/[0.02]">
+                  <label className="w-full h-24 border-2 border-dashed border-zinc-200 hover:border-purple-500/30 rounded-2xl flex flex-col items-center justify-center cursor-pointer transition-all hover:bg-zinc-50/70">
                     <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-zinc-500 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                    <span className="text-xs text-zinc-500 font-cairo">ارفع لقطة شاشة التحويل</span>
+                    <span className="text-xs text-zinc-500 font-sans">ارفع لقطة شاشة التحويل</span>
                     <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
                       const file = e.target.files?.[0];
                       if (!file) return;
@@ -2133,7 +2133,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                 disabled={!instapayScreenshotUrl || isLoading}
                 onClick={handleSubmit(onSubmit)}
                 className={cn(
-                  "w-full h-12 text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all font-cairo",
+                  "w-full h-12 text-zinc-900 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all font-sans",
                   (instapayScreenshotUrl && !isLoading)
                     ? "bg-emerald-600 hover:bg-emerald-500 shadow-[0_4px_14px_rgba(16,185,129,0.3)]"
                     : "bg-zinc-700 cursor-not-allowed opacity-50"

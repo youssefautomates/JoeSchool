@@ -64,7 +64,7 @@ export function CustomCursor() {
       
       {/* Inner Dot */}
       <motion.div
-        className="fixed top-0 left-0 w-3 h-3 bg-rose-500 rounded-full pointer-events-none z-[9999]"
+        className="fixed top-0 left-0 w-3 h-3 bg-brand-500 rounded-full pointer-events-none z-[9999]"
         animate={{
           x: mousePosition.x - 6,
           y: mousePosition.y - 6,
@@ -76,7 +76,7 @@ export function CustomCursor() {
       
       {/* Outer Glow / Ring */}
       <motion.div
-        className="fixed top-0 left-0 w-10 h-10 border border-rose-500/50 rounded-full pointer-events-none z-[9998] flex items-center justify-center overflow-hidden"
+        className="fixed top-0 left-0 w-10 h-10 border border-zinc-200/60 rounded-full pointer-events-none z-[9998] flex items-center justify-center overflow-hidden"
         animate={{
           x: mousePosition.x - 20,
           y: mousePosition.y - 20,
@@ -90,7 +90,7 @@ export function CustomCursor() {
           <motion.div 
             initial={{ opacity: 0, scale: 0 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="w-full h-full bg-rose-500/20 blur-md rounded-full"
+            className="w-full h-full bg-brand-500/20 blur-md rounded-full"
           />
         )}
       </motion.div>

@@ -109,7 +109,7 @@ export default function InsightsSection({ orders, stats, coursesAnalytics }: Ins
       case "positive":
         return { icon: TrendingUp, color: "text-emerald-400", bg: "bg-emerald-500/10 border-emerald-500/20", glow: "from-emerald-500/5 to-transparent" };
       case "negative":
-        return { icon: AlertTriangle, color: "text-rose-400", bg: "bg-rose-500/10 border-rose-500/20", glow: "from-rose-500/5 to-transparent" };
+        return { icon: AlertTriangle, color: "text-yellow-500", bg: "bg-brand-500/10 border-zinc-200/60", glow: "from-brand-500/5 to-transparent" };
       case "trend":
         return { icon: Sparkles, color: "text-purple-400", bg: "bg-purple-500/10 border-purple-500/20", glow: "from-purple-500/5 to-transparent" };
       default:
@@ -120,8 +120,8 @@ export default function InsightsSection({ orders, stats, coursesAnalytics }: Ins
   return (
     <div className="space-y-4 text-left" dir="ltr">
       <div className="flex items-center gap-2">
-        <Sparkles className="w-4.5 h-4.5 text-[#D6004B]" />
-        <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">AI Performance Insights & Recommendations</h3>
+        <Sparkles className="w-4.5 h-4.5 text-[#1D4ED8]" />
+        <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-500">AI Performance Insights & Recommendations</h3>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -136,19 +136,19 @@ export default function InsightsSection({ orders, stats, coursesAnalytics }: Ins
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.05 }}
               whileHover={{ y: -2, borderColor: "rgba(255,255,255,0.1)" }}
-              className="p-4 rounded-2xl bg-[#09090e]/80 border border-white/5 relative overflow-hidden group flex gap-3 text-left font-sans"
+              className="p-4 rounded-2xl bg-slate-50/80 border border-zinc-200/60 relative overflow-hidden group flex gap-3 text-left font-sans"
             >
               {/* Glow background */}
               <div className={`absolute -inset-px bg-gradient-to-br ${style.glow} opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none rounded-2xl`} />
 
-              <div className={`w-8.5 h-8.5 rounded-lg flex items-center justify-center border shrink-0 relative z-10 ${style.bg}`}>
+              <div className={`w-8.5 h-8.5 rounded-2xl flex items-center justify-center border shrink-0 relative z-10 ${style.bg}`}>
                 <IconComponent className={`w-4.5 h-4.5 ${style.color}`} />
               </div>
 
               <div className="min-w-0 flex-1 space-y-1 relative z-10">
-                <h4 className="font-extrabold text-[11px] sm:text-xs text-white leading-tight">{item.title}</h4>
-                <p className="text-[10px] sm:text-[10.5px] text-zinc-400 leading-relaxed font-semibold">{item.description}</p>
-                <div className="flex items-center gap-1 text-[9px] font-bold text-[#D6004B] pt-1">
+                <h4 className="font-extrabold text-[11px] sm:text-xs text-zinc-900 leading-tight">{item.title}</h4>
+                <p className="text-[10px] sm:text-[10.5px] text-zinc-500 leading-relaxed font-semibold">{item.description}</p>
+                <div className="flex items-center gap-1 text-[9px] font-bold text-[#1D4ED8] pt-1">
                   <span>Action Recommendation: {item.impact}</span>
                   <ArrowRight className="w-2.5 h-2.5" />
                 </div>

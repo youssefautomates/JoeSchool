@@ -90,8 +90,8 @@ export default function WishlistButton({
       className={cn(
         "flex items-center justify-center rounded-full p-2 border transition-all duration-300",
         isLiked
-          ? "bg-rose-500/10 border-rose-500/30 text-rose-500 shadow-[0_0_15px_rgba(244,63,94,0.3)]"
-          : "bg-black/60 border-white/10 text-white/70 hover:text-white hover:border-white/30",
+          ? "bg-brand-500/10 border-zinc-200/60 text-yellow-500 shadow-[0_0_15px_rgba(244,63,94,0.3)]"
+          : "bg-black/60 border-zinc-200 text-zinc-700 hover:text-zinc-900 hover:border-zinc-300",
         className
       )}
       aria-label="Add to wishlist"
@@ -106,7 +106,7 @@ export default function WishlistButton({
         >
           <Heart
             size={size}
-            className={cn("transition-all duration-300", isLiked ? "fill-rose-500" : "")}
+            className={cn("transition-all duration-300", isLiked ? "fill-brand-500" : "")}
           />
         </motion.div>
       </AnimatePresence>

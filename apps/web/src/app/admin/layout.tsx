@@ -68,7 +68,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {pathname === "/admin/login" ? (
         children
       ) : (
-        <div className="min-h-screen bg-[#050505] text-white selection:bg-rose-500/30 overflow-x-hidden" dir="ltr">
+        <div className="min-h-screen bg-white text-zinc-900 selection:bg-brand-500/30 overflow-x-hidden" dir="ltr">
       {/* Mobile Drawer (visible on < lg screens) */}
       <AnimatePresence>
         {isMobileMenuOpen && (
@@ -87,17 +87,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed left-0 top-0 h-screen w-80 bg-[#09090b] border-r border-white/5 z-50 flex flex-col shadow-2xl lg:hidden"
+              className="fixed left-0 top-0 h-screen w-80 bg-slate-50 border-r border-zinc-200/60 z-50 flex flex-col shadow-sm border border-zinc-200/60 lg:hidden"
               dir="ltr"
             >
-              <div className="p-6 flex items-center justify-between border-b border-white/5">
+              <div className="p-6 flex items-center justify-between border-b border-zinc-200/60">
                 <div>
                   <span className="text-lg font-sans font-black tracking-tighter block uppercase">Admin Console Pro</span>
-                  <span className="text-[10px] text-[#D6004B] font-bold tracking-[0.2em] uppercase">Joe Automation</span>
+                  <span className="text-[10px] text-[#1D4ED8] font-bold tracking-[0.2em] uppercase">Joe Automation</span>
                 </div>
                 <button
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="w-8 h-8 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center text-zinc-400 hover:text-white"
+                  className="w-8 h-8 rounded-2xl bg-zinc-100/40 border border-zinc-200/60 flex items-center justify-center text-zinc-500 hover:text-zinc-900"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -106,15 +106,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <nav className="flex-1 p-6 space-y-6 overflow-y-auto custom-scrollbar">
                 <Suspense fallback={
                   <div className="space-y-4 px-4 py-2">
-                    <div className="h-4 bg-white/5 rounded-md w-2/3 animate-pulse" />
-                    <div className="h-10 bg-white/5 rounded-xl animate-pulse" />
+                    <div className="h-4 bg-zinc-100/40 rounded-xl w-2/3 animate-pulse" />
+                    <div className="h-10 bg-zinc-100/40 rounded-2xl animate-pulse" />
                   </div>
                 }>
                   <SidebarNav pathname={pathname} navGroups={navGroups} />
                 </Suspense>
               </nav>
 
-              <div className="p-6 border-t border-white/5 space-y-4">
+              <div className="p-6 border-t border-zinc-200/60 space-y-4">
                 <button 
                   onClick={async () => {
                     await fetch('/api/admin/logout', { method: 'POST' });
@@ -132,27 +132,27 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </AnimatePresence>
 
       {/* Sidebar - Positioned on Left for LTR (Desktop only) */}
-      <aside className="fixed left-0 top-0 h-screen w-80 bg-[#09090b] border-r border-white/5 z-50 hidden lg:flex flex-col shadow-2xl" dir="ltr">
-        <div className="p-8 flex items-center gap-4 border-b border-white/5">
+      <aside className="fixed left-0 top-0 h-screen w-80 bg-slate-50 border-r border-zinc-200/60 z-50 hidden lg:flex flex-col shadow-sm border border-zinc-200/60" dir="ltr">
+        <div className="p-8 flex items-center gap-4 border-b border-zinc-200/60">
           <div>
             <span className="text-xl font-sans font-black tracking-tighter block uppercase">Admin Console Pro</span>
-            <span className="text-[10px] text-[#D6004B] font-bold tracking-[0.2em] uppercase">Joe Automation</span>
+            <span className="text-[10px] text-[#1D4ED8] font-bold tracking-[0.2em] uppercase">Joe Automation</span>
           </div>
         </div>
 
         <nav className="flex-1 p-6 space-y-8 overflow-y-auto custom-scrollbar">
           <Suspense fallback={
             <div className="space-y-4 px-4 py-2">
-              <div className="h-4 bg-white/5 rounded-md w-2/3 animate-pulse" />
-              <div className="h-10 bg-white/5 rounded-xl animate-pulse" />
-              <div className="h-10 bg-white/5 rounded-xl animate-pulse" />
+              <div className="h-4 bg-zinc-100/40 rounded-xl w-2/3 animate-pulse" />
+              <div className="h-10 bg-zinc-100/40 rounded-2xl animate-pulse" />
+              <div className="h-10 bg-zinc-100/40 rounded-2xl animate-pulse" />
             </div>
           }>
             <SidebarNav pathname={pathname} navGroups={navGroups} />
           </Suspense>
         </nav>
 
-        <div className="p-6 border-t border-white/5 space-y-4">
+        <div className="p-6 border-t border-zinc-200/60 space-y-4">
           <button 
             onClick={async () => {
               await fetch('/api/admin/logout', { method: 'POST' });
@@ -169,20 +169,20 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* Main Content - Padded on Left for LTR Sidebar */}
       <main className="lg:pl-80 min-h-screen transition-all" dir="ltr">
         {/* Header */}
-        <header className="sticky top-0 h-16 sm:h-24 border-b border-white/5 bg-[#050505]/80 backdrop-blur-2xl z-40 px-4 sm:px-8 flex items-center justify-between">
+        <header className="sticky top-0 h-16 sm:h-24 border-b border-zinc-200/60 bg-white/80 backdrop-blur-2xl z-40 px-4 sm:px-8 flex items-center justify-between">
           <div className="flex items-center gap-4 sm:gap-8 flex-1">
             <button
               onClick={() => setIsMobileMenuOpen(true)}
-              className="w-10 h-10 rounded-xl bg-white/5 border border-white/5 flex items-center justify-center text-zinc-400 hover:text-white transition-all lg:hidden"
+              className="w-10 h-10 rounded-2xl bg-zinc-100/40 border border-zinc-200/60 flex items-center justify-center text-zinc-500 hover:text-zinc-900 transition-all lg:hidden"
             >
               <Menu className="w-5 h-5" />
             </button>
             <div className="relative w-full max-w-md hidden md:block group">
-              <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-rose-500 transition-colors" />
+              <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-yellow-500 transition-colors" />
               <input 
                 type="text" 
                 placeholder="Search for anything..." 
-                className="w-full bg-white/5 border border-white/5 rounded-2xl py-3.5 pl-12 pr-4 text-sm font-sans focus:outline-none focus:border-rose-500/50 focus:bg-white/10 transition-all text-zinc-200"
+                className="w-full bg-zinc-100/40 border border-zinc-200/60 rounded-2xl py-3.5 pl-12 pr-4 text-sm font-sans focus:outline-none focus:border-zinc-200/60 focus:bg-zinc-100/80 transition-all text-zinc-800"
               />
             </div>
           </div>
@@ -190,21 +190,21 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <div className="flex items-center gap-4 sm:gap-6">
             <button 
               onClick={() => window.dispatchEvent(new CustomEvent("toggle-admin-notifications"))}
-              className="relative w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-white/5 border border-white/5 flex items-center justify-center text-zinc-400 hover:text-white transition-all group"
+              className="relative w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-zinc-100/40 border border-zinc-200/60 flex items-center justify-center text-zinc-500 hover:text-zinc-900 transition-all group"
             >
               <Bell className="w-5 h-5 group-hover:scale-110 transition-transform" />
-              <span className="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 w-2 h-2 bg-rose-600 rounded-full border-2 border-[#050505]" />
+              <span className="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 w-2 h-2 bg-brand-600 rounded-full border-2 border-[#050505]" />
             </button>
 
-            <div className="flex items-center gap-3 sm:gap-4 pl-3 sm:pl-4 border-l border-white/5 h-10">
+            <div className="flex items-center gap-3 sm:gap-4 pl-3 sm:pl-4 border-l border-zinc-200/60 h-10">
               <div className="text-left hidden sm:block">
-                <p className="text-sm font-bold text-white font-sans leading-none mb-1">Youssef Mostafa</p>
+                <p className="text-sm font-bold text-zinc-900 font-sans leading-none mb-1">Youssef Mostafa</p>
                 <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest leading-none">Administrator</p>
               </div>
               <div className="relative group cursor-pointer">
-                <Avatar className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl border-2 border-white/5 group-hover:border-rose-600/50 transition-all shadow-xl">
-                  <AvatarImage src="https://github.com/shadcn.png" className="rounded-xl" />
-                  <AvatarFallback className="bg-rose-600 text-white rounded-xl">YM</AvatarFallback>
+                <Avatar className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl border-2 border-zinc-200/60 group-hover:border-brand-600/50 transition-all shadow-sm border border-zinc-200/60">
+                  <AvatarImage src="https://github.com/shadcn.png" className="rounded-2xl" />
+                  <AvatarFallback className="bg-brand-600 text-white rounded-2xl">YM</AvatarFallback>
                 </Avatar>
                 <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 border-2 border-[#050505] rounded-full" />
               </div>
@@ -268,8 +268,8 @@ function SidebarNav({ pathname, navGroups }: { pathname: string, navGroups: any[
                 className={cn(
                   "flex items-center gap-4 px-5 py-3.5 rounded-2xl transition-all duration-300 group relative border border-transparent",
                   isActive 
-                    ? "bg-[#D6004B] text-white shadow-xl shadow-[#D6004B]/20 border-[#D6004B]/20" 
-                    : "text-zinc-400 hover:text-white hover:bg-white/[0.03] hover:border-white/5"
+                    ? "bg-[#1D4ED8] text-white shadow-sm border border-zinc-200/60 shadow-[#1D4ED8]/20 border-[#1D4ED8]/20" 
+                    : "text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100/30 hover:border-zinc-200/60"
                 )}
               >
                 {isActive && (
@@ -281,11 +281,11 @@ function SidebarNav({ pathname, navGroups }: { pathname: string, navGroups: any[
                 )}
                 <item.icon className={cn(
                   "w-5 h-5 transition-all duration-300", 
-                  isActive ? "text-white scale-110 drop-shadow-[0_0_8px_rgba(255,255,255,0.4)]" : "text-zinc-500 group-hover:text-[#D6004B] group-hover:scale-110"
+                  isActive ? "text-zinc-900 scale-110 drop-shadow-[0_0_8px_rgba(255,255,255,0.4)]" : "text-zinc-500 group-hover:text-[#1D4ED8] group-hover:scale-110"
                 )} />
                 <span className="font-bold text-[13px] tracking-wide font-sans transition-colors duration-300">{item.name}</span>
                 {item.href === "/admin/inbox" && unreadCount > 0 && (
-                  <span className="ml-auto text-[10px] px-2 py-0.5 rounded-full bg-[#D6004B] text-white font-bold leading-none min-w-[20px] text-center shadow-[0_0_10px_rgba(214,0,75,0.4)]">
+                  <span className="ml-auto text-[10px] px-2 py-0.5 rounded-full bg-[#1D4ED8] text-white font-bold leading-none min-w-[20px] text-center shadow-[0_0_10px_rgba(29, 78, 216,0.4)]">
                     {unreadCount}
                   </span>
                 )}

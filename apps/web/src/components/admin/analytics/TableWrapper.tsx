@@ -15,20 +15,20 @@ export default function TableWrapper({
   title,
   subtitle,
   icon: Icon,
-  iconColorClass = "text-rose-500 bg-rose-500/10 border-rose-500/20",
+  iconColorClass = "text-yellow-500 bg-brand-500/10 border-zinc-200/60",
   action,
   children
 }: TableWrapperProps) {
   return (
-    <div className="rounded-3xl bg-[#09090e]/80 border border-white/5 p-4 sm:p-6 shadow-2xl overflow-hidden">
+    <div className="rounded-3xl bg-slate-50/80 border border-zinc-200/60 p-4 sm:p-6 shadow-sm border border-zinc-200/60 overflow-hidden">
       {/* Header */}
-      <div className="pb-4 border-b border-white/5 mb-5 flex items-center justify-between gap-4">
+      <div className="pb-4 border-b border-zinc-200/60 mb-5 flex items-center justify-between gap-4">
         <div className="flex items-center gap-3 min-w-0">
-          <div className={`w-9 h-9 rounded-xl flex items-center justify-center border shrink-0 ${iconColorClass}`}>
+          <div className={`w-9 h-9 rounded-2xl flex items-center justify-center border shrink-0 ${iconColorClass}`}>
             <Icon className="w-4.5 h-4.5" />
           </div>
           <div className="min-w-0 text-right">
-            <h3 className="text-xs font-extrabold uppercase tracking-wider text-zinc-300 truncate">{title}</h3>
+            <h3 className="text-xs font-extrabold uppercase tracking-wider text-zinc-700 truncate">{title}</h3>
             <p className="text-[9.5px] text-zinc-500 font-semibold truncate mt-0.5">{subtitle}</p>
           </div>
         </div>

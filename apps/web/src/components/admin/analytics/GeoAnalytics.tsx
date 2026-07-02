@@ -105,18 +105,18 @@ export default function GeoAnalytics({ orders, visitorsCount = 0 }: GeoAnalytics
   const activeHoverData = countryStats.find(c => c.code === hoveredCountry);
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 sm:gap-8 rounded-3xl bg-[#09090e]/80 border border-white/5 p-5 sm:p-6 shadow-2xl relative overflow-hidden text-left" dir="ltr">
+    <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 sm:gap-8 rounded-3xl bg-slate-50/80 border border-zinc-200/60 p-5 sm:p-6 shadow-sm border border-zinc-200/60 relative overflow-hidden text-left" dir="ltr">
       
       {/* Country statistics column */}
       <div className="lg:col-span-2 space-y-4">
         <div>
-          <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">Geographical Sales Analytics</h3>
+          <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-500">Geographical Sales Analytics</h3>
           <p className="text-[10px] text-zinc-500 mt-0.5">Most active student locations and checkout activity</p>
         </div>
 
         <div className="space-y-2.5 max-h-[320px] overflow-y-auto pl-1 custom-scrollbar">
           {countryStats.map((c, index) => {
-            const colors = ["#D6004B", "#10b981", "#3b82f6", "#f59e0b", "#a855f7", "#06b6d4"];
+            const colors = ["#1D4ED8", "#10b981", "#3b82f6", "#f59e0b", "#a855f7", "#06b6d4"];
             const color = colors[index] || "#71717a";
             const maxRevenue = countryStats[0]?.revenue || 1;
             const pct = maxRevenue > 0 ? (c.revenue / maxRevenue) * 100 : 0;
@@ -126,25 +126,25 @@ export default function GeoAnalytics({ orders, visitorsCount = 0 }: GeoAnalytics
                 key={c.code}
                 onMouseEnter={() => setHoveredCountry(c.code)}
                 onMouseLeave={() => setHoveredCountry(null)}
-                className={`p-2.5 rounded-xl border transition-all cursor-pointer ${
+                className={`p-2.5 rounded-2xl border transition-all cursor-pointer ${
                   hoveredCountry === c.code
-                    ? "bg-white/[0.04] border-white/10"
-                    : "bg-white/[0.01] border-white/5"
+                    ? "bg-white/[0.04] border-zinc-200"
+                    : "bg-zinc-50/40 border-zinc-200/60"
                 }`}
               >
                 <div className="flex items-center justify-between text-xs mb-1.5">
                   <div className="flex items-center gap-2 min-w-0 text-left">
                     <span className="text-sm shrink-0">{c.flag}</span>
-                    <span className="font-bold text-white truncate">{c.name}</span>
+                    <span className="font-bold text-zinc-900 truncate">{c.name}</span>
                     {c.orders > 0 && (
                       <span className="text-[8px] px-1 py-0.2 rounded bg-emerald-500/10 text-emerald-400 font-bold shrink-0">{c.growth}</span>
                     )}
                   </div>
-                  <span className="font-bold font-mono text-[11px] text-rose-500 shrink-0">
+                  <span className="font-bold font-mono text-[11px] text-yellow-500 shrink-0">
                     {c.revenue > 0 ? `${c.revenue} EGP` : "0 EGP"}
                   </span>
                 </div>
-                <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden mb-1.5" dir="ltr">
+                <div className="w-full bg-zinc-100/40 h-1.5 rounded-full overflow-hidden mb-1.5" dir="ltr">
                   <div
                     className="h-full rounded-full transition-all duration-700"
                     style={{ width: `${Math.max(c.revenue > 0 ? 3 : 0, pct)}%`, backgroundColor: color }}
@@ -161,7 +161,7 @@ export default function GeoAnalytics({ orders, visitorsCount = 0 }: GeoAnalytics
       </div>
 
       {/* Interactive Map Visualizer Column */}
-      <div className="lg:col-span-3 bg-white/[0.01] border border-white/5 rounded-2xl relative h-64 sm:h-[350px] overflow-hidden flex items-center justify-center p-4">
+      <div className="lg:col-span-3 bg-zinc-50/40 border border-zinc-200/60 rounded-2xl relative h-64 sm:h-[350px] overflow-hidden flex items-center justify-center p-4">
         
         {/* World Map SVG representation */}
         <div 
@@ -204,10 +204,10 @@ export default function GeoAnalytics({ orders, visitorsCount = 0 }: GeoAnalytics
               >
                 <span className="relative flex h-3.5 w-3.5">
                   <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
-                    isHovered || hasData ? "bg-rose-400" : "bg-zinc-700/50"
+                    isHovered || hasData ? "bg-brand-400" : "bg-zinc-700/50"
                   }`}></span>
                   <span className={`relative inline-flex rounded-full h-3.5 w-3.5 border border-black/40 transition-colors duration-300 ${
-                    isHovered ? "bg-rose-500 scale-125" : hasData ? "bg-rose-600" : "bg-zinc-700"
+                    isHovered ? "bg-brand-500 scale-125" : hasData ? "bg-brand-600" : "bg-zinc-700"
                   }`}></span>
                 </span>
               </div>
@@ -218,21 +218,21 @@ export default function GeoAnalytics({ orders, visitorsCount = 0 }: GeoAnalytics
           {hoveredCountry && activeHoverData && (
             <div
               style={{ left: tooltipPos.x, top: tooltipPos.y }}
-              className="absolute z-30 p-3 rounded-xl bg-[#060608]/95 border border-white/10 shadow-2xl backdrop-blur-md text-[10px] pointer-events-none w-40 space-y-1.5 transition-all duration-100 text-left font-sans"
+              className="absolute z-30 p-3 rounded-2xl bg-[#060608]/95 border border-zinc-200 shadow-sm border border-zinc-200/60 backdrop-blur-md text-[10px] pointer-events-none w-40 space-y-1.5 transition-all duration-100 text-left font-sans"
               dir="ltr"
             >
-              <div className="flex items-center gap-1.5 border-b border-white/5 pb-1 mb-1">
+              <div className="flex items-center gap-1.5 border-b border-zinc-200/60 pb-1 mb-1">
                 <span>{activeHoverData.flag}</span>
-                <span className="font-extrabold text-white">{activeHoverData.name}</span>
+                <span className="font-extrabold text-zinc-900">{activeHoverData.name}</span>
               </div>
-              <div className="space-y-0.5 text-zinc-400 font-semibold">
+              <div className="space-y-0.5 text-zinc-500 font-semibold">
                 <div className="flex justify-between">
                   <span>Revenue:</span>
-                  <span className="text-rose-400 font-mono font-black">{activeHoverData.revenue} EGP</span>
+                  <span className="text-yellow-500 font-mono font-black">{activeHoverData.revenue} EGP</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Orders:</span>
-                  <span className="text-white font-mono">{activeHoverData.orders}</span>
+                  <span className="text-zinc-900 font-mono">{activeHoverData.orders}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Conversion Rate:</span>
@@ -244,9 +244,9 @@ export default function GeoAnalytics({ orders, visitorsCount = 0 }: GeoAnalytics
         </div>
 
         {/* Legend Overlay */}
-        <div className="absolute bottom-3 left-3 flex items-center gap-4 bg-black/40 border border-white/5 backdrop-blur-sm px-3 py-1.5 rounded-xl text-[9px] text-zinc-500 font-bold" dir="ltr">
+        <div className="absolute bottom-3 left-3 flex items-center gap-4 bg-black/40 border border-zinc-200/60 backdrop-blur-sm px-3 py-1.5 rounded-2xl text-[9px] text-zinc-500 font-bold" dir="ltr">
           <span className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-rose-600" />
+            <span className="w-2 h-2 rounded-full bg-brand-600" />
             Active Checkout Activity
           </span>
           <span className="flex items-center gap-1.5">

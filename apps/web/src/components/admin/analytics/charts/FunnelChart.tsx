@@ -21,7 +21,7 @@ export default function FunnelChart({ stages }: FunnelChartProps) {
 
   if (maxCount === 0) {
     return (
-      <div className="w-full h-full flex flex-col items-center justify-center border border-dashed border-white/5 rounded-2xl p-6 text-center text-zinc-500 text-xs font-sans">
+      <div className="w-full h-full flex flex-col items-center justify-center border border-dashed border-zinc-200/60 rounded-2xl p-6 text-center text-zinc-500 text-xs font-sans">
         Insufficient traffic records found to analyze the conversion funnel.
       </div>
     );
@@ -31,8 +31,8 @@ export default function FunnelChart({ stages }: FunnelChartProps) {
     <div className="w-full h-full flex flex-col justify-between font-sans text-left" dir="ltr">
       
       {/* Title block */}
-      <div className="pb-4 border-b border-white/5 mb-5">
-        <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">Sales & Subscription Conversion Funnel</h3>
+      <div className="pb-4 border-b border-zinc-200/60 mb-5">
+        <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-500">Sales & Subscription Conversion Funnel</h3>
         <p className="text-[10px] text-zinc-500">Analysis of drop-off and conversion rates through purchasing stages</p>
       </div>
 
@@ -45,18 +45,18 @@ export default function FunnelChart({ stages }: FunnelChartProps) {
             <div key={stage.name} className="relative space-y-1 text-left">
               {/* Step info row */}
               <div className="flex items-center justify-between text-xs">
-                <span className="font-bold text-zinc-300 flex items-center gap-1.5">
-                  <span className="w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center text-[9px] bg-white/5 font-black text-zinc-400 shrink-0">
+                <span className="font-bold text-zinc-700 flex items-center gap-1.5">
+                  <span className="w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center text-[9px] bg-zinc-100/40 font-black text-zinc-500 shrink-0">
                     {idx + 1}
                   </span>
                   <span className="text-[10px] sm:text-xs">{stage.name}</span>
                   <span className="text-[9px] text-zinc-500 font-semibold hidden sm:inline">({stage.label})</span>
                 </span>
-                <span className="font-black text-white font-mono text-[10px] sm:text-xs shrink-0">{stage.count} sessions</span>
+                <span className="font-black text-zinc-900 font-mono text-[10px] sm:text-xs shrink-0">{stage.count} sessions</span>
               </div>
 
               {/* Progress bar container */}
-              <div className="w-full bg-white/5 h-2.5 rounded-full overflow-hidden flex relative z-10" dir="ltr">
+              <div className="w-full bg-zinc-100/40 h-2.5 rounded-full overflow-hidden flex relative z-10" dir="ltr">
                 <motion.div 
                   initial={{ width: 0 }}
                   animate={{ width: `${pctWidth}%` }}
@@ -74,7 +74,7 @@ export default function FunnelChart({ stages }: FunnelChartProps) {
                     Conv: {stage.convRate}
                   </span>
                   <span className="text-zinc-600">|</span>
-                  <span className="text-rose-400">Drop: {stage.dropRate}</span>
+                  <span className="text-yellow-500">Drop: {stage.dropRate}</span>
                 </div>
               )}
             </div>

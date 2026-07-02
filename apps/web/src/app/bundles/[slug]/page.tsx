@@ -78,18 +78,18 @@ export default function BundlePage({ params }: { params: Promise<{ slug: string 
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#050505] flex items-center justify-center">
-        <div className="w-12 h-12 border-4 border-rose-600/30 border-t-rose-600 rounded-full animate-spin" />
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="w-12 h-12 border-4 border-brand-600/30 border-t-brand-600 rounded-full animate-spin" />
       </div>
     );
   }
 
   if (!bundle) {
     return (
-      <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center text-white font-cairo">
-        <h1 className="text-4xl font-alexandria font-bold mb-4 font-black">العرض غير موجود</h1>
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center text-zinc-900 font-sans">
+        <h1 className="text-4xl font-cairo font-bold mb-4 font-black">العرض غير موجود</h1>
         <p className="text-zinc-500 mb-6 text-sm">عذراً، يبدو أن هذه الحزمة لم تعد متوفرة أو تم تغيير الرابط الخاص بها.</p>
-        <Link href="/" className="text-rose-400 hover:text-rose-300 underline font-bold">العودة للرئيسية</Link>
+        <Link href="/" className="text-yellow-500 hover:text-brand-300 underline font-bold">العودة للرئيسية</Link>
       </div>
     );
   }
@@ -99,14 +99,14 @@ export default function BundlePage({ params }: { params: Promise<{ slug: string 
   const productsCount = bundle.items.filter(it => it.item_type === "digital_product").length;
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white font-cairo selection:bg-rose-500/30" style={{ isolation: 'isolate' }}>
+    <div className="min-h-screen bg-white text-zinc-900 font-sans selection:bg-brand-500/30" style={{ isolation: 'isolate' }}>
       <Navbar />
       
       <main className="pt-20 md:pt-32 pb-32 md:pb-24 relative z-0">
         <section className="container mx-auto px-4 md:px-6 max-w-7xl">
           
           {/* Back link */}
-          <Link href="/" className="inline-flex items-center gap-2 text-zinc-500 hover:text-white transition-colors mb-6 text-xs font-bold group">
+          <Link href="/" className="inline-flex items-center gap-2 text-zinc-500 hover:text-zinc-900 transition-colors mb-6 text-xs font-bold group">
             <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
             <span>العودة لجميع العروض والمنتجات</span>
           </Link>
@@ -117,7 +117,7 @@ export default function BundlePage({ params }: { params: Promise<{ slug: string 
             <div className="w-full lg:w-[62%] space-y-8">
               
               {/* Main Banner Media Container */}
-              <div className="relative aspect-video bg-[#08080c] rounded-2xl md:rounded-[2.5rem] overflow-hidden shadow-2xl border border-white/5 flex items-center justify-center group/banner">
+              <div className="relative aspect-video bg-[#08080c] rounded-2xl md:rounded-[2.5rem] overflow-hidden shadow-sm border border-zinc-200/60 border border-zinc-200/60 flex items-center justify-center group/banner">
                 {bundle.banner_url || bundle.image_url ? (
                   <Image 
                     src={bundle.banner_url || bundle.image_url || ""} 
@@ -134,7 +134,7 @@ export default function BundlePage({ params }: { params: Promise<{ slug: string 
                 
                 {/* Floating Tags */}
                 <div className="absolute top-4 left-4 md:top-6 md:left-6 flex flex-col gap-3 z-20">
-                  <div className="bg-rose-600 text-white font-alexandria font-black px-4 py-2 rounded-xl text-xs md:text-sm shadow-[0_0_30px_rgba(214,0,75,0.4)] flex items-center gap-1.5 border border-rose-500/30">
+                  <div className="bg-brand-600 text-white font-sans font-black px-4 py-2 rounded-2xl text-xs md:text-sm shadow-[0_0_30px_rgba(29, 78, 216,0.4)] flex items-center gap-1.5 border border-zinc-200/60">
                     <Sparkles className="w-4 h-4 animate-pulse" />
                     <span>حزمة عروض سوبر حصرية</span>
                   </div>
@@ -148,47 +148,47 @@ export default function BundlePage({ params }: { params: Promise<{ slug: string 
                       </span>
                     )}
                     {productsCount > 0 && (
-                      <span className="bg-rose-500/20 text-rose-300 border border-rose-500/30 px-3 py-1 rounded-full text-[10px] font-black backdrop-blur-md">
+                      <span className="bg-brand-500/20 text-brand-300 border border-zinc-200/60 px-3 py-1 rounded-full text-[10px] font-black backdrop-blur-md">
                         {productsCount} ملفات وأدوات رقمية
                       </span>
                     )}
                   </div>
-                  <h2 className="text-xl md:text-4xl font-alexandria font-black text-white leading-tight drop-shadow-lg">
+                  <h2 className="text-xl md:text-4xl font-sans font-black text-zinc-900 leading-tight drop-shadow-sm border border-zinc-200/60">
                     {bundle.title}
                   </h2>
                 </div>
               </div>
 
               {/* Description Body */}
-              <div className="bg-[#0b0b10]/60 backdrop-blur-xl rounded-3xl md:rounded-[2.5rem] p-6 md:p-12 border border-white/5 shadow-2xl space-y-6 md:space-y-8">
-                <div className="flex items-center gap-3 md:gap-4 border-b border-white/5 pb-4 md:pb-6">
-                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-rose-500/10 flex items-center justify-center border border-rose-500/20 text-rose-500 shrink-0 shadow-[0_0_15px_rgba(244,63,94,0.15)]">
+              <div className="bg-[#0b0b10]/60 backdrop-blur-xl rounded-3xl md:rounded-[2.5rem] p-6 md:p-12 border border-zinc-200/60 shadow-sm border border-zinc-200/60 space-y-6 md:space-y-8">
+                <div className="flex items-center gap-3 md:gap-4 border-b border-zinc-200/60 pb-4 md:pb-6">
+                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-2xl md:rounded-2xl bg-brand-500/10 flex items-center justify-center border border-zinc-200/60 text-yellow-500 shrink-0 shadow-[0_0_15px_rgba(244,63,94,0.15)]">
                     <Target className="w-4 h-4 md:w-5.5 md:h-5.5" />
                   </div>
                   <div className="flex flex-col">
-                    <h2 className="text-xl md:text-3xl font-alexandria font-black text-white leading-tight">تفاصيل الحزمة الكبرى</h2>
-                    <span className="font-cairo text-[10px] md:text-xs text-zinc-500 font-medium">ما ستحصل عليه فور الاشتراك</span>
+                    <h2 className="text-xl md:text-3xl font-sans font-black text-zinc-900 leading-tight">تفاصيل الحزمة الكبرى</h2>
+                    <span className="font-alexandria text-[10px] md:text-xs text-zinc-500 font-medium">ما ستحصل عليه فور الاشتراك</span>
                   </div>
                 </div>
 
                 <div className="prose prose-invert prose-rose max-w-none">
                   {bundle.description ? (
-                    <div className="text-zinc-300 font-cairo text-[15px] md:text-base leading-[1.8] space-y-5" dangerouslySetInnerHTML={{ __html: bundle.description.replace(/\n/g, '<br/>') }} />
+                    <div className="text-zinc-700 font-sans text-[15px] md:text-base leading-[1.8] space-y-5" dangerouslySetInnerHTML={{ __html: bundle.description.replace(/\n/g, '<br/>') }} />
                   ) : (
-                    <p className="text-zinc-400 font-cairo text-[15px] md:text-base leading-[1.8]">هذه الحزمة مصممة خصيصاً لتمنحك حلاً متكاملاً يجمع بين المعرفة الفنية المساراتية والأدوات الرقمية الجاهزة للتثبيت الفوري بأعلى كفاءة ممكنة وسعر موفر لا يصدق.</p>
+                    <p className="text-zinc-500 font-sans text-[15px] md:text-base leading-[1.8]">هذه الحزمة مصممة خصيصاً لتمنحك حلاً متكاملاً يجمع بين المعرفة الفنية المساراتية والأدوات الرقمية الجاهزة للتثبيت الفوري بأعلى كفاءة ممكنة وسعر موفر لا يصدق.</p>
                   )}
                 </div>
               </div>
 
               {/* Bundle Contents List */}
-              <div className="bg-[#0b0b10]/60 backdrop-blur-xl rounded-3xl md:rounded-[2.5rem] p-6 md:p-12 border border-white/5 shadow-2xl space-y-6 md:space-y-8">
-                <div className="flex items-center gap-3 md:gap-4 border-b border-white/5 pb-4 md:pb-6">
-                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-purple-500/10 flex items-center justify-center border border-purple-500/20 text-purple-400 shrink-0 shadow-[0_0_15px_rgba(168,85,247,0.15)]">
+              <div className="bg-[#0b0b10]/60 backdrop-blur-xl rounded-3xl md:rounded-[2.5rem] p-6 md:p-12 border border-zinc-200/60 shadow-sm border border-zinc-200/60 space-y-6 md:space-y-8">
+                <div className="flex items-center gap-3 md:gap-4 border-b border-zinc-200/60 pb-4 md:pb-6">
+                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-2xl md:rounded-2xl bg-purple-500/10 flex items-center justify-center border border-purple-500/20 text-purple-400 shrink-0 shadow-[0_0_15px_rgba(168,85,247,0.15)]">
                     <Layers className="w-4 h-4 md:w-5.5 md:h-5.5" />
                   </div>
                   <div className="flex flex-col">
-                    <h2 className="text-xl md:text-3xl font-alexandria font-black text-white leading-tight">محتويات الحزمة المشمولة ({bundle.items.length})</h2>
-                    <span className="font-cairo text-[10px] md:text-xs text-zinc-500 font-medium">اضغط لعرض تفاصيل أي عنصر</span>
+                    <h2 className="text-xl md:text-3xl font-sans font-black text-zinc-900 leading-tight">محتويات الحزمة المشمولة ({bundle.items.length})</h2>
+                    <span className="font-alexandria text-[10px] md:text-xs text-zinc-500 font-medium">اضغط لعرض تفاصيل أي عنصر</span>
                   </div>
                 </div>
 
@@ -207,28 +207,28 @@ export default function BundlePage({ params }: { params: Promise<{ slug: string 
                     const typeBadge = isCourse ? "دورة تعليمية" : "منتج رقمي";
                     const badgeColor = isCourse 
                       ? "bg-purple-500/10 text-purple-400 border-purple-500/20" 
-                      : "bg-rose-500/10 text-rose-400 border-rose-500/20";
+                      : "bg-brand-500/10 text-yellow-500 border-zinc-200/60";
 
                     const itemLink = isCourse ? `/courses/${slug}` : `/product/${slug}`;
 
                     return (
                       <div 
                         key={idx}
-                        className="bg-white/[0.01] border border-white/5 hover:border-white/10 p-5 rounded-3xl flex flex-col md:flex-row gap-5 items-start md:items-center justify-between transition-all duration-300 group"
+                        className="bg-zinc-50/40 border border-zinc-200/60 hover:border-zinc-200 p-5 rounded-3xl flex flex-col md:flex-row gap-5 items-start md:items-center justify-between transition-all duration-300 group"
                       >
                         <div className="flex gap-4 items-center min-w-0 w-full md:w-auto">
-                          <div className="w-24 aspect-video rounded-xl overflow-hidden shrink-0 bg-neutral-900 border border-white/5 relative">
+                          <div className="w-24 aspect-video rounded-2xl overflow-hidden shrink-0 bg-neutral-900 border border-zinc-200/60 relative">
                             {image ? (
                               <img src={image} alt={title} className="w-full h-full object-cover object-center" />
                             ) : (
-                              <div className="w-full h-full flex items-center justify-center text-xs font-bold text-white/20">YA</div>
+                              <div className="w-full h-full flex items-center justify-center text-xs font-bold text-zinc-900/20">YA</div>
                             )}
                             <span className={cn("absolute bottom-1 left-1 px-1.5 py-0.5 rounded-full text-[7px] font-black border backdrop-blur-sm", badgeColor)}>
                               {typeBadge}
                             </span>
                           </div>
                           <div className="min-w-0 flex-1">
-                            <h4 className="text-sm md:text-base font-bold text-white group-hover:text-rose-500 transition-colors truncate">
+                            <h4 className="text-sm md:text-base font-bold text-zinc-900 group-hover:text-yellow-500 transition-colors truncate">
                               {title}
                             </h4>
                             <p className="text-zinc-500 text-xs line-clamp-2 mt-1 leading-relaxed">
@@ -250,7 +250,7 @@ export default function BundlePage({ params }: { params: Promise<{ slug: string 
                                 </>
                               ) : (
                                 <span className="flex items-center gap-1">
-                                  <Download className="w-3 h-3 text-rose-400" />
+                                  <Download className="w-3 h-3 text-yellow-500" />
                                   تنزيل فوري
                                 </span>
                               )}
@@ -262,21 +262,21 @@ export default function BundlePage({ params }: { params: Promise<{ slug: string 
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end shrink-0 border-t border-white/5 md:border-none pt-4 md:pt-0">
+                        <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end shrink-0 border-t border-zinc-200/60 md:border-none pt-4 md:pt-0">
                           <div className="flex flex-col text-right md:text-left">
                             {originalPrice > 0 && (
                               <span className="text-[10px] text-zinc-600 line-through">
                                 {formatPrice(originalPrice, currency)}
                               </span>
                             )}
-                            <span className="text-xs font-black text-zinc-400 font-mono">
+                            <span className="text-xs font-black text-zinc-500 font-mono">
                               {price === 0 ? "مجاني" : formatPrice(price, currency)} (مشمول مجاناً)
                             </span>
                           </div>
                           
                           <Link 
                             href={itemLink}
-                            className="h-9 px-4 bg-white/5 hover:bg-white/10 border border-white/10 text-white text-[10px] font-bold rounded-lg flex items-center justify-center gap-1 transition-all"
+                            className="h-9 px-4 bg-zinc-100/40 hover:bg-zinc-100/80 border border-zinc-200 text-zinc-900 text-[10px] font-bold rounded-2xl flex items-center justify-center gap-1 transition-all"
                           >
                             <span>التفاصيل</span>
                             <ArrowLeft className="w-3.5 h-3.5 rtl:rotate-180" />
@@ -289,8 +289,8 @@ export default function BundlePage({ params }: { params: Promise<{ slug: string 
               </div>
 
               {/* Delivery and Guarantee Badges */}
-              <div className="bg-[#0b0b10]/60 backdrop-blur-xl rounded-3xl md:rounded-[2.5rem] p-6 md:p-10 border border-white/5 shadow-2xl space-y-6">
-                <h3 className="text-lg font-alexandria font-black text-white flex items-center gap-2">
+              <div className="bg-[#0b0b10]/60 backdrop-blur-xl rounded-3xl md:rounded-[2.5rem] p-6 md:p-10 border border-zinc-200/60 shadow-sm border border-zinc-200/60 space-y-6">
+                <h3 className="text-lg font-sans font-black text-zinc-900 flex items-center gap-2">
                   <ShieldCheck className="w-5 h-5 text-emerald-500" />
                   <span>الضمان الثلاثي الأقوى</span>
                 </h3>
@@ -302,10 +302,10 @@ export default function BundlePage({ params }: { params: Promise<{ slug: string 
                     { title: "تحديثات مجانية مدى الحياة", desc: "أي تدفق عمل أو درس إضافي يتم نشره في هذه الحزمة ستحصل عليه مجاناً بدون دفع فلس إضافي.", icon: Zap }
                   ].map((x, idx) => (
                     <div key={idx} className="space-y-2">
-                      <div className="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center">
+                      <div className="w-9 h-9 rounded-2xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center">
                         <x.icon className="w-4.5 h-4.5" />
                       </div>
-                      <h4 className="text-xs font-alexandria font-black text-white">{x.title}</h4>
+                      <h4 className="text-xs font-sans font-black text-zinc-900">{x.title}</h4>
                       <p className="text-[10px] text-zinc-500 font-bold leading-relaxed">{x.desc}</p>
                     </div>
                   ))}
@@ -316,8 +316,8 @@ export default function BundlePage({ params }: { params: Promise<{ slug: string 
 
             {/* Right Column: Pricing & Checkout Conversion */}
             <div className="w-full lg:w-[38%] lg:sticky lg:top-32 space-y-6 md:space-y-8">
-              <div className="bg-[#0c0c12] p-5 sm:p-8 md:p-10 lg:p-12 rounded-3xl md:rounded-[2.5rem] lg:rounded-[3rem] border border-white/10 shadow-2xl relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-br from-rose-600/5 to-transparent opacity-50" />
+              <div className="bg-[#0c0c12] p-5 sm:p-8 md:p-10 lg:p-12 rounded-3xl md:rounded-[2.5rem] lg:rounded-[3rem] border border-zinc-200 shadow-sm border border-zinc-200/60 relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-br from-brand-600/5 to-transparent opacity-50" />
                 
                 {/* Wishlist Button float inside absolute */}
                 <div className="absolute top-4 left-4 z-20">
@@ -327,33 +327,33 @@ export default function BundlePage({ params }: { params: Promise<{ slug: string 
                 <div className="relative z-10 space-y-5 md:space-y-8">
                   <div className="space-y-2 md:space-y-4">
                     {bundle.discount_pct && bundle.discount_pct > 0 ? (
-                      <Badge className="bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 font-alexandria px-2.5 py-1 md:px-4 md:py-2 rounded-lg md:rounded-xl text-[9px] md:text-[10px] font-black uppercase tracking-widest">
+                      <Badge className="bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 font-sans px-2.5 py-1 md:px-4 md:py-2 rounded-2xl md:rounded-2xl text-[9px] md:text-[10px] font-black uppercase tracking-widest">
                         🎉 وفر {bundle.discount_pct}% بالكامل حالياً
                       </Badge>
                     ) : null}
-                    <h1 className="text-[22px] leading-[1.3] sm:text-3xl md:text-4xl lg:text-5xl font-alexandria font-black text-white md:leading-tight tracking-tighter">
+                    <h1 className="text-[22px] leading-[1.3] sm:text-3xl md:text-4xl lg:text-5xl font-sans font-black text-zinc-900 md:leading-tight tracking-tighter">
                       {bundle.title}
                     </h1>
-                    <p className="text-zinc-500 font-cairo text-xs leading-relaxed">
+                    <p className="text-zinc-500 font-sans text-xs leading-relaxed">
                       {bundle.short_description || "احصل على جميع مكونات هذه الحزمة ووفر مئات الدولارات مقارنة بشرائها بشكل منفصل."}
                     </p>
                   </div>
 
-                  <div className="flex items-center justify-between py-3 md:py-6 border-y border-white/5">
+                  <div className="flex items-center justify-between py-3 md:py-6 border-y border-zinc-200/60">
                     <div className="flex flex-col">
                       {bundlePricing && bundlePricing.original_price > 0 && (
-                        <span className="text-zinc-600 font-alexandria text-xs sm:text-base md:text-xl line-through decoration-rose-500/30 mb-0">
+                        <span className="text-zinc-600 font-sans text-xs sm:text-base md:text-xl line-through decoration-brand-500/30 mb-0">
                           {formatPrice(bundlePricing.original_price, currency)}
                         </span>
                       )}
                       <div className="flex items-baseline gap-1.5 md:gap-3">
-                        <span className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-alexandria font-black text-white tracking-tighter">
+                        <span className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-sans font-black text-zinc-900 tracking-tighter">
                           {bundlePricing ? (bundlePricing.price === 0 ? "مجاني" : formatPrice(bundlePricing.price, currency)) : ""}
                         </span>
                       </div>
                     </div>
                     {bundlePricing && bundlePricing.discount_pct > 0 ? (
-                      <div className="bg-rose-600 text-white font-alexandria font-black px-2.5 py-1 md:px-4 md:py-2 rounded-lg md:rounded-xl text-xs md:text-sm shadow-lg shadow-rose-600/20">
+                      <div className="bg-brand-600 text-white font-sans font-black px-2.5 py-1 md:px-4 md:py-2 rounded-2xl md:rounded-2xl text-xs md:text-sm shadow-sm border border-zinc-200/60 shadow-brand-600/20">
                         خصم {bundlePricing.discount_pct}%
                       </div>
                     ) : null}
@@ -362,7 +362,7 @@ export default function BundlePage({ params }: { params: Promise<{ slug: string 
                   <div className="space-y-2.5 md:space-y-4 pt-1 md:pt-4">
                     <Link
                       href={`/checkout/${bundle.id}`}
-                      className="w-full h-12 sm:h-16 md:h-20 inline-flex items-center justify-center gap-2 md:gap-4 bg-[#D6004B] hover:bg-[#ff0059] text-white font-alexandria font-black text-sm sm:text-lg md:text-2xl rounded-xl md:rounded-[2rem] transition-all shadow-[0_15px_40px_rgba(214,0,75,0.35)] hover:shadow-[0_20px_50px_rgba(214,0,75,0.5)] active:scale-95 group"
+                      className="w-full h-12 sm:h-16 md:h-20 inline-flex items-center justify-center gap-2 md:gap-4 bg-[#1D4ED8] hover:bg-[#3B82F6] text-white font-sans font-black text-sm sm:text-lg md:text-2xl rounded-2xl md:rounded-[2rem] transition-all shadow-[0_15px_40px_rgba(29, 78, 216,0.35)] hover:shadow-[0_20px_50px_rgba(29, 78, 216,0.5)] active:scale-95 group"
                     >
                       شراء الحزمة بالكامل
                       <ArrowLeft className="w-4 h-4 md:w-7 md:h-7 rtl:rotate-180 group-hover:-translate-x-2 transition-transform" />
@@ -382,7 +382,7 @@ export default function BundlePage({ params }: { params: Promise<{ slug: string 
                         } as any as Product);
                         toast.success("تمت إضافة حزمة العروض للسلة بنجاح!");
                       }}
-                      className="w-full h-10 sm:h-14 md:h-16 inline-flex items-center justify-center gap-2 md:gap-3 bg-white/5 hover:bg-white/10 text-white font-alexandria font-black text-xs sm:text-base md:text-lg rounded-xl md:rounded-[1.5rem] border border-white/10 transition-all active:scale-95"
+                      className="w-full h-10 sm:h-14 md:h-16 inline-flex items-center justify-center gap-2 md:gap-3 bg-zinc-100/40 hover:bg-zinc-100/80 text-zinc-900 font-sans font-black text-xs sm:text-base md:text-lg rounded-2xl md:rounded-[1.5rem] border border-zinc-200 transition-all active:scale-95"
                     >
                       <ShoppingCart className="w-3.5 h-3.5 md:w-5 md:h-5" />
                       إضافة الحزمة للسلة
@@ -392,18 +392,18 @@ export default function BundlePage({ params }: { params: Promise<{ slug: string 
                   <div className="flex items-center justify-center gap-4 md:gap-6 pt-2 md:pt-6 text-zinc-500">
                     <div className="flex items-center gap-1.5 md:gap-2">
                        <ShieldCheck className="w-3 h-3 md:w-4 md:h-4 text-emerald-500" />
-                       <span className="text-[8px] md:text-[9px] font-alexandria font-black uppercase tracking-widest">آمن 100%</span>
+                       <span className="text-[8px] md:text-[9px] font-sans font-black uppercase tracking-widest">آمن 100%</span>
                     </div>
                     <div className="flex items-center gap-1.5 md:gap-2">
                        <Lock className="w-3 h-3 md:w-4 md:h-4" />
-                       <span className="text-[8px] md:text-[9px] font-alexandria font-black uppercase tracking-widest">تشفير SSL</span>
+                       <span className="text-[8px] md:text-[9px] font-sans font-black uppercase tracking-widest">تشفير SSL</span>
                     </div>
                   </div>
                 </div>
               </div>
 
               {/* Social Proof */}
-              <div className="bg-white/5 rounded-3xl md:rounded-[2.5rem] p-5 md:p-8 border border-white/5 flex items-center justify-between gap-3 md:gap-4">
+              <div className="bg-zinc-100/40 rounded-3xl md:rounded-[2.5rem] p-5 md:p-8 border border-zinc-200/60 flex items-center justify-between gap-3 md:gap-4">
                  <div className="flex -space-x-2 md:-space-x-3 rtl:space-x-reverse">
                    {["felix","sara","mia","alex"].map((seed) => (
                      <div key={seed} className="w-8 h-8 md:w-10 md:h-10 rounded-full border-2 border-[#050505] bg-zinc-800 overflow-hidden relative">
@@ -415,7 +415,7 @@ export default function BundlePage({ params }: { params: Promise<{ slug: string 
                     <div className="flex text-yellow-400 gap-0.5 justify-end mb-0.5 md:mb-1">
                        {[1,2,3,4,5].map(i => <Star key={i} className="w-3 h-3 md:w-3.5 md:h-3.5 fill-current" />)}
                     </div>
-                    <p className="text-white font-alexandria font-bold text-xs md:text-sm">وفر أكثر من 1500+ ريال</p>
+                    <p className="text-zinc-900 font-sans font-bold text-xs md:text-sm">وفر أكثر من 1500+ ريال</p>
                  </div>
               </div>
             </div>
@@ -426,7 +426,7 @@ export default function BundlePage({ params }: { params: Promise<{ slug: string 
           <ProductReviews productId={bundle.id} initialReviews={allReviews} productTitle={bundle.title} />
 
           {/* Related engine Carousel */}
-          <div className="mt-20 border-t border-white/5 pt-16">
+          <div className="mt-20 border-t border-zinc-200/60 pt-16">
             <RelatedCarousel sourceType="bundle" sourceId={bundle.id} />
           </div>
 
@@ -434,12 +434,12 @@ export default function BundlePage({ params }: { params: Promise<{ slug: string 
       </main>
 
       {/* Mobile Sticky Bar */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-black/80 backdrop-blur-2xl border-t border-white/10 p-3 z-50 flex items-center justify-between gap-3 pb-safe shadow-[0_-20px_50px_rgba(0,0,0,0.8)] supports-[backdrop-filter]:bg-black/60">
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-black/80 backdrop-blur-2xl border-t border-zinc-200 p-3 z-50 flex items-center justify-between gap-3 pb-safe shadow-[0_-20px_50px_rgba(0,0,0,0.8)] supports-[backdrop-filter]:bg-black/60">
         <div className="flex flex-col pl-2">
-          <span className="text-lg font-alexandria font-black text-white leading-none tracking-tighter">
+          <span className="text-lg font-sans font-black text-zinc-900 leading-none tracking-tighter">
             {bundlePricing ? (bundlePricing.price === 0 ? "مجاني" : formatPrice(bundlePricing.price, currency)) : ""}
           </span>
-          {bundlePricing && bundlePricing.original_price > 0 && <span className="text-[9px] text-zinc-400 line-through mt-0.5">بدلاً من {formatPrice(bundlePricing.original_price, currency)}</span>}
+          {bundlePricing && bundlePricing.original_price > 0 && <span className="text-[9px] text-zinc-500 line-through mt-0.5">بدلاً من {formatPrice(bundlePricing.original_price, currency)}</span>}
         </div>
         <div className="flex gap-2 flex-1">
           <button
@@ -453,13 +453,13 @@ export default function BundlePage({ params }: { params: Promise<{ slug: string 
               category: "حزم العروض",
               description: bundle.short_description || bundle.description
             } as any as Product)}
-            className="h-11 w-11 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl flex items-center justify-center active:scale-90 shrink-0 transition-colors"
+            className="h-11 w-11 bg-zinc-100/40 hover:bg-zinc-100/80 border border-zinc-200 text-zinc-900 rounded-2xl flex items-center justify-center active:scale-90 shrink-0 transition-colors"
           >
             <ShoppingCart className="w-4 h-4" />
           </button>
           <Link
             href={`/checkout/${bundle.id}`}
-            className="flex-1 h-11 bg-[#D6004B] text-white font-alexandria font-black text-sm rounded-xl flex items-center justify-center gap-1.5 active:scale-95 shadow-[0_10px_30px_rgba(214,0,75,0.3)]"
+            className="flex-1 h-11 bg-[#1D4ED8] text-white font-sans font-black text-sm rounded-2xl flex items-center justify-center gap-1.5 active:scale-95 shadow-[0_10px_30px_rgba(29, 78, 216,0.3)]"
           >
             شراء فوري للحزمة
             <ArrowLeft className="w-4 h-4 rtl:rotate-180" />

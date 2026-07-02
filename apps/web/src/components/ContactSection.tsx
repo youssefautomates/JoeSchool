@@ -36,10 +36,10 @@ export function ContactSection() {
   };
 
   return (
-    <section id="contact" className="py-16 md:py-24 relative overflow-hidden bg-[#050508] select-none font-cairo">
+    <section id="contact" className="py-16 md:py-24 relative overflow-hidden bg-white select-none font-sans">
       {/* Background glow effects */}
       <div className="absolute inset-0 pointer-events-none z-0">
-        <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-[300px] sm:w-[500px] h-[300px] sm:h-[500px] bg-rose-500/5 rounded-full blur-[100px] mix-blend-screen" />
+        <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-[300px] sm:w-[500px] h-[300px] sm:h-[500px] bg-brand-500/5 rounded-full blur-[100px] mix-blend-screen" />
         <div className="absolute bottom-0 right-10 w-[200px] sm:w-[400px] h-[200px] sm:h-[400px] bg-purple-650/5 rounded-full blur-[80px] mix-blend-screen" />
       </div>
 
@@ -48,8 +48,8 @@ export function ContactSection() {
         <div className="text-center max-w-2xl mx-auto mb-16">
 
 
-          <h2 className="text-2xl md:text-5xl font-alexandria font-black text-white mb-4 tracking-tight">تواصل معنا</h2>
-          <p className="text-zinc-400 text-xs sm:text-sm leading-relaxed max-w-xl mx-auto">
+          <h2 className="text-2xl md:text-5xl font-sans font-black text-zinc-900 mb-4 tracking-tight">تواصل معنا</h2>
+          <p className="text-zinc-500 text-xs sm:text-sm leading-relaxed max-w-xl mx-auto">
             يسعدنا دائماً سماع استفساراتكم أو تلقي آرائكم. تواصل معنا مباشرة عبر الواتساب أو راسلنا برقمك واستفسارك عبر النموذج البريدي أدناه.
           </p>
         </div>
@@ -58,7 +58,7 @@ export function ContactSection() {
           
           {/* Direct channels (5 cols) */}
           <div className="lg:col-span-5 space-y-6">
-            <h3 className="text-base sm:text-lg font-alexandria font-bold text-white border-r-4 border-rose-500 pr-3 mb-6">
+            <h3 className="text-base sm:text-lg font-sans font-bold text-zinc-900 border-r-4 border-brand-500 pr-3 mb-6">
               قنوات الاتصال الفوري
             </h3>
 
@@ -68,7 +68,7 @@ export function ContactSection() {
               target="_blank"
               rel="noopener noreferrer"
               whileHover={{ scale: 1.015, y: -2 }}
-              className="block bg-[#0a0a0f] border border-white/5 hover:border-emerald-500/30 rounded-3xl p-6 shadow-2xl transition-all duration-300 group"
+              className="block bg-slate-50 border border-zinc-200/60 hover:border-emerald-500/30 rounded-3xl p-6 shadow-sm border border-zinc-200/60 transition-all duration-300 group"
             >
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 group-hover:bg-emerald-500/20 transition-all">
@@ -78,7 +78,7 @@ export function ContactSection() {
                 </div>
                 <div className="text-right">
                   <span className="text-[10px] text-zinc-500 block font-bold">تواصل فوري عبر الواتساب</span>
-                  <span className="text-base font-bold text-white block mt-0.5" dir="ltr">+20 110 709 9196</span>
+                  <span className="text-base font-bold text-zinc-900 block mt-0.5" dir="ltr">+20 110 709 9196</span>
                 </div>
               </div>
               <div className="mt-4 flex items-center justify-end text-xs text-emerald-400 font-bold gap-1">
@@ -91,18 +91,18 @@ export function ContactSection() {
             <motion.a
               href="mailto:support@joeschool.com"
               whileHover={{ scale: 1.015, y: -2 }}
-              className="block bg-[#0a0a0f] border border-white/5 hover:border-rose-500/30 rounded-3xl p-6 shadow-2xl transition-all duration-300 group"
+              className="block bg-slate-50 border border-zinc-200/60 hover:border-zinc-200/60 rounded-3xl p-6 shadow-sm border border-zinc-200/60 transition-all duration-300 group"
             >
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-[#D6004B] flex items-center justify-center shrink-0 group-hover:bg-rose-500/20 transition-all">
+                <div className="w-12 h-12 rounded-2xl bg-brand-500/10 border border-zinc-200/60 text-[#1D4ED8] flex items-center justify-center shrink-0 group-hover:bg-brand-500/20 transition-all">
                   <Mail className="w-6 h-6" />
                 </div>
                 <div className="text-right">
                   <span className="text-[10px] text-zinc-500 block font-bold">راسلنا مباشرة عبر البريد الإلكتروني</span>
-                  <span className="text-base font-bold text-white block mt-0.5 font-sans" dir="ltr">support@joeschool.com</span>
+                  <span className="text-base font-bold text-zinc-900 block mt-0.5 font-sans" dir="ltr">support@joeschool.com</span>
                 </div>
               </div>
-              <div className="mt-4 flex items-center justify-end text-xs text-[#D6004B] font-bold gap-1">
+              <div className="mt-4 flex items-center justify-end text-xs text-[#1D4ED8] font-bold gap-1">
                 <span>أرسل رسالة إلكترونية</span>
                 <Send className="w-3.5 h-3.5 rotate-180" />
               </div>
@@ -112,10 +112,10 @@ export function ContactSection() {
 
           {/* Contact Email Form (7 cols) */}
           <div className="lg:col-span-7">
-            <div className="bg-[#0a0a0f] border border-white/5 rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden text-right" dir="rtl">
-              <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-[#D6004B] to-transparent" />
+            <div className="bg-slate-50 border border-zinc-200/60 rounded-3xl p-6 sm:p-8 shadow-sm border border-zinc-200/60 relative overflow-hidden text-right" dir="rtl">
+              <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-[#1D4ED8] to-transparent" />
               
-              <h3 className="text-lg font-alexandria font-bold text-white mb-6">
+              <h3 className="text-lg font-sans font-bold text-zinc-900 mb-6">
                 أرسل رسالة دعم فني مباشرة
               </h3>
 
@@ -123,14 +123,14 @@ export function ContactSection() {
                 <div className="py-12 flex flex-col items-center text-center space-y-6">
                   <CheckCircle2 className="w-16 h-16 text-emerald-500 animate-bounce" />
                   <div className="space-y-2">
-                    <h4 className="text-xl font-bold text-white font-cairo">تم الإرسال بنجاح!</h4>
-                    <p className="text-zinc-400 text-xs sm:text-sm max-w-sm leading-relaxed mx-auto">
+                    <h4 className="text-xl font-bold text-zinc-900 font-sans">تم الإرسال بنجاح!</h4>
+                    <p className="text-zinc-500 text-xs sm:text-sm max-w-sm leading-relaxed mx-auto">
                       شكراً لتواصلك. لقد تم استلام استفسارك بنجاح وسيقوم فريق الدعم بالرد عليك على بريدك الإلكتروني قريباً جداً.
                     </p>
                   </div>
                   <button
                     onClick={() => setStatus("idle")}
-                    className="px-6 py-2 bg-white/5 hover:bg-white/10 text-white rounded-xl text-xs font-bold transition-all border border-white/10"
+                    className="px-6 py-2 bg-zinc-100/40 hover:bg-zinc-100/80 text-zinc-900 rounded-2xl text-xs font-bold transition-all border border-zinc-200"
                   >
                     إرسال رسالة أخرى
                   </button>
@@ -138,44 +138,44 @@ export function ContactSection() {
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-5">
                   <div className="space-y-2">
-                    <label className="text-xs font-bold text-zinc-400 mr-1 block">الاسم الكريم</label>
+                    <label className="text-xs font-bold text-zinc-500 mr-1 block">الاسم الكريم</label>
                     <input
                       required
                       type="text"
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      className="w-full bg-white/5 border border-white/5 hover:border-white/10 focus:border-[#D6004B]/50 focus:bg-white/10 rounded-2xl py-3 px-5 text-white text-xs sm:text-sm focus:outline-none transition-all font-cairo"
+                      className="w-full bg-zinc-100/40 border border-zinc-200/60 hover:border-zinc-200 focus:border-[#1D4ED8]/50 focus:bg-zinc-100/80 rounded-2xl py-3 px-5 text-zinc-900 text-xs sm:text-sm focus:outline-none transition-all font-sans"
                       placeholder="أدخل اسمك بالكامل"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-xs font-bold text-zinc-400 mr-1 block">البريد الإلكتروني</label>
+                    <label className="text-xs font-bold text-zinc-500 mr-1 block">البريد الإلكتروني</label>
                     <input
                       required
                       type="email"
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="w-full bg-white/5 border border-white/5 hover:border-white/10 focus:border-[#D6004B]/50 focus:bg-white/10 rounded-2xl py-3 px-5 text-white text-xs sm:text-sm focus:outline-none transition-all font-cairo text-right"
+                      className="w-full bg-zinc-100/40 border border-zinc-200/60 hover:border-zinc-200 focus:border-[#1D4ED8]/50 focus:bg-zinc-100/80 rounded-2xl py-3 px-5 text-zinc-900 text-xs sm:text-sm focus:outline-none transition-all font-sans text-right"
                       placeholder="name@example.com"
                       dir="ltr"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-xs font-bold text-zinc-400 mr-1 block">محتوى الاستفسار أو الرسالة</label>
+                    <label className="text-xs font-bold text-zinc-500 mr-1 block">محتوى الاستفسار أو الرسالة</label>
                     <textarea
                       required
                       rows={4}
                       value={formData.message}
                       onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                      className="w-full bg-white/5 border border-white/5 hover:border-white/10 focus:border-[#D6004B]/50 focus:bg-white/10 rounded-2xl py-3 px-5 text-white text-xs sm:text-sm focus:outline-none transition-all font-cairo resize-none leading-relaxed"
+                      className="w-full bg-zinc-100/40 border border-zinc-200/60 hover:border-zinc-200 focus:border-[#1D4ED8]/50 focus:bg-zinc-100/80 rounded-2xl py-3 px-5 text-zinc-900 text-xs sm:text-sm focus:outline-none transition-all font-sans resize-none leading-relaxed"
                       placeholder="اكتب استفسارك أو تفاصيل الرسالة هنا..."
                     />
                   </div>
 
                   {status === "error" && (
-                    <div className="flex items-center gap-3 text-rose-500 bg-rose-500/10 p-4 rounded-xl font-cairo text-xs sm:text-sm border border-rose-500/20">
+                    <div className="flex items-center gap-3 text-yellow-500 bg-brand-500/10 p-4 rounded-2xl font-sans text-xs sm:text-sm border border-zinc-200/60">
                       <AlertCircle className="w-4 h-4 shrink-0" />
                       <span>{errorMessage}</span>
                     </div>
@@ -184,7 +184,7 @@ export function ContactSection() {
                   <button
                     disabled={status === "loading"}
                     type="submit"
-                    className="w-full bg-[#D6004B] hover:bg-[#b0003d] disabled:opacity-50 text-white font-cairo font-bold py-3.5 rounded-2xl transition-all shadow-[0_0_20px_rgba(214,0,75,0.25)] flex items-center justify-center gap-2 group cursor-pointer"
+                    className="w-full bg-[#2563EB] hover:bg-[#1D4ED8] disabled:opacity-50 text-white font-sans font-bold py-3.5 rounded-2xl transition-all shadow-[0_0_20px_rgba(29, 78, 216,0.25)] flex items-center justify-center gap-2 group cursor-pointer"
                   >
                     {status === "loading" ? (
                       <>

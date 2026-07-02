@@ -82,7 +82,7 @@ export function ProductMedia({
       <div className={cn(
         "absolute inset-0 z-10 pointer-events-none transition-opacity duration-500",
         isHovered && !staticOnly ? "opacity-30" : "opacity-0",
-        "bg-gradient-to-t from-rose-600/20 to-transparent"
+        "bg-gradient-to-t from-brand-600/20 to-transparent"
       )} />
 
       {staticOnly && image_url ? (
@@ -123,7 +123,7 @@ export function ProductMedia({
           <div className="absolute inset-0 flex items-center justify-center">
             <PlayCircle className={cn(
               "w-12 h-12 transition-all duration-300",
-              isHovered ? "text-rose-500 scale-110" : "text-white/40"
+              isHovered ? "text-yellow-500 scale-110" : "text-zinc-900/40"
             )} />
           </div>
         </div>
@@ -139,7 +139,7 @@ export function ProductMedia({
           style={{ transform: isHovered ? 'scale(1.02)' : 'scale(1)' }}
         />
       ) : (
-        <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#0a0a0f] text-zinc-800">
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-50 text-zinc-800">
           <PlayCircle className="w-12 h-12 mb-2 opacity-20" />
           <span className="text-[10px] font-bold uppercase tracking-widest opacity-20">No Preview</span>
         </div>
@@ -147,7 +147,7 @@ export function ProductMedia({
 
       {/* Subtle bottom gradient for card content readability */}
       {!staticOnly && (
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0f]/80 via-transparent to-transparent opacity-60" />
+        <div className="absolute inset-0 bg-gradient-to-t from-white/80 via-transparent to-transparent opacity-60" />
       )}
     </div>
   );

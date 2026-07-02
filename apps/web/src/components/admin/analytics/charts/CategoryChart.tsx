@@ -21,7 +21,7 @@ export default function CategoryChart({ data }: CategoryChartProps) {
 
   if (totalRevenue === 0) {
     return (
-      <div className="w-full h-full flex flex-col items-center justify-center border border-dashed border-white/5 rounded-2xl p-6 text-center text-zinc-500 text-xs font-sans">
+      <div className="w-full h-full flex flex-col items-center justify-center border border-dashed border-zinc-200/60 rounded-2xl p-6 text-center text-zinc-500 text-xs font-sans">
         No category sales statistics found.
       </div>
     );
@@ -36,9 +36,9 @@ export default function CategoryChart({ data }: CategoryChartProps) {
 
   return (
     <div className="w-full h-full flex flex-col justify-between font-sans text-left" dir="ltr">
-      <div className="flex items-center justify-between mb-5 pb-4 border-b border-white/5">
+      <div className="flex items-center justify-between mb-5 pb-4 border-b border-zinc-200/60">
         <div>
-          <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">Category Sales</h3>
+          <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-500">Category Sales</h3>
           <p className="text-[10px] text-zinc-500 mt-0.5">Sales volume distribution and conversion rate by product category</p>
         </div>
         <Award className="w-4 h-4 text-zinc-500 shrink-0" />
@@ -52,14 +52,14 @@ export default function CategoryChart({ data }: CategoryChartProps) {
               <XAxis dataKey="name" stroke="#3f3f46" fontSize={8} tickLine={false} />
               <YAxis stroke="#3f3f46" fontSize={8} tickLine={false} />
               <Tooltip
-                contentStyle={{ backgroundColor: "#060608", borderColor: "rgba(255,255,255,0.06)", borderRadius: "12px", textAlign: "left" }}
-                labelStyle={{ color: "#ffffff", fontWeight: "bold", fontSize: "10px" }}
+                contentStyle={{ backgroundColor: "#ffffff", borderColor: "rgba(0,0,0,0.08)", borderRadius: "12px", textAlign: "left" }}
+                labelStyle={{ color: "#09090b", fontWeight: "bold", fontSize: "10px" }}
                 itemStyle={{ fontSize: "10px" }}
                 formatter={(value: any, name: any) => [name === "Revenue" ? `${value} EGP` : `${value}%`, name === "Revenue" ? "Revenue" : "Conversion Rate"]}
               />
-              <Bar dataKey="Revenue" fill="#D6004B" radius={[4, 4, 0, 0]}>
+              <Bar dataKey="Revenue" fill="#1D4ED8" radius={[4, 4, 0, 0]}>
                 {chartData.map((_, index) => (
-                  <Cell key={`cell-${index}`} fill={index === 0 ? "#D6004B" : index === 1 ? "#10b981" : "#3b82f6"} />
+                  <Cell key={`cell-${index}`} fill={index === 0 ? "#1D4ED8" : index === 1 ? "#10b981" : "#3b82f6"} />
                 ))}
               </Bar>
             </BarChart>
@@ -69,17 +69,17 @@ export default function CategoryChart({ data }: CategoryChartProps) {
         {/* Detailed stats rows */}
         <div className="md:col-span-2 space-y-2.5">
           {data.map((c, index) => {
-            const colors = ["#D6004B", "#10b981", "#3b82f6", "#f59e0b"];
+            const colors = ["#1D4ED8", "#10b981", "#3b82f6", "#f59e0b"];
             const color = colors[index] || "#71717a";
 
             return (
-              <div key={c.name} className="p-2.5 rounded-xl bg-white/[0.01] border border-white/5 space-y-1.5 text-left">
+              <div key={c.name} className="p-2.5 rounded-2xl bg-zinc-50/40 border border-zinc-200/60 space-y-1.5 text-left">
                 <div className="flex items-center justify-between text-xs">
                   <div className="flex items-center gap-1.5 min-w-0">
                     <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: color }} />
-                    <span className="font-bold text-white truncate">{c.name}</span>
+                    <span className="font-bold text-zinc-900 truncate">{c.name}</span>
                   </div>
-                  <span className="font-black text-rose-500 font-mono shrink-0 ml-1">{c.revenue} EGP</span>
+                  <span className="font-black text-yellow-500 font-mono shrink-0 ml-1">{c.revenue} EGP</span>
                 </div>
                 <div className="flex items-center justify-between text-[9px] text-zinc-500 font-bold">
                   <span>{c.visits} visits</span>

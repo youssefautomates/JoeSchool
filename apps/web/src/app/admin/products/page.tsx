@@ -164,7 +164,8 @@ export default function AdminProductsPage() {
     status: "Active", is_featured: false, enable_gateway_fee: true,
     image_url: "", video_url: "", gallery: ["", "", "", ""],
     file_url: "", file_type: "zip", displayTags: "",
-    seo_title: "", seo_description: ""
+    seo_title: "", seo_description: "",
+    category: ""
   });
 
   // Upload States
@@ -227,7 +228,8 @@ export default function AdminProductsPage() {
       status: "Active", is_featured: false, enable_gateway_fee: true,
       image_url: "", video_url: "", gallery: ["", "", "", ""],
       file_url: "", file_type: "zip", displayTags: "",
-      seo_title: "", seo_description: ""
+      seo_title: "", seo_description: "",
+      category: ""
     });
     setVideoUploading(false);
     setVideoUploadProgress(null);
@@ -261,7 +263,8 @@ export default function AdminProductsPage() {
       file_type: unpacked.file_type || "zip",
       displayTags: unpacked.displayTags || "",
       seo_title: unpacked.seo_title || "",
-      seo_description: unpacked.seo_description || ""
+      seo_description: unpacked.seo_description || "",
+      category: unpacked.category || ""
     });
 
     setVideoUploading(false);
@@ -555,9 +558,9 @@ export default function AdminProductsPage() {
     <div className="space-y-8 animate-in fade-in duration-700 p-2 md:p-6 text-left font-sans" style={{ minHeight: "100vh" }} dir="ltr">
       
       {/* Header Panel */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 border-b border-white/5 pb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 border-b border-zinc-200/60 pb-6">
         <div>
-          <h1 className="text-3xl font-black text-white font-sans tracking-tight">
+          <h1 className="text-3xl font-black text-zinc-900 font-sans tracking-tight">
             {view === "list" ? "Digital Products Hub" : selectedProduct ? "Edit Product Asset" : "Add Product Asset"}
           </h1>
           <p className="text-zinc-500 text-xs mt-1">
@@ -570,14 +573,14 @@ export default function AdminProductsPage() {
         {view === "list" ? (
           <button
             onClick={handleCreateNewProduct}
-            className="flex items-center justify-center gap-2 px-6 h-12 bg-rose-600 hover:bg-rose-700 text-white rounded-2xl font-bold text-xs transition-all active:scale-95 shadow-lg shadow-rose-600/20 cursor-pointer"
+            className="flex items-center justify-center gap-2 px-6 h-12 bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-2xl font-bold text-xs transition-all active:scale-95 shadow-sm border border-zinc-200/60 shadow-brand-600/20 cursor-pointer"
           >
             <Plus className="w-4 h-4" /> Create Product
           </button>
         ) : (
           <button
             onClick={() => setView("list")}
-            className="flex items-center justify-center gap-2 px-6 h-12 bg-white/5 hover:bg-white/10 text-white rounded-2xl font-bold text-xs border border-white/5 transition-all cursor-pointer"
+            className="flex items-center justify-center gap-2 px-6 h-12 bg-zinc-100/40 hover:bg-zinc-100/80 text-zinc-900 rounded-2xl font-bold text-xs border border-zinc-200/60 transition-all cursor-pointer"
           >
             <ArrowRight className="w-4 h-4" /> Back to Hub
           </button>
@@ -588,32 +591,32 @@ export default function AdminProductsPage() {
       {view === "list" && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {loading ? (
-            Array.from({ length: 3 }).map((_, i) => <div key={i} className="h-96 rounded-3xl bg-white/5 animate-pulse" />)
+            Array.from({ length: 3 }).map((_, i) => <div key={i} className="h-96 rounded-3xl bg-zinc-100/40 animate-pulse" />)
           ) : products.length === 0 ? (
-            <div className="col-span-full text-center py-20 bg-white/[0.02] border border-white/5 rounded-3xl">
+            <div className="col-span-full text-center py-20 bg-zinc-50/70 border border-zinc-200/60 rounded-3xl">
               <Package className="w-16 h-16 text-zinc-700 mx-auto mb-4" />
               <p className="text-zinc-500 font-bold mb-4">No digital products registered yet.</p>
-              <button onClick={handleCreateNewProduct} className="px-6 py-3 bg-rose-600 hover:bg-rose-700 rounded-xl font-bold text-xs inline-flex items-center gap-2 cursor-pointer">
+              <button onClick={handleCreateNewProduct} className="px-6 py-3 bg-[#2563EB] hover:bg-[#1D4ED8] rounded-2xl font-bold text-xs inline-flex items-center gap-2 cursor-pointer">
                 <Plus className="w-4 h-4" /> Create Your First Product
               </button>
             </div>
           ) : (
             products.map((p) => {
               return (
-                <div key={p.id} className="bg-[#0a0a0f] border border-white/5 rounded-3xl overflow-hidden shadow-2xl flex flex-col justify-between hover:border-white/10 transition-all group">
-                  <div className="relative h-44 bg-zinc-900 border-b border-white/5">
+                <div key={p.id} className="bg-slate-50 border border-zinc-200/60 rounded-3xl overflow-hidden shadow-sm border border-zinc-200/60 flex flex-col justify-between hover:border-zinc-200 transition-all group">
+                  <div className="relative h-44 bg-zinc-900 border-b border-zinc-200/60">
                     <img src={safeImageSrc(p.image_url)} alt={p.title} className="w-full h-full object-cover opacity-85 group-hover:scale-103 transition-transform duration-500" />
                     <div className="absolute top-4 left-4 z-20 flex gap-2">
                       <span className={cn(
                         "text-[9px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded border border-none",
                         p.status === '\u0646\u0634\u0637' || p.status === 'Active' || (p.status as string) === 'active' ? "bg-emerald-950 text-emerald-400" :
                         p.status === '\u0645\u0633\u0648\u062f\u0629' || p.status === 'Draft' || (p.status as string) === 'draft' ? "bg-amber-950 text-amber-400" :
-                        "bg-zinc-800 text-zinc-400"
+                        "bg-zinc-800 text-zinc-500"
                       )}>
                         {p.status === '\u0646\u0634\u0637' || p.status === 'Active' || (p.status as string) === 'active' ? 'Active' : p.status === '\u0645\u0633\u0648\u062f\u0629' || p.status === 'Draft' || (p.status as string) === 'draft' ? 'Draft' : p.status === '\u0645\u062e\u0641\u064a' || p.status === 'Hidden' || (p.status as string) === 'hidden' ? 'Hidden' : p.status}
                       </span>
                       {p.is_featured && (
-                        <span className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-rose-950 text-rose-400 border border-rose-900/30">
+                        <span className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-brand-950 text-yellow-500 border border-brand-900/30">
                           Featured
                         </span>
                       )}
@@ -625,13 +628,13 @@ export default function AdminProductsPage() {
                       <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider block">
                         {p.category === "\u0627\u0644\u0623\u062a\u0645\u062a\u0629" || p.category === "Automation" ? "Automation" : p.category === "\u0627\u0644\u0630\u0643\u0627\u0621 \u0627\u0644\u0627\u0635\u0637\u0646\u0627\u0639\u064a" || p.category === "Artificial Intelligence" ? "Artificial Intelligence" : p.category === "\u0635\u0646\u0627\u0639\u0629 \u0627\u0644\u0645\u062d\u062a\u0648\u0649" || p.category === "Content Creation" ? "Content Creation" : p.category}
                       </span>
-                      <h3 className="text-base font-alexandria font-bold text-white line-clamp-2">{p.title}</h3>
-                      {p.arabic_title && <p className="text-xs text-zinc-400 font-bold font-cairo line-clamp-1">{p.arabic_title}</p>}
+                      <h3 className="text-base font-sans font-bold text-zinc-900 line-clamp-2">{p.title}</h3>
+                      {p.arabic_title && <p className="text-xs text-zinc-500 font-bold font-alexandria line-clamp-1">{p.arabic_title}</p>}
                     </div>
 
-                    <div className="flex justify-between items-center py-2 border-t border-b border-white/5">
+                    <div className="flex justify-between items-center py-2 border-t border-b border-zinc-200/60">
                       <div className="flex flex-col">
-                        <span className="text-rose-400 text-sm font-bold font-sans">
+                        <span className="text-yellow-500 text-sm font-bold font-sans">
                           {formatPrice(Number(p.price_egp || p.price), 'EGP').replace("EGP", "L.E")}
                         </span>
                         <span className="text-emerald-400 text-[10px] font-sans">
@@ -640,17 +643,17 @@ export default function AdminProductsPage() {
                       </div>
                       <div className="text-right flex flex-col">
                         <span className="text-zinc-500 text-[9px] font-black uppercase tracking-widest">Sales & Views</span>
-                        <span className="text-zinc-400 text-xs font-bold font-sans mt-0.5">
+                        <span className="text-zinc-500 text-xs font-bold font-sans mt-0.5">
                           {p.sales || 0} purchases / {p.views || 0} clicks
                         </span>
                       </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-2">
-                      <button onClick={() => handleEditProduct(p)} className="h-10 rounded-xl bg-white/5 border border-white/5 hover:border-white/10 text-white font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer">
+                      <button onClick={() => handleEditProduct(p)} className="h-10 rounded-2xl bg-zinc-100/40 border border-zinc-200/60 hover:border-zinc-200 text-zinc-900 font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer">
                         <Edit className="w-3.5 h-3.5" /> <span>Manage Asset</span>
                       </button>
-                      <button onClick={() => handleDeleteProduct(p.id, p.title)} className="h-10 rounded-xl bg-red-950/15 border border-red-900/10 hover:bg-red-950/30 text-red-400 font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer">
+                      <button onClick={() => handleDeleteProduct(p.id, p.title)} className="h-10 rounded-2xl bg-red-950/15 border border-red-900/10 hover:bg-red-950/30 text-red-400 font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer">
                         <Trash2 className="w-3.5 h-3.5" /> <span>Delete</span>
                       </button>
                     </div>
@@ -667,16 +670,16 @@ export default function AdminProductsPage() {
         <form onSubmit={handleSave} className="space-y-10">
           
           {/* Section 1: Basic Digital Product Info */}
-          <div className="bg-[#0a0a0f] border border-white/5 rounded-3xl p-6 md:p-8 shadow-2xl">
-            <div className="flex items-center justify-between mb-8 border-b border-white/5 pb-4">
-              <h2 className="text-lg font-alexandria font-bold text-white flex items-center gap-2">
-                <Package className="w-5 h-5 text-rose-500" />
+          <div className="bg-slate-50 border border-zinc-200/60 rounded-3xl p-6 md:p-8 shadow-sm border border-zinc-200/60">
+            <div className="flex items-center justify-between mb-8 border-b border-zinc-200/60 pb-4">
+              <h2 className="text-lg font-sans font-bold text-zinc-900 flex items-center gap-2">
+                <Package className="w-5 h-5 text-yellow-500" />
                 Product Details
               </h2>
               <button
                 type="submit"
                 disabled={saving || uploadingField !== null}
-                className="h-10 px-6 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold flex items-center gap-2 shadow-lg text-xs cursor-pointer disabled:opacity-55"
+                className="h-10 px-6 bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-2xl font-bold flex items-center gap-2 shadow-sm border border-zinc-200/60 text-xs cursor-pointer disabled:opacity-55"
               >
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                 <span>Save Changes</span>
@@ -686,86 +689,87 @@ export default function AdminProductsPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               
               <div className="flex flex-col gap-2">
-                <label className="text-xs font-bold text-zinc-400">English Title (Main) *</label>
+                <label className="text-xs font-bold text-zinc-500">English Title (Main) *</label>
                 <input 
                   required 
                   value={form.title} 
                   onChange={e => setForm({ ...form, title: e.target.value })} 
-                  className="bg-white/5 border border-white/5 rounded-xl py-3.5 px-4 text-sm focus:border-rose-500/50 text-white outline-none" 
+                  className="bg-zinc-100/40 border border-zinc-200/60 rounded-2xl py-3.5 px-4 text-sm focus:border-zinc-200/60 text-zinc-900 outline-none" 
                   placeholder="e.g. n8n Professional Templates Bundle" 
                 />
               </div>
 
               <div className="flex flex-col gap-2">
-                <label className="text-xs font-bold text-zinc-400">Arabic Title Support</label>
+                <label className="text-xs font-bold text-zinc-500">Arabic Title Support</label>
                 <input 
                   value={form.arabic_title} 
                   onChange={e => setForm({ ...form, arabic_title: e.target.value })} 
-                  className="bg-white/5 border border-white/5 rounded-xl py-3.5 px-4 text-sm focus:border-rose-500/50 text-white outline-none text-left font-sans" 
+                  className="bg-zinc-100/40 border border-zinc-200/60 rounded-2xl py-3.5 px-4 text-sm focus:border-zinc-200/60 text-zinc-900 outline-none text-left font-sans" 
                   placeholder="e.g. Premium Automation Templates Bundle" 
                   dir="ltr"
                 />
               </div>
 
               <div className="flex flex-col gap-2">
-                <label className="text-xs font-bold text-zinc-400">Slug</label>
+                <label className="text-xs font-bold text-zinc-500">Slug</label>
                 <input 
                   value={form.slug} 
                   onChange={e => setForm({ ...form, slug: e.target.value })} 
-                  className="bg-white/5 border border-white/5 rounded-xl py-3.5 px-4 text-sm text-zinc-300 outline-none" 
+                  className="bg-zinc-100/40 border border-zinc-200/60 rounded-2xl py-3.5 px-4 text-sm text-zinc-700 outline-none" 
                   placeholder="auto-generated-slug" 
                 />
               </div>
 
               <div className="flex flex-col gap-2">
-                <label className="text-xs font-bold text-zinc-400">Category Selector</label>
+                <label className="text-xs font-bold text-zinc-500">Category Selector</label>
                 <select 
                   value={form.category} 
                   onChange={e => setForm({ ...form, category: e.target.value })} 
-                  className="bg-[#0f0f15] border border-white/5 rounded-xl py-3.5 px-4 text-sm text-white outline-none cursor-pointer"
+                  className="bg-slate-50 border border-zinc-200/60 rounded-2xl py-3.5 px-4 text-sm text-zinc-900 outline-none cursor-pointer"
                 >
-                  {(categories.length > 0 ? categories : ["AI Content Creation", "AI Animation", "Creative Video Production", "Digital Storytelling"]).map((cat) => (
-                    <option key={cat} value={cat} className="bg-[#0f0f15]">{cat}</option>
+                  <option value="" className="bg-slate-50">None (بدون قسم)</option>
+                  {categories.map((cat) => (
+                    <option key={cat} value={cat} className="bg-slate-50">{cat}</option>
                   ))}
                 </select>
               </div>
 
               <div className="flex flex-col gap-2">
-                <label className="text-xs font-bold text-zinc-400">Product Status</label>
+                <label className="text-xs font-bold text-zinc-500">Product Status</label>
                 <select 
                   value={form.status} 
                   onChange={e => setForm({ ...form, status: e.target.value as any })} 
-                  className="bg-[#0f0f15] border border-white/5 rounded-xl py-3.5 px-4 text-sm text-white outline-none cursor-pointer"
+                  className="bg-slate-50 border border-zinc-200/60 rounded-2xl py-3.5 px-4 text-sm text-zinc-900 outline-none cursor-pointer"
                 >
-                  <option value="Active" className="bg-[#0f0f15]">Active (Visible in store)</option>
-                  <option value="Draft" className="bg-[#0f0f15]">Draft (Internal preview)</option>
-                  <option value="Hidden" className="bg-[#0f0f15]">Hidden (Completely invisible)</option>
+                  <option value="Active" className="bg-slate-50">Active (Visible in store)</option>
+                  <option value="Draft" className="bg-slate-50">Draft (Internal preview)</option>
+                  <option value="Hidden" className="bg-slate-50">Hidden (Completely invisible)</option>
                 </select>
               </div>
 
-              <div className="flex items-center gap-4 bg-white/[0.01] border border-white/5 rounded-xl p-4 mt-4">
+              <div className="flex items-center gap-4 bg-zinc-50/40 border border-zinc-200/60 rounded-2xl p-4 mt-4">
                 <input 
                   type="checkbox" 
                   id="isFeaturedProductCheckbox"
                   checked={form.is_featured} 
                   onChange={e => setForm({ ...form, is_featured: e.target.checked })} 
-                  className="w-4 h-4 text-rose-600 border-white/10 rounded focus:ring-rose-500 cursor-pointer"
+                  className="w-4 h-4 text-brand-600 border-zinc-200 rounded focus:ring-brand-500 cursor-pointer"
                 />
-                <label htmlFor="isFeaturedProductCheckbox" className="text-xs font-bold text-zinc-300 cursor-pointer select-none">
+                <label htmlFor="isFeaturedProductCheckbox" className="text-xs font-bold text-zinc-700 cursor-pointer select-none">
                   Featured Product (Highlight in main storefront collection)
                 </label>
               </div>
 
-              <div className="flex flex-col gap-1.5 bg-white/[0.01] border border-white/5 rounded-xl p-4 mt-2">
+              <div className="flex flex-col gap-1.5 bg-zinc-50/40 border border-zinc-200/60 rounded-2xl p-4 mt-2">
                 <div className="flex items-center gap-4">
                   <input 
                     type="checkbox" 
                     id="enableGatewayFeeCheckbox"
                     checked={form.enable_gateway_fee !== false} 
                     onChange={e => setForm({ ...form, enable_gateway_fee: e.target.checked })} 
-                    className="w-4 h-4 text-rose-600 border-white/10 rounded focus:ring-rose-500 cursor-pointer accent-rose-600"
+                    className="w-4 h-4 text-brand-600 border-zinc-200 rounded focus:ring-brand-500 cursor-pointer accent-brand-600"
                   />
-                  <label htmlFor="enableGatewayFeeCheckbox" className="text-xs font-bold text-zinc-300 cursor-pointer select-none">
+                  <label htmlFor="enableGatewayFeeCheckbox" className="text-xs font-bold text-zinc-700 cursor-pointer select-none">
                     Enable Payment Processing Fee Recovery (3%)
                   </label>
                 </div>
@@ -778,31 +782,31 @@ export default function AdminProductsPage() {
           </div>
 
           {/* Section 2: Pricing System */}
-          <div className="bg-[#0a0a0f] border border-white/5 rounded-3xl p-6 md:p-8 shadow-2xl">
-            <h2 className="text-lg font-alexandria font-bold text-white mb-6 border-b border-white/5 pb-4">
+          <div className="bg-slate-50 border border-zinc-200/60 rounded-3xl p-6 md:p-8 shadow-sm border border-zinc-200/60">
+            <h2 className="text-lg font-sans font-bold text-zinc-900 mb-6 border-b border-zinc-200/60 pb-4">
               Pricing System
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               
               <div className="flex flex-col gap-2">
-                <label className="text-xs font-bold text-rose-400">Price in EGP *</label>
+                <label className="text-xs font-bold text-yellow-500">Price in EGP *</label>
                 <input 
                   type="number" 
                   required 
                   value={form.price_egp} 
                   onChange={e => setForm({ ...form, price_egp: e.target.value })} 
-                  className="bg-white/5 border border-white/5 rounded-xl py-3.5 px-4 text-sm focus:border-rose-500/50 text-white outline-none" 
+                  className="bg-zinc-100/40 border border-zinc-200/60 rounded-2xl py-3.5 px-4 text-sm focus:border-zinc-200/60 text-zinc-900 outline-none" 
                   placeholder="e.g. 500" 
                 />
               </div>
 
               <div className="flex flex-col gap-2">
-                <label className="text-xs font-bold text-zinc-400">Original Price (EGP) - Crossed out</label>
+                <label className="text-xs font-bold text-zinc-500">Original Price (EGP) - Crossed out</label>
                 <input 
                   type="number" 
                   value={form.original_price_egp} 
                   onChange={e => setForm({ ...form, original_price_egp: e.target.value })} 
-                  className="bg-white/5 border border-white/5 rounded-xl py-3.5 px-4 text-sm focus:border-rose-500/50 text-white outline-none" 
+                  className="bg-zinc-100/40 border border-zinc-200/60 rounded-2xl py-3.5 px-4 text-sm focus:border-zinc-200/60 text-zinc-900 outline-none" 
                   placeholder="e.g. 1000" 
                 />
               </div>
@@ -814,18 +818,18 @@ export default function AdminProductsPage() {
                   required 
                   value={form.price_usd} 
                   onChange={e => setForm({ ...form, price_usd: e.target.value })} 
-                  className="bg-white/5 border border-white/5 rounded-xl py-3.5 px-4 text-sm focus:border-emerald-550/50 text-white outline-none" 
+                  className="bg-zinc-100/40 border border-zinc-200/60 rounded-2xl py-3.5 px-4 text-sm focus:border-emerald-550/50 text-zinc-900 outline-none" 
                   placeholder="e.g. 15" 
                 />
               </div>
 
               <div className="flex flex-col gap-2">
-                <label className="text-xs font-bold text-zinc-400">Original Price (USD) - Crossed out</label>
+                <label className="text-xs font-bold text-zinc-500">Original Price (USD) - Crossed out</label>
                 <input 
                   type="number" 
                   value={form.original_price_usd} 
                   onChange={e => setForm({ ...form, original_price_usd: e.target.value })} 
-                  className="bg-white/5 border border-white/5 rounded-xl py-3.5 px-4 text-sm focus:border-emerald-550/50 text-white outline-none" 
+                  className="bg-zinc-100/40 border border-zinc-200/60 rounded-2xl py-3.5 px-4 text-sm focus:border-emerald-550/50 text-zinc-900 outline-none" 
                   placeholder="e.g. 30" 
                 />
               </div>
@@ -834,24 +838,24 @@ export default function AdminProductsPage() {
           </div>
 
           {/* Section 3: Descriptions */}
-          <div className="bg-[#0a0a0f] border border-white/5 rounded-3xl p-6 md:p-8 shadow-2xl">
-            <h2 className="text-lg font-alexandria font-bold text-white mb-6 border-b border-white/5 pb-4">
+          <div className="bg-slate-50 border border-zinc-200/60 rounded-3xl p-6 md:p-8 shadow-sm border border-zinc-200/60">
+            <h2 className="text-lg font-sans font-bold text-zinc-900 mb-6 border-b border-zinc-200/60 pb-4">
               Description Workspace
             </h2>
             <div className="space-y-6">
               
               <div className="flex flex-col gap-2">
-                <label className="text-xs font-bold text-zinc-400">Short Compelling Overview</label>
+                <label className="text-xs font-bold text-zinc-500">Short Compelling Overview</label>
                 <input 
                   value={form.short_description} 
                   onChange={e => setForm({ ...form, short_description: e.target.value })} 
-                  className="bg-white/5 border border-white/5 rounded-xl py-3.5 px-4 text-sm text-white focus:border-rose-500/50 outline-none" 
+                  className="bg-zinc-100/40 border border-zinc-200/60 rounded-2xl py-3.5 px-4 text-sm text-zinc-900 focus:border-zinc-200/60 outline-none" 
                   placeholder="Appears directly under the title in card previews" 
                 />
               </div>
 
               <div className="flex flex-col gap-2">
-                <label className="text-xs font-bold text-zinc-400">Full & Professional Rich description</label>
+                <label className="text-xs font-bold text-zinc-500">Full & Professional Rich description</label>
                 <RichTextEditor 
                   label=""
                   value={form.description}
@@ -864,24 +868,24 @@ export default function AdminProductsPage() {
           </div>
 
           {/* Section 4: Advanced Media & Gallery System */}
-          <div className="bg-[#0a0a0f] border border-white/5 rounded-3xl p-6 md:p-8 shadow-2xl">
-            <h2 className="text-lg font-alexandria font-bold text-white mb-6 border-b border-white/5 pb-4">
+          <div className="bg-slate-50 border border-zinc-200/60 rounded-3xl p-6 md:p-8 shadow-sm border border-zinc-200/60">
+            <h2 className="text-lg font-sans font-bold text-zinc-900 mb-6 border-b border-zinc-200/60 pb-4">
               Media & Assets System
             </h2>
             
             <div className="space-y-8">
               
               {/* Cover Image Upload (Course design style with Drag & Drop overlay) */}
-              <div className="border border-white/5 bg-white/[0.01] rounded-2xl p-6 space-y-4">
+              <div className="border border-zinc-200/60 bg-zinc-50/40 rounded-2xl p-6 space-y-4">
                 <div className="flex items-center gap-2">
-                  <ImageIcon className="w-5 h-5 text-rose-500" />
-                  <span className="text-sm font-bold text-white">Cover Display Image (JPEG/PNG/WebP, max 15MB)</span>
+                  <ImageIcon className="w-5 h-5 text-yellow-500" />
+                  <span className="text-sm font-bold text-zinc-900">Cover Display Image (JPEG/PNG/WebP, max 15MB)</span>
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
                   
                   {/* Drag-Drop Box */}
-                  <div className="border-2 border-dashed border-white/10 hover:border-rose-500/40 rounded-xl p-8 text-center transition-all bg-black/25 relative group min-h-[140px] flex items-center justify-center">
+                  <div className="border-2 border-dashed border-zinc-200 hover:border-zinc-200/60 rounded-2xl p-8 text-center transition-all bg-black/25 relative group min-h-[140px] flex items-center justify-center">
                     <input 
                       type="file" 
                       accept="image/*" 
@@ -891,24 +895,24 @@ export default function AdminProductsPage() {
                     />
                     
                     <div className="space-y-2">
-                      <UploadCloud className="w-8 h-8 text-zinc-500 group-hover:text-rose-500 mx-auto transition-colors" />
-                      <div className="text-xs font-bold text-white">Drag cover image here or click to browse</div>
+                      <UploadCloud className="w-8 h-8 text-zinc-500 group-hover:text-yellow-500 mx-auto transition-colors" />
+                      <div className="text-xs font-bold text-zinc-900">Drag cover image here or click to browse</div>
                       <p className="text-[10px] text-zinc-500">Public bucket: products/covers/</p>
                     </div>
 
                     {uploadingField === "image_url" && (
-                      <div className="absolute inset-0 bg-[#0a0a0f]/95 rounded-xl flex flex-col items-center justify-center p-4 z-20">
-                        <Loader2 className="w-6 h-6 text-rose-500 animate-spin" />
-                        <span className="text-[10px] text-zinc-400 font-bold mt-2">Uploading image...</span>
+                      <div className="absolute inset-0 bg-slate-50/95 rounded-2xl flex flex-col items-center justify-center p-4 z-20">
+                        <Loader2 className="w-6 h-6 text-yellow-500 animate-spin" />
+                        <span className="text-[10px] text-zinc-500 font-bold mt-2">Uploading image...</span>
                       </div>
                     )}
                   </div>
 
                   {/* Preview Container */}
-                  <div className="bg-black/35 rounded-xl p-4 border border-white/5 flex flex-col justify-center gap-3">
+                  <div className="bg-black/35 rounded-2xl p-4 border border-zinc-200/60 flex flex-col justify-center gap-3">
                     {form.image_url ? (
                       <div className="flex items-center gap-4">
-                        <div className="relative w-28 aspect-video rounded-lg overflow-hidden border border-white/10 shrink-0">
+                        <div className="relative w-28 aspect-video rounded-2xl overflow-hidden border border-zinc-200 shrink-0">
                           <Image src={form.image_url} alt="Cover Preview" fill className="object-cover" />
                         </div>
                         <div className="flex-1 min-w-0">
@@ -928,7 +932,7 @@ export default function AdminProductsPage() {
                     <input 
                       value={form.image_url} 
                       onChange={e => setForm({ ...form, image_url: e.target.value })} 
-                      className="bg-white/5 border border-white/5 rounded-lg py-2 px-3 text-xs text-zinc-300 outline-none mt-1" 
+                      className="bg-zinc-100/40 border border-zinc-200/60 rounded-2xl py-2 px-3 text-xs text-zinc-700 outline-none mt-1" 
                       placeholder="Or enter direct cover URL..." 
                     />
                   </div>
@@ -937,19 +941,19 @@ export default function AdminProductsPage() {
               </div>
 
               {/* Promo Video (Course system implementation) */}
-              <div className="border border-white/5 bg-white/[0.01] rounded-2xl p-6 space-y-4">
+              <div className="border border-zinc-200/60 bg-zinc-50/40 rounded-2xl p-6 space-y-4">
                 <div className="flex items-center gap-2">
-                  <Play className="w-5 h-5 text-rose-500" />
-                  <span className="text-sm font-bold text-white">Promotional Video Workspace (Max 500MB)</span>
+                  <Play className="w-5 h-5 text-yellow-500" />
+                  <span className="text-sm font-bold text-zinc-900">Promotional Video Workspace (Max 500MB)</span>
                 </div>
 
-                <div className="flex bg-black/40 p-1.5 rounded-xl border border-white/5 max-w-sm">
+                <div className="flex bg-black/40 p-1.5 rounded-2xl border border-zinc-200/60 max-w-sm">
                   <button
                     type="button"
                     onClick={() => setVideoSourceTab("upload")}
                     className={cn(
-                      "flex-1 py-2 px-3 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-1 cursor-pointer",
-                      videoSourceTab === "upload" ? "bg-rose-600 text-white" : "text-zinc-500 hover:text-white"
+                      "flex-1 py-2 px-3 rounded-2xl text-[10px] font-black uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-1 cursor-pointer",
+                      videoSourceTab === "upload" ? "bg-brand-600 text-white" : "text-zinc-500 hover:text-white"
                     )}
                   >
                     Upload Video
@@ -958,8 +962,8 @@ export default function AdminProductsPage() {
                     type="button"
                     onClick={() => setVideoSourceTab("link")}
                     className={cn(
-                      "flex-1 py-2 px-3 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-1 cursor-pointer",
-                      videoSourceTab === "link" ? "bg-rose-600 text-white" : "text-zinc-500 hover:text-white"
+                      "flex-1 py-2 px-3 rounded-2xl text-[10px] font-black uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-1 cursor-pointer",
+                      videoSourceTab === "link" ? "bg-brand-600 text-white" : "text-zinc-500 hover:text-white"
                     )}
                   >
                     Link External
@@ -969,7 +973,7 @@ export default function AdminProductsPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
                   
                   {videoSourceTab === "upload" && (
-                    <div className="border-2 border-dashed border-white/10 hover:border-rose-500/40 rounded-xl p-8 text-center transition-all bg-black/25 relative group min-h-[140px] flex items-center justify-center">
+                    <div className="border-2 border-dashed border-zinc-200 hover:border-zinc-200/60 rounded-2xl p-8 text-center transition-all bg-black/25 relative group min-h-[140px] flex items-center justify-center">
                       <input 
                         type="file" 
                         accept="video/*" 
@@ -978,28 +982,28 @@ export default function AdminProductsPage() {
                         disabled={videoUploading}
                       />
                       <div className="space-y-2">
-                        <UploadCloud className="w-8 h-8 text-zinc-500 group-hover:text-rose-500 mx-auto transition-colors" />
-                        <div className="text-xs font-bold text-white">Drag video here or click to browse</div>
+                        <UploadCloud className="w-8 h-8 text-zinc-500 group-hover:text-yellow-500 mx-auto transition-colors" />
+                        <div className="text-xs font-bold text-zinc-900">Drag video here or click to browse</div>
                         <p className="text-[10px] text-zinc-500">Public bucket: course-images/products/videos</p>
                       </div>
 
                       {videoUploadProgress !== null && videoUploading && (
-                        <div className="absolute inset-0 bg-[#0a0a0f]/95 rounded-xl flex flex-col items-center justify-center p-6 space-y-2 z-20">
-                          <Loader2 className="w-6 h-6 text-rose-500 animate-spin" />
+                        <div className="absolute inset-0 bg-slate-50/95 rounded-2xl flex flex-col items-center justify-center p-6 space-y-2 z-20">
+                          <Loader2 className="w-6 h-6 text-yellow-500 animate-spin" />
                           <div className="w-full max-w-xs space-y-1">
-                            <div className="flex justify-between text-[10px] font-bold text-white">
+                            <div className="flex justify-between text-[10px] font-bold text-zinc-900">
                               <span>Uploading to Supabase...</span>
                               <span>{videoUploadProgress}%</span>
                             </div>
-                            <div className="w-full bg-white/10 h-1 rounded-full overflow-hidden">
-                              <div className="bg-rose-500 h-full" style={{ width: `${videoUploadProgress}%` }} />
+                            <div className="w-full bg-zinc-100/80 h-1 rounded-full overflow-hidden">
+                              <div className="bg-brand-500 h-full" style={{ width: `${videoUploadProgress}%` }} />
                             </div>
                             <p className="text-[9px] text-zinc-500 truncate">{videoFileName} ({videoFileSize})</p>
                             
                             <button
                               type="button"
                               onClick={cancelVideoUpload}
-                              className="mt-3 w-full py-1.5 bg-red-650/20 hover:bg-red-600 text-red-400 hover:text-white rounded-lg text-[10px] font-bold transition-colors cursor-pointer"
+                              className="mt-3 w-full py-1.5 bg-red-650/20 hover:bg-red-600 text-red-400 hover:text-white rounded-2xl text-[10px] font-bold transition-colors cursor-pointer"
                             >
                               Cancel Upload
                             </button>
@@ -1010,20 +1014,20 @@ export default function AdminProductsPage() {
                   )}
 
                   {videoSourceTab === "link" && (
-                    <div className="bg-black/35 rounded-xl p-6 border border-white/5 space-y-3">
+                    <div className="bg-black/35 rounded-2xl p-6 border border-zinc-200/60 space-y-3">
                       <div className="flex flex-col gap-2">
-                        <label className="text-[10px] font-bold text-zinc-400">Video Link / Bunny HLS URL / YouTube URL</label>
+                        <label className="text-[10px] font-bold text-zinc-500">Video Link / Bunny HLS URL / YouTube URL</label>
                         <div className="flex gap-2">
                           <input 
                             value={externalVideoInput} 
                             onChange={e => setExternalVideoInput(e.target.value)} 
-                            className="bg-white/5 border border-white/5 rounded-lg py-2 px-3 text-xs text-white outline-none flex-1" 
+                            className="bg-zinc-100/40 border border-zinc-200/60 rounded-2xl py-2 px-3 text-xs text-zinc-900 outline-none flex-1" 
                             placeholder="https://iframe.mediadelivery.net/play/..."
                           />
                           <button 
                             type="button" 
                             onClick={handleLinkExternalVideo} 
-                            className="px-4 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold cursor-pointer"
+                            className="px-4 bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-2xl text-xs font-bold cursor-pointer"
                           >
                             Set Link
                           </button>
@@ -1033,10 +1037,10 @@ export default function AdminProductsPage() {
                   )}
 
                   {/* Video Preview */}
-                  <div className="bg-black/35 rounded-xl p-4 border border-white/5 min-h-[140px] flex flex-col justify-center items-center">
+                  <div className="bg-black/35 rounded-2xl p-4 border border-zinc-200/60 min-h-[140px] flex flex-col justify-center items-center">
                     {form.video_url ? (
                       <div className="w-full space-y-3">
-                        <div className="relative aspect-video w-full rounded-lg overflow-hidden border border-white/10">
+                        <div className="relative aspect-video w-full rounded-2xl overflow-hidden border border-zinc-200">
                           {form.video_url.includes('youtube.com') || form.video_url.includes('youtu.be') ? (
                             <iframe 
                               src={`https://www.youtube.com/embed/${form.video_url.split('v=')[1]?.split('&')[0] || form.video_url.split('/').pop()}`}
@@ -1068,7 +1072,7 @@ export default function AdminProductsPage() {
 
               {/* Gallery Items Upload Grid (4 slots, move & shift support) */}
               <div className="space-y-4">
-                <span className="text-sm font-bold text-white block">Additional Image Gallery (JPEG/PNG/WebP, max 15MB)</span>
+                <span className="text-sm font-bold text-zinc-900 block">Additional Image Gallery (JPEG/PNG/WebP, max 15MB)</span>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                   {form.gallery.map((url: string, idx: number) => {
@@ -1076,23 +1080,23 @@ export default function AdminProductsPage() {
                     return (
                       <div 
                         key={idx} 
-                        className="bg-white/[0.01] hover:bg-white/[0.02] border border-white/5 rounded-2xl p-4 flex flex-col justify-between items-stretch gap-3 relative group"
+                        className="bg-zinc-50/40 hover:bg-zinc-50/70 border border-zinc-200/60 rounded-2xl p-4 flex flex-col justify-between items-stretch gap-3 relative group"
                       >
                         <span className="text-[9px] font-black uppercase tracking-widest text-zinc-550 block">Gallery Slot {idx + 1}</span>
                         
                         {/* Drag and drop upload card */}
-                        <div className="relative aspect-square rounded-xl overflow-hidden border border-dashed border-white/10 hover:border-rose-500/30 flex flex-col items-center justify-center bg-black/25">
+                        <div className="relative aspect-square rounded-2xl overflow-hidden border border-dashed border-zinc-200 hover:border-zinc-200/60 flex flex-col items-center justify-center bg-black/25">
                           {url ? (
                             <>
                               <img src={url} alt={`Gallery Slot ${idx}`} className="w-full h-full object-cover" />
                               <div className="absolute inset-0 bg-black/75 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
-                                <UploadCloud className="w-5 h-5 text-white" />
-                                <span className="text-[9px] font-bold text-white uppercase">Replace</span>
+                                <UploadCloud className="w-5 h-5 text-zinc-900" />
+                                <span className="text-[9px] font-bold text-zinc-900 uppercase">Replace</span>
                               </div>
                             </>
                           ) : (
                             <>
-                              <UploadCloud className="w-6 h-6 text-zinc-500 group-hover:text-rose-500 mb-1 transition-colors" />
+                              <UploadCloud className="w-6 h-6 text-zinc-500 group-hover:text-yellow-500 mb-1 transition-colors" />
                               <span className="text-[8px] font-black text-zinc-500 uppercase">Browse</span>
                             </>
                           )}
@@ -1106,9 +1110,9 @@ export default function AdminProductsPage() {
                           />
 
                           {isUploading && (
-                            <div className="absolute inset-0 bg-[#0a0a0f]/95 rounded-xl flex flex-col items-center justify-center z-20">
-                              <Loader2 className="w-4 h-4 text-rose-500 animate-spin" />
-                              <span className="text-[8px] text-zinc-400 font-bold mt-2">Uploading...</span>
+                            <div className="absolute inset-0 bg-slate-50/95 rounded-2xl flex flex-col items-center justify-center z-20">
+                              <Loader2 className="w-4 h-4 text-yellow-500 animate-spin" />
+                              <span className="text-[8px] text-zinc-500 font-bold mt-2">Uploading...</span>
                             </div>
                           )}
                         </div>
@@ -1121,13 +1125,13 @@ export default function AdminProductsPage() {
                             newG[idx] = e.target.value;
                             setForm({ ...form, gallery: newG });
                           }}
-                          className="bg-white/5 border border-white/5 rounded-lg py-1.5 px-2 text-[10px] text-zinc-300 outline-none font-mono" 
+                          className="bg-zinc-100/40 border border-zinc-200/60 rounded-2xl py-1.5 px-2 text-[10px] text-zinc-700 outline-none font-mono" 
                           placeholder="Gallery URL..." 
                         />
 
                         {/* Slide tools: swap order (Move Left / Move Right), delete */}
                         {url && (
-                          <div className="flex items-center justify-between border-t border-white/5 pt-2">
+                          <div className="flex items-center justify-between border-t border-zinc-200/60 pt-2">
                             <div className="flex gap-1">
                               <button
                                 type="button"
@@ -1137,7 +1141,7 @@ export default function AdminProductsPage() {
                                   setForm((prev: any) => ({ ...prev, gallery: swapped }));
                                   toast.success("Shifted item left!");
                                 }}
-                                className="p-1 rounded bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white disabled:opacity-30 cursor-pointer"
+                                className="p-1 rounded bg-zinc-100/40 hover:bg-zinc-100/80 text-zinc-500 hover:text-zinc-900 disabled:opacity-30 cursor-pointer"
                               >
                                 <ArrowLeft className="w-3.5 h-3.5" />
                               </button>
@@ -1149,7 +1153,7 @@ export default function AdminProductsPage() {
                                   setForm((prev: any) => ({ ...prev, gallery: swapped }));
                                   toast.success("Shifted item right!");
                                 }}
-                                className="p-1 rounded bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white disabled:opacity-30 cursor-pointer"
+                                className="p-1 rounded bg-zinc-100/40 hover:bg-zinc-100/80 text-zinc-500 hover:text-zinc-900 disabled:opacity-30 cursor-pointer"
                               >
                                 <ArrowRight className="w-3.5 h-3.5" />
                               </button>
@@ -1173,15 +1177,15 @@ export default function AdminProductsPage() {
           </div>
 
           {/* Section 5: Deliverables Workspace */}
-          <div className="bg-[#0a0a0f] border border-white/5 rounded-3xl p-6 md:p-8 shadow-2xl">
-            <h2 className="text-lg font-alexandria font-bold text-white mb-6 border-b border-white/5 pb-4">
+          <div className="bg-slate-50 border border-zinc-200/60 rounded-3xl p-6 md:p-8 shadow-sm border border-zinc-200/60">
+            <h2 className="text-lg font-sans font-bold text-zinc-900 mb-6 border-b border-zinc-200/60 pb-4">
               Digital Deliverables
             </h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               
               <div className="flex flex-col gap-2 md:col-span-2">
-                <label className="text-xs font-bold text-zinc-400 flex items-center justify-between">
+                <label className="text-xs font-bold text-zinc-500 flex items-center justify-between">
                   <span>File Deliverable URL (Protected downloads)</span>
                   <label className="text-emerald-400 text-xs hover:underline flex items-center gap-1 cursor-pointer">
                     <FileUp className="w-3.5 h-3.5" />
@@ -1198,23 +1202,23 @@ export default function AdminProductsPage() {
                   <input 
                     value={form.file_url} 
                     onChange={e => setForm({ ...form, file_url: e.target.value })} 
-                    className="bg-white/5 border border-white/5 rounded-xl py-3.5 px-4 text-sm text-white focus:border-rose-500/50 outline-none flex-1 font-mono" 
+                    className="bg-zinc-100/40 border border-zinc-200/60 rounded-2xl py-3.5 px-4 text-sm text-zinc-900 focus:border-zinc-200/60 outline-none flex-1 font-mono" 
                     placeholder="https://... (Deliverable file download URL)" 
                   />
                   {form.file_url && (
                     <button 
                       type="button"
                       onClick={() => setForm({ ...form, file_url: "" })}
-                      className="p-3 bg-red-950/15 border border-red-900/10 text-red-500 rounded-xl flex items-center justify-center cursor-pointer"
+                      className="p-3 bg-red-950/15 border border-red-900/10 text-red-500 rounded-2xl flex items-center justify-center cursor-pointer"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
                   )}
                 </div>
                 {uploadingField === "file_url" && (
-                  <div className="w-full bg-white/5 rounded-lg p-3 flex flex-col gap-1">
-                    <span className="text-[10px] text-zinc-400 font-bold">Uploading secure deliverable file: {uploadProgress}%</span>
-                    <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden">
+                  <div className="w-full bg-zinc-100/40 rounded-2xl p-3 flex flex-col gap-1">
+                    <span className="text-[10px] text-zinc-500 font-bold">Uploading secure deliverable file: {uploadProgress}%</span>
+                    <div className="w-full h-1 bg-zinc-100/80 rounded-full overflow-hidden">
                       <div className="h-full bg-emerald-500" style={{ width: `${uploadProgress}%` }} />
                     </div>
                   </div>
@@ -1222,26 +1226,26 @@ export default function AdminProductsPage() {
               </div>
 
               <div className="flex flex-col gap-2">
-                <label className="text-xs font-bold text-zinc-400">File Format Extension</label>
+                <label className="text-xs font-bold text-zinc-500">File Format Extension</label>
                 <select 
                   value={form.file_type} 
                   onChange={e => setForm({ ...form, file_type: e.target.value })} 
-                  className="bg-[#0f0f15] border border-white/5 rounded-xl py-3.5 px-4 text-sm text-white outline-none cursor-pointer"
+                  className="bg-slate-50 border border-zinc-200/60 rounded-2xl py-3.5 px-4 text-sm text-zinc-900 outline-none cursor-pointer"
                 >
-                  <option value="zip" className="bg-[#0f0f15]">ZIP / Rar Archive</option>
-                  <option value="pdf" className="bg-[#0f0f15]">PDF Document</option>
-                  <option value="json" className="bg-[#0f0f15]">JSON Workflow File</option>
-                  <option value="video" className="bg-[#0f0f15]">MP4 Video Deliverable</option>
-                  <option value="link" className="bg-[#0f0f15]">External Redirection Link</option>
+                  <option value="zip" className="bg-slate-50">ZIP / Rar Archive</option>
+                  <option value="pdf" className="bg-slate-50">PDF Document</option>
+                  <option value="json" className="bg-slate-50">JSON Workflow File</option>
+                  <option value="video" className="bg-slate-50">MP4 Video Deliverable</option>
+                  <option value="link" className="bg-slate-50">External Redirection Link</option>
                 </select>
               </div>
 
               <div className="flex flex-col gap-2">
-                <label className="text-xs font-bold text-zinc-400">Search Keywords (Tags - comma separated)</label>
+                <label className="text-xs font-bold text-zinc-500">Search Keywords (Tags - comma separated)</label>
                 <input 
                   value={form.displayTags} 
                   onChange={e => setForm({ ...form, displayTags: e.target.value })} 
-                  className="bg-white/5 border border-white/5 rounded-xl py-3.5 px-4 text-sm text-white focus:border-rose-500/50 outline-none" 
+                  className="bg-zinc-100/40 border border-zinc-200/60 rounded-2xl py-3.5 px-4 text-sm text-zinc-900 focus:border-zinc-200/60 outline-none" 
                   placeholder="e.g. n8n, workflow, template" 
                 />
               </div>
@@ -1250,29 +1254,29 @@ export default function AdminProductsPage() {
           </div>
 
           {/* Section 6: SEO Metadata */}
-          <div className="bg-[#0a0a0f] border border-white/5 rounded-3xl p-6 md:p-8 shadow-2xl">
-            <h2 className="text-lg font-alexandria font-bold text-white mb-6 border-b border-white/5 pb-4">
+          <div className="bg-slate-50 border border-zinc-200/60 rounded-3xl p-6 md:p-8 shadow-sm border border-zinc-200/60">
+            <h2 className="text-lg font-sans font-bold text-zinc-900 mb-6 border-b border-zinc-200/60 pb-4">
               SEO Engine Settings
             </h2>
             <div className="grid grid-cols-1 gap-6">
               
               <div className="flex flex-col gap-2">
-                <label className="text-xs font-bold text-zinc-400">Meta Title</label>
+                <label className="text-xs font-bold text-zinc-500">Meta Title</label>
                 <input 
                   value={form.seo_title} 
                   onChange={e => setForm({ ...form, seo_title: e.target.value })} 
-                  className="bg-white/5 border border-white/5 rounded-xl py-3.5 px-4 text-sm text-white focus:border-rose-500/50 outline-none" 
+                  className="bg-zinc-100/40 border border-zinc-200/60 rounded-2xl py-3.5 px-4 text-sm text-zinc-900 focus:border-zinc-200/60 outline-none" 
                   placeholder="Title shown on Search Engines" 
                 />
               </div>
 
               <div className="flex flex-col gap-2">
-                <label className="text-xs font-bold text-zinc-400">Meta Description</label>
+                <label className="text-xs font-bold text-zinc-500">Meta Description</label>
                 <textarea 
                   value={form.seo_description} 
                   onChange={e => setForm({ ...form, seo_description: e.target.value })} 
                   rows={4}
-                  className="bg-white/5 border border-white/5 rounded-xl py-3.5 px-4 text-sm text-white focus:border-rose-500/50 outline-none resize-none" 
+                  className="bg-zinc-100/40 border border-zinc-200/60 rounded-2xl py-3.5 px-4 text-sm text-zinc-900 focus:border-zinc-200/60 outline-none resize-none" 
                   placeholder="Short summary paragraph shown in search indexes..."
                 />
               </div>
@@ -1281,12 +1285,12 @@ export default function AdminProductsPage() {
           </div>
 
           {/* Footer Save Row */}
-          <div className="p-6 bg-[#0a0a0f] border border-white/5 rounded-3xl flex items-center justify-between shadow-2xl">
+          <div className="p-6 bg-slate-50 border border-zinc-200/60 rounded-3xl flex items-center justify-between shadow-sm border border-zinc-200/60">
             <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">* Indicated fields are required</span>
             <button
               type="submit"
               disabled={saving || uploadingField !== null}
-              className="h-14 px-10 bg-gradient-to-r from-rose-600 to-rose-700 hover:from-rose-500 hover:to-rose-600 text-white rounded-2xl font-black text-sm tracking-widest uppercase transition-all shadow-xl hover:shadow-rose-600/30 cursor-pointer disabled:opacity-55"
+              className="h-14 px-10 bg-gradient-to-r from-brand-600 to-brand-700 hover:from-brand-500 hover:to-brand-600 text-white rounded-2xl font-black text-sm tracking-widest uppercase transition-all shadow-sm border border-zinc-200/60 hover:shadow-brand-600/30 cursor-pointer disabled:opacity-55"
             >
               {saving ? (
                 <span className="flex items-center gap-2">

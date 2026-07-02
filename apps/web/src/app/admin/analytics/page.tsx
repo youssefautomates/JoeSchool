@@ -94,7 +94,7 @@ export default function AnalyticsDashboard() {
     const returningCustomersCount = uniqueEmails.filter(e => emailCounts[e] > 1).length;
 
     const data = [
-      { name: "New Customers", value: newCustomersCount, color: "#D6004B" },
+      { name: "New Customers", value: newCustomersCount, color: "#F59E0B" },
       { name: "Returning Customers", value: returningCustomersCount, color: "#10b981" }
     ];
 
@@ -131,7 +131,7 @@ export default function AnalyticsDashboard() {
     const completedCount = filteredOrders.filter(o => o.status === "completed").length;
     if (completedCount === 0) {
       return [
-        { name: "TikTok Ads", value: 0, percent: 0, color: "#D6004B" },
+        { name: "TikTok Ads", value: 0, percent: 0, color: "#F59E0B" },
         { name: "Facebook Ads", value: 0, percent: 0, color: "#3b82f6" },
         { name: "Organic Search", value: 0, percent: 0, color: "#10b981" },
         { name: "Direct Traffic", value: 0, percent: 0, color: "#f59e0b" }
@@ -140,7 +140,7 @@ export default function AnalyticsDashboard() {
 
     // Split completed orders to realistic traffic breakdown
     return [
-      { name: "TikTok Ads", value: Math.round(completedCount * 0.45), percent: 45, color: "#D6004B" },
+      { name: "TikTok Ads", value: Math.round(completedCount * 0.45), percent: 45, color: "#F59E0B" },
       { name: "Facebook Ads", value: Math.round(completedCount * 0.30), percent: 30, color: "#3b82f6" },
       { name: "Organic Search", value: Math.round(completedCount * 0.15), percent: 15, color: "#10b981" },
       { name: "Direct Traffic", value: Math.round(completedCount * 0.10), percent: 10, color: "#f59e0b" }
@@ -148,12 +148,12 @@ export default function AnalyticsDashboard() {
   }, [filteredOrders]);
 
   return (
-    <div className="space-y-8 font-sans text-zinc-100 min-h-screen pb-16">
+    <div className="space-y-8 font-sans text-zinc-900 min-h-screen pb-16">
       
       {/* Header controls */}
-      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6 pb-6 border-b border-white/5">
+      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6 pb-6 border-b border-zinc-200/60">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-white via-zinc-200 to-rose-500 bg-clip-text text-transparent">
+          <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-white via-zinc-200 to-brand-500 bg-clip-text text-transparent">
             Detailed Analytics
           </h1>
           <p className="text-zinc-500 text-sm mt-1">
@@ -162,13 +162,13 @@ export default function AnalyticsDashboard() {
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="flex items-center bg-white/5 border border-white/5 rounded-xl p-1 gap-1">
+          <div className="flex items-center bg-zinc-100/40 border border-zinc-200/60 rounded-2xl p-1 gap-1">
             {["7", "30", "90"].map((range) => (
               <button
                 key={range}
                 onClick={() => setDateRange(range)}
-                className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                  dateRange === range ? "bg-rose-600 text-white shadow-lg" : "text-zinc-400 hover:text-white"
+                className={`px-4 py-1.5 rounded-2xl text-xs font-bold transition-all ${
+                  dateRange === range ? "bg-brand-600 text-white shadow-sm border border-zinc-200/60" : "text-zinc-500 hover:text-white"
                 }`}
               >
                 Last {range} Days
@@ -179,7 +179,7 @@ export default function AnalyticsDashboard() {
           <button
             onClick={loadData}
             disabled={loading}
-            className="flex items-center gap-2 px-5 h-11 rounded-xl text-xs font-bold transition-all bg-rose-600/10 border border-rose-500/20 hover:bg-rose-600 text-rose-400 hover:text-white"
+            className="flex items-center gap-2 px-5 h-11 rounded-2xl text-xs font-bold transition-all bg-brand-600/10 border border-zinc-200/60 hover:bg-brand-600 text-yellow-500 hover:text-white"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
             Refresh
@@ -188,7 +188,7 @@ export default function AnalyticsDashboard() {
       </div>
 
       {/* Selector Tabs */}
-      <div className="flex border-b border-white/5 pb-1 gap-2 overflow-x-auto">
+      <div className="flex border-b border-zinc-200/60 pb-1 gap-2 overflow-x-auto">
         {[
           { id: "sales", label: "Sales Performance", icon: BarChart3 },
           { id: "customers", label: "Customer Behavior", icon: Users },
@@ -200,10 +200,10 @@ export default function AnalyticsDashboard() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
-              className={`flex items-center gap-2 px-6 py-3 rounded-xl text-xs font-bold transition-all ${
+              className={`flex items-center gap-2 px-6 py-3 rounded-2xl text-xs font-bold transition-all ${
                 activeTab === tab.id 
-                  ? "bg-rose-600 text-white shadow-lg" 
-                  : "text-zinc-400 hover:text-white hover:bg-white/5"
+                  ? "bg-brand-600 text-white shadow-sm border border-zinc-200/60" 
+                  : "text-zinc-500 hover:text-white hover:bg-zinc-100/40"
               }`}
             >
               <Icon className="w-4 h-4" />
@@ -215,8 +215,8 @@ export default function AnalyticsDashboard() {
 
       <div className="min-h-[400px]">
         {loading ? (
-          <div className="w-full h-80 flex items-center justify-center bg-[#09090b]/40 rounded-3xl border border-white/5 animate-pulse">
-            <Loader2 className="w-8 h-8 text-rose-500 animate-spin" />
+          <div className="w-full h-80 flex items-center justify-center bg-slate-50/40 rounded-3xl border border-zinc-200/60 animate-pulse">
+            <Loader2 className="w-8 h-8 text-yellow-500 animate-spin" />
           </div>
         ) : (
           <AnimatePresence mode="wait">
@@ -231,11 +231,11 @@ export default function AnalyticsDashboard() {
               {/* Sales Tab */}
               {activeTab === "sales" && (
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                  <div className="lg:col-span-2 rounded-3xl bg-[#09090b]/60 border border-white/5 p-6 shadow-2xl">
-                    <h3 className="font-bold text-sm text-white mb-6">Daily Sales Curve & Profit</h3>
+                  <div className="lg:col-span-2 rounded-3xl bg-slate-50/60 border border-zinc-200/60 p-6 shadow-sm border border-zinc-200/60">
+                    <h3 className="font-bold text-sm text-zinc-900 mb-6">Daily Sales Curve & Profit</h3>
                     <div className="w-full h-80">
                       {orders.length === 0 ? (
-                        <div className="w-full h-full flex flex-col items-center justify-center border border-dashed border-white/5 rounded-2xl text-center p-6">
+                        <div className="w-full h-full flex flex-col items-center justify-center border border-dashed border-zinc-200/60 rounded-2xl text-center p-6">
                           <BarChart3 className="w-8 h-8 text-zinc-600 mb-2" />
                           <p className="text-xs text-zinc-500">No sales data available at the moment.</p>
                         </div>
@@ -245,7 +245,7 @@ export default function AnalyticsDashboard() {
                             <XAxis dataKey="name" stroke="#52525b" fontSize={10} />
                             <YAxis stroke="#52525b" fontSize={10} />
                             <Tooltip contentStyle={{ backgroundColor: "#09090b", borderColor: "rgba(255,255,255,0.08)" }} />
-                            <Area type="monotone" dataKey="revenue" name="Revenue" stroke="#D6004B" strokeWidth={2} fill="rgba(214,0,75,0.1)" />
+                            <Area type="monotone" dataKey="revenue" name="Revenue" stroke="#1D4ED8" strokeWidth={2} fill="rgba(29, 78, 216,0.1)" />
                             <Area type="monotone" dataKey="profit" name="Profit" stroke="#10b981" strokeWidth={2} fill="rgba(16,185,129,0.1)" />
                           </AreaChart>
                         </ResponsiveContainer>
@@ -253,22 +253,22 @@ export default function AnalyticsDashboard() {
                     </div>
                   </div>
 
-                  <div className="rounded-3xl bg-[#09090b]/60 border border-white/5 p-6 shadow-2xl flex flex-col justify-between">
+                  <div className="rounded-3xl bg-slate-50/60 border border-zinc-200/60 p-6 shadow-sm border border-zinc-200/60 flex flex-col justify-between">
                     <div>
-                      <h3 className="font-bold text-sm text-white mb-6">Peak Operational Times</h3>
+                      <h3 className="font-bold text-sm text-zinc-900 mb-6">Peak Operational Times</h3>
                       <div className="space-y-4">
-                        <div className="flex justify-between items-center p-3 rounded-2xl bg-white/[0.02]">
-                          <span className="text-xs text-zinc-400">Evening Purchases</span>
-                          <span className="text-xs font-bold text-rose-500">{orders.length > 0 ? "65%" : "0%"}</span>
+                        <div className="flex justify-between items-center p-3 rounded-2xl bg-zinc-50/70">
+                          <span className="text-xs text-zinc-500">Evening Purchases</span>
+                          <span className="text-xs font-bold text-yellow-500">{orders.length > 0 ? "65%" : "0%"}</span>
                         </div>
-                        <div className="flex justify-between items-center p-3 rounded-2xl bg-white/[0.02]">
-                          <span className="text-xs text-zinc-400">Top Sales Day</span>
+                        <div className="flex justify-between items-center p-3 rounded-2xl bg-zinc-50/70">
+                          <span className="text-xs text-zinc-500">Top Sales Day</span>
                           <span className="text-xs font-bold text-emerald-400">{orders.length > 0 ? "Tuesday" : "N/A"}</span>
                         </div>
                       </div>
                     </div>
-                    <div className="p-4 rounded-2xl bg-rose-500/5 border border-rose-500/10 mt-6">
-                      <p className="text-[10px] text-rose-400 leading-relaxed font-bold">
+                    <div className="p-4 rounded-2xl bg-brand-500/5 border border-zinc-200/60 mt-6">
+                      <p className="text-[10px] text-yellow-500 leading-relaxed font-bold">
                         📌 Pro Tip: The system automatically schedules automated marketing campaigns once real database triggers are met.
                       </p>
                     </div>
@@ -279,8 +279,8 @@ export default function AnalyticsDashboard() {
               {/* Customer Behavior Tab */}
               {activeTab === "customers" && (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                  <div className="rounded-3xl bg-[#09090b]/60 border border-white/5 p-6 shadow-2xl flex flex-col items-center justify-center">
-                    <h3 className="font-bold text-sm text-white mb-6 w-full text-left">Buyer Demographics Breakdown</h3>
+                  <div className="rounded-3xl bg-slate-50/60 border border-zinc-200/60 p-6 shadow-sm border border-zinc-200/60 flex flex-col items-center justify-center">
+                    <h3 className="font-bold text-sm text-zinc-900 mb-6 w-full text-left">Buyer Demographics Breakdown</h3>
                     <div className="w-full h-64 flex justify-center items-center">
                       {customersSummary.total === 0 ? (
                         <div className="text-xs text-zinc-500">No buyer records found in the database yet.</div>
@@ -309,24 +309,24 @@ export default function AnalyticsDashboard() {
                       {customersSummary.total > 0 && customersSummary.data.map((item) => (
                         <div key={item.name} className="flex items-center gap-2 text-xs">
                           <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
-                          <span className="text-zinc-400">{item.name} ({item.value})</span>
+                          <span className="text-zinc-500">{item.name} ({item.value})</span>
                         </div>
                       ))}
                     </div>
                   </div>
 
-                  <div className="rounded-3xl bg-[#09090b]/60 border border-white/5 p-6 shadow-2xl">
-                    <h3 className="font-bold text-sm text-white mb-6">Actual Purchase Retention</h3>
-                    <p className="text-xs text-zinc-400 leading-relaxed mb-6">
+                  <div className="rounded-3xl bg-slate-50/60 border border-zinc-200/60 p-6 shadow-sm border border-zinc-200/60">
+                    <h3 className="font-bold text-sm text-zinc-900 mb-6">Actual Purchase Retention</h3>
+                    <p className="text-xs text-zinc-500 leading-relaxed mb-6">
                       Returning customers represent the backbone of your store. Customer retention is tracked via matching email logs.
                     </p>
                     <div className="space-y-4">
-                      <div className="flex justify-between items-center p-3 rounded-2xl bg-white/[0.02]">
-                        <span className="text-xs text-zinc-400">Total Unique Buyers</span>
-                        <span className="text-xs font-bold text-white">{customersSummary.total} Customers</span>
+                      <div className="flex justify-between items-center p-3 rounded-2xl bg-zinc-50/70">
+                        <span className="text-xs text-zinc-500">Total Unique Buyers</span>
+                        <span className="text-xs font-bold text-zinc-900">{customersSummary.total} Customers</span>
                       </div>
-                      <div className="flex justify-between items-center p-3 rounded-2xl bg-white/[0.02]">
-                        <span className="text-xs text-zinc-400">Customer Satisfaction Rate</span>
+                      <div className="flex justify-between items-center p-3 rounded-2xl bg-zinc-50/70">
+                        <span className="text-xs text-zinc-500">Customer Satisfaction Rate</span>
                         <span className="text-xs font-bold text-emerald-400">{customersSummary.total > 0 ? "98%" : "0%"}</span>
                       </div>
                     </div>
@@ -336,17 +336,17 @@ export default function AnalyticsDashboard() {
 
               {/* Conversion Funnel Tab */}
               {activeTab === "conversion" && (
-                <div className="rounded-3xl bg-[#09090b]/60 border border-white/5 p-8 shadow-2xl">
-                  <h3 className="font-bold text-sm text-white mb-8">Visual Conversion Funnel Diagram</h3>
+                <div className="rounded-3xl bg-slate-50/60 border border-zinc-200/60 p-8 shadow-sm border border-zinc-200/60">
+                  <h3 className="font-bold text-sm text-zinc-900 mb-8">Visual Conversion Funnel Diagram</h3>
                   
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-6 relative">
                     {funnelData.map((item, index) => (
-                      <div key={item.stage} className="relative p-6 rounded-3xl bg-white/[0.02] border border-white/5 flex flex-col items-center justify-between text-center">
+                      <div key={item.stage} className="relative p-6 rounded-3xl bg-zinc-50/70 border border-zinc-200/60 flex flex-col items-center justify-between text-center">
                         <div>
                           <span className="text-2xl font-black" style={{ color: item.color }}>
                             {item.percent}%
                           </span>
-                          <h4 className="text-xs font-bold text-zinc-300 mt-2">{item.stage}</h4>
+                          <h4 className="text-xs font-bold text-zinc-700 mt-2">{item.stage}</h4>
                         </div>
                         <p className="text-[10px] text-zinc-500 mt-4 font-bold">{item.count.toLocaleString()} Active Events</p>
                         
@@ -364,8 +364,8 @@ export default function AnalyticsDashboard() {
               {/* Traffic Sources Tab */}
               {activeTab === "traffic" && (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                  <div className="rounded-3xl bg-[#09090b]/60 border border-white/5 p-6 shadow-2xl">
-                    <h3 className="font-bold text-sm text-white mb-6">Traffic Sources & Sales Flows</h3>
+                  <div className="rounded-3xl bg-slate-50/60 border border-zinc-200/60 p-6 shadow-sm border border-zinc-200/60">
+                    <h3 className="font-bold text-sm text-zinc-900 mb-6">Traffic Sources & Sales Flows</h3>
                     <div className="w-full h-64 flex items-center justify-center">
                       {orders.filter(o => o.status === "completed").length === 0 ? (
                         <div className="text-xs text-zinc-500">No traffic records in the database yet.</div>
@@ -390,17 +390,17 @@ export default function AnalyticsDashboard() {
                     </div>
                   </div>
 
-                  <div className="rounded-3xl bg-[#09090b]/60 border border-white/5 p-6 shadow-2xl flex flex-col justify-between">
+                  <div className="rounded-3xl bg-slate-50/60 border border-zinc-200/60 p-6 shadow-sm border border-zinc-200/60 flex flex-col justify-between">
                     <div>
-                      <h3 className="font-bold text-sm text-white mb-6">Ad Revenue & Attribution Comparison</h3>
+                      <h3 className="font-bold text-sm text-zinc-900 mb-6">Ad Revenue & Attribution Comparison</h3>
                       <div className="space-y-4">
                         {trafficData.map((entry) => (
-                          <div key={entry.name} className="flex items-center justify-between p-3 rounded-2xl bg-white/[0.02]">
-                            <span className="text-xs text-zinc-400 flex items-center gap-2">
+                          <div key={entry.name} className="flex items-center justify-between p-3 rounded-2xl bg-zinc-50/70">
+                            <span className="text-xs text-zinc-500 flex items-center gap-2">
                               <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: entry.color }} />
                               {entry.name}
                             </span>
-                            <span className="text-xs font-bold text-white">{entry.percent}% of Conversions</span>
+                            <span className="text-xs font-bold text-zinc-900">{entry.percent}% of Conversions</span>
                           </div>
                         ))}
                       </div>

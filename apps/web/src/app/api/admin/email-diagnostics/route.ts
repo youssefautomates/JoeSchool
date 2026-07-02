@@ -202,7 +202,7 @@ export async function POST(req: Request) {
                 <table width="100%" cellpadding="0" cellspacing="0" style="max-width:580px;background-color:#ffffff;border-radius:20px;overflow:hidden;border: 1px solid #e2e8f0;box-shadow: 0 10px 30px rgba(0,0,0,0.025);">
                   <!-- Header -->
                   <tr>
-                    <td style="padding:30px 24px;text-align:center;background-color:#060505;border-bottom:4px solid #D6004B;">
+                    <td style="padding:30px 24px;text-align:center;background-color:#060505;border-bottom:4px solid #1D4ED8;">
                       <h2 style="margin: 0; color: #ffffff; font-size: 20px; font-weight: 800;">🧪 فحص وتوصيلية البريد الإلكتروني</h2>
                       <p style="color: #94a3b8; font-size: 13px; margin: 6px 0 0 0;">Deliverability & Inbox Placement Test</p>
                     </td>

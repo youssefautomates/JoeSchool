@@ -118,14 +118,14 @@ export default function InboxPage() {
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 p-2 md:p-8 font-sans" dir="ltr">
       {/* Page Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-white/5">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-zinc-200/60">
         <div>
-          <h1 className="text-2xl font-black text-white mb-2">Inbox 📬</h1>
+          <h1 className="text-2xl font-black text-zinc-900 mb-2">Inbox 📬</h1>
           <p className="text-zinc-500 text-xs">View and manage incoming messages for support@joeschool.com directly from the dashboard.</p>
         </div>
         <button
           onClick={fetchEmails}
-          className="h-10 px-4 bg-white/5 hover:bg-white/10 text-white text-xs font-bold rounded-xl border border-white/5 flex items-center gap-2 transition-all active:scale-95"
+          className="h-10 px-4 bg-zinc-100/40 hover:bg-zinc-100/80 text-zinc-900 text-xs font-bold rounded-2xl border border-zinc-200/60 flex items-center gap-2 transition-all active:scale-95"
         >
           <RefreshCw className="w-3.5 h-3.5" />
           Refresh Mail
@@ -134,27 +134,27 @@ export default function InboxPage() {
 
       {/* Stats Bar */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div className="bg-[#09090e] p-6 rounded-2xl border border-white/5 flex items-center justify-between">
+        <div className="bg-slate-50 p-6 rounded-2xl border border-zinc-200/60 flex items-center justify-between">
           <div>
             <p className="text-zinc-500 text-[10px] font-black uppercase tracking-wider mb-1 font-sans">Total Messages</p>
-            <h3 className="text-2xl font-black text-white font-sans">{totalCount}</h3>
+            <h3 className="text-2xl font-black text-zinc-900 font-sans">{totalCount}</h3>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-zinc-400">
+          <div className="w-10 h-10 rounded-2xl bg-zinc-100/40 flex items-center justify-center text-zinc-500">
             <Mail className="w-5 h-5" />
           </div>
         </div>
 
-        <div className="bg-[#09090e] p-6 rounded-2xl border border-white/5 flex items-center justify-between">
+        <div className="bg-slate-50 p-6 rounded-2xl border border-zinc-200/60 flex items-center justify-between">
           <div>
             <p className="text-zinc-500 text-[10px] font-black uppercase tracking-wider mb-1 font-sans">Unread Messages</p>
-            <h3 className="text-2xl font-black text-white font-sans flex items-center gap-2">
+            <h3 className="text-2xl font-black text-zinc-900 font-sans flex items-center gap-2">
               {unreadCount}
               {unreadCount > 0 && (
-                <span className="text-[10px] px-2 py-0.5 bg-[#D6004B]/20 text-[#D6004B] border border-[#D6004B]/30 rounded-full font-bold">Active</span>
+                <span className="text-[10px] px-2 py-0.5 bg-[#1D4ED8]/20 text-[#1D4ED8] border border-[#1D4ED8]/30 rounded-full font-bold">Active</span>
               )}
             </h3>
           </div>
-          <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${unreadCount > 0 ? 'bg-[#D6004B]/10 text-[#D6004B]' : 'bg-white/5 text-zinc-500'}`}>
+          <div className={`w-10 h-10 rounded-2xl flex items-center justify-center ${unreadCount > 0 ? 'bg-[#1D4ED8]/10 text-[#1D4ED8]' : 'bg-zinc-100/40 text-zinc-500'}`}>
             <MailOpen className="w-5 h-5" />
           </div>
         </div>
@@ -162,31 +162,31 @@ export default function InboxPage() {
 
       {/* Actions and Search */}
       <div className="relative w-full max-w-md group">
-        <Search className="w-4.5 h-4.5 absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-[#D6004B] transition-colors" />
+        <Search className="w-4.5 h-4.5 absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-[#1D4ED8] transition-colors" />
         <Input 
           type="text" 
           placeholder="Search by sender or subject..." 
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="h-11 bg-white/5 border-white/10 text-white text-xs pl-12 pr-4 rounded-xl text-left focus:border-[#D6004B]/50 transition-all font-sans"
+          className="h-11 bg-zinc-100/40 border-zinc-200 text-zinc-900 text-xs pl-12 pr-4 rounded-2xl text-left focus:border-[#1D4ED8]/50 transition-all font-sans"
         />
       </div>
 
       {/* Main Mail Area */}
-      <div className="bg-[#09090e] rounded-2xl border border-white/5 overflow-hidden shadow-2xl relative">
+      <div className="bg-slate-50 rounded-2xl border border-zinc-200/60 overflow-hidden shadow-sm border border-zinc-200/60 relative">
         {loading ? (
           // Loading Skeletons
           <div className="divide-y divide-white/5">
             {[1, 2, 3].map(i => (
               <div key={i} className="p-6 flex items-center gap-4 animate-pulse">
-                <div className="w-3.5 h-3.5 rounded-full bg-white/5 shrink-0" />
+                <div className="w-3.5 h-3.5 rounded-full bg-zinc-100/40 shrink-0" />
                 <div className="flex-1 space-y-3">
                   <div className="flex items-center justify-between">
-                    <div className="h-4 bg-white/5 rounded-md w-1/4" />
-                    <div className="h-3 bg-white/5 rounded-md w-12" />
+                    <div className="h-4 bg-zinc-100/40 rounded-xl w-1/4" />
+                    <div className="h-3 bg-zinc-100/40 rounded-xl w-12" />
                   </div>
-                  <div className="h-3.5 bg-white/5 rounded-md w-1/3" />
-                  <div className="h-3 bg-white/5 rounded-md w-2/3" />
+                  <div className="h-3.5 bg-zinc-100/40 rounded-xl w-1/3" />
+                  <div className="h-3 bg-zinc-100/40 rounded-xl w-2/3" />
                 </div>
               </div>
             ))}
@@ -194,10 +194,10 @@ export default function InboxPage() {
         ) : filteredEmails.length === 0 ? (
           // Empty State
           <div className="flex flex-col items-center justify-center py-24 text-center">
-            <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-center text-zinc-650 mb-4 animate-bounce-subtle">
+            <div className="w-16 h-16 rounded-2xl bg-zinc-100/40 border border-zinc-200/60 flex items-center justify-center text-zinc-650 mb-4 animate-bounce-subtle">
               <Inbox className="w-8 h-8" />
             </div>
-            <h3 className="text-base font-black text-white mb-1">No incoming messages yet</h3>
+            <h3 className="text-base font-black text-zinc-900 mb-1">No incoming messages yet</h3>
             <p className="text-zinc-500 text-xs max-w-[280px]">Your inbox is completely empty at the moment.</p>
           </div>
         ) : (
@@ -207,25 +207,25 @@ export default function InboxPage() {
               <div 
                 key={email.id}
                 onClick={() => handleOpenEmail(email)}
-                className={`p-6 flex items-start gap-4 transition-all hover:bg-white/[0.02] cursor-pointer relative group/row ${!email.isRead ? 'bg-[#D6004B]/[0.02]' : ''}`}
+                className={`p-6 flex items-start gap-4 transition-all hover:bg-zinc-50/70 cursor-pointer relative group/row ${!email.isRead ? 'bg-[#1D4ED8]/[0.02]' : ''}`}
               >
                 {/* Active Indicator Line */}
                 {!email.isRead && (
-                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#D6004B]" />
+                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#1D4ED8]" />
                 )}
 
                 {/* Read/Unread Dot */}
                 <div className="pt-1.5 shrink-0">
-                  <div className={`w-2 h-2 rounded-full transition-all ${email.isRead ? 'bg-zinc-800 scale-75' : 'bg-[#D6004B] shadow-[0_0_8px_rgba(214,0,75,0.7)]'}`} />
+                  <div className={`w-2 h-2 rounded-full transition-all ${email.isRead ? 'bg-zinc-800 scale-75' : 'bg-[#1D4ED8] shadow-[0_0_8px_rgba(29, 78, 216,0.7)]'}`} />
                 </div>
 
                 {/* Info and Metadata */}
                 <div className="flex-1 min-w-0 text-left space-y-1">
                   <div className="flex items-center justify-between gap-4">
-                    <span className="font-bold text-xs text-white truncate max-w-[200px] sm:max-w-xs">{email.from}</span>
+                    <span className="font-bold text-xs text-zinc-900 truncate max-w-[200px] sm:max-w-xs">{email.from}</span>
                     <span className="text-[10px] text-zinc-555 shrink-0 font-sans">{formatDate(email.date)}</span>
                   </div>
-                  <h4 className={`text-xs truncate transition-colors group-hover/row:text-[#D6004B] ${!email.isRead ? 'font-black text-white' : 'text-zinc-350'}`}>
+                  <h4 className={`text-xs truncate transition-colors group-hover/row:text-[#1D4ED8] ${!email.isRead ? 'font-black text-zinc-900' : 'text-zinc-350'}`}>
                     {email.subject}
                   </h4>
                   <p className="text-[11px] text-zinc-500 line-clamp-1 leading-relaxed">
@@ -257,20 +257,20 @@ export default function InboxPage() {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="fixed top-0 bottom-0 right-0 w-full max-w-2xl bg-[#09090e] border-l border-white/10 z-50 shadow-2xl flex flex-col font-sans"
+              className="fixed top-0 bottom-0 right-0 w-full max-w-2xl bg-slate-50 border-l border-zinc-200 z-50 shadow-sm border border-zinc-200/60 flex flex-col font-sans"
               dir="ltr"
             >
               {/* Header Panel */}
-              <div className="p-6 border-b border-white/5 flex items-center justify-between gap-4">
+              <div className="p-6 border-b border-zinc-200/60 flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
                   <button 
                     onClick={() => setSelectedEmail(null)}
-                    className="w-10 h-10 rounded-xl bg-white/5 border border-white/5 flex items-center justify-center text-zinc-400 hover:text-white transition-colors active:scale-95 shrink-0"
+                    className="w-10 h-10 rounded-2xl bg-zinc-100/40 border border-zinc-200/60 flex items-center justify-center text-zinc-500 hover:text-zinc-900 transition-colors active:scale-95 shrink-0"
                   >
                     <ChevronLeft className="w-5 h-5" />
                   </button>
                   <div className="text-left">
-                    <h3 className="text-sm font-black text-white line-clamp-1">{selectedEmail.subject}</h3>
+                    <h3 className="text-sm font-black text-zinc-900 line-clamp-1">{selectedEmail.subject}</h3>
                     <p className="text-[10px] text-zinc-500 font-sans mt-0.5">{selectedEmail.from}</p>
                   </div>
                 </div>
@@ -280,7 +280,7 @@ export default function InboxPage() {
                     <button
                       onClick={() => markAsRead(selectedEmail.id)}
                       disabled={markingId === selectedEmail.id}
-                      className="h-9 px-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20 text-[11px] font-bold rounded-xl flex items-center gap-1.5 transition-all disabled:opacity-50 active:scale-95 shrink-0"
+                      className="h-9 px-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20 text-[11px] font-bold rounded-2xl flex items-center gap-1.5 transition-all disabled:opacity-50 active:scale-95 shrink-0"
                     >
                       {markingId === selectedEmail.id ? (
                         <div className="w-3 h-3 border-2 border-emerald-400/30 border-t-emerald-400 rounded-full animate-spin" />
@@ -297,28 +297,28 @@ export default function InboxPage() {
               {/* Message Content Container */}
               <div className="flex-1 overflow-y-auto p-6 custom-scrollbar space-y-6">
                 {/* Meta details */}
-                <div className="bg-white/[0.01] border border-white/5 rounded-2xl p-4 text-xs text-zinc-400 space-y-2 text-left">
-                  <div><strong>From:</strong> <span className="text-zinc-200 font-sans">{selectedEmail.from}</span></div>
-                  <div><strong>To:</strong> <span className="text-zinc-200 font-sans">support@joeschool.com</span></div>
-                  <div><strong>Date:</strong> <span className="text-zinc-200 font-sans">{new Date(selectedEmail.date).toLocaleString("en-US")}</span></div>
+                <div className="bg-zinc-50/40 border border-zinc-200/60 rounded-2xl p-4 text-xs text-zinc-500 space-y-2 text-left">
+                  <div><strong>From:</strong> <span className="text-zinc-800 font-sans">{selectedEmail.from}</span></div>
+                  <div><strong>To:</strong> <span className="text-zinc-800 font-sans">support@joeschool.com</span></div>
+                  <div><strong>Date:</strong> <span className="text-zinc-800 font-sans">{new Date(selectedEmail.date).toLocaleString("en-US")}</span></div>
                 </div>
 
                 {/* Email Body */}
-                <div className="bg-white/[0.01] border border-white/5 rounded-2xl p-4 min-h-[300px] relative">
+                <div className="bg-zinc-50/40 border border-zinc-200/60 rounded-2xl p-4 min-h-[300px] relative">
                   {loadingBody ? (
                     <div className="absolute inset-0 flex flex-col items-center justify-center text-zinc-500 gap-3">
-                      <div className="w-8 h-8 border-4 border-rose-600/30 border-t-rose-600 rounded-full animate-spin" />
+                      <div className="w-8 h-8 border-4 border-brand-600/30 border-t-brand-600 rounded-full animate-spin" />
                       <span className="text-xs">Loading message...</span>
                     </div>
                   ) : emailBody ? (
                     // Safe render within a styled division, converting line breaks or loading HTML
                     emailBody.includes("<div") || emailBody.includes("<p") || emailBody.includes("<br") ? (
                       <div 
-                        className="email-body-content text-zinc-200 prose prose-invert prose-rose max-w-none text-xs leading-relaxed"
+                        className="email-body-content text-zinc-800 prose prose-invert prose-rose max-w-none text-xs leading-relaxed"
                         dangerouslySetInnerHTML={{ __html: emailBody }}
                       />
                     ) : (
-                      <pre className="text-zinc-200 whitespace-pre-wrap font-sans text-xs leading-relaxed text-left dir-ltr">
+                      <pre className="text-zinc-800 whitespace-pre-wrap font-sans text-xs leading-relaxed text-left dir-ltr">
                         {emailBody}
                       </pre>
                     )

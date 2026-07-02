@@ -76,7 +76,7 @@ export function SocialLinks() {
           variants={itemVariants}
           whileHover={{ y: -4, scale: 1.1, transition: { type: "spring" as const, stiffness: 500, damping: 20 } }}
           whileTap={{ scale: 0.95 }}
-          className={`group w-11 h-11 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-zinc-400 backdrop-blur-md transition-all duration-150 relative overflow-hidden cursor-pointer active:scale-95 ${link.hoverClass}`}
+          className={`group w-11 h-11 rounded-full bg-zinc-100/40 border border-zinc-200 flex items-center justify-center text-zinc-500 backdrop-blur-md transition-all duration-150 relative overflow-hidden cursor-pointer active:scale-95 ${link.hoverClass}`}
         >
           {/* Subtle hover background sweep */}
           <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />

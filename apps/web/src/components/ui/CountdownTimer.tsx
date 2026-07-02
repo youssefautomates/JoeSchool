@@ -41,7 +41,7 @@ export function CountdownTimer({ hours = 24 }: { hours?: number }) {
   }, [hours]);
 
   return (
-    <div className="flex items-center gap-3 bg-red-50 border border-red-100 px-4 py-2 rounded-lg font-alexandria w-fit shadow-sm">
+    <div className="flex items-center gap-3 bg-red-50 border border-red-100 px-4 py-2 rounded-2xl font-sans w-fit shadow-sm">
       <Clock className="w-4 h-4 text-red-600 animate-pulse" />
       <div className="flex items-center gap-2 text-red-600 font-bold">
         <span className="w-6 text-center tabular-nums">{timeLeft.seconds.toString().padStart(2, '0')}</span>
@@ -50,7 +50,7 @@ export function CountdownTimer({ hours = 24 }: { hours?: number }) {
         <span>:</span>
         <span className="w-6 text-center tabular-nums">{timeLeft.hours.toString().padStart(2, '0')}</span>
       </div>
-      <span className="text-red-600/80 text-sm font-cairo mr-2">ينتهي العرض خلال</span>
+      <span className="text-red-600/80 text-sm font-sans mr-2">ينتهي العرض خلال</span>
     </div>
   );
 }

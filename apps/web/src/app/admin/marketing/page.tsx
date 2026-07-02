@@ -235,7 +235,7 @@ export default function MarketingPage() {
   if (loadingPixels && loadingCoupons) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="w-12 h-12 border-4 border-rose-600/30 border-t-rose-600 rounded-full animate-spin" />
+        <div className="w-12 h-12 border-4 border-brand-600/30 border-t-brand-600 rounded-full animate-spin" />
       </div>
     );
   }
@@ -245,18 +245,18 @@ export default function MarketingPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
-          <h1 className="text-4xl font-extrabold text-white mb-3">Marketing & Smart Coupons</h1>
-          <p className="text-zinc-400">Manage promotional discount codes and tracking pixels in one unified luxury workspace.</p>
+          <h1 className="text-4xl font-extrabold text-zinc-900 mb-3">Marketing & Smart Coupons</h1>
+          <p className="text-zinc-500">Manage promotional discount codes and tracking pixels in one unified luxury workspace.</p>
         </div>
 
         {/* Tab Switcher */}
-        <div className="bg-white/5 border border-white/5 p-1 rounded-xl flex gap-1 self-start md:self-auto">
+        <div className="bg-zinc-100/40 border border-zinc-200/60 p-1 rounded-2xl flex gap-1 self-start md:self-auto">
           <button
             onClick={() => setActiveTab("coupons")}
-            className={`h-10 px-5 rounded-lg text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+            className={`h-10 px-5 rounded-2xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === "coupons" 
-                ? "bg-rose-600 text-white shadow-lg shadow-rose-600/20" 
-                : "text-zinc-400 hover:text-white"
+                ? "bg-brand-600 text-white shadow-sm border border-zinc-200/60 shadow-brand-600/20" 
+                : "text-zinc-500 hover:text-zinc-900"
             }`}
           >
             <Ticket className="w-4 h-4" />
@@ -264,10 +264,10 @@ export default function MarketingPage() {
           </button>
           <button
             onClick={() => setActiveTab("pixels")}
-            className={`h-10 px-5 rounded-lg text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+            className={`h-10 px-5 rounded-2xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === "pixels" 
-                ? "bg-rose-600 text-white shadow-lg shadow-rose-600/20" 
-                : "text-zinc-400 hover:text-white"
+                ? "bg-brand-600 text-white shadow-sm border border-zinc-200/60 shadow-brand-600/20" 
+                : "text-zinc-500 hover:text-zinc-900"
             }`}
           >
             <Target className="w-4 h-4" />
@@ -288,64 +288,64 @@ export default function MarketingPage() {
           >
             {/* Stats Dashboard */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="bg-[#0a0a0f] border border-white/5 rounded-[2rem] p-6 flex items-center gap-4 relative overflow-hidden group">
-                <div className="absolute top-0 right-0 w-24 h-24 bg-rose-600/5 rounded-full blur-[30px]" />
-                <div className="w-12 h-12 bg-rose-500/10 rounded-2xl flex items-center justify-center border border-rose-500/20 shrink-0">
-                  <Ticket className="w-6 h-6 text-rose-500" />
+              <div className="bg-slate-50 border border-zinc-200/60 rounded-[2rem] p-6 flex items-center gap-4 relative overflow-hidden group">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-brand-600/5 rounded-full blur-[30px]" />
+                <div className="w-12 h-12 bg-brand-500/10 rounded-2xl flex items-center justify-center border border-zinc-200/60 shrink-0">
+                  <Ticket className="w-6 h-6 text-yellow-500" />
                 </div>
                 <div>
                   <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Total Coupons</p>
-                  <h3 className="text-2xl font-extrabold text-white mt-1">{coupons.length}</h3>
+                  <h3 className="text-2xl font-extrabold text-zinc-900 mt-1">{coupons.length}</h3>
                 </div>
               </div>
 
-              <div className="bg-[#0a0a0f] border border-white/5 rounded-[2rem] p-6 flex items-center gap-4 relative overflow-hidden group">
+              <div className="bg-slate-50 border border-zinc-200/60 rounded-[2rem] p-6 flex items-center gap-4 relative overflow-hidden group">
                 <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-600/5 rounded-full blur-[30px]" />
                 <div className="w-12 h-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center border border-emerald-500/20 shrink-0">
                   <CheckCircle2 className="w-6 h-6 text-emerald-500" />
                 </div>
                 <div>
                   <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Active Coupons</p>
-                  <h3 className="text-2xl font-extrabold text-white mt-1">{activeCount}</h3>
+                  <h3 className="text-2xl font-extrabold text-zinc-900 mt-1">{activeCount}</h3>
                 </div>
               </div>
 
-              <div className="bg-[#0a0a0f] border border-white/5 rounded-[2rem] p-6 flex items-center gap-4 relative overflow-hidden group">
+              <div className="bg-slate-50 border border-zinc-200/60 rounded-[2rem] p-6 flex items-center gap-4 relative overflow-hidden group">
                 <div className="absolute top-0 right-0 w-24 h-24 bg-amber-600/5 rounded-full blur-[30px]" />
                 <div className="w-12 h-12 bg-amber-500/10 rounded-2xl flex items-center justify-center border border-amber-500/20 shrink-0">
                   <Calendar className="w-6 h-6 text-amber-500" />
                 </div>
                 <div>
                   <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Expired / Depleted</p>
-                  <h3 className="text-2xl font-extrabold text-white mt-1">{expiredCount}</h3>
+                  <h3 className="text-2xl font-extrabold text-zinc-900 mt-1">{expiredCount}</h3>
                 </div>
               </div>
 
-              <div className="bg-[#0a0a0f] border border-white/5 rounded-[2rem] p-6 flex items-center gap-4 relative overflow-hidden group">
+              <div className="bg-slate-50 border border-zinc-200/60 rounded-[2rem] p-6 flex items-center gap-4 relative overflow-hidden group">
                 <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-600/5 rounded-full blur-[30px]" />
                 <div className="w-12 h-12 bg-indigo-500/10 rounded-2xl flex items-center justify-center border border-indigo-500/20 shrink-0">
                   <BarChart3 className="w-6 h-6 text-indigo-500" />
                 </div>
                 <div>
                   <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Total Usage Count</p>
-                  <h3 className="text-2xl font-extrabold text-white mt-1">{totalUses}</h3>
+                  <h3 className="text-2xl font-extrabold text-zinc-900 mt-1">{totalUses}</h3>
                 </div>
               </div>
             </div>
 
             {tableMissing ? (
-              <div className="bg-rose-950/20 border border-rose-900/30 rounded-[2rem] p-8 flex flex-col items-center text-center max-w-2xl mx-auto">
-                <ShieldAlert className="w-16 h-16 text-rose-500 mb-4 animate-pulse" />
-                <h3 className="text-2xl font-extrabold text-white mb-2">Database Setup Required</h3>
-                <p className="text-zinc-400 text-sm leading-relaxed mb-6">
+              <div className="bg-brand-950/20 border border-brand-900/30 rounded-[2rem] p-8 flex flex-col items-center text-center max-w-2xl mx-auto">
+                <ShieldAlert className="w-16 h-16 text-yellow-500 mb-4 animate-pulse" />
+                <h3 className="text-2xl font-extrabold text-zinc-900 mb-2">Database Setup Required</h3>
+                <p className="text-zinc-500 text-sm leading-relaxed mb-6">
                   The coupons table has not been created in your Supabase database yet. Please run the following SQL script inside the Supabase SQL Editor to enable coupons immediately:
                 </p>
-                <div className="bg-[#07070b] border border-white/5 rounded-xl p-4 w-full font-mono text-left text-xs text-rose-300 overflow-x-auto mb-6 select-all max-h-[150px]">
+                <div className="bg-[#07070b] border border-zinc-200/60 rounded-2xl p-4 w-full font-mono text-left text-xs text-brand-300 overflow-x-auto mb-6 select-all max-h-[150px]">
                   {`CREATE TABLE public.coupons (\n    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n    code TEXT UNIQUE NOT NULL,\n    discount_percent INTEGER NOT NULL CHECK (discount_percent > 0 AND discount_percent <= 100),\n    max_uses INTEGER NOT NULL DEFAULT 100,\n    used_count INTEGER NOT NULL DEFAULT 0,\n    expiry_date TIMESTAMP WITH TIME ZONE,\n    applies_to_type TEXT NOT NULL DEFAULT 'all',\n    applies_to_id TEXT,\n    created_at TIMESTAMP WITH TIME ZONE DEFAULT now()\n);\n\nALTER TABLE public.coupons ENABLE ROW LEVEL SECURITY;\n\nCREATE POLICY "Allow public read coupons" ON public.coupons FOR SELECT USING (true);\nCREATE POLICY "Allow admin manage coupons" ON public.coupons FOR ALL USING (true);\n\nALTER TABLE public.orders ADD COLUMN IF NOT EXISTS coupon_code TEXT;`}
                 </div>
                 <button
                   onClick={fetchCoupons}
-                  className="h-11 px-6 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-xl text-xs transition-colors cursor-pointer"
+                  className="h-11 px-6 bg-brand-600 hover:bg-brand-500 text-white font-bold rounded-2xl text-xs transition-colors cursor-pointer"
                 >
                   I've run the script, check again
                 </button>
@@ -354,21 +354,21 @@ export default function MarketingPage() {
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
                 
                 {/* Create Coupon Card */}
-                <div className="lg:col-span-4 bg-[#0a0a0f] border border-white/5 rounded-[2rem] p-6 md:p-8 relative overflow-hidden">
+                <div className="lg:col-span-4 bg-slate-50 border border-zinc-200/60 rounded-[2rem] p-6 md:p-8 relative overflow-hidden">
                   <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#ff0f53] to-[#ff00b3]" />
-                  <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-                    <Plus className="w-5 h-5 text-rose-500" />
+                  <h3 className="text-xl font-bold text-zinc-900 mb-6 flex items-center gap-2">
+                    <Plus className="w-5 h-5 text-yellow-500" />
                     Create New Coupon
                   </h3>
 
                   <form onSubmit={handleCreateCoupon} className="space-y-4">
                     <div className="space-y-2">
-                      <Label className="text-zinc-400 text-xs font-bold">Coupon Code</Label>
+                      <Label className="text-zinc-500 text-xs font-bold">Coupon Code</Label>
                       <Input
                         value={newCoupon.code}
                         onChange={e => setNewCoupon({ ...newCoupon, code: e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "") })}
                         placeholder="e.g. BLACKFRIDAY"
-                        className="h-11 bg-white/5 border-white/10 text-white font-mono text-left uppercase text-sm"
+                        className="h-11 bg-zinc-100/40 border-zinc-200 text-zinc-900 font-mono text-left uppercase text-sm"
                         maxLength={18}
                         required
                       />
@@ -376,9 +376,9 @@ export default function MarketingPage() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label className="text-zinc-400 text-xs font-bold flex justify-between">
+                      <Label className="text-zinc-500 text-xs font-bold flex justify-between">
                         <span>Discount Percentage</span>
-                        <span className="text-rose-400 font-bold">{newCoupon.discount_percent}%</span>
+                        <span className="text-yellow-500 font-bold">{newCoupon.discount_percent}%</span>
                       </Label>
                       <div className="flex items-center gap-4">
                         <input
@@ -387,7 +387,7 @@ export default function MarketingPage() {
                           max="100"
                           value={newCoupon.discount_percent}
                           onChange={e => setNewCoupon({ ...newCoupon, discount_percent: parseInt(e.target.value) })}
-                          className="flex-1 accent-rose-600 h-1.5 bg-white/10 rounded-lg cursor-pointer"
+                          className="flex-1 accent-brand-600 h-1.5 bg-zinc-100/80 rounded-2xl cursor-pointer"
                         />
                         <Input
                           type="number"
@@ -395,63 +395,63 @@ export default function MarketingPage() {
                           max="100"
                           value={newCoupon.discount_percent}
                           onChange={e => setNewCoupon({ ...newCoupon, discount_percent: Math.min(100, Math.max(1, parseInt(e.target.value) || 20)) })}
-                          className="w-16 h-9 bg-white/5 border-white/10 text-center text-xs p-1"
+                          className="w-16 h-9 bg-zinc-100/40 border-zinc-200 text-center text-xs p-1"
                         />
                       </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label className="text-zinc-400 text-xs font-bold">Maximum Uses</Label>
+                        <Label className="text-zinc-500 text-xs font-bold">Maximum Uses</Label>
                         <Input
                           type="number"
                           min="1"
                           value={newCoupon.max_uses}
                           onChange={e => setNewCoupon({ ...newCoupon, max_uses: Math.max(1, parseInt(e.target.value) || 100) })}
-                          className="h-11 bg-white/5 border-white/10 text-white text-xs"
+                          className="h-11 bg-zinc-100/40 border-zinc-200 text-zinc-900 text-xs"
                           required
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label className="text-zinc-400 text-xs font-bold">Expiry Date (Optional)</Label>
+                        <Label className="text-zinc-500 text-xs font-bold">Expiry Date (Optional)</Label>
                         <Input
                           type="date"
                           value={newCoupon.expiry_date}
                           onChange={e => setNewCoupon({ ...newCoupon, expiry_date: e.target.value })}
-                          className="h-11 bg-white/5 border-white/10 text-white text-xs cursor-pointer text-left"
+                          className="h-11 bg-zinc-100/40 border-zinc-200 text-zinc-900 text-xs cursor-pointer text-left"
                         />
                       </div>
                     </div>
 
                     <div className="space-y-2">
-                      <Label className="text-zinc-400 text-xs font-bold">Apply Discount To</Label>
+                      <Label className="text-zinc-500 text-xs font-bold">Apply Discount To</Label>
                       <select
                         value={newCoupon.applies_to_type}
                         onChange={e => setNewCoupon({ ...newCoupon, applies_to_type: e.target.value as any, applies_to_id: "" })}
-                        className="w-full h-11 rounded-xl bg-white/5 border border-white/10 px-3 text-xs text-zinc-300 focus:outline-none focus:border-rose-500 cursor-pointer"
+                        className="w-full h-11 rounded-2xl bg-zinc-100/40 border border-zinc-200 px-3 text-xs text-zinc-700 focus:outline-none focus:border-brand-500 cursor-pointer"
                       >
-                        <option value="all" className="bg-[#0a0a0f] text-white">Entire Store (All Products)</option>
-                        <option value="product" className="bg-[#0a0a0f] text-white">Specific Digital Product</option>
-                        <option value="course" className="bg-[#0a0a0f] text-white">Specific LMS Course</option>
+                        <option value="all" className="bg-slate-50 text-zinc-900">Entire Store (All Products)</option>
+                        <option value="product" className="bg-slate-50 text-zinc-900">Specific Digital Product</option>
+                        <option value="course" className="bg-slate-50 text-zinc-900">Specific LMS Course</option>
                       </select>
                     </div>
 
                     {newCoupon.applies_to_type !== "all" && (
                       <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
-                        <Label className="text-zinc-400 text-xs font-bold">
+                        <Label className="text-zinc-500 text-xs font-bold">
                           {newCoupon.applies_to_type === "course" ? "Select Target LMS Course" : "Select Target Digital Product"}
                         </Label>
                         <select
                           value={newCoupon.applies_to_id}
                           onChange={e => setNewCoupon({ ...newCoupon, applies_to_id: e.target.value })}
-                          className="w-full h-11 rounded-xl bg-white/5 border border-white/10 px-3 text-xs text-zinc-300 focus:outline-none focus:border-rose-500 cursor-pointer"
+                          className="w-full h-11 rounded-2xl bg-zinc-100/40 border border-zinc-200 px-3 text-xs text-zinc-700 focus:outline-none focus:border-brand-500 cursor-pointer"
                           required
                         >
-                          <option value="" className="bg-[#0a0a0f] text-zinc-500">Select from list...</option>
+                          <option value="" className="bg-slate-50 text-zinc-500">Select from list...</option>
                           {availableItems
                               .filter(item => item.type === newCoupon.applies_to_type)
                               .map(item => (
-                                <option key={item.id} value={item.id} className="bg-[#0a0a0f] text-white">
+                                <option key={item.id} value={item.id} className="bg-slate-50 text-zinc-900">
                                   {item.title}
                                 </option>
                               ))}
@@ -462,10 +462,10 @@ export default function MarketingPage() {
                     <button
                       type="submit"
                       disabled={submittingCoupon}
-                      className="w-full h-11 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 transition-all disabled:opacity-50 mt-2 cursor-pointer shadow-lg shadow-rose-600/10 hover:shadow-rose-600/20"
+                      className="w-full h-11 bg-brand-600 hover:bg-brand-500 text-white font-bold rounded-2xl text-xs flex items-center justify-center gap-2 transition-all disabled:opacity-50 mt-2 cursor-pointer shadow-sm border border-zinc-200/60 shadow-brand-600/10 hover:shadow-brand-600/20"
                     >
                       {submittingCoupon ? (
-                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        <div className="w-5 h-5 border-2 border-zinc-300 border-t-white rounded-full animate-spin" />
                       ) : (
                         <Plus className="w-4 h-4" />
                       )}
@@ -475,9 +475,9 @@ export default function MarketingPage() {
                 </div>
 
                 {/* Coupons List Table */}
-                <div className="lg:col-span-8 bg-[#0a0a0f] border border-white/5 rounded-[2rem] p-6 md:p-8 relative overflow-hidden">
-                  <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-                    <Tag className="w-5 h-5 text-rose-500" />
+                <div className="lg:col-span-8 bg-slate-50 border border-zinc-200/60 rounded-[2rem] p-6 md:p-8 relative overflow-hidden">
+                  <h3 className="text-xl font-bold text-zinc-900 mb-6 flex items-center gap-2">
+                    <Tag className="w-5 h-5 text-yellow-500" />
                     Active Coupons Ledger
                   </h3>
 
@@ -489,9 +489,9 @@ export default function MarketingPage() {
                     </div>
                   ) : (
                     <div className="overflow-x-auto">
-                      <table className="w-full text-left text-xs text-zinc-300">
+                      <table className="w-full text-left text-xs text-zinc-700">
                         <thead>
-                          <tr className="border-b border-white/5 text-zinc-500 font-bold h-10">
+                          <tr className="border-b border-zinc-200/60 text-zinc-500 font-bold h-10">
                             <th className="pb-3 text-left">Coupon Code</th>
                             <th className="pb-3 text-center">Discount</th>
                             <th className="pb-3 text-center">Usage</th>
@@ -510,10 +510,10 @@ export default function MarketingPage() {
                             const targetName = availableItems.find(i => i.id === coupon.applies_to_id || `course-${i.id}` === coupon.applies_to_id)?.title || coupon.applies_to_id;
 
                             return (
-                              <tr key={coupon.id} className="hover:bg-white/[0.01] transition-all">
+                              <tr key={coupon.id} className="hover:bg-zinc-50/40 transition-all">
                                 <td className="py-4">
                                   <div className="flex items-center gap-2">
-                                    <span className="font-mono text-sm font-bold text-white px-2.5 py-1 bg-white/5 border border-white/5 rounded-lg select-all">
+                                    <span className="font-mono text-sm font-bold text-zinc-900 px-2.5 py-1 bg-zinc-100/40 border border-zinc-200/60 rounded-2xl select-all">
                                       {coupon.code}
                                     </span>
                                     {isInactive && (
@@ -524,20 +524,20 @@ export default function MarketingPage() {
                                   </div>
                                 </td>
                                 <td className="py-4 text-center">
-                                  <span className="inline-flex items-center gap-0.5 font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/20 text-xs">
+                                  <span className="inline-flex items-center gap-0.5 font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-xl border border-emerald-500/20 text-xs">
                                     <Percent className="w-3 h-3" />
                                     {coupon.discount_percent}% Off
                                   </span>
                                 </td>
                                 <td className="py-4 text-center">
                                   <div className="flex flex-col items-center gap-1">
-                                    <span className="font-bold text-zinc-200">
+                                    <span className="font-bold text-zinc-800">
                                       {coupon.used_count} / {coupon.max_uses}
                                     </span>
                                     {/* Progress bar */}
-                                    <div className="w-20 h-1 bg-white/5 rounded-full overflow-hidden">
+                                    <div className="w-20 h-1 bg-zinc-100/40 rounded-full overflow-hidden">
                                       <div 
-                                        className={`h-full rounded-full ${isExceeded ? 'bg-red-500' : 'bg-rose-600'}`}
+                                        className={`h-full rounded-full ${isExceeded ? 'bg-red-500' : 'bg-brand-600'}`}
                                         style={{ width: `${Math.min(100, (coupon.used_count / coupon.max_uses) * 100)}%` }}
                                       />
                                     </div>
@@ -545,7 +545,7 @@ export default function MarketingPage() {
                                 </td>
                                 <td className="py-4 text-center">
                                   {coupon.applies_to_type === "all" ? (
-                                    <span className="text-zinc-400 bg-white/5 px-2 py-1 rounded text-[10px]">
+                                    <span className="text-zinc-500 bg-zinc-100/40 px-2 py-1 rounded text-[10px]">
                                       Entire Store 🌐
                                     </span>
                                   ) : (
@@ -553,7 +553,7 @@ export default function MarketingPage() {
                                       <span className="text-zinc-500 text-[9px] block">
                                         {coupon.applies_to_type === "course" ? "Course 📚" : "Product 📦"}
                                       </span>
-                                      <span className="text-rose-300 font-bold block truncate w-full text-center" title={targetName || ""}>
+                                      <span className="text-brand-300 font-bold block truncate w-full text-center" title={targetName || ""}>
                                         {targetName || "Custom"}
                                       </span>
                                     </div>
@@ -561,7 +561,7 @@ export default function MarketingPage() {
                                 </td>
                                 <td className="py-4 text-center">
                                   {coupon.expiry_date ? (
-                                    <span className={`font-mono text-[10px] ${isExpired ? "text-red-400 line-through" : "text-zinc-400"}`}>
+                                    <span className={`font-mono text-[10px] ${isExpired ? "text-red-400 line-through" : "text-zinc-500"}`}>
                                       {new Date(coupon.expiry_date).toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" })}
                                     </span>
                                   ) : (
@@ -571,7 +571,7 @@ export default function MarketingPage() {
                                 <td className="py-4 text-right">
                                   <button
                                     onClick={() => handleDeleteCoupon(coupon.id, coupon.code)}
-                                    className="p-2 text-zinc-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors cursor-pointer"
+                                    className="p-2 text-zinc-500 hover:text-red-400 hover:bg-red-500/10 rounded-2xl transition-colors cursor-pointer"
                                     title="Delete Coupon"
                                   >
                                     <Trash2 className="w-3.5 h-3.5" />
@@ -599,16 +599,16 @@ export default function MarketingPage() {
             className="grid grid-cols-1 lg:grid-cols-2 gap-8"
           >
             {/* Meta Pixel Card */}
-            <div className="bg-[#0a0a0f] p-8 rounded-[2rem] border border-white/5 relative overflow-hidden group hover:border-blue-500/30 transition-all">
+            <div className="bg-slate-50 p-8 rounded-[2rem] border border-zinc-200/60 relative overflow-hidden group hover:border-blue-500/30 transition-all">
               <div className="absolute top-0 right-0 w-32 h-32 bg-blue-600/10 rounded-full blur-[50px] pointer-events-none" />
               
               <div className="flex items-center justify-between mb-8 relative z-10">
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center border border-blue-500/20">
+                  <div className="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center border border-blue-500/20">
                     <Target className="w-6 h-6 text-blue-500" />
                   </div>
                   <div>
-                    <h3 className="text-2xl font-bold text-white">Meta Pixel</h3>
+                    <h3 className="text-2xl font-bold text-zinc-900">Meta Pixel</h3>
                     <p className="text-sm text-zinc-500 mt-1">Track Facebook & Instagram conversion events</p>
                   </div>
                 </div>
@@ -623,32 +623,32 @@ export default function MarketingPage() {
 
               <div className="space-y-6 relative z-10">
                 <div className="space-y-3">
-                  <Label className="text-zinc-300 font-bold">Pixel ID</Label>
+                  <Label className="text-zinc-700 font-bold">Pixel ID</Label>
                   <Input 
                     value={settings.metaPixelId}
                     onChange={(e) => setSettings({...settings, metaPixelId: e.target.value})}
                     placeholder="e.g. 123456789012345"
-                    className="h-12 bg-white/5 border-white/10 text-white font-mono text-left focus:border-blue-500 focus:ring-blue-500/20"
+                    className="h-12 bg-zinc-100/40 border-zinc-200 text-zinc-900 font-mono text-left focus:border-blue-500 focus:ring-blue-500/20"
                     dir="ltr"
                   />
                 </div>
 
                 <div className="space-y-3">
-                  <Label className="text-zinc-300 font-bold">Meta Conversions API Token</Label>
+                  <Label className="text-zinc-700 font-bold">Meta Conversions API Token</Label>
                   <Input 
                     value={settings.metaCapiToken || ""}
                     onChange={(e) => setSettings({...settings, metaCapiToken: e.target.value})}
                     placeholder="EAAB... (Paste your Meta Access Token here)"
-                    className="h-12 bg-white/5 border-white/10 text-white font-mono text-left focus:border-blue-500 focus:ring-blue-500/20"
+                    className="h-12 bg-zinc-100/40 border-zinc-200 text-zinc-900 font-mono text-left focus:border-blue-500 focus:ring-blue-500/20"
                     type="password"
                     dir="ltr"
                   />
                   <p className="text-xs text-zinc-500">Required for Server-Side events to work.</p>
                 </div>
 
-                <div className="flex items-center justify-between p-4 bg-white/5 border border-white/10 rounded-xl">
+                <div className="flex items-center justify-between p-4 bg-zinc-100/40 border border-zinc-200 rounded-2xl">
                   <div>
-                    <Label className="text-zinc-300 font-bold">Enable Conversions API (Server-Side)</Label>
+                    <Label className="text-zinc-700 font-bold">Enable Conversions API (Server-Side)</Label>
                     <p className="text-xs text-zinc-500 mt-1">Send purchase events directly from the server for 100% accuracy</p>
                   </div>
                   <Switch 
@@ -659,18 +659,18 @@ export default function MarketingPage() {
                 </div>
 
                 <div className="space-y-3">
-                  <Label className="text-zinc-300 font-bold">Meta CAPI Test Code</Label>
+                  <Label className="text-zinc-700 font-bold">Meta CAPI Test Code</Label>
                   <Input 
                     value={settings.metaCapiTestCode || ""}
                     onChange={(e) => setSettings({...settings, metaCapiTestCode: e.target.value})}
                     placeholder="e.g. TEST12345 (Leave empty in production)"
-                    className="h-12 bg-white/5 border-white/10 text-white font-mono text-left focus:border-blue-500 focus:ring-blue-500/20"
+                    className="h-12 bg-zinc-100/40 border-zinc-200 text-zinc-900 font-mono text-left focus:border-blue-500 focus:ring-blue-500/20"
                     dir="ltr"
                   />
                   <p className="text-xs text-zinc-500">Only used for testing Server-Side events in Events Manager.</p>
                 </div>
                 
-                <div className="bg-blue-500/5 border border-blue-500/10 rounded-xl p-4 flex gap-3">
+                <div className="bg-blue-500/5 border border-blue-500/10 rounded-2xl p-4 flex gap-3">
                   <Activity className="w-5 h-5 text-blue-400 shrink-0 mt-0.5" />
                   <div className="text-sm text-blue-100/70 leading-relaxed">
                     <p className="font-bold text-blue-300 mb-1">Events tracked automatically:</p>
@@ -681,16 +681,16 @@ export default function MarketingPage() {
             </div>
 
             {/* TikTok Pixel Card */}
-            <div className="bg-[#0a0a0f] p-8 rounded-[2rem] border border-white/5 relative overflow-hidden group hover:border-pink-500/30 transition-all">
+            <div className="bg-slate-50 p-8 rounded-[2rem] border border-zinc-200/60 relative overflow-hidden group hover:border-pink-500/30 transition-all">
               <div className="absolute top-0 right-0 w-32 h-32 bg-pink-600/10 rounded-full blur-[50px] pointer-events-none" />
               
               <div className="flex items-center justify-between mb-8 relative z-10">
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-pink-500/10 rounded-xl flex items-center justify-center border border-pink-500/20">
+                  <div className="w-12 h-12 bg-pink-500/10 rounded-2xl flex items-center justify-center border border-pink-500/20">
                     <Target className="w-6 h-6 text-pink-500" />
                   </div>
                   <div>
-                    <h3 className="text-2xl font-bold text-white">TikTok Pixel</h3>
+                    <h3 className="text-2xl font-bold text-zinc-900">TikTok Pixel</h3>
                     <p className="text-sm text-zinc-500 mt-1">Track conversion events from TikTok advertisements</p>
                   </div>
                 </div>
@@ -705,17 +705,17 @@ export default function MarketingPage() {
 
               <div className="space-y-6 relative z-10">
                 <div className="space-y-3">
-                  <Label className="text-zinc-300 font-bold">Pixel ID</Label>
+                  <Label className="text-zinc-700 font-bold">Pixel ID</Label>
                   <Input 
                     value={settings.tiktokPixelId}
                     onChange={(e) => setSettings({...settings, tiktokPixelId: e.target.value})}
                     placeholder="e.g. C1234567890ABCDEF"
-                    className="h-12 bg-white/5 border-white/10 text-white font-mono text-left focus:border-pink-500 focus:ring-pink-500/20"
+                    className="h-12 bg-zinc-100/40 border-zinc-200 text-zinc-900 font-mono text-left focus:border-pink-500 focus:ring-pink-500/20"
                     dir="ltr"
                   />
                 </div>
                 
-                <div className="bg-pink-500/5 border border-pink-500/10 rounded-xl p-4 flex gap-3">
+                <div className="bg-pink-500/5 border border-pink-500/10 rounded-2xl p-4 flex gap-3">
                   <Activity className="w-5 h-5 text-pink-400 shrink-0 mt-0.5" />
                   <div className="text-sm text-pink-100/70 leading-relaxed">
                     <p className="font-bold text-pink-300 mb-1">Pre-integrated Events:</p>
@@ -730,9 +730,9 @@ export default function MarketingPage() {
               <button
                 onClick={handleSavePixels}
                 disabled={savingPixels}
-                className="h-12 px-8 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl flex items-center gap-2 transition-all disabled:opacity-50 cursor-pointer shadow-lg shadow-emerald-600/10 hover:shadow-emerald-600/20"
+                className="h-12 px-8 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-2xl flex items-center gap-2 transition-all disabled:opacity-50 cursor-pointer shadow-sm border border-zinc-200/60 shadow-emerald-600/10 hover:shadow-emerald-600/20"
               >
-                {savingPixels ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save className="w-5 h-5" />}
+                {savingPixels ? <div className="w-5 h-5 border-2 border-zinc-300 border-t-white rounded-full animate-spin" /> : <Save className="w-5 h-5" />}
                 Save Pixel Settings
               </button>
             </div>
@@ -742,7 +742,7 @@ export default function MarketingPage() {
 
       {/* Dynamic SEO/Traction Alert Card */}
       <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-[2rem] p-8 flex items-start gap-4">
-        <div className="w-12 h-12 bg-emerald-500/10 rounded-xl flex items-center justify-center shrink-0">
+        <div className="w-12 h-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center shrink-0">
           <CheckCircle2 className="w-6 h-6 text-emerald-500" />
         </div>
         <div>

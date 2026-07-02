@@ -130,11 +130,11 @@ function VerifyEmailForm() {
   };
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white font-cairo flex items-center justify-center relative overflow-hidden px-4 py-8">
+    <div className="min-h-screen bg-white text-zinc-900 font-sans flex items-center justify-center relative overflow-hidden px-4 py-8">
       {/* Background Grids & Glowing Rose Blurs */}
       <div className="absolute inset-0 pointer-events-none z-0">
         <div className="absolute inset-0 bg-grid-lines mask-radial-faded opacity-40"></div>
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] sm:w-[600px] h-[350px] sm:h-[600px] bg-rose-600/10 rounded-full blur-[100px] mix-blend-screen"></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] sm:w-[600px] h-[350px] sm:h-[600px] bg-brand-600/10 rounded-full blur-[100px] mix-blend-screen"></div>
       </div>
 
       <div className="w-full max-w-lg relative z-10">
@@ -150,10 +150,10 @@ function VerifyEmailForm() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
-          className="bg-[#0a0a0f]/80 backdrop-blur-2xl border border-white/5 rounded-3xl p-6 sm:p-10 shadow-[0_20px_50px_rgba(0,0,0,0.8)] relative overflow-hidden"
+          className="bg-slate-50/80 backdrop-blur-2xl border border-zinc-200/60 rounded-3xl p-6 sm:p-10 shadow-[0_20px_50px_rgba(0,0,0,0.8)] relative overflow-hidden"
         >
           {/* Subtle top edge glow */}
-          <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-[#D6004B] to-transparent" />
+          <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-[#1D4ED8] to-transparent" />
 
           <AnimatePresence mode="wait">
             {isVerified ? (
@@ -170,8 +170,8 @@ function VerifyEmailForm() {
                 </div>
                 
                 <div>
-                  <h2 className="text-2xl font-alexandria font-bold text-white mb-2">تم تأكيد البريد الإلكتروني!</h2>
-                  <p className="text-zinc-400 text-sm">تهانينا، تم تفعيل حساب الطالب الخاص بك بنجاح. سنقوم بتحويلك الآن للوحة التحكم الخاصة بك...</p>
+                  <h2 className="text-2xl font-sans font-bold text-zinc-900 mb-2">تم تأكيد البريد الإلكتروني!</h2>
+                  <p className="text-zinc-500 text-sm">تهانينا، تم تفعيل حساب الطالب الخاص بك بنجاح. سنقوم بتحويلك الآن للوحة التحكم الخاصة بك...</p>
                 </div>
 
                 <div className="flex flex-col items-center gap-2">
@@ -197,47 +197,47 @@ function VerifyEmailForm() {
                 className="space-y-6"
               >
                 <div>
-                  <div className="w-16 h-16 bg-rose-500/10 border border-rose-500/20 rounded-2xl flex items-center justify-center text-rose-500 mb-6 shadow-[0_0_30px_rgba(214,0,75,0.15)] relative overflow-hidden group">
+                  <div className="w-16 h-16 bg-brand-500/10 border border-zinc-200/60 rounded-2xl flex items-center justify-center text-yellow-500 mb-6 shadow-[0_0_30px_rgba(29, 78, 216,0.15)] relative overflow-hidden group">
                     <Mail className="w-8 h-8 animate-pulse z-10" />
-                    <div className="absolute w-12 h-12 bg-rose-600/20 rounded-full blur-lg group-hover:scale-125 transition-transform pointer-events-none" />
+                    <div className="absolute w-12 h-12 bg-brand-600/20 rounded-full blur-lg group-hover:scale-125 transition-transform pointer-events-none" />
                   </div>
 
-                  <h2 className="text-xl sm:text-2xl font-alexandria font-bold text-white mb-2">تأكيد حساب الطالب الخاص بك</h2>
-                  <p className="text-zinc-400 text-xs sm:text-sm leading-relaxed">
+                  <h2 className="text-xl sm:text-2xl font-sans font-bold text-zinc-900 mb-2">تأكيد حساب الطالب الخاص بك</h2>
+                  <p className="text-zinc-500 text-xs sm:text-sm leading-relaxed">
                     لقد أرسلنا رسالة بريد إلكتروني تحتوي على رابط تفعيل فوري إلى العنوان التالي:
                   </p>
                 </div>
 
                 {/* Email highlighting box */}
-                <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-4 flex items-center justify-between gap-4">
-                  <span className="font-bold text-sm sm:text-base text-rose-400 select-all truncate max-w-[260px] sm:max-w-xs text-right" dir="ltr">
+                <div className="bg-zinc-50/70 border border-zinc-200/60 rounded-2xl p-4 flex items-center justify-between gap-4">
+                  <span className="font-bold text-sm sm:text-base text-yellow-500 select-all truncate max-w-[260px] sm:max-w-xs text-right" dir="ltr">
                     {email || "بريدك الإلكتروني المسجل"}
                   </span>
-                  <span className="text-[10px] bg-rose-950 text-rose-400 border border-rose-900/30 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider scale-90 shrink-0">معلق</span>
+                  <span className="text-[10px] bg-brand-950 text-yellow-500 border border-brand-900/30 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider scale-90 shrink-0">معلق</span>
                 </div>
 
                 {/* Onboarding steps list */}
-                <div className="space-y-3.5 pt-2 text-xs sm:text-sm text-zinc-400">
+                <div className="space-y-3.5 pt-2 text-xs sm:text-sm text-zinc-500">
                   <div className="flex items-start gap-3">
-                    <span className="w-5 h-5 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-[10px] font-bold text-rose-500 shrink-0 mt-0.5">١</span>
+                    <span className="w-5 h-5 rounded-full bg-zinc-100/40 border border-zinc-200 flex items-center justify-center text-[10px] font-bold text-yellow-500 shrink-0 mt-0.5">١</span>
                     <p className="leading-relaxed text-right">افتح بريدك الوارد (Inbox) أو مجلد البريد غير الهام (Spam).</p>
                   </div>
                   <div className="flex items-start gap-3">
-                    <span className="w-5 h-5 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-[10px] font-bold text-rose-500 shrink-0 mt-0.5">٢</span>
+                    <span className="w-5 h-5 rounded-full bg-zinc-100/40 border border-zinc-200 flex items-center justify-center text-[10px] font-bold text-yellow-500 shrink-0 mt-0.5">٢</span>
                     <p className="leading-relaxed text-right">اضغط على زر <strong>"تأكيد الحساب"</strong> المرفق بالرسالة لتثبيت التفعيل.</p>
                   </div>
                   <div className="flex items-start gap-3">
-                    <span className="w-5 h-5 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-[10px] font-bold text-rose-500 shrink-0 mt-0.5">٣</span>
+                    <span className="w-5 h-5 rounded-full bg-zinc-100/40 border border-zinc-200 flex items-center justify-center text-[10px] font-bold text-yellow-500 shrink-0 mt-0.5">٣</span>
                     <p className="leading-relaxed text-right">سيتم تحديث هذه الصفحة وتحويلك تلقائياً للوحة التحكم.</p>
                   </div>
                 </div>
 
                 {/* Main Action CTAs */}
-                <div className="space-y-3 pt-4 border-t border-white/5">
+                <div className="space-y-3 pt-4 border-t border-zinc-200/60">
                   {/* Open Gmail button */}
                   <button
                     onClick={handleOpenGmail}
-                    className="w-full group h-14 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-white rounded-2xl font-bold text-base transition-all hover:-translate-y-0.5 active:scale-98 flex items-center justify-center gap-2 cursor-pointer"
+                    className="w-full group h-14 bg-zinc-100/40 hover:bg-zinc-100/80 border border-zinc-200 hover:border-zinc-200 text-zinc-900 rounded-2xl font-bold text-base transition-all hover:-translate-y-0.5 active:scale-98 flex items-center justify-center gap-2 cursor-pointer"
                   >
                     <span>فتح بريد Gmail سريعاً</span>
                     <ExternalLink className="w-5 h-5 group-hover:scale-105 transition-transform" />
@@ -248,7 +248,7 @@ function VerifyEmailForm() {
                     <button
                       onClick={handleManualCheck}
                       disabled={isChecking}
-                      className="h-12 bg-rose-600 hover:bg-rose-700 disabled:opacity-50 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all active:scale-98 cursor-pointer"
+                      className="h-12 bg-[#2563EB] hover:bg-[#1D4ED8] disabled:opacity-50 text-white rounded-2xl text-xs font-bold flex items-center justify-center gap-2 transition-all active:scale-98 cursor-pointer"
                     >
                       {isChecking ? (
                         <>
@@ -267,7 +267,7 @@ function VerifyEmailForm() {
                     <button
                       onClick={handleResend}
                       disabled={isResending || cooldown > 0}
-                      className="h-12 bg-white/5 hover:bg-white/10 disabled:opacity-50 border border-white/5 hover:border-white/10 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all active:scale-98 cursor-pointer"
+                      className="h-12 bg-zinc-100/40 hover:bg-zinc-100/80 disabled:opacity-50 border border-zinc-200/60 hover:border-zinc-200 text-zinc-900 rounded-2xl text-xs font-bold flex items-center justify-center gap-2 transition-all active:scale-98 cursor-pointer"
                     >
                       {isResending ? (
                         <>
@@ -287,9 +287,9 @@ function VerifyEmailForm() {
                 </div>
 
                 {/* Back to login link */}
-                <div className="pt-6 border-t border-white/5 text-center flex flex-col sm:flex-row justify-between items-center gap-4 text-xs sm:text-sm text-zinc-500">
+                <div className="pt-6 border-t border-zinc-200/60 text-center flex flex-col sm:flex-row justify-between items-center gap-4 text-xs sm:text-sm text-zinc-500">
                   <p>هل قمت بإدخال بريد خاطئ؟</p>
-                  <Link href="/signup" className="text-rose-400 hover:text-rose-300 font-bold transition-colors">
+                  <Link href="/signup" className="text-yellow-500 hover:text-brand-300 font-bold transition-colors">
                     العودة لإنشاء حساب جديد
                   </Link>
                 </div>
@@ -311,10 +311,10 @@ function VerifyEmailForm() {
 export default function VerifyEmailPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-[#050505] flex items-center justify-center font-cairo text-white">
+      <div className="min-h-screen bg-white flex items-center justify-center font-sans text-zinc-900">
         <div className="flex flex-col items-center gap-4">
-          <Loader2 className="w-10 h-10 text-rose-500 animate-spin" />
-          <p className="text-zinc-400 text-sm font-medium font-cairo">جاري تحميل المعطيات...</p>
+          <Loader2 className="w-10 h-10 text-yellow-500 animate-spin" />
+          <p className="text-zinc-500 text-sm font-medium font-sans">جاري تحميل المعطيات...</p>
         </div>
       </div>
     }>

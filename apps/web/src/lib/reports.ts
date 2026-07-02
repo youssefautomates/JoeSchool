@@ -1047,7 +1047,7 @@ export async function sendMonthlyExcelReportEmail(reportData: ReportData, excelB
     <style>
       body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8fafc; color: #0f172a; margin: 0; padding: 24px; }
       .container { max-width: 650px; background-color: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin: 0 auto; }
-      .header { background-color: #0f172a; padding: 32px 24px; text-align: center; border-bottom: 4px solid #D6004B; color: #ffffff; }
+      .header { background-color: #0f172a; padding: 32px 24px; text-align: center; border-bottom: 4px solid #1D4ED8; color: #ffffff; }
       .header h1 { margin: 0; font-size: 20px; font-weight: 800; letter-spacing: 0.5px; }
       .header p { margin: 6px 0 0 0; font-size: 14px; color: #94a3b8; }
       .body { padding: 32px 24px; }
@@ -1057,7 +1057,7 @@ export async function sendMonthlyExcelReportEmail(reportData: ReportData, excelB
       .summary-table tr:last-child td { border-bottom: none; }
       .trend-green { color: #16a34a; font-weight: bold; }
       .trend-red { color: #dc2626; font-weight: bold; }
-      .insights-section { background-color: #fafafa; border-right: 4px solid #D6004B; border-radius: 6px; padding: 16px; margin-top: 24px; }
+      .insights-section { background-color: #fafafa; border-right: 4px solid #1D4ED8; border-radius: 6px; padding: 16px; margin-top: 24px; }
       .insights-section h3 { margin: 0 0 10px 0; font-size: 14px; color: #0f172a; }
       .insights-section ul { margin: 0; padding-left: 20px; font-size: 13px; line-height: 1.6; color: #475569; }
       .footer { background-color: #f8fafc; padding: 20px; text-align: center; font-size: 11px; color: #94a3b8; border-top: 1px solid #e2e8f0; }

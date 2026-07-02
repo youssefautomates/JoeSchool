@@ -54,13 +54,13 @@ export function InfiniteTestimonials() {
             key={`${testimonial.id}-${idx}`} 
             className="w-[300px] md:w-[400px] shrink-0 px-4"
           >
-            <div className="bg-zinc-50 border border-zinc-200 rounded-2xl p-6 h-full flex flex-col hover:bg-white hover:border-rose-500/50 transition-all shadow-sm hover:shadow-md">
+            <div className="bg-zinc-50 border border-zinc-200 rounded-2xl p-6 h-full flex flex-col hover:bg-white hover:border-zinc-200/60 transition-all shadow-sm hover:shadow-md">
               <div className="flex items-center gap-1 mb-4 text-emerald-500">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <Star key={star} className="w-4 h-4 fill-emerald-500" />
                 ))}
               </div>
-              <p className="text-zinc-600 font-cairo leading-relaxed flex-1 mb-6 text-sm md:text-base">
+              <p className="text-zinc-600 font-sans leading-relaxed flex-1 mb-6 text-sm md:text-base">
                 "{testimonial.content}"
               </p>
               <div className="flex items-center gap-4">
@@ -74,8 +74,8 @@ export function InfiniteTestimonials() {
                   />
                 </div>
                 <div>
-                  <h4 className="font-alexandria font-bold text-zinc-900 text-sm">{testimonial.name}</h4>
-                  <p className="font-cairo text-zinc-500 text-xs">{testimonial.role}</p>
+                  <h4 className="font-sans font-bold text-zinc-900 text-sm">{testimonial.name}</h4>
+                  <p className="font-alexandria text-zinc-500 text-xs">{testimonial.role}</p>
                 </div>
               </div>
             </div>

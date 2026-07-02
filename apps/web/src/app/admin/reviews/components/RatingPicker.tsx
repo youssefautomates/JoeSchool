@@ -12,7 +12,7 @@ export function RatingPicker({ rating, onChange }: RatingPickerProps) {
 
   return (
     <div 
-      className="flex items-center gap-1 bg-white/5 p-3 rounded-xl border border-white/10 w-fit select-none"
+      className="flex items-center gap-1 bg-zinc-100/40 p-3 rounded-2xl border border-zinc-200 w-fit select-none"
       dir="ltr"
       onMouseLeave={() => setHoverRating(null)}
     >
@@ -66,7 +66,7 @@ export function RatingPicker({ rating, onChange }: RatingPickerProps) {
         })}
       </div>
       
-      <span className="text-white text-xs font-bold font-mono ml-3 bg-white/10 px-2 py-0.5 rounded-md min-w-[28px] text-center">
+      <span className="text-zinc-900 text-xs font-bold font-mono ml-3 bg-zinc-100/80 px-2 py-0.5 rounded-xl min-w-[28px] text-center">
         {activeRating.toFixed(1)}
       </span>
     </div>

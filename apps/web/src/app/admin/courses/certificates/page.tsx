@@ -35,36 +35,36 @@ export default function AdminCertificatesPage() {
   return (
     <div className="space-y-8 text-left font-sans animate-in fade-in slide-in-from-bottom-4 duration-700" dir="ltr">
       {/* Page Header */}
-      <div className="flex items-center justify-between border-b border-white/5 pb-6">
+      <div className="flex items-center justify-between border-b border-zinc-200/60 pb-6">
         <div>
-          <h1 className="text-3xl font-extrabold text-white">Issued Certificates Ledger</h1>
-          <p className="text-zinc-400 text-sm mt-1">Browse and audit academic completion certificates issued to students upon finishing 100% of their curriculum.</p>
+          <h1 className="text-3xl font-extrabold text-zinc-900">Issued Certificates Ledger</h1>
+          <p className="text-zinc-500 text-sm mt-1">Browse and audit academic completion certificates issued to students upon finishing 100% of their curriculum.</p>
         </div>
-        <div className="w-12 h-12 rounded-xl bg-emerald-600/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+        <div className="w-12 h-12 rounded-2xl bg-emerald-600/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
           <Award className="w-6 h-6" />
         </div>
       </div>
 
       {/* Search Bar */}
-      <div className="flex bg-[#0a0a0f] border border-white/5 p-4 rounded-2xl">
+      <div className="flex bg-slate-50 border border-zinc-200/60 p-4 rounded-2xl">
         <div className="relative flex-1 group">
-          <Search className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-rose-500 transition-colors" />
+          <Search className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-yellow-500 transition-colors" />
           <input 
             type="text" 
             placeholder="Search by student name, course, or unique Verification ID..." 
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full bg-white/5 border border-white/5 rounded-xl py-2.5 pl-11 pr-4 text-xs font-sans focus:outline-none focus:border-rose-500/50 transition-all text-white"
+            className="w-full bg-zinc-100/40 border border-zinc-200/60 rounded-2xl py-2.5 pl-11 pr-4 text-xs font-sans focus:outline-none focus:border-zinc-200/60 transition-all text-zinc-900"
           />
         </div>
       </div>
 
       {/* Certificates Data Grid */}
-      <div className="bg-[#0a0a0f] border border-white/5 rounded-3xl overflow-hidden shadow-2xl">
+      <div className="bg-slate-50 border border-zinc-200/60 rounded-3xl overflow-hidden shadow-sm border border-zinc-200/60">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-white/[0.02] border-b border-white/5 text-[11px] font-black text-zinc-400 uppercase tracking-widest font-sans">
+              <tr className="bg-zinc-50/70 border-b border-zinc-200/60 text-[11px] font-black text-zinc-500 uppercase tracking-widest font-sans">
                 <th className="p-5">Verification ID</th>
                 <th className="p-5">Student Name</th>
                 <th className="p-5">Course Path</th>
@@ -75,9 +75,9 @@ export default function AdminCertificatesPage() {
             <tbody>
               {loading ? (
                 Array.from({ length: 2 }).map((_, i) => (
-                  <tr key={i} className="animate-pulse border-b border-white/5">
+                  <tr key={i} className="animate-pulse border-b border-zinc-200/60">
                     <td colSpan={5} className="p-8">
-                      <div className="h-6 bg-white/5 rounded-lg w-full" />
+                      <div className="h-6 bg-zinc-100/40 rounded-2xl w-full" />
                     </td>
                   </tr>
                 ))
@@ -92,25 +92,25 @@ export default function AdminCertificatesPage() {
                 filteredCerts.map((cert) => (
                   <tr 
                     key={cert.id} 
-                    className="border-b border-white/5 hover:bg-white/[0.01] transition-all font-sans text-xs"
+                    className="border-b border-zinc-200/60 hover:bg-zinc-50/40 transition-all font-sans text-xs"
                   >
                     {/* Verification ID */}
-                    <td className="p-5 font-mono text-rose-400 font-black text-sm tracking-wide">
+                    <td className="p-5 font-mono text-yellow-500 font-black text-sm tracking-wide">
                       {cert.verification_id}
                     </td>
 
                     {/* Student Name */}
-                    <td className="p-5 font-bold text-white text-sm">
+                    <td className="p-5 font-bold text-zinc-900 text-sm">
                       {cert.student_name}
                     </td>
 
                     {/* Course */}
-                    <td className="p-5 text-zinc-300 font-medium">
+                    <td className="p-5 text-zinc-700 font-medium">
                       {cert.course_name}
                     </td>
 
                     {/* Issue Date */}
-                    <td className="p-5 text-zinc-400 font-mono">
+                    <td className="p-5 text-zinc-500 font-mono">
                       {cert.issued_at}
                     </td>
 

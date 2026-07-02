@@ -113,8 +113,8 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ less
   .icon {
     width: 80px;
     height: 80px;
-    background: rgba(214,0,75,0.1);
-    border: 2px solid rgba(214,0,75,0.3);
+    background: rgba(29, 78, 216,0.1);
+    border: 2px solid rgba(29, 78, 216,0.3);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -128,11 +128,11 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ less
     display: inline-block;
     margin-top: 1rem;
     padding: 0.35rem 1rem;
-    background: rgba(214,0,75,0.1);
-    border: 1px solid rgba(214,0,75,0.3);
+    background: rgba(29, 78, 216,0.1);
+    border: 1px solid rgba(29, 78, 216,0.3);
     border-radius: 999px;
     font-size: 0.75rem;
-    color: #D6004B;
+    color: #1D4ED8;
     font-weight: 700;
   }
 </style>

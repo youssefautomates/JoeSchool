@@ -85,13 +85,13 @@ export function ReviewCard({ review, productName, onEdit, onDelete, onStatusChan
   const getSourceBadge = (source?: string) => {
     switch (source) {
       case "manual_admin":
-        return <span className="bg-zinc-800 text-zinc-400 border border-zinc-700/50 px-2 py-0.5 rounded-full text-[8px] font-bold font-sans">Admin Console</span>;
+        return <span className="bg-zinc-800 text-zinc-500 border border-zinc-700/50 px-2 py-0.5 rounded-full text-[8px] font-bold font-sans">Admin Console</span>;
       case "imported":
         return <span className="bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2 py-0.5 rounded-full text-[8px] font-bold font-sans">Imported</span>;
       case "customer_submitted":
         return <span className="bg-purple-500/10 text-purple-400 border border-purple-500/20 px-2 py-0.5 rounded-full text-[8px] font-bold font-sans">Customer Submitted</span>;
       default:
-        return <span className="bg-zinc-800 text-zinc-400 border border-zinc-700/50 px-2 py-0.5 rounded-full text-[8px] font-bold font-sans">Admin Console</span>;
+        return <span className="bg-zinc-800 text-zinc-500 border border-zinc-700/50 px-2 py-0.5 rounded-full text-[8px] font-bold font-sans">Admin Console</span>;
     }
   };
 
@@ -112,14 +112,14 @@ export function ReviewCard({ review, productName, onEdit, onDelete, onStatusChan
 
   return (
     <div 
-      className={`bg-[#09090e] p-6 rounded-3xl border transition-all duration-300 flex flex-col justify-between group relative overflow-hidden font-sans ${
+      className={`bg-slate-50 p-6 rounded-3xl border transition-all duration-300 flex flex-col justify-between group relative overflow-hidden font-sans ${
         review.status === "hidden"
           ? "border-red-500/20 opacity-55 hover:opacity-100"
           : review.status === "pending"
           ? "border-amber-500/20 shadow-md"
           : review.status === "archived"
-          ? "border-zinc-800 opacity-40"
-          : "border-white/5 hover:border-rose-500/30"
+          ? "border-zinc-200/60 opacity-40"
+          : "border-zinc-200/60 hover:border-zinc-200/60"
       }`}
       dir="ltr"
     >
@@ -131,26 +131,26 @@ export function ReviewCard({ review, productName, onEdit, onDelete, onStatusChan
               {review.avatarUrl ? (
                 <img 
                   src={review.avatarUrl} 
-                  className="w-10 h-10 rounded-full object-cover border border-white/10 shadow-inner" 
+                  className="w-10 h-10 rounded-full object-cover border border-zinc-200 shadow-inner" 
                   alt={displayName} 
                 />
               ) : (
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-rose-500/20 to-orange-500/10 flex items-center justify-center border border-white/5 text-rose-400 font-sans font-bold text-sm shadow-inner">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-brand-500/20 to-orange-500/10 flex items-center justify-center border border-zinc-200/60 text-yellow-500 font-sans font-bold text-sm shadow-inner">
                   {fallbackLetter}
                 </div>
               )}
             </div>
             <div className="min-w-0 text-left">
-              <h4 className="text-white font-bold text-xs md:text-sm font-sans truncate">
+              <h4 className="text-zinc-900 font-bold text-xs md:text-sm font-sans truncate">
                 {displayName}
               </h4>
               <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
                 {renderedStarsBlock}
-                <span className="text-[9px] font-mono text-zinc-500 bg-white/[0.03] px-1 rounded border border-white/5">
+                <span className="text-[9px] font-mono text-zinc-500 bg-zinc-100/30 px-1 rounded border border-zinc-200/60">
                   {review.rating.toFixed(1)}
                 </span>
                 {review.isFeatured && (
-                  <div className="flex items-center gap-0.5 text-rose-500 ml-1.5 shrink-0">
+                  <div className="flex items-center gap-0.5 text-yellow-500 ml-1.5 shrink-0">
                     <Sparkles className="w-3 h-3 fill-current" />
                     <span className="text-[8px] font-bold font-sans">Featured ({review.featuredPosition || 0})</span>
                   </div>
@@ -171,7 +171,7 @@ export function ReviewCard({ review, productName, onEdit, onDelete, onStatusChan
           {isLongText && (
             <button
               onClick={() => setIsExpanded(!isExpanded)}
-              className="text-[#D6004B] hover:text-[#ff0059] text-[10px] font-bold font-sans underline cursor-pointer self-start animate-pulse"
+              className="text-[#1D4ED8] hover:text-[#3B82F6] text-[10px] font-bold font-sans underline cursor-pointer self-start animate-pulse"
             >
               {isExpanded ? "Show Less" : "Show More"}
             </button>
@@ -179,14 +179,14 @@ export function ReviewCard({ review, productName, onEdit, onDelete, onStatusChan
         </div>
       </div>
 
-      <div className="pt-4 mt-6 border-t border-white/5 space-y-4 relative z-10">
+      <div className="pt-4 mt-6 border-t border-zinc-200/60 space-y-4 relative z-10">
         {/* Product/Course pill badge */}
         {productName && (
-          <div className="flex items-center gap-1.5 text-zinc-500 bg-white/[0.02] border border-white/5 px-2.5 py-1 rounded-full text-[10px] font-bold font-sans w-fit max-w-full" title={productName}>
+          <div className="flex items-center gap-1.5 text-zinc-500 bg-zinc-50/70 border border-zinc-200/60 px-2.5 py-1 rounded-full text-[10px] font-bold font-sans w-fit max-w-full" title={productName}>
             {review.sourceType === "course" ? (
-              <BookOpen className="w-3 h-3 text-[#D6004B] shrink-0" />
+              <BookOpen className="w-3 h-3 text-[#1D4ED8] shrink-0" />
             ) : (
-              <ShoppingBag className="w-3 h-3 text-[#D6004B] shrink-0" />
+              <ShoppingBag className="w-3 h-3 text-[#1D4ED8] shrink-0" />
             )}
             <span className="truncate max-w-[220px]">{productName}</span>
           </div>
@@ -197,7 +197,7 @@ export function ReviewCard({ review, productName, onEdit, onDelete, onStatusChan
           {review.status !== "visible" && review.status !== "archived" && (
             <button
               onClick={() => onStatusChange(review, "visible")}
-              className="flex-1 py-2 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 rounded-lg text-[10px] font-bold font-sans transition-colors flex items-center justify-center gap-1 cursor-pointer"
+              className="flex-1 py-2 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 rounded-2xl text-[10px] font-bold font-sans transition-colors flex items-center justify-center gap-1 cursor-pointer"
               title="Publish Review"
             >
               <Eye className="w-3.5 h-3.5" />
@@ -207,7 +207,7 @@ export function ReviewCard({ review, productName, onEdit, onDelete, onStatusChan
           {review.status !== "hidden" && review.status !== "archived" && (
             <button
               onClick={() => onStatusChange(review, "hidden")}
-              className="flex-1 py-2 bg-zinc-800 text-zinc-400 hover:bg-red-500/15 hover:text-red-400 rounded-lg text-[10px] font-bold font-sans transition-colors flex items-center justify-center gap-1 cursor-pointer"
+              className="flex-1 py-2 bg-zinc-800 text-zinc-500 hover:bg-red-500/15 hover:text-red-400 rounded-2xl text-[10px] font-bold font-sans transition-colors flex items-center justify-center gap-1 cursor-pointer"
               title="Hide Review"
             >
               <EyeOff className="w-3.5 h-3.5" />
@@ -218,7 +218,7 @@ export function ReviewCard({ review, productName, onEdit, onDelete, onStatusChan
           {review.status === "archived" && (
             <button
               onClick={() => onStatusChange(review, "pending")}
-              className="flex-1 py-2 bg-[#D6004B]/10 text-rose-500 hover:bg-[#D6004B]/20 rounded-lg text-[10px] font-bold font-sans transition-colors flex items-center justify-center gap-1 cursor-pointer"
+              className="flex-1 py-2 bg-[#1D4ED8]/10 text-yellow-500 hover:bg-[#1D4ED8]/20 rounded-2xl text-[10px] font-bold font-sans transition-colors flex items-center justify-center gap-1 cursor-pointer"
               title="Restore from Archive"
             >
               <span>Restore</span>
@@ -228,7 +228,7 @@ export function ReviewCard({ review, productName, onEdit, onDelete, onStatusChan
           {/* Edit / Delete Icon triggers */}
           <button
             onClick={() => onEdit(review)}
-            className="p-2 rounded-lg bg-white/5 border border-white/5 text-zinc-400 hover:text-white hover:border-white/10 transition-all cursor-pointer"
+            className="p-2 rounded-2xl bg-zinc-100/40 border border-zinc-200/60 text-zinc-500 hover:text-zinc-900 hover:border-zinc-200 transition-all cursor-pointer"
             title="Edit Review Details"
           >
             <Edit3 className="w-3.5 h-3.5" />
@@ -244,7 +244,7 @@ export function ReviewCard({ review, productName, onEdit, onDelete, onStatusChan
                 onDelete(review.id, reason);
               }
             }}
-            className="p-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors cursor-pointer"
+            className="p-2 rounded-2xl bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors cursor-pointer"
             title={review.status === "archived" ? "Delete Permanently" : "Archive Review"}
           >
             <Trash2 className="w-3.5 h-3.5" />
@@ -253,8 +253,8 @@ export function ReviewCard({ review, productName, onEdit, onDelete, onStatusChan
       </div>
 
       {/* Subtle Ambient Hover Glow & Testimonial Quote Mark */}
-      <div className="absolute top-0 right-0 w-32 h-32 bg-[#D6004B]/5 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-      <div className="absolute top-4 left-4 text-white/[0.02] font-serif text-6xl pointer-events-none">
+      <div className="absolute top-0 right-0 w-32 h-32 bg-[#1D4ED8]/5 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+      <div className="absolute top-4 left-4 text-zinc-900/[0.02] font-serif text-6xl pointer-events-none">
         ”
       </div>
     </div>

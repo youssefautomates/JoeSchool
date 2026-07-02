@@ -213,12 +213,12 @@ export default function AIBusinessAssistant() {
 
   // Quick Action AI Tools
   const aiTools = [
-    { label: "Analyze Platform", prompt: "Conduct a comprehensive and deep audit of the entire store based on the active database parameters. Extract conversion insights, acquisition channels performance, and structural improvements.", icon: Brain, color: "from-[#D6004B] to-[#ff0059]" },
+    { label: "Analyze Platform", prompt: "Conduct a comprehensive and deep audit of the entire store based on the active database parameters. Extract conversion insights, acquisition channels performance, and structural improvements.", icon: Brain, color: "from-[#1D4ED8] to-[#3B82F6]" },
     { label: "Max Profit Strategy", prompt: "Identify the absolute best instant profit opportunities and cashflow triggers based on my active digital products, enrollment rates, and completed orders. Provide specific bundle proposals.", icon: Zap, color: "from-amber-500 to-orange-600" },
     { label: "LMS Academy Review", prompt: "Review my academy courses, student enrollment metrics, and lesson completion trends. Propose actionable retention strategies to increase student graduation rates.", icon: BookOpen, color: "from-blue-500 to-indigo-600" },
     { label: "Audit Digital Files", prompt: "Evaluate the price points, sales counts, and failure rates of all digital products in my store. Recommend pricing adjustments or value-addons to scale sales velocity.", icon: Package, color: "from-emerald-500 to-teal-600" },
     { label: "Design Funnel", prompt: "Design a high-converting marketing funnel that combines my digital files and academic courses. Structure a concrete bump offer and upsell logic to maximize AOV.", icon: Target, color: "from-purple-500 to-pink-600" },
-    { label: "Check Drop-offs", prompt: "Review checkout abandonment ratios, failed payment intentions, and student drop-off hotspots. Detail clear technical and performance marketing remediations.", icon: AlertTriangle, color: "from-rose-500 to-red-600" },
+    { label: "Check Drop-offs", prompt: "Review checkout abandonment ratios, failed payment intentions, and student drop-off hotspots. Detail clear technical and performance marketing remediations.", icon: AlertTriangle, color: "from-brand-500 to-red-600" },
     { label: "Propose Promo Campaign", prompt: "Draft a complete 7-day marketing campaign (incorporating TikTok/Facebook ads structure, email sequences, and discount codes) to rapidly accelerate store volume.", icon: Flame, color: "from-orange-500 to-red-500" },
     { label: "Student Engagement", prompt: "Examine student review scores, watch durations, and study streaks. Recommend enhancements to the student learn page to boost course completion.", icon: Award, color: "from-cyan-500 to-sky-600" }
   ];
@@ -241,20 +241,20 @@ export default function AIBusinessAssistant() {
       
       // 1. Headers formatting
       if (trimmed.startsWith("###")) {
-        return <h4 key={i} className="text-sm font-sans font-bold text-rose-400 mt-4 mb-2">{trimmed.replace("###", "")}</h4>;
+        return <h4 key={i} className="text-sm font-sans font-bold text-yellow-500 mt-4 mb-2">{trimmed.replace("###", "")}</h4>;
       }
       if (trimmed.startsWith("##")) {
-        return <h3 key={i} className="text-base font-sans font-black text-white mt-5 mb-2.5 pb-1 border-b border-white/5">{trimmed.replace("##", "")}</h3>;
+        return <h3 key={i} className="text-base font-sans font-black text-zinc-900 mt-5 mb-2.5 pb-1 border-b border-zinc-200/60">{trimmed.replace("##", "")}</h3>;
       }
       if (trimmed.startsWith("#")) {
-        return <h2 key={i} className="text-lg font-sans font-black text-[#D6004B] mt-6 mb-3">{trimmed.replace("#", "")}</h2>;
+        return <h2 key={i} className="text-lg font-sans font-black text-[#1D4ED8] mt-6 mb-3">{trimmed.replace("#", "")}</h2>;
       }
 
       // 2. Unordered lists formatting
       if (trimmed.startsWith("-") || trimmed.startsWith("*")) {
         const bulletText = trimmed.slice(1).trim();
         return (
-          <ul key={i} className="list-disc list-inside text-zinc-300 text-xs py-0.5 pl-4 space-y-1">
+          <ul key={i} className="list-disc list-inside text-zinc-700 text-xs py-0.5 pl-4 space-y-1">
             <li>{bulletText}</li>
           </ul>
         );
@@ -263,7 +263,7 @@ export default function AIBusinessAssistant() {
       // 3. Numbers/Ordered lists formatting
       if (/^\d+\./.test(trimmed)) {
         return (
-          <ol key={i} className="list-decimal list-inside text-zinc-300 text-xs py-0.5 pl-4 space-y-1">
+          <ol key={i} className="list-decimal list-inside text-zinc-700 text-xs py-0.5 pl-4 space-y-1">
             <li>{trimmed.replace(/^\d+\./, "").trim()}</li>
           </ol>
         );
@@ -274,8 +274,8 @@ export default function AIBusinessAssistant() {
       if (boldRegex.test(line)) {
         const parts = line.split(boldRegex);
         return (
-          <p key={i} className="text-zinc-300 text-xs leading-relaxed my-1.5">
-            {parts.map((part, index) => index % 2 === 1 ? <strong key={index} className="text-white font-bold">{part}</strong> : part)}
+          <p key={i} className="text-zinc-700 text-xs leading-relaxed my-1.5">
+            {parts.map((part, index) => index % 2 === 1 ? <strong key={index} className="text-zinc-900 font-bold">{part}</strong> : part)}
           </p>
         );
       }
@@ -287,12 +287,12 @@ export default function AIBusinessAssistant() {
 
       // 6. Normal line rendering
       if (!trimmed) return <div key={i} className="h-2" />;
-      return <p key={i} className="text-zinc-300 text-xs leading-relaxed my-1.5">{line}</p>;
+      return <p key={i} className="text-zinc-700 text-xs leading-relaxed my-1.5">{line}</p>;
     });
   }
 
   return (
-    <div className="flex flex-col lg:flex-row h-[calc(100vh-140px)] min-h-[550px] bg-[#050505] rounded-3xl border border-white/5 overflow-hidden shadow-2xl relative font-sans text-left" dir="ltr">
+    <div className="flex flex-col lg:flex-row h-[calc(100vh-140px)] min-h-[550px] bg-white rounded-3xl border border-zinc-200/60 overflow-hidden shadow-sm border border-zinc-200/60 relative font-sans text-left" dir="ltr">
       
       {/* 🔴 Sidebar Panel - AI Conversations History */}
       <AnimatePresence>
@@ -302,18 +302,18 @@ export default function AIBusinessAssistant() {
             animate={{ width: 320, opacity: 1 }}
             exit={{ width: 0, opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="h-full bg-[#08080c] border-r border-white/5 flex flex-col shrink-0 relative z-30"
+            className="h-full bg-[#08080c] border-r border-zinc-200/60 flex flex-col shrink-0 relative z-30"
           >
             {/* Sidebar Header */}
-            <div className="p-5 border-b border-white/5 flex items-center justify-between">
+            <div className="p-5 border-b border-zinc-200/60 flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <Brain className="w-5 h-5 text-[#D6004B]" />
-                <h3 className="text-xs font-black text-white uppercase tracking-wider">Advisory Sessions</h3>
+                <Brain className="w-5 h-5 text-[#1D4ED8]" />
+                <h3 className="text-xs font-black text-zinc-900 uppercase tracking-wider">Advisory Sessions</h3>
               </div>
               
               <button
                 onClick={handleStartNewChat}
-                className="p-2 bg-[#D6004B]/10 hover:bg-[#D6004B] text-[#D6004B] hover:text-white rounded-xl transition-all cursor-pointer border border-transparent"
+                className="p-2 bg-[#1D4ED8]/10 hover:bg-[#1D4ED8] text-[#1D4ED8] hover:text-white rounded-2xl transition-all cursor-pointer border border-transparent"
                 title="Start New Session"
               >
                 <Plus className="w-4 h-4" />
@@ -344,18 +344,18 @@ export default function AIBusinessAssistant() {
                       className={cn(
                         "p-3.5 rounded-2xl border transition-all cursor-pointer group flex items-center justify-between gap-3 relative overflow-hidden",
                         isActive 
-                          ? "bg-[#D6004B]/10 border-[#D6004B]/30 text-white" 
-                          : "bg-white/[0.01] border-white/5 text-zinc-400 hover:text-white hover:bg-white/[0.03] hover:border-white/10"
+                          ? "bg-[#1D4ED8]/10 border-[#1D4ED8]/30 text-white" 
+                          : "bg-zinc-50/40 border-zinc-200/60 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100/30 hover:border-zinc-200"
                       )}
                     >
                       <div className="flex items-center gap-2.5 min-w-0">
-                        <MessageSquare className={cn("w-4 h-4 shrink-0", isActive ? "text-[#D6004B]" : "text-zinc-500")} />
+                        <MessageSquare className={cn("w-4 h-4 shrink-0", isActive ? "text-[#1D4ED8]" : "text-zinc-500")} />
                         <p className="text-xs font-bold truncate pl-1 text-left">{conv.title}</p>
                       </div>
                       
                       <button
                         onClick={(e) => handleDeleteChat(conv.id, e)}
-                        className="p-1.5 opacity-0 group-hover:opacity-100 hover:bg-red-500/10 text-zinc-500 hover:text-red-400 rounded-lg transition-all"
+                        className="p-1.5 opacity-0 group-hover:opacity-100 hover:bg-red-500/10 text-zinc-500 hover:text-red-400 rounded-2xl transition-all"
                         title="Delete Session"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
@@ -373,20 +373,20 @@ export default function AIBusinessAssistant() {
       <div className="flex-1 flex flex-col h-full bg-[#060609] relative min-w-0">
         
         {/* Chat Toolbar Panel */}
-        <header className="p-4 bg-[#09090d]/60 border-b border-white/5 flex items-center justify-between gap-4 z-20">
+        <header className="p-4 bg-[#09090d]/60 border-b border-zinc-200/60 flex items-center justify-between gap-4 z-20">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-2 bg-white/5 hover:bg-white/10 border border-white/5 text-zinc-400 hover:text-white rounded-xl transition-all cursor-pointer"
+              className="p-2 bg-zinc-100/40 hover:bg-zinc-100/80 border border-zinc-200/60 text-zinc-500 hover:text-zinc-900 rounded-2xl transition-all cursor-pointer"
               title="Toggle Sidebar"
             >
               <ChevronLeft className={cn("w-4 h-4 transition-transform", sidebarOpen ? "" : "rotate-180")} />
             </button>
 
             <div>
-              <h2 className="text-xs md:text-sm font-black text-white flex items-center gap-1.5 uppercase tracking-wide">
+              <h2 className="text-xs md:text-sm font-black text-zinc-900 flex items-center gap-1.5 uppercase tracking-wide">
                 Smart Growth & Advisory AI Assistant
-                <Sparkles className="w-4 h-4 text-[#D6004B]" />
+                <Sparkles className="w-4 h-4 text-[#1D4ED8]" />
               </h2>
               <p className="text-[10px] text-zinc-500 font-bold mt-0.5">Intelligent advisory officer analyzing database metrics, sales figures, and student logs to suggest marketing options.</p>
             </div>
@@ -407,15 +407,15 @@ export default function AIBusinessAssistant() {
             <div className="max-w-4xl mx-auto space-y-8 py-4">
               
               <div className="text-center space-y-3">
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-[#D6004B] to-purple-600 flex items-center justify-center mx-auto shadow-lg shadow-[#D6004B]/20 relative group">
-                  <Brain className="w-8 h-8 text-white group-hover:scale-110 transition-transform duration-300" />
-                  <div className="absolute inset-0 bg-[#D6004B] rounded-2xl blur-xl opacity-30 -z-10 group-hover:opacity-50 transition-opacity" />
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-[#1D4ED8] to-purple-600 flex items-center justify-center mx-auto shadow-sm border border-zinc-200/60 shadow-[#1D4ED8]/20 relative group">
+                  <Brain className="w-8 h-8 text-zinc-900 group-hover:scale-110 transition-transform duration-300" />
+                  <div className="absolute inset-0 bg-[#1D4ED8] rounded-2xl blur-xl opacity-30 -z-10 group-hover:opacity-50 transition-opacity" />
                 </div>
                 
-                <h1 className="text-xl md:text-2xl font-black text-white tracking-tight">
+                <h1 className="text-xl md:text-2xl font-black text-zinc-900 tracking-tight">
                   Welcome to the Smart Growth Advisory Hub
                 </h1>
-                <p className="text-xs text-zinc-400 max-w-lg mx-auto leading-relaxed font-semibold">
+                <p className="text-xs text-zinc-500 max-w-lg mx-auto leading-relaxed font-semibold">
                   I am your performance marketing and finance advisor, directly connected to your store sales, courses, and students. Trigger any analysis tool below or write to me directly!
                 </p>
               </div>
@@ -429,14 +429,14 @@ export default function AIBusinessAssistant() {
                       key={tool.label}
                       onClick={() => handleSendMessage(tool.prompt)}
                       disabled={isLoading}
-                      className="p-4 rounded-3xl bg-[#09090d]/80 border border-white/5 hover:border-[#D6004B]/40 transition-all text-left relative overflow-hidden group shadow-md hover:shadow-xl hover:shadow-[#D6004B]/5 cursor-pointer text-xs font-bold active:scale-95 border border-transparent"
+                      className="p-4 rounded-3xl bg-[#09090d]/80 border border-zinc-200/60 hover:border-[#1D4ED8]/40 transition-all text-left relative overflow-hidden group shadow-md hover:shadow-sm border border-zinc-200/60 hover:shadow-[#1D4ED8]/5 cursor-pointer text-xs font-bold active:scale-95 border border-transparent"
                     >
-                      <div className="absolute top-0 right-0 w-16 h-16 rounded-full blur-2xl opacity-10 bg-gradient-to-br from-[#D6004B] to-purple-600 pointer-events-none" />
-                      <div className="w-8 h-8 rounded-xl flex items-center justify-center bg-white/5 mb-3 group-hover:bg-[#D6004B]/10 transition-colors">
-                        <tool.icon className="w-4 h-4 text-zinc-400 group-hover:text-[#D6004B] transition-colors" />
+                      <div className="absolute top-0 right-0 w-16 h-16 rounded-full blur-2xl opacity-10 bg-gradient-to-br from-[#1D4ED8] to-purple-600 pointer-events-none" />
+                      <div className="w-8 h-8 rounded-2xl flex items-center justify-center bg-zinc-100/40 mb-3 group-hover:bg-[#1D4ED8]/10 transition-colors">
+                        <tool.icon className="w-4 h-4 text-zinc-500 group-hover:text-[#1D4ED8] transition-colors" />
                       </div>
-                      <p className="text-white text-xs font-bold mb-1 leading-snug">{tool.label}</p>
-                      <span className="text-[9px] text-zinc-500 font-semibold group-hover:text-zinc-400 transition-colors">Run Tool ←</span>
+                      <p className="text-zinc-900 text-xs font-bold mb-1 leading-snug">{tool.label}</p>
+                      <span className="text-[9px] text-zinc-500 font-semibold group-hover:text-zinc-500 transition-colors">Run Tool ←</span>
                     </button>
                   ))}
                 </div>
@@ -450,7 +450,7 @@ export default function AIBusinessAssistant() {
                     <button
                       key={preset}
                       onClick={() => setInputMessage(preset)}
-                      className="p-3.5 bg-white/[0.01] hover:bg-white/[0.03] border border-white/5 hover:border-white/10 rounded-2xl text-left text-xs text-zinc-300 hover:text-white transition-all cursor-pointer font-bold leading-relaxed"
+                      className="p-3.5 bg-zinc-50/40 hover:bg-zinc-100/30 border border-zinc-200/60 hover:border-zinc-200 rounded-2xl text-left text-xs text-zinc-700 hover:text-zinc-900 transition-all cursor-pointer font-bold leading-relaxed"
                     >
                       {preset}
                     </button>
@@ -472,16 +472,16 @@ export default function AIBusinessAssistant() {
                     className={cn(
                       "flex gap-4 p-5 rounded-3xl border relative text-left",
                       isUser 
-                        ? "bg-white/[0.01] border-white/5 flex-row" 
-                        : "bg-[#09090d]/80 border-white/5 flex-row"
+                        ? "bg-zinc-50/40 border-zinc-200/60 flex-row" 
+                        : "bg-[#09090d]/80 border-zinc-200/60 flex-row"
                     )}
                   >
                     {/* User / Bot Avatar Icon */}
                     <div className={cn(
-                      "w-8 h-8 rounded-xl flex items-center justify-center shrink-0 shadow-lg",
+                      "w-8 h-8 rounded-2xl flex items-center justify-center shrink-0 shadow-sm border border-zinc-200/60",
                       isUser 
-                        ? "bg-zinc-800 text-zinc-300" 
-                        : "bg-gradient-to-tr from-[#D6004B] to-purple-600 text-white"
+                        ? "bg-zinc-800 text-zinc-700" 
+                        : "bg-gradient-to-tr from-[#1D4ED8] to-purple-600 text-zinc-900"
                     )}>
                       {isUser ? <User className="w-4 h-4" /> : <Brain className="w-4 h-4" />}
                     </div>
@@ -492,7 +492,7 @@ export default function AIBusinessAssistant() {
                       </p>
                       
                       {isUser ? (
-                        <p className="text-white text-xs font-bold leading-relaxed whitespace-pre-wrap">{msg.content}</p>
+                        <p className="text-zinc-900 text-xs font-bold leading-relaxed whitespace-pre-wrap">{msg.content}</p>
                       ) : (
                         <div className="space-y-1 font-sans">
                           {formatAIText(msg.content)}
@@ -508,15 +508,15 @@ export default function AIBusinessAssistant() {
           {/* Render Active Streaming AI response */}
           {streamingText && (
             <div className="max-w-4xl mx-auto space-y-6">
-              <div className="flex gap-4 p-5 rounded-3xl border bg-[#09090d]/80 border-white/5 text-left flex-row">
-                <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 shadow-lg bg-gradient-to-tr from-[#D6004B] to-purple-600 text-white">
+              <div className="flex gap-4 p-5 rounded-3xl border bg-[#09090d]/80 border-zinc-200/60 text-left flex-row">
+                <div className="w-8 h-8 rounded-2xl flex items-center justify-center shrink-0 shadow-sm border border-zinc-200/60 bg-gradient-to-tr from-[#1D4ED8] to-purple-600 text-zinc-900">
                   <Brain className="w-4 h-4 animate-pulse" />
                 </div>
                 
                 <div className="space-y-2 flex-1 min-w-0">
                   <p className="text-[10px] font-black tracking-widest uppercase text-zinc-500 flex items-center gap-1.5">
                     Thinking & generating...
-                    <Loader2 className="w-3 h-3 text-[#D6004B] animate-spin" />
+                    <Loader2 className="w-3 h-3 text-[#1D4ED8] animate-spin" />
                   </p>
                   
                   <div className="space-y-1 font-sans">
@@ -530,8 +530,8 @@ export default function AIBusinessAssistant() {
           {/* Rendering AI Typing status */}
           {isTyping && !streamingText && (
             <div className="max-w-4xl mx-auto space-y-6">
-              <div className="flex gap-4 p-5 rounded-3xl border bg-[#09090d]/80 border-white/5 text-left flex-row">
-                <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 shadow-lg bg-gradient-to-tr from-[#D6004B] to-purple-600 text-white">
+              <div className="flex gap-4 p-5 rounded-3xl border bg-[#09090d]/80 border-zinc-200/60 text-left flex-row">
+                <div className="w-8 h-8 rounded-2xl flex items-center justify-center shrink-0 shadow-sm border border-zinc-200/60 bg-gradient-to-tr from-[#1D4ED8] to-purple-600 text-zinc-900">
                   <Brain className="w-4 h-4 animate-bounce" />
                 </div>
                 
@@ -539,9 +539,9 @@ export default function AIBusinessAssistant() {
                   <p className="text-[10px] font-black tracking-widest uppercase text-zinc-500">Connecting to database and compiling telemetry...</p>
                   
                   <div className="flex items-center gap-1.5 py-2">
-                    <span className="w-2 h-2 rounded-full bg-[#D6004B] animate-bounce" />
-                    <span className="w-2 h-2 rounded-full bg-[#D6004B]/60 animate-bounce [animation-delay:0.2s]" />
-                    <span className="w-2 h-2 rounded-full bg-[#D6004B]/30 animate-bounce [animation-delay:0.4s]" />
+                    <span className="w-2 h-2 rounded-full bg-[#1D4ED8] animate-bounce" />
+                    <span className="w-2 h-2 rounded-full bg-[#1D4ED8]/60 animate-bounce [animation-delay:0.2s]" />
+                    <span className="w-2 h-2 rounded-full bg-[#1D4ED8]/30 animate-bounce [animation-delay:0.4s]" />
                   </div>
                 </div>
               </div>
@@ -552,8 +552,8 @@ export default function AIBusinessAssistant() {
         </div>
 
         {/* Interactive Chat Input Area */}
-        <footer className="p-4 bg-[#09090d]/60 border-t border-white/5 z-20">
-          <div className="max-w-4xl mx-auto flex items-center gap-3 bg-white/5 border border-white/5 rounded-2xl p-1.5 focus-within:border-[#D6004B]/40 focus-within:ring-1 focus-within:ring-[#D6004B]/20 transition-all">
+        <footer className="p-4 bg-[#09090d]/60 border-t border-zinc-200/60 z-20">
+          <div className="max-w-4xl mx-auto flex items-center gap-3 bg-zinc-100/40 border border-zinc-200/60 rounded-2xl p-1.5 focus-within:border-[#1D4ED8]/40 focus-within:ring-1 focus-within:ring-[#1D4ED8]/20 transition-all">
             <input
               type="text"
               placeholder={isLoading ? "AI is thinking and generating details..." : "Ask the Smart Advisor for performance strategies or marketing ideas..."}
@@ -563,7 +563,7 @@ export default function AIBusinessAssistant() {
               onKeyDown={(e) => {
                 if (e.key === "Enter") handleSendMessage();
               }}
-              className="flex-1 bg-transparent border-none focus:outline-none focus:ring-0 text-xs px-3 text-white placeholder-zinc-500 text-left"
+              className="flex-1 bg-transparent border-none focus:outline-none focus:ring-0 text-xs px-3 text-zinc-900 placeholder-zinc-500 text-left"
               dir="ltr"
             />
             
@@ -571,10 +571,10 @@ export default function AIBusinessAssistant() {
               onClick={() => handleSendMessage()}
               disabled={isLoading || !inputMessage.trim()}
               className={cn(
-                "p-3 rounded-xl transition-all cursor-pointer active:scale-95 flex items-center justify-center shrink-0 border border-transparent",
+                "p-3 rounded-2xl transition-all cursor-pointer active:scale-95 flex items-center justify-center shrink-0 border border-transparent",
                 inputMessage.trim() && !isLoading
-                  ? "bg-[#D6004B] text-white hover:bg-[#ff0059] shadow-lg shadow-[#D6004B]/25"
-                  : "bg-white/5 text-zinc-500 cursor-not-allowed"
+                  ? "bg-[#1D4ED8] text-white hover:bg-[#3B82F6] shadow-sm border border-zinc-200/60 shadow-[#1D4ED8]/25"
+                  : "bg-zinc-100/40 text-zinc-500 cursor-not-allowed"
               )}
             >
               <Send className="w-4 h-4" />

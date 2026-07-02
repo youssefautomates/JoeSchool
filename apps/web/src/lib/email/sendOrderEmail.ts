@@ -259,11 +259,11 @@ export async function sendOrderEmail(
             <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #fcfcfd; border-radius: 16px; border: 1px solid #eef2f6; direction: rtl;">
               <tr>
                 <td class="inner-padding" style="padding: 24px; text-align: right;">
-                  <span style="font-size: 12px; color: #D6004B; font-weight: bold; margin-bottom: 8px; display: inline-block; padding: 4px 10px; background-color: #fff0f5; border-radius: 20px;">🎓 دورة تعليمية معتمدة</span>
+                  <span style="font-size: 12px; color: #1D4ED8; font-weight: bold; margin-bottom: 8px; display: inline-block; padding: 4px 10px; background-color: #EFF6FF; border-radius: 20px;">🎓 دورة تعليمية معتمدة</span>
                   <h3 style="margin: 0 0 16px 0; font-size: 16px; color: #0f172a; font-weight: bold; line-height: 1.4;">${product.title}</h3>
                   <table cellpadding="0" cellspacing="0" class="mobile-btn-container" style="margin-top: 5px;">
                     <tr>
-                      <td style="background-color: #D6004B; border-radius: 10px; box-shadow: 0 4px 12px rgba(214, 0, 75, 0.25);">
+                      <td style="background-color: #1D4ED8; border-radius: 10px; box-shadow: 0 4px 12px rgba(29, 78, 216, 0.25);">
                         <a href="${courseLink}" class="mobile-btn" style="display: inline-block; padding: 12px 24px; color: #ffffff; text-decoration: none; font-weight: bold; font-size: 14px;">🚀 ابدأ التعلم الآن</a>
                       </td>
                     </tr>
@@ -313,7 +313,7 @@ export async function sendOrderEmail(
     `;
 
     const credentialsBlock = `
-    <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #fcfcfd; border-radius: 16px; border: 1px solid #eef2f6; border-right: 4px solid #D6004B; direction: rtl; text-align: right; margin-bottom: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.02);">
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #fcfcfd; border-radius: 16px; border: 1px solid #eef2f6; border-right: 4px solid #1D4ED8; direction: rtl; text-align: right; margin-bottom: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.02);">
       <tr>
         <td class="inner-padding" style="padding: 24px;">
           <h3 style="margin: 0 0 8px 0; font-size: 16px; color: #0f172a; font-weight: bold;">🔑 تفاصيل الدخول لحسابك الموحد</h3>
@@ -329,7 +329,7 @@ export async function sendOrderEmail(
           
           <table cellpadding="0" cellspacing="0" class="mobile-btn-container" style="margin: 0 auto;">
             <tr>
-              <td style="background-color: #D6004B; border-radius: 10px; box-shadow: 0 4px 12px rgba(214, 0, 75, 0.25);">
+              <td style="background-color: #1D4ED8; border-radius: 10px; box-shadow: 0 4px 12px rgba(29, 78, 216, 0.25);">
                 <a href="https://www.joeschool.com/login?email=${encodeURIComponent(loginEmail)}&redirect=%2Fdashboard" class="mobile-btn" style="display: inline-block; padding: 12px 28px; color: #ffffff; text-decoration: none; font-weight: bold; font-size: 14px;">🔑 اضغط هنا لتسجيل الدخول مباشرة</a>
               </td>
             </tr>
@@ -422,7 +422,7 @@ export async function sendOrderEmail(
         <table width="100%" cellpadding="0" cellspacing="0" class="main-table" style="max-width:580px;background-color:#ffffff;border-radius:20px;overflow:hidden;border: 1px solid #e2e8f0;box-shadow: 0 10px 30px rgba(0,0,0,0.025);">
           <!-- Header block -->
           <tr>
-            <td class="header-padding" style="padding:40px 24px;text-align:center;background-color:#060505;border-bottom:4px solid #D6004B;">
+            <td class="header-padding" style="padding:40px 24px;text-align:center;background-color:#060505;border-bottom:4px solid #1D4ED8;">
               <h1 class="header-title" style="margin:0;color:#ffffff;font-size:24px;font-weight: 900;line-height: 1.4;">أهلاً ${customerName} 🎉</h1>
               <p style="color:#94a3b8;margin:8px 0 0 0;font-size:14px;line-height: 1.6;">تم تأكيد وتفعيل طلبك بنجاح. دورتك ومنتجاتك التعليمية بانتظارك.</p>
             </td>
@@ -440,11 +440,11 @@ export async function sendOrderEmail(
                 <p style="color:#334155;font-size:14px;margin:6px 0;line-height: 1.5; word-break: break-all; word-wrap: break-word;"><strong>رقم الفاتورة:</strong> #${transactionId}</p>
                 <p style="color:#334155;font-size:14px;margin:6px 0;line-height: 1.5; word-break: break-all; word-wrap: break-word;"><strong>التاريخ:</strong> ${new Date().toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
                 ${isUSDOrder ? `
-                  <p style="color:#D6004B;font-size:15px;font-weight:bold;margin:6px 0;line-height: 1.5; word-break: break-all; word-wrap: break-word;"><strong>المبلغ الإجمالي:</strong> $${totalOriginalUsd.toFixed(2)} USD</p>
+                  <p style="color:#1D4ED8;font-size:15px;font-weight:bold;margin:6px 0;line-height: 1.5; word-break: break-all; word-wrap: break-word;"><strong>المبلغ الإجمالي:</strong> $${totalOriginalUsd.toFixed(2)} USD</p>
                   <p style="color:#475569;font-size:13px;margin:6px 0;line-height: 1.5; word-break: break-all; word-wrap: break-word;"><strong>المبلغ المخصوم فعلياً:</strong> ${totalChargedEgp.toFixed(2)} ج.م</p>
                   ${firstExchangeRate ? `<p style="color:#64748b;font-size:11px;margin:4px 0;line-height: 1.5; word-break: break-all; word-wrap: break-word;">سعر الصرف المثبت: 1 USD = ${firstExchangeRate.toFixed(4)} ج.م</p>` : ''}
                 ` : `
-                  <p style="color:#D6004B;font-size:15px;font-weight:bold;margin:6px 0;line-height: 1.5; word-break: break-all; word-wrap: break-word;"><strong>المبلغ الإجمالي:</strong> ${totalAmount.toFixed(2)} ج.م</p>
+                  <p style="color:#1D4ED8;font-size:15px;font-weight:bold;margin:6px 0;line-height: 1.5; word-break: break-all; word-wrap: break-word;"><strong>المبلغ الإجمالي:</strong> ${totalAmount.toFixed(2)} ج.م</p>
                 `}
               </div>
             </td>
@@ -454,7 +454,7 @@ export async function sendOrderEmail(
             <td class="footer-padding" style="padding:32px 24px;text-align:center;background-color:#060505;border-top: 1px solid #1e293b;">
               <p style="color:#94a3b8;font-size:13px;margin:0 0 12px 0;line-height: 1.6;">
                 استلمت هذا البريد لأنك قمت بالاشتراك في دورتنا التعليمية عبر JoeSchool.<br/>
-                لديك استفسار؟ <a href="https://www.joeschool.com/contact" style="color:#D6004B;text-decoration:underline;font-weight:bold;margin-top:4px;display:inline-block;">اتصل بالدعم الفني للمنصة</a>
+                لديك استفسار؟ <a href="https://www.joeschool.com/contact" style="color:#1D4ED8;text-decoration:underline;font-weight:bold;margin-top:4px;display:inline-block;">اتصل بالدعم الفني للمنصة</a>
               </p>
               <p style="color:#64748b;font-size:11px;margin:16px 0 0 0;">&copy; ${new Date().getFullYear()} JoeSchool. جميع الحقوق محفوظة.</p>
             </td>

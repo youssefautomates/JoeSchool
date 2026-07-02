@@ -34,15 +34,15 @@ export default function CollapsibleSection({
   return (
     <div className="w-full">
       {shouldCollapse ? (
-        <div className="border border-white/5 rounded-3xl bg-[#09090e]/60 overflow-hidden">
+        <div className="border border-zinc-200/60 rounded-3xl bg-slate-50/60 overflow-hidden">
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className="w-full flex items-center justify-between p-4 text-right font-sans font-extrabold text-xs uppercase tracking-wider text-zinc-400 hover:text-white transition-colors"
+            className="w-full flex items-center justify-between p-4 text-right font-sans font-extrabold text-xs uppercase tracking-wider text-zinc-500 hover:text-zinc-900 transition-colors"
           >
             <span>{title}</span>
-            <div className="w-7 h-7 rounded-lg bg-white/5 flex items-center justify-center shrink-0">
+            <div className="w-7 h-7 rounded-2xl bg-zinc-100/40 flex items-center justify-center shrink-0">
               {isOpen ? (
-                <ChevronUp className="w-4 h-4 text-rose-500" />
+                <ChevronUp className="w-4 h-4 text-yellow-500" />
               ) : (
                 <ChevronDown className="w-4 h-4 text-zinc-500" />
               )}
@@ -56,7 +56,7 @@ export default function CollapsibleSection({
                 exit={{ height: 0, opacity: 0 }}
                 transition={{ duration: 0.2, ease: "easeInOut" }}
               >
-                <div className="p-4 pt-2 border-t border-white/5 bg-[#07070b]/20">
+                <div className="p-4 pt-2 border-t border-zinc-200/60 bg-[#07070b]/20">
                   {children}
                 </div>
               </motion.div>

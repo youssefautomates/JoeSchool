@@ -84,15 +84,15 @@ export default function ProductsPage() {
   });
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white selection:bg-rose-500/30 font-cairo overflow-x-hidden">
+    <div className="min-h-screen bg-white text-zinc-900 selection:bg-brand-500/30 font-sans overflow-x-hidden">
       <Navbar />
 
       <main className="flex-1 flex flex-col pt-24 pb-16">
         {/* Header Hero Section */}
         <section className="relative py-12 md:py-20 flex items-center justify-center overflow-hidden">
-          <div className="absolute inset-0 pointer-events-none bg-[#050505] z-0">
+          <div className="absolute inset-0 pointer-events-none bg-white z-0">
             <div className="absolute inset-0 bg-grid-lines mask-radial-faded opacity-50"></div>
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-rose-500/10 rounded-full blur-[80px]" />
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-brand-500/10 rounded-full blur-[80px]" />
           </div>
 
           <div className="container relative z-10 mx-auto px-4 text-center max-w-4xl">
@@ -102,7 +102,7 @@ export default function ProductsPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
-              className="text-3xl sm:text-5xl md:text-6xl font-alexandria font-black leading-tight tracking-tight text-white mb-6"
+              className="text-3xl sm:text-5xl md:text-6xl font-sans font-black leading-tight tracking-tight text-zinc-900 mb-6"
             >
               مكتبة المنتجات الرقمية
             </motion.h1>
@@ -111,7 +111,7 @@ export default function ProductsPage() {
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="text-zinc-400 text-sm sm:text-lg max-w-2xl mx-auto leading-relaxed"
+              className="text-zinc-500 text-sm sm:text-lg max-w-2xl mx-auto leading-relaxed"
             >
               استكشف مجموعتنا المتنوعة من المنتجات الرقمية المميزة والمصممة لمساعدتك في مشروعك الإبداعي والمهني.
             </motion.p>
@@ -127,10 +127,10 @@ export default function ProductsPage() {
                   key={cat}
                   onClick={() => setActiveCategory(cat)}
                   className={cn(
-                    "px-5 py-2.5 rounded-full font-cairo text-xs md:text-sm font-bold transition-all duration-300 shrink-0 select-none cursor-pointer border snap-align-start",
+                    "px-5 py-2.5 rounded-full font-sans text-xs md:text-sm font-bold transition-all duration-300 shrink-0 select-none cursor-pointer border snap-align-start",
                     activeCategory === cat
-                      ? "bg-[#D6004B] text-white border-[#D6004B] shadow-[0_4px_15px_rgba(214,0,75,0.3)] scale-105"
-                      : "bg-white/5 text-zinc-400 border-white/5 hover:border-white/10 hover:text-white"
+                      ? "bg-[#1D4ED8] text-white border-[#1D4ED8] shadow-[0_4px_15px_rgba(29, 78, 216,0.3)] scale-105"
+                      : "bg-white text-zinc-700 border border-zinc-200 hover:bg-slate-50"
                   )}
                 >
                   {cat}
@@ -144,13 +144,13 @@ export default function ProductsPage() {
         <section className="container mx-auto px-4 max-w-6xl flex-1">
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-20 gap-4">
-              <Loader2 className="w-10 h-10 text-rose-500 animate-spin" />
-              <p className="text-zinc-400 text-sm font-medium">جاري تحميل المنتجات الرقمية الاحترافية...</p>
+              <Loader2 className="w-10 h-10 text-yellow-500 animate-spin" />
+              <p className="text-zinc-500 text-sm font-medium">جاري تحميل المنتجات الرقمية الاحترافية...</p>
             </div>
           ) : filteredProducts.length === 0 ? (
-            <div className="text-center py-20 bg-white/[0.02] border border-white/5 rounded-3xl p-8 max-w-md mx-auto">
+            <div className="text-center py-20 bg-zinc-50/70 border border-zinc-200/60 rounded-3xl p-8 max-w-md mx-auto">
               <Package className="w-12 h-12 text-zinc-700 mx-auto mb-4" />
-              <h3 className="font-alexandria font-bold text-white text-base">لا توجد منتجات رقمية متاحة حالياً</h3>
+              <h3 className="font-sans font-bold text-zinc-900 text-base">لا توجد منتجات رقمية متاحة حالياً</h3>
               <p className="text-zinc-500 text-xs sm:text-sm mt-1">
                 تتوفر منتجات جديدة قريباً جداً في هذه الصفحة. تابع قنواتنا للحصول على التحديثات!
               </p>
@@ -177,13 +177,13 @@ export default function ProductsPage() {
                       onClick={() => router.push(`/product/${product.slug}`)}
                       onMouseEnter={() => setHoveredId(product.id)}
                       onMouseLeave={() => setHoveredId(null)}
-                      className="block relative h-full flex flex-col bg-[#09090e] border border-[#1b1b24]/60 hover:border-[#D6004B]/50 rounded-[2rem] overflow-hidden group-hover:-translate-y-3 transition-all duration-300 shadow-2xl hover:shadow-[0_30px_60px_-15px_rgba(214,0,75,0.25)] cursor-pointer"
+                      className="block relative h-full flex flex-col bg-slate-50 border border-[#1b1b24]/60 hover:border-[#1D4ED8]/50 rounded-[2rem] overflow-hidden group-hover:-translate-y-3 transition-all duration-300 shadow-sm border border-zinc-200/60 hover:shadow-[0_30px_60px_-15px_rgba(29, 78, 216,0.25)] cursor-pointer"
                     >
                       {/* Glow Light Sweep Shimmer Effect */}
                       <div className="absolute inset-0 w-[50%] h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12 -translate-x-[200%] group-hover:translate-x-[350%] transition-transform duration-1000 ease-out pointer-events-none z-10" />
                       
                       {/* Media Area */}
-                      <div className="relative w-full aspect-video overflow-hidden border-b border-white/5">
+                      <div className="relative w-full aspect-video overflow-hidden border-b border-zinc-200/60">
                         <ProductMedia
                           image_url={primaryImage}
                           video_url={primaryVideo}
@@ -197,15 +197,15 @@ export default function ProductsPage() {
                         {/* Badges */}
                         <div className="absolute top-4 left-4 md:top-6 md:left-6 flex flex-col gap-2 z-20">
                           {isFree ? (
-                            <Badge className="bg-emerald-600 text-white border-none font-cairo text-[9px] md:text-[10px] py-0.5 px-2.5 shadow-lg rounded-md font-bold">هدية مجانية</Badge>
+                            <Badge className="bg-emerald-600 text-white border-none font-sans text-[9px] md:text-[10px] py-0.5 px-2.5 shadow-sm border border-zinc-200/60 rounded-xl font-bold">هدية مجانية</Badge>
                           ) : product.is_featured ? (
-                            <Badge className="bg-[#D6004B] text-white border-none font-cairo text-[9px] md:text-[10px] py-0.5 px-2.5 shadow-lg rounded-md font-bold">الأكثر مبيعاً</Badge>
+                            <Badge className="bg-[#1D4ED8] text-white border-none font-sans text-[9px] md:text-[10px] py-0.5 px-2.5 shadow-sm border border-zinc-200/60 rounded-xl font-bold">الأكثر مبيعاً</Badge>
                           ) : null}
                         </div>
 
                         {/* Category Badge */}
                         <div className="absolute top-4 right-4 md:top-6 md:right-6 z-20">
-                          <span className="bg-[#D6004B]/15 text-[#D6004B] border border-[#D6004B]/30 font-cairo text-[9px] md:text-[10px] font-black py-1 px-3 rounded-full backdrop-blur-md shadow-[0_0_15px_rgba(214,0,75,0.2)] tracking-wide">
+                          <span className="bg-[#1D4ED8]/15 text-[#1D4ED8] border border-[#1D4ED8]/30 font-sans text-[9px] md:text-[10px] font-black py-1 px-3 rounded-full backdrop-blur-md shadow-none tracking-wide">
                             {getProductCategory(product)}
                           </span>
                         </div>
@@ -219,32 +219,32 @@ export default function ProductsPage() {
                       {/* Content Area */}
                       <div className="p-6 flex-1 flex flex-col relative z-10">
                         <div className="flex items-center gap-2 mb-3 md:mb-4">
-                          <div className="flex items-center gap-1.5 bg-white/10 backdrop-blur-md px-2.5 py-1 rounded-md border border-white/10">
-                            <Zap className="w-2.5 h-2.5 text-rose-400" />
-                            <span className="text-[9px] font-bold text-white uppercase tracking-widest">تنزيل فوري</span>
+                          <div className="flex items-center gap-1.5 bg-zinc-100/80 backdrop-blur-md px-2.5 py-1 rounded-xl border border-zinc-200">
+                            <Zap className="w-2.5 h-2.5 text-yellow-500" />
+                            <span className="text-[9px] font-bold text-zinc-900 uppercase tracking-widest">تنزيل فوري</span>
                           </div>
                         </div>
 
-                        <h3 className="text-base sm:text-lg font-alexandria font-bold text-white mb-2 leading-snug group-hover:text-[#D6004B] transition-colors line-clamp-2">
+                        <h3 className="text-base sm:text-lg font-sans font-bold text-zinc-900 mb-2 leading-snug group-hover:text-[#1D4ED8] transition-colors line-clamp-2">
                           {product.title}
                         </h3>
 
-                        <p className="text-zinc-400 font-cairo text-xs mb-6 leading-relaxed line-clamp-2">
+                        <p className="text-zinc-500 font-sans text-xs mb-6 leading-relaxed line-clamp-2">
                           {product.short_description || product.description || "أداة احترافية مصممة لزيادة إنتاجيتك بشكل فوري."}
                         </p>
 
                         <div className="mt-auto flex items-end justify-between">
                           <div className="flex flex-col">
                             {productPricing.original_price && productPricing.original_price > 0 ? (
-                              <span className="text-[9px] font-cairo line-through text-zinc-500 mb-0.5">
+                              <span className="text-[9px] font-sans line-through text-zinc-500 mb-0.5">
                                 {formatPrice(productPricing.original_price, currency)}
                               </span>
                             ) : null}
                             <div className="flex items-baseline gap-0.5">
                               {isFree ? (
-                                <span className="text-2xl font-alexandria font-black text-emerald-400">مجاني</span>
+                                <span className="text-2xl font-sans font-black text-emerald-400">مجاني</span>
                               ) : (
-                                <span className="text-2xl font-alexandria font-black text-white">
+                                <span className="text-2xl font-sans font-black text-zinc-900">
                                   {formatPrice(productPricing.price, currency)}
                                 </span>
                               )}
@@ -262,12 +262,12 @@ export default function ProductsPage() {
                                 });
                                 toast.success("تمت الإضافة للسلة");
                               }}
-                              className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-[#D6004B] hover:border-[#D6004B] hover:shadow-[0_0_15px_rgba(214,0,75,0.4)] transition-all duration-300"
+                              className="w-10 h-10 rounded-2xl bg-zinc-100/40 border border-zinc-200 flex items-center justify-center text-zinc-900 hover:bg-[#1D4ED8] hover:border-[#1D4ED8] hover:shadow-[0_0_15px_rgba(29, 78, 216,0.4)] transition-all duration-300"
                               title="إضافة إلى السلة"
                             >
                               <ShoppingCart className="w-4 h-4" />
                             </button>
-                            <div className="h-10 px-4 rounded-xl bg-[#D6004B] flex items-center justify-center text-white font-bold text-xs gap-1.5 shadow-lg shadow-rose-600/30 group-hover:bg-rose-600 group-hover:shadow-[0_0_20px_rgba(214,0,75,0.5)] transition-all duration-300">
+                            <div className="h-10 px-4 rounded-2xl bg-[#1D4ED8] flex items-center justify-center text-white font-bold text-xs gap-1.5 shadow-sm border border-zinc-200/60 shadow-brand-600/30 group-hover:bg-brand-600 group-hover:shadow-[0_0_20px_rgba(29, 78, 216,0.5)] transition-all duration-300">
                               <span>شراء الآن</span>
                               <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform rtl:rotate-180" />
                             </div>

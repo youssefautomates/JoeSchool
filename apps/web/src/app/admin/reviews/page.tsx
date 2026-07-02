@@ -552,7 +552,7 @@ export default function ReviewsAdminPage() {
   if (loading && reviews.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-3">
-        <Loader2 className="w-12 h-12 text-[#D6004B] animate-spin" />
+        <Loader2 className="w-12 h-12 text-[#1D4ED8] animate-spin" />
         <span className="text-zinc-500 font-bold text-xs font-sans">Loading reviews management dashboard...</span>
       </div>
     );
@@ -562,19 +562,19 @@ export default function ReviewsAdminPage() {
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 p-2 md:p-6 font-sans" dir="ltr">
       
       {/* 1. Header Navigation Bar */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 border-b border-white/5 pb-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 border-b border-zinc-200/60 pb-6">
         <div>
           <div className="flex items-center gap-2">
             {viewMode !== "select" && (
               <button
                 onClick={handleBackToSelect}
-                className="p-1.5 rounded-lg bg-white/5 border border-white/5 text-zinc-400 hover:text-white transition-all cursor-pointer font-sans text-xs flex items-center gap-1 mr-2"
+                className="p-1.5 rounded-2xl bg-zinc-100/40 border border-zinc-200/60 text-zinc-500 hover:text-zinc-900 transition-all cursor-pointer font-sans text-xs flex items-center gap-1 mr-2"
               >
                 <ArrowLeft className="w-3.5 h-3.5" />
                 <span>Back</span>
               </button>
             )}
-            <h1 className="text-xl md:text-3xl font-black text-white font-sans leading-none">
+            <h1 className="text-xl md:text-3xl font-black text-zinc-900 font-sans leading-none">
               {viewMode === "select" 
                 ? "Manage Customer Reviews" 
                 : viewMode === "all" 
@@ -594,7 +594,7 @@ export default function ReviewsAdminPage() {
         {viewMode !== "select" && (
           <button
             onClick={handleOpenAdd}
-            className="h-11 px-6 bg-[#D6004B] hover:bg-[#ff0059] text-white text-xs font-bold rounded-xl flex items-center gap-2 transition-all active:scale-95 shadow-[0_8px_20px_rgba(214,0,75,0.2)] cursor-pointer font-sans shrink-0"
+            className="h-11 px-6 bg-[#1D4ED8] hover:bg-[#3B82F6] text-white text-xs font-bold rounded-2xl flex items-center gap-2 transition-all active:scale-95 shadow-[0_8px_20px_rgba(29, 78, 216,0.2)] cursor-pointer font-sans shrink-0"
           >
             <Plus className="w-4 h-4" />
             <span>Add Manual Review</span>
@@ -612,36 +612,36 @@ export default function ReviewsAdminPage() {
         <motion.div 
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          className="max-w-xl mx-auto bg-[#09090e]/60 border border-white/5 rounded-3xl p-8 backdrop-blur-xl space-y-6 shadow-2xl relative"
+          className="max-w-xl mx-auto bg-slate-50/60 border border-zinc-200/60 rounded-3xl p-8 backdrop-blur-xl space-y-6 shadow-sm border border-zinc-200/60 relative"
         >
-          <div className="absolute top-0 left-0 w-32 h-32 bg-[#D6004B]/5 rounded-full blur-2xl pointer-events-none" />
+          <div className="absolute top-0 left-0 w-32 h-32 bg-[#1D4ED8]/5 rounded-full blur-2xl pointer-events-none" />
           
-          <h3 className="text-sm font-bold text-white flex items-center gap-2 border-b border-white/5 pb-4 font-sans">
-            {viewMode === "courses" ? <BookOpen className="w-5 h-5 text-rose-500" /> : <ShoppingBag className="w-5 h-5 text-emerald-500" />}
+          <h3 className="text-sm font-bold text-zinc-900 flex items-center gap-2 border-b border-zinc-200/60 pb-4 font-sans">
+            {viewMode === "courses" ? <BookOpen className="w-5 h-5 text-yellow-500" /> : <ShoppingBag className="w-5 h-5 text-emerald-500" />}
             <span>{viewMode === "courses" ? "Filter Academy Courses" : "Filter Store Products"}</span>
           </h3>
 
           <div className="space-y-5">
             {/* STEP 1: Searchable Dropdown Category */}
             <div className="flex flex-col gap-2 relative">
-              <label className="text-xs text-zinc-300 font-bold font-sans">Step 1: Select Category</label>
+              <label className="text-xs text-zinc-700 font-bold font-sans">Step 1: Select Category</label>
               
               <div 
                 onClick={() => setCatDropdownOpen(!catDropdownOpen)}
-                className="w-full h-11 px-4 rounded-xl bg-white/5 border border-white/10 text-zinc-300 text-xs flex items-center justify-between cursor-pointer focus:border-rose-500/50 hover:bg-white/[0.07] transition-all font-sans"
+                className="w-full h-11 px-4 rounded-2xl bg-zinc-100/40 border border-zinc-200 text-zinc-700 text-xs flex items-center justify-between cursor-pointer focus:border-zinc-200/60 hover:bg-white/[0.07] transition-all font-sans"
               >
                 <span>{selectedCat || "Search and select category..."}</span>
                 <Sliders className="w-4 h-4 text-zinc-500" />
               </div>
 
               {catDropdownOpen && (
-                <div className="absolute top-[105%] left-0 right-0 bg-[#09090e] border border-white/10 rounded-xl p-3 z-30 shadow-2xl space-y-2 animate-in fade-in slide-in-from-top-1 duration-200">
+                <div className="absolute top-[105%] left-0 right-0 bg-slate-50 border border-zinc-200 rounded-2xl p-3 z-30 shadow-sm border border-zinc-200/60 space-y-2 animate-in fade-in slide-in-from-top-1 duration-200">
                   <input
                     type="text"
                     placeholder="Search category..."
                     value={catSearch}
                     onChange={(e) => setCatSearch(e.target.value)}
-                    className="w-full h-9 px-3 rounded-lg bg-white/5 border border-white/10 text-zinc-300 text-xs outline-none focus:border-rose-500/40 font-sans"
+                    className="w-full h-9 px-3 rounded-2xl bg-zinc-100/40 border border-zinc-200 text-zinc-700 text-xs outline-none focus:border-zinc-200/60 font-sans"
                     onClick={(e) => e.stopPropagation()}
                   />
                   <div className="max-h-48 overflow-y-auto space-y-1 custom-scrollbar">
@@ -657,8 +657,8 @@ export default function ReviewsAdminPage() {
                             setCatDropdownOpen(false);
                             setCatSearch("");
                           }}
-                          className={`p-2.5 rounded-lg text-xs font-bold font-sans cursor-pointer transition-colors ${
-                            selectedCat === cat.name ? "bg-[#D6004B]/10 text-rose-500" : "hover:bg-white/5 text-zinc-400 hover:text-white"
+                          className={`p-2.5 rounded-2xl text-xs font-bold font-sans cursor-pointer transition-colors ${
+                            selectedCat === cat.name ? "bg-[#1D4ED8]/10 text-yellow-500" : "hover:bg-zinc-100/40 text-zinc-500 hover:text-white"
                           }`}
                         >
                           {cat.name}
@@ -672,16 +672,16 @@ export default function ReviewsAdminPage() {
 
             {/* STEP 2: Searchable Dropdown Product / Course */}
             <div className="flex flex-col gap-2 relative">
-              <label className="text-xs text-zinc-300 font-bold font-sans">
+              <label className="text-xs text-zinc-700 font-bold font-sans">
                 Step 2: Select {viewMode === "courses" ? "Course" : "Product"}
               </label>
 
               <div 
                 onClick={() => selectedCat && setItemDropdownOpen(!itemDropdownOpen)}
-                className={`w-full h-11 px-4 rounded-xl border text-xs flex items-center justify-between transition-all font-sans ${
+                className={`w-full h-11 px-4 rounded-2xl border text-xs flex items-center justify-between transition-all font-sans ${
                   selectedCat 
-                    ? "bg-white/5 border-white/10 text-zinc-300 cursor-pointer hover:bg-white/[0.07]" 
-                    : "bg-white/[0.01] border-white/5 text-zinc-600 cursor-not-allowed"
+                    ? "bg-zinc-100/40 border-zinc-200 text-zinc-700 cursor-pointer hover:bg-white/[0.07]" 
+                    : "bg-zinc-50/40 border-zinc-200/60 text-zinc-600 cursor-not-allowed"
                 }`}
               >
                 <span>
@@ -695,13 +695,13 @@ export default function ReviewsAdminPage() {
               </div>
 
               {itemDropdownOpen && selectedCat && (
-                <div className="absolute top-[105%] left-0 right-0 bg-[#09090e] border border-white/10 rounded-xl p-3 z-30 shadow-2xl space-y-2 animate-in fade-in slide-in-from-top-1 duration-200">
+                <div className="absolute top-[105%] left-0 right-0 bg-slate-50 border border-zinc-200 rounded-2xl p-3 z-30 shadow-sm border border-zinc-200/60 space-y-2 animate-in fade-in slide-in-from-top-1 duration-200">
                   <input
                     type="text"
                     placeholder={`Search ${viewMode === "courses" ? "course" : "product"}...`}
                     value={itemSearch}
                     onChange={(e) => setItemSearch(e.target.value)}
-                    className="w-full h-9 px-3 rounded-lg bg-white/5 border border-white/10 text-zinc-300 text-xs outline-none focus:border-rose-500/40 font-sans"
+                    className="w-full h-9 px-3 rounded-2xl bg-zinc-100/40 border border-zinc-200 text-zinc-700 text-xs outline-none focus:border-zinc-200/60 font-sans"
                     onClick={(e) => e.stopPropagation()}
                   />
                   <div className="max-h-48 overflow-y-auto space-y-1 custom-scrollbar">
@@ -716,8 +716,8 @@ export default function ReviewsAdminPage() {
                             setItemDropdownOpen(false);
                             setItemSearch("");
                           }}
-                          className={`p-2.5 rounded-lg text-xs font-bold font-sans cursor-pointer transition-colors ${
-                            selectedItem === item.id ? "bg-[#D6004B]/10 text-rose-500" : "hover:bg-white/5 text-zinc-400 hover:text-white"
+                          className={`p-2.5 rounded-2xl text-xs font-bold font-sans cursor-pointer transition-colors ${
+                            selectedItem === item.id ? "bg-[#1D4ED8]/10 text-yellow-500" : "hover:bg-zinc-100/40 text-zinc-500 hover:text-white"
                           }`}
                         >
                           {item.title}
@@ -733,7 +733,7 @@ export default function ReviewsAdminPage() {
             <button
               onClick={() => setShowActiveReviews(true)}
               disabled={!selectedCat || !selectedItem}
-              className="w-full py-3.5 bg-[#D6004B] hover:bg-[#ff0059] text-white rounded-xl text-xs font-bold font-sans transition-all disabled:opacity-20 disabled:cursor-not-allowed active:scale-[0.98] shrink-0"
+              className="w-full py-3.5 bg-[#1D4ED8] hover:bg-[#3B82F6] text-white rounded-2xl text-xs font-bold font-sans transition-all disabled:opacity-20 disabled:cursor-not-allowed active:scale-[0.98] shrink-0"
             >
               Show Reviews Now
             </button>
@@ -747,18 +747,18 @@ export default function ReviewsAdminPage() {
           
           {/* Header Title inside specific workflows */}
           {showActiveReviews && (
-            <div className="bg-[#09090e]/60 border border-rose-500/10 p-5 rounded-2xl flex items-center justify-between gap-4 font-sans">
+            <div className="bg-slate-50/60 border border-zinc-200/60 p-5 rounded-2xl flex items-center justify-between gap-4 font-sans">
               <div className="flex items-center gap-2">
-                <span className="text-rose-500">📌</span>
-                <span className="text-zinc-300 font-bold">Filtered Reviews for:</span>
-                <span className="text-white font-black font-sans">{getProductName(selectedItem)}</span>
+                <span className="text-yellow-500">📌</span>
+                <span className="text-zinc-700 font-bold">Filtered Reviews for:</span>
+                <span className="text-zinc-900 font-black font-sans">{getProductName(selectedItem)}</span>
               </div>
               <button
                 onClick={() => {
                   setShowActiveReviews(false);
                   setSelectedItem("");
                 }}
-                className="text-[10px] bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white px-3 py-1.5 rounded-lg border border-white/5 transition-all font-bold cursor-pointer"
+                className="text-[10px] bg-zinc-100/40 hover:bg-zinc-100/80 text-zinc-500 hover:text-zinc-900 px-3 py-1.5 rounded-2xl border border-zinc-200/60 transition-all font-bold cursor-pointer"
               >
                 Change Course/Product
               </button>

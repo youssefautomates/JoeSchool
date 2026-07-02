@@ -165,8 +165,8 @@ export default function LmsSection({
 
       {/* Course detailed statistics grids */}
       <div className="space-y-4">
-        <div className="border-b border-white/5 pb-2">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">Academy Course Performance (LMS)</h3>
+        <div className="border-b border-zinc-200/60 pb-2">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-500">Academy Course Performance (LMS)</h3>
           <p className="text-[10px] text-zinc-500 mt-0.5">Detailed indicators of enrollment metrics, drop-offs, and conversion rates per course</p>
         </div>
 
@@ -186,30 +186,30 @@ export default function LmsSection({
               return (
                 <div 
                   key={c.id} 
-                  className="p-5 rounded-3xl bg-[#09090e]/80 border border-white/5 hover:border-white/10 transition-all duration-300 shadow-2xl flex flex-col justify-between"
+                  className="p-5 rounded-3xl bg-slate-50/80 border border-zinc-200/60 hover:border-zinc-200 transition-all duration-300 shadow-sm border border-zinc-200/60 flex flex-col justify-between"
                 >
                   <div className="space-y-3">
                     <div className="flex justify-between items-start">
-                      <span className="px-2 py-0.5 rounded bg-rose-600/10 border border-rose-500/20 text-rose-500 text-[8.5px] font-black uppercase tracking-wider">
+                      <span className="px-2 py-0.5 rounded bg-brand-600/10 border border-zinc-200/60 text-yellow-500 text-[8.5px] font-black uppercase tracking-wider">
                         Academy Course
                       </span>
-                      <span className="text-xs font-black text-rose-500 font-mono">
+                      <span className="text-xs font-black text-yellow-500 font-mono">
                         {formatPrice(c.grossRevenue, "EGP")}
                       </span>
                     </div>
 
                     <div>
-                      <h4 className="font-extrabold text-white text-xs leading-snug truncate">{c.title}</h4>
+                      <h4 className="font-extrabold text-zinc-900 text-xs leading-snug truncate">{c.title}</h4>
                       <p className="text-[9px] text-zinc-500 font-mono mt-0.5">ID: {c.id} · Course Price: {formatPrice(c.price, "EGP")}</p>
                     </div>
 
                     {/* Stats cells */}
-                    <div className="grid grid-cols-3 gap-2 bg-white/[0.01] p-2.5 rounded-2xl border border-white/5 font-semibold text-center">
+                    <div className="grid grid-cols-3 gap-2 bg-zinc-50/40 p-2.5 rounded-2xl border border-zinc-200/60 font-semibold text-center">
                       <div>
                         <span className="text-[8px] text-zinc-500 block uppercase">Students</span>
-                        <span className="text-xs font-black text-white font-mono">{c.totalStudents}</span>
+                        <span className="text-xs font-black text-zinc-900 font-mono">{c.totalStudents}</span>
                       </div>
-                      <div className="border-x border-white/5">
+                      <div className="border-x border-zinc-200/60">
                         <span className="text-[8px] text-zinc-500 block uppercase">7d New</span>
                         <span className="text-xs font-black text-emerald-400 font-mono">+{c.newStudentsWeek}</span>
                       </div>
@@ -223,19 +223,19 @@ export default function LmsSection({
                   </div>
 
                   {/* Visual funnel details - wrapped in LTR to maintain bar alignment */}
-                  <div className="space-y-2 mt-4 pt-4 border-t border-white/5" dir="ltr">
+                  <div className="space-y-2 mt-4 pt-4 border-t border-zinc-200/60" dir="ltr">
                     <h5 className="text-[8.5px] font-bold uppercase tracking-wider text-zinc-500 flex justify-between">
-                      <span className="text-rose-400 lowercase">{c.dropOffs} Drop-offs ({c.dropOffRate.toFixed(0)}%)</span>
+                      <span className="text-yellow-500 lowercase">{c.dropOffs} Drop-offs ({c.dropOffRate.toFixed(0)}%)</span>
                       <span>Payment Funnel</span>
                     </h5>
 
-                    <div className="space-y-2 text-[9px] font-semibold text-zinc-400">
+                    <div className="space-y-2 text-[9px] font-semibold text-zinc-500">
                       <div>
                         <div className="flex justify-between mb-0.5">
                           <span>{views} Views</span>
                           <span>Detail page views</span>
                         </div>
-                        <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
+                        <div className="w-full bg-zinc-100/40 h-1.5 rounded-full overflow-hidden">
                           <div className="h-full bg-blue-500 rounded-full" style={{ width: "100%" }} />
                         </div>
                       </div>
@@ -245,7 +245,7 @@ export default function LmsSection({
                           <span className="text-emerald-400">{purchases} Completed ({views > 0 ? ((purchases / views) * 100).toFixed(0) : 0}% Conv. Rate)</span>
                           <span>Completed Purchases</span>
                         </div>
-                        <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
+                        <div className="w-full bg-zinc-100/40 h-1.5 rounded-full overflow-hidden">
                           <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${views > 0 ? (purchases / views) * 100 : 0}%` }} />
                         </div>
                       </div>
@@ -263,32 +263,32 @@ export default function LmsSection({
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 sm:gap-8">
         
         {/* Watch KPI Details */}
-        <div className="xl:col-span-2 rounded-3xl bg-[#09090e]/80 border border-white/5 p-5 sm:p-6 shadow-2xl flex flex-col justify-between">
-          <div className="pb-3 border-b border-white/5 mb-4">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">Educational Content View Analytics</h3>
+        <div className="xl:col-span-2 rounded-3xl bg-slate-50/80 border border-zinc-200/60 p-5 sm:p-6 shadow-sm border border-zinc-200/60 flex flex-col justify-between">
+          <div className="pb-3 border-b border-zinc-200/60 mb-4">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-500">Educational Content View Analytics</h3>
             <p className="text-[10px] text-zinc-500">Average viewer retention metrics and drop-off points for learning videos</p>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 bg-white/[0.01] p-4 rounded-2xl border border-white/5 mb-5 text-center">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 bg-zinc-50/40 p-4 rounded-2xl border border-zinc-200/60 mb-5 text-center">
             <div>
-              <Clock className="w-4 h-4 text-rose-500 mx-auto mb-1" />
+              <Clock className="w-4 h-4 text-yellow-500 mx-auto mb-1" />
               <span className="text-[8px] text-zinc-500 block uppercase font-bold">Avg Watch Time</span>
-              <span className="text-xs font-black text-white font-mono">{learningStats.avgWatchTime}</span>
+              <span className="text-xs font-black text-zinc-900 font-mono">{learningStats.avgWatchTime}</span>
             </div>
-            <div className="border-l border-white/5">
+            <div className="border-l border-zinc-200/60">
               <PlayCircle className="w-4 h-4 text-blue-500 mx-auto mb-1" />
               <span className="text-[8px] text-zinc-500 block uppercase font-bold">Total Watch Hours</span>
-              <span className="text-xs font-black text-white font-mono">{learningStats.totalHours}</span>
+              <span className="text-xs font-black text-zinc-900 font-mono">{learningStats.totalHours}</span>
             </div>
-            <div className="border-l border-white/5">
+            <div className="border-l border-zinc-200/60">
               <Award className="w-4 h-4 text-purple-500 mx-auto mb-1" />
               <span className="text-[8px] text-zinc-500 block uppercase font-bold">Video Completion Rate</span>
               <span className="text-xs font-black text-emerald-400 font-mono">{learningStats.completionRate}</span>
             </div>
-            <div className="border-l border-white/5">
-              <ShieldAlert className="w-4 h-4 text-rose-500 mx-auto mb-1" />
+            <div className="border-l border-zinc-200/60">
+              <ShieldAlert className="w-4 h-4 text-yellow-500 mx-auto mb-1" />
               <span className="text-[8px] text-zinc-500 block uppercase font-bold">Drop-off Rate</span>
-              <span className="text-xs font-black text-rose-400 font-mono">{learningStats.dropOffRate}</span>
+              <span className="text-xs font-black text-yellow-500 font-mono">{learningStats.dropOffRate}</span>
             </div>
           </div>
 
@@ -301,7 +301,7 @@ export default function LmsSection({
                   <div className="py-8 text-center text-zinc-600 text-xs">No watch activity logged currently.</div>
                 ) : (
                   learningStats.mostWatched.map((w, idx) => (
-                    <div key={idx} className="p-2.5 rounded-xl bg-white/[0.02] border border-white/5 flex items-center justify-between font-semibold">
+                    <div key={idx} className="p-2.5 rounded-2xl bg-zinc-50/70 border border-zinc-200/60 flex items-center justify-between font-semibold">
                       <span className="truncate pr-2">{w.title}</span>
                       <span className="text-zinc-500 font-mono text-[9px] shrink-0 font-bold">{w.views} Views · {w.duration}</span>
                     </div>
@@ -312,13 +312,13 @@ export default function LmsSection({
 
             {/* Least watched */}
             <div className="space-y-2">
-              <h5 className="text-[9px] font-black uppercase text-rose-400 tracking-wider">Least Watched Chapters</h5>
+              <h5 className="text-[9px] font-black uppercase text-yellow-500 tracking-wider">Least Watched Chapters</h5>
               <div className="space-y-1.5">
                 {learningStats.leastWatched.length === 0 ? (
                   <div className="py-8 text-center text-zinc-600 text-xs">No watch activity logged currently.</div>
                 ) : (
                   learningStats.leastWatched.map((w, idx) => (
-                    <div key={idx} className="p-2.5 rounded-xl bg-white/[0.02] border border-white/5 flex items-center justify-between font-semibold">
+                    <div key={idx} className="p-2.5 rounded-2xl bg-zinc-50/70 border border-zinc-200/60 flex items-center justify-between font-semibold">
                       <span className="truncate pr-2">{w.title}</span>
                       <span className="text-zinc-500 font-mono text-[9px] shrink-0 font-bold">{w.views} Views · {w.duration}</span>
                     </div>
@@ -336,7 +336,7 @@ export default function LmsSection({
 
       {/* Geographic student analytics world map heatmap - Collapsible on Mobile */}
       <CollapsibleSection title="Geographic Student Attendance &amp; Top Countries" defaultExpanded={false}>
-        <div className="rounded-3xl bg-[#09090e]/80 border border-white/5 p-4 sm:p-6 shadow-2xl" dir="ltr">
+        <div className="rounded-3xl bg-slate-50/80 border border-zinc-200/60 p-4 sm:p-6 shadow-sm border border-zinc-200/60" dir="ltr">
           <GeoAnalytics orders={orders} />
         </div>
       </CollapsibleSection>

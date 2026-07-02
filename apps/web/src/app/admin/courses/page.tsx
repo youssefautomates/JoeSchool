@@ -53,37 +53,37 @@ function SortableSection({ section, index, onEdit, onDelete, onAddLesson, lesson
   const allLessons = lessons || [];
 
   return (
-    <div ref={setNodeRef} style={style} className={cn("border border-white/5 bg-[#0f0f15] rounded-2xl overflow-hidden mb-4", isDragging && "opacity-50 border-rose-500")}>
-      <div className="p-4 bg-white/[0.02] border-b border-white/5 flex items-center justify-between gap-4">
+    <div ref={setNodeRef} style={style} className={cn("border border-zinc-200/60 bg-slate-50 rounded-2xl overflow-hidden mb-4", isDragging && "opacity-50 border-brand-500")}>
+      <div className="p-4 bg-zinc-50/70 border-b border-zinc-200/60 flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div {...attributes} {...listeners} className="cursor-grab hover:text-white text-zinc-500">
+          <div {...attributes} {...listeners} className="cursor-grab hover:text-zinc-900 text-zinc-500">
             <GripVertical className="w-5 h-5" />
           </div>
-          <span className="w-8 h-8 rounded-lg bg-rose-600/10 text-rose-400 font-black text-xs flex items-center justify-center border border-rose-500/20 shrink-0">
+          <span className="w-8 h-8 rounded-2xl bg-brand-600/10 text-yellow-500 font-black text-xs flex items-center justify-center border border-zinc-200/60 shrink-0">
             {index + 1}
           </span>
           <div className="text-left">
             <div className="flex items-center gap-2 flex-wrap">
-              <h3 className="font-sans font-bold text-white text-sm md:text-base">{section.title}</h3>
+              <h3 className="font-sans font-bold text-zinc-900 text-sm md:text-base">{section.title}</h3>
               <span className="text-[10px] text-zinc-500 font-bold">({allLessons.length} lectures)</span>
             </div>
             {section.description && (
-              <p className="text-[11px] text-zinc-400 mt-0.5 max-w-lg leading-relaxed">{section.description}</p>
+              <p className="text-[11px] text-zinc-500 mt-0.5 max-w-lg leading-relaxed">{section.description}</p>
             )}
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={() => toggleExpand(section.id)} className="p-2 rounded-lg hover:bg-white/5 text-zinc-400 hover:text-white transition-colors cursor-pointer">
+          <button onClick={() => toggleExpand(section.id)} className="p-2 rounded-2xl hover:bg-zinc-100/40 text-zinc-500 hover:text-zinc-900 transition-colors cursor-pointer">
             {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
           </button>
-          <button onClick={() => onEdit(section)} className="p-2 rounded-lg hover:bg-white/5 text-zinc-400 hover:text-rose-400 transition-colors cursor-pointer">
+          <button onClick={() => onEdit(section)} className="p-2 rounded-2xl hover:bg-zinc-100/40 text-zinc-500 hover:text-yellow-500 transition-colors cursor-pointer">
             <Edit className="w-4 h-4" />
           </button>
-          <button onClick={() => onDelete(section.id)} className="p-2 rounded-lg hover:bg-red-500/10 text-red-500 transition-colors cursor-pointer">
+          <button onClick={() => onDelete(section.id)} className="p-2 rounded-2xl hover:bg-red-500/10 text-red-500 transition-colors cursor-pointer">
             <Trash2 className="w-4 h-4" />
           </button>
-          <div className="h-6 w-[1px] bg-white/5 mx-2" />
-          <button onClick={() => onAddLesson(section.id)} className="h-9 px-4 bg-rose-600/10 hover:bg-rose-600 text-rose-400 hover:text-white border border-rose-500/20 hover:border-rose-600 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer">
+          <div className="h-6 w-[1px] bg-zinc-100/40 mx-2" />
+          <button onClick={() => onAddLesson(section.id)} className="h-9 px-4 bg-brand-600/10 hover:bg-brand-600 text-yellow-500 hover:text-white border border-zinc-200/60 hover:border-brand-600 rounded-2xl text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer">
             <Plus className="w-3.5 h-3.5" />
             <span>Add Lesson</span>
           </button>
@@ -116,14 +116,14 @@ function SortableLesson({ lesson, onEdit, onDelete }: any) {
   
   return (
     <div ref={setNodeRef} style={style} className={cn(
-      "p-3.5 rounded-xl bg-white/[0.01] hover:bg-white/[0.03] border border-white/5 hover:border-white/10 flex items-center justify-between gap-4 transition-all group flex-wrap", 
+      "p-3.5 rounded-2xl bg-zinc-50/40 hover:bg-zinc-100/30 border border-zinc-200/60 hover:border-zinc-200 flex items-center justify-between gap-4 transition-all group flex-wrap", 
       isDragging && "opacity-50 border-emerald-500"
     )}>
       <div className="flex items-center gap-3">
-        <div {...attributes} {...listeners} className="cursor-grab hover:text-white text-zinc-600">
+        <div {...attributes} {...listeners} className="cursor-grab hover:text-zinc-900 text-zinc-600">
           <GripVertical className="w-4 h-4" />
         </div>
-        {lesson.lecture_type === "video" && <Video className="w-4 h-4 text-rose-500" />}
+        {lesson.lecture_type === "video" && <Video className="w-4 h-4 text-yellow-500" />}
         {lesson.lecture_type === "pdf" && <FileText className="w-4 h-4 text-emerald-500" />}
         {lesson.lecture_type === "link" && <LinkIcon className="w-4 h-4 text-sky-500" />}
         {lesson.lecture_type === "download" && <Download className="w-4 h-4 text-amber-500" />}
@@ -131,7 +131,7 @@ function SortableLesson({ lesson, onEdit, onDelete }: any) {
         
         <div className="text-left">
           <div className="flex items-center gap-2 flex-wrap">
-            <h4 className="font-bold text-xs sm:text-sm text-white group-hover:text-rose-400 transition-colors">{lesson.title}</h4>
+            <h4 className="font-bold text-xs sm:text-sm text-zinc-900 group-hover:text-yellow-500 transition-colors">{lesson.title}</h4>
             {lesson.is_preview ? (
               <span className="bg-emerald-950 text-emerald-400 text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded border border-emerald-900/30">Free Preview</span>
             ) : null}
@@ -143,7 +143,7 @@ function SortableLesson({ lesson, onEdit, onDelete }: any) {
       </div>
       <div className="flex items-center gap-2">
         {lesson.duration_seconds > 0 && (
-          <span className="text-[10px] text-zinc-500 font-bold bg-white/5 px-2 py-0.5 rounded ml-2">
+          <span className="text-[10px] text-zinc-500 font-bold bg-zinc-100/40 px-2 py-0.5 rounded ml-2">
             {(() => {
               const h = Math.floor(lesson.duration_seconds / 3600);
               const m = Math.floor((lesson.duration_seconds % 3600) / 60);
@@ -154,7 +154,7 @@ function SortableLesson({ lesson, onEdit, onDelete }: any) {
             })()}
           </span>
         )}
-        <button onClick={onEdit} className="p-1.5 rounded hover:bg-white/5 text-zinc-400 hover:text-white transition-colors cursor-pointer">
+        <button onClick={onEdit} className="p-1.5 rounded hover:bg-zinc-100/40 text-zinc-500 hover:text-zinc-900 transition-colors cursor-pointer">
           <Edit className="w-3.5 h-3.5" />
         </button>
         <button onClick={onDelete} className="p-1.5 rounded hover:bg-red-500/10 text-red-500 transition-colors cursor-pointer">
@@ -211,8 +211,8 @@ function ShowcaseAdminItem({
   const embedUrl = signedUrl || vid.playbackUrl;
 
   return (
-    <div className="bg-white/[0.01] border border-white/5 rounded-xl overflow-hidden p-2 flex flex-col justify-between group relative">
-      <div className="aspect-[9/16] bg-zinc-950 rounded-lg overflow-hidden relative border border-white/5 mb-2">
+    <div className="bg-zinc-50/40 border border-zinc-200/60 rounded-2xl overflow-hidden p-2 flex flex-col justify-between group relative">
+      <div className="aspect-[9/16] bg-zinc-950 rounded-2xl overflow-hidden relative border border-zinc-200/60 mb-2">
         {vid.thumbnailUrl ? (
           <img src={vid.thumbnailUrl} alt="Cover preview" className="w-full h-full object-cover" />
         ) : embedUrl ? (
@@ -227,8 +227,8 @@ function ShowcaseAdminItem({
         )}
         {isUploading && (
           <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center gap-1.5 z-10">
-            <Loader2 className="w-4 h-4 animate-spin text-rose-500" />
-            <span className="text-[9px] text-zinc-400 font-sans">Uploading cover...</span>
+            <Loader2 className="w-4 h-4 animate-spin text-yellow-500" />
+            <span className="text-[9px] text-zinc-500 font-sans">Uploading cover...</span>
           </div>
         )}
       </div>
@@ -238,7 +238,7 @@ function ShowcaseAdminItem({
           value={vid.title || ""} 
           onChange={(e) => onChangeTitle(e.target.value)}
           placeholder="Video title..."
-          className="w-full bg-white/5 border border-white/5 rounded-lg py-1 px-1.5 text-[10px] text-white focus:border-rose-500/50 outline-none" 
+          className="w-full bg-zinc-100/40 border border-zinc-200/60 rounded-2xl py-1 px-1.5 text-[10px] text-zinc-900 focus:border-zinc-200/60 outline-none" 
         />
         
         <div className="flex gap-1">
@@ -247,9 +247,9 @@ function ShowcaseAdminItem({
             value={vid.thumbnailUrl || ""} 
             onChange={(e) => onChangeThumbnail(e.target.value)}
             placeholder="Video cover URL..."
-            className="w-full bg-white/5 border border-white/5 rounded-lg py-1 px-1.5 text-[9px] text-white focus:border-rose-500/50 outline-none" 
+            className="w-full bg-zinc-100/40 border border-zinc-200/60 rounded-2xl py-1 px-1.5 text-[9px] text-zinc-900 focus:border-zinc-200/60 outline-none" 
           />
-          <label className="p-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg flex items-center justify-center cursor-pointer transition-colors shrink-0">
+          <label className="p-1.5 bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-2xl flex items-center justify-center cursor-pointer transition-colors shrink-0">
             <ImageIcon className="w-3 h-3" />
             <input type="file" accept="image/*" className="hidden" onChange={handleImageChange} disabled={isUploading} />
           </label>
@@ -258,7 +258,7 @@ function ShowcaseAdminItem({
         <button 
           type="button"
           onClick={() => onDelete(vid.id)} 
-          className="w-full py-1 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white border border-red-500/20 rounded-lg text-[9px] font-bold transition-all cursor-pointer"
+          className="w-full py-1 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white border border-red-500/20 rounded-2xl text-[9px] font-bold transition-all cursor-pointer"
         >
           Delete Video
         </button>
@@ -722,7 +722,7 @@ export default function AdminCoursesPage() {
     title: "", slug: "", short_description: "", description: "",
     image_url: "", banner_url: "", price: 0, original_price: 0,
     price_egp: 0, original_price_egp: 0, price_usd: 0, original_price_usd: 0,
-    is_free: false, is_featured: false, enable_gateway_fee: true, status: "draft", level: "Beginner", category: "AI Content Creation",
+    is_free: false, is_featured: false, enable_gateway_fee: true, status: "draft", level: "Beginner", category: "",
     tags: [], requirements: [], what_will_learn: [], who_is_for: [],
     certificate_bg_url: "", certificate_text_color: "#000000",
     certificate_name_x: 50, certificate_name_y: 40, certificate_name_size: 24,
@@ -771,7 +771,7 @@ export default function AdminCoursesPage() {
       banner_url: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1600",
       price: 0, original_price: 0,
       price_egp: 0, original_price_egp: 0, price_usd: 0, original_price_usd: 0,
-      is_free: false, is_featured: false, enable_gateway_fee: true, status: "draft", level: "Beginner", category: "AI Content Creation",
+      is_free: false, is_featured: false, enable_gateway_fee: true, status: "draft", level: "Beginner", category: "",
       tags: [], requirements: [], what_will_learn: [], who_is_for: [],
       certificate_bg_url: "", certificate_text_color: "#000000",
       certificate_name_x: 50, certificate_name_y: 40, certificate_name_size: 24, certificate_course_x: 50, certificate_course_y: 55, certificate_date_x: 50, certificate_date_y: 70, certificate_date_size: 14,
@@ -806,7 +806,8 @@ export default function AdminCoursesPage() {
       showcase_videos: course.showcase_videos || [],
       promo_video_id: course.promo_video_id || "",
       cta_text: course.cta_text || "",
-      cta_secondary_text: course.cta_secondary_text || ""
+      cta_secondary_text: course.cta_secondary_text || "",
+      category: course.category || ""
     });
     
     // Load curriculum & students
@@ -1347,18 +1348,18 @@ export default function AdminCoursesPage() {
   return (
     <div className="space-y-8 pb-32">
       {/* HEADER */}
-      <div className="flex items-center justify-between border-b border-white/5 pb-6">
+      <div className="flex items-center justify-between border-b border-zinc-200/60 pb-6">
         <div>
-          <h1 className="text-3xl font-sans font-black text-white">Course & Section Management</h1>
-          <p className="text-zinc-400 text-sm mt-1">Create and organize your academy, lectures, and curriculum with full flexibility.</p>
+          <h1 className="text-3xl font-sans font-black text-zinc-900">Course & Section Management</h1>
+          <p className="text-zinc-500 text-sm mt-1">Create and organize your academy, lectures, and curriculum with full flexibility.</p>
         </div>
         {view === "list" && (
-          <button onClick={handleCreateNewCourse} className="h-12 px-6 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold flex items-center gap-2 transition-all cursor-pointer">
+          <button onClick={handleCreateNewCourse} className="h-12 px-6 bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-2xl font-bold flex items-center gap-2 transition-all cursor-pointer">
             <Plus className="w-5 h-5" /> <span>Add New Course</span>
           </button>
         )}
         {view === "form" && (
-          <button onClick={() => setView("list")} className="h-12 px-6 bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-xl font-bold flex items-center gap-2 transition-all cursor-pointer">
+          <button onClick={() => setView("list")} className="h-12 px-6 bg-zinc-100/40 hover:bg-zinc-100/80 text-zinc-900 border border-zinc-200 rounded-2xl font-bold flex items-center gap-2 transition-all cursor-pointer">
             <span>Back to List</span>
           </button>
         )}
@@ -1368,19 +1369,19 @@ export default function AdminCoursesPage() {
       {view === "list" && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {loading ? (
-            Array.from({ length: 3 }).map((_, i) => <div key={i} className="h-96 rounded-3xl bg-white/5 animate-pulse" />)
+            Array.from({ length: 3 }).map((_, i) => <div key={i} className="h-96 rounded-3xl bg-zinc-100/40 animate-pulse" />)
           ) : courses.length === 0 ? (
-            <div className="col-span-full text-center py-20 bg-white/[0.02] border border-white/5 rounded-3xl">
+            <div className="col-span-full text-center py-20 bg-zinc-50/70 border border-zinc-200/60 rounded-3xl">
               <BookOpen className="w-16 h-16 text-zinc-700 mx-auto mb-4" />
               <p className="text-zinc-500 font-bold mb-4">No courses added yet in the academy.</p>
-              <button onClick={handleCreateNewCourse} className="px-6 py-3 bg-rose-600 hover:bg-rose-700 rounded-xl font-bold text-xs inline-flex items-center gap-2 cursor-pointer">
+              <button onClick={handleCreateNewCourse} className="px-6 py-3 bg-[#2563EB] hover:bg-[#1D4ED8] rounded-2xl font-bold text-xs inline-flex items-center gap-2 cursor-pointer">
                 <Plus className="w-4 h-4" /> Create Your First Course Now
               </button>
             </div>
           ) : (
             courses.map(course => (
-              <div key={course.id} className="bg-[#0a0a0f] border border-white/5 rounded-3xl overflow-hidden shadow-2xl flex flex-col justify-between hover:border-white/10 transition-all group">
-                <div className="relative h-44 bg-zinc-900 border-b border-white/5">
+              <div key={course.id} className="bg-slate-50 border border-zinc-200/60 rounded-3xl overflow-hidden shadow-sm border border-zinc-200/60 flex flex-col justify-between hover:border-zinc-200 transition-all group">
+                <div className="relative h-44 bg-zinc-900 border-b border-zinc-200/60">
                   <img src={course.image_url} alt={course.title} className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-500" />
                   <div className="absolute top-4 left-4 z-20 flex gap-2">
                     <span className={cn("text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded border", course.status === "published" ? "bg-emerald-950 text-emerald-400 border-emerald-900/30" : "bg-amber-950 text-amber-400 border-amber-900/30")}>
@@ -1391,13 +1392,13 @@ export default function AdminCoursesPage() {
                 <div className="p-6 flex-1 flex flex-col justify-between space-y-4">
                   <div className="space-y-2">
                     <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider block">{course.category}</span>
-                    <h3 className="text-lg font-alexandria font-bold text-white line-clamp-2">{course.title}</h3>
+                    <h3 className="text-lg font-sans font-bold text-zinc-900 line-clamp-2">{course.title}</h3>
                   </div>
-                  <div className="grid grid-cols-2 gap-2 border-t border-white/5 pt-4">
-                    <button onClick={() => handleEditCourse(course)} className="h-10 rounded-xl bg-white/5 border border-white/5 hover:border-white/10 text-white font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer">
+                  <div className="grid grid-cols-2 gap-2 border-t border-zinc-200/60 pt-4">
+                    <button onClick={() => handleEditCourse(course)} className="h-10 rounded-2xl bg-zinc-100/40 border border-zinc-200/60 hover:border-zinc-200 text-zinc-900 font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer">
                       <Edit className="w-3.5 h-3.5" /> <span>Manage Course</span>
                     </button>
-                    <button onClick={() => handleDeleteCourse(course.id)} className="h-10 rounded-xl bg-red-950/15 border border-red-900/10 hover:bg-red-950/30 text-red-400 font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer">
+                    <button onClick={() => handleDeleteCourse(course.id)} className="h-10 rounded-2xl bg-red-950/15 border border-red-900/10 hover:bg-red-950/30 text-red-400 font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer">
                       <Trash2 className="w-3.5 h-3.5" /> <span>Delete</span>
                     </button>
                   </div>
@@ -1412,75 +1413,76 @@ export default function AdminCoursesPage() {
       {view === "form" && (
         <div className="space-y-12">
           {/* Section 1: Basic Course Info */}
-          <div className="bg-[#0a0a0f] border border-white/5 rounded-3xl p-6 md:p-8 shadow-2xl">
-            <div className="flex items-center justify-between mb-8 border-b border-white/5 pb-4">
-              <h2 className="text-xl font-alexandria font-bold text-white flex items-center gap-2">
-                <BookOpen className="w-5 h-5 text-rose-500" />
+          <div className="bg-slate-50 border border-zinc-200/60 rounded-3xl p-6 md:p-8 shadow-sm border border-zinc-200/60">
+            <div className="flex items-center justify-between mb-8 border-b border-zinc-200/60 pb-4">
+              <h2 className="text-xl font-sans font-bold text-zinc-900 flex items-center gap-2">
+                <BookOpen className="w-5 h-5 text-yellow-500" />
                 Course Basic Data
               </h2>
-              <button onClick={handleSaveCourse} className="h-10 px-6 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold flex items-center gap-2 shadow-lg text-xs cursor-pointer">
+              <button onClick={handleSaveCourse} className="h-10 px-6 bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-2xl font-bold flex items-center gap-2 shadow-sm border border-zinc-200/60 text-xs cursor-pointer">
                 <Save className="w-4 h-4" /> <span>Save Changes</span>
               </button>
             </div>
             
             <form onSubmit={handleSaveCourse} className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="flex flex-col gap-2">
-                <label className="text-xs font-bold text-zinc-400">Course Title *</label>
-                <input required value={courseForm.title || ""} onChange={e => setCourseForm({ ...courseForm, title: e.target.value })} className="bg-white/5 border border-white/5 rounded-xl py-3 px-4 text-sm focus:border-rose-500/50" />
+                <label className="text-xs font-bold text-zinc-500">Course Title *</label>
+                <input required value={courseForm.title || ""} onChange={e => setCourseForm({ ...courseForm, title: e.target.value })} className="bg-zinc-100/40 border border-zinc-200/60 rounded-2xl py-3 px-4 text-sm focus:border-zinc-200/60" />
               </div>
               <div className="flex flex-col gap-2">
-                <label className="text-xs font-bold text-zinc-400">Unique Slug</label>
-                <input value={courseForm.slug || ""} onChange={e => setCourseForm({ ...courseForm, slug: e.target.value })} className="bg-white/5 border border-white/5 rounded-xl py-3 px-4 text-sm text-zinc-300" />
+                <label className="text-xs font-bold text-zinc-500">Unique Slug</label>
+                <input value={courseForm.slug || ""} onChange={e => setCourseForm({ ...courseForm, slug: e.target.value })} className="bg-zinc-100/40 border border-zinc-200/60 rounded-2xl py-3 px-4 text-sm text-zinc-700" />
               </div>
               
               <div className="flex flex-col gap-2">
-                <label className="text-xs font-bold text-rose-400">Price in EGP *</label>
-                <input type="number" required value={courseForm.price_egp !== undefined ? courseForm.price_egp : courseForm.price} onChange={e => setCourseForm({ ...courseForm, price_egp: Number(e.target.value), price: Number(e.target.value) })} className="bg-white/5 border border-white/5 rounded-xl py-3 px-4 text-sm focus:border-rose-500/50" />
+                <label className="text-xs font-bold text-yellow-500">Price in EGP *</label>
+                <input type="number" required value={courseForm.price_egp !== undefined ? courseForm.price_egp : courseForm.price} onChange={e => setCourseForm({ ...courseForm, price_egp: Number(e.target.value), price: Number(e.target.value) })} className="bg-zinc-100/40 border border-zinc-200/60 rounded-2xl py-3 px-4 text-sm focus:border-zinc-200/60" />
               </div>
               <div className="flex flex-col gap-2">
-                <label className="text-xs font-bold text-zinc-400">Original Price before discount (EGP)</label>
-                <input type="number" value={courseForm.original_price_egp !== undefined ? (courseForm.original_price_egp || "") : (courseForm.original_price || "")} onChange={e => setCourseForm({ ...courseForm, original_price_egp: Number(e.target.value), original_price: Number(e.target.value) })} className="bg-white/5 border border-white/5 rounded-xl py-3 px-4 text-sm focus:border-rose-500/50" />
+                <label className="text-xs font-bold text-zinc-500">Original Price before discount (EGP)</label>
+                <input type="number" value={courseForm.original_price_egp !== undefined ? (courseForm.original_price_egp || "") : (courseForm.original_price || "")} onChange={e => setCourseForm({ ...courseForm, original_price_egp: Number(e.target.value), original_price: Number(e.target.value) })} className="bg-zinc-100/40 border border-zinc-200/60 rounded-2xl py-3 px-4 text-sm focus:border-zinc-200/60" />
               </div>
 
               <div className="flex flex-col gap-2">
                 <label className="text-xs font-bold text-emerald-400">Price in USD *</label>
-                <input type="number" required value={courseForm.price_usd || 0} onChange={e => setCourseForm({ ...courseForm, price_usd: Number(e.target.value) })} className="bg-white/5 border border-white/5 rounded-xl py-3 px-4 text-sm focus:border-emerald-500/50" />
+                <input type="number" required value={courseForm.price_usd || 0} onChange={e => setCourseForm({ ...courseForm, price_usd: Number(e.target.value) })} className="bg-zinc-100/40 border border-zinc-200/60 rounded-2xl py-3 px-4 text-sm focus:border-emerald-500/50" />
               </div>
               <div className="flex flex-col gap-2">
-                <label className="text-xs font-bold text-zinc-400">Original Price before discount (USD)</label>
-                <input type="number" value={courseForm.original_price_usd || ""} onChange={e => setCourseForm({ ...courseForm, original_price_usd: Number(e.target.value) })} className="bg-white/5 border border-white/5 rounded-xl py-3 px-4 text-sm focus:border-emerald-500/50" />
+                <label className="text-xs font-bold text-zinc-500">Original Price before discount (USD)</label>
+                <input type="number" value={courseForm.original_price_usd || ""} onChange={e => setCourseForm({ ...courseForm, original_price_usd: Number(e.target.value) })} className="bg-zinc-100/40 border border-zinc-200/60 rounded-2xl py-3 px-4 text-sm focus:border-emerald-500/50" />
               </div>
 
               <div className="flex flex-col gap-2">
-                <label className="text-xs font-bold text-zinc-400">Course Level</label>
-                <select value={courseForm.level} onChange={e => setCourseForm({ ...courseForm, level: e.target.value as any })} className="bg-[#0f0f15] border border-white/5 rounded-xl py-3 px-4 text-sm">
+                <label className="text-xs font-bold text-zinc-500">Course Level</label>
+                <select value={courseForm.level} onChange={e => setCourseForm({ ...courseForm, level: e.target.value as any })} className="bg-slate-50 border border-zinc-200/60 rounded-2xl py-3 px-4 text-sm">
                   <option value="Beginner">Beginner</option>
                   <option value="Intermediate">Intermediate</option>
                   <option value="Advanced">Advanced</option>
                 </select>
               </div>
               <div className="flex flex-col gap-2">
-                <label className="text-xs font-bold text-zinc-400">Course Category</label>
-                <select value={courseForm.category} onChange={e => setCourseForm({ ...courseForm, category: e.target.value })} className="bg-[#0f0f15] border border-white/5 rounded-xl py-3 px-4 text-sm">
-                  {(categories.length > 0 ? categories : ["AI Content Creation", "AI Animation", "Creative Video Production", "Digital Storytelling", "Free Courses"]).map((cat) => (
+                <label className="text-xs font-bold text-zinc-500">Course Category</label>
+                <select value={courseForm.category} onChange={e => setCourseForm({ ...courseForm, category: e.target.value })} className="bg-slate-50 border border-zinc-200/60 rounded-2xl py-3 px-4 text-sm">
+                  <option value="" className="bg-slate-50">None (بدون قسم)</option>
+                  {categories.map((cat) => (
                     <option key={cat} value={cat}>{cat}</option>
                   ))}
                 </select>
               </div>
 
               <div className="flex flex-col gap-2">
-                <label className="text-xs font-bold text-zinc-400">Publication Status</label>
-                <select value={courseForm.status} onChange={e => setCourseForm({ ...courseForm, status: e.target.value as any })} className="bg-[#0f0f15] border border-white/5 rounded-xl py-3 px-4 text-sm">
+                <label className="text-xs font-bold text-zinc-500">Publication Status</label>
+                <select value={courseForm.status} onChange={e => setCourseForm({ ...courseForm, status: e.target.value as any })} className="bg-slate-50 border border-zinc-200/60 rounded-2xl py-3 px-4 text-sm">
                   <option value="draft">Draft</option>
                   <option value="published">Published</option>
                   <option value="hidden">Hidden</option>
                 </select>
               </div>
               <div className="flex flex-col gap-2">
-                <label className="text-xs font-bold text-zinc-400">Course Cover Image (shown on homepage and store cards)</label>
+                <label className="text-xs font-bold text-zinc-500">Course Cover Image (shown on homepage and store cards)</label>
                 <div className="flex gap-2">
-                  <input value={courseForm.image_url || ""} onChange={e => setCourseForm({ ...courseForm, image_url: e.target.value })} className="bg-white/5 border border-white/5 rounded-xl py-3 px-4 text-sm flex-1 text-zinc-300" />
-                  <label className="h-[46px] px-4 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer">
+                  <input value={courseForm.image_url || ""} onChange={e => setCourseForm({ ...courseForm, image_url: e.target.value })} className="bg-zinc-100/40 border border-zinc-200/60 rounded-2xl py-3 px-4 text-sm flex-1 text-zinc-700" />
+                  <label className="h-[46px] px-4 bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-2xl font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer">
                     {uploadingField === "image_url" ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4 rotate-180" />}
                     <span>Upload Image</span>
                     <input type="file" accept="image/*" className="hidden" onChange={e => handleFileUpload(e, "image_url")} disabled={uploadingField !== null} />
@@ -1489,10 +1491,10 @@ export default function AdminCoursesPage() {
               </div>
 
               <div className="flex flex-col gap-2">
-                <label className="text-xs font-bold text-zinc-400">Banner URL</label>
+                <label className="text-xs font-bold text-zinc-500">Banner URL</label>
                 <div className="flex gap-2">
-                  <input value={courseForm.banner_url || ""} onChange={e => setCourseForm({ ...courseForm, banner_url: e.target.value })} className="bg-white/5 border border-white/5 rounded-xl py-3 px-4 text-sm flex-1 text-zinc-300" />
-                  <label className="h-[46px] px-4 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer">
+                  <input value={courseForm.banner_url || ""} onChange={e => setCourseForm({ ...courseForm, banner_url: e.target.value })} className="bg-zinc-100/40 border border-zinc-200/60 rounded-2xl py-3 px-4 text-sm flex-1 text-zinc-700" />
+                  <label className="h-[46px] px-4 bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-2xl font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer">
                     {uploadingField === "banner_url" ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4 rotate-180" />}
                     <span>Upload Banner</span>
                     <input type="file" accept="image/*" className="hidden" onChange={e => handleFileUpload(e, "banner_url")} disabled={uploadingField !== null} />
@@ -1501,20 +1503,20 @@ export default function AdminCoursesPage() {
               </div>
 
               <div className="flex flex-col gap-2">
-                <label className="text-xs font-bold text-zinc-400">Course Promo Video (ID / URL)</label>
+                <label className="text-xs font-bold text-zinc-500">Course Promo Video (ID / URL)</label>
                 <div className="flex gap-2">
                   <input 
                     value={courseForm.promo_video_id || ""} 
                     onChange={e => setCourseForm({ ...courseForm, promo_video_id: e.target.value })} 
                     placeholder={promoUploading ? "Uploading promo video..." : "Video ID or URL..."}
                     disabled={promoUploading}
-                    className="bg-white/5 border border-white/5 rounded-xl py-3 px-4 text-sm flex-1 text-zinc-300 disabled:opacity-50" 
+                    className="bg-zinc-100/40 border border-zinc-200/60 rounded-2xl py-3 px-4 text-sm flex-1 text-zinc-700 disabled:opacity-50" 
                   />
                   {courseForm.promo_video_id && !promoUploading && (
                     <button
                       type="button"
                       onClick={handlePromoVideoDelete}
-                      className="h-[46px] px-4 bg-red-600/10 hover:bg-red-600 text-red-500 hover:text-white border border-red-500/20 rounded-xl font-bold text-xs flex items-center justify-center gap-1 transition-all cursor-pointer"
+                      className="h-[46px] px-4 bg-red-600/10 hover:bg-red-600 text-red-500 hover:text-white border border-red-500/20 rounded-2xl font-bold text-xs flex items-center justify-center gap-1 transition-all cursor-pointer"
                     >
                       Delete
                     </button>
@@ -1523,13 +1525,13 @@ export default function AdminCoursesPage() {
                     <button
                       type="button"
                       onClick={handleCancelPromoUpload}
-                      className="h-[46px] px-4 bg-red-600/10 hover:bg-red-600 text-red-500 hover:text-white border border-red-500/20 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                      className="h-[46px] px-4 bg-red-600/10 hover:bg-red-600 text-red-500 hover:text-white border border-red-500/20 rounded-2xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer"
                     >
                       <X className="w-4 h-4" />
                       <span>Cancel ({promoProgress}%)</span>
                     </button>
                   ) : (
-                    <label className="h-[46px] px-4 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer">
+                    <label className="h-[46px] px-4 bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-2xl font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer">
                       <Video className="w-4 h-4" />
                       <span>Upload Video</span>
                       <input type="file" accept="video/*" className="hidden" onChange={handlePromoVideoUpload} disabled={promoUploading} />
@@ -1537,8 +1539,8 @@ export default function AdminCoursesPage() {
                   )}
                 </div>
                 {promoProgress !== null && (
-                  <div className="w-full bg-white/5 rounded-full h-1.5 overflow-hidden">
-                    <div className="bg-rose-600 h-full transition-all duration-300" style={{ width: `${promoProgress}%` }} />
+                  <div className="w-full bg-zinc-100/40 rounded-full h-1.5 overflow-hidden">
+                    <div className="bg-brand-600 h-full transition-all duration-300" style={{ width: `${promoProgress}%` }} />
                   </div>
                 )}
               </div>
@@ -1551,7 +1553,7 @@ export default function AdminCoursesPage() {
                   value={courseForm.cta_text || ""}
                   onChange={e => setCourseForm({ ...courseForm, cta_text: e.target.value })}
                   placeholder='e.g. "اشترك الآن" (leave empty for default)'
-                  className="bg-white/5 border border-violet-500/20 focus:border-violet-500/50 rounded-xl py-3 px-4 text-sm text-zinc-300 placeholder:text-zinc-600"
+                  className="bg-zinc-100/40 border border-violet-500/20 focus:border-violet-500/50 rounded-2xl py-3 px-4 text-sm text-zinc-700 placeholder:text-zinc-600"
                 />
                 <p className="text-[10px] text-zinc-500">The main enroll button text. Supports Arabic. Leave empty to use the dynamic default (free/discount text).</p>
               </div>
@@ -1561,34 +1563,34 @@ export default function AdminCoursesPage() {
                   value={courseForm.cta_secondary_text || ""}
                   onChange={e => setCourseForm({ ...courseForm, cta_secondary_text: e.target.value })}
                   placeholder='e.g. "إضافة إلى السلة" (leave empty to hide or use default)'
-                  className="bg-white/5 border border-violet-500/20 focus:border-violet-500/50 rounded-xl py-3 px-4 text-sm text-zinc-300 placeholder:text-zinc-600"
+                  className="bg-zinc-100/40 border border-violet-500/20 focus:border-violet-500/50 rounded-2xl py-3 px-4 text-sm text-zinc-700 placeholder:text-zinc-600"
                 />
                 <p className="text-[10px] text-zinc-500">The secondary add-to-cart button text. Leave empty to use default text.</p>
               </div>
 
               <div className="flex flex-col gap-4 py-2 justify-center">
                 <div className="flex items-center gap-3 select-none">
-                  <input type="checkbox" id="isFreeCheckbox" checked={courseForm.is_free || false} onChange={e => setCourseForm({ ...courseForm, is_free: e.target.checked })} className="w-4 h-4 rounded accent-rose-600 cursor-pointer" />
-                  <label htmlFor="isFreeCheckbox" className="text-xs font-bold text-zinc-300 cursor-pointer">
+                  <input type="checkbox" id="isFreeCheckbox" checked={courseForm.is_free || false} onChange={e => setCourseForm({ ...courseForm, is_free: e.target.checked })} className="w-4 h-4 rounded accent-brand-600 cursor-pointer" />
+                  <label htmlFor="isFreeCheckbox" className="text-xs font-bold text-zinc-700 cursor-pointer">
                     This course is completely free
                   </label>
                 </div>
                 <div className="flex items-center gap-3 select-none">
-                  <input type="checkbox" id="isFeaturedCheckbox" checked={courseForm.is_featured || false} onChange={e => setCourseForm({ ...courseForm, is_featured: e.target.checked })} className="w-4 h-4 rounded accent-rose-600 cursor-pointer" />
-                  <label htmlFor="isFeaturedCheckbox" className="text-xs font-bold text-zinc-300 cursor-pointer">
+                  <input type="checkbox" id="isFeaturedCheckbox" checked={courseForm.is_featured || false} onChange={e => setCourseForm({ ...courseForm, is_featured: e.target.checked })} className="w-4 h-4 rounded accent-brand-600 cursor-pointer" />
+                  <label htmlFor="isFeaturedCheckbox" className="text-xs font-bold text-zinc-700 cursor-pointer">
                     Featured course
                   </label>
                 </div>
-                <div className="flex flex-col gap-1 bg-white/[0.01] border border-white/5 rounded-xl p-3 select-none">
+                <div className="flex flex-col gap-1 bg-zinc-50/40 border border-zinc-200/60 rounded-2xl p-3 select-none">
                   <div className="flex items-center gap-3">
                     <input 
                       type="checkbox" 
                       id="courseEnableGatewayFeeCheckbox" 
                       checked={courseForm.enable_gateway_fee !== false} 
                       onChange={e => setCourseForm({ ...courseForm, enable_gateway_fee: e.target.checked })} 
-                      className="w-4 h-4 rounded accent-rose-600 cursor-pointer" 
+                      className="w-4 h-4 rounded accent-brand-600 cursor-pointer" 
                     />
-                    <label htmlFor="courseEnableGatewayFeeCheckbox" className="text-xs font-bold text-zinc-300 cursor-pointer">
+                    <label htmlFor="courseEnableGatewayFeeCheckbox" className="text-xs font-bold text-zinc-700 cursor-pointer">
                       Enable Payment Processing Fee Recovery (3%)
                     </label>
                   </div>
@@ -1610,12 +1612,12 @@ export default function AdminCoursesPage() {
               
               <div className="md:col-span-2">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-bold text-white">Full & Professional Course Description</span>
+                  <span className="text-sm font-bold text-zinc-900">Full & Professional Course Description</span>
                   <button
                     type="button"
                     onClick={handleEnhanceDescription}
                     disabled={isEnhancing}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white rounded-lg text-xs font-bold font-sans transition-all shadow-lg hover:shadow-violet-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white rounded-2xl text-xs font-bold font-sans transition-all shadow-sm border border-zinc-200/60 hover:shadow-violet-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {isEnhancing ? (
                       <Loader2 className="w-4 h-4 animate-spin" />
@@ -1637,19 +1639,19 @@ export default function AdminCoursesPage() {
 
           {/* Section 2: Curriculum Builder (ONLY IF SAVED ONCE) */}
           {selectedCourse ? (
-            <div className="bg-[#0a0a0f] border border-white/5 rounded-3xl p-6 md:p-8 shadow-2xl">
-              <div className="flex items-center justify-between mb-8 border-b border-white/5 pb-4">
-                <h2 className="text-xl font-alexandria font-bold text-white flex items-center gap-2">
-                  <Video className="w-5 h-5 text-rose-500" />
+            <div className="bg-slate-50 border border-zinc-200/60 rounded-3xl p-6 md:p-8 shadow-sm border border-zinc-200/60">
+              <div className="flex items-center justify-between mb-8 border-b border-zinc-200/60 pb-4">
+                <h2 className="text-xl font-sans font-bold text-zinc-900 flex items-center gap-2">
+                  <Video className="w-5 h-5 text-yellow-500" />
                   Curriculum Builder
                 </h2>
-                <button onClick={() => { setEditingSectionId(null); setEditingSectionTitle(""); setEditingSectionDescription(""); setShowSectionModal(true); }} className="h-10 px-5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold flex items-center gap-2 text-xs cursor-pointer">
+                <button onClick={() => { setEditingSectionId(null); setEditingSectionTitle(""); setEditingSectionDescription(""); setShowSectionModal(true); }} className="h-10 px-5 bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-2xl font-bold flex items-center gap-2 text-xs cursor-pointer">
                   <Plus className="w-4 h-4" /> <span>Add Study Section</span>
                 </button>
               </div>
 
               {curriculumSections.length === 0 && !savingSection ? (
-                <div className="text-center py-12 border border-dashed border-white/10 rounded-2xl">
+                <div className="text-center py-12 border border-dashed border-zinc-200 rounded-2xl">
                   <AlertCircle className="w-10 h-10 text-zinc-600 mx-auto mb-3" />
                   <p className="text-zinc-500 font-bold text-sm">Curriculum is empty. Add a study section to get started.</p>
                 </div>
@@ -1685,16 +1687,16 @@ export default function AdminCoursesPage() {
 
                       {/* Skeleton loader for saving a new section */}
                       {savingSection && !editingSectionId && (
-                        <div className="border border-white/5 bg-[#0f0f15]/50 rounded-2xl p-4 flex items-center justify-between gap-4 animate-pulse">
+                        <div className="border border-zinc-200/60 bg-slate-50/50 rounded-2xl p-4 flex items-center justify-between gap-4 animate-pulse">
                           <div className="flex items-center gap-3 w-full">
-                            <div className="w-5 h-5 rounded bg-white/5" />
-                            <div className="w-8 h-8 rounded-lg bg-white/5" />
+                            <div className="w-5 h-5 rounded bg-zinc-100/40" />
+                            <div className="w-8 h-8 rounded-2xl bg-zinc-100/40" />
                             <div className="space-y-2 flex-1">
-                              <div className="h-4 bg-white/10 rounded w-1/3" />
-                              <div className="h-3 bg-white/5 rounded w-1/2" />
+                              <div className="h-4 bg-zinc-100/80 rounded w-1/3" />
+                              <div className="h-3 bg-zinc-100/40 rounded w-1/2" />
                             </div>
                           </div>
-                          <div className="w-24 h-8 bg-white/5 rounded-lg" />
+                          <div className="w-24 h-8 bg-zinc-100/40 rounded-2xl" />
                         </div>
                       )}
                     </div>
@@ -1703,19 +1705,19 @@ export default function AdminCoursesPage() {
               )}
             </div>
           ) : (
-            <div className="bg-[#0a0a0f] border border-white/5 rounded-3xl p-8 text-center relative overflow-hidden shadow-2xl space-y-6">
+            <div className="bg-slate-50 border border-zinc-200/60 rounded-3xl p-8 text-center relative overflow-hidden shadow-sm border border-zinc-200/60 space-y-6">
               {/* Decorative radial glow */}
-              <div className="absolute w-80 h-80 bg-rose-500/5 rounded-full blur-[80px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
+              <div className="absolute w-80 h-80 bg-brand-500/5 rounded-full blur-[80px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
 
-              <div className="mx-auto w-20 h-20 rounded-full bg-rose-600/10 border border-rose-500/20 flex items-center justify-center text-rose-500 animate-pulse">
+              <div className="mx-auto w-20 h-20 rounded-full bg-brand-600/10 border border-zinc-200/60 flex items-center justify-center text-yellow-500 animate-pulse">
                 <Video className="w-10 h-10" />
               </div>
 
               <div className="space-y-2 max-w-lg mx-auto">
-                <h3 className="font-alexandria font-bold text-white text-lg md:text-xl">
+                <h3 className="font-sans font-bold text-zinc-900 text-lg md:text-xl">
                   Curriculum & Lecture Management (LMS Builder) Ready to go!
                 </h3>
-                <p className="text-zinc-400 text-xs md:text-sm leading-relaxed">
+                <p className="text-zinc-500 text-xs md:text-sm leading-relaxed">
                   You're building a great learning path! 🚀 Please save the basic course data first (title, price, and cover) to create the course in the database, then you'll instantly get access to the curriculum builder, video lecture uploads, and drag-and-drop PDF/attachment management.
                 </p>
               </div>
@@ -1724,7 +1726,7 @@ export default function AdminCoursesPage() {
                 <button
                   type="button"
                   onClick={() => handleSaveCourse()}
-                  className="h-11 px-8 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-2 mx-auto active:scale-95 transition-all shadow-lg shadow-rose-600/20 cursor-pointer"
+                  className="h-11 px-8 bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-2xl font-bold text-xs flex items-center justify-center gap-2 mx-auto active:scale-95 transition-all shadow-sm border border-zinc-200/60 shadow-brand-600/20 cursor-pointer"
                 >
                   <Save className="w-4 h-4" />
                   <span>Save Course Data & Activate Lecture Builder 🚀</span>
@@ -1735,13 +1737,13 @@ export default function AdminCoursesPage() {
 
           {/* Section 3: Certificate Builder */}
           {selectedCourse ? (
-            <div className="bg-[#0a0a0f] border border-white/5 rounded-3xl p-6 md:p-8 shadow-2xl">
-              <div className="flex items-center justify-between mb-8 border-b border-white/5 pb-4">
-                <h2 className="text-xl font-alexandria font-bold text-white flex items-center gap-2">
+            <div className="bg-slate-50 border border-zinc-200/60 rounded-3xl p-6 md:p-8 shadow-sm border border-zinc-200/60">
+              <div className="flex items-center justify-between mb-8 border-b border-zinc-200/60 pb-4">
+                <h2 className="text-xl font-sans font-bold text-zinc-900 flex items-center gap-2">
                   <CheckCircle className="w-5 h-5 text-emerald-500" />
                   Automatic Certificate Builder
                 </h2>
-                <button onClick={handleSaveCourse} className="h-10 px-6 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold flex items-center gap-2 shadow-lg text-xs cursor-pointer">
+                <button onClick={handleSaveCourse} className="h-10 px-6 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-bold flex items-center gap-2 shadow-sm border border-zinc-200/60 text-xs cursor-pointer">
                   <Save className="w-4 h-4" /> <span>Save Certificate Settings</span>
                 </button>
               </div>
@@ -1749,10 +1751,10 @@ export default function AdminCoursesPage() {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div className="space-y-6">
                   <div className="flex flex-col gap-2">
-                    <label className="text-xs font-bold text-zinc-400">Certificate Background Image</label>
+                    <label className="text-xs font-bold text-zinc-500">Certificate Background Image</label>
                     <div className="flex gap-2">
-                      <input value={courseForm.certificate_bg_url || ""} onChange={e => setCourseForm({ ...courseForm, certificate_bg_url: e.target.value })} placeholder="Certificate background URL..." className="bg-white/5 border border-white/5 rounded-xl py-3 px-4 text-sm flex-1 text-zinc-300" />
-                      <label className="h-[46px] px-4 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer">
+                      <input value={courseForm.certificate_bg_url || ""} onChange={e => setCourseForm({ ...courseForm, certificate_bg_url: e.target.value })} placeholder="Certificate background URL..." className="bg-zinc-100/40 border border-zinc-200/60 rounded-2xl py-3 px-4 text-sm flex-1 text-zinc-700" />
+                      <label className="h-[46px] px-4 bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-2xl font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer">
                         {uploadingField === "certificate_bg_url" ? <Loader2 className="w-4 h-4 animate-spin" /> : <ImageIcon className="w-4 h-4" />}
                         <span>Upload Background</span>
                         <input type="file" accept="image/*" className="hidden" onChange={e => handleFileUpload(e, "certificate_bg_url")} disabled={uploadingField !== null} />
@@ -1761,43 +1763,43 @@ export default function AdminCoursesPage() {
                   </div>
                   
                   <div className="flex flex-col gap-2">
-                    <label className="text-xs font-bold text-zinc-400">Test Student Name (Live Preview)</label>
-                    <input type="text" value={testStudentName} onChange={e => setTestStudentName(e.target.value)} placeholder="e.g. John Smith..." className="bg-white/5 border border-white/5 rounded-xl py-3 px-4 text-sm focus:border-rose-500/50 text-white" />
+                    <label className="text-xs font-bold text-zinc-500">Test Student Name (Live Preview)</label>
+                    <input type="text" value={testStudentName} onChange={e => setTestStudentName(e.target.value)} placeholder="e.g. John Smith..." className="bg-zinc-100/40 border border-zinc-200/60 rounded-2xl py-3 px-4 text-sm focus:border-zinc-200/60 text-zinc-900" />
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="flex flex-col gap-2">
-                      <label className="text-xs font-bold text-zinc-400">Student Name Horizontal Position (X %)</label>
-                      <input type="number" value={courseForm.certificate_name_x ?? ""} onChange={e => setCourseForm({...courseForm, certificate_name_x: Number(e.target.value)})} className="bg-white/5 border border-white/5 rounded-xl py-2 px-4 text-sm text-white" />
+                      <label className="text-xs font-bold text-zinc-500">Student Name Horizontal Position (X %)</label>
+                      <input type="number" value={courseForm.certificate_name_x ?? ""} onChange={e => setCourseForm({...courseForm, certificate_name_x: Number(e.target.value)})} className="bg-zinc-100/40 border border-zinc-200/60 rounded-2xl py-2 px-4 text-sm text-zinc-900" />
                     </div>
                     <div className="flex flex-col gap-2">
-                      <label className="text-xs font-bold text-zinc-400">Student Name Vertical Position (Y %)</label>
-                      <input type="number" value={courseForm.certificate_name_y ?? ""} onChange={e => setCourseForm({...courseForm, certificate_name_y: Number(e.target.value)})} className="bg-white/5 border border-white/5 rounded-xl py-2 px-4 text-sm text-white" />
+                      <label className="text-xs font-bold text-zinc-500">Student Name Vertical Position (Y %)</label>
+                      <input type="number" value={courseForm.certificate_name_y ?? ""} onChange={e => setCourseForm({...courseForm, certificate_name_y: Number(e.target.value)})} className="bg-zinc-100/40 border border-zinc-200/60 rounded-2xl py-2 px-4 text-sm text-zinc-900" />
                     </div>
                     
                     <div className="flex flex-col gap-2">
-                      <label className="text-xs font-bold text-zinc-400">Date Horizontal Position (X %)</label>
-                      <input type="number" value={courseForm.certificate_date_x ?? ""} onChange={e => setCourseForm({...courseForm, certificate_date_x: Number(e.target.value)})} className="bg-white/5 border border-white/5 rounded-xl py-2 px-4 text-sm text-white" />
+                      <label className="text-xs font-bold text-zinc-500">Date Horizontal Position (X %)</label>
+                      <input type="number" value={courseForm.certificate_date_x ?? ""} onChange={e => setCourseForm({...courseForm, certificate_date_x: Number(e.target.value)})} className="bg-zinc-100/40 border border-zinc-200/60 rounded-2xl py-2 px-4 text-sm text-zinc-900" />
                     </div>
                     <div className="flex flex-col gap-2">
-                      <label className="text-xs font-bold text-zinc-400">Date Vertical Position (Y %)</label>
-                      <input type="number" value={courseForm.certificate_date_y ?? ""} onChange={e => setCourseForm({...courseForm, certificate_date_y: Number(e.target.value)})} className="bg-[#0f0f15] border border-white/5 rounded-xl py-2 px-4 text-sm text-white" />
+                      <label className="text-xs font-bold text-zinc-500">Date Vertical Position (Y %)</label>
+                      <input type="number" value={courseForm.certificate_date_y ?? ""} onChange={e => setCourseForm({...courseForm, certificate_date_y: Number(e.target.value)})} className="bg-slate-50 border border-zinc-200/60 rounded-2xl py-2 px-4 text-sm text-zinc-900" />
                     </div>
 
                     <div className="flex flex-col gap-2">
-                      <label className="text-xs font-bold text-rose-400">Student Name Font Size (px)</label>
-                      <input type="number" value={courseForm.certificate_name_size ?? ""} onChange={e => setCourseForm({...courseForm, certificate_name_size: Number(e.target.value)})} className="bg-white/5 border border-white/5 rounded-xl py-2 px-4 text-sm text-white" />
+                      <label className="text-xs font-bold text-yellow-500">Student Name Font Size (px)</label>
+                      <input type="number" value={courseForm.certificate_name_size ?? ""} onChange={e => setCourseForm({...courseForm, certificate_name_size: Number(e.target.value)})} className="bg-zinc-100/40 border border-zinc-200/60 rounded-2xl py-2 px-4 text-sm text-zinc-900" />
                     </div>
                     <div className="flex flex-col gap-2">
-                      <label className="text-xs font-bold text-zinc-400">Date Font Size (px)</label>
-                      <input type="number" value={courseForm.certificate_date_size ?? ""} onChange={e => setCourseForm({...courseForm, certificate_date_size: Number(e.target.value)})} className="bg-white/5 border border-white/5 rounded-xl py-2 px-4 text-sm text-white" />
+                      <label className="text-xs font-bold text-zinc-500">Date Font Size (px)</label>
+                      <input type="number" value={courseForm.certificate_date_size ?? ""} onChange={e => setCourseForm({...courseForm, certificate_date_size: Number(e.target.value)})} className="bg-zinc-100/40 border border-zinc-200/60 rounded-2xl py-2 px-4 text-sm text-zinc-900" />
                     </div>
                   </div>
                 </div>
                 
                 {/* Certificate Preview Box */}
                 <div 
-                  className="relative w-full aspect-[1.414/1] bg-white/5 rounded-xl border border-white/10 overflow-hidden flex items-center justify-center"
+                  className="relative w-full aspect-[1.414/1] bg-zinc-100/40 rounded-2xl border border-zinc-200 overflow-hidden flex items-center justify-center"
                   style={{ containerType: 'inline-size' } as React.CSSProperties}
                 >
                   <style dangerouslySetInnerHTML={{__html: `
@@ -1846,7 +1848,7 @@ export default function AdminCoursesPage() {
               </div>
             </div>
           ) : (
-            <div className="bg-[#0a0a0f] border border-white/5 rounded-3xl p-8 text-center relative overflow-hidden shadow-2xl space-y-6">
+            <div className="bg-slate-50 border border-zinc-200/60 rounded-3xl p-8 text-center relative overflow-hidden shadow-sm border border-zinc-200/60 space-y-6">
               {/* Decorative radial glow */}
               <div className="absolute w-80 h-80 bg-emerald-500/5 rounded-full blur-[80px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
 
@@ -1855,10 +1857,10 @@ export default function AdminCoursesPage() {
               </div>
 
               <div className="space-y-2 max-w-lg mx-auto">
-                <h3 className="font-alexandria font-bold text-white text-lg md:text-xl">
+                <h3 className="font-sans font-bold text-zinc-900 text-lg md:text-xl">
                   Automatic Student Certificates Builder
                 </h3>
-                <p className="text-zinc-400 text-xs md:text-sm leading-relaxed">
+                <p className="text-zinc-500 text-xs md:text-sm leading-relaxed">
                   Grant your students official completion certificates with a dynamic QR code once they complete course requirements! Please save the basic course data first to activate the name, date, and text color positioning panel over your custom certificate template.
                 </p>
               </div>
@@ -1867,37 +1869,37 @@ export default function AdminCoursesPage() {
 
           {/* Section 3.5: Showcase Videos Builder */}
           {selectedCourse ? (
-            <div className="bg-[#0a0a0f] border border-white/5 rounded-3xl p-6 md:p-8 shadow-2xl space-y-6 mt-8">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/5 pb-4">
-                <h2 className="text-xl font-alexandria font-bold text-white flex items-center gap-2">
-                  <Video className="w-5 h-5 text-rose-500" />
+            <div className="bg-slate-50 border border-zinc-200/60 rounded-3xl p-6 md:p-8 shadow-sm border border-zinc-200/60 space-y-6 mt-8">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-200/60 pb-4">
+                <h2 className="text-xl font-sans font-bold text-zinc-900 flex items-center gap-2">
+                  <Video className="w-5 h-5 text-yellow-500" />
                   Student Results Showcase Videos
                 </h2>
                 <div className="flex items-center gap-2">
-                  <label className="h-10 px-5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold flex items-center gap-2 text-xs cursor-pointer transition-all select-none">
+                  <label className="h-10 px-5 bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-2xl font-bold flex items-center gap-2 text-xs cursor-pointer transition-all select-none">
                     <Plus className="w-4 h-4" /> <span>Upload Video (max 10)</span>
                     <input type="file" accept="video/*" multiple className="hidden" onChange={handleShowcaseVideoUpload} disabled={showcaseUploading} />
                   </label>
-                  <button type="button" onClick={() => handleSaveCourse()} className="h-10 px-5 bg-zinc-800 hover:bg-zinc-700 text-white border border-white/10 rounded-xl font-bold flex items-center gap-2 text-xs transition-all cursor-pointer">
+                  <button type="button" onClick={() => handleSaveCourse()} className="h-10 px-5 bg-zinc-800 hover:bg-zinc-700 text-zinc-900 border border-zinc-200 rounded-2xl font-bold flex items-center gap-2 text-xs transition-all cursor-pointer">
                     <Save className="w-4 h-4" /> <span>Save Changes</span>
                   </button>
                 </div>
               </div>
 
               {showcaseUploading && (
-                <div className="bg-white/[0.02] border border-white/5 p-4 rounded-2xl space-y-2">
+                <div className="bg-zinc-50/70 border border-zinc-200/60 p-4 rounded-2xl space-y-2">
                   <div className="flex items-center justify-between text-xs font-bold">
-                    <span className="text-zinc-400">Upload Status: {showcaseStatus}</span>
-                    <span className="text-rose-400">{showcaseProgress}%</span>
+                    <span className="text-zinc-500">Upload Status: {showcaseStatus}</span>
+                    <span className="text-yellow-500">{showcaseProgress}%</span>
                   </div>
-                  <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden">
-                    <div className="h-full bg-rose-600 transition-all duration-300" style={{ width: `${showcaseProgress || 0}%` }} />
+                  <div className="w-full h-2 bg-zinc-100/40 rounded-full overflow-hidden">
+                    <div className="h-full bg-brand-600 transition-all duration-300" style={{ width: `${showcaseProgress || 0}%` }} />
                   </div>
                 </div>
               )}
 
               {(!courseForm.showcase_videos || courseForm.showcase_videos.length === 0) ? (
-                <div className="text-center py-12 border border-dashed border-white/10 rounded-2xl">
+                <div className="text-center py-12 border border-dashed border-zinc-200 rounded-2xl">
                   <AlertCircle className="w-10 h-10 text-zinc-600 mx-auto mb-3" />
                   <p className="text-zinc-500 font-bold text-sm">No showcase videos uploaded yet. Upload vertical videos (9:16) to display on the course page.</p>
                 </div>
@@ -1929,14 +1931,14 @@ export default function AdminCoursesPage() {
               )}
             </div>
           ) : (
-            <div className="bg-[#0a0a0f] border border-white/5 rounded-3xl p-8 text-center relative overflow-hidden shadow-2xl space-y-6 mt-8">
-              <div className="absolute w-80 h-80 bg-rose-500/5 rounded-full blur-[80px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
-              <div className="mx-auto w-20 h-20 rounded-full bg-rose-600/10 border border-rose-500/20 flex items-center justify-center text-rose-500">
+            <div className="bg-slate-50 border border-zinc-200/60 rounded-3xl p-8 text-center relative overflow-hidden shadow-sm border border-zinc-200/60 space-y-6 mt-8">
+              <div className="absolute w-80 h-80 bg-brand-500/5 rounded-full blur-[80px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
+              <div className="mx-auto w-20 h-20 rounded-full bg-brand-600/10 border border-zinc-200/60 flex items-center justify-center text-yellow-500">
                 <Video className="w-10 h-10" />
               </div>
               <div className="space-y-2 max-w-lg mx-auto">
-                <h3 className="font-sans font-bold text-white text-lg md:text-xl">Student Results Showcase Videos</h3>
-                <p className="text-zinc-400 text-xs md:text-sm leading-relaxed">
+                <h3 className="font-sans font-bold text-zinc-900 text-lg md:text-xl">Student Results Showcase Videos</h3>
+                <p className="text-zinc-500 text-xs md:text-sm leading-relaxed">
                   Upload vertical (TikTok/Reels) videos showcasing your students' results to encourage new buyers! Please save the course first to get started.
                 </p>
               </div>
@@ -1945,9 +1947,9 @@ export default function AdminCoursesPage() {
 
           {/* Section 4: Students Progress Dashboard */}
           {selectedCourse && (
-             <div className="bg-[#0a0a0f] border border-white/5 rounded-3xl p-6 md:p-8 shadow-2xl">
-                <div className="flex items-center justify-between mb-8 border-b border-white/5 pb-4">
-                  <h2 className="text-xl font-alexandria font-bold text-white flex items-center gap-2">
+             <div className="bg-slate-50 border border-zinc-200/60 rounded-3xl p-6 md:p-8 shadow-sm border border-zinc-200/60">
+                <div className="flex items-center justify-between mb-8 border-b border-zinc-200/60 pb-4">
+                  <h2 className="text-xl font-sans font-bold text-zinc-900 flex items-center gap-2">
                     <Users className="w-5 h-5 text-blue-500" />
                     Students Progress Dashboard
                   </h2>
@@ -1969,7 +1971,7 @@ export default function AdminCoursesPage() {
                         document.body.removeChild(link);
                         toast.success("CSV file exported successfully! 📂");
                       }}
-                      className="h-9 px-4 bg-blue-600/10 hover:bg-blue-600 text-blue-400 hover:text-white border border-blue-500/20 hover:border-blue-600 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+                      className="h-9 px-4 bg-blue-600/10 hover:bg-blue-600 text-blue-400 hover:text-zinc-900 border border-blue-500/20 hover:border-blue-600 rounded-2xl text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
                     >
                       <Download className="w-3.5 h-3.5" />
                       <span>Export CSV</span>
@@ -1981,8 +1983,8 @@ export default function AdminCoursesPage() {
                   <p className="text-zinc-500 text-center py-6 text-sm">No students enrolled in this course yet.</p>
                 ) : (
                   <div className="overflow-x-auto">
-                    <table className="w-full text-sm text-left text-zinc-400">
-                      <thead className="text-xs text-white uppercase bg-white/5">
+                    <table className="w-full text-sm text-left text-zinc-500">
+                      <thead className="text-xs text-zinc-900 uppercase bg-zinc-100/40">
                         <tr>
                           <th className="px-6 py-4 rounded-l-xl">Student Name / Email</th>
                           <th className="px-6 py-4">Join Date</th>
@@ -1991,8 +1993,8 @@ export default function AdminCoursesPage() {
                       </thead>
                       <tbody>
                         {studentsData.map(student => (
-                          <tr key={student.id} className="border-b border-white/5 bg-white/[0.01]">
-                            <td className="px-6 py-4 font-bold text-white flex flex-col">
+                          <tr key={student.id} className="border-b border-zinc-200/60 bg-zinc-50/40">
+                            <td className="px-6 py-4 font-bold text-zinc-900 flex flex-col">
                               <span>{student.user_name || "Student"}</span>
                               <span className="text-[10px] text-zinc-500">{student.user_email}</span>
                             </td>
@@ -2010,15 +2012,15 @@ export default function AdminCoursesPage() {
           )}
 
           {/* Save Course Footer Action */}
-          <div className="flex items-center justify-between bg-[#0a0a0f]/90 backdrop-blur-md border border-white/5 p-6 rounded-3xl shadow-2xl mt-8">
+          <div className="flex items-center justify-between bg-slate-50/90 backdrop-blur-md border border-zinc-200/60 p-6 rounded-3xl shadow-sm border border-zinc-200/60 mt-8">
             <div className="flex flex-col gap-1">
-              <span className="text-sm font-bold text-white font-sans">Save All Changes</span>
+              <span className="text-sm font-bold text-zinc-900 font-sans">Save All Changes</span>
               <span className="text-zinc-500 text-xs">Save all current course, curriculum, and certificate details to the database</span>
             </div>
             <button 
               type="button"
               onClick={() => handleSaveCourse()} 
-              className="h-12 px-8 bg-rose-600 hover:bg-rose-700 text-white rounded-2xl font-bold text-sm flex items-center gap-2 transition-all active:scale-95 shadow-lg shadow-rose-600/20 cursor-pointer"
+              className="h-12 px-8 bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-2xl font-bold text-sm flex items-center gap-2 transition-all active:scale-95 shadow-sm border border-zinc-200/60 shadow-brand-600/20 cursor-pointer"
             >
               <Save className="w-5 h-5" /> <span>Save Full Course 🚀</span>
             </button>
@@ -2030,21 +2032,21 @@ export default function AdminCoursesPage() {
       {/* Section Modal */}
       {showSectionModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-          <div className="bg-[#0a0a0f] border border-white/10 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl relative">
-            <h3 className="font-sans font-bold text-white text-base">
+          <div className="bg-slate-50 border border-zinc-200 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-sm border border-zinc-200/60 relative">
+            <h3 className="font-sans font-bold text-zinc-900 text-base">
               {editingSectionId ? "Edit Study Section Title" : "Add New Study Section"}
             </h3>
             <div className="flex flex-col gap-2">
-              <label className="text-xs text-zinc-400 font-bold">Section Name *</label>
-              <input required disabled={savingSection} value={editingSectionTitle} onChange={e => setEditingSectionTitle(e.target.value)} placeholder="e.g. Unit 1: Introduction..." className="bg-white/5 border border-white/5 rounded-xl py-3 px-4 text-sm focus:border-rose-500/50 text-white disabled:opacity-50" />
+              <label className="text-xs text-zinc-500 font-bold">Section Name *</label>
+              <input required disabled={savingSection} value={editingSectionTitle} onChange={e => setEditingSectionTitle(e.target.value)} placeholder="e.g. Unit 1: Introduction..." className="bg-zinc-100/40 border border-zinc-200/60 rounded-2xl py-3 px-4 text-sm focus:border-zinc-200/60 text-zinc-900 disabled:opacity-50" />
             </div>
             <div className="flex flex-col gap-2">
-              <label className="text-xs text-zinc-400 font-bold">Section Description</label>
-              <textarea rows={3} disabled={savingSection} value={editingSectionDescription} onChange={e => setEditingSectionDescription(e.target.value)} placeholder="Write a brief overview of this section's content..." className="bg-white/5 border border-white/5 rounded-xl py-3 px-4 text-sm focus:border-rose-500/50 text-white disabled:opacity-50" />
+              <label className="text-xs text-zinc-500 font-bold">Section Description</label>
+              <textarea rows={3} disabled={savingSection} value={editingSectionDescription} onChange={e => setEditingSectionDescription(e.target.value)} placeholder="Write a brief overview of this section's content..." className="bg-zinc-100/40 border border-zinc-200/60 rounded-2xl py-3 px-4 text-sm focus:border-zinc-200/60 text-zinc-900 disabled:opacity-50" />
             </div>
-            <div className="flex items-center justify-end gap-2 border-t border-white/5 pt-4">
-              <button disabled={savingSection} onClick={() => setShowSectionModal(false)} className="h-10 px-4 bg-white/5 hover:bg-white/10 rounded-xl font-bold text-xs cursor-pointer disabled:opacity-50 text-white">Cancel</button>
-              <button disabled={savingSection || !editingSectionTitle} onClick={handleSaveSection} className="h-10 px-6 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-xs cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2">
+            <div className="flex items-center justify-end gap-2 border-t border-zinc-200/60 pt-4">
+              <button disabled={savingSection} onClick={() => setShowSectionModal(false)} className="h-10 px-4 bg-zinc-100/40 hover:bg-zinc-100/80 rounded-2xl font-bold text-xs cursor-pointer disabled:opacity-50 text-zinc-900">Cancel</button>
+              <button disabled={savingSection || !editingSectionTitle} onClick={handleSaveSection} className="h-10 px-6 bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-2xl font-bold text-xs cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2">
                 {savingSection ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
                 <span>Save Section</span>
               </button>
@@ -2056,9 +2058,9 @@ export default function AdminCoursesPage() {
       {/* Lesson Modal */}
       {showLessonModal && editingLesson && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] flex items-center justify-center p-4 overflow-y-auto py-10">
-          <div className="bg-[#0a0a0f] border border-white/10 rounded-2xl max-w-2xl w-full p-6 md:p-8 space-y-6 shadow-2xl relative my-auto max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-rose-600/30">
-            <div className="flex items-center justify-between border-b border-white/5 pb-3">
-              <h3 className="font-sans font-bold text-white text-base md:text-lg">
+          <div className="bg-slate-50 border border-zinc-200 rounded-2xl max-w-2xl w-full p-6 md:p-8 space-y-6 shadow-sm border border-zinc-200/60 relative my-auto max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-brand-600/30">
+            <div className="flex items-center justify-between border-b border-zinc-200/60 pb-3">
+              <h3 className="font-sans font-bold text-zinc-900 text-base md:text-lg">
                 {editingLesson.id ? "Edit Lecture Details" : "Add New Lecture/Lesson"}
               </h3>
               <button 
@@ -2072,20 +2074,20 @@ export default function AdminCoursesPage() {
                   setShowLessonModal(false); 
                   setEditingLesson(null); 
                 }} 
-                className="text-zinc-500 hover:text-white transition-colors"
+                className="text-zinc-500 hover:text-zinc-900 transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="flex flex-col gap-1.5 sm:col-span-2">
-                <label className="text-xs text-zinc-400 font-bold">Lecture Title *</label>
-                <input required value={editingLesson.title || ""} onChange={e => setEditingLesson({ ...editingLesson, title: e.target.value })} className="bg-white/5 border border-white/5 rounded-xl py-3 px-4 text-sm" />
+                <label className="text-xs text-zinc-500 font-bold">Lecture Title *</label>
+                <input required value={editingLesson.title || ""} onChange={e => setEditingLesson({ ...editingLesson, title: e.target.value })} className="bg-zinc-100/40 border border-zinc-200/60 rounded-2xl py-3 px-4 text-sm" />
               </div>
               <div className="flex flex-col gap-1.5 sm:col-span-2">
-                <label className="text-xs text-zinc-400 font-bold">Lecture Duration</label>
+                <label className="text-xs text-zinc-500 font-bold">Lecture Duration</label>
                 <div className="grid grid-cols-2 gap-2">
-                  <div className="flex items-center gap-2 bg-white/5 border border-white/5 rounded-xl px-3 h-[46px]">
+                  <div className="flex items-center gap-2 bg-zinc-100/40 border border-zinc-200/60 rounded-2xl px-3 h-[46px]">
                     <input 
                       type="number" 
                       min={0}
@@ -2100,11 +2102,11 @@ export default function AdminCoursesPage() {
                           duration_seconds: (h * 3600) + (m * 60) + s
                         });
                       }} 
-                      className="bg-transparent border-0 w-full text-sm focus:ring-0 text-white outline-none" 
+                      className="bg-transparent border-0 w-full text-sm focus:ring-0 text-zinc-900 outline-none" 
                     />
                     <span className="text-xs text-zinc-500 font-bold shrink-0">hr</span>
                   </div>
-                  <div className="flex items-center gap-2 bg-white/5 border border-white/5 rounded-xl px-3 h-[46px]">
+                  <div className="flex items-center gap-2 bg-zinc-100/40 border border-zinc-200/60 rounded-2xl px-3 h-[46px]">
                     <input 
                       type="number" 
                       min={0}
@@ -2120,7 +2122,7 @@ export default function AdminCoursesPage() {
                           duration_seconds: (h * 3600) + (m * 60) + s
                         });
                       }} 
-                      className="bg-transparent border-0 w-full text-sm focus:ring-0 text-white outline-none" 
+                      className="bg-transparent border-0 w-full text-sm focus:ring-0 text-zinc-900 outline-none" 
                     />
                     <span className="text-xs text-zinc-500 font-bold shrink-0">min</span>
                   </div>
@@ -2129,9 +2131,9 @@ export default function AdminCoursesPage() {
               
               {/* Video URL with Live Preview & Direct Upload */}
               {editingLesson.lecture_type === "video" && (
-                <div className="flex flex-col gap-3 sm:col-span-2 space-y-2 bg-white/[0.01] border border-white/5 p-5 rounded-2xl">
-                  <div className="flex items-center justify-between border-b border-white/5 pb-2.5">
-                    <label className="text-xs text-rose-400 font-black font-sans flex items-center gap-1">
+                <div className="flex flex-col gap-3 sm:col-span-2 space-y-2 bg-zinc-50/40 border border-zinc-200/60 p-5 rounded-2xl">
+                  <div className="flex items-center justify-between border-b border-zinc-200/60 pb-2.5">
+                    <label className="text-xs text-yellow-500 font-black font-sans flex items-center gap-1">
                       <Video className="w-4 h-4" />
                       <span>Secure Video Upload & Hosting (Private Streaming)</span>
                     </label>
@@ -2140,15 +2142,15 @@ export default function AdminCoursesPage() {
 
                   {/* Tab Selector - Only show if video is not yet uploaded/linked */}
                   {!(editingLesson.video_url || editingLesson.video_id) && bunnyUploadStatus !== "Encoding" && (
-                    <div className="flex p-1 bg-white/5 border border-white/5 rounded-xl gap-1 mb-2">
+                    <div className="flex p-1 bg-zinc-100/40 border border-zinc-200/60 rounded-2xl gap-1 mb-2">
                       <button
                         type="button"
                         onClick={() => setVideoSourceTab("upload")}
                         className={cn(
-                          "flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all duration-300 font-sans flex items-center justify-center gap-1.5 cursor-pointer",
+                          "flex-1 py-2 px-3 rounded-2xl text-xs font-bold transition-all duration-300 font-sans flex items-center justify-center gap-1.5 cursor-pointer",
                           videoSourceTab === "upload" 
-                            ? "bg-rose-600 text-white shadow-md shadow-rose-600/20" 
-                            : "text-zinc-400 hover:text-white hover:bg-white/5"
+                            ? "bg-brand-600 text-white shadow-md shadow-brand-600/20" 
+                            : "text-zinc-500 hover:text-white hover:bg-zinc-100/40"
                         )}
                       >
                         <Download className="w-3.5 h-3.5 rotate-180" />
@@ -2158,10 +2160,10 @@ export default function AdminCoursesPage() {
                         type="button"
                         onClick={() => setVideoSourceTab("link")}
                         className={cn(
-                          "flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all duration-300 font-sans flex items-center justify-center gap-1.5 cursor-pointer",
+                          "flex-1 py-2 px-3 rounded-2xl text-xs font-bold transition-all duration-300 font-sans flex items-center justify-center gap-1.5 cursor-pointer",
                           videoSourceTab === "link" 
-                            ? "bg-rose-600 text-white shadow-md shadow-rose-600/20" 
-                            : "text-zinc-400 hover:text-white hover:bg-white/5"
+                            ? "bg-brand-600 text-white shadow-md shadow-brand-600/20" 
+                            : "text-zinc-500 hover:text-white hover:bg-zinc-100/40"
                         )}
                       >
                         <LinkIcon className="w-3.5 h-3.5" />
@@ -2172,7 +2174,7 @@ export default function AdminCoursesPage() {
 
                   {/* Drag/Drop and File picker box (Upload Tab) */}
                   {videoSourceTab === "upload" && !(editingLesson.video_url || editingLesson.video_id) && bunnyUploadStatus !== "Encoding" && (
-                    <div className="border-2 border-dashed border-white/10 hover:border-rose-500/40 rounded-xl p-8 text-center transition-all bg-black/25 relative group">
+                    <div className="border-2 border-dashed border-zinc-200 hover:border-zinc-200/60 rounded-2xl p-8 text-center transition-all bg-black/25 relative group">
                       <input 
                         type="file" 
                         accept="video/*" 
@@ -2182,10 +2184,10 @@ export default function AdminCoursesPage() {
                       />
                       
                       <div className="space-y-3">
-                        <div className="w-12 h-12 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center mx-auto group-hover:scale-110 transition-transform">
+                        <div className="w-12 h-12 rounded-full bg-brand-500/10 border border-zinc-200/60 text-yellow-500 flex items-center justify-center mx-auto group-hover:scale-110 transition-transform">
                           <Download className="w-6 h-6 rotate-180" />
                         </div>
-                        <div className="text-sm font-bold text-white">Drag video file here or click to browse</div>
+                        <div className="text-sm font-bold text-zinc-900">Drag video file here or click to browse</div>
                         <p className="text-zinc-500 text-xs font-sans">
                           Uploads directly to streaming server (supports very large files)
                         </p>
@@ -2193,16 +2195,16 @@ export default function AdminCoursesPage() {
 
                       {/* Progress Bar overlay */}
                       {videoUploadProgress !== null && (
-                        <div className="absolute inset-0 bg-[#0a0a0f]/95 rounded-xl flex flex-col items-center justify-center p-6 space-y-3 z-20">
-                          <Loader2 className="w-8 h-8 text-[#D6004B] animate-spin" />
+                        <div className="absolute inset-0 bg-slate-50/95 rounded-2xl flex flex-col items-center justify-center p-6 space-y-3 z-20">
+                          <Loader2 className="w-8 h-8 text-[#1D4ED8] animate-spin" />
                           <div className="w-full max-w-xs space-y-1">
-                            <div className="flex justify-between text-xs font-bold text-white">
+                            <div className="flex justify-between text-xs font-bold text-zinc-900">
                               <span>Uploading video to server...</span>
                               <span>{videoUploadProgress}%</span>
                             </div>
-                            <div className="w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
+                            <div className="w-full bg-zinc-100/80 h-1.5 rounded-full overflow-hidden">
                               <div 
-                                className="bg-[#D6004B] h-full transition-all duration-300"
+                                className="bg-[#1D4ED8] h-full transition-all duration-300"
                                 style={{ width: `${videoUploadProgress}%` }}
                               />
                             </div>
@@ -2217,9 +2219,9 @@ export default function AdminCoursesPage() {
 
                   {/* External Link Input Box (Link Tab) */}
                   {videoSourceTab === "link" && !(editingLesson.video_url || editingLesson.video_id) && (
-                    <div className="bg-black/25 border border-white/5 rounded-xl p-6 space-y-4">
+                    <div className="bg-black/25 border border-zinc-200/60 rounded-2xl p-6 space-y-4">
                       <div className="flex flex-col gap-1.5">
-                        <label className="text-xs text-zinc-400 font-bold font-sans">Enter a video URL or ID</label>
+                        <label className="text-xs text-zinc-500 font-bold font-sans">Enter a video URL or ID</label>
                         <p className="text-[10px] text-zinc-500 leading-normal mb-1 font-sans">
                           e.g. embed URL, playback URL, or raw video GUID. We'll extract the video ID and fetch full details automatically.
                         </p>
@@ -2229,14 +2231,14 @@ export default function AdminCoursesPage() {
                             value={externalVideoInput}
                             onChange={e => setExternalVideoInput(e.target.value)}
                             placeholder="https://iframe.mediadelivery.net/embed/..."
-                            className="bg-white/5 border border-white/5 rounded-xl py-3 px-4 text-xs font-mono text-zinc-300 flex-1 focus:border-rose-500/50 outline-none"
+                            className="bg-zinc-100/40 border border-zinc-200/60 rounded-2xl py-3 px-4 text-xs font-mono text-zinc-700 flex-1 focus:border-zinc-200/60 outline-none"
                             disabled={fetchingVideoDetails}
                           />
                           <button
                             type="button"
                             onClick={handleFetchExternalVideo}
                             disabled={fetchingVideoDetails || !externalVideoInput}
-                            className="h-[46px] px-5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold font-sans flex items-center justify-center gap-1.5 transition-all disabled:opacity-50 cursor-pointer"
+                            className="h-[46px] px-5 bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-2xl text-xs font-bold font-sans flex items-center justify-center gap-1.5 transition-all disabled:opacity-50 cursor-pointer"
                           >
                             {fetchingVideoDetails ? (
                               <>
@@ -2257,11 +2259,11 @@ export default function AdminCoursesPage() {
 
                   {/* Polling/Encoding Progress container */}
                   {bunnyUploadStatus === "Encoding" && (
-                    <div className="border border-dashed border-amber-500/20 rounded-xl p-8 text-center bg-black/25 relative">
+                    <div className="border border-dashed border-amber-500/20 rounded-2xl p-8 text-center bg-black/25 relative">
                       <div className="space-y-3 max-w-md mx-auto">
                         <Loader2 className="w-10 h-10 text-amber-500 animate-spin mx-auto" />
-                        <div className="text-sm font-bold text-white">Encoding & processing video on server</div>
-                        <div className="w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
+                        <div className="text-sm font-bold text-zinc-900">Encoding & processing video on server</div>
+                        <div className="w-full bg-zinc-100/80 h-1.5 rounded-full overflow-hidden">
                           <div 
                             className="bg-amber-500 h-full transition-all duration-300"
                             style={{ width: `${bunnyEncodeProgress || 0}%` }}
@@ -2284,13 +2286,13 @@ export default function AdminCoursesPage() {
                         value={editingLesson.video_id || editingLesson.video_url || ""} 
                         onChange={e => setEditingLesson({ ...editingLesson, video_url: e.target.value })} 
                         placeholder="Video path or Video ID..." 
-                        className="bg-white/5 border border-white/5 rounded-xl py-3 px-4 text-xs flex-1 font-mono text-zinc-300" 
+                        className="bg-zinc-100/40 border border-zinc-200/60 rounded-2xl py-3 px-4 text-xs flex-1 font-mono text-zinc-700" 
                       />
                       {(editingLesson.video_url || editingLesson.video_id) && (
                         <button 
                           type="button"
                           onClick={handleVideoDelete}
-                          className="h-[46px] px-4 bg-red-950/20 hover:bg-red-950/40 text-red-500 border border-red-900/10 rounded-xl text-xs font-bold font-sans flex items-center justify-center transition-all cursor-pointer"
+                          className="h-[46px] px-4 bg-red-950/20 hover:bg-red-950/40 text-red-500 border border-red-900/10 rounded-2xl text-xs font-bold font-sans flex items-center justify-center transition-all cursor-pointer"
                         >
                           🗑️ Delete Video
                         </button>
@@ -2303,8 +2305,8 @@ export default function AdminCoursesPage() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
                       
                       {/* Video Player Preview */}
-                      <div className="rounded-xl overflow-hidden border border-white/10 bg-zinc-950 aspect-video relative flex flex-col justify-center items-center">
-                        <span className="absolute top-2 right-2 bg-black/60 text-[9px] text-zinc-400 font-black px-2 py-0.5 rounded backdrop-blur z-20 font-sans uppercase tracking-wider">Video Player Preview</span>
+                      <div className="rounded-2xl overflow-hidden border border-zinc-200 bg-zinc-950 aspect-video relative flex flex-col justify-center items-center">
+                        <span className="absolute top-2 right-2 bg-black/60 text-[9px] text-zinc-500 font-black px-2 py-0.5 rounded backdrop-blur z-20 font-sans uppercase tracking-wider">Video Player Preview</span>
                         {bunnyUploadStatus === "Encoding" ? (
                           <div className="text-center p-4 flex flex-col items-center justify-center space-y-3">
                             <Loader2 className="w-8 h-8 text-amber-500 animate-spin" />
@@ -2333,7 +2335,7 @@ export default function AdminCoursesPage() {
                       </div>
 
                       {/* Auto-extracted Thumbnail Preview */}
-                      <div className="rounded-xl overflow-hidden border border-white/10 bg-zinc-950 aspect-video relative flex flex-col justify-center items-center">
+                      <div className="rounded-2xl overflow-hidden border border-zinc-200 bg-zinc-950 aspect-video relative flex flex-col justify-center items-center">
                         <span className="absolute top-2 right-2 bg-black/60 text-[9px] text-emerald-400 font-black px-2 py-0.5 rounded backdrop-blur z-20 font-sans uppercase tracking-wider flex items-center gap-1">
                           <CheckCircle className="w-2.5 h-2.5" />
                           Thumbnail Cover
@@ -2354,17 +2356,17 @@ export default function AdminCoursesPage() {
                       </div>
 
                       {/* Custom cover section */}
-                      <div className="sm:col-span-2 border-t border-white/5 pt-4 space-y-3">
-                        <label className="text-xs font-bold text-zinc-400 font-sans block">Custom Lecture Cover</label>
+                      <div className="sm:col-span-2 border-t border-zinc-200/60 pt-4 space-y-3">
+                        <label className="text-xs font-bold text-zinc-500 font-sans block">Custom Lecture Cover</label>
                         <div className="flex gap-2">
                           <input 
                             type="text" 
                             value={editingLesson.thumbnail_url || ""} 
                             onChange={e => setEditingLesson(prev => prev ? { ...prev, thumbnail_url: e.target.value } : prev)} 
                             placeholder="Enter a cover image URL or upload an image..." 
-                            className="bg-white/5 border border-white/5 rounded-xl py-3 px-4 text-xs flex-1 text-zinc-300 focus:border-rose-500/50 outline-none" 
+                            className="bg-zinc-100/40 border border-zinc-200/60 rounded-2xl py-3 px-4 text-xs flex-1 text-zinc-700 focus:border-zinc-200/60 outline-none" 
                           />
-                          <label className="h-[46px] px-4 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer transition-colors select-none shrink-0">
+                          <label className="h-[46px] px-4 bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-2xl font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer transition-colors select-none shrink-0">
                             {uploadingField === "lesson_thumbnail_url" ? <Loader2 className="w-4 h-4 animate-spin" /> : <ImageIcon className="w-4 h-4" />}
                             <span>Upload Cover</span>
                             <input 
@@ -2387,8 +2389,8 @@ export default function AdminCoursesPage() {
               )}
 
               {/* Lesson Attachments System */}
-              <div className="flex flex-col gap-3 sm:col-span-2 space-y-2 bg-white/[0.01] border border-white/5 p-5 rounded-2xl">
-                <div className="flex items-center justify-between border-b border-white/5 pb-2.5">
+              <div className="flex flex-col gap-3 sm:col-span-2 space-y-2 bg-zinc-50/40 border border-zinc-200/60 p-5 rounded-2xl">
+                <div className="flex items-center justify-between border-b border-zinc-200/60 pb-2.5">
                   <label className="text-xs text-emerald-400 font-black font-sans flex items-center gap-1">
                     <FileText className="w-4 h-4" />
                     <span>Lesson Attachments System</span>
@@ -2397,7 +2399,7 @@ export default function AdminCoursesPage() {
                 </div>
 
                 {/* Upload zone */}
-                <div className="border-2 border-dashed border-white/10 hover:border-emerald-500/40 rounded-xl p-6 text-center transition-all bg-black/25 relative group">
+                <div className="border-2 border-dashed border-zinc-200 hover:border-emerald-500/40 rounded-2xl p-6 text-center transition-all bg-black/25 relative group">
                   <input 
                     type="file" 
                     multiple
@@ -2409,21 +2411,21 @@ export default function AdminCoursesPage() {
                     <div className="w-10 h-10 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto group-hover:scale-110 transition-transform">
                       <Plus className="w-5 h-5" />
                     </div>
-                    <div className="text-xs font-bold text-white">Drag files here or click to browse</div>
+                    <div className="text-xs font-bold text-zinc-900">Drag files here or click to browse</div>
                     <p className="text-zinc-500 text-[10px]">
                       Supports PDF, ZIP, DOCX, XLSX, MP3, images and code files up to 100MB per file
                     </p>
                   </div>
 
                   {attachmentUploading && (
-                    <div className="absolute inset-0 bg-[#0a0a0f]/95 rounded-xl flex flex-col items-center justify-center p-4 space-y-2 z-20">
+                    <div className="absolute inset-0 bg-slate-50/95 rounded-2xl flex flex-col items-center justify-center p-4 space-y-2 z-20">
                       <Loader2 className="w-6 h-6 text-emerald-500 animate-spin" />
                       <div className="w-full max-w-xs space-y-1">
-                        <div className="flex justify-between text-[10px] font-bold text-white">
+                        <div className="flex justify-between text-[10px] font-bold text-zinc-900">
                           <span>Uploading attachments...</span>
                           <span>{attachmentProgress !== null ? `${attachmentProgress}%` : ""}</span>
                         </div>
-                        <div className="w-full bg-white/10 h-1 rounded-full overflow-hidden">
+                        <div className="w-full bg-zinc-100/80 h-1 rounded-full overflow-hidden">
                           <div 
                             className="bg-emerald-500 h-full transition-all duration-300"
                             style={{ width: `${attachmentProgress || 0}%` }}
@@ -2440,11 +2442,11 @@ export default function AdminCoursesPage() {
                     <span className="text-[10px] text-zinc-500 font-bold block">Currently Attached Files ({editingLesson.attachments.length})</span>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       {editingLesson.attachments.map((file, idx) => (
-                        <div key={file.url || idx} className="p-3 bg-white/5 border border-white/5 hover:border-white/10 rounded-xl flex items-center justify-between gap-3 group transition-all">
+                        <div key={file.url || idx} className="p-3 bg-zinc-100/40 border border-zinc-200/60 hover:border-zinc-200 rounded-2xl flex items-center justify-between gap-3 group transition-all">
                           <div className="flex items-center gap-2.5 min-w-0">
                             <span className="text-lg shrink-0">{getFileIcon(file.type)}</span>
                             <div className="min-w-0 leading-tight">
-                              <p className="text-xs font-bold text-white truncate max-w-[160px]">{file.name}</p>
+                              <p className="text-xs font-bold text-zinc-900 truncate max-w-[160px]">{file.name}</p>
                               <span className="text-[9px] text-zinc-500 font-bold font-mono">{formatBytes(file.size)}</span>
                             </div>
                           </div>
@@ -2464,14 +2466,14 @@ export default function AdminCoursesPage() {
 
               {editingLesson.lecture_type === "link" && (
                 <div className="flex flex-col gap-1.5 sm:col-span-2">
-                  <label className="text-xs text-zinc-400 font-bold">External Link</label>
-                  <input type="text" value={editingLesson.external_link || ""} onChange={e => setEditingLesson({ ...editingLesson, external_link: e.target.value })} placeholder="https://..." className="bg-white/5 border border-white/5 rounded-xl py-3 px-4 text-sm text-zinc-300" />
+                  <label className="text-xs text-zinc-500 font-bold">External Link</label>
+                  <input type="text" value={editingLesson.external_link || ""} onChange={e => setEditingLesson({ ...editingLesson, external_link: e.target.value })} placeholder="https://..." className="bg-zinc-100/40 border border-zinc-200/60 rounded-2xl py-3 px-4 text-sm text-zinc-700" />
                 </div>
               )}
 
               <div className="flex items-center gap-3 py-2 sm:col-span-2 select-none">
-                <input type="checkbox" id="previewCheckbox" checked={editingLesson.is_preview} onChange={e => setEditingLesson({ ...editingLesson, is_preview: e.target.checked })} className="w-4 h-4 rounded accent-rose-600 cursor-pointer" />
-                <label htmlFor="previewCheckbox" className="text-xs font-bold text-zinc-300 cursor-pointer">
+                <input type="checkbox" id="previewCheckbox" checked={editingLesson.is_preview} onChange={e => setEditingLesson({ ...editingLesson, is_preview: e.target.checked })} className="w-4 h-4 rounded accent-brand-600 cursor-pointer" />
+                <label htmlFor="previewCheckbox" className="text-xs font-bold text-zinc-700 cursor-pointer">
                   Make this lesson available as a free preview
                 </label>
               </div>
@@ -2485,7 +2487,7 @@ export default function AdminCoursesPage() {
                 />
               </div>
             </div>
-            <div className="flex items-center justify-end gap-2 border-t border-white/5 pt-4">
+            <div className="flex items-center justify-end gap-2 border-t border-zinc-200/60 pt-4">
               <button disabled={savingLesson} onClick={() => { 
                 if (bunnyUploadStatus === 'Uploading' || bunnyUploadStatus === 'Encoding') {
                   if (!confirm("A video is currently uploading or processing. Closing will cancel the upload. Are you sure?")) {
@@ -2495,11 +2497,11 @@ export default function AdminCoursesPage() {
                 }
                 setShowLessonModal(false); 
                 setEditingLesson(null); 
-              }} className="h-10 px-4 bg-white/5 hover:bg-white/10 rounded-xl font-bold text-xs cursor-pointer disabled:opacity-50 text-white">Cancel</button>
+              }} className="h-10 px-4 bg-zinc-100/40 hover:bg-zinc-100/80 rounded-2xl font-bold text-xs cursor-pointer disabled:opacity-50 text-zinc-900">Cancel</button>
               <button 
                 disabled={savingLesson || !editingLesson.title || bunnyUploadStatus === "Uploading" || bunnyUploadStatus === "Encoding"} 
                 onClick={handleSaveLesson} 
-                className="h-10 px-6 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-xs cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
+                className="h-10 px-6 bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-2xl font-bold text-xs cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {savingLesson ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
                 <span>Save Lecture</span>

@@ -31,8 +31,8 @@ export function FAQSection() {
     <section id="faq" className="py-16 md:py-20 relative">
       <div className="container mx-auto px-4 max-w-3xl">
         <div className="text-center mb-10">
-          <h2 className="text-2xl md:text-3xl font-alexandria font-black text-white mb-3">الأسئلة الشائعة</h2>
-          <p className="text-zinc-500 text-xs md:text-sm font-cairo">كل ما تحتاج لمعرفته حول خدماتنا ومنتجاتنا</p>
+          <h2 className="text-2xl md:text-3xl font-sans font-black text-zinc-900 mb-3">الأسئلة الشائعة</h2>
+          <p className="text-zinc-500 text-xs md:text-sm font-alexandria">كل ما تحتاج لمعرفته حول خدماتنا ومنتجاتنا</p>
         </div>
 
         <div className="space-y-3">
@@ -40,10 +40,10 @@ export function FAQSection() {
             <div 
               key={idx}
               className={cn(
-                "group rounded-xl border transition-all duration-300",
+                "group rounded-2xl border transition-all duration-300",
                 openIndex === idx 
-                  ? "bg-white/[0.04] border-rose-500/20 shadow-[0_0_15px_rgba(214,0,75,0.03)]" 
-                  : "bg-white/[0.01] border-white/5 hover:border-white/10"
+                  ? "bg-white/[0.04] border-zinc-200/60 shadow-[0_0_15px_rgba(29, 78, 216,0.03)]" 
+                  : "bg-zinc-50/40 border-zinc-200/60 hover:border-zinc-200"
               )}
             >
               <button
@@ -52,21 +52,21 @@ export function FAQSection() {
               >
                 <div className="flex items-center gap-3">
                   <div className={cn(
-                    "w-7 h-7 rounded-md flex items-center justify-center transition-colors shrink-0",
-                    openIndex === idx ? "bg-rose-500 text-white" : "bg-white/5 text-zinc-500 group-hover:text-zinc-300"
+                    "w-7 h-7 rounded-xl flex items-center justify-center transition-colors shrink-0",
+                    openIndex === idx ? "bg-brand-500 text-white" : "bg-zinc-100/40 text-zinc-500 group-hover:text-zinc-700"
                   )}>
                     <HelpCircle className="w-3.5 h-3.5" />
                   </div>
                   <span className={cn(
-                    "text-sm md:text-base font-alexandria font-bold transition-colors",
-                    openIndex === idx ? "text-white" : "text-zinc-300 group-hover:text-white"
+                    "text-sm md:text-base font-sans font-bold transition-colors",
+                    openIndex === idx ? "text-brand-600" : "text-zinc-700 group-hover:text-brand-600"
                   )}>
                     {faq.q}
                   </span>
                 </div>
                 <ChevronDown className={cn(
                   "w-4 h-4 text-zinc-500 transition-transform duration-300 shrink-0",
-                  openIndex === idx && "rotate-180 text-rose-500"
+                  openIndex === idx && "rotate-180 text-yellow-500"
                 )} />
               </button>
 
@@ -79,7 +79,7 @@ export function FAQSection() {
                     transition={{ duration: 0.25, ease: "easeInOut" }}
                     className="overflow-hidden"
                   >
-                    <div className="px-5 pb-4 pt-0 text-xs md:text-sm text-zinc-400 font-cairo leading-relaxed pr-11">
+                    <div className="px-5 pb-4 pt-0 text-xs md:text-sm text-zinc-500 font-sans leading-relaxed pr-11">
                       {faq.a}
                     </div>
                   </motion.div>

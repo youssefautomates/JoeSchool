@@ -19,7 +19,7 @@ interface RevenueChartProps {
 export default function RevenueChart({ data, revenueGrowth, currencySymbol = "EGP" }: RevenueChartProps) {
   if (!data || data.length === 0) {
     return (
-      <div className="w-full h-full flex flex-col items-center justify-center border border-dashed border-white/5 rounded-2xl p-6 text-center text-zinc-500 text-xs font-sans">
+      <div className="w-full h-full flex flex-col items-center justify-center border border-dashed border-zinc-200/60 rounded-2xl p-6 text-center text-zinc-500 text-xs font-sans">
         No payment records found for the selected period.
       </div>
     );
@@ -27,16 +27,16 @@ export default function RevenueChart({ data, revenueGrowth, currencySymbol = "EG
 
   return (
     <div className="w-full h-full flex flex-col justify-between font-sans text-left" dir="ltr">
-      <div className="flex items-center justify-between mb-5 pb-4 border-b border-white/5">
+      <div className="flex items-center justify-between mb-5 pb-4 border-b border-zinc-200/60">
         <div>
-          <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">Revenue & Profit Progression</h3>
+          <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-500">Revenue & Profit Progression</h3>
           <p className="text-[10px] text-zinc-500 mt-0.5">Volume of completed business transactions in the local currency</p>
         </div>
         {revenueGrowth !== undefined && revenueGrowth !== 0 && (
           <span className={`flex items-center gap-1 text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-full ${
             revenueGrowth >= 0 
               ? "text-emerald-400 bg-emerald-500/5 border border-emerald-500/10" 
-              : "text-rose-400 bg-rose-500/5 border border-rose-500/10"
+              : "text-yellow-500 bg-brand-500/5 border border-zinc-200/60"
           }`}>
             {revenueGrowth >= 0 ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
             {revenueGrowth >= 0 ? "+" : ""}{revenueGrowth.toFixed(1)}% vs previous period
@@ -49,8 +49,8 @@ export default function RevenueChart({ data, revenueGrowth, currencySymbol = "EG
           <AreaChart data={data} margin={{ top: 10, right: 5, left: -25, bottom: 0 }}>
             <defs>
               <linearGradient id="revenueGlow" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#D6004B" stopOpacity={0.15}/>
-                <stop offset="95%" stopColor="#D6004B" stopOpacity={0}/>
+                <stop offset="5%" stopColor="#1D4ED8" stopOpacity={0.15}/>
+                <stop offset="95%" stopColor="#1D4ED8" stopOpacity={0}/>
               </linearGradient>
               <linearGradient id="profitGlow" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="#10b981" stopOpacity={0.15}/>
@@ -72,12 +72,12 @@ export default function RevenueChart({ data, revenueGrowth, currencySymbol = "EG
               dx={-5}
             />
             <Tooltip 
-              contentStyle={{ backgroundColor: "#060608", borderColor: "rgba(255,255,255,0.06)", borderRadius: "12px", textAlign: "left" }}
-              labelStyle={{ color: "#ffffff", fontWeight: "bold", fontSize: "10px" }}
+              contentStyle={{ backgroundColor: "#ffffff", borderColor: "rgba(0,0,0,0.08)", borderRadius: "12px", textAlign: "left" }}
+              labelStyle={{ color: "#09090b", fontWeight: "bold", fontSize: "10px" }}
               itemStyle={{ fontSize: "10px", padding: "1px 0" }}
               formatter={(value: any, name: any) => [`${value} ${currencySymbol === 'USD' ? 'USD' : 'EGP'}`, name === 'Revenue' ? 'Revenue' : 'Net Profit']}
             />
-            <Area type="monotone" dataKey="Revenue" stroke="#D6004B" strokeWidth={1.5} fillOpacity={1} fill="url(#revenueGlow)" name="Revenue" />
+            <Area type="monotone" dataKey="Revenue" stroke="#1D4ED8" strokeWidth={1.5} fillOpacity={1} fill="url(#revenueGlow)" name="Revenue" />
             <Area type="monotone" dataKey="Profit" stroke="#10b981" strokeWidth={1.5} fillOpacity={1} fill="url(#profitGlow)" name="Profit" />
           </AreaChart>
         </ResponsiveContainer>

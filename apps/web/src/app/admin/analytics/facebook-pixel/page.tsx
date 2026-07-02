@@ -93,12 +93,12 @@ export default function FacebookPixelAnalytics() {
   ];
 
   return (
-    <div className="space-y-8 font-sans text-zinc-100 min-h-screen pb-16">
+    <div className="space-y-8 font-sans text-zinc-900 min-h-screen pb-16">
       
       {/* Header controls */}
-      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6 pb-6 border-b border-white/5">
+      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6 pb-6 border-b border-zinc-200/60">
         <div>
-          <h1 className="text-2xl font-black tracking-tight text-white flex items-center gap-3">
+          <h1 className="text-2xl font-black tracking-tight text-zinc-900 flex items-center gap-3">
             Facebook Pixel & Meta Ads Insights
             <Target className="w-6 h-6 text-blue-500" />
           </h1>
@@ -108,15 +108,15 @@ export default function FacebookPixelAnalytics() {
         </div>
 
         <div className="flex items-center gap-3">
-          <span className={`px-4 py-2 rounded-xl text-xs font-bold border ${
-            stats.purchase > 0 ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-zinc-500/10 text-zinc-400 border-zinc-500/20"
+          <span className={`px-4 py-2 rounded-2xl text-xs font-bold border ${
+            stats.purchase > 0 ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-zinc-500/10 text-zinc-500 border-zinc-500/20"
           }`}>
             {stats.status}
           </span>
           <button
             onClick={loadData}
             disabled={loading}
-            className="flex items-center justify-center w-10 h-10 rounded-xl bg-white/5 border border-white/5 text-zinc-400 hover:text-white"
+            className="flex items-center justify-center w-10 h-10 rounded-2xl bg-zinc-100/40 border border-zinc-200/60 text-zinc-500 hover:text-zinc-900"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
           </button>
@@ -124,10 +124,10 @@ export default function FacebookPixelAnalytics() {
       </div>
 
       {/* Attribution Selector Widget */}
-      <div className="p-6 rounded-2xl bg-[#09090e] border border-white/5 shadow-2xl space-y-4">
+      <div className="p-6 rounded-2xl bg-slate-50 border border-zinc-200/60 shadow-sm border border-zinc-200/60 space-y-4">
         <div className="flex items-center gap-2">
-          <Sparkles className="w-4 h-4 text-rose-500" />
-          <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-300">Campaign & Click Attribution Customization</h3>
+          <Sparkles className="w-4 h-4 text-yellow-500" />
+          <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-700">Campaign & Click Attribution Customization</h3>
         </div>
         <p className="text-xs text-zinc-500 font-semibold">
           Select a specific product targeted by Meta Ads to isolate and view only its associated dynamic Pixel events:
@@ -136,11 +136,11 @@ export default function FacebookPixelAnalytics() {
         <select
           value={selectedProductId}
           onChange={(e) => setSelectedProductId(e.target.value)}
-          className="w-full max-w-md bg-white/5 border border-white/5 rounded-xl px-4 py-3 text-xs text-zinc-300 focus:outline-none focus:border-rose-500/50 transition-all font-sans cursor-pointer"
+          className="w-full max-w-md bg-zinc-100/40 border border-zinc-200/60 rounded-2xl px-4 py-3 text-xs text-zinc-700 focus:outline-none focus:border-zinc-200/60 transition-all font-sans cursor-pointer"
         >
-          <option value="all" className="bg-[#09090b] text-zinc-300 font-bold">All Active Digital Products & Courses</option>
+          <option value="all" className="bg-slate-50 text-zinc-700 font-bold">All Active Digital Products & Courses</option>
           {products.map((p) => (
-            <option key={p.id} value={p.id} className="bg-[#09090b] text-zinc-300">{p.title}</option>
+            <option key={p.id} value={p.id} className="bg-slate-50 text-zinc-700">{p.title}</option>
           ))}
         </select>
       </div>
@@ -149,13 +149,13 @@ export default function FacebookPixelAnalytics() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
         {/* Events tracking table */}
-        <div className="lg:col-span-2 rounded-2xl bg-[#09090e] border border-white/5 p-6 shadow-2xl space-y-6">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">Detected Pixel Events</h3>
+        <div className="lg:col-span-2 rounded-2xl bg-slate-50 border border-zinc-200/60 p-6 shadow-sm border border-zinc-200/60 space-y-6">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-500">Detected Pixel Events</h3>
           
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-white/5 text-zinc-500 text-[10px] uppercase font-bold">
+                <tr className="border-b border-zinc-200/60 text-zinc-500 text-[10px] uppercase font-bold">
                   <th className="pb-3 text-left">Event Name</th>
                   <th className="pb-3 text-center">Total Events</th>
                   <th className="pb-3 text-center">Active Ingestion Type</th>
@@ -164,13 +164,13 @@ export default function FacebookPixelAnalytics() {
               </thead>
               <tbody className="divide-y divide-white/5 text-xs">
                 {funnelData.map((item) => (
-                  <tr key={item.name} className="hover:bg-white/[0.01] transition-colors">
-                    <td className="py-4 font-bold text-white">{item.name}</td>
-                    <td className="py-4 text-center font-bold text-zinc-300">{item.events.toLocaleString()}</td>
+                  <tr key={item.name} className="hover:bg-zinc-50/40 transition-colors">
+                    <td className="py-4 font-bold text-zinc-900">{item.name}</td>
+                    <td className="py-4 text-center font-bold text-zinc-700">{item.events.toLocaleString()}</td>
                     <td className="py-4 text-center font-bold text-blue-400">{item.events > 0 ? "Conversions API (CAPI)" : "None"}</td>
                     <td className="py-4 text-right">
                       <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full border ${
-                        item.events > 0 ? "bg-emerald-500/5 text-emerald-400 border-emerald-500/10" : "bg-zinc-500/5 text-zinc-400 border-zinc-500/10"
+                        item.events > 0 ? "bg-emerald-500/5 text-emerald-400 border-emerald-500/10" : "bg-zinc-500/5 text-zinc-500 border-zinc-500/10"
                       }`}>
                         {item.events > 0 ? "Active & Firing" : "Dormant"}
                       </span>
@@ -183,23 +183,23 @@ export default function FacebookPixelAnalytics() {
         </div>
 
         {/* CAPI Matching card */}
-        <div className="rounded-2xl bg-[#09090e] border border-white/5 p-6 shadow-2xl flex flex-col justify-between h-fit">
+        <div className="rounded-2xl bg-slate-50 border border-zinc-200/60 p-6 shadow-sm border border-zinc-200/60 flex flex-col justify-between h-fit">
           <div className="space-y-6">
             <div>
-              <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">Meta Attribution & CAPI Health</h3>
+              <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-500">Meta Attribution & CAPI Health</h3>
               <p className="text-xs text-zinc-500 leading-relaxed mt-2 font-semibold">
                 Match quality score is computed programmatically based on user identity parameter coverage mapped in the DB.
               </p>
             </div>
             
             <div className="space-y-3">
-              <div className="flex justify-between items-center p-3 rounded-xl bg-white/[0.01] text-xs font-semibold">
+              <div className="flex justify-between items-center p-3 rounded-2xl bg-zinc-50/40 text-xs font-semibold">
                 <span className="text-zinc-500">Event Match Quality</span>
                 <span className="text-emerald-400 font-bold">{stats.purchase > 0 ? "8.4 / 10 Excellent" : "0 / 10"}</span>
               </div>
-              <div className="flex justify-between items-center p-3 rounded-xl bg-white/[0.01] text-xs font-semibold">
+              <div className="flex justify-between items-center p-3 rounded-2xl bg-zinc-50/40 text-xs font-semibold">
                 <span className="text-zinc-500">Total Attributed Revenue</span>
-                <span className="text-rose-500 font-bold">{formatPrice(stats.revenue, 'EGP')}</span>
+                <span className="text-yellow-500 font-bold">{formatPrice(stats.revenue, 'EGP')}</span>
               </div>
             </div>
           </div>
@@ -208,20 +208,20 @@ export default function FacebookPixelAnalytics() {
       </div>
 
       {/* Funnel Graph */}
-      <div className="rounded-2xl bg-[#09090e] border border-white/5 p-8 shadow-2xl">
-        <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400 mb-8">Facebook Pixel Event Funnel Breakdown</h3>
+      <div className="rounded-2xl bg-slate-50 border border-zinc-200/60 p-8 shadow-sm border border-zinc-200/60">
+        <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-500 mb-8">Facebook Pixel Event Funnel Breakdown</h3>
         
         <div className="grid grid-cols-1 sm:grid-cols-5 gap-6">
           {funnelData.map((item, index) => {
             const prev = index > 0 ? funnelData[index - 1].events : item.events;
             const drop = (index > 0 && prev > 0) ? Math.round((item.events / prev) * 100) : (item.events > 0 ? 100 : 0);
             return (
-              <div key={item.name} className="relative p-6 rounded-2xl bg-white/[0.01] border border-white/5 flex flex-col items-center justify-between text-center gap-4">
+              <div key={item.name} className="relative p-6 rounded-2xl bg-zinc-50/40 border border-zinc-200/60 flex flex-col items-center justify-between text-center gap-4">
                 <div>
                   <span className="text-xl font-black" style={{ color: item.color }}>
                     {drop}%
                   </span>
-                  <h4 className="text-xs font-bold text-zinc-300 mt-2">{item.name}</h4>
+                  <h4 className="text-xs font-bold text-zinc-700 mt-2">{item.name}</h4>
                 </div>
                 <p className="text-[10px] text-zinc-500 font-bold">{item.events.toLocaleString()} events</p>
               </div>

@@ -34,11 +34,11 @@ export default function ActivityFeed({ activities, maxItems = 15 }: ActivityFeed
       case "review":
         return { icon: Star, color: "text-amber-400 bg-amber-500/10 border-amber-500/20" };
       case "quiz_failure":
-        return { icon: AlertTriangle, color: "text-rose-400 bg-rose-500/10 border-rose-500/20" };
+        return { icon: AlertTriangle, color: "text-yellow-500 bg-brand-500/10 border-zinc-200/60" };
       case "login":
-        return { icon: ShieldCheck, color: "text-zinc-400 bg-white/5 border-white/5" };
+        return { icon: ShieldCheck, color: "text-zinc-500 bg-zinc-100/40 border-zinc-200/60" };
       default:
-        return { icon: HelpCircle, color: "text-zinc-500 bg-white/5 border-white/5" };
+        return { icon: HelpCircle, color: "text-zinc-500 bg-zinc-100/40 border-zinc-200/60" };
     }
   };
 
@@ -74,11 +74,11 @@ export default function ActivityFeed({ activities, maxItems = 15 }: ActivityFeed
   };
 
   return (
-    <div className="rounded-3xl bg-[#09090e]/80 border border-white/5 p-5 sm:p-6 shadow-2xl flex flex-col justify-between h-[420px] relative overflow-hidden text-left" dir="ltr">
+    <div className="rounded-3xl bg-slate-50/80 border border-zinc-200/60 p-5 sm:p-6 shadow-sm border border-zinc-200/60 flex flex-col justify-between h-[420px] relative overflow-hidden text-left" dir="ltr">
       <div>
-        <div className="flex items-center justify-between mb-4 pb-3 border-b border-white/5">
+        <div className="flex items-center justify-between mb-4 pb-3 border-b border-zinc-200/60">
           <div>
-            <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">Live Student Activity Log</h3>
+            <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-500">Live Student Activity Log</h3>
             <p className="text-[10px] text-zinc-500">Interactive learning events and instant student interactions</p>
           </div>
           <span className="flex h-2 w-2 relative">
@@ -104,23 +104,23 @@ export default function ActivityFeed({ activities, maxItems = 15 }: ActivityFeed
                     initial={{ opacity: 0, x: 10 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -10 }}
-                    className="p-3 rounded-xl bg-white/[0.01] hover:bg-white/[0.03] border border-white/5 hover:border-white/10 transition-all flex items-start gap-3 text-left font-sans"
+                    className="p-3 rounded-2xl bg-zinc-50/40 hover:bg-zinc-100/30 border border-zinc-200/60 hover:border-zinc-200 transition-all flex items-start gap-3 text-left font-sans"
                   >
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center border shrink-0 ${config.color}`}>
+                    <div className={`w-8 h-8 rounded-2xl flex items-center justify-center border shrink-0 ${config.color}`}>
                       <IconComponent className="w-4 h-4" />
                     </div>
 
                     <div className="min-w-0 flex-1 space-y-0.5">
                       <div className="flex items-center justify-between gap-2">
-                        <p className="text-[11px] font-black text-white truncate">{act.user}</p>
+                        <p className="text-[11px] font-black text-zinc-900 truncate">{act.user}</p>
                         <span className="text-[8.5px] text-zinc-500 font-mono shrink-0" dir="ltr">
                           {formatRelativeTime(act.created_at)}
                         </span>
                       </div>
-                      <p className="text-[10px] text-zinc-400 font-semibold leading-tight">
+                      <p className="text-[10px] text-zinc-500 font-semibold leading-tight">
                         {getLabel(act.type)}{" "}
                         {act.itemTitle && (
-                          <span className="text-white font-extrabold">{act.itemTitle}</span>
+                          <span className="text-zinc-900 font-extrabold">{act.itemTitle}</span>
                         )}
                       </p>
                       {act.details && (
@@ -135,9 +135,9 @@ export default function ActivityFeed({ activities, maxItems = 15 }: ActivityFeed
         </div>
       </div>
 
-      <div className="pt-3 border-t border-white/5 flex items-center justify-between text-[9px] text-zinc-600 font-bold">
+      <div className="pt-3 border-t border-zinc-200/60 flex items-center justify-between text-[9px] text-zinc-600 font-bold">
         <span>Showing latest {maxItems} events</span>
-        <span className="text-rose-500 uppercase tracking-widest">Active Live Feed</span>
+        <span className="text-yellow-500 uppercase tracking-widest">Active Live Feed</span>
       </div>
     </div>
   );

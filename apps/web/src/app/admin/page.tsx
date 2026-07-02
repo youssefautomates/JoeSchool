@@ -26,32 +26,32 @@ import { useAdminPreferences } from "@/context/AdminPreferencesContext";
 // Dynamically import section views
 const OverviewSection = dynamic(() => import("@/components/admin/analytics/OverviewSection"), {
   ssr: false,
-  loading: () => <div className="h-64 w-full animate-pulse bg-white/5 rounded-3xl" />
+  loading: () => <div className="h-64 w-full animate-pulse bg-zinc-100/40 rounded-3xl" />
 });
 
 const LmsSection = dynamic(() => import("@/components/admin/analytics/LmsSection"), {
   ssr: false,
-  loading: () => <div className="h-64 w-full animate-pulse bg-white/5 rounded-3xl" />
+  loading: () => <div className="h-64 w-full animate-pulse bg-zinc-100/40 rounded-3xl" />
 });
 
 const StoreSection = dynamic(() => import("@/components/admin/analytics/StoreSection"), {
   ssr: false,
-  loading: () => <div className="h-64 w-full animate-pulse bg-white/5 rounded-3xl" />
+  loading: () => <div className="h-64 w-full animate-pulse bg-zinc-100/40 rounded-3xl" />
 });
 
 const DiagnosticsSection = dynamic(() => import("@/components/admin/analytics/DiagnosticsSection"), {
   ssr: false,
-  loading: () => <div className="h-64 w-full animate-pulse bg-white/5 rounded-3xl" />
+  loading: () => <div className="h-64 w-full animate-pulse bg-zinc-100/40 rounded-3xl" />
 });
 
 const AdminOrders = dynamic(() => import("./orders/page"), {
   ssr: false,
-  loading: () => <div className="h-64 w-full animate-pulse bg-white/5 rounded-3xl" />
+  loading: () => <div className="h-64 w-full animate-pulse bg-zinc-100/40 rounded-3xl" />
 });
 
 const LiveOrdersFeed = dynamic(() => import("./orders/live/page"), {
   ssr: false,
-  loading: () => <div className="h-64 w-full animate-pulse bg-white/5 rounded-3xl" />
+  loading: () => <div className="h-64 w-full animate-pulse bg-zinc-100/40 rounded-3xl" />
 });
 
 // Interfaces mapped to database schemas
@@ -1378,14 +1378,15 @@ export default function AdminDashboard() {
   }, [orders, searchTerm]);
 
   // Diagnostics and Webhook Failures logs
+  // Uses filteredOrders so that Reset Statistics zeroes these counts too
   const diagnosticsLogs = useMemo(() => {
-    const failed = orders.filter(o => o.status === "failed");
-    const pending = orders.filter(o => o.status === "pending");
+    const failed = filteredOrders.filter(o => o.status === "failed");
+    const pending = filteredOrders.filter(o => o.status === "pending");
     return {
       failed,
       pending
     };
-  }, [orders]);
+  }, [filteredOrders]);
 
   const formatDate = (dateStr: string) => {
     return new Date(dateStr).toLocaleDateString("en-US", {
@@ -1430,7 +1431,7 @@ export default function AdminDashboard() {
   <Style ss:ID="ColHeader">
    <Alignment ss:Horizontal="Center" ss:Vertical="Center"/>
    <Font ss:FontName="Segoe UI" x:Family="Swiss" ss:Size="11" ss:Color="#FFFFFF" ss:Bold="1"/>
-   <Interior ss:Color="#D6004B" ss:Pattern="Solid"/>
+   <Interior ss:Color="#1D4ED8" ss:Pattern="Solid"/>
   </Style>
   <Style ss:ID="DataCell">
    <Alignment ss:Horizontal="Left" ss:Vertical="Center"/>
@@ -1576,8 +1577,41 @@ export default function AdminDashboard() {
     toast.success("Excel report compiled and downloaded successfully!");
   };
 
+  // Reset all platform statistics to zero starting from now
+  // This sets analyticsResetDate to the current timestamp and re-runs in "reset" mode
+  // Student accounts and enrollments are NOT affected.
+  const handlePlatformReset = async () => {
+    const confirmed = window.confirm(
+      "⚠️ تحذير: هل أنت متأكد من تصفير جميع إحصائيات المنصة؟\n\nسيتم تصفير: الزيارات، المبيعات، الإيرادات، وجميع مؤشرات الأداء.\nحسابات الطلاب والبيانات الفعلية لن تُمس.\n\nهذا الإجراء لا يمكن التراجع عنه."
+    );
+    if (!confirmed) return;
+
+    try {
+      const newResetDate = new Date().toISOString();
+      const res = await fetch("/api/admin/settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          analyticsResetDate: newResetDate,
+          analyticsMode: "reset"
+        })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setResetDate(newResetDate);
+        setAnalyticsMode("reset");
+        toast.success("✅ تم تصفير جميع الإحصائيات بنجاح! المنصة تبدأ من الصفر الآن.");
+        await loadData();
+      } else {
+        toast.error(data.error || "فشل تصفير الإحصائيات");
+      }
+    } catch (err) {
+      toast.error("حدث خطأ أثناء التواصل مع الخادم");
+    }
+  };
+
   return (
-    <div className="space-y-6 sm:space-y-8 text-zinc-100 min-h-screen pb-24 bg-transparent px-0 font-sans">
+    <div className="space-y-6 sm:space-y-8 text-zinc-900 min-h-screen pb-24 bg-transparent px-0 font-sans">
       
       {/* Premium Dashboard Filters (top) */}
       <DashboardFilters
@@ -1592,18 +1626,16 @@ export default function AdminDashboard() {
         loading={loading}
         onRefresh={loadData}
         onExport={downloadExcelReport}
+        onReset={handlePlatformReset}
         hasCountriesData={Object.keys(topCountriesData.reduce((acc: any, curr) => {
           const cName = curr.name.split(" ").slice(1).join(" ");
           if (cName && cName !== "Unknown") acc[cName] = true;
           return acc;
         }, {}))}
-        analyticsMode={analyticsMode}
-        setAnalyticsMode={setAnalyticsMode}
-        analyticsResetDate={resetDate}
       />
 
       {/* Desktop view switcher tabs (hidden on mobile) */}
-      <div className="hidden lg:block border-b border-white/5">
+      <div className="hidden lg:block border-b border-zinc-200/60">
         <div className="flex gap-4">
           {[
             { id: "overview", label: "Global Overview", icon: BarChart3 },
@@ -1621,8 +1653,8 @@ export default function AdminDashboard() {
                 onClick={() => setActiveTab(tab.id as any)}
                 className={`flex items-center gap-2 px-6 py-3.5 border-b-2 font-bold text-xs transition-all ${
                   isActive 
-                    ? "border-rose-500 text-white bg-white/5 rounded-t-xl" 
-                    : "border-transparent text-zinc-400 hover:text-white"
+                    ? "border-brand-500 text-zinc-900 bg-zinc-100/40 rounded-t-xl" 
+                    : "border-transparent text-zinc-500 hover:text-zinc-900"
                 }`}
               >
                 <Icon className="w-4 h-4" />
@@ -1636,7 +1668,7 @@ export default function AdminDashboard() {
       {loading ? (
         <div className="w-full h-64 flex items-center justify-center">
           <div className="flex flex-col items-center gap-3">
-            <Loader2 className="w-8 h-8 text-rose-500 animate-spin" />
+            <Loader2 className="w-8 h-8 text-yellow-500 animate-spin" />
             <p className="text-xs text-zinc-500 font-semibold">Retrieving platform analytics...</p>
           </div>
         </div>
@@ -1716,7 +1748,7 @@ export default function AdminDashboard() {
       />
 
       {/* Mobile Sticky Bottom Tab Bar */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 lg:hidden bg-[#07070b]/90 backdrop-blur-md border-t border-white/5 px-4 py-2.5 flex items-center justify-around">
+      <div className="fixed bottom-0 left-0 right-0 z-40 lg:hidden bg-[#07070b]/90 backdrop-blur-md border-t border-zinc-200/60 px-4 py-2.5 flex items-center justify-around">
         {[
           { id: "overview", label: "Overview", icon: BarChart3 },
           { id: "lms", label: "LMS", icon: BookOpen },
@@ -1732,7 +1764,7 @@ export default function AdminDashboard() {
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
               className={`flex flex-col items-center gap-1 transition-all ${
-                isActive ? "text-rose-500 scale-105" : "text-zinc-500 hover:text-zinc-300"
+                isActive ? "text-yellow-500 scale-105" : "text-zinc-500 hover:text-zinc-700"
               }`}
             >
               <Icon className="w-5 h-5" />
@@ -1750,42 +1782,42 @@ export default function AdminDashboard() {
               initial={{ scale: 0.96, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.96, opacity: 0 }}
-              className="w-full max-w-md bg-[#07070b] border border-white/10 rounded-2xl overflow-hidden shadow-2xl p-6 relative text-left"
+              className="w-full max-w-md bg-[#07070b] border border-zinc-200 rounded-2xl overflow-hidden shadow-sm border border-zinc-200/60 p-6 relative text-left"
               dir="ltr"
             >
               <button
                 onClick={() => setSelectedOrder(null)}
-                className="absolute top-4 right-4 text-zinc-500 hover:text-white text-xs font-bold"
+                className="absolute top-4 right-4 text-zinc-500 hover:text-zinc-900 text-xs font-bold"
               >
                 Close ✕
               </button>
 
-              <h3 className="font-bold text-xs uppercase tracking-widest text-zinc-400 mb-5">Transaction Details</h3>
+              <h3 className="font-bold text-xs uppercase tracking-widest text-zinc-500 mb-5">Transaction Details</h3>
               
               <div className="space-y-4">
-                <div className="bg-white/5 rounded-xl p-4 space-y-2 border border-white/5 text-xs font-semibold text-zinc-300">
+                <div className="bg-zinc-100/40 rounded-2xl p-4 space-y-2 border border-zinc-200/60 text-xs font-semibold text-zinc-700">
                   <div className="flex justify-between">
                     <span className="text-zinc-500">Customer Name</span>
-                    <span className="font-bold text-white">{selectedOrder.customer_name || "Guest"}</span>
+                    <span className="font-bold text-zinc-900">{selectedOrder.customer_name || "Guest"}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-zinc-500">Email Address</span>
-                    <span className="font-bold text-white font-mono">{selectedOrder.customer_email}</span>
+                    <span className="font-bold text-zinc-900 font-mono">{selectedOrder.customer_email}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-zinc-500">Digital Product</span>
-                    <span className="font-bold text-white">{selectedOrder.product_title}</span>
+                    <span className="font-bold text-zinc-900">{selectedOrder.product_title}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-zinc-500">Amount Paid</span>
-                    <span className="font-bold text-rose-500 font-mono">
+                    <span className="font-bold text-yellow-500 font-mono">
                       {formatPrice(selectedOrder.amount, (selectedOrder.currency as any) || 'EGP')}
                     </span>
                   </div>
                   {selectedOrder.country && (
                     <div className="flex justify-between">
                       <span className="text-zinc-500">Billing Country</span>
-                      <span className="font-bold text-white flex items-center gap-1.5">
+                      <span className="font-bold text-zinc-900 flex items-center gap-1.5">
                         <Globe className="w-3.5 h-3.5 text-zinc-500" />
                         {selectedOrder.country}
                       </span>
@@ -1794,7 +1826,7 @@ export default function AdminDashboard() {
                   {selectedOrder.payment_method && (
                     <div className="flex justify-between">
                       <span className="text-zinc-500">Payment Gateway</span>
-                      <span className="font-bold text-white flex items-center gap-1.5">
+                      <span className="font-bold text-zinc-900 flex items-center gap-1.5">
                         <CreditCard className="w-3.5 h-3.5 text-zinc-500" />
                         {selectedOrder.payment_method}
                       </span>
@@ -1803,23 +1835,23 @@ export default function AdminDashboard() {
                   {selectedOrder.coupon_code && (
                     <div className="flex justify-between">
                       <span className="text-zinc-500">Coupon Code</span>
-                      <span className="font-black text-rose-400 font-mono">{selectedOrder.coupon_code}</span>
+                      <span className="font-black text-yellow-500 font-mono">{selectedOrder.coupon_code}</span>
                     </div>
                   )}
                 </div>
 
                 <div className="space-y-3 text-left">
                   <h4 className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Database Operations Audit Log</h4>
-                  <div className="relative border-l border-white/10 pl-4 ml-1.5 space-y-3">
+                  <div className="relative border-l border-zinc-200 pl-4 ml-1.5 space-y-3">
                     <div className="relative">
                       <div className="absolute left-[-20.5px] top-1.5 w-2 h-2 rounded-full bg-emerald-500" />
-                      <p className="text-[10px] font-bold text-white">Record created in Supabase</p>
+                      <p className="text-[10px] font-bold text-zinc-900">Record created in Supabase</p>
                       <p className="text-[8px] text-zinc-500 font-mono font-semibold">{formatDate(selectedOrder.created_at)}</p>
                     </div>
 
                     <div className="relative">
                       <div className="absolute left-[-20.5px] top-1.5 w-2 h-2 rounded-full bg-emerald-500" />
-                      <p className="text-[10px] font-bold text-white">Paymob Callback webhook received</p>
+                      <p className="text-[10px] font-bold text-zinc-900">Paymob Callback webhook received</p>
                       <p className="text-[8px] text-zinc-500 font-mono font-semibold">Digital signature verified &amp; payload validated</p>
                     </div>
 
@@ -1827,7 +1859,7 @@ export default function AdminDashboard() {
                       <div className={`absolute left-[-20.5px] top-1.5 w-2 h-2 rounded-full ${
                         selectedOrder.status === 'completed' ? 'bg-emerald-500' : selectedOrder.status === 'failed' ? 'bg-red-500' : 'bg-amber-500'
                       }`} />
-                      <p className="text-[10px] font-bold text-white">Database status transition completed</p>
+                      <p className="text-[10px] font-bold text-zinc-900">Database status transition completed</p>
                       <p className="text-[8px] text-zinc-500 font-mono font-semibold">
                         {selectedOrder.status === 'completed' ? 'Automated delivery & course enrollment completed' : selectedOrder.status === 'failed' ? 'Transaction flagged as failed payment' : 'Awaiting gateway payment confirmation'}
                       </p>

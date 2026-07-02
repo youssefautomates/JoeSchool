@@ -29,13 +29,13 @@ export const MemoizedStarSVG = memo(function StarSVG({ fillPercent }: StarSVGPro
     return <Star className="w-3.5 h-3.5 fill-transparent" style={{ color: "#6b0020" }} />;
   }
   if (fillPercent >= 100) {
-    return <Star className="w-3.5 h-3.5 fill-current" style={{ color: "#D6004B" }} />;
+    return <Star className="w-3.5 h-3.5 fill-current" style={{ color: "#F59E0B" }} />;
   }
   return (
     <div className="relative w-3.5 h-3.5">
       <Star className="w-3.5 h-3.5 fill-transparent absolute inset-0" style={{ color: "#6b0020" }} />
       <div className="absolute inset-0 overflow-hidden" style={{ width: `${fillPercent}%` }}>
-        <Star className="w-3.5 h-3.5 fill-current" style={{ color: "#D6004B" }} />
+        <Star className="w-3.5 h-3.5 fill-current" style={{ color: "#F59E0B" }} />
       </div>
     </div>
   );
@@ -85,15 +85,15 @@ const MARQUEE_CSS = `
 
 /* Gradient palettes cycling per card index */
 const AVATAR_GRADIENTS = [
-  "from-rose-500/30 via-pink-500/20 to-rose-900/10",
+  "from-brand-500/30 via-pink-500/20 to-brand-900/10",
   "from-violet-500/30 via-purple-500/20 to-indigo-900/10",
-  "from-amber-500/30 via-orange-500/20 to-rose-900/10",
+  "from-amber-500/30 via-orange-500/20 to-brand-900/10",
   "from-cyan-500/30 via-sky-500/20 to-blue-900/10",
   "from-emerald-500/30 via-teal-500/20 to-green-900/10",
   "from-fuchsia-500/30 via-pink-500/20 to-purple-900/10",
 ];
 const AVATAR_TEXT_COLORS = [
-  "text-rose-300",
+  "text-brand-300",
   "text-violet-300",
   "text-amber-300",
   "text-cyan-300",
@@ -101,7 +101,7 @@ const AVATAR_TEXT_COLORS = [
   "text-fuchsia-300",
 ];
 const GLOW_COLORS = [
-  "bg-rose-500/15",
+  "bg-brand-500/15",
   "bg-violet-500/15",
   "bg-amber-500/15",
   "bg-cyan-500/15",
@@ -109,7 +109,7 @@ const GLOW_COLORS = [
   "bg-fuchsia-500/15",
 ];
 const BORDER_HOVER_COLORS = [
-  "hover:border-rose-500/30",
+  "hover:border-zinc-200/60",
   "hover:border-violet-500/30",
   "hover:border-amber-500/30",
   "hover:border-cyan-500/30",
@@ -177,10 +177,10 @@ export function ProductReviews({ productId, initialReviews, courseTitle, product
 
       {/* Section header */}
       <div className="flex items-center gap-3 mb-10" dir="rtl">
-        <div className="w-11 h-11 md:w-13 md:h-13 bg-gradient-to-br from-rose-600/20 to-rose-900/10 rounded-2xl flex items-center justify-center border border-rose-500/10 shadow-lg shadow-rose-500/5">
-          <MessageSquareQuote className="w-5 h-5 md:w-6 md:h-6 text-rose-400" />
+        <div className="w-11 h-11 md:w-13 md:h-13 bg-gradient-to-br from-brand-600/20 to-brand-900/10 rounded-2xl flex items-center justify-center border border-zinc-200/60 shadow-sm border border-zinc-200/60 shadow-brand-500/5">
+          <MessageSquareQuote className="w-5 h-5 md:w-6 md:h-6 text-yellow-500" />
         </div>
-        <h2 className="text-xl sm:text-2xl font-alexandria font-black text-white tracking-tight leading-none">
+        <h2 className="text-xl sm:text-2xl font-sans font-black text-zinc-900 tracking-tight leading-none">
           {title || "آراء الطلاب"}
         </h2>
       </div>
@@ -188,8 +188,8 @@ export function ProductReviews({ productId, initialReviews, courseTitle, product
       {/* Marquee viewport */}
       <div className="relative w-full overflow-hidden" dir="ltr">
         {/* Fade edges */}
-        <div className="absolute left-0 top-0 bottom-0 w-10 md:w-14 bg-gradient-to-r from-[#050505] to-transparent z-10 pointer-events-none" />
-        <div className="absolute right-0 top-0 bottom-0 w-10 md:w-14 bg-gradient-to-l from-[#050505] to-transparent z-10 pointer-events-none" />
+        <div className="absolute left-0 top-0 bottom-0 w-10 md:w-14 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />
+        <div className="absolute right-0 top-0 bottom-0 w-10 md:w-14 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
 
         {/* Animated track */}
         <div className="pr-marquee-track gap-4 md:gap-5 py-3">
@@ -240,7 +240,7 @@ export function ProductReviews({ productId, initialReviews, courseTitle, product
                       />
                     ) : (
                       <div className={`w-11 h-11 rounded-full bg-gradient-to-br ${AVATAR_GRADIENTS[colorIdx]} flex items-center justify-center ring-1 ring-white/10 shadow-md`}>
-                        <span className={`font-alexandria font-bold text-base ${AVATAR_TEXT_COLORS[colorIdx]}`}>
+                        <span className={`font-sans font-bold text-base ${AVATAR_TEXT_COLORS[colorIdx]}`}>
                           {fallbackLetter}
                         </span>
                       </div>
@@ -251,7 +251,7 @@ export function ProductReviews({ productId, initialReviews, courseTitle, product
 
                   {/* Name + Stars */}
                   <div className="min-w-0 flex-1">
-                    <p className="font-alexandria font-bold text-white text-[13px] md:text-sm truncate leading-tight">
+                    <p className="font-sans font-bold text-zinc-900 text-[13px] md:text-sm truncate leading-tight">
                       {displayName}
                     </p>
                     <div className="flex items-center gap-1.5 mt-1">
@@ -261,7 +261,7 @@ export function ProductReviews({ productId, initialReviews, courseTitle, product
 
                   {/* Verified badge */}
                   {review.isVerified && (
-                    <div className="shrink-0 text-[9px] font-bold text-emerald-400/80 bg-emerald-400/8 border border-emerald-400/15 rounded-full px-2 py-0.5 font-cairo whitespace-nowrap">
+                    <div className="shrink-0 text-[9px] font-bold text-emerald-400/80 bg-emerald-400/8 border border-emerald-400/15 rounded-full px-2 py-0.5 font-sans whitespace-nowrap">
                       ✓ مُتحقق
                     </div>
                   )}
@@ -272,7 +272,7 @@ export function ProductReviews({ productId, initialReviews, courseTitle, product
 
                 {/* Review text */}
                 <div className="relative z-10 flex-1 flex items-center">
-                  <p className="text-zinc-300 font-cairo text-[13px] md:text-[14px] leading-[1.75] line-clamp-3 w-full text-right">
+                  <p className="text-zinc-700 font-sans text-[13px] md:text-[14px] leading-[1.75] line-clamp-3 w-full text-right">
                     {review.text}
                   </p>
                 </div>

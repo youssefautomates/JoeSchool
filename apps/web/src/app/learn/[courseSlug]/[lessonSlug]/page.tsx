@@ -566,10 +566,10 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ courseS
 
   if (checkingAuth || !course || !currentLesson) {
     return (
-      <div className="min-h-screen bg-[#050505] flex items-center justify-center font-cairo text-white">
+      <div className="min-h-screen bg-white flex items-center justify-center font-sans text-zinc-900">
         <div className="flex flex-col items-center gap-4">
-          <Loader2 className="w-10 h-10 text-rose-500 animate-spin" />
-          <p className="text-zinc-400 text-sm font-medium">جاري تأمين الجلسة وفتح مشغل الدروس...</p>
+          <Loader2 className="w-10 h-10 text-yellow-500 animate-spin" />
+          <p className="text-zinc-500 text-sm font-medium">جاري تأمين الجلسة وفتح مشغل الدروس...</p>
         </div>
       </div>
     );
@@ -581,31 +581,31 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ courseS
   const nextLesson = currentIdx !== -1 && currentIdx < allLessonsFlat.length - 1 ? allLessonsFlat[currentIdx + 1] : null;
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white font-cairo flex flex-col h-screen overflow-hidden">
+    <div className="min-h-screen bg-white text-zinc-900 font-sans flex flex-col h-screen overflow-hidden">
       
       {/* Upper Navigation Header */}
-      <header className="h-16 bg-[#0a0a0f] border-b border-white/5 px-6 flex items-center justify-between shrink-0 z-30 font-alexandria">
+      <header className="h-16 bg-slate-50 border-b border-zinc-200/60 px-6 flex items-center justify-between shrink-0 z-30 font-sans">
         <div className="flex items-center gap-4">
           {/* Sidebar Toggle Button */}
           <button 
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-2 rounded-lg bg-white/5 border border-white/10 hover:text-rose-500 transition-colors cursor-pointer"
+            className="p-2 rounded-2xl bg-zinc-100/40 border border-zinc-200 hover:text-yellow-500 transition-colors cursor-pointer"
             title="توسيع/طي قائمة المحاضرات"
           >
             {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
           
-          <Link href="/dashboard" className="flex items-center gap-2 text-xs font-bold text-zinc-400 hover:text-white transition-colors">
+          <Link href="/dashboard" className="flex items-center gap-2 text-xs font-bold text-zinc-500 hover:text-zinc-900 transition-colors">
             <ArrowRight className="w-4 h-4 rtl:rotate-180" />
             <span>لوحة التحكم</span>
           </Link>
           
           <span className="text-zinc-600 hidden sm:inline">|</span>
-          <span className="text-xs sm:text-sm font-bold text-white hidden sm:inline truncate max-w-xs">{course.title}</span>
+          <span className="text-xs sm:text-sm font-bold text-zinc-900 hidden sm:inline truncate max-w-xs">{course.title}</span>
         </div>
 
         {/* Keyboard Shortcuts Guide Indicator */}
-        <div className="hidden md:flex items-center gap-2 text-[10px] text-zinc-500 border border-white/5 bg-white/[0.01] px-3 py-1.5 rounded-xl font-bold">
+        <div className="hidden md:flex items-center gap-2 text-[10px] text-zinc-500 border border-zinc-200/60 bg-zinc-50/40 px-3 py-1.5 rounded-2xl font-bold">
           <Keyboard className="w-3.5 h-3.5 text-zinc-600" />
           <span>اختصارات لوحة المفاتيح مفعلة (Space/Arrows)</span>
         </div>
@@ -615,13 +615,13 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ courseS
           {activeCert ? (
             <button
               onClick={() => setShowCertModal(true)}
-              className="px-4 py-1.5 bg-gradient-to-r from-amber-500 to-yellow-500 text-black text-[10px] sm:text-xs rounded-full font-black flex items-center gap-1.5 shadow-lg shadow-amber-500/20 active:scale-95 transition-all cursor-pointer"
+              className="px-4 py-1.5 bg-gradient-to-r from-amber-500 to-yellow-500 text-black text-[10px] sm:text-xs rounded-full font-black flex items-center gap-1.5 shadow-sm border border-zinc-200/60 shadow-amber-500/20 active:scale-95 transition-all cursor-pointer"
             >
               <Award className="w-3.5 h-3.5" />
               <span>عرض شهادة الإكمال 🎓</span>
             </button>
           ) : (
-            <span className="bg-rose-600/10 border border-rose-500/20 text-rose-400 text-[10px] sm:text-xs px-3 py-1 rounded-full font-bold">
+            <span className="bg-brand-600/10 border border-zinc-200/60 text-yellow-500 text-[10px] sm:text-xs px-3 py-1 rounded-full font-bold">
               مكتمل: {progressPercent}%
             </span>
           )}
@@ -639,19 +639,19 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ courseS
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "tween", duration: 0.25 }}
-              className="absolute right-0 top-0 bottom-0 w-80 sm:w-96 bg-[#0a0a0f] border-l border-white/5 flex flex-col z-20 lg:relative lg:translate-x-0 font-cairo"
+              className="absolute right-0 top-0 bottom-0 w-80 sm:w-96 bg-slate-50 border-l border-zinc-200/60 flex flex-col z-20 lg:relative lg:translate-x-0 font-sans"
             >
               {/* Sidebar Header */}
-              <div className="p-5 border-b border-white/5 flex justify-between items-center shrink-0">
+              <div className="p-5 border-b border-zinc-200/60 flex justify-between items-center shrink-0">
                 <div>
                   <span className="text-[10px] text-zinc-500 font-bold block">محتويات القسم</span>
-                  <span className="text-xs font-bold text-white mt-1 block">تتبع تقدمك في حضور المحاضرات</span>
+                  <span className="text-xs font-bold text-zinc-900 mt-1 block">تتبع تقدمك في حضور المحاضرات</span>
                 </div>
                 
                 {/* Progress Circle Ring */}
                 <div className="flex items-center gap-3">
-                  <div className="text-right font-alexandria">
-                    <span className="text-sm font-black text-rose-500 block">{progressPercent}%</span>
+                  <div className="text-right font-sans">
+                    <span className="text-sm font-black text-yellow-500 block">{progressPercent}%</span>
                     <span className="text-[9px] text-zinc-500 block">{completedCount} من {totalCount} درس</span>
                   </div>
                 </div>
@@ -662,14 +662,14 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ courseS
                 {sections.map((mod, mIdx) => {
                   const isExpanded = expandedSections.includes(mod.id);
                   return (
-                    <div key={mod.id} className="border border-white/5 rounded-2xl bg-black/40 overflow-hidden transition-all duration-350">
+                    <div key={mod.id} className="border border-zinc-200/60 rounded-2xl bg-black/40 overflow-hidden transition-all duration-350">
                       <button
                         onClick={() => toggleSection(mod.id)}
-                        className="w-full p-4 flex items-center justify-between gap-3 bg-white/[0.01] hover:bg-white/[0.03] transition-colors text-right"
+                        className="w-full p-4 flex items-center justify-between gap-3 bg-zinc-50/40 hover:bg-zinc-100/30 transition-colors text-right"
                       >
                         <div className="min-w-0 flex-1">
-                          <span className="text-[10px] text-rose-500 font-bold block">الوحدة {mIdx + 1}</span>
-                          <h3 className="text-xs font-black text-zinc-300 leading-snug truncate mt-0.5">{mod.title}</h3>
+                          <span className="text-[10px] text-yellow-500 font-bold block">الوحدة {mIdx + 1}</span>
+                          <h3 className="text-xs font-black text-zinc-700 leading-snug truncate mt-0.5">{mod.title}</h3>
                         </div>
                         <ChevronLeft className={`w-4 h-4 text-zinc-500 transition-transform duration-300 ${isExpanded ? "-rotate-90" : "rtl:rotate-180"}`} />
                       </button>
@@ -681,7 +681,7 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ courseS
                             animate={{ height: "auto", opacity: 1 }}
                             exit={{ height: 0, opacity: 0 }}
                             transition={{ duration: 0.2 }}
-                            className="border-t border-white/5 bg-[#0a0a0f] p-2 space-y-1 overflow-hidden"
+                            className="border-t border-zinc-200/60 bg-slate-50 p-2 space-y-1 overflow-hidden"
                           >
                             {mod.lessons.map((lesson) => {
                               const isCurrent = lesson.id === currentLesson.id;
@@ -689,19 +689,19 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ courseS
                               return (
                                 <div
                                   key={lesson.id}
-                                  className={`w-full text-right flex items-center gap-3 p-3 rounded-xl transition-all duration-300 ${
+                                  className={`w-full text-right flex items-center gap-3 p-3 rounded-2xl transition-all duration-300 ${
                                     isCurrent 
-                                      ? "bg-rose-600/10 border border-rose-500/30 text-rose-400" 
-                                      : "hover:bg-white/[0.02] text-zinc-400 hover:text-white"
+                                      ? "bg-brand-600/10 border border-zinc-200/60 text-yellow-500" 
+                                      : "hover:bg-zinc-50/70 text-zinc-500 hover:text-zinc-900"
                                   }`}
                                 >
                                   {/* Checkbox button */}
                                   <button 
                                     onClick={() => handleToggleComplete(lesson.id)}
-                                    className={`w-5 h-5 rounded-md border shrink-0 flex items-center justify-center transition-all cursor-pointer ${
+                                    className={`w-5 h-5 rounded-xl border shrink-0 flex items-center justify-center transition-all cursor-pointer ${
                                       isCompleted 
-                                        ? "bg-rose-600 border-rose-600 text-white" 
-                                        : "border-zinc-700 hover:border-rose-500"
+                                        ? "bg-brand-600 border-brand-600 text-white" 
+                                        : "border-zinc-700 hover:border-brand-500"
                                     }`}
                                   >
                                     {isCompleted && <CheckCircle2 className="w-4 h-4" />}
@@ -715,7 +715,7 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ courseS
                                     }}
                                     className="flex-1 text-right min-w-0 bg-transparent border-none p-0 cursor-pointer block"
                                   >
-                                    <p className={`text-xs font-bold leading-snug truncate ${isCurrent ? "text-white" : ""}`}>{lesson.title}</p>
+                                    <p className={`text-xs font-bold leading-snug truncate ${isCurrent ? "text-zinc-900" : ""}`}>{lesson.title}</p>
                                     <div className="flex items-center gap-2 text-[9px] text-zinc-500 mt-1 font-bold">
                                       <Clock className="w-3 h-3 text-zinc-600" />
                                       <span>{Math.floor(lesson.duration_seconds / 60) || 5} دقيقة</span>
@@ -745,7 +745,7 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ courseS
           {/* Main Cinematic Video Panel / Embed */}
           <div 
             ref={playerRef}
-            className="aspect-video w-full max-w-4xl mx-auto rounded-xl bg-zinc-950 border border-white/5 overflow-hidden relative group flex flex-col items-center justify-center shadow-2xl shrink-0"
+            className="aspect-video w-full max-w-4xl mx-auto rounded-2xl bg-zinc-950 border border-zinc-200/60 overflow-hidden relative group flex flex-col items-center justify-center shadow-sm border border-zinc-200/60 shrink-0"
           >
             {/* Cinematic Overlay Grid */}
             <div className="absolute inset-0 bg-grid-lines mask-radial-faded opacity-20 pointer-events-none z-0"></div>
@@ -771,13 +771,13 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ courseS
                 />
               </div>
             ) : currentLesson.lecture_type === "video" ? (
-              <div className="absolute inset-0 w-full h-full z-10 flex flex-col items-center justify-center gap-4 bg-[#0a0a0f] p-6 text-center select-none">
-                <div className="w-16 h-16 rounded-full bg-rose-600/10 border border-rose-500/20 flex items-center justify-center text-[#D6004B] shadow-[0_0_30px_rgba(214,0,75,0.15)] animate-pulse">
+              <div className="absolute inset-0 w-full h-full z-10 flex flex-col items-center justify-center gap-4 bg-slate-50 p-6 text-center select-none">
+                <div className="w-16 h-16 rounded-full bg-brand-600/10 border border-zinc-200/60 flex items-center justify-center text-[#1D4ED8] shadow-[0_0_30px_rgba(29, 78, 216,0.15)] animate-pulse">
                   <PlayCircle className="w-8 h-8" />
                 </div>
                 <div className="space-y-1 max-w-xs">
-                  <h4 className="font-alexandria font-bold text-white text-sm">المحاضرة قيد الإعداد 🎬</h4>
-                  <p className="text-zinc-500 text-xs font-cairo leading-relaxed">
+                  <h4 className="font-sans font-bold text-zinc-900 text-sm">المحاضرة قيد الإعداد 🎬</h4>
+                  <p className="text-zinc-500 text-xs font-alexandria leading-relaxed">
                     لم يتم رفع فيديو لهذه المحاضرة بعد. يرجى المتابعة وسيكون الفيديو متاحاً قريباً.
                   </p>
                 </div>
@@ -785,13 +785,13 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ courseS
             ) : (
               // Non-video content states (PDF, Links, Downloads)
               <div className="text-center z-10 space-y-4 p-6">
-                <div className="w-16 h-16 rounded-2xl bg-rose-600/10 border border-rose-500/20 flex items-center justify-center text-rose-500 mx-auto">
+                <div className="w-16 h-16 rounded-2xl bg-brand-600/10 border border-zinc-200/60 flex items-center justify-center text-yellow-500 mx-auto">
                   {currentLesson.lecture_type === "pdf" && <FileText className="w-8 h-8 text-emerald-400" />}
                   {currentLesson.lecture_type === "link" && <LinkIcon className="w-8 h-8 text-sky-400" />}
                   {currentLesson.lecture_type === "download" && <Download className="w-8 h-8 text-amber-400" />}
                 </div>
 
-                <h3 className="font-alexandria font-bold text-white text-base">
+                <h3 className="font-sans font-bold text-zinc-900 text-base">
                   {currentLesson.lecture_type === "pdf" && "محتوى دراسي مقروء (PDF)"}
                   {currentLesson.lecture_type === "link" && "رابط خارجي للمحاضرة"}
                   {currentLesson.lecture_type === "download" && "ملف مرفق للتحميل"}
@@ -808,7 +808,7 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ courseS
                     href={currentLesson.attachment_url}
                     target="_blank"
                     rel="noreferrer"
-                    className="h-10 px-6 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold inline-flex items-center gap-2 active:scale-95 transition-all shadow-lg shadow-rose-600/10"
+                    className="h-10 px-6 bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-2xl text-xs font-bold inline-flex items-center gap-2 active:scale-95 transition-all shadow-sm border border-zinc-200/60 shadow-brand-600/10"
                   >
                     <Download className="w-4 h-4" />
                     <span>تحميل الملف: {currentLesson.attachment_name || "اضغط للتحميل"}</span>
@@ -820,7 +820,7 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ courseS
                     href={currentLesson.external_link}
                     target="_blank"
                     rel="noreferrer"
-                    className="h-10 px-6 bg-sky-600 hover:bg-sky-700 text-white rounded-xl text-xs font-bold inline-flex items-center gap-2 active:scale-95 transition-all shadow-lg"
+                    className="h-10 px-6 bg-sky-600 hover:bg-sky-700 text-zinc-900 rounded-2xl text-xs font-bold inline-flex items-center gap-2 active:scale-95 transition-all shadow-sm border border-zinc-200/60"
                   >
                     <LinkIcon className="w-4 h-4" />
                     <span>فتح الرابط الخارجي</span>
@@ -830,17 +830,17 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ courseS
             )}
 
             {/* Sticky Player Controls bar */}
-            <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-black/80 to-transparent px-4 flex items-center justify-between text-[10px] text-zinc-400 select-none pointer-events-none">
+            <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-black/80 to-transparent px-4 flex items-center justify-between text-[10px] text-zinc-500 select-none pointer-events-none">
               <span>HD 1080p • تشغيل آمن وموثق</span>
               <span>JoeSchool LMS</span>
             </div>
           </div>
 
           {/* Lesson Outline Title & Quick Actions */}
-          <div className="w-full max-w-4xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/5 pb-6">
+          <div className="w-full max-w-4xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-zinc-200/60 pb-6">
             <div>
-              <span className="text-[10px] text-rose-500 font-bold block uppercase tracking-wider font-alexandria">تشاهد حالياً</span>
-              <h2 className="text-lg sm:text-2xl font-alexandria font-bold text-white mt-1 leading-snug">{currentLesson.title}</h2>
+              <span className="text-[10px] text-yellow-500 font-bold block uppercase tracking-wider font-sans">تشاهد حالياً</span>
+              <h2 className="text-lg sm:text-2xl font-alexandria font-bold text-zinc-900 mt-1 leading-snug">{currentLesson.title}</h2>
               <p className="text-xs text-zinc-500 mt-1 flex items-center gap-2">
                 <Clock className="w-3.5 h-3.5" />
                 <span>مدة الشرح التقريبية: {Math.floor(currentLesson.duration_seconds / 60) || 5} دقيقة</span>
@@ -852,7 +852,7 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ courseS
               {prevLesson && (
                 <button
                   onClick={() => router.push(`/learn/${courseSlug}/${prevLesson.slug}`)}
-                  className="h-12 w-12 rounded-xl border border-white/5 hover:bg-white/5 text-zinc-400 hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+                  className="h-12 w-12 rounded-2xl border border-zinc-200/60 hover:bg-zinc-100/40 text-zinc-500 hover:text-zinc-900 flex items-center justify-center transition-colors cursor-pointer"
                   title="الدرس السابق (أو اضغط ArrowRight)"
                 >
                   <ArrowRight className="w-5 h-5 " />
@@ -861,10 +861,10 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ courseS
 
               <button
                 onClick={() => handleToggleComplete(currentLesson.id)}
-                className={`h-12 px-6 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all active:scale-98 cursor-pointer ${
+                className={`h-12 px-6 rounded-2xl text-xs font-bold flex items-center justify-center gap-2 transition-all active:scale-98 cursor-pointer ${
                   completedLessons.includes(currentLesson.id)
                     ? "bg-emerald-600/10 border border-emerald-500/30 text-emerald-400"
-                    : "bg-rose-600 hover:bg-rose-700 text-white shadow-lg shadow-rose-600/25"
+                    : "bg-[#2563EB] hover:bg-[#1D4ED8] text-white shadow-sm border border-zinc-200/60 shadow-brand-600/25"
                 }`}
               >
                 <CheckCircle2 className="w-4.5 h-4.5" />
@@ -876,7 +876,7 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ courseS
               {nextLesson && (
                 <button
                   onClick={() => router.push(`/learn/${courseSlug}/${nextLesson.slug}`)}
-                  className="h-12 w-12 rounded-xl border border-white/5 hover:bg-white/5 text-zinc-400 hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+                  className="h-12 w-12 rounded-2xl border border-zinc-200/60 hover:bg-zinc-100/40 text-zinc-500 hover:text-zinc-900 flex items-center justify-center transition-colors cursor-pointer"
                   title="الدرس التالي (أو اضغط ArrowLeft)"
                 >
                   <ArrowLeft className="w-5 h-5 " />
@@ -886,8 +886,8 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ courseS
           </div>
 
           {/* Additional details tabs (Overview, Notes, Q&A) */}
-          <div className="w-full max-w-4xl mx-auto space-y-4 font-cairo">
-            <div className="flex border-b border-white/5 gap-6 text-xs font-bold text-zinc-500 pb-1 overflow-x-auto scrollbar-none font-alexandria">
+          <div className="w-full max-w-4xl mx-auto space-y-4 font-sans">
+            <div className="flex border-b border-zinc-200/60 gap-6 text-xs font-bold text-zinc-500 pb-1 overflow-x-auto scrollbar-none font-cairo">
               {[
                 { id: "overview", name: "تفاصيل وملاحظات الدرس", icon: FileText },
                 { id: "personal_notes", name: "ملاحظاتي الشخصية Notes", icon: Keyboard },
@@ -898,8 +898,8 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ courseS
                   onClick={() => setActiveTab(t.id)}
                   className={`flex items-center gap-2 pb-2.5 transition-colors border-b-2 shrink-0 cursor-pointer ${
                     activeTab === t.id 
-                      ? "border-rose-600 text-white" 
-                      : "border-transparent hover:text-zinc-300"
+                      ? "border-brand-600 text-zinc-900" 
+                      : "border-transparent hover:text-zinc-700"
                   }`}
                 >
                   <t.icon className="w-3.5 h-3.5" />
@@ -911,9 +911,9 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ courseS
             {/* Tab content displays */}
             <div className="py-4">
               {activeTab === "overview" && (
-                <div className="space-y-4 text-xs sm:text-sm text-zinc-400 leading-relaxed">
+                <div className="space-y-4 text-xs sm:text-sm text-zinc-500 leading-relaxed">
                   <div 
-                    className="bg-white/[0.01] border border-white/5 p-5 rounded-2xl space-y-3"
+                    className="bg-zinc-50/40 border border-zinc-200/60 p-5 rounded-2xl space-y-3"
                     dangerouslySetInnerHTML={{ 
                       __html: currentLesson.content 
                         ? currentLesson.content.replace(/\n/g, '<br/>') 
@@ -929,7 +929,7 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ courseS
                     <span className="text-[10px] text-zinc-500 font-bold block">اكتب ملاحظاتك الشخصية، يتم حفظها تلقائياً على متصفحك</span>
                     <button 
                       onClick={handleDownloadNote}
-                      className="text-[10px] text-rose-400 hover:text-rose-300 font-bold border border-rose-500/10 px-3 py-1.5 rounded-lg bg-rose-600/5 transition-all flex items-center gap-1"
+                      className="text-[10px] text-yellow-500 hover:text-brand-300 font-bold border border-zinc-200/60 px-3 py-1.5 rounded-2xl bg-brand-600/5 transition-all flex items-center gap-1"
                     >
                       <Download className="w-3 h-3" />
                       <span>تنزيل الملاحظة كملف نصي</span>
@@ -940,13 +940,13 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ courseS
                     value={personalNote}
                     onChange={e => setPersonalNote(e.target.value)}
                     placeholder="مثال: النقاط الهامة في هذا الدرس، الأكواد المشروحة..."
-                    className="w-full bg-[#0a0a0f] border border-white/5 focus:border-rose-500/50 rounded-2xl p-4 text-xs focus:outline-none transition-all text-white text-right leading-relaxed"
+                    className="w-full bg-slate-50 border border-zinc-200/60 focus:border-zinc-200/60 rounded-2xl p-4 text-xs focus:outline-none transition-all text-zinc-900 text-right leading-relaxed"
                   />
                   <div className="flex justify-end">
                     <button 
                       onClick={handleSaveNote}
                       disabled={isSavingNote}
-                      className="h-10 px-5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 disabled:opacity-50"
+                      className="h-10 px-5 bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-2xl text-xs font-bold transition-all flex items-center gap-1.5 disabled:opacity-50"
                     >
                       {isSavingNote ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle className="w-3.5 h-3.5" />}
                       <span>حفظ الملاحظة</span>
@@ -959,13 +959,13 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ courseS
                 <div className="space-y-4">
                   {/* Single Legacy Attachment (if any) */}
                   {currentLesson.attachment_url && (!currentLesson.attachments || currentLesson.attachments.length === 0) && (
-                    <div className="bg-[#0a0a0f] border border-white/5 rounded-2xl p-4 flex items-center justify-between gap-4 hover:border-rose-500/20 transition-all">
+                    <div className="bg-slate-50 border border-zinc-200/60 rounded-2xl p-4 flex items-center justify-between gap-4 hover:border-zinc-200/60 transition-all">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-rose-600/10 border border-rose-500/20 flex items-center justify-center text-rose-500">
+                        <div className="w-10 h-10 rounded-2xl bg-brand-600/10 border border-zinc-200/60 flex items-center justify-center text-yellow-500">
                           <Download className="w-5 h-5" />
                         </div>
                         <div>
-                          <h4 className="text-xs sm:text-sm font-bold text-white">{currentLesson.attachment_name || "ملف مرفق للدراسة والعمل"}</h4>
+                          <h4 className="text-xs sm:text-sm font-bold text-zinc-900">{currentLesson.attachment_name || "ملف مرفق للدراسة والعمل"}</h4>
                           <p className="text-[10px] text-zinc-500 mt-0.5">جاهز للتنزيل الفوري • حجم خفيف</p>
                         </div>
                       </div>
@@ -973,7 +973,7 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ courseS
                         href={`/api/video/attachment?lessonId=${currentLesson.id}&url=${encodeURIComponent(currentLesson.attachment_url)}`}
                         target="_blank"
                         rel="noreferrer"
-                        className="h-9 px-4 bg-white/5 hover:bg-white/10 text-white rounded-lg text-[10px] font-bold transition-all border border-white/10 flex items-center justify-center shrink-0"
+                        className="h-9 px-4 bg-zinc-100/40 hover:bg-zinc-100/80 text-zinc-900 rounded-2xl text-[10px] font-bold transition-all border border-zinc-200 flex items-center justify-center shrink-0"
                       >
                         تحميل الآن
                       </a>
@@ -1006,14 +1006,14 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ courseS
                         return (
                           <div 
                             key={file.url || idx} 
-                            className="bg-[#0a0a0f] border border-white/5 hover:border-emerald-500/30 rounded-2xl p-4 flex items-center justify-between gap-4 transition-all group hover:scale-[1.01]"
+                            className="bg-slate-50 border border-zinc-200/60 hover:border-emerald-500/30 rounded-2xl p-4 flex items-center justify-between gap-4 transition-all group hover:scale-[1.01]"
                           >
                             <div className="flex items-center gap-3 min-w-0">
-                              <div className="w-10 h-10 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-lg shrink-0">
+                              <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-lg shrink-0">
                                 {getFileIcon(file.type)}
                               </div>
                               <div className="min-w-0 leading-tight">
-                                <h4 className="text-xs sm:text-sm font-bold text-white truncate max-w-[200px]" title={file.name}>
+                                <h4 className="text-xs sm:text-sm font-bold text-zinc-900 truncate max-w-[200px]" title={file.name}>
                                   {file.name}
                                 </h4>
                                 <span className="text-[10px] text-zinc-500 mt-0.5 font-bold font-mono">
@@ -1025,7 +1025,7 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ courseS
                               href={`/api/video/attachment?lessonId=${currentLesson.id}&url=${encodeURIComponent(file.url)}`}
                               target="_blank"
                               rel="noreferrer"
-                              className="h-9 px-4 bg-emerald-600/10 border border-emerald-500/20 hover:bg-emerald-600 text-emerald-400 hover:text-white rounded-xl text-[10px] font-bold transition-all flex items-center justify-center shrink-0 gap-1"
+                              className="h-9 px-4 bg-emerald-600/10 border border-emerald-500/20 hover:bg-emerald-600 text-emerald-400 hover:text-white rounded-2xl text-[10px] font-bold transition-all flex items-center justify-center shrink-0 gap-1"
                             >
                               <Download className="w-3.5 h-3.5" />
                               <span>تحميل</span>
@@ -1062,15 +1062,15 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ courseS
               initial={{ scale: 0.95, y: 20 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.95, y: 20 }}
-              className="bg-[#08080c]/90 border border-amber-500/20 rounded-[2.5rem] max-w-3xl w-full p-6 sm:p-10 space-y-8 shadow-[0_0_80px_rgba(217,119,6,0.15)] relative overflow-hidden font-cairo"
+              className="bg-[#08080c]/90 border border-amber-500/20 rounded-[2.5rem] max-w-3xl w-full p-6 sm:p-10 space-y-8 shadow-[0_0_80px_rgba(217,119,6,0.15)] relative overflow-hidden font-sans"
             >
               {/* Premium Background Ornaments */}
               <div className="absolute top-0 right-0 w-80 h-80 bg-amber-500/5 rounded-full blur-[120px] -z-10 pointer-events-none" />
-              <div className="absolute bottom-0 left-0 w-80 h-80 bg-rose-500/5 rounded-full blur-[120px] -z-10 pointer-events-none" />
+              <div className="absolute bottom-0 left-0 w-80 h-80 bg-brand-500/5 rounded-full blur-[120px] -z-10 pointer-events-none" />
 
               <button 
                 onClick={() => setShowCertModal(false)}
-                className="absolute top-6 left-6 p-2.5 rounded-2xl bg-white/5 hover:bg-rose-500/20 text-zinc-400 hover:text-rose-400 border border-white/10 hover:border-rose-500/30 transition-all cursor-pointer z-10"
+                className="absolute top-6 left-6 p-2.5 rounded-2xl bg-zinc-100/40 hover:bg-brand-500/20 text-zinc-500 hover:text-yellow-500 border border-zinc-200 hover:border-zinc-200/60 transition-all cursor-pointer z-10"
                 title="إغلاق"
               >
                 <X className="w-5 h-5" />
@@ -1079,7 +1079,7 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ courseS
               {/* Celebration Header */}
               <div className="text-center space-y-4 pt-4">
                 <div className="mx-auto w-24 h-24 rounded-full bg-gradient-to-tr from-amber-500 to-yellow-400 border-2 border-amber-400/30 flex items-center justify-center text-black shadow-[0_0_50px_rgba(245,158,11,0.35)] relative overflow-hidden group">
-                  <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
+                  <div className="absolute inset-0 bg-zinc-200/80 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
                   <Award className="w-12 h-12 text-black shrink-0 relative z-10" />
                 </div>
                 
@@ -1088,11 +1088,11 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ courseS
                   <span>مبارك الإنجاز الاستثنائي العظيم! 🎉</span>
                 </div>
                 
-                <h2 className="font-alexandria font-black text-2xl sm:text-4xl text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-yellow-200 to-amber-500 tracking-tight leading-tight">
+                <h2 className="font-sans font-black text-2xl sm:text-4xl text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-yellow-200 to-amber-500 tracking-tight leading-tight">
                   تهانينا الحارة من جو سكول
                 </h2>
                 
-                <p className="text-zinc-400 text-xs sm:text-sm max-w-lg mx-auto leading-relaxed">
+                <p className="text-zinc-500 text-xs sm:text-sm max-w-lg mx-auto leading-relaxed">
                   بكل فخر واعتزاز، نُبارك لك إتمام كامل متطلبات ودروس هذا المسار التعليمي الفخم بنجاح باهر. هذا الإنجاز يعكس شغفك وعزيمتك نحو التميز الرقمي والاحتراف!
                 </p>
               </div>
@@ -1100,7 +1100,7 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ courseS
               {/* Certificate Preview Frame (Aesthetic live-preview) */}
               {activeCert.certificate_bg_url ? (
                 <div 
-                  className="w-full aspect-[1.414/1] bg-[#0a0a0f] border border-amber-500/30 rounded-3xl overflow-hidden relative shadow-2xl"
+                  className="w-full aspect-[1.414/1] bg-slate-50 border border-amber-500/30 rounded-3xl overflow-hidden relative shadow-sm border border-zinc-200/60"
                   style={{ containerType: 'inline-size' } as React.CSSProperties}
                 >
                   <style dangerouslySetInnerHTML={{__html: `
@@ -1155,7 +1155,7 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ courseS
                   <div className="space-y-4">
                     <p className="text-zinc-500 text-xs font-medium">يُشهد فريق العمل الفني بالمنصة بأن الطالب المتميز:</p>
                     <h3 
-                      className="text-white text-2xl sm:text-4xl underline decoration-amber-500/30 decoration-wavy underline-offset-8 transition-all font-black"
+                      className="text-zinc-900 text-2xl sm:text-4xl underline decoration-amber-500/30 decoration-wavy underline-offset-8 transition-all font-black"
                       style={{
                         fontFamily: /[\u0600-\u06FF]/.test(activeCert.student_name) ? "'Cairo', 'Alexandria', sans-serif" : "'Alike', serif",
                       }}
@@ -1163,34 +1163,34 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ courseS
                       {activeCert.student_name}
                     </h3>
                     <p className="text-zinc-500 text-xs font-medium mt-4">قد اجتاز بتفوق كامل دروس المسار التدريبي الاحترافي:</p>
-                    <h4 className="font-alexandria font-bold text-lg sm:text-xl text-rose-400 bg-rose-500/5 border border-rose-500/10 rounded-xl py-3 px-6 inline-block">
+                    <h4 className="font-sans font-bold text-lg sm:text-xl text-yellow-500 bg-brand-500/5 border border-zinc-200/60 rounded-2xl py-3 px-6 inline-block">
                       {activeCert.course_name}
                     </h4>
                   </div>
 
                   {/* Metadata & Verification Block */}
-                  <div className="flex flex-col sm:flex-row items-center justify-between border-t border-white/5 pt-6 gap-6 text-xs text-right sm:text-center text-zinc-500 font-bold leading-normal">
+                  <div className="flex flex-col sm:flex-row items-center justify-between border-t border-zinc-200/60 pt-6 gap-6 text-xs text-right sm:text-center text-zinc-500 font-bold leading-normal">
                     <div className="space-y-2 text-right shrink-0">
                       <div>
                         <span className="block text-[9px] text-zinc-600 font-medium">تاريخ إصدار الشهادة:</span>
-                        <span className="text-zinc-300 font-mono mt-0.5 block">{activeCert.issued_at}</span>
+                        <span className="text-zinc-700 font-mono mt-0.5 block">{activeCert.issued_at}</span>
                       </div>
                       <div>
                         <span className="block text-[9px] text-zinc-600 font-medium">رقم التوثيق الرقمي المعتمد:</span>
-                        <span className="text-rose-400 font-mono mt-0.5 block">{activeCert.verification_id}</span>
+                        <span className="text-yellow-500 font-mono mt-0.5 block">{activeCert.verification_id}</span>
                       </div>
-                      <div className="flex items-center gap-1.5 text-[9px] text-emerald-400 bg-emerald-950/30 border border-emerald-900/20 px-2.5 py-1 rounded-lg w-fit">
+                      <div className="flex items-center gap-1.5 text-[9px] text-emerald-400 bg-emerald-950/30 border border-emerald-900/20 px-2.5 py-1 rounded-2xl w-fit">
                         <ShieldCheck className="w-4.5 h-4.5 text-emerald-500" />
                         <span>شهادة آمنة ومدرجة في حسابك للرجوع إليها دائماً</span>
                       </div>
                     </div>
 
                     {/* QR Code */}
-                    <div className="flex flex-col items-center gap-1.5 bg-white/[0.02] border border-white/5 p-2 rounded-2xl shrink-0 group-hover/cert:scale-[1.03] transition-transform duration-350">
+                    <div className="flex flex-col items-center gap-1.5 bg-zinc-50/70 border border-zinc-200/60 p-2 rounded-2xl shrink-0 group-hover/cert:scale-[1.03] transition-transform duration-350">
                       <img 
                         src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&color=d97706&bgcolor=0a0a0f&data=${encodeURIComponent(`https://joeschool.com/certificates/verify?id=${activeCert.verification_id}`)}`}
                         alt="Certificate QR Verification" 
-                        className="w-18 h-18 rounded-lg border border-amber-500/10"
+                        className="w-18 h-18 rounded-2xl border border-amber-500/10"
                       />
                       <span className="text-[7px] text-amber-500/60 font-mono tracking-widest block uppercase font-bold select-none">Scan to Verify</span>
                     </div>
@@ -1200,23 +1200,23 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ courseS
 
               {/* Certificate Editing Section */}
               {!isEditingName ? (
-                <div className="flex flex-col items-center justify-center p-5 bg-white/[0.01] border border-white/5 rounded-3xl gap-3 text-center">
-                  <div className="text-zinc-400 text-xs font-medium">الاسم المطبوع حالياً على الشهادة: <span className="text-amber-400 font-black">{activeCert.student_name}</span></div>
+                <div className="flex flex-col items-center justify-center p-5 bg-zinc-50/40 border border-zinc-200/60 rounded-3xl gap-3 text-center">
+                  <div className="text-zinc-500 text-xs font-medium">الاسم المطبوع حالياً على الشهادة: <span className="text-amber-400 font-black">{activeCert.student_name}</span></div>
                   <button
                     onClick={() => {
                       setNewNameInput(activeCert.student_name);
                       setIsEditingName(true);
                     }}
-                    className="px-5 py-2.5 bg-white/5 hover:bg-white/10 text-rose-400 border border-white/10 hover:border-rose-500/25 rounded-2xl font-bold text-xs flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-95"
+                    className="px-5 py-2.5 bg-zinc-100/40 hover:bg-zinc-100/80 text-yellow-500 border border-zinc-200 hover:border-brand-500/25 rounded-2xl font-bold text-xs flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-95"
                   >
                     <Edit className="w-3.5 h-3.5" />
                     <span>تعديل الاسم المطبوع على الشهادة</span>
                   </button>
                 </div>
               ) : (
-                <div className="flex flex-col bg-white/[0.01] border border-white/5 p-6 rounded-3xl gap-4 text-right">
+                <div className="flex flex-col bg-zinc-50/40 border border-zinc-200/60 p-6 rounded-3xl gap-4 text-right">
                   <div className="space-y-1">
-                    <label className="text-xs font-alexandria font-bold text-zinc-300 block">تعديل اسم الطالب المطبوع:</label>
+                    <label className="text-xs font-sans font-bold text-zinc-700 block">تعديل اسم الطالب المطبوع:</label>
                     <p className="text-[10px] text-zinc-500 font-medium">تنبيه: يمكنك فقط تعديل نص الاسم. لا يمكنك تغيير نوع الخط أو الحجم المحددين مسبقاً من الإدارة لضمان توافق وجودة الشهادة الاحترافية.</p>
                   </div>
                   
@@ -1225,21 +1225,21 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ courseS
                     value={newNameInput}
                     onChange={(e) => setNewNameInput(e.target.value)}
                     placeholder="اكتب اسمك الثلاثي بالشكل الصحيح..."
-                    className="w-full bg-[#0a0a0f] border border-white/5 focus:border-rose-500/50 rounded-2xl p-4 text-xs focus:outline-none transition-all text-white text-right leading-relaxed"
+                    className="w-full bg-slate-50 border border-zinc-200/60 focus:border-zinc-200/60 rounded-2xl p-4 text-xs focus:outline-none transition-all text-zinc-900 text-right leading-relaxed"
                     required
                   />
                   
                   <div className="flex items-center justify-end gap-2.5">
                     <button
                       onClick={() => setIsEditingName(false)}
-                      className="h-10 px-5 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white rounded-xl text-xs font-bold transition-all cursor-pointer border border-white/5"
+                      className="h-10 px-5 bg-zinc-900 hover:bg-zinc-800 text-zinc-500 hover:text-zinc-900 rounded-2xl text-xs font-bold transition-all cursor-pointer border border-zinc-200/60"
                     >
                       إلغاء
                     </button>
                     <button
                       onClick={handleSaveCertificateName}
                       disabled={isSavingName || !newNameInput.trim()}
-                      className="h-10 px-5 bg-gradient-to-l from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 text-white rounded-xl text-xs font-alexandria font-black flex items-center justify-center gap-1.5 transition-all disabled:opacity-50 cursor-pointer shadow-lg shadow-rose-600/10"
+                      className="h-10 px-5 bg-gradient-to-l from-brand-600 to-pink-600 hover:from-brand-500 hover:to-pink-500 text-zinc-900 rounded-2xl text-xs font-sans font-black flex items-center justify-center gap-1.5 transition-all disabled:opacity-50 cursor-pointer shadow-sm border border-zinc-200/60 shadow-brand-600/10"
                     >
                       {isSavingName ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle className="w-3.5 h-3.5" />}
                       <span>حفظ الاسم وتحديث الشهادة</span>
@@ -1249,7 +1249,7 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ courseS
               )}
 
               {/* Actions Footer */}
-              <div className="flex flex-col sm:flex-row items-center justify-end gap-3 pt-4 border-t border-white/5">
+              <div className="flex flex-col sm:flex-row items-center justify-end gap-3 pt-4 border-t border-zinc-200/60">
                 <button
                   onClick={() => downloadCertificate("pdf")}
                   disabled={isDownloadingPdf || isDownloadingPng}
@@ -1266,21 +1266,21 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ courseS
                 <button
                   onClick={() => downloadCertificate("png")}
                   disabled={isDownloadingPdf || isDownloadingPng}
-                  className="w-full sm:w-auto h-12 px-5 bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-2xl font-bold text-xs flex items-center justify-center gap-2 active:scale-95 transition-all shrink-0 cursor-pointer"
+                  className="w-full sm:w-auto h-12 px-5 bg-zinc-100/40 hover:bg-zinc-100/80 text-zinc-900 border border-zinc-200 rounded-2xl font-bold text-xs flex items-center justify-center gap-2 active:scale-95 transition-all shrink-0 cursor-pointer"
                 >
                   {isDownloadingPng ? (
                     <Loader2 className="w-4.5 h-4.5 animate-spin" />
                   ) : (
-                    <FileImage className="w-4.5 h-4.5 text-zinc-400" />
+                    <FileImage className="w-4.5 h-4.5 text-zinc-500" />
                   )}
                   <span>تحميل بصيغة PNG (صورة)</span>
                 </button>
                 
                 <button
                   onClick={() => window.print()}
-                  className="w-full sm:w-auto h-12 px-5 bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-2xl font-bold text-xs flex items-center justify-center gap-2 active:scale-95 transition-all shrink-0 cursor-pointer"
+                  className="w-full sm:w-auto h-12 px-5 bg-zinc-100/40 hover:bg-zinc-100/80 text-zinc-900 border border-zinc-200 rounded-2xl font-bold text-xs flex items-center justify-center gap-2 active:scale-95 transition-all shrink-0 cursor-pointer"
                 >
-                  <Printer className="w-4.5 h-4.5 text-zinc-400" />
+                  <Printer className="w-4.5 h-4.5 text-zinc-500" />
                   <span>طباعة الشهادة</span>
                 </button>
                 
@@ -1289,7 +1289,7 @@ export default function LessonPlayerPage({ params }: { params: Promise<{ courseS
                     setIsEditingName(false);
                     setShowCertModal(false);
                   }}
-                  className="w-full sm:w-auto h-12 px-6 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white rounded-2xl font-bold text-xs active:scale-95 transition-all shrink-0 cursor-pointer"
+                  className="w-full sm:w-auto h-12 px-6 bg-zinc-800 hover:bg-zinc-700 text-zinc-700 hover:text-zinc-900 rounded-2xl font-bold text-xs active:scale-95 transition-all shrink-0 cursor-pointer"
                 >
                   العودة للمشاهدة
                 </button>

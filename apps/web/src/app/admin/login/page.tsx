@@ -50,11 +50,11 @@ export default function AdminLogin() {
       <div className="absolute inset-0 pointer-events-none">
         <div
           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full"
-          style={{ background: "radial-gradient(circle, rgba(214,0,75,0.13) 0%, transparent 70%)" }}
+          style={{ background: "radial-gradient(circle, rgba(29, 78, 216,0.13) 0%, transparent 70%)" }}
         />
         <div
           className="absolute top-0 right-0 w-[350px] h-[350px] rounded-full"
-          style={{ background: "radial-gradient(circle, rgba(214,0,75,0.07) 0%, transparent 70%)" }}
+          style={{ background: "radial-gradient(circle, rgba(29, 78, 216,0.07) 0%, transparent 70%)" }}
         />
         <div
           className="absolute bottom-0 left-0 w-[300px] h-[300px] rounded-full"
@@ -110,7 +110,7 @@ export default function AdminLogin() {
             backdropFilter: "blur(28px)",
             WebkitBackdropFilter: "blur(28px)",
             border: "1px solid rgba(255,255,255,0.09)",
-            boxShadow: "0 40px 90px rgba(0,0,0,0.55), inset 0 0 0 1px rgba(214,0,75,0.07)",
+            boxShadow: "0 40px 90px rgba(0,0,0,0.55), inset 0 0 0 1px rgba(29, 78, 216,0.07)",
           }}
         >
           <form onSubmit={handleLogin} className="space-y-5">
@@ -132,15 +132,15 @@ export default function AdminLogin() {
                   value={email}
                   onChange={e => setEmail(e.target.value)}
                   disabled={isLoading}
-                  className="h-14 pr-12 font-sans text-sm rounded-xl transition-all duration-200 outline-none ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+                  className="h-14 pr-12 font-sans text-sm rounded-2xl transition-all duration-200 outline-none ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
                   style={{
                     background: "rgba(255,255,255,0.045)",
                     border: "1.5px solid rgba(255,255,255,0.1)",
                     color: "#f4f4f5",
                   }}
                   onFocus={e => {
-                    e.currentTarget.style.border = "1.5px solid #D6004B";
-                    e.currentTarget.style.background = "rgba(214,0,75,0.07)";
+                    e.currentTarget.style.border = "1.5px solid #1D4ED8";
+                    e.currentTarget.style.background = "rgba(29, 78, 216,0.07)";
                   }}
                   onBlur={e => {
                     e.currentTarget.style.border = "1.5px solid rgba(255,255,255,0.1)";
@@ -167,15 +167,15 @@ export default function AdminLogin() {
                   value={password}
                   onChange={e => setPassword(e.target.value)}
                   disabled={isLoading}
-                  className="h-14 pr-12 pl-12 font-sans text-sm rounded-xl transition-all duration-200 outline-none ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+                  className="h-14 pr-12 pl-12 font-sans text-sm rounded-2xl transition-all duration-200 outline-none ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
                   style={{
                     background: "rgba(255,255,255,0.045)",
                     border: "1.5px solid rgba(255,255,255,0.1)",
                     color: "#f4f4f5",
                   }}
                   onFocus={e => {
-                    e.currentTarget.style.border = "1.5px solid #D6004B";
-                    e.currentTarget.style.background = "rgba(214,0,75,0.07)";
+                    e.currentTarget.style.border = "1.5px solid #1D4ED8";
+                    e.currentTarget.style.background = "rgba(29, 78, 216,0.07)";
                   }}
                   onBlur={e => {
                     e.currentTarget.style.border = "1.5px solid rgba(255,255,255,0.1)";
@@ -199,17 +199,17 @@ export default function AdminLogin() {
             <button
               type="submit"
               disabled={isLoading || !email || !password}
-              className="w-full h-14 mt-2 rounded-xl font-sans font-black text-lg text-white transition-all duration-200 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed"
+              className="w-full h-14 mt-2 rounded-2xl font-sans font-black text-lg text-zinc-900 transition-all duration-200 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed"
               style={{
-                background: "linear-gradient(135deg, #D6004B 0%, #ff2d6b 100%)",
-                boxShadow: "0 8px 32px rgba(214,0,75,0.38)",
+                background: "linear-gradient(135deg, #1D4ED8 0%, #ff2d6b 100%)",
+                boxShadow: "0 8px 32px rgba(29, 78, 216,0.38)",
               }}
               onMouseEnter={e => {
                 if (!isLoading && (email || password))
-                  (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 14px 44px rgba(214,0,75,0.55)";
+                  (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 14px 44px rgba(29, 78, 216,0.55)";
               }}
               onMouseLeave={e => {
-                (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 8px 32px rgba(214,0,75,0.38)";
+                (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 8px 32px rgba(29, 78, 216,0.38)";
               }}
             >
               {isLoading ? (
@@ -225,7 +225,7 @@ export default function AdminLogin() {
 
           {/* Security Footer */}
           <div
-            className="mt-6 flex items-center justify-center gap-2.5 py-3.5 rounded-xl font-sans text-xs"
+            className="mt-6 flex items-center justify-center gap-2.5 py-3.5 rounded-2xl font-sans text-xs"
             style={{
               background: "rgba(255,255,255,0.03)",
               border: "1px solid rgba(255,255,255,0.06)",

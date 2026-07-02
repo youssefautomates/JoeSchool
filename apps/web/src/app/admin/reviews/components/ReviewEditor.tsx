@@ -210,28 +210,28 @@ export function ReviewEditor({ review, products, onSave, onClose }: ReviewEditor
   return (
     <div className="fixed inset-0 z-50 flex overflow-hidden bg-black/85 backdrop-blur-md font-sans" dir="ltr">
       {/* Side-by-Side Flex Layout */}
-      <div className="flex flex-col lg:flex-row w-full max-w-[1400px] bg-[#050508] border-r border-white/10 shadow-2xl overflow-y-auto">
+      <div className="flex flex-col lg:flex-row w-full max-w-[1400px] bg-white border-r border-zinc-200 shadow-sm border border-zinc-200/60 overflow-y-auto">
         
         {/* RIGHT COLUMN: Form Controls */}
-        <div className="flex-1 p-6 md:p-10 border-r border-white/5 space-y-6">
+        <div className="flex-1 p-6 md:p-10 border-r border-zinc-200/60 space-y-6">
           
           {/* Draft recovery notifier */}
           {hasDraft && (
-            <div className="bg-rose-500/10 border border-rose-500/20 p-4 rounded-xl flex items-center justify-between gap-4 font-sans text-xs font-bold text-rose-400 animate-pulse">
+            <div className="bg-brand-500/10 border border-zinc-200/60 p-4 rounded-2xl flex items-center justify-between gap-4 font-sans text-xs font-bold text-yellow-500 animate-pulse">
               <div className="flex items-center gap-2 text-left">
-                <AlertCircle className="w-4 h-4 text-rose-500 shrink-0" />
+                <AlertCircle className="w-4 h-4 text-yellow-500 shrink-0" />
                 <span>An incomplete saved draft was found. Do you want to restore it?</span>
               </div>
               <div className="flex items-center gap-2">
                 <button
                   onClick={handleRestoreDraft}
-                  className="px-3 py-1.5 bg-[#D6004B] text-white rounded-lg hover:bg-[#ff0059] cursor-pointer"
+                  className="px-3 py-1.5 bg-[#1D4ED8] text-white rounded-2xl hover:bg-[#3B82F6] cursor-pointer"
                 >
                   Restore
                 </button>
                 <button
                   onClick={handleDiscardDraft}
-                  className="px-3 py-1.5 bg-white/5 text-zinc-400 hover:text-white rounded-lg cursor-pointer"
+                  className="px-3 py-1.5 bg-zinc-100/40 text-zinc-500 hover:text-zinc-900 rounded-2xl cursor-pointer"
                 >
                   Discard
                 </button>
@@ -239,9 +239,9 @@ export function ReviewEditor({ review, products, onSave, onClose }: ReviewEditor
             </div>
           )}
 
-          <div className="flex items-center justify-between border-b border-white/5 pb-5">
+          <div className="flex items-center justify-between border-b border-zinc-200/60 pb-5">
             <div className="text-left">
-              <h2 className="text-xl font-black text-white font-sans">
+              <h2 className="text-xl font-black text-zinc-900 font-sans">
                 {review ? "Edit Customer Review" : "Add New Review"}
               </h2>
               <p className="text-zinc-500 text-[11px] md:text-xs font-sans mt-1.5">
@@ -251,7 +251,7 @@ export function ReviewEditor({ review, products, onSave, onClose }: ReviewEditor
             
             <button
               onClick={handleCancelClose}
-              className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-colors cursor-pointer"
+              className="p-2 rounded-2xl bg-zinc-100/40 hover:bg-zinc-100/80 text-zinc-500 hover:text-zinc-900 transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -261,23 +261,23 @@ export function ReviewEditor({ review, products, onSave, onClose }: ReviewEditor
             
             {/* 1. Product Link */}
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs text-zinc-300 font-bold font-sans">Linked Item (Course or Digital Product)</label>
+              <label className="text-xs text-zinc-700 font-bold font-sans">Linked Item (Course or Digital Product)</label>
               <select
                 value={formData.productId}
                 required
                 onChange={(e) => handleChange("productId", e.target.value)}
-                className="w-full h-11 px-4 rounded-xl bg-white/5 border border-white/10 text-zinc-300 text-xs outline-none focus:border-rose-500/50 cursor-pointer"
+                className="w-full h-11 px-4 rounded-2xl bg-zinc-100/40 border border-zinc-200 text-zinc-700 text-xs outline-none focus:border-zinc-200/60 cursor-pointer"
               >
                 <option value="" disabled className="bg-zinc-950 text-zinc-500">-- Select Course or Product --</option>
                 {products.map(p => (
-                  <option key={p.id} value={p.id} className="bg-[#050508] text-white">
+                  <option key={p.id} value={p.id} className="bg-white text-zinc-900">
                     {p.title}
                   </option>
                 ))}
               </select>
               {formData.sourceType && (
                 <div className="flex items-center gap-2 mt-1 select-none">
-                  <span className="bg-zinc-800/80 text-zinc-400 border border-zinc-700/30 px-2 py-0.5 rounded text-[9px] font-bold font-sans">
+                  <span className="bg-zinc-800/80 text-zinc-500 border border-zinc-700/30 px-2 py-0.5 rounded text-[9px] font-bold font-sans">
                     Source Type: {formData.sourceType === "course" ? "🎓 Course" : "🛍️ Product"}
                   </span>
                   <span className="bg-zinc-800/80 text-zinc-500 border border-zinc-700/30 px-2 py-0.5 rounded text-[9px] font-mono font-bold">
@@ -290,31 +290,31 @@ export function ReviewEditor({ review, products, onSave, onClose }: ReviewEditor
             {/* 2. Names */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="flex flex-col gap-1.5 text-left">
-                <label className="text-xs text-zinc-300 font-bold font-sans">First Name (Fully visible)</label>
+                <label className="text-xs text-zinc-700 font-bold font-sans">First Name (Fully visible)</label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. John"
                   value={formData.firstName || ""}
                   onChange={(e) => handleChange("firstName", e.target.value)}
-                  className="h-11 px-4 rounded-xl bg-white/5 border border-white/10 text-zinc-300 text-xs outline-none focus:border-rose-500/50"
+                  className="h-11 px-4 rounded-2xl bg-zinc-100/40 border border-zinc-200 text-zinc-700 text-xs outline-none focus:border-zinc-200/60"
                 />
               </div>
               <div className="flex flex-col gap-1.5 text-left">
-                <label className="text-xs text-zinc-300 font-bold font-sans">Last Name (First letter only)</label>
+                <label className="text-xs text-zinc-700 font-bold font-sans">Last Name (First letter only)</label>
                 <input
                   type="text"
                   placeholder="e.g. Doe"
                   value={formData.lastName || ""}
                   onChange={(e) => handleChange("lastName", e.target.value)}
-                  className="h-11 px-4 rounded-xl bg-white/5 border border-white/10 text-zinc-300 text-xs outline-none focus:border-rose-500/50"
+                  className="h-11 px-4 rounded-2xl bg-zinc-100/40 border border-zinc-200 text-zinc-700 text-xs outline-none focus:border-zinc-200/60"
                 />
               </div>
             </div>
 
             {/* 3. Rating Stars Picker */}
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs text-zinc-300 font-bold font-sans">Rating Stars (Supports half stars)</label>
+              <label className="text-xs text-zinc-700 font-bold font-sans">Rating Stars (Supports half stars)</label>
               <RatingPicker 
                 rating={formData.rating || 5} 
                 onChange={(rating) => handleChange("rating", rating)} 
@@ -324,49 +324,49 @@ export function ReviewEditor({ review, products, onSave, onClose }: ReviewEditor
 
             {/* 5. Review Testimonial Text */}
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs text-zinc-300 font-bold font-sans">Review Text</label>
+              <label className="text-xs text-zinc-700 font-bold font-sans">Review Text</label>
               <textarea
                 value={formData.text || ""}
                 required
                 onChange={(e) => handleChange("text", e.target.value)}
                 placeholder="Write the review text and experience shared by the customer..."
-                className="w-full h-28 p-4 rounded-xl bg-white/5 border border-white/10 text-zinc-300 text-xs outline-none focus:border-rose-500/50 resize-none font-sans leading-relaxed"
+                className="w-full h-28 p-4 rounded-2xl bg-zinc-100/40 border border-zinc-200 text-zinc-700 text-xs outline-none focus:border-zinc-200/60 resize-none font-sans leading-relaxed"
               />
             </div>
 
             {/* 6. Settings Toggles and Dropdowns */}
-            <div className="flex flex-col gap-1.5 bg-white/[0.01] border border-white/5 p-5 rounded-2xl">
+            <div className="flex flex-col gap-1.5 bg-zinc-50/40 border border-zinc-200/60 p-5 rounded-2xl">
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs text-zinc-300 font-bold font-sans">Publishing Status</label>
+                <label className="text-xs text-zinc-700 font-bold font-sans">Publishing Status</label>
                 <select
                   value={formData.status}
                   onChange={(e) => handleChange("status", e.target.value)}
-                  className="w-full h-11 px-3.5 rounded-xl bg-white/5 border border-white/10 text-zinc-300 font-sans text-xs outline-none focus:border-rose-500/50 cursor-pointer"
+                  className="w-full h-11 px-3.5 rounded-2xl bg-zinc-100/40 border border-zinc-200 text-zinc-700 font-sans text-xs outline-none focus:border-zinc-200/60 cursor-pointer"
                 >
-                  <option value="visible" className="bg-[#050508]">🟢 Active & Approved (Visible)</option>
-                  <option value="pending" className="bg-[#050508]">⏳ Pending Moderation</option>
-                  <option value="hidden" className="bg-[#050508]">🔴 Hidden</option>
-                  <option value="archived" className="bg-[#050508]">📁 Archived / Soft Deleted</option>
+                  <option value="visible" className="bg-white">🟢 Active & Approved (Visible)</option>
+                  <option value="pending" className="bg-white">⏳ Pending Moderation</option>
+                  <option value="hidden" className="bg-white">🔴 Hidden</option>
+                  <option value="archived" className="bg-white">📁 Archived / Soft Deleted</option>
                 </select>
               </div>
             </div>
 
             {/* Action buttons */}
-            <div className="flex items-center justify-end gap-3 border-t border-white/5 pt-5">
+            <div className="flex items-center justify-end gap-3 border-t border-zinc-200/60 pt-5">
               <button
                 type="button"
                 onClick={handleCancelClose}
-                className="h-11 px-6 bg-white/5 hover:bg-white/10 text-zinc-300 rounded-xl font-bold text-xs transition-all font-sans cursor-pointer"
+                className="h-11 px-6 bg-zinc-100/40 hover:bg-zinc-100/80 text-zinc-700 rounded-2xl font-bold text-xs transition-all font-sans cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={saving}
-                className="h-11 px-8 bg-[#D6004B] hover:bg-[#ff0059] text-white rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer disabled:opacity-50"
+                className="h-11 px-8 bg-[#1D4ED8] hover:bg-[#3B82F6] text-white rounded-2xl font-bold text-xs flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer disabled:opacity-50"
               >
                 {saving ? (
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <div className="w-4 h-4 border-2 border-zinc-300 border-t-white rounded-full animate-spin" />
                 ) : (
                   <Save className="w-4 h-4" />
                 )}
@@ -377,12 +377,12 @@ export function ReviewEditor({ review, products, onSave, onClose }: ReviewEditor
         </div>
 
         {/* LEFT COLUMN: Live Preview Mode */}
-        <div className="lg:w-[450px] bg-black/60 p-6 md:p-8 flex flex-col justify-start space-y-6 relative border-l border-white/5 select-none shrink-0 lg:h-screen lg:sticky lg:top-0">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-rose-600/5 rounded-full blur-[80px] pointer-events-none" />
+        <div className="lg:w-[450px] bg-black/60 p-6 md:p-8 flex flex-col justify-start space-y-6 relative border-l border-zinc-200/60 select-none shrink-0 lg:h-screen lg:sticky lg:top-0">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-brand-600/5 rounded-full blur-[80px] pointer-events-none" />
           
-          <div className="border-b border-white/5 pb-4 text-left">
-            <h3 className="text-sm font-bold text-white flex items-center gap-2 font-sans">
-              <Sparkles className="w-4.5 h-4.5 text-rose-500 fill-current" />
+          <div className="border-b border-zinc-200/60 pb-4 text-left">
+            <h3 className="text-sm font-bold text-zinc-900 flex items-center gap-2 font-sans">
+              <Sparkles className="w-4.5 h-4.5 text-yellow-500 fill-current" />
               <span>Live Preview</span>
             </h3>
             <p className="text-zinc-500 text-[10px] font-sans mt-1">

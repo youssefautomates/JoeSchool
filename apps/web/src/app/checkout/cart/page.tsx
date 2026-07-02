@@ -744,42 +744,42 @@ export default function CartCheckoutPage() {
 
   if (removedAllDuplicates || (items.length === 0 && removedAllDuplicates)) {
     return (
-      <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center text-white font-cairo p-4 text-center space-y-6">
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center text-zinc-900 font-sans p-4 text-center space-y-6">
         <ShieldAlert className="w-16 h-16 text-red-500 animate-bounce" />
         
         {user ? (
           <>
-            <h1 className="text-3xl font-cairo font-bold mb-2">أنت مشترك بالفعل في هذا الكورس.</h1>
-            <p className="text-zinc-400 text-sm max-w-md mx-auto leading-relaxed">
+            <h1 className="text-3xl font-sans font-bold mb-2">أنت مشترك بالفعل في هذا الكورس.</h1>
+            <p className="text-zinc-500 text-sm max-w-md mx-auto leading-relaxed">
               لقد قمت بالاشتراك في الكورسات التي كانت في سلتك مسبقاً، يمكنك البدء في مشاهدتها فوراً من لوحة التحكم.
             </p>
             <div className="flex gap-4">
-              <Link href={enrolledCourseSlug ? `/learn/${enrolledCourseSlug}/${firstLessonSlug || ""}` : "/dashboard"} className="h-12 px-8 bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white font-cairo font-bold text-sm rounded-xl flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 cursor-pointer">
+              <Link href={enrolledCourseSlug ? `/learn/${enrolledCourseSlug}/${firstLessonSlug || ""}` : "/dashboard"} className="h-12 px-8 bg-gradient-to-r from-red-500 to-brand-600 hover:from-red-600 hover:to-brand-700 text-white font-sans font-bold text-sm rounded-2xl flex items-center justify-center gap-2 shadow-sm border border-zinc-200/60 transition-all active:scale-95 cursor-pointer">
                 <BookOpen className="w-4 h-4" />
                 <span>فتح الكورس</span>
               </Link>
-              <Link href="/dashboard" className="h-12 px-6 bg-white/5 hover:bg-white/10 text-white font-cairo font-bold text-sm rounded-xl flex items-center justify-center gap-2 border border-white/10 transition-colors cursor-pointer">
-                <LayoutDashboard className="w-4 h-4 text-zinc-400" />
+              <Link href="/dashboard" className="h-12 px-6 bg-zinc-100/40 hover:bg-zinc-100/80 text-zinc-900 font-sans font-bold text-sm rounded-2xl flex items-center justify-center gap-2 border border-zinc-200 transition-colors cursor-pointer">
+                <LayoutDashboard className="w-4 h-4 text-zinc-500" />
                 <span>لوحة التحكم</span>
               </Link>
             </div>
           </>
         ) : (
           <>
-            <h1 className="text-3xl font-cairo font-bold mb-2">تم العثور على اشتراك سابق لهذا البريد الإلكتروني.</h1>
-            <p className="text-zinc-400 text-sm max-w-md mx-auto leading-relaxed">
+            <h1 className="text-3xl font-sans font-bold mb-2">تم العثور على اشتراك سابق لهذا البريد الإلكتروني.</h1>
+            <p className="text-zinc-500 text-sm max-w-md mx-auto leading-relaxed">
               لقد قمت بشراء هذا الكورس وإنشاء حساب بالفعل. يرجى تسجيل الدخول للوصول إلى محتوى الكورس.
             </p>
             <div className="flex gap-4">
               <Link 
                 href={`/login?redirect=${encodeURIComponent(enrolledCourseSlug ? `/learn/${enrolledCourseSlug}/${firstLessonSlug || ""}` : "/dashboard")}`} 
-                className="h-12 px-8 bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white font-cairo font-bold text-sm rounded-xl flex items-center justify-center gap-2 shadow-[0_4px_14px_rgba(244,63,94,0.25)] transition-all active:scale-95 cursor-pointer"
+                className="h-12 px-8 bg-gradient-to-r from-red-500 to-brand-600 hover:from-red-600 hover:to-brand-700 text-white font-sans font-bold text-sm rounded-2xl flex items-center justify-center gap-2 shadow-[0_4px_14px_rgba(244,63,94,0.25)] transition-all active:scale-95 cursor-pointer"
               >
                 <span>🔑 تسجيل الدخول</span>
               </Link>
               <Link 
                 href="/login/forgot-password" 
-                className="h-12 px-6 bg-white/5 hover:bg-white/10 text-white font-cairo font-bold text-sm rounded-xl flex items-center justify-center gap-2 border border-white/10 transition-colors cursor-pointer"
+                className="h-12 px-6 bg-zinc-100/40 hover:bg-zinc-100/80 text-zinc-900 font-sans font-bold text-sm rounded-2xl flex items-center justify-center gap-2 border border-zinc-200 transition-colors cursor-pointer"
               >
                 <span>🔒 نسيت كلمة المرور</span>
               </Link>
@@ -792,27 +792,27 @@ export default function CartCheckoutPage() {
 
   if (items.length === 0) {
     return (
-      <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center text-white font-cairo">
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center text-zinc-900 font-sans">
         <Package className="w-16 h-16 text-zinc-700 mb-4" />
-        <h1 className="text-3xl font-cairo font-bold mb-4">السلة فارغة حالياً</h1>
-        <Link href="/" className="text-rose-400 hover:text-rose-300 underline">العودة للرئيسية</Link>
+        <h1 className="text-3xl font-sans font-bold mb-4">السلة فارغة حالياً</h1>
+        <Link href="/" className="text-yellow-500 hover:text-brand-300 underline">العودة للرئيسية</Link>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white font-cairo">
+    <div className="min-h-screen bg-white text-zinc-900 font-sans">
       <Navbar />
       
       <main className="pt-32 pb-24 relative overflow-hidden">
         {/* Glow Effects */}
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-rose-600/10 rounded-full blur-[100px] pointer-events-none" />
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-brand-600/10 rounded-full blur-[100px] pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-orange-500/10 rounded-full blur-[100px] pointer-events-none" />
 
         <div className="container mx-auto px-4 max-w-6xl relative z-10">
           {/* Header */}
           <div className="flex flex-col items-center justify-center text-center gap-2 mb-8">
-            <Link href="/" className="inline-flex items-center text-zinc-500 hover:text-white font-cairo transition-all group">
+            <Link href="/" className="inline-flex items-center text-zinc-500 hover:text-zinc-900 font-sans transition-all group">
               <ChevronRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
               العودة للتسوق
             </Link>
@@ -825,37 +825,37 @@ export default function CartCheckoutPage() {
               <motion.div 
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
-                className="bg-[#0a0a0f]/80 backdrop-blur-2xl rounded-[2rem] p-6 md:p-8 border border-white/5 shadow-2xl relative overflow-hidden"
+                className="bg-slate-50/80 backdrop-blur-2xl rounded-[2rem] p-6 md:p-8 border border-zinc-200/60 shadow-sm border border-zinc-200/60 relative overflow-hidden"
               >
-                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-rose-600 to-orange-400" />
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-brand-600 to-orange-400" />
                 
-                <h2 className="text-xl font-cairo font-bold text-white mb-6">تفاصيل الطلب</h2>
+                <h2 className="text-xl font-sans font-bold text-zinc-900 mb-6">تفاصيل الطلب</h2>
                 
                 <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="space-y-4">
                   {/* Full Name */}
                   <div className="space-y-2">
-                    <Label className="font-cairo font-bold text-zinc-400 text-sm">الاسم بالكامل *</Label>
+                    <Label className="font-sans font-bold text-zinc-500 text-sm">الاسم بالكامل *</Label>
                     <div className="relative">
                       <Input 
                         placeholder="ادخل اسمك لإنشاء الحساب" 
                         className={cn(
-                          "h-12 rounded-xl bg-white/5 border text-white text-sm font-cairo hover:bg-white/[0.07] focus:bg-white/10 focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all text-right",
+                          "h-12 rounded-2xl bg-zinc-100/40 border text-zinc-900 text-sm font-sans hover:bg-white/[0.07] focus:bg-zinc-100/80 focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all text-right",
                           fullNameValue && fullNameValue.length > 0
                             ? (errors.fullName 
                                 ? "border-red-500/50 focus:border-red-500 focus:ring-red-500" 
                                 : "border-emerald-500/50 focus:border-emerald-500 focus:ring-emerald-500")
-                            : "border-white/5"
+                            : "border-zinc-200/60"
                         )}
                         disabled={isLoading}
                         autoFocus
                         {...register("fullName")}
                       />
                     </div>
-                    {errors.fullName && <p className="text-xs text-red-400 font-cairo flex items-center gap-1 mt-1"><ShieldAlert className="w-3 h-3" /> {errors.fullName.message}</p>}
+                    {errors.fullName && <p className="text-xs text-red-400 font-sans flex items-center gap-1 mt-1"><ShieldAlert className="w-3 h-3" /> {errors.fullName.message}</p>}
                   </div>
 
                   <div className="space-y-2">
-                    <Label className="font-cairo font-bold text-zinc-400 text-sm">البريد الإلكتروني *</Label>
+                    <Label className="font-sans font-bold text-zinc-500 text-sm">البريد الإلكتروني *</Label>
                     <div className="relative">
                       <Mail 
                         className={cn(
@@ -870,12 +870,12 @@ export default function CartCheckoutPage() {
                         type="email"
                         dir="ltr"
                         className={cn(
-                          "h-12 rounded-xl bg-white/5 border text-white text-sm font-cairo hover:bg-white/[0.07] focus:bg-white/10 focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all pl-11",
+                          "h-12 rounded-2xl bg-zinc-100/40 border text-zinc-900 text-sm font-sans hover:bg-white/[0.07] focus:bg-zinc-100/80 focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all pl-11",
                           emailValue && emailValue.length > 0
                             ? (errors.email 
                                 ? "border-red-500/50 focus:border-red-500 focus:ring-red-500" 
                                 : "border-emerald-500/50 focus:border-emerald-500 focus:ring-emerald-500")
-                            : "border-white/5"
+                            : "border-zinc-200/60"
                         )}
                         disabled={isLoading}
                         {...register("email", {
@@ -883,13 +883,13 @@ export default function CartCheckoutPage() {
                         })}
                       />
                     </div>
-                    {errors.email && <p className="text-xs text-red-400 font-cairo flex items-center gap-1 mt-1"><ShieldAlert className="w-3 h-3" /> {errors.email.message}</p>}
+                    {errors.email && <p className="text-xs text-red-400 font-sans flex items-center gap-1 mt-1"><ShieldAlert className="w-3 h-3" /> {errors.email.message}</p>}
                     {emailStatus?.exists && !emailStatus?.ownsCourse && (
-                      <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 p-4 rounded-xl flex items-start gap-3 font-cairo text-sm mt-3">
+                      <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 p-4 rounded-2xl flex items-start gap-3 font-sans text-sm mt-3">
                         <Sparkles className="w-5 h-5 shrink-0 mt-0.5 animate-pulse" />
                         <div>
                           <p className="font-bold">مرحباً بك مجدداً!</p>
-                          <p className="text-zinc-300 text-xs mt-1">
+                          <p className="text-zinc-700 text-xs mt-1">
                             هذا البريد الإلكتروني مسجل لدينا بالفعل. سيتم ربط الكورسات الجديدة بحسابك الحالي فور إتمام الدفع دون الحاجة لإنشاء حساب جديد.
                           </p>
                         </div>
@@ -900,7 +900,7 @@ export default function CartCheckoutPage() {
                   {!user && !emailStatus?.exists && (
                     <>
                       <div className="space-y-2">
-                        <Label className="font-cairo font-bold text-zinc-400 text-sm">كلمة المرور *</Label>
+                        <Label className="font-sans font-bold text-zinc-500 text-sm">كلمة المرور *</Label>
                         <div className="relative">
                           <Lock 
                             className={cn(
@@ -915,25 +915,25 @@ export default function CartCheckoutPage() {
                             type="password"
                             dir="ltr"
                             className={cn(
-                              "h-12 rounded-xl bg-white/5 border text-white text-sm font-cairo hover:bg-white/[0.07] focus:bg-white/10 focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all pl-11",
+                              "h-12 rounded-2xl bg-zinc-100/40 border text-zinc-900 text-sm font-sans hover:bg-white/[0.07] focus:bg-zinc-100/80 focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all pl-11",
                               passwordValue && passwordValue.length > 0
                                 ? (errors.password 
                                     ? "border-red-500/50 focus:border-red-500 focus:ring-red-500" 
                                     : "border-emerald-500/50 focus:border-emerald-500 focus:ring-emerald-500")
-                                : "border-white/5"
+                                : "border-zinc-200/60"
                             )}
                             disabled={isLoading}
                             {...register("password")}
                           />
                         </div>
-                        {errors.password && <p className="text-xs text-red-400 font-cairo flex items-center gap-1 mt-1"><ShieldAlert className="w-3 h-3" /> {errors.password.message}</p>}
+                        {errors.password && <p className="text-xs text-red-400 font-sans flex items-center gap-1 mt-1"><ShieldAlert className="w-3 h-3" /> {errors.password.message}</p>}
                       </div>
                     </>
                   )}
 
                   {/* Phone Number (Optional) */}
                   <div className="space-y-2">
-                    <Label className="font-cairo font-bold text-zinc-400 text-sm">رقم الهاتف (واتساب) (اختياري)</Label>
+                    <Label className="font-sans font-bold text-zinc-500 text-sm">رقم الهاتف (واتساب) (اختياري)</Label>
                     <div className="relative w-full" dir="ltr">
                       <PhoneInput
                         country={detectedCountry}
@@ -955,9 +955,9 @@ export default function CartCheckoutPage() {
                   </div>
 
                   {!user && (
-                    <p className="text-xs text-zinc-500 font-cairo mt-2 text-right">
+                    <p className="text-xs text-zinc-500 font-sans mt-2 text-right">
                       لديك حساب بالفعل؟{" "}
-                      <Link href="/login?redirect=/checkout/cart" className="text-rose-400 hover:text-rose-300 underline font-bold transition-all">
+                      <Link href="/login?redirect=/checkout/cart" className="text-yellow-500 hover:text-brand-300 underline font-bold transition-all">
                         اضغط هنا لتسجيل الدخول
                       </Link>
                     </p>
@@ -965,7 +965,7 @@ export default function CartCheckoutPage() {
 
                   <style>{`
                     .react-tel-input {
-                      font-family: var(--font-cairo), sans-serif;
+                      font-family: var(--font-sans), sans-serif;
                       width: 100%;
                     }
                     .react-tel-input .form-control {
@@ -1083,7 +1083,7 @@ export default function CartCheckoutPage() {
 
                   {/* Payment Method Selector */}
                   <div className="pt-4 mt-4">
-                    <Label className="font-cairo font-bold text-zinc-400 text-sm mb-3 block">طريقة الدفع</Label>
+                    <Label className="font-sans font-bold text-zinc-500 text-sm mb-3 block">طريقة الدفع</Label>
                     <div className="flex flex-col gap-3 w-full">
                       
                       {/* Card Option */}
@@ -1092,11 +1092,11 @@ export default function CartCheckoutPage() {
                         whileTap={{ scale: 0.99 }}
                         onClick={() => setPaymentMethod("card")}
                         className={cn(
-                          "relative cursor-pointer rounded-xl border transition-all duration-300 select-none",
+                          "relative cursor-pointer rounded-2xl border transition-all duration-300 select-none",
                           "flex flex-row items-center justify-between gap-2 sm:gap-4 h-[70px] px-3 sm:px-4 py-3 w-full",
                           paymentMethod === "card" 
-                            ? "border-[#D6004B] bg-[#D6004B]/5 shadow-[0_0_20px_rgba(214,0,75,0.12)]" 
-                            : "border-white/5 bg-white/[0.01] hover:border-white/10 hover:bg-white/[0.02]"
+                            ? "border-[#1D4ED8] bg-[#1D4ED8]/5 shadow-[0_0_20px_rgba(29, 78, 216,0.12)]" 
+                            : "border-zinc-200/60 bg-zinc-50/40 hover:border-zinc-200 hover:bg-zinc-50/70"
                         )}
                         dir="rtl"
                       >
@@ -1105,14 +1105,14 @@ export default function CartCheckoutPage() {
                           {/* Radio indicator */}
                           <div className={cn(
                             "w-5 h-5 rounded-full border flex items-center justify-center transition-all shrink-0",
-                            paymentMethod === "card" ? "border-[#D6004B] bg-[#D6004B]/10" : "border-white/10 bg-white/5"
+                            paymentMethod === "card" ? "border-[#1D4ED8] bg-[#1D4ED8]/10" : "border-zinc-200 bg-zinc-100/40"
                           )}>
-                            {paymentMethod === "card" && <div className="w-2.5 h-2.5 rounded-full bg-[#D6004B]" />}
+                            {paymentMethod === "card" && <div className="w-2.5 h-2.5 rounded-full bg-[#1D4ED8]" />}
                           </div>
                           
                           {/* Text */}
                           <div className="text-right">
-                            <h4 className={cn("font-bold text-sm sm:text-base transition-colors leading-tight whitespace-nowrap", paymentMethod === "card" ? "text-white" : "text-zinc-300")}>
+                            <h4 className={cn("font-bold text-sm sm:text-base transition-colors leading-tight whitespace-nowrap", paymentMethod === "card" ? "text-zinc-900" : "text-zinc-700")}>
                               البطاقات البنكية
                             </h4>
                           </div>
@@ -1154,11 +1154,11 @@ export default function CartCheckoutPage() {
                           whileTap={{ scale: 0.99 }}
                           onClick={() => setPaymentMethod("wallet")}
                           className={cn(
-                            "relative cursor-pointer rounded-xl border transition-all duration-300 select-none",
+                            "relative cursor-pointer rounded-2xl border transition-all duration-300 select-none",
                             "flex flex-col w-full px-3 sm:px-4 py-0",
                             paymentMethod === "wallet" 
-                              ? "border-[#D6004B] bg-[#D6004B]/5 shadow-[0_0_20px_rgba(214,0,75,0.12)]" 
-                              : "border-white/5 bg-white/[0.01] hover:border-white/10 hover:bg-white/[0.02]"
+                              ? "border-[#1D4ED8] bg-[#1D4ED8]/5 shadow-[0_0_20px_rgba(29, 78, 216,0.12)]" 
+                              : "border-zinc-200/60 bg-zinc-50/40 hover:border-zinc-200 hover:bg-zinc-50/70"
                           )}
                           dir="rtl"
                         >
@@ -1168,14 +1168,14 @@ export default function CartCheckoutPage() {
                               {/* Radio indicator */}
                               <div className={cn(
                                 "w-5 h-5 rounded-full border flex items-center justify-center transition-all shrink-0",
-                                paymentMethod === "wallet" ? "border-[#D6004B] bg-[#D6004B]/10" : "border-white/10 bg-white/5"
+                                paymentMethod === "wallet" ? "border-[#1D4ED8] bg-[#1D4ED8]/10" : "border-zinc-200 bg-zinc-100/40"
                               )}>
-                                {paymentMethod === "wallet" && <div className="w-2.5 h-2.5 rounded-full bg-[#D6004B]" />}
+                                {paymentMethod === "wallet" && <div className="w-2.5 h-2.5 rounded-full bg-[#1D4ED8]" />}
                               </div>
                               
                               {/* Text */}
                               <div className="text-right">
-                                <h4 className={cn("font-bold text-sm sm:text-base transition-colors leading-tight whitespace-nowrap", paymentMethod === "wallet" ? "text-white" : "text-zinc-300")}>
+                                <h4 className={cn("font-bold text-sm sm:text-base transition-colors leading-tight whitespace-nowrap", paymentMethod === "wallet" ? "text-zinc-900" : "text-zinc-700")}>
                                   محفظة إلكترونية
                                 </h4>
                               </div>
@@ -1210,23 +1210,23 @@ export default function CartCheckoutPage() {
                           {/* Expandable Inner Content (Input & Helper Text) */}
                           <div className={cn(
                             "transition-all duration-500 ease-in-out overflow-hidden w-full",
-                            paymentMethod === "wallet" ? "max-h-[200px] opacity-100 pb-4 pt-4 border-t border-white/5" : "max-h-0 opacity-0 pointer-events-none"
+                            paymentMethod === "wallet" ? "max-h-[200px] opacity-100 pb-4 pt-4 border-t border-zinc-200/60" : "max-h-0 opacity-0 pointer-events-none"
                           )}>
                             <div className="space-y-4">
                               <div className="space-y-2">
                                 <div className={cn(
-                                  "relative flex items-center rounded-xl bg-white/[0.02] border transition-all h-14 w-full overflow-hidden", 
+                                  "relative flex items-center rounded-2xl bg-zinc-50/70 border transition-all h-14 w-full overflow-hidden", 
                                   walletNumberError 
                                     ? "border-red-500/40 focus-within:ring-2 focus-within:ring-red-500/10 focus-within:border-red-500" 
                                     : (isWalletValid 
                                         ? "border-emerald-500/40 focus-within:ring-2 focus-within:ring-emerald-500/10 focus-within:border-emerald-500" 
-                                        : "border-white/10 focus-within:border-[#D6004B] focus-within:ring-2 focus-within:ring-[#D6004B]/10 hover:border-white/20"
+                                        : "border-zinc-200 focus-within:border-[#1D4ED8] focus-within:ring-2 focus-within:ring-[#1D4ED8]/10 hover:border-zinc-200"
                                       )
                                 )} dir="ltr">
                                   {/* Country prefix on the left */}
-                                  <div className="flex items-center gap-2 px-4 border-r border-white/5 bg-white/[0.01] h-full shrink-0 select-none">
+                                  <div className="flex items-center gap-2 px-4 border-r border-zinc-200/60 bg-zinc-50/40 h-full shrink-0 select-none">
                                     <span className="text-xl">🇪🇬</span>
-                                    <span className="text-sm font-semibold text-zinc-400 font-sans">+20</span>
+                                    <span className="text-sm font-semibold text-zinc-500 font-sans">+20</span>
                                   </div>
                                   {/* Input field */}
                                   <input 
@@ -1236,7 +1236,7 @@ export default function CartCheckoutPage() {
                                     placeholder="رقم الهاتف" 
                                     maxLength={11}
                                     inputMode="numeric"
-                                    className="h-full flex-grow bg-transparent text-white font-cairo text-base px-4 focus:outline-none placeholder-zinc-500 text-left placeholder-shown:text-right"
+                                    className="h-full flex-grow bg-transparent text-zinc-900 font-sans text-base px-4 focus:outline-none placeholder-zinc-500 text-left placeholder-shown:text-right"
                                     dir="ltr"
                                     disabled={isLoading}
                                   />
@@ -1248,12 +1248,12 @@ export default function CartCheckoutPage() {
                                   )}
                                 </div>
                                 {walletNumberError && (
-                                  <p className="text-xs text-red-400 font-cairo flex items-center gap-1 mt-1 text-right" dir="rtl">
+                                  <p className="text-xs text-red-400 font-sans flex items-center gap-1 mt-1 text-right" dir="rtl">
                                     <ShieldAlert className="w-3 h-3 inline ml-1" /> {walletNumberError}
                                   </p>
                                 )}
                                 {!walletNumberError && (
-                                  <p className="text-[11px] text-zinc-500 font-cairo text-right mt-1.5 leading-relaxed">
+                                  <p className="text-[11px] text-zinc-500 font-sans text-right mt-1.5 leading-relaxed">
                                     أدخل رقم هاتفك لتتمكن من الدفع بواسطة محفظة إلكترونية ثم اضغط على زر "دفع"
                                   </p>
                                 )}
@@ -1288,11 +1288,11 @@ export default function CartCheckoutPage() {
                             }
                           }}
                           className={cn(
-                            "relative cursor-pointer rounded-xl border transition-all duration-300 select-none",
+                            "relative cursor-pointer rounded-2xl border transition-all duration-300 select-none",
                             "flex flex-row items-center justify-between gap-2 sm:gap-4 h-[70px] px-3 sm:px-4 py-3 w-full",
                             paymentMethod === "instapay" 
-                              ? "border-[#D6004B] bg-[#D6004B]/5 shadow-[0_0_20px_rgba(214,0,75,0.12)]" 
-                              : "border-white/5 bg-white/[0.01] hover:border-purple-500/10 hover:bg-purple-500/[0.005] hover:border-white/10"
+                              ? "border-[#1D4ED8] bg-[#1D4ED8]/5 shadow-[0_0_20px_rgba(29, 78, 216,0.12)]" 
+                              : "border-zinc-200/60 bg-zinc-50/40 hover:border-purple-500/10 hover:bg-purple-500/[0.005] hover:border-zinc-200"
                           )}
                           dir="rtl"
                         >
@@ -1301,14 +1301,14 @@ export default function CartCheckoutPage() {
                             {/* Radio indicator */}
                             <div className={cn(
                               "w-5 h-5 rounded-full border flex items-center justify-center transition-all shrink-0",
-                              paymentMethod === "instapay" ? "border-[#D6004B] bg-[#D6004B]/10" : "border-white/10 bg-white/5"
+                              paymentMethod === "instapay" ? "border-[#1D4ED8] bg-[#1D4ED8]/10" : "border-zinc-200 bg-zinc-100/40"
                             )}>
-                              {paymentMethod === "instapay" && <div className="w-2.5 h-2.5 rounded-full bg-[#D6004B]" />}
+                              {paymentMethod === "instapay" && <div className="w-2.5 h-2.5 rounded-full bg-[#1D4ED8]" />}
                             </div>
                             
                             {/* Text */}
                             <div className="text-right">
-                              <h4 className={cn("font-bold text-sm sm:text-base transition-colors leading-tight whitespace-nowrap", paymentMethod === "instapay" ? "text-white" : "text-zinc-300")}>
+                              <h4 className={cn("font-bold text-sm sm:text-base transition-colors leading-tight whitespace-nowrap", paymentMethod === "instapay" ? "text-zinc-900" : "text-zinc-700")}>
                                 إنستاباي - Instapay
                               </h4>
                             </div>
@@ -1332,11 +1332,11 @@ export default function CartCheckoutPage() {
 
                   {/* Inline Card Fields (Animated transition) */}
                   <div className={cn(
-                    "transition-all duration-500 ease-in-out overflow-hidden border-t border-white/5",
+                    "transition-all duration-500 ease-in-out overflow-hidden border-t border-zinc-200/60",
                     paymentMethod === "card" ? "max-h-[600px] opacity-100 pt-6 mt-6" : "max-h-0 opacity-0 pt-0 mt-0 border-transparent pointer-events-none"
                   )}>
                     <div className="mb-4">
-                      <h3 className="font-cairo font-bold text-white flex items-center gap-2 text-sm">
+                      <h3 className="font-sans font-bold text-zinc-900 flex items-center gap-2 text-sm">
                         <ShieldCheck className="w-4 h-4 text-emerald-400" />
                         بيانات البطاقة
                       </h3>
@@ -1344,7 +1344,7 @@ export default function CartCheckoutPage() {
 
                     <div className="space-y-3">
                       <div className="space-y-1.5">
-                        <Label className="font-cairo text-xs text-zinc-400">رقم البطاقة</Label>
+                        <Label className="font-sans text-xs text-zinc-500">رقم البطاقة</Label>
                         <div className="relative">
                           <Input 
                             ref={cardNumberRef}
@@ -1354,19 +1354,19 @@ export default function CartCheckoutPage() {
                             dir="ltr"
                             maxLength={19}
                             inputMode="numeric"
-                            className={cn("h-14 rounded-xl bg-white/5 border-white/5 text-white font-mono text-lg tracking-widest hover:bg-white/[0.07] focus:bg-white/10 focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all", 
+                            className={cn("h-14 rounded-2xl bg-zinc-100/40 border-zinc-200/60 text-zinc-900 font-mono text-lg tracking-widest hover:bg-white/[0.07] focus:bg-zinc-100/80 focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all", 
                               cardErrors.number ? "border-red-500/50 focus:ring-red-500" : (cardNumber.length === 19 ? "border-emerald-500/50 focus:ring-emerald-500" : "")
                             )}
                               disabled={isLoading}
                             />
                             {cardNumber.length === 19 && !cardErrors.number && <CheckCircle2 className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-emerald-500" />}
                           </div>
-                              {cardErrors.number && <p className="text-xs text-red-400 font-cairo flex items-center gap-1 mt-1"><ShieldAlert className="w-3 h-3" /> {cardErrors.number}</p>}
+                              {cardErrors.number && <p className="text-xs text-red-400 font-sans flex items-center gap-1 mt-1"><ShieldAlert className="w-3 h-3" /> {cardErrors.number}</p>}
                         </div>
 
                       <div className="grid grid-cols-2 gap-3">
                         <div className="space-y-1.5">
-                          <Label className="font-cairo text-xs text-zinc-400">تاريخ الانتهاء</Label>
+                          <Label className="font-sans text-xs text-zinc-500">تاريخ الانتهاء</Label>
                           <Input 
                             value={expiryDate}
                             onChange={handleExpiryChange}
@@ -1374,15 +1374,15 @@ export default function CartCheckoutPage() {
                             dir="ltr"
                             maxLength={5}
                             inputMode="numeric"
-                            className={cn("h-12 rounded-xl bg-white/5 border-white/5 text-white font-mono text-base text-center hover:bg-white/[0.07] focus:bg-white/10 focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all", 
+                            className={cn("h-12 rounded-2xl bg-zinc-100/40 border-zinc-200/60 text-zinc-900 font-mono text-base text-center hover:bg-white/[0.07] focus:bg-zinc-100/80 focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all", 
                               cardErrors.expiry ? "border-red-500/50 focus:ring-red-500" : (expiryDate.length === 5 ? "border-emerald-500/40 focus:ring-emerald-500/20" : "")
                             )}
                             disabled={isLoading}
                           />
-                          {cardErrors.expiry && <p className="text-[10px] text-red-400 font-cairo flex items-center gap-1 mt-1"><ShieldAlert className="w-3 h-3" /> {cardErrors.expiry}</p>}
+                          {cardErrors.expiry && <p className="text-[10px] text-red-400 font-sans flex items-center gap-1 mt-1"><ShieldAlert className="w-3 h-3" /> {cardErrors.expiry}</p>}
                         </div>
                         <div className="space-y-1.5">
-                          <Label className="font-cairo text-xs text-zinc-400">رمز الأمان (CVV)</Label>
+                          <Label className="font-sans text-xs text-zinc-500">رمز الأمان (CVV)</Label>
                           <Input 
                             value={cvv}
                             onChange={handleCvvChange}
@@ -1391,51 +1391,51 @@ export default function CartCheckoutPage() {
                             dir="ltr"
                             maxLength={3}
                             inputMode="numeric"
-                            className={cn("h-12 rounded-xl bg-white/5 border-white/5 text-white font-mono text-base text-center hover:bg-white/[0.07] focus:bg-white/10 focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all", 
+                            className={cn("h-12 rounded-2xl bg-zinc-100/40 border-zinc-200/60 text-zinc-900 font-mono text-base text-center hover:bg-white/[0.07] focus:bg-zinc-100/80 focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all", 
                               cardErrors.cvv ? "border-red-500/50 focus:ring-red-500" : (cvv.length === 3 ? "border-emerald-500/40 focus:ring-emerald-500/20" : "")
                             )}
                             disabled={isLoading}
                           />
-                            {cardErrors.cvv && <p className="text-xs text-red-400 font-cairo flex items-center gap-1 mt-1"><ShieldAlert className="w-3 h-3" /> {cardErrors.cvv}</p>}
+                            {cardErrors.cvv && <p className="text-xs text-red-400 font-sans flex items-center gap-1 mt-1"><ShieldAlert className="w-3 h-3" /> {cardErrors.cvv}</p>}
                           </div>
                         </div>
 
                       <div className="space-y-1.5">
-                        <Label className="font-cairo text-xs text-zinc-400">اسم حامل البطاقة</Label>
+                        <Label className="font-sans text-xs text-zinc-500">اسم حامل البطاقة</Label>
                         <Input 
                           value={cardHolder}
                           onChange={handleCardHolderChange}
                           placeholder="الاسم كما هو مكتوب على البطاقة" 
-                          className={cn("h-12 rounded-xl bg-white/5 border-white/5 text-white text-sm font-cairo hover:bg-white/[0.07] focus:bg-white/10 focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all", 
+                          className={cn("h-12 rounded-2xl bg-zinc-100/40 border-zinc-200/60 text-zinc-900 text-sm font-sans hover:bg-white/[0.07] focus:bg-zinc-100/80 focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all", 
                             cardErrors.holder ? "border-red-500/50 focus:ring-red-500" : (cardHolder.length >= 3 ? "border-emerald-500/50 focus:ring-emerald-500" : "")
                           )}
                           disabled={isLoading}
                         />
-                        {cardErrors.holder && <p className="text-[10px] text-red-400 font-cairo flex items-center gap-1 mt-1"><ShieldAlert className="w-3 h-3" /> {cardErrors.holder}</p>}
+                        {cardErrors.holder && <p className="text-[10px] text-red-400 font-sans flex items-center gap-1 mt-1"><ShieldAlert className="w-3 h-3" /> {cardErrors.holder}</p>}
                       </div>
 
                       <div className="flex items-center gap-2 pt-2 cursor-pointer" onClick={() => setSaveCard(!saveCard)}>
-                        <div className={cn("w-4 h-4 rounded border flex items-center justify-center transition-all", saveCard ? "bg-rose-600 border-rose-600" : "border-white/20 bg-transparent")}>
-                          {saveCard && <CheckCircle2 className="w-3 h-3 text-white" />}
+                        <div className={cn("w-4 h-4 rounded border flex items-center justify-center transition-all", saveCard ? "bg-brand-600 border-brand-600" : "border-zinc-200 bg-transparent")}>
+                          {saveCard && <CheckCircle2 className="w-3 h-3 text-zinc-900" />}
                         </div>
-                        <Label className="font-cairo text-xs text-zinc-400 cursor-pointer select-none">حفظ بيانات البطاقة للمدفوعات القادمة بأمان</Label>
+                        <Label className="font-sans text-xs text-zinc-500 cursor-pointer select-none">حفظ بيانات البطاقة للمدفوعات القادمة بأمان</Label>
                       </div>
                     </div>
                   </div>
 
-                  <div className="pt-6 border-t border-white/5 mt-8">
+                  <div className="pt-6 border-t border-zinc-200/60 mt-8">
                     <div className="flex flex-wrap items-center justify-center gap-4 md:gap-6 mb-6 opacity-50 hover:opacity-80 transition-opacity">
                       <div className="flex items-center gap-1.5"><Lock className="w-3.5 h-3.5"/><span className="text-[10px] uppercase tracking-widest font-bold">SSL Secure</span></div>
-                      <div className="w-1 h-1 rounded-full bg-white/20 hidden md:block" />
+                      <div className="w-1 h-1 rounded-full bg-zinc-200/80 hidden md:block" />
                       <div className="flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5"/><span className="text-[10px] uppercase tracking-widest font-bold">Paymob Protected</span></div>
-                      <div className="w-1 h-1 rounded-full bg-white/20 hidden md:block" />
+                      <div className="w-1 h-1 rounded-full bg-zinc-200/80 hidden md:block" />
                       <div className="flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5"/><span className="text-[10px] uppercase tracking-widest font-bold">Instant Delivery</span></div>
                     </div>
 
                     <Button 
                       type="submit" 
                       disabled={isLoading}
-                      className="w-full h-14 text-white font-cairo text-lg font-bold rounded-xl transition-all active:scale-[0.98] bg-[#D6004B] hover:bg-[#b0003d] shadow-[0_4px_14px_0_rgba(214,0,75,0.39)] hover:shadow-[0_6px_20px_rgba(214,0,75,0.23)] hover:-translate-y-0.5"
+                      className="w-full h-14 text-zinc-900 font-sans text-lg font-bold rounded-2xl transition-all active:scale-[0.98] bg-[#2563EB] hover:bg-[#1D4ED8] shadow-[0_4px_14px_0_rgba(29, 78, 216,0.39)] hover:shadow-[0_6px_20px_rgba(29, 78, 216,0.23)] hover:-translate-y-0.5"
                     >
                       {isLoading ? (
                         <>
@@ -1458,23 +1458,23 @@ export default function CartCheckoutPage() {
             {/* Order Summary (Left Side on Desktop, Top on Mobile) */}
             <div className="lg:col-span-5">
               <div className="sticky top-24 space-y-6">
-                <div className="bg-white/5 border border-white/5 rounded-[2rem] p-6 md:p-8 backdrop-blur-2xl">
-                  <h3 className="font-cairo font-bold text-white text-lg mb-5 flex items-center gap-2 border-b border-white/10 pb-4">
-                    <Package className="w-5 h-5 text-rose-500" />
+                <div className="bg-zinc-100/40 border border-zinc-200/60 rounded-[2rem] p-6 md:p-8 backdrop-blur-2xl">
+                  <h3 className="font-sans font-bold text-zinc-900 text-lg mb-5 flex items-center gap-2 border-b border-zinc-200 pb-4">
+                    <Package className="w-5 h-5 text-yellow-500" />
                     منتجات السلة ({items.length})
                   </h3>
                   
                   <div className="flex flex-col gap-4 mb-6">
                     {resolvedItems.map((item) => (
-                      <div key={item.id} className="flex gap-4 items-start pb-4 border-b border-white/5 last:border-0 last:pb-0">
-                        <div className="w-16 h-16 rounded-xl bg-zinc-900 border border-white/10 relative overflow-hidden shrink-0">
+                      <div key={item.id} className="flex gap-4 items-start pb-4 border-b border-zinc-200/60 last:border-0 last:pb-0">
+                        <div className="w-16 h-16 rounded-2xl bg-zinc-900 border border-zinc-200 relative overflow-hidden shrink-0">
                           {item.image_url && (
                             <Image src={item.image_url} alt={item.title} fill className="object-cover" />
                           )}
                         </div>
                         <div>
-                          <h4 className="font-cairo font-bold text-white text-sm leading-tight mb-1 line-clamp-2">{item.title}</h4>
-                          <span className="text-rose-400 font-bold text-sm">
+                          <h4 className="font-sans font-bold text-zinc-900 text-sm leading-tight mb-1 line-clamp-2">{item.title}</h4>
+                          <span className="text-yellow-500 font-bold text-sm">
                             {formatPrice(
                               (item.showFee && !hasSeparatedFeeRow) ? item.finalPrice : item.price,
                               currency
@@ -1485,34 +1485,34 @@ export default function CartCheckoutPage() {
                     ))}
                   </div>
 
-                  <div className="py-6 space-y-4 border-t border-white/10">
+                  <div className="py-6 space-y-4 border-t border-zinc-200">
                     {hasSeparatedFeeRow && (
                       <>
-                        <div className="flex justify-between items-center text-zinc-400 font-cairo">
+                        <div className="flex justify-between items-center text-zinc-500 font-sans">
                           <span>المجموع الفرعي</span>
                           <span>{formatPrice(subtotalCartTotal, currency)}</span>
                         </div>
-                        <div className="flex flex-col gap-0.5 border-t border-white/5 pt-2">
-                          <div className="flex justify-between items-center text-zinc-400 font-cairo text-xs">
+                        <div className="flex flex-col gap-0.5 border-t border-zinc-200/60 pt-2">
+                          <div className="flex justify-between items-center text-zinc-500 font-sans text-xs">
                             <span>رسوم معالجة الدفع</span>
                             <span>{formatPrice(displayedFee, currency)}</span>
                           </div>
-                          <span className="text-[9px] text-zinc-500 text-right leading-relaxed font-cairo block">
+                          <span className="text-[9px] text-zinc-500 text-right leading-relaxed font-sans block">
                             (رسوم بسيطة للمساعدة في تغطية تكاليف بوابة الدفع الآمنة)
                           </span>
                         </div>
                       </>
                     )}
 
-                    <div className="flex justify-between items-center pt-4 border-t border-white/10">
-                      <span className="font-cairo font-bold text-white text-xl">الإجمالي</span>
-                      <div className="flex items-baseline gap-1 text-white">
-                        <span className="text-3xl font-cairo font-black">{formatPrice(resolvedCartTotal, currency)}</span>
+                    <div className="flex justify-between items-center pt-4 border-t border-zinc-200">
+                      <span className="font-sans font-bold text-zinc-900 text-xl">الإجمالي</span>
+                      <div className="flex items-baseline gap-1 text-zinc-900">
+                        <span className="text-3xl font-sans font-black">{formatPrice(resolvedCartTotal, currency)}</span>
                       </div>
                     </div>
 
                     {currency === "USD" && (
-                      <div className="mt-4 p-3 bg-rose-500/10 border border-rose-500/20 text-rose-400 rounded-xl text-xs font-cairo text-center leading-relaxed">
+                      <div className="mt-4 p-3 bg-brand-500/10 border border-zinc-200/60 text-yellow-500 rounded-2xl text-xs font-sans text-center leading-relaxed">
                         Notice: Final payment will be processed in EGP based on the current exchange rate ($1 = {exchangeRate.toFixed(2)} EGP).
                         <br />
                         تنبيه: سيتم معالجة الدفع النهائي بالجنيه المصري (EGP) بناءً على سعر الصرف الحالي ($1 = {exchangeRate.toFixed(2)} ج.م).
@@ -1520,14 +1520,14 @@ export default function CartCheckoutPage() {
                     )}
                   </div>
 
-                  <div className="bg-[#050505] rounded-2xl p-4 border border-white/5">
+                  <div className="bg-white rounded-2xl p-4 border border-zinc-200/60">
                     <ul className="space-y-3">
                       {[
                         "ملفات المنتجات الأصلية والكاملة",
                         "دعم فني وتحديثات مجانية",
                         "إرسال تلقائي للبريد الإلكتروني"
                       ].map((benefit, i) => (
-                        <li key={i} className="flex items-center gap-2 text-zinc-400 font-cairo text-sm">
+                        <li key={i} className="flex items-center gap-2 text-zinc-500 font-sans text-sm">
                           <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
                           {benefit}
                         </li>
@@ -1549,9 +1549,9 @@ export default function CartCheckoutPage() {
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="relative bg-[#0a0a12] border border-white/10 rounded-3xl p-6 md:p-8 max-w-md w-full max-h-[90vh] overflow-y-auto shadow-2xl z-10"
+            className="relative bg-[#0a0a12] border border-zinc-200 rounded-3xl p-6 md:p-8 max-w-md w-full max-h-[90vh] overflow-y-auto shadow-sm border border-zinc-200/60 z-10"
           >
-            <button onClick={() => setShowInstapayModal(false)} className="absolute top-4 left-4 w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-zinc-400 hover:text-white transition-all">
+            <button onClick={() => setShowInstapayModal(false)} className="absolute top-4 left-4 w-8 h-8 rounded-full bg-zinc-100/40 hover:bg-zinc-100/80 flex items-center justify-center text-zinc-500 hover:text-zinc-900 transition-all">
               <span className="text-lg">&times;</span>
             </button>
 
@@ -1560,13 +1560,13 @@ export default function CartCheckoutPage() {
                 <div className="w-14 h-14 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center mx-auto mb-3">
                   <span className="text-xl font-black font-sans text-purple-400">IPN</span>
                 </div>
-                <h3 className="text-xl font-cairo font-bold text-white">الدفع عبر Instapay</h3>
-                <p className="text-sm text-zinc-400 font-cairo mt-1">قم بتحويل المبلغ ثم أرسل لقطة الشاشة</p>
+                <h3 className="text-xl font-sans font-bold text-zinc-900">الدفع عبر Instapay</h3>
+                <p className="text-sm text-zinc-500 font-cairo mt-1">قم بتحويل المبلغ ثم أرسل لقطة الشاشة</p>
               </div>
 
               <div className="bg-purple-500/10 border border-purple-500/20 rounded-2xl p-4">
-                <p className="text-sm text-purple-300 font-cairo mb-1">المبلغ المطلوب تحويله</p>
-                <p className="text-3xl font-cairo font-black text-white">{formatPrice(resolvedCartTotal, currency)}</p>
+                <p className="text-sm text-purple-300 font-sans mb-1">المبلغ المطلوب تحويله</p>
+                <p className="text-3xl font-cairo font-black text-zinc-900">{formatPrice(resolvedCartTotal, currency)}</p>
               </div>
 
               <div className="bg-white rounded-2xl p-4 mx-auto max-w-[220px]">
@@ -1574,18 +1574,18 @@ export default function CartCheckoutPage() {
               </div>
 
               <div className="space-y-3 text-right">
-                <div className="bg-white/5 border border-white/5 rounded-xl p-3 flex items-center justify-between">
+                <div className="bg-zinc-100/40 border border-zinc-200/60 rounded-2xl p-3 flex items-center justify-between">
                   <button onClick={() => { navigator.clipboard.writeText('youssef.m2003@instapay'); toast.success('تم نسخ العنوان'); }} className="text-xs text-purple-400 font-bold hover:text-purple-300 transition-colors cursor-pointer">نسخ</button>
                   <div className="text-right">
-                    <p className="text-[10px] text-zinc-500 font-cairo">Payment Address</p>
-                    <p className="text-sm text-white font-mono font-bold" dir="ltr">youssef.m2003@instapay</p>
+                    <p className="text-[10px] text-zinc-500 font-sans">Payment Address</p>
+                    <p className="text-sm text-zinc-900 font-mono font-bold" dir="ltr">youssef.m2003@instapay</p>
                   </div>
                 </div>
-                <div className="bg-white/5 border border-white/5 rounded-xl p-3 flex items-center justify-between">
+                <div className="bg-zinc-100/40 border border-zinc-200/60 rounded-2xl p-3 flex items-center justify-between">
                   <button onClick={() => { navigator.clipboard.writeText('01016748891'); toast.success('تم نسخ الرقم'); }} className="text-xs text-purple-400 font-bold hover:text-purple-300 transition-colors cursor-pointer">نسخ</button>
                   <div className="text-right">
-                    <p className="text-[10px] text-zinc-500 font-cairo">رقم الهاتف</p>
-                    <p className="text-sm text-white font-mono font-bold" dir="ltr">01016748891</p>
+                    <p className="text-[10px] text-zinc-500 font-sans">رقم الهاتف</p>
+                    <p className="text-sm text-zinc-900 font-mono font-bold" dir="ltr">01016748891</p>
                   </div>
                 </div>
               </div>
@@ -1594,7 +1594,7 @@ export default function CartCheckoutPage() {
                 href="https://ipn.eg/S/youssefmohamed2003/instapay/MJ1vR8" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="w-full h-12 bg-purple-600 hover:bg-purple-500 text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-[0_4px_14px_rgba(147,51,234,0.3)] font-cairo"
+                className="w-full h-12 bg-purple-600 hover:bg-purple-500 text-zinc-900 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-[0_4px_14px_rgba(147,51,234,0.3)] font-sans"
               >
                 ادفع مباشرة عبر Instapay
                 <ChevronRight className="w-4 h-4 rtl:rotate-180" />
@@ -1602,13 +1602,13 @@ export default function CartCheckoutPage() {
 
               <div className="space-y-2">
                 {instapayScreenshot ? (
-                  <div className="relative rounded-xl overflow-hidden border border-purple-500/30 bg-white/5">
+                  <div className="relative rounded-2xl overflow-hidden border border-purple-500/30 bg-zinc-100/40">
                     <img src={instapayScreenshot} alt="لقطة شاشة التحويل" className="w-full h-auto max-h-48 object-contain" />
                     {isUploadingScreenshot && (
                       <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
                         <div className="flex flex-col items-center gap-2">
                           <Loader2 className="w-6 h-6 animate-spin text-purple-400" />
-                          <span className="text-xs text-purple-300 font-cairo">جاري رفع الصورة...</span>
+                          <span className="text-xs text-purple-300 font-sans">جاري رفع الصورة...</span>
                         </div>
                       </div>
                     )}
@@ -1621,16 +1621,16 @@ export default function CartCheckoutPage() {
                       </button>
                     )}
                     {instapayScreenshotUrl && !isUploadingScreenshot && (
-                      <div className="absolute bottom-2 left-2 flex items-center gap-1.5 bg-emerald-500/90 text-white text-[10px] font-bold px-2 py-1 rounded-full font-cairo">
+                      <div className="absolute bottom-2 left-2 flex items-center gap-1.5 bg-emerald-500/90 text-white text-[10px] font-bold px-2 py-1 rounded-full font-sans">
                         <CheckCircle2 className="w-3 h-3" />
                         تم رفع الصورة
                       </div>
                     )}
                   </div>
                 ) : (
-                  <label className="w-full h-24 border-2 border-dashed border-white/10 hover:border-purple-500/30 rounded-xl flex flex-col items-center justify-center cursor-pointer transition-all hover:bg-white/[0.02]">
+                  <label className="w-full h-24 border-2 border-dashed border-zinc-200 hover:border-purple-500/30 rounded-2xl flex flex-col items-center justify-center cursor-pointer transition-all hover:bg-zinc-50/70">
                     <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-zinc-500 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                    <span className="text-xs text-zinc-500 font-cairo">ارفع لقطة شاشة التحويل</span>
+                    <span className="text-xs text-zinc-500 font-sans">ارفع لقطة شاشة التحويل</span>
                     <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
                       const file = e.target.files?.[0];
                       if (!file) return;
@@ -1662,7 +1662,7 @@ export default function CartCheckoutPage() {
                 disabled={!instapayScreenshotUrl || isLoading}
                 onClick={handleSubmit(onSubmit)}
                 className={cn(
-                  "w-full h-12 text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all font-cairo",
+                  "w-full h-12 text-zinc-900 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all font-sans",
                   (instapayScreenshotUrl && !isLoading)
                     ? "bg-emerald-600 hover:bg-emerald-500 shadow-[0_4px_14px_rgba(16,185,129,0.3)]"
                     : "bg-zinc-700 cursor-not-allowed opacity-50"

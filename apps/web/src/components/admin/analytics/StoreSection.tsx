@@ -13,12 +13,12 @@ import AnalyticsEmptyState from "./AnalyticsEmptyState";
 // Dynamically import charts
 const CategoryChart = dynamic(() => import("./charts/CategoryChart"), {
   ssr: false,
-  loading: () => <div className="h-48 sm:h-56 w-full animate-pulse bg-white/5 rounded-3xl" />
+  loading: () => <div className="h-48 sm:h-56 w-full animate-pulse bg-zinc-100/40 rounded-3xl" />
 });
 
 const FunnelChart = dynamic(() => import("./charts/FunnelChart"), {
   ssr: false,
-  loading: () => <div className="h-48 w-full animate-pulse bg-white/5 rounded-3xl" />
+  loading: () => <div className="h-48 w-full animate-pulse bg-zinc-100/40 rounded-3xl" />
 });
 
 interface StoreSectionProps {
@@ -135,12 +135,12 @@ export default function StoreSection({
       {/* Charts section: Funnel & Categories */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 sm:gap-8">
         {/* Sales funnel - wrapped in LTR for Recharts mapping */}
-        <div className="xl:col-span-2 rounded-3xl bg-[#09090e]/80 border border-white/5 p-4 sm:p-6 shadow-2xl" dir="ltr">
+        <div className="xl:col-span-2 rounded-3xl bg-slate-50/80 border border-zinc-200/60 p-4 sm:p-6 shadow-sm border border-zinc-200/60" dir="ltr">
           <FunnelChart stages={funnelStages} />
         </div>
 
         {/* Categories breakdown - wrapped in LTR for Recharts mapping */}
-        <div className="rounded-3xl bg-[#09090e]/80 border border-white/5 p-4 sm:p-6 shadow-2xl" dir="ltr">
+        <div className="rounded-3xl bg-slate-50/80 border border-zinc-200/60 p-4 sm:p-6 shadow-sm border border-zinc-200/60" dir="ltr">
           <CategoryChart data={categoryStats} />
         </div>
       </div>
@@ -163,7 +163,7 @@ export default function StoreSection({
             <div className="hidden sm:block overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="border-b border-white/5 text-zinc-500 text-[10px] uppercase font-bold">
+                  <tr className="border-b border-zinc-200/60 text-zinc-500 text-[10px] uppercase font-bold">
                     <th className="pb-3 text-left">Digital Product</th>
                     <th className="pb-3 text-center">Unit Price</th>
                     <th className="pb-3 text-center">Quantity Sold</th>
@@ -175,15 +175,15 @@ export default function StoreSection({
                 </thead>
                 <tbody className="divide-y divide-white/5">
                   {productsAnalytics.map((p) => (
-                    <tr key={p.id} className="hover:bg-white/[0.01] transition-colors text-xs font-semibold text-zinc-300">
+                    <tr key={p.id} className="hover:bg-zinc-50/40 transition-colors text-xs font-semibold text-zinc-700">
                       <td className="py-4">
                         <div className="min-w-0 pr-4 text-left">
-                          <p className="font-bold text-white truncate max-w-xs">{p.title}</p>
+                          <p className="font-bold text-zinc-900 truncate max-w-xs">{p.title}</p>
                           <span className="text-[9px] text-zinc-500 font-mono">ID: {p.id}</span>
                         </div>
                       </td>
-                      <td className="py-4 text-center font-bold font-mono text-zinc-400">{formatPrice(p.price, "EGP")}</td>
-                      <td className="py-4 text-center font-bold text-white font-mono">{p.salesUnits} units</td>
+                      <td className="py-4 text-center font-bold font-mono text-zinc-500">{formatPrice(p.price, "EGP")}</td>
+                      <td className="py-4 text-center font-bold text-zinc-900 font-mono">{p.salesUnits} units</td>
                       <td className="py-4 text-center font-bold text-zinc-500 font-mono">{p.views} views</td>
                       <td className="py-4 text-center font-mono">
                         <span className="text-emerald-400 font-black">{p.conversionRate.toFixed(1)}%</span>
@@ -193,7 +193,7 @@ export default function StoreSection({
                           {p.failureRate.toFixed(1)}%
                         </span>
                       </td>
-                      <td className="py-4 text-right font-black text-rose-500 font-mono">{formatPrice(p.grossRevenue, "EGP")}</td>
+                      <td className="py-4 text-right font-black text-yellow-500 font-mono">{formatPrice(p.grossRevenue, "EGP")}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -203,29 +203,29 @@ export default function StoreSection({
             {/* Mobile Stacked Cards View (hidden on desktop) */}
             <div className="sm:hidden space-y-3">
               {productsAnalytics.map((p) => (
-                <div key={p.id} className="p-4 rounded-xl bg-white/[0.01] border border-white/5 space-y-3 text-left">
+                <div key={p.id} className="p-4 rounded-2xl bg-zinc-50/40 border border-zinc-200/60 space-y-3 text-left">
                   <div className="flex justify-between items-start gap-2">
                     <div className="min-w-0 text-left">
-                      <h4 className="font-bold text-white text-xs leading-snug truncate max-w-[180px]">{p.title}</h4>
+                      <h4 className="font-bold text-zinc-900 text-xs leading-snug truncate max-w-[180px]">{p.title}</h4>
                       <span className="text-[8.5px] text-zinc-500 font-mono">ID: {p.id}</span>
                     </div>
-                    <span className="text-xs font-black text-rose-500 font-mono shrink-0">
+                    <span className="text-xs font-black text-yellow-500 font-mono shrink-0">
                       {formatPrice(p.grossRevenue, "EGP")}
                     </span>
                   </div>
                   
-                  <div className="grid grid-cols-2 gap-2 text-[10px] bg-white/[0.01] p-2 rounded-lg border border-white/5 font-semibold text-zinc-400">
+                  <div className="grid grid-cols-2 gap-2 text-[10px] bg-zinc-50/40 p-2 rounded-2xl border border-zinc-200/60 font-semibold text-zinc-500">
                     <div>
                       <span className="text-zinc-500 block">Unit Price</span>
-                      <span className="text-zinc-300 font-mono">{formatPrice(p.price, "EGP")}</span>
+                      <span className="text-zinc-700 font-mono">{formatPrice(p.price, "EGP")}</span>
                     </div>
                     <div>
                       <span className="text-zinc-500 block">Quantity Sold</span>
-                      <span className="text-white font-mono">{p.salesUnits} units</span>
+                      <span className="text-zinc-900 font-mono">{p.salesUnits} units</span>
                     </div>
                     <div>
                       <span className="text-zinc-500 block">Page Views</span>
-                      <span className="text-zinc-400 font-mono">{p.views} views</span>
+                      <span className="text-zinc-500 font-mono">{p.views} views</span>
                     </div>
                     <div>
                       <span className="text-zinc-500 block">Conversion Rate</span>
@@ -235,7 +235,7 @@ export default function StoreSection({
 
                   <div className="flex justify-between items-center text-[10px] pt-1 font-semibold">
                     <span className="text-zinc-500">Payment Failure Rate</span>
-                    <span className={p.failureRate > 15 ? "text-red-500 font-black" : "text-zinc-400 font-bold"}>
+                    <span className={p.failureRate > 15 ? "text-red-500 font-black" : "text-zinc-500 font-bold"}>
                       {p.failureRate.toFixed(1)}%
                     </span>
                   </div>
@@ -248,23 +248,23 @@ export default function StoreSection({
 
       {/* Customer analytics profiles - Collapsible on Mobile */}
       <CollapsibleSection title="Customer Loyalty &amp; Purchase Frequency Analytics" defaultExpanded={false}>
-        <div className="rounded-3xl bg-[#09090e]/80 border border-white/5 p-4 sm:p-6 shadow-2xl">
+        <div className="rounded-3xl bg-slate-50/80 border border-zinc-200/60 p-4 sm:p-6 shadow-sm border border-zinc-200/60">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
             {/* Top spenders list */}
             <div className="space-y-3">
-              <h5 className="text-[9px] font-black uppercase text-rose-500 tracking-wider">Top Spenders in Store</h5>
+              <h5 className="text-[9px] font-black uppercase text-yellow-500 tracking-wider">Top Spenders in Store</h5>
               <div className="space-y-2">
                 {customerAnalytics.length === 0 ? (
                   <div className="py-8 text-center text-zinc-600 text-xs">No customer payment logs recorded yet.</div>
                 ) : (
                   customerAnalytics.map((c, index) => (
-                    <div key={index} className="p-3 rounded-xl bg-white/[0.01] border border-white/5 flex items-center justify-between font-semibold">
+                    <div key={index} className="p-3 rounded-2xl bg-zinc-50/40 border border-zinc-200/60 flex items-center justify-between font-semibold">
                       <div className="min-w-0 pr-2 text-left">
-                        <p className="text-[11px] text-white font-extrabold truncate">{c.name}</p>
+                        <p className="text-[11px] text-zinc-900 font-extrabold truncate">{c.name}</p>
                         <p className="text-[9px] text-zinc-500 font-mono truncate">{c.email}</p>
                       </div>
                       <div className="text-right shrink-0">
-                        <span className="text-xs font-black text-rose-500 font-mono">{formatPrice(c.spent, "EGP")}</span>
+                        <span className="text-xs font-black text-yellow-500 font-mono">{formatPrice(c.spent, "EGP")}</span>
                         <span className="text-[8.5px] text-zinc-500 block">{c.ordersCount} orders</span>
                       </div>
                     </div>
@@ -274,18 +274,18 @@ export default function StoreSection({
             </div>
 
             {/* Customer Retention metrics */}
-            <div className="space-y-3 bg-white/[0.01] p-4 border border-white/5 rounded-2xl">
+            <div className="space-y-3 bg-zinc-50/40 p-4 border border-zinc-200/60 rounded-2xl">
               <h5 className="text-[9px] font-black uppercase text-emerald-400 tracking-wider">Retention &amp; Loyalty Indicators</h5>
-              <div className="space-y-3 text-xs font-semibold text-zinc-400">
+              <div className="space-y-3 text-xs font-semibold text-zinc-500">
                 <p className="leading-relaxed">
-                  Analytics indicate that the returning customer rate stands at <span className="text-white font-extrabold">{storeStats.retCustPct}</span>. Offering digital files and automated workflow utilities encourages students to place repeat orders.
+                  Analytics indicate that the returning customer rate stands at <span className="text-zinc-900 font-extrabold">{storeStats.retCustPct}</span>. Offering digital files and automated workflow utilities encourages students to place repeat orders.
                 </p>
                 <div className="grid grid-cols-2 gap-3 pt-2 text-center text-[10px]">
-                  <div className="bg-white/5 p-2 rounded-xl border border-white/5">
+                  <div className="bg-zinc-100/40 p-2 rounded-2xl border border-zinc-200/60">
                     <span className="text-zinc-500 block font-bold">New Customers</span>
-                    <span className="text-sm font-black text-white font-mono">{storeStats.newCustPct}</span>
+                    <span className="text-sm font-black text-zinc-900 font-mono">{storeStats.newCustPct}</span>
                   </div>
-                  <div className="bg-white/5 p-2 rounded-xl border border-white/5">
+                  <div className="bg-zinc-100/40 p-2 rounded-2xl border border-zinc-200/60">
                     <span className="text-zinc-500 block font-bold">Returning Customers</span>
                     <span className="text-sm font-black text-emerald-400 font-mono">{storeStats.retCustPct}</span>
                   </div>

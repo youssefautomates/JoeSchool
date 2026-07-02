@@ -6,9 +6,6 @@ import { PixelTracker } from "@/components/PixelTracker";
 import { getKV } from "@/lib/kv";
 import "./globals.css";
 
-const cairo = { variable: "font-cairo" };
-const alexandria = { variable: "font-alexandria" };
-
 export const metadata: Metadata = {
   metadataBase: new URL("https://joeschool.com"),
   title: {
@@ -69,7 +66,7 @@ export default async function RootLayout({
     <html
       lang="ar"
       dir="rtl"
-      className={`${cairo.variable} ${alexandria.variable} scroll-smooth`}
+      className="scroll-smooth"
     >
       <head>
         {isPixelEnabled && (
@@ -101,7 +98,7 @@ export default async function RootLayout({
           </>
         )}
       </head>
-      <body className="min-h-screen bg-white text-zinc-900 font-cairo flex flex-col antialiased selection:bg-rose-600/10 selection:text-rose-600">
+      <body className="min-h-screen bg-white text-zinc-900 font-sans flex flex-col antialiased selection:bg-brand-600/10 selection:text-brand-600">
         <Providers>
           <Suspense fallback={null}>
             <PixelTracker initialSettings={settings} />

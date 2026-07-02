@@ -47,31 +47,50 @@ export default function AdminOrders() {
     internationalCount: 0
   });
 
+  // Analytics reset date — loaded from settings so Reset Statistics zeroes this page too
+  const [resetDate, setResetDate] = useState<string>("");
+
   const hasFetched = useRef(false);
 
   useEffect(() => {
     if (hasFetched.current) return;
     hasFetched.current = true;
-    fetchOrders(1);
-    fetchGlobalStats();
+    // First load the reset date, then fetch data filtered by it
+    fetch("/api/admin/settings")
+      .then(r => r.json())
+      .then(settings => {
+        const rd = settings?.analyticsResetDate || "";
+        setResetDate(rd);
+        fetchOrders(1, false, rd);
+        fetchGlobalStats(rd);
+      })
+      .catch(() => {
+        fetchOrders(1, false, "");
+        fetchGlobalStats("");
+      });
   }, []); // eslint-disable-line
 
-  async function fetchGlobalStats() {
+  async function fetchGlobalStats(rd: string = resetDate) {
     try {
       const { data, error } = await supabase
         .from("orders")
-        .select("amount, status, currency, country");
+        .select("amount, status, currency, country, created_at");
 
       if (error) throw error;
       if (data) {
-        const completed = data.filter(o => o.status === "completed");
+        // Apply reset date filter if set
+        const filteredData = rd
+          ? data.filter(o => new Date(o.created_at) >= new Date(rd))
+          : data;
+
+        const completed = filteredData.filter(o => o.status === "completed");
         const completedEgp = completed.filter(o => o.currency !== "USD");
         const completedUsd = completed.filter(o => o.currency === "USD");
         
         const egpRevenue = completedEgp.reduce((acc, curr) => acc + Number(curr.amount || 0), 0);
         const usdRevenue = completedUsd.reduce((acc, curr) => acc + Number(curr.amount || 0), 0);
 
-        const rate = data.length > 0 ? ((completed.length / data.length) * 100).toFixed(1) : "0";
+        const rate = filteredData.length > 0 ? ((completed.length / filteredData.length) * 100).toFixed(1) : "0";
         
         const internationalCount = completed.filter(o => {
           return o.currency === "USD" || (o.country && o.country !== "EG" && o.country !== "Unknown");
@@ -80,7 +99,7 @@ export default function AdminOrders() {
         setStatsData({
           totalRevenueEGP: egpRevenue,
           totalRevenueUSD: usdRevenue,
-          totalOrdersCount: data.length,
+          totalOrdersCount: filteredData.length,
           completedCount: completed.length,
           conversionRate: rate,
           internationalCount
@@ -91,19 +110,25 @@ export default function AdminOrders() {
     }
   }
 
-  async function fetchOrders(pageNumber = 1, isLoadMore = false) {
+  async function fetchOrders(pageNumber = 1, isLoadMore = false, rd: string = resetDate) {
     if (!isLoadMore) setIsLoading(true);
     try {
       const from = (pageNumber - 1) * PAGE_SIZE;
       const to = from + PAGE_SIZE - 1;
 
       // Select all columns to get tracking metadata
-      const { data, error } = await supabase
+      let query = supabase
         .from("orders")
         .select("*")
         .order("created_at", { ascending: false })
         .range(from, to);
 
+      // Apply reset date filter if set (show only orders after the reset)
+      if (rd) {
+        query = query.gte("created_at", rd);
+      }
+
+      const { data, error } = await query;
       if (error) throw error;
 
       if (data) {
@@ -337,7 +362,7 @@ export default function AdminOrders() {
               font-family: 'Alexandria', sans-serif;
               font-weight: 900;
               font-size: 32px;
-              color: #D6004B;
+              color: #1D4ED8;
               margin: 0;
             }
             .logo-subtitle {
@@ -422,7 +447,7 @@ export default function AdminOrders() {
             }
             .grand-total {
               font-size: 18px;
-              color: #D6004B !important;
+              color: #1D4ED8 !important;
             }
             .footer {
               text-align: center;
@@ -513,7 +538,7 @@ export default function AdminOrders() {
                   ${order.coupon_code ? `
                   <tr class="total-row">
                     <td class="total-label">Coupon Code Used:</td>
-                    <td style="text-align: right;" class="total-value font-mono text-rose-500">${order.coupon_code}</td>
+                    <td style="text-align: right;" class="total-value font-mono text-yellow-500">${order.coupon_code}</td>
                   </tr>
                   ` : ''}
                   <tr class="total-row" style="border-top: 2px solid #e5e7eb;">
@@ -595,22 +620,22 @@ export default function AdminOrders() {
       {/* Page Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
-          <h1 className="text-4xl font-extrabold tracking-tight mb-2 text-white">Orders Ledger</h1>
+          <h1 className="text-4xl font-extrabold tracking-tight mb-2 text-zinc-900">Orders Ledger</h1>
           <p className="text-zinc-500">Manage store transactions, audit payment states, and view international visitor tracking.</p>
         </div>
         <div className="flex gap-3">
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className="flex items-center gap-2 px-5 h-12 rounded-xl font-semibold text-sm transition-all active:scale-95 cursor-pointer bg-white/5 border border-white/10 text-zinc-300 hover:text-white"
+            className="flex items-center gap-2 px-5 h-12 rounded-2xl font-semibold text-sm transition-all active:scale-95 cursor-pointer bg-zinc-100/40 border border-zinc-200 text-zinc-700 hover:text-zinc-900"
           >
             <Filter className="w-4 h-4" />
             {showFilters ? "Hide Filters" : "Show Filters"}
           </button>
           <button
             onClick={() => { setPage(1); fetchOrders(1); fetchGlobalStats(); }}
-            className="flex items-center gap-2 px-5 h-12 rounded-xl font-semibold text-sm transition-all active:scale-95 cursor-pointer bg-white/5 border border-white/10 text-zinc-300 hover:text-white"
+            className="flex items-center gap-2 px-5 h-12 rounded-2xl font-semibold text-sm transition-all active:scale-95 cursor-pointer bg-zinc-100/40 border border-zinc-200 text-zinc-700 hover:text-zinc-900"
           >
-            {isLoading ? <Loader2 className="w-5 h-5 animate-spin text-rose-500" /> : <RefreshCw className="w-5 h-5" />}
+            {isLoading ? <Loader2 className="w-5 h-5 animate-spin text-yellow-500" /> : <RefreshCw className="w-5 h-5" />}
             Refresh
           </button>
         </div>
@@ -619,7 +644,7 @@ export default function AdminOrders() {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
         {[
-          { label: "EGP Revenue (Completed)", value: formatPrice(totalRevenueEGP, "EGP").replace("\u062c.\u0645", "L.E").replace("EGP", "L.E"), sub: "Egypt payments", accent: "#D6004B", glow: "rgba(214,0,75,0.12)" },
+          { label: "EGP Revenue (Completed)", value: formatPrice(totalRevenueEGP, "EGP").replace("\u062c.\u0645", "L.E").replace("EGP", "L.E"), sub: "Egypt payments", accent: "#1D4ED8", glow: "rgba(29, 78, 216,0.12)" },
           { label: "USD Revenue (Completed)", value: formatPrice(totalRevenueUSD, "USD"), sub: "International payments", accent: "#3b82f6", glow: "rgba(59,130,246,0.12)" },
           { label: "International Orders", value: internationalCount, sub: "Completed outside Egypt", accent: "#10b981", glow: "rgba(16,185,129,0.12)" },
           { label: "Conversion Rate", value: `${conversionRate}%`, sub: `Across ${totalOrdersCount} orders`, accent: "#f59e0b", glow: "rgba(245,158,11,0.12)" },
@@ -627,7 +652,7 @@ export default function AdminOrders() {
           <div key={stat.label} className="rounded-2xl p-6 relative overflow-hidden" style={{ background: "rgba(16,16,26,0.85)", border: "1px solid rgba(255,255,255,0.07)", boxShadow: "0 8px 32px rgba(0,0,0,0.3)" }}>
             <div className="absolute top-0 right-0 w-28 h-28 rounded-full blur-3xl pointer-events-none" style={{ background: stat.glow }} />
             <p className="mb-1 text-xs relative z-10 text-zinc-500 font-bold uppercase tracking-wider">{stat.label}</p>
-            <h3 className="text-2xl font-extrabold relative z-10 text-white mt-1">{stat.value}</h3>
+            <h3 className="text-2xl font-extrabold relative z-10 text-zinc-900 mt-1">{stat.value}</h3>
             <div className="mt-3 flex items-center text-xs font-bold relative z-10" style={{ color: stat.accent }}>
               <Sparkles className="w-3.5 h-3.5 mr-1.5" />
               {stat.sub}
@@ -646,7 +671,7 @@ export default function AdminOrders() {
             <Input
               type="text"
               placeholder="Search by customer name, email, ID or title..."
-              className="h-12 pl-12 rounded-xl text-white border-white/10"
+              className="h-12 pl-12 rounded-2xl text-zinc-900 border-zinc-200"
               style={{ background: "rgba(255,255,255,0.05)", border: "1.5px solid rgba(255,255,255,0.1)", color: "#f4f4f5" }}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -654,7 +679,7 @@ export default function AdminOrders() {
           </div>
           <button 
             onClick={handleExportCSV}
-            className="flex items-center gap-2 px-5 h-12 rounded-xl text-sm transition-all cursor-pointer bg-white/5 border border-white/10 text-zinc-300 hover:text-white"
+            className="flex items-center gap-2 px-5 h-12 rounded-2xl text-sm transition-all cursor-pointer bg-zinc-100/40 border border-zinc-200 text-zinc-700 hover:text-zinc-900"
           >
             <Download className="w-4 h-4" />
             Export CSV Report
@@ -668,7 +693,7 @@ export default function AdminOrders() {
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              className="p-6 bg-white/[0.01] border-b border-white/5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 overflow-hidden"
+              className="p-6 bg-zinc-50/40 border-b border-zinc-200/60 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 overflow-hidden"
             >
               {/* Country */}
               <div className="flex flex-col gap-1.5">
@@ -676,7 +701,7 @@ export default function AdminOrders() {
                 <select
                   value={filterCountry}
                   onChange={e => setFilterCountry(e.target.value)}
-                  className="bg-[#0b0b14] border border-white/10 rounded-xl py-2 px-3 text-xs text-zinc-300 focus:outline-none focus:border-rose-500/50"
+                  className="bg-[#0b0b14] border border-zinc-200 rounded-2xl py-2 px-3 text-xs text-zinc-700 focus:outline-none focus:border-zinc-200/60"
                 >
                   <option value="all">All Countries</option>
                   {uniqueCountries.map(c => (
@@ -691,7 +716,7 @@ export default function AdminOrders() {
                 <select
                   value={filterCurrency}
                   onChange={e => setFilterCurrency(e.target.value)}
-                  className="bg-[#0b0b14] border border-white/10 rounded-xl py-2 px-3 text-xs text-zinc-300 focus:outline-none focus:border-rose-500/50"
+                  className="bg-[#0b0b14] border border-zinc-200 rounded-2xl py-2 px-3 text-xs text-zinc-700 focus:outline-none focus:border-zinc-200/60"
                 >
                   <option value="all">All Currencies</option>
                   {uniqueCurrencies.map(c => (
@@ -706,7 +731,7 @@ export default function AdminOrders() {
                 <select
                   value={filterProductType}
                   onChange={e => setFilterProductType(e.target.value)}
-                  className="bg-[#0b0b14] border border-white/10 rounded-xl py-2 px-3 text-xs text-zinc-300 focus:outline-none focus:border-rose-500/50"
+                  className="bg-[#0b0b14] border border-zinc-200 rounded-2xl py-2 px-3 text-xs text-zinc-700 focus:outline-none focus:border-zinc-200/60"
                 >
                   <option value="all">All Products</option>
                   <option value="course">Academy Courses</option>
@@ -720,7 +745,7 @@ export default function AdminOrders() {
                 <select
                   value={filterDeviceType}
                   onChange={e => setFilterDeviceType(e.target.value)}
-                  className="bg-[#0b0b14] border border-white/10 rounded-xl py-2 px-3 text-xs text-zinc-300 focus:outline-none focus:border-rose-500/50"
+                  className="bg-[#0b0b14] border border-zinc-200 rounded-2xl py-2 px-3 text-xs text-zinc-700 focus:outline-none focus:border-zinc-200/60"
                 >
                   <option value="all">All Devices</option>
                   <option value="mobile">Mobile</option>
@@ -735,7 +760,7 @@ export default function AdminOrders() {
                 <select
                   value={filterCoupon}
                   onChange={e => setFilterCoupon(e.target.value)}
-                  className="bg-[#0b0b14] border border-white/10 rounded-xl py-2 px-3 text-xs text-zinc-300 focus:outline-none focus:border-rose-500/50"
+                  className="bg-[#0b0b14] border border-zinc-200 rounded-2xl py-2 px-3 text-xs text-zinc-700 focus:outline-none focus:border-zinc-200/60"
                 >
                   <option value="all">All coupon usages</option>
                   <option value="has_coupon">Used Promo Code</option>
@@ -750,7 +775,7 @@ export default function AdminOrders() {
                   type="date"
                   value={filterStartDate}
                   onChange={e => setFilterStartDate(e.target.value)}
-                  className="bg-[#0b0b14] border border-white/10 rounded-xl py-2 px-3 text-xs text-zinc-300 focus:outline-none focus:border-rose-500/50"
+                  className="bg-[#0b0b14] border border-zinc-200 rounded-2xl py-2 px-3 text-xs text-zinc-700 focus:outline-none focus:border-zinc-200/60"
                 />
               </div>
 
@@ -761,7 +786,7 @@ export default function AdminOrders() {
                   type="date"
                   value={filterEndDate}
                   onChange={e => setFilterEndDate(e.target.value)}
-                  className="bg-[#0b0b14] border border-white/10 rounded-xl py-2 px-3 text-xs text-zinc-300 focus:outline-none focus:border-rose-500/50"
+                  className="bg-[#0b0b14] border border-zinc-200 rounded-2xl py-2 px-3 text-xs text-zinc-700 focus:outline-none focus:border-zinc-200/60"
                 />
               </div>
 
@@ -778,7 +803,7 @@ export default function AdminOrders() {
                     setFilterStartDate("");
                     setFilterEndDate("");
                   }}
-                  className="w-full h-9 rounded-xl text-xs font-bold bg-rose-600/10 border border-rose-500/20 hover:bg-rose-600 text-rose-400 hover:text-white transition-all"
+                  className="w-full h-9 rounded-2xl text-xs font-bold bg-brand-600/10 border border-zinc-200/60 hover:bg-brand-600 text-yellow-500 hover:text-white transition-all"
                 >
                   Clear Filters
                 </button>
@@ -805,8 +830,8 @@ export default function AdminOrders() {
               {isLoading ? (
                 <TableRow>
                   <TableCell colSpan={7} className="text-center py-24">
-                    <Loader2 className="w-12 h-12 animate-spin mx-auto text-rose-600 mb-6" />
-                    <p className="text-zinc-400 text-lg animate-pulse">Fetching database logs from Supabase...</p>
+                    <Loader2 className="w-12 h-12 animate-spin mx-auto text-brand-600 mb-6" />
+                    <p className="text-zinc-500 text-lg animate-pulse">Fetching database logs from Supabase...</p>
                   </TableCell>
                 </TableRow>
               ) : filteredOrders.length === 0 ? (
@@ -827,16 +852,16 @@ export default function AdminOrders() {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: idx * 0.02 }}
                       onClick={() => setSelectedOrder(order)}
-                      className="border-zinc-800 hover:bg-zinc-800/40 transition-all cursor-pointer group"
+                      className="border-zinc-200/60 hover:bg-zinc-800/40 transition-all cursor-pointer group"
                     >
                       <TableCell className="py-5 pl-8">
                         <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 rounded-xl bg-zinc-800 flex items-center justify-center text-zinc-400 group-hover:bg-rose-600 group-hover:text-white transition-all">
+                          <div className="w-10 h-10 rounded-2xl bg-zinc-800 flex items-center justify-center text-zinc-500 group-hover:bg-brand-600 group-hover:text-white transition-all">
                             <CreditCard className="w-4 h-4" />
                           </div>
                           <div>
-                            <div className="font-extrabold text-white mb-0.5 text-sm tracking-tight">{order.invoice_id || order.payment_id || order.id?.slice(0, 8)}</div>
-                            <div className="text-rose-400 text-xs font-bold">
+                            <div className="font-extrabold text-zinc-900 mb-0.5 text-sm tracking-tight">{order.invoice_id || order.payment_id || order.id?.slice(0, 8)}</div>
+                            <div className="text-yellow-500 text-xs font-bold">
                               {isEgp ? `${finalPaid} EGP` : `$${finalPaid}`}
                             </div>
                           </div>
@@ -844,18 +869,18 @@ export default function AdminOrders() {
                       </TableCell>
                       <TableCell>
                         <div className="flex flex-col">
-                          <span className="text-white font-bold text-sm mb-0.5">{order.customer_name}</span>
+                          <span className="text-zinc-900 font-bold text-sm mb-0.5">{order.customer_name}</span>
                           <span className="text-zinc-500 text-[10px] font-mono leading-none">{order.customer_email}</span>
                         </div>
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <span className="text-lg">{countryFlag}</span>
-                          <span className="text-zinc-300 font-bold text-xs">{order.country || "Unknown"}</span>
+                          <span className="text-zinc-700 font-bold text-xs">{order.country || "Unknown"}</span>
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div className="flex items-center gap-2 text-zinc-400 text-xs font-semibold">
+                        <div className="flex items-center gap-2 text-zinc-500 text-xs font-semibold">
                           <Laptop className="w-3.5 h-3.5 opacity-60" />
                           <span>{order.device_type || "Desktop"} / {order.browser || "Unknown"}</span>
                         </div>
@@ -873,16 +898,16 @@ export default function AdminOrders() {
                           })()}
                           <Badge className={
                             order.status === 'completed'
-                              ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 px-2.5 py-0.5 rounded-lg text-[10px]'
+                              ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 px-2.5 py-0.5 rounded-2xl text-[10px]'
                               : order.status === 'pending'
-                                ? 'bg-amber-500/10 text-amber-400 border-amber-500/20 px-2.5 py-0.5 rounded-lg text-[10px]'
-                                : 'bg-red-500/10 text-red-400 border-red-500/20 px-2.5 py-0.5 rounded-lg text-[10px]'
+                                ? 'bg-amber-500/10 text-amber-400 border-amber-500/20 px-2.5 py-0.5 rounded-2xl text-[10px]'
+                                : 'bg-red-500/10 text-red-400 border-red-500/20 px-2.5 py-0.5 rounded-2xl text-[10px]'
                           }>
                             {order.status === 'completed' ? 'Paid' : order.status === 'pending' ? 'Pending' : 'Failed'}
                           </Badge>
                         </div>
                       </TableCell>
-                      <TableCell className="text-zinc-400 text-xs font-mono">
+                      <TableCell className="text-zinc-500 text-xs font-mono">
                         <div className="flex flex-col">
                           <span>{new Date(order.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
                           <span className="text-[9px] text-zinc-600">{formatLocalTimeOnly(order.created_at)}</span>
@@ -890,19 +915,19 @@ export default function AdminOrders() {
                       </TableCell>
                       <TableCell className="pr-8" onClick={e => e.stopPropagation()}>
                         <DropdownMenu>
-                          <DropdownMenuTrigger className="h-8 w-8 p-0 text-zinc-500 hover:bg-zinc-800 hover:text-white rounded-xl flex items-center justify-center outline-none transition-all cursor-pointer">
+                          <DropdownMenuTrigger className="h-8 w-8 p-0 text-zinc-500 hover:bg-zinc-800 hover:text-zinc-900 rounded-2xl flex items-center justify-center outline-none transition-all cursor-pointer">
                             <MoreVertical className="h-4.5 w-4.5" />
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="bg-zinc-950 border-zinc-800 text-zinc-300 w-64 p-2 rounded-2xl shadow-2xl">
+                          <DropdownMenuContent align="end" className="bg-zinc-950 border-zinc-200/60 text-zinc-700 w-64 p-2 rounded-2xl shadow-sm border border-zinc-200/60">
                             <DropdownMenuItem 
                               onClick={() => setSelectedOrder(order)}
-                              className="hover:bg-zinc-800 hover:text-white cursor-pointer focus:bg-zinc-800 focus:text-white rounded-xl p-3"
+                              className="hover:bg-zinc-800 hover:text-zinc-900 cursor-pointer focus:bg-zinc-800 focus:text-zinc-900 rounded-2xl p-3"
                             >
-                              <Eye className="w-5 h-5 mr-3 text-rose-400" /> View Invoice details
+                              <Eye className="w-5 h-5 mr-3 text-yellow-500" /> View Invoice details
                             </DropdownMenuItem>
                             {order.status === 'completed' && (
                               <DropdownMenuItem
-                                className="hover:bg-zinc-800 hover:text-white cursor-pointer focus:bg-zinc-800 focus:text-white rounded-xl p-3"
+                                className="hover:bg-zinc-800 hover:text-zinc-900 cursor-pointer focus:bg-zinc-800 focus:text-zinc-900 rounded-2xl p-3"
                                 onClick={() => handleResendEmail(order.customer_email)}
                               >
                                 <Mail className="w-5 h-5 mr-3 text-emerald-400" /> Resend Delivery Email
@@ -911,7 +936,7 @@ export default function AdminOrders() {
                             <DropdownMenuSeparator className="bg-zinc-800 my-1" />
                             <DropdownMenuItem 
                               onClick={() => handlePrintInvoice(order)}
-                              className="hover:bg-zinc-800 hover:text-white cursor-pointer focus:bg-zinc-800 focus:text-white rounded-xl p-3"
+                              className="hover:bg-zinc-800 hover:text-zinc-900 cursor-pointer focus:bg-zinc-800 focus:text-zinc-900 rounded-2xl p-3"
                             >
                               <Download className="w-5 h-5 mr-3 text-amber-400" /> Download PDF Invoice
                             </DropdownMenuItem>
@@ -928,10 +953,10 @@ export default function AdminOrders() {
 
         {/* Load More Trigger */}
         {hasMore && !isLoading && (
-          <div className="p-6 border-t border-white/5 text-center">
+          <div className="p-6 border-t border-zinc-200/60 text-center">
             <button
               onClick={loadMore}
-              className="px-6 py-2 rounded-xl text-xs font-bold transition-all bg-white/5 border border-white/10 text-zinc-300 hover:text-white"
+              className="px-6 py-2 rounded-2xl text-xs font-bold transition-all bg-zinc-100/40 border border-zinc-200 text-zinc-700 hover:text-zinc-900"
             >
               Load More Orders
             </button>
@@ -947,50 +972,50 @@ export default function AdminOrders() {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="w-full max-w-4xl bg-[#09090f] border border-white/10 rounded-3xl overflow-hidden shadow-2xl relative flex flex-col max-h-[90vh]"
+              className="w-full max-w-4xl bg-[#09090f] border border-zinc-200 rounded-3xl overflow-hidden shadow-sm border border-zinc-200/60 relative flex flex-col max-h-[90vh]"
             >
               {/* Header */}
-              <div className="p-6 border-b border-white/5 flex items-center justify-between bg-white/[0.01]">
+              <div className="p-6 border-b border-zinc-200/60 flex items-center justify-between bg-zinc-50/40">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-rose-600/10 border border-rose-500/20 flex items-center justify-center text-rose-500">
+                  <div className="w-10 h-10 rounded-2xl bg-brand-600/10 border border-zinc-200/60 flex items-center justify-center text-yellow-500">
                     <Clock className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-white text-base">Invoice Details - {selectedOrder.invoice_id || selectedOrder.payment_id || selectedOrder.id?.slice(0, 8)}</h3>
+                    <h3 className="font-bold text-zinc-900 text-base">Invoice Details - {selectedOrder.invoice_id || selectedOrder.payment_id || selectedOrder.id?.slice(0, 8)}</h3>
                     <p className="text-[10px] text-zinc-500">Audit logs & tracking metadata</p>
                   </div>
                 </div>
                 <button
                   onClick={() => setSelectedOrder(null)}
-                  className="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                  className="w-8 h-8 rounded-2xl bg-zinc-100/40 hover:bg-zinc-100/80 flex items-center justify-center text-zinc-500 hover:text-zinc-900 transition-colors cursor-pointer"
                 >
                   <X className="w-4 h-4" />
                 </button>
               </div>
 
               {/* Scrollable Body */}
-              <div className="p-8 overflow-y-auto space-y-8 flex-1 custom-scrollbar text-xs font-semibold text-zinc-300">
+              <div className="p-8 overflow-y-auto space-y-8 flex-1 custom-scrollbar text-xs font-semibold text-zinc-700">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   
                   {/* Card 1: Customer Information */}
-                  <div className="p-5 rounded-2xl bg-white/[0.01] border border-white/5 space-y-4">
-                    <h4 className="text-[10px] uppercase tracking-wider text-rose-500 font-bold border-b border-white/5 pb-2">Customer Information</h4>
+                  <div className="p-5 rounded-2xl bg-zinc-50/40 border border-zinc-200/60 space-y-4">
+                    <h4 className="text-[10px] uppercase tracking-wider text-yellow-500 font-bold border-b border-zinc-200/60 pb-2">Customer Information</h4>
                     <div className="space-y-3">
                       <div>
                         <span className="text-[10px] text-zinc-500 block">Full Name</span>
-                        <span className="text-white mt-1 block">{selectedOrder.customer_name}</span>
+                        <span className="text-zinc-900 mt-1 block">{selectedOrder.customer_name}</span>
                       </div>
                       <div>
                         <span className="text-[10px] text-zinc-500 block">Email Address</span>
-                        <span className="text-white mt-1 block font-mono">{selectedOrder.customer_email}</span>
+                        <span className="text-zinc-900 mt-1 block font-mono">{selectedOrder.customer_email}</span>
                       </div>
                       <div>
                         <span className="text-[10px] text-zinc-500 block">Phone Number</span>
-                        <span className="text-white mt-1 block font-mono">{selectedOrder.customer_phone || "-"}</span>
+                        <span className="text-zinc-900 mt-1 block font-mono">{selectedOrder.customer_phone || "-"}</span>
                       </div>
                       <div>
                         <span className="text-[10px] text-zinc-500 block">Country Location</span>
-                        <span className="text-white mt-1 block flex items-center gap-1.5">
+                        <span className="text-zinc-900 mt-1 block flex items-center gap-1.5">
                           {getFlagEmoji(selectedOrder.country)} {selectedOrder.country || "Unknown"}
                         </span>
                       </div>
@@ -998,23 +1023,23 @@ export default function AdminOrders() {
                   </div>
 
                   {/* Card 2: Purchase Information */}
-                  <div className="p-5 rounded-2xl bg-white/[0.01] border border-white/5 space-y-4">
-                    <h4 className="text-[10px] uppercase tracking-wider text-emerald-400 font-bold border-b border-white/5 pb-2">Purchase Information</h4>
+                  <div className="p-5 rounded-2xl bg-zinc-50/40 border border-zinc-200/60 space-y-4">
+                    <h4 className="text-[10px] uppercase tracking-wider text-emerald-400 font-bold border-b border-zinc-200/60 pb-2">Purchase Information</h4>
                     <div className="space-y-3">
                       <div>
                         <span className="text-[10px] text-zinc-500 block">Digital product / Course</span>
-                        <span className="text-white mt-1 block truncate" title={selectedOrder.product_title}>{selectedOrder.product_title}</span>
+                        <span className="text-zinc-900 mt-1 block truncate" title={selectedOrder.product_title}>{selectedOrder.product_title}</span>
                       </div>
                       <div className="grid grid-cols-2 gap-2">
                         <div>
                           <span className="text-[10px] text-zinc-500 block">Subtotal</span>
-                          <span className="text-white mt-1 block font-mono">
+                          <span className="text-zinc-900 mt-1 block font-mono">
                             {formatPrice(selectedOrder.subtotal_price || selectedOrder.amount, selectedOrder.currency || "EGP")}
                           </span>
                         </div>
                         <div>
                           <span className="text-[10px] text-zinc-500 block">Gateway Surcharge</span>
-                          <span className="text-white mt-1 block font-mono text-amber-400">
+                          <span className="text-zinc-900 mt-1 block font-mono text-amber-400">
                             {formatPrice(selectedOrder.gateway_fee_amount || 0, selectedOrder.currency || "EGP")}
                           </span>
                         </div>
@@ -1022,7 +1047,7 @@ export default function AdminOrders() {
                       <div className="grid grid-cols-2 gap-2">
                         <div>
                           <span className="text-[10px] text-zinc-500 block">Coupon Code</span>
-                          <span className="text-white mt-1 block font-mono text-rose-400">{selectedOrder.coupon_code || "None"}</span>
+                          <span className="text-zinc-900 mt-1 block font-mono text-yellow-500">{selectedOrder.coupon_code || "None"}</span>
                         </div>
                         <div>
                           <span className="text-[10px] text-zinc-500 block">Final Total Charged</span>
@@ -1034,7 +1059,7 @@ export default function AdminOrders() {
                       <div className="grid grid-cols-2 gap-2">
                         <div>
                           <span className="text-[10px] text-zinc-500 block">Payment Channel</span>
-                          <span className="text-white mt-1 block capitalize">{selectedOrder.payment_provider || "Paymob"}</span>
+                          <span className="text-zinc-900 mt-1 block capitalize">{selectedOrder.payment_provider || "Paymob"}</span>
                         </div>
                         {(() => {
                           const payMethodInfo = getPaymentMethodInfo(selectedOrder);
@@ -1053,30 +1078,30 @@ export default function AdminOrders() {
                   </div>
 
                   {/* Card 3: Technical Metadata */}
-                  <div className="p-5 rounded-2xl bg-white/[0.01] border border-white/5 space-y-4">
-                    <h4 className="text-[10px] uppercase tracking-wider text-blue-400 font-bold border-b border-white/5 pb-2">Technical Metadata</h4>
+                  <div className="p-5 rounded-2xl bg-zinc-50/40 border border-zinc-200/60 space-y-4">
+                    <h4 className="text-[10px] uppercase tracking-wider text-blue-400 font-bold border-b border-zinc-200/60 pb-2">Technical Metadata</h4>
                     <div className="space-y-3">
                       <div>
                         <span className="text-[10px] text-zinc-500 block">Masked IP Address</span>
-                        <span className="text-white mt-1 block font-mono">{maskIpAddress(selectedOrder.ip_address)}</span>
+                        <span className="text-zinc-900 mt-1 block font-mono">{maskIpAddress(selectedOrder.ip_address)}</span>
                       </div>
                       <div className="grid grid-cols-2 gap-2">
                         <div>
                           <span className="text-[10px] text-zinc-500 block">Device / OS</span>
-                          <span className="text-white mt-1 block">{selectedOrder.device_type || "Desktop"} / {selectedOrder.os || "Unknown"}</span>
+                          <span className="text-zinc-900 mt-1 block">{selectedOrder.device_type || "Desktop"} / {selectedOrder.os || "Unknown"}</span>
                         </div>
                         <div>
                           <span className="text-[10px] text-zinc-500 block">Browser Agent</span>
-                          <span className="text-white mt-1 block">{selectedOrder.browser || "Unknown"}</span>
+                          <span className="text-zinc-900 mt-1 block">{selectedOrder.browser || "Unknown"}</span>
                         </div>
                       </div>
                       <div>
                         <span className="text-[10px] text-zinc-500 block">Local Time & Timezone</span>
-                        <span className="text-white mt-1 block font-mono text-[10px]">{selectedOrder.timezone || "UTC"} ({formatLocalTimeOnly(selectedOrder.created_at)})</span>
+                        <span className="text-zinc-900 mt-1 block font-mono text-[10px]">{selectedOrder.timezone || "UTC"} ({formatLocalTimeOnly(selectedOrder.created_at)})</span>
                       </div>
                       <div>
                         <span className="text-[10px] text-zinc-500 block">ISO User Language</span>
-                        <span className="text-white mt-1 block font-mono uppercase">{selectedOrder.language || "Unknown"}</span>
+                        <span className="text-zinc-900 mt-1 block font-mono uppercase">{selectedOrder.language || "Unknown"}</span>
                       </div>
                     </div>
                   </div>
@@ -1084,14 +1109,14 @@ export default function AdminOrders() {
                 </div>
 
                 {/* Audit Logs */}
-                <div className="p-5 rounded-2xl bg-white/[0.01] border border-white/5 space-y-4">
-                  <h4 className="text-[10px] uppercase tracking-wider text-zinc-500 font-bold border-b border-white/5 pb-2">Security Audits</h4>
-                  <div className="relative border-l border-white/10 pl-6 ml-3 space-y-4 text-xs font-semibold">
+                <div className="p-5 rounded-2xl bg-zinc-50/40 border border-zinc-200/60 space-y-4">
+                  <h4 className="text-[10px] uppercase tracking-wider text-zinc-500 font-bold border-b border-zinc-200/60 pb-2">Security Audits</h4>
+                  <div className="relative border-l border-zinc-200 pl-6 ml-3 space-y-4 text-xs font-semibold">
                     <div className="relative">
                       <div className="absolute left-[-28.5px] top-1 w-3.5 h-3.5 rounded-full bg-emerald-500/20 border-2 border-emerald-500 flex items-center justify-center">
                         <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                       </div>
-                      <p className="text-white">Transaction Initialized</p>
+                      <p className="text-zinc-900">Transaction Initialized</p>
                       <p className="text-[10px] text-zinc-500 mt-0.5">Secure payment intent snapshot recorded · {formatDate(selectedOrder.created_at)}</p>
                     </div>
                     <div className="relative">
@@ -1110,7 +1135,7 @@ export default function AdminOrders() {
                             : "bg-amber-500"
                         }`} />
                       </div>
-                      <p className="text-white">Payment Status: <span className="capitalize">{selectedOrder.status}</span></p>
+                      <p className="text-zinc-900">Payment Status: <span className="capitalize">{selectedOrder.status}</span></p>
                       <p className="text-[10px] text-zinc-500 mt-0.5">
                         {selectedOrder.status === "completed" 
                           ? "Fulfillment complete: download links dispatched & LMS access unlocked." 
@@ -1124,16 +1149,16 @@ export default function AdminOrders() {
               </div>
 
               {/* Footer Tools */}
-              <div className="p-6 border-t border-white/5 flex items-center justify-end gap-3 bg-white/[0.01]">
+              <div className="p-6 border-t border-zinc-200/60 flex items-center justify-end gap-3 bg-zinc-50/40">
                 <button
                   onClick={() => setSelectedOrder(null)}
-                  className="px-5 h-11 rounded-xl text-xs font-bold bg-white/5 border border-white/10 text-zinc-300 hover:text-white transition-all cursor-pointer"
+                  className="px-5 h-11 rounded-2xl text-xs font-bold bg-zinc-100/40 border border-zinc-200 text-zinc-700 hover:text-zinc-900 transition-all cursor-pointer"
                 >
                   Close Details
                 </button>
                 <button
                   onClick={() => handlePrintInvoice(selectedOrder)}
-                  className="px-6 h-11 rounded-xl text-xs font-black bg-rose-600 hover:bg-rose-700 text-white transition-all cursor-pointer flex items-center gap-2 shadow-lg shadow-rose-600/10"
+                  className="px-6 h-11 rounded-2xl text-xs font-black bg-[#2563EB] hover:bg-[#1D4ED8] text-white transition-all cursor-pointer flex items-center gap-2 shadow-sm border border-zinc-200/60 shadow-brand-600/10"
                 >
                   <Download className="w-4 h-4" />
                   Print / Download PDF Invoice

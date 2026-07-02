@@ -40,11 +40,11 @@ export default function RelatedCarousel({
   if (!loading && items.length === 0) return null;
 
   return (
-    <section className="py-12 border-t border-white/5 relative overflow-hidden bg-black/40">
+    <section className="py-12 border-t border-zinc-200/60 relative overflow-hidden bg-black/40">
       <div className="container mx-auto px-4 max-w-7xl relative z-10">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
           <div>
-            <div className="flex items-center gap-2 text-rose-500 mb-2 font-mono text-sm uppercase tracking-wider">
+            <div className="flex items-center gap-2 text-yellow-500 mb-2 font-mono text-sm uppercase tracking-wider">
               <Sparkles className="w-4 h-4 animate-pulse" />
               <span>موصى به لك</span>
             </div>
@@ -59,14 +59,14 @@ export default function RelatedCarousel({
             ? Array.from({ length: limit }).map((_, i) => (
                 <div
                   key={i}
-                  className="rounded-2xl border border-white/5 bg-neutral-900/40 p-4 space-y-4 animate-pulse"
+                  className="rounded-2xl border border-zinc-200/60 bg-neutral-900/40 p-4 space-y-4 animate-pulse"
                 >
-                  <div className="aspect-video w-full rounded-xl bg-white/5" />
-                  <div className="h-4 w-2/3 bg-white/5 rounded" />
-                  <div className="h-3 w-full bg-white/5 rounded" />
+                  <div className="aspect-video w-full rounded-2xl bg-zinc-100/40" />
+                  <div className="h-4 w-2/3 bg-zinc-100/40 rounded" />
+                  <div className="h-3 w-full bg-zinc-100/40 rounded" />
                   <div className="flex justify-between items-center pt-2">
-                    <div className="h-4 w-1/4 bg-white/5 rounded" />
-                    <div className="h-8 w-1/3 bg-white/5 rounded" />
+                    <div className="h-4 w-1/4 bg-zinc-100/40 rounded" />
+                    <div className="h-8 w-1/3 bg-zinc-100/40 rounded" />
                   </div>
                 </div>
               ))
@@ -90,15 +90,15 @@ export default function RelatedCarousel({
                     ? "bg-purple-500/10 text-purple-400 border-purple-500/20"
                     : item.type === "bundle"
                     ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
-                    : "bg-rose-500/10 text-rose-400 border-rose-500/20";
+                    : "bg-brand-500/10 text-yellow-500 border-zinc-200/60";
 
                 return (
                   <div
                     key={`${item.type}:${item.id}`}
-                    className="group relative rounded-2xl border border-white/5 bg-[#09090e] hover:border-rose-500/30 hover:shadow-[0_0_20px_rgba(214,0,75,0.15)] transition-all duration-300 p-4 flex flex-col h-full cursor-pointer"
+                    className="group relative rounded-2xl border border-zinc-200/60 bg-slate-50 hover:border-zinc-200/60 hover:shadow-[0_0_20px_rgba(29, 78, 216,0.15)] transition-all duration-300 p-4 flex flex-col h-full cursor-pointer"
                     onClick={() => window.location.href = itemLink}
                   >
-                    <div className="relative aspect-video w-full rounded-xl overflow-hidden mb-4 bg-black/40">
+                    <div className="relative aspect-video w-full rounded-2xl overflow-hidden mb-4 bg-black/40">
                       {item.image_url ? (
                         <img
                           src={item.image_url}
@@ -107,7 +107,7 @@ export default function RelatedCarousel({
                           loading="lazy"
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-white/20 font-bold bg-neutral-900">
+                        <div className="w-full h-full flex items-center justify-center text-zinc-900/20 font-bold bg-neutral-900">
                           JoeSchool
                         </div>
                       )}
@@ -125,22 +125,22 @@ export default function RelatedCarousel({
 
                     <div className="flex flex-col flex-grow">
                       {item.category && (
-                        <span className="text-rose-500 text-xs font-mono mb-1">{item.category}</span>
+                        <span className="text-yellow-500 text-xs font-mono mb-1">{item.category}</span>
                       )}
-                      <h3 className="text-base font-bold text-white group-hover:text-rose-400 transition-colors line-clamp-1 mb-2">
+                      <h3 className="text-base font-bold text-zinc-900 group-hover:text-yellow-500 transition-colors line-clamp-1 mb-2">
                         {item.title}
                       </h3>
                       <p className="text-neutral-400 text-xs line-clamp-2 mb-4 flex-grow leading-relaxed">
                         {item.description}
                       </p>
 
-                      <div className="flex items-center justify-between pt-3 border-t border-white/5 mt-auto">
+                      <div className="flex items-center justify-between pt-3 border-t border-zinc-200/60 mt-auto">
                         <div className="flex flex-col">
                           {(() => {
                             const pricing = resolveProductPrice(item, currency);
                             return (
                               <>
-                                <span className="text-base font-bold text-rose-500">
+                                <span className="text-base font-bold text-yellow-500">
                                   {pricing.price === 0 ? "مجاني" : formatPrice(pricing.price, currency)}
                                 </span>
                                 {pricing.original_price && pricing.original_price > pricing.price ? (
@@ -155,7 +155,7 @@ export default function RelatedCarousel({
 
                         <Link
                           href={itemLink}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-[#D6004B] hover:text-white border border-white/10 hover:border-rose-500 text-neutral-300 text-xs font-medium transition-all duration-300"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-zinc-100/40 hover:bg-[#1D4ED8] hover:text-white border border-zinc-200 hover:border-brand-500 text-neutral-300 text-xs font-medium transition-all duration-300"
                         >
                           <span>عرض</span>
                           <ChevronLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />

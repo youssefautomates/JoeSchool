@@ -292,7 +292,7 @@ export function CustomVideoPlayer({ src, className }: CustomVideoPlayerProps) {
       {/* Loading Spinner */}
       {isLoading && hasInteracted && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/20 pointer-events-none z-30">
-          <Loader2 className="w-10 h-10 text-[#D6004B] animate-spin" />
+          <Loader2 className="w-10 h-10 text-[#1D4ED8] animate-spin" />
         </div>
       )}
 
@@ -303,13 +303,13 @@ export function CustomVideoPlayer({ src, className }: CustomVideoPlayerProps) {
           className="absolute inset-0 z-40 flex flex-col items-center justify-center cursor-pointer bg-black/10 hover:bg-black/5 transition-all"
         >
           {/* Big pulsing play button */}
-          <div className="relative w-14 h-14 sm:w-20 sm:h-20 bg-[#D6004B] border-2 border-white/20 rounded-full flex items-center justify-center mb-4 shadow-[0_0_40px_rgba(214,0,75,0.6)] hover:scale-105 transition-transform duration-300">
-            <Play className="w-6 h-6 sm:w-8 sm:h-8 text-white fill-current ml-0.5 sm:ml-1" />
-            <span className="absolute inset-0 rounded-full bg-[#D6004B]/30 animate-ping" />
+          <div className="relative w-14 h-14 sm:w-20 sm:h-20 bg-[#1D4ED8] border-2 border-zinc-200 rounded-full flex items-center justify-center mb-4 shadow-[0_0_40px_rgba(29, 78, 216,0.6)] hover:scale-105 transition-transform duration-300">
+            <Play className="w-6 h-6 sm:w-8 sm:h-8 text-zinc-900 fill-current ml-0.5 sm:ml-1" />
+            <span className="absolute inset-0 rounded-full bg-[#1D4ED8]/30 animate-ping" />
           </div>
 
           {/* Unmute Pill */}
-          <div className="flex items-center gap-2 bg-[#0c0c12]/80 backdrop-blur-md px-5 py-2.5 rounded-full border border-white/10 text-white text-xs font-bold font-cairo shadow-lg hover:bg-[#0c0c12]/95 transition-all">
+          <div className="flex items-center gap-2 bg-[#0c0c12]/80 backdrop-blur-md px-5 py-2.5 rounded-full border border-zinc-200 text-zinc-900 text-xs font-bold font-sans shadow-sm border border-zinc-200/60 hover:bg-[#0c0c12]/95 transition-all">
             <VolumeX className="w-4 h-4 text-zinc-350" />
             <span>{"\u0623\u0636\u063a\u0637 \u0644\u0641\u062a\u062d \u0627\u0644\u0635\u0648\u062a"}</span>
           </div>
@@ -346,9 +346,9 @@ export function CustomVideoPlayer({ src, className }: CustomVideoPlayerProps) {
                 style={{ animation: 'centerFlashAnim 0.6s ease-out forwards' }}
               >
                 {centerFlash === "pause" ? (
-                  <Pause className="w-6 h-6 sm:w-7 sm:h-7 text-white fill-current" />
+                  <Pause className="w-6 h-6 sm:w-7 sm:h-7 text-zinc-900 fill-current" />
                 ) : (
-                  <Play className="w-6 h-6 sm:w-7 sm:h-7 text-white fill-current ml-0.5 sm:ml-1" />
+                  <Play className="w-6 h-6 sm:w-7 sm:h-7 text-zinc-900 fill-current ml-0.5 sm:ml-1" />
                 )}
               </div>
             </div>
@@ -368,9 +368,9 @@ export function CustomVideoPlayer({ src, className }: CustomVideoPlayerProps) {
                 max={duration || 100}
                 value={currentTime}
                 onChange={handleSeekChange}
-                className="w-full h-1 bg-white/20 rounded-full appearance-none cursor-pointer outline-none transition-all accent-[#D6004B] hover:h-1.5 focus:outline-none custom-video-slider"
+                className="w-full h-1 bg-zinc-200/80 rounded-full appearance-none cursor-pointer outline-none transition-all accent-[#1D4ED8] hover:h-1.5 focus:outline-none custom-video-slider"
                 style={{
-                  background: `linear-gradient(to right, #D6004B 0%, #D6004B ${(currentTime / (duration || 1)) * 100}%, rgba(255, 255, 255, 0.2) ${(currentTime / (duration || 1)) * 100}%, rgba(255, 255, 255, 0.2) 100%)`
+                  background: `linear-gradient(to right, #1D4ED8 0%, #1D4ED8 ${(currentTime / (duration || 1)) * 100}%, rgba(255, 255, 255, 0.2) ${(currentTime / (duration || 1)) * 100}%, rgba(255, 255, 255, 0.2) 100%)`
                 }}
               />
             </div>
@@ -383,7 +383,7 @@ export function CustomVideoPlayer({ src, className }: CustomVideoPlayerProps) {
                 {/* Play/Pause */}
                 <button 
                   onClick={togglePlay} 
-                  className="text-white hover:text-[#D6004B] transition-colors p-1 flex items-center justify-center shrink-0"
+                  className="text-zinc-900 hover:text-[#1D4ED8] transition-colors p-1 flex items-center justify-center shrink-0"
                 >
                   {isPlaying ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current ml-0.5" />}
                 </button>
@@ -391,30 +391,30 @@ export function CustomVideoPlayer({ src, className }: CustomVideoPlayerProps) {
                 {/* Rewind 10s */}
                 <button 
                   onClick={handleRewind10} 
-                  className="text-zinc-400 hover:text-white transition-colors p-1 relative flex items-center justify-center group shrink-0"
+                  className="text-zinc-500 hover:text-zinc-900 transition-colors p-1 relative flex items-center justify-center group shrink-0"
                   title="10 seconds back"
                 >
                   <RotateCcw className="w-4.5 h-4.5" />
-                  <span className="absolute text-[7px] font-bold mt-1 scale-90 text-white font-sans">10</span>
+                  <span className="absolute text-[7px] font-bold mt-1 scale-90 text-zinc-900 font-sans">10</span>
                 </button>
 
                 {/* Forward 10s */}
                 <button 
                   onClick={handleForward10} 
-                  className="text-zinc-400 hover:text-white transition-colors p-1 relative flex items-center justify-center group shrink-0"
+                  className="text-zinc-500 hover:text-zinc-900 transition-colors p-1 relative flex items-center justify-center group shrink-0"
                   title="10 seconds forward"
                 >
                   <RotateCw className="w-4.5 h-4.5" />
-                  <span className="absolute text-[7px] font-bold mt-1 scale-90 text-white font-sans">10</span>
+                  <span className="absolute text-[7px] font-bold mt-1 scale-90 text-zinc-900 font-sans">10</span>
                 </button>
 
                 {/* Volume slider & mute */}
                 <div className="flex items-center gap-1 group/volume shrink-0">
                   <button 
                     onClick={toggleMute} 
-                    className="text-zinc-350 hover:text-white transition-colors p-1 flex items-center justify-center"
+                    className="text-zinc-350 hover:text-zinc-900 transition-colors p-1 flex items-center justify-center"
                   >
-                    {isMuted ? <VolumeX className="w-4.5 h-4.5 text-zinc-400" /> : <Volume2 className="w-4.5 h-4.5" />}
+                    {isMuted ? <VolumeX className="w-4.5 h-4.5 text-zinc-500" /> : <Volume2 className="w-4.5 h-4.5" />}
                   </button>
                   
                   <input
@@ -424,15 +424,15 @@ export function CustomVideoPlayer({ src, className }: CustomVideoPlayerProps) {
                     step={0.05}
                     value={isMuted ? 0 : volume}
                     onChange={handleVolumeSliderChange}
-                    className="w-0 overflow-hidden group-hover/volume:w-16 h-1 appearance-none cursor-pointer outline-none transition-all duration-300 rounded-full accent-[#D6004B]"
+                    className="w-0 overflow-hidden group-hover/volume:w-16 h-1 appearance-none cursor-pointer outline-none transition-all duration-300 rounded-full accent-[#1D4ED8]"
                     style={{
-                      background: `linear-gradient(to right, #D6004B 0%, #D6004B ${(isMuted ? 0 : volume) * 100}%, rgba(255, 255, 255, 0.2) ${(isMuted ? 0 : volume) * 100}%, rgba(255, 255, 255, 0.2) 100%)`
+                      background: `linear-gradient(to right, #1D4ED8 0%, #1D4ED8 ${(isMuted ? 0 : volume) * 100}%, rgba(255, 255, 255, 0.2) ${(isMuted ? 0 : volume) * 100}%, rgba(255, 255, 255, 0.2) 100%)`
                     }}
                   />
                 </div>
 
                 {/* Time Indicator */}
-                <div className="text-[10px] sm:text-[11px] text-zinc-300 font-medium font-sans pl-1 select-none">
+                <div className="text-[10px] sm:text-[11px] text-zinc-700 font-medium font-sans pl-1 select-none">
                   {formatTime(currentTime)} / {formatTime(duration)}
                 </div>
               </div>
@@ -447,15 +447,15 @@ export function CustomVideoPlayer({ src, className }: CustomVideoPlayerProps) {
                       setShowSpeedMenu(!showSpeedMenu);
                     }}
                     className={cn(
-                      "text-zinc-350 hover:text-white transition-colors p-1 flex items-center justify-center",
-                      showSpeedMenu && "text-[#D6004B] hover:text-[#D6004B]"
+                      "text-zinc-350 hover:text-zinc-900 transition-colors p-1 flex items-center justify-center",
+                      showSpeedMenu && "text-[#1D4ED8] hover:text-[#1D4ED8]"
                     )}
                   >
                     <Settings className="w-4.5 h-4.5" />
                   </button>
 
                   {showSpeedMenu && (
-                    <div className="absolute bottom-9 right-0 bg-[#0a0a0f]/95 backdrop-blur-xl border border-white/10 rounded-xl py-1 w-20 shadow-2xl z-50 flex flex-col text-center font-sans text-[11px]">
+                    <div className="absolute bottom-9 right-0 bg-slate-50/95 backdrop-blur-xl border border-zinc-200 rounded-2xl py-1 w-20 shadow-sm border border-zinc-200/60 z-50 flex flex-col text-center font-sans text-[11px]">
                       {[0.5, 1, 1.25, 1.5, 2].map((speed) => (
                         <button
                           key={speed}
@@ -464,8 +464,8 @@ export function CustomVideoPlayer({ src, className }: CustomVideoPlayerProps) {
                             changeSpeed(speed);
                           }}
                           className={cn(
-                            "py-1 text-zinc-400 hover:bg-white/5 hover:text-white transition-colors",
-                            playbackSpeed === speed && "text-[#D6004B] font-bold"
+                            "py-1 text-zinc-500 hover:bg-zinc-100/40 hover:text-zinc-900 transition-colors",
+                            playbackSpeed === speed && "text-[#1D4ED8] font-bold"
                           )}
                         >
                           {speed}x
@@ -478,7 +478,7 @@ export function CustomVideoPlayer({ src, className }: CustomVideoPlayerProps) {
                 {/* Fullscreen Button */}
                 <button 
                   onClick={toggleFullscreen} 
-                  className="text-zinc-350 hover:text-white transition-colors p-1 flex items-center justify-center"
+                  className="text-zinc-350 hover:text-zinc-900 transition-colors p-1 flex items-center justify-center"
                 >
                   {isFullscreen ? <Minimize className="w-4.5 h-4.5" /> : <Maximize className="w-4.5 h-4.5" />}
                 </button>
@@ -495,7 +495,7 @@ export function CustomVideoPlayer({ src, className }: CustomVideoPlayerProps) {
           width: 10px;
           height: 10px;
           border-radius: 50%;
-          background: #D6004B;
+          background: #1D4ED8;
           cursor: pointer;
           opacity: 0;
           transition: opacity 0.2s, transform 0.2s;
@@ -508,7 +508,7 @@ export function CustomVideoPlayer({ src, className }: CustomVideoPlayerProps) {
           height: 10px;
           border: 0;
           border-radius: 50%;
-          background: #D6004B;
+          background: #1D4ED8;
           cursor: pointer;
           opacity: 0;
           transition: opacity 0.2s, transform 0.2s;

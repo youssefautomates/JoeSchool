@@ -42,7 +42,7 @@ function ShowcaseVideoCard({ video, onClick }: ShowcaseVideoCardProps) {
   return (
     <div 
       onClick={onClick}
-      className="w-full aspect-[9/16] bg-gradient-to-b from-[#09090e] to-[#040406] border border-white/5 hover:border-[#D6004B]/50 rounded-2xl overflow-hidden relative group transition-all duration-500 transform hover:-translate-y-2 shadow-2xl cursor-pointer"
+      className="w-full aspect-[9/16] bg-gradient-to-b from-[#09090e] to-[#040406] border border-zinc-200/60 hover:border-[#1D4ED8]/50 rounded-2xl overflow-hidden relative group transition-all duration-500 transform hover:-translate-y-2 shadow-sm border border-zinc-200/60 cursor-pointer"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -56,11 +56,11 @@ function ShowcaseVideoCard({ video, onClick }: ShowcaseVideoCardProps) {
           loading="lazy"
         />
       ) : (
-        <div className="w-full h-full bg-gradient-to-br from-[#12121c] via-[#09090e] to-[#050508] flex flex-col items-center justify-center p-4 text-center">
-          <div className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-[#D6004B] mb-3 group-hover:scale-110 transition-transform">
+        <div className="w-full h-full bg-gradient-to-br from-white to-slate-50/60 border border-zinc-200/60 flex flex-col items-center justify-center p-4 text-center">
+          <div className="w-12 h-12 rounded-full bg-zinc-100/40 border border-zinc-200 flex items-center justify-center text-[#1D4ED8] mb-3 group-hover:scale-110 transition-transform">
             <Sparkles className="w-5 h-5 animate-pulse" />
           </div>
-          <span className="text-[10px] text-zinc-400 font-bold font-alexandria">تطبيق طالب</span>
+          <span className="text-[10px] text-zinc-500 font-bold font-sans">تطبيق طالب</span>
         </div>
       )}
 
@@ -69,7 +69,7 @@ function ShowcaseVideoCard({ video, onClick }: ShowcaseVideoCardProps) {
 
       {/* Play Icon Overlay */}
       <div className="absolute inset-0 flex items-center justify-center transition-all duration-300">
-        <div className="w-14 h-14 rounded-full bg-[#D6004B]/95 text-white flex items-center justify-center shadow-lg border border-[#D6004B]/30 group-hover:scale-110 transition-transform">
+        <div className="w-14 h-14 rounded-full bg-[#1D4ED8]/95 text-white flex items-center justify-center shadow-sm border border-zinc-200/60 border border-[#1D4ED8]/30 group-hover:scale-110 transition-transform">
           <Play className="w-6 h-6 fill-current ml-0.5" />
         </div>
       </div>
@@ -108,8 +108,8 @@ function ShowcaseModalPlayer({ video, preFetchedUrl }: { video: ShowcaseVideo; p
   if (loading) {
     return (
       <div className="w-full h-full flex flex-col items-center justify-center gap-3 bg-[#07070a]">
-        <Loader2 className="w-8 h-8 text-[#D6004B] animate-spin" />
-        <span className="text-xs text-zinc-400 font-cairo">تحميل الفيديو بأمان...</span>
+        <Loader2 className="w-8 h-8 text-[#1D4ED8] animate-spin" />
+        <span className="text-xs text-zinc-500 font-sans">تحميل الفيديو بأمان...</span>
       </div>
     );
   }
@@ -396,10 +396,10 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#050505] flex items-center justify-center font-cairo text-white">
+      <div className="min-h-screen bg-white flex items-center justify-center font-sans text-zinc-900">
         <div className="flex flex-col items-center gap-4">
-          <Loader2 className="w-10 h-10 text-[#D6004B] animate-spin" />
-          <p className="text-zinc-400 text-sm font-medium">جاري تحميل تفاصيل الكورس...</p>
+          <Loader2 className="w-10 h-10 text-[#1D4ED8] animate-spin" />
+          <p className="text-zinc-500 text-sm font-medium">جاري تحميل تفاصيل الكورس...</p>
         </div>
       </div>
     );
@@ -407,14 +407,14 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
 
   if (!course) {
     return (
-      <div className="min-h-screen bg-[#050505] text-white selection:bg-rose-500/30 font-cairo overflow-x-hidden">
+      <div className="min-h-screen bg-white text-zinc-900 selection:bg-brand-500/30 font-sans overflow-x-hidden">
         <Navbar />
         <main className="flex-1 pt-32 pb-20 container mx-auto px-4 text-center">
-          <div className="max-w-md mx-auto bg-[#0a0a0f] border border-white/5 rounded-3xl p-8 space-y-6">
+          <div className="max-w-md mx-auto bg-slate-50 border border-zinc-200/60 rounded-3xl p-8 space-y-6">
             <BookOpen className="w-16 h-16 text-zinc-700 mx-auto" />
-            <h1 className="text-xl font-alexandria font-bold">هذا الكورس غير متوفر حالياً</h1>
+            <h1 className="text-xl font-sans font-bold">هذا الكورس غير متوفر حالياً</h1>
             <p className="text-zinc-500 text-sm">تأكد من الرابط الصحيح أو تصفح الأكاديمية لمزيد من الأقسام المميزة.</p>
-            <Link href="/courses" className="inline-flex h-11 px-6 bg-[#D6004B] hover:bg-[#b0003d] text-white rounded-xl text-xs font-bold items-center gap-2">
+            <Link href="/courses" className="inline-flex h-11 px-6 bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-2xl text-xs font-bold items-center gap-2">
               العودة لقائمة الأقسام
             </Link>
           </div>
@@ -499,17 +499,17 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
   // ─────────────────────────────────────────────────────────────────────────
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white selection:bg-[#D6004B]/30 font-cairo overflow-x-hidden">
+    <div className="min-h-screen bg-white text-zinc-900 selection:bg-[#1D4ED8]/30 font-sans overflow-x-hidden">
       <Navbar />
 
       <main className="flex-1 pt-24 pb-0 md:pb-20">
         <div className="hidden md:block">
         
         {/* Cinematic Header Section */}
-        <section className="relative pt-8 pb-16 md:py-20 border-b border-white/5 bg-[#09090b]/40">
+        <section className="relative pt-8 pb-16 md:py-20 border-b border-zinc-200/60 bg-slate-50/40">
           <div className="absolute inset-0 pointer-events-none z-0">
             <div className="absolute inset-0 bg-grid-lines mask-radial-faded opacity-35"></div>
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[350px] bg-rose-600/5 rounded-full blur-[120px]" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[350px] bg-brand-600/5 rounded-full blur-[120px]" />
           </div>
 
           <div className="container relative z-10 mx-auto px-4 max-w-6xl">
@@ -524,7 +524,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
               >
                 <Link
                   href="/courses"
-                  className="inline-flex items-center gap-2 text-xs font-bold text-zinc-400 hover:text-white transition-colors"
+                  className="inline-flex items-center gap-2 text-xs font-bold text-zinc-500 hover:text-zinc-900 transition-colors"
                 >
                   <ArrowLeft className="w-4 h-4 rtl:rotate-180" />
                   <span>العودة لكافة الأقسام التدريبية</span>
@@ -532,13 +532,13 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
 
                 {/* Sparkling badge removed, title size slightly decreased */}
                 <div className="space-y-4">
-                  <h1 className="text-xl sm:text-3xl lg:text-4xl font-alexandria font-black text-white leading-tight">
+                  <h1 className="text-xl sm:text-3xl lg:text-4xl font-sans font-black text-zinc-900 leading-tight">
                     {course.title}
                   </h1>
                 </div>
 
                 {/* 16:9 Interactive Video/Cover Container */}
-                <div className="aspect-video bg-[#0a0a0f] border border-white/5 rounded-3xl overflow-hidden relative shadow-2xl group">
+                <div className="aspect-video bg-slate-50 border border-zinc-200/60 rounded-3xl overflow-hidden relative shadow-sm border border-zinc-200/60 group">
                   {previewVideoUrl ? (
                     isEmbed ? (
                       <div className="absolute inset-0 z-10 flex items-center justify-center bg-black">
@@ -561,11 +561,11 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                             <motion.div 
                               animate={{ scale: [1, 1.08, 1] }}
                               transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-                              className="relative w-20 h-20 bg-[#D6004B]/90 backdrop-blur-xl border-2 border-white/20 rounded-full flex items-center justify-center mb-4 shadow-[0_0_40px_rgba(214,0,75,0.5)] group-hover/unmute:shadow-[0_0_60px_rgba(214,0,75,0.7)] transition-shadow"
+                              className="relative w-20 h-20 bg-[#1D4ED8]/90 backdrop-blur-xl border-2 border-zinc-200 rounded-full flex items-center justify-center mb-4 shadow-[0_0_40px_rgba(29, 78, 216,0.5)] group-hover/unmute:shadow-none transition-shadow"
                             >
-                              <Play className="w-8 h-8 text-white fill-current ml-1" />
+                              <Play className="w-8 h-8 text-zinc-900 fill-current ml-1" />
                             </motion.div>
-                            <span className="relative text-xs font-cairo font-bold text-white/80 bg-black/50 backdrop-blur-md px-5 py-2 rounded-xl border border-white/10 group-hover/unmute:text-white group-hover/unmute:border-white/20 transition-all flex items-center gap-2">
+                            <span className="relative text-xs font-sans font-bold text-zinc-800 bg-black/50 backdrop-blur-md px-5 py-2 rounded-2xl border border-zinc-200 group-hover/unmute:text-zinc-900 group-hover/unmute:border-zinc-200 transition-all flex items-center gap-2">
                               <VolumeX className="w-3.5 h-3.5" />
                               اضغط لفتح الصوت
                             </span>
@@ -581,7 +581,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                   ) : course.promo_video_id ? (
                     /* Video is expected but URL is still loading — black placeholder */
                     <div className="absolute inset-0 flex items-center justify-center bg-black">
-                      <Loader2 className="w-8 h-8 text-[#D6004B] animate-spin" />
+                      <Loader2 className="w-8 h-8 text-[#1D4ED8] animate-spin" />
                     </div>
                   ) : (
                     <>
@@ -601,18 +601,18 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                 </div>
 
                 {/* Mobile-only CTA Section (appears under video, block lg:hidden) */}
-                <div className="block lg:hidden bg-[#0a0a0f] border border-white/5 rounded-3xl p-6 shadow-2xl relative overflow-hidden my-4">
-                  <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-transparent via-[#D6004B] to-transparent animate-pulse" />
+                <div className="block lg:hidden bg-slate-50 border border-zinc-200/60 rounded-3xl p-6 shadow-sm border border-zinc-200/60 relative overflow-hidden my-4">
+                  <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-transparent via-[#1D4ED8] to-transparent animate-pulse" />
                   
                   {isEnrolled ? (
                     <div className="space-y-4">
-                      <div className="flex items-center gap-2.5 text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-4 py-3 rounded-2xl text-xs font-bold justify-center font-cairo">
+                      <div className="flex items-center gap-2.5 text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-4 py-3 rounded-2xl text-xs font-bold justify-center font-sans">
                         <CheckCircle2 className="w-5 h-5" />
                         <span>حسابك مفعل ومسجل في القسم</span>
                       </div>
                       <Link
                         href={`/learn/${course.slug}/${firstLessonSlug}`}
-                        className="w-full h-14 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-bold text-base shadow-[0_10px_30px_rgba(16,185,129,0.3)] transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer font-alexandria"
+                        className="w-full h-14 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-bold text-base shadow-[0_10px_30px_rgba(16,185,129,0.3)] transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer font-sans"
                       >
                         <span>ادخل مشغل الدروس الفنية</span>
                         <ArrowLeft className="w-5 h-5 rtl:rotate-180" />
@@ -621,23 +621,23 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                   ) : (
                     <div className="space-y-5">
                       <div className="flex items-baseline justify-between">
-                        <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest font-alexandria">استثمار الانضمام للقسم</span>
+                        <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest font-sans">استثمار الانضمام للقسم</span>
                         {coursePricing && coursePricing.original_price > coursePricing.price && (
-                          <span className="text-xs text-zinc-500 line-through font-alexandria">بدلاً من {formatPrice(coursePricing.original_price, currency)}</span>
+                          <span className="text-xs text-zinc-500 line-through font-sans">بدلاً من {formatPrice(coursePricing.original_price, currency)}</span>
                         )}
                       </div>
                       <div className="flex items-baseline gap-2">
-                        <span className="text-3xl font-alexandria font-black text-white">
+                        <span className="text-3xl font-sans font-black text-zinc-900">
                           {coursePricing ? (coursePricing.price === 0 ? "مجاني" : formatPrice(coursePricing.price, currency)) : ""}
                         </span>
                         {coursePricing && coursePricing.original_price > coursePricing.price && (
-                          <span className="text-xs text-emerald-400 font-bold ml-1 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-md animate-pulse">
+                          <span className="text-xs text-emerald-400 font-bold ml-1 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-xl animate-pulse">
                             وفر {coursePricing.discount_pct}%
                           </span>
                         )}
                       </div>
                       {course.price > 0 && course.enable_gateway_fee !== false && (
-                        <p className="text-[10px] text-zinc-500 text-right leading-relaxed font-cairo">
+                        <p className="text-[10px] text-zinc-500 text-right leading-relaxed font-sans">
                           * قد يتم إضافة رسوم معالجة دفع بسيطة أثناء إتمام الطلب.
                         </p>
                       )}
@@ -649,7 +649,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                           console.log('[CTA_CLICKED]');
                           handleInitiateCheckout();
                         }}
-                        className="primary-hero-cta w-full h-14 bg-gradient-to-r from-[#D6004B] via-[#ff1d6b] to-[#D6004B] text-white rounded-2xl font-black text-lg shadow-[0_10px_30px_rgba(214,0,75,0.4)] transition-all flex items-center justify-center gap-2.5 active:scale-98 cursor-pointer font-alexandria animate-pulse-glow"
+                        className="primary-hero-cta w-full h-14 bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-2xl font-black text-lg shadow-[0_10px_30px_rgba(29, 78, 216,0.4)] transition-all flex items-center justify-center gap-2.5 active:scale-98 cursor-pointer font-sans animate-pulse-glow"
                       >
                         <span>{ctaPrimary}</span>
                         <ArrowLeft className="w-5 h-5 rtl:rotate-180" />
@@ -658,9 +658,9 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                       {course.price > 0 && (
                         <button
                           onClick={handleAddToCart}
-                          className="primary-hero-cta w-full mt-2.5 h-14 bg-white/5 hover:bg-white/10 text-white rounded-2xl font-black text-base border border-white/10 transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer font-alexandria hover:border-[#D6004B]/30"
+                          className="primary-hero-cta w-full mt-2.5 h-14 bg-zinc-100/40 hover:bg-zinc-100/80 text-zinc-900 rounded-2xl font-black text-base border border-zinc-200 transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer font-sans hover:border-[#1D4ED8]/30"
                         >
-                          <ShoppingCart className="w-5 h-5 text-zinc-300" />
+                          <ShoppingCart className="w-5 h-5 text-zinc-700" />
                           <span>{ctaSecondary}</span>
                         </button>
                       )}
@@ -671,10 +671,10 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                 {/* Blue Box: Glassmorphism badges row (Directly under the video container) */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                   {/* Card 1: Duration */}
-                  <div className="bg-[#0b0b12]/60 border border-white/5 p-4 rounded-2xl flex flex-col items-center justify-center text-center min-h-[140px] hover:border-[#D6004B]/30 hover:bg-[#0b0b12]/80 transition-all shadow-lg select-none">
-                    <Clock className="w-6 h-6 text-rose-500 mb-2 shrink-0" />
-                    <span className="text-[11px] text-zinc-400 font-bold mb-1 font-cairo">المدة</span>
-                    <span className="text-base sm:text-lg text-white font-alexandria font-black mb-1 leading-none">
+                  <div className="bg-white/60 border border-zinc-200/60 p-4 rounded-2xl flex flex-col items-center justify-center text-center min-h-[140px] hover:border-[#1D4ED8]/30 hover:bg-white/80 transition-all shadow-sm border border-zinc-200/60 select-none">
+                    <Clock className="w-6 h-6 text-yellow-500 mb-2 shrink-0" />
+                    <span className="text-[11px] text-zinc-500 font-bold mb-1 font-sans">المدة</span>
+                    <span className="text-base sm:text-lg text-zinc-900 font-cairo font-black mb-1 leading-none">
                       {course.duration_hours >= 1
                         ? `${course.duration_hours} س`
                         : course.duration_hours > 0
@@ -682,24 +682,24 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                         : "0 س"
                       }
                     </span>
-                    <span className="text-[10px] text-zinc-500 font-medium font-cairo">إجمالي الوقت</span>
+                    <span className="text-[10px] text-zinc-500 font-medium font-sans">إجمالي الوقت</span>
                   </div>
 
                   {/* Card 2: Lectures */}
-                  <div className="bg-[#0b0b12]/60 border border-white/5 p-4 rounded-2xl flex flex-col items-center justify-center text-center min-h-[140px] hover:border-[#D6004B]/30 hover:bg-[#0b0b12]/80 transition-all shadow-lg select-none">
-                    <BookOpen className="w-6 h-6 text-rose-500 mb-2 shrink-0" />
-                    <span className="text-[11px] text-zinc-400 font-bold mb-1 font-cairo">المحاضرات</span>
-                    <span className="text-base sm:text-lg text-white font-alexandria font-black mb-1 leading-none">
+                  <div className="bg-white/60 border border-zinc-200/60 p-4 rounded-2xl flex flex-col items-center justify-center text-center min-h-[140px] hover:border-[#1D4ED8]/30 hover:bg-white/80 transition-all shadow-sm border border-zinc-200/60 select-none">
+                    <BookOpen className="w-6 h-6 text-yellow-500 mb-2 shrink-0" />
+                    <span className="text-[11px] text-zinc-500 font-bold mb-1 font-sans">المحاضرات</span>
+                    <span className="text-base sm:text-lg text-zinc-900 font-cairo font-black mb-1 leading-none">
                       {totalLessons > 0 ? totalLessons : course.lessons_count}
                     </span>
-                    <span className="text-[10px] text-zinc-500 font-medium font-cairo">دروس مسجلة</span>
+                    <span className="text-[10px] text-zinc-500 font-medium font-sans">دروس مسجلة</span>
                   </div>
 
                   {/* Card 3: Rating */}
-                  <div className="bg-[#0b0b12]/60 border border-white/5 p-4 rounded-2xl flex flex-col items-center justify-center text-center min-h-[140px] hover:border-[#D6004B]/30 hover:bg-[#0b0b12]/80 transition-all shadow-lg select-none">
+                  <div className="bg-white/60 border border-zinc-200/60 p-4 rounded-2xl flex flex-col items-center justify-center text-center min-h-[140px] hover:border-[#1D4ED8]/30 hover:bg-white/80 transition-all shadow-sm border border-zinc-200/60 select-none">
                     <Star className="w-6 h-6 text-yellow-400 fill-current mb-2 shrink-0 animate-pulse" />
-                    <span className="text-[11px] text-zinc-400 font-bold mb-1 font-cairo">التقييم</span>
-                    <span className="text-base sm:text-lg text-white font-alexandria font-black mb-0.5 leading-none">
+                    <span className="text-[11px] text-zinc-500 font-bold mb-1 font-sans">التقييم</span>
+                    <span className="text-base sm:text-lg text-zinc-900 font-cairo font-black mb-0.5 leading-none">
                       {averageRating}
                     </span>
                     <div className="flex items-center justify-center gap-0.5 mt-0.5">
@@ -720,18 +720,18 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                   </div>
 
                   {/* Card 4: Certificate */}
-                  <div className="bg-[#0b0b12]/60 border border-white/5 p-4 rounded-2xl flex flex-col items-center justify-center text-center min-h-[140px] hover:border-[#D6004B]/30 hover:bg-[#0b0b12]/80 transition-all shadow-lg select-none">
+                  <div className="bg-white/60 border border-zinc-200/60 p-4 rounded-2xl flex flex-col items-center justify-center text-center min-h-[140px] hover:border-[#1D4ED8]/30 hover:bg-white/80 transition-all shadow-sm border border-zinc-200/60 select-none">
                     <Award className="w-6 h-6 text-emerald-500 mb-2 shrink-0" />
-                    <span className="text-xs sm:text-sm text-white font-alexandria font-black mb-1.5 leading-none">شهادة الإتمام</span>
-                    <span className="text-[10px] text-zinc-500 font-medium font-cairo">بعد إكمال الكورس</span>
+                    <span className="text-xs sm:text-sm text-zinc-900 font-sans font-black mb-1.5 leading-none">شهادة الإتمام</span>
+                    <span className="text-[10px] text-zinc-500 font-medium font-alexandria">بعد إكمال الكورس</span>
                   </div>
                 </div>
 
                 {/* Green Box: Tabbed Detail Navigation Layer */}
-                <div className="border-t border-white/5 pt-6 space-y-6">
+                <div className="border-t border-zinc-200/60 pt-6 space-y-6">
                   
                   {/* Tab switches: centered premium tab bar with icons */}
-                  <div className="flex items-center justify-around border-b border-white/5 pb-2 w-full">
+                  <div className="flex items-center justify-around border-b border-zinc-200/60 pb-2 w-full">
                     {[
                       { id: 'overview', label: 'الوصف', icon: FileText },
                       { id: 'curriculum', label: 'المنهج', icon: BookOpen },
@@ -746,16 +746,16 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                           key={tab.id}
                           onClick={() => setActiveTab(tab.id as any)}
                           className={cn(
-                            "flex flex-col items-center justify-center gap-1.5 py-3 transition-all relative cursor-pointer font-alexandria font-bold text-xs sm:text-sm flex-1 text-center select-none cursor-pointer",
-                            isActive ? "text-[#D6004B]" : "text-zinc-400 hover:text-white"
+                            "flex flex-col items-center justify-center gap-1.5 py-3 transition-all relative cursor-pointer font-sans font-bold text-xs sm:text-sm flex-1 text-center select-none cursor-pointer",
+                            isActive ? "text-[#1D4ED8]" : "text-zinc-500 hover:text-zinc-900"
                           )}
                         >
-                          <TabIcon className={cn("w-5 h-5 mb-0.5", isActive ? "text-[#D6004B]" : "text-zinc-500")} />
+                          <TabIcon className={cn("w-5 h-5 mb-0.5", isActive ? "text-[#1D4ED8]" : "text-zinc-500")} />
                           <span>{tab.label}</span>
                           {isActive && (
                             <motion.div 
                               layoutId="activeTabIndicator" 
-                              className="absolute bottom-0 h-[3px] bg-[#D6004B] rounded-full w-12" 
+                              className="absolute bottom-0 h-[3px] bg-[#1D4ED8] rounded-full w-12" 
                               transition={{ type: "spring", stiffness: 380, damping: 30 }}
                             />
                           )}
@@ -777,24 +777,24 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                         >
                           {/* Course Description with correct format styling */}
                           {course.description ? (
-                            <div className="text-zinc-300 font-cairo text-sm sm:text-base leading-[1.8] [&_p]:mb-4 [&_p]:leading-[1.8] [&_li]:mb-3 [&_li]:leading-[1.8] [&_h1]:mt-6 [&_h1]:mb-2 [&_h1]:text-lg [&_h2]:mt-5 [&_h2]:mb-2 [&_h2]:text-base [&_span]:leading-[1.8]" dangerouslySetInnerHTML={{ __html: course.description }} />
+                            <div className="text-zinc-700 font-sans text-sm sm:text-base leading-[1.8] [&_p]:mb-4 [&_p]:leading-[1.8] [&_li]:mb-3 [&_li]:leading-[1.8] [&_h1]:mt-6 [&_h1]:mb-2 [&_h1]:text-lg [&_h2]:mt-5 [&_h2]:mb-2 [&_h2]:text-base [&_span]:leading-[1.8]" dangerouslySetInnerHTML={{ __html: course.description }} />
                           ) : (
-                            <p className="text-zinc-400 font-cairo text-sm sm:text-base leading-[1.8]">هذا المسار يحتوي على شرح مفصل وتطبيق شامل لمهارات صناعة المحتوى بالذكاء الاصطناعي وإنتاج الفيديو الإبداعي بأقوى الأدوات الرقمية.</p>
+                            <p className="text-zinc-500 font-sans text-sm sm:text-base leading-[1.8]">هذا المسار يحتوي على شرح مفصل وتطبيق شامل لمهارات صناعة المحتوى بالذكاء الاصطناعي وإنتاج الفيديو الإبداعي بأقوى الأدوات الرقمية.</p>
                           )}
 
                           {/* Checklist: What You'll Learn */}
                           {course.what_will_learn && course.what_will_learn.length > 0 && (
-                            <div className="bg-white/[0.02] backdrop-blur-md border border-white/10 rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl relative overflow-hidden">
+                            <div className="bg-zinc-50/70 backdrop-blur-md border border-zinc-200 rounded-3xl p-6 sm:p-8 space-y-6 shadow-sm border border-zinc-200/60 relative overflow-hidden">
                               <div className="absolute -top-10 -right-10 w-32 h-32 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
-                              <h3 className="text-lg sm:text-xl font-alexandria font-bold text-white flex items-center gap-2 relative z-10">
+                              <h3 className="text-lg sm:text-xl font-sans font-bold text-zinc-900 flex items-center gap-2 relative z-10">
                                 <CheckCircle2 className="w-5 h-5 text-emerald-500" />
                                 ماذا ستتعلم وتنجز عملياً؟
                               </h3>
                               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 relative z-10">
                                 {course.what_will_learn.map((feat, fIdx) => (
-                                  <div key={fIdx} className="flex items-start gap-3 bg-black/20 border border-white/5 p-3 rounded-xl hover:border-emerald-500/30 transition-colors group">
+                                  <div key={fIdx} className="flex items-start gap-3 bg-black/20 border border-zinc-200/60 p-3 rounded-2xl hover:border-emerald-500/30 transition-colors group">
                                     <Check className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5 group-hover:scale-110 transition-transform" />
-                                    <span className="text-zinc-300 text-xs sm:text-sm leading-relaxed">{feat}</span>
+                                    <span className="text-zinc-700 text-xs sm:text-sm leading-relaxed">{feat}</span>
                                   </div>
                                 ))}
                               </div>
@@ -803,12 +803,12 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
 
                           {/* Course Requirements */}
                           {course.requirements && course.requirements.length > 0 && (
-                            <div className="bg-[#0a0a0f] border border-white/5 rounded-3xl p-6 sm:p-8 space-y-4">
-                              <h3 className="text-lg sm:text-xl font-alexandria font-bold text-white flex items-center gap-2">
-                                <AlertCircle className="w-5 h-5 text-rose-500" />
+                            <div className="bg-slate-50 border border-zinc-200/60 rounded-3xl p-6 sm:p-8 space-y-4">
+                              <h3 className="text-lg sm:text-xl font-sans font-bold text-zinc-900 flex items-center gap-2">
+                                <AlertCircle className="w-5 h-5 text-yellow-500" />
                                 متطلبات البدء في القسم
                               </h3>
-                              <ul className="space-y-3.5 text-xs sm:text-sm text-zinc-400 list-disc pr-5">
+                              <ul className="space-y-3.5 text-xs sm:text-sm text-zinc-500 list-disc pr-5">
                                 {course.requirements.map((req, rIdx) => (
                                   <li key={rIdx} className="leading-relaxed">{req}</li>
                                 ))}
@@ -818,17 +818,17 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
 
                           {/* Target Audience: Who is this for? */}
                           {course.who_is_for && course.who_is_for.length > 0 && (
-                            <div className="bg-white/[0.02] backdrop-blur-md border border-white/10 rounded-3xl p-6 sm:p-8 space-y-4 shadow-2xl relative overflow-hidden">
+                            <div className="bg-zinc-50/70 backdrop-blur-md border border-zinc-200 rounded-3xl p-6 sm:p-8 space-y-4 shadow-sm border border-zinc-200/60 relative overflow-hidden">
                               <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
-                              <h3 className="text-lg sm:text-xl font-alexandria font-bold text-white flex items-center gap-2 relative z-10">
+                              <h3 className="text-lg sm:text-xl font-sans font-bold text-zinc-900 flex items-center gap-2 relative z-10">
                                 <Users className="w-5 h-5 text-blue-500" />
                                 من هو الفرد المستهدف بهذا القسم؟
                               </h3>
                               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 relative z-10">
                                 {course.who_is_for.map((aud, aIdx) => (
-                                  <div key={aIdx} className="flex items-center gap-2 bg-black/20 border border-white/5 p-3.5 rounded-xl hover:border-blue-500/30 transition-colors group">
+                                  <div key={aIdx} className="flex items-center gap-2 bg-black/20 border border-zinc-200/60 p-3.5 rounded-2xl hover:border-blue-500/30 transition-colors group">
                                     <div className="w-2 h-2 rounded-full bg-blue-500 shrink-0 group-hover:scale-125 transition-transform" />
-                                    <span className="text-zinc-300 text-xs sm:text-sm">{aud}</span>
+                                    <span className="text-zinc-700 text-xs sm:text-sm">{aud}</span>
                                   </div>
                                 ))}
                               </div>
@@ -845,8 +845,8 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                           exit={{ opacity: 0, y: -10 }}
                           className="space-y-6"
                         >
-                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/5 pb-3">
-                            <h3 className="text-lg sm:text-xl font-alexandria font-bold text-white">منهج الوحدات والمواضيع الدراسية</h3>
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-zinc-200/60 pb-3">
+                            <h3 className="text-lg sm:text-xl font-sans font-bold text-zinc-900">منهج الوحدات والمواضيع الدراسية</h3>
                             <span className="text-xs text-zinc-500 font-bold">{sections.length} وحدات رئيسية • {totalLessons} محاضرة شاملة</span>
                           </div>
 
@@ -861,19 +861,19 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                                 return (
                                   <div 
                                     key={mod.id}
-                                    className="bg-[#0a0a0f] border border-white/5 rounded-2xl overflow-hidden transition-all duration-300"
+                                    className="bg-slate-50 border border-zinc-200/60 rounded-2xl overflow-hidden transition-all duration-300"
                                   >
                                     <button
                                       onClick={() => setOpenModuleIndex(isOpen ? null : index)}
-                                      className="w-full px-6 py-4 flex items-center justify-between gap-4 font-bold text-sm sm:text-base text-white hover:bg-white/[0.02] transition-colors"
+                                      className="w-full px-6 py-4 flex items-center justify-between gap-4 font-bold text-sm sm:text-base text-zinc-900 hover:bg-zinc-50/70 transition-colors"
                                     >
                                       <span className="flex items-center gap-3 text-right">
-                                        <BookOpen className="w-5 h-5 text-[#D6004B] shrink-0" />
+                                        <BookOpen className="w-5 h-5 text-[#1D4ED8] shrink-0" />
                                         <span>{mod.title}</span>
                                       </span>
                                       <div className="flex items-center gap-2 text-xs text-zinc-500 shrink-0">
                                         <span>{mod.lessons.length} دروس ({durationMinutes} دقيقة)</span>
-                                        <ChevronDown className={`w-5 h-5 text-zinc-400 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
+                                        <ChevronDown className={`w-5 h-5 text-zinc-500 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
                                       </div>
                                     </button>
 
@@ -884,7 +884,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                                           animate={{ height: "auto", opacity: 1 }}
                                           exit={{ height: 0, opacity: 0 }}
                                           transition={{ duration: 0.2 }}
-                                          className="border-t border-white/5 bg-black/40 overflow-hidden"
+                                          className="border-t border-zinc-200/60 bg-black/40 overflow-hidden"
                                         >
                                           <div className="px-6 py-4 space-y-3.5">
                                             {mod.lessons.map((lesson, lIdx) => (
@@ -897,8 +897,8 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                                                 }}
                                                 className={`flex items-center justify-between gap-3 text-xs sm:text-sm py-2 border-b border-white/[0.02] last:border-b-0 transition-all duration-200 ${
                                                   lesson.is_preview 
-                                                    ? "cursor-pointer text-zinc-300 hover:text-white hover:bg-emerald-500/[0.02] px-2.5 -mx-2.5 rounded-xl border-l-2 border-l-transparent hover:border-l-emerald-500" 
-                                                    : "text-zinc-400"
+                                                    ? "cursor-pointer text-zinc-700 hover:text-zinc-900 hover:bg-emerald-500/[0.02] px-2.5 -mx-2.5 rounded-2xl border-l-2 border-l-transparent hover:border-l-emerald-500" 
+                                                    : "text-zinc-500"
                                                 }`}
                                               >
                                                 <span className="flex items-center gap-2.5 text-right">
@@ -940,17 +940,17 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                           exit={{ opacity: 0, y: -10 }}
                           className="space-y-6 text-center"
                         >
-                          <div className="max-w-xl mx-auto bg-[#0a0a0f] border border-white/5 rounded-3xl p-6 sm:p-8 space-y-6">
-                            <Award className="w-16 h-16 text-[#D6004B] mx-auto animate-pulse" />
+                          <div className="max-w-xl mx-auto bg-slate-50 border border-zinc-200/60 rounded-3xl p-6 sm:p-8 space-y-6">
+                            <Award className="w-16 h-16 text-[#1D4ED8] mx-auto animate-pulse" />
                             <div className="space-y-2">
-                              <h3 className="font-alexandria font-black text-white text-lg sm:text-xl">احصل على شهادتك المهنية المعتمدة</h3>
-                              <p className="text-zinc-400 text-xs sm:text-sm leading-relaxed">
+                              <h3 className="font-sans font-black text-zinc-900 text-lg sm:text-xl">احصل على شهادتك المهنية المعتمدة</h3>
+                              <p className="text-zinc-500 text-xs sm:text-sm leading-relaxed">
                                 بمجرد إنتهائك من سماعك جميع محاضرات الدورة ستحصل على شهادة احترافية بإسمك من "جو سكول"، بحيث تعزز من فرص قبولك في أفضل الوظائف.
                               </p>
                             </div>
 
                             {/* Certificate Mockup Frame */}
-                            <div className="aspect-[1.414/1] bg-[#07070a] border border-white/10 rounded-2xl relative overflow-hidden shadow-2xl flex items-center justify-center w-full" style={{ containerType: 'inline-size' } as React.CSSProperties}>
+                            <div className="aspect-[1.414/1] bg-[#07070a] border border-zinc-200 rounded-2xl relative overflow-hidden shadow-sm border border-zinc-200/60 flex items-center justify-center w-full" style={{ containerType: 'inline-size' } as React.CSSProperties}>
                               <style dangerouslySetInnerHTML={{__html: `
                                 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@700;800;900&family=Alexandria:wght@800;900&family=Alike&display=swap');
                               `}} />
@@ -997,24 +997,24 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                                   <div className="absolute inset-0 bg-grid-lines mask-radial-faded opacity-10" />
                                   
                                   <div className="flex justify-between items-start z-10">
-                                    <div className="w-6 h-6 border-t-2 border-r-2 border-rose-500/20" />
-                                    <span className="text-[8px] font-black text-rose-500/50 uppercase tracking-widest font-alexandria">JoeSchool Academy</span>
-                                    <div className="w-6 h-6 border-t-2 border-l-2 border-rose-500/20" />
+                                    <div className="w-6 h-6 border-t-2 border-r-2 border-zinc-200/60" />
+                                    <span className="text-[8px] font-black text-yellow-500/50 uppercase tracking-widest font-sans">JoeSchool Academy</span>
+                                    <div className="w-6 h-6 border-t-2 border-l-2 border-zinc-200/60" />
                                   </div>
 
                                   <div className="space-y-2 z-10">
-                                    <h4 className="text-zinc-400 text-[10px] uppercase font-bold tracking-widest font-alexandria">شهادة إتمام وتخرج رسمية</h4>
-                                    <div className="text-sm font-alexandria font-bold text-white border-b border-white/5 pb-2 max-w-xs mx-auto">طالب متفوق ومتميز</div>
+                                    <h4 className="text-zinc-500 text-[10px] uppercase font-bold tracking-widest font-sans">شهادة إتمام وتخرج رسمية</h4>
+                                    <div className="text-sm font-alexandria font-bold text-zinc-900 border-b border-zinc-200/60 pb-2 max-w-xs mx-auto">طالب متفوق ومتميز</div>
                                     <p className="text-zinc-500 text-[9px] max-w-xs mx-auto leading-relaxed">لاجتيازه كافة متطلبات الدورة التدريبية التطبيقية بنجاح.</p>
-                                    <div className="text-rose-500 text-xs font-alexandria font-black">{course.title}</div>
+                                    <div className="text-yellow-500 text-xs font-sans font-black">{course.title}</div>
                                   </div>
 
-                                  <div className="flex justify-between items-end z-10 text-[8px] text-zinc-500 font-bold border-t border-white/5 pt-3">
+                                  <div className="flex justify-between items-end z-10 text-[8px] text-zinc-500 font-bold border-t border-zinc-200/60 pt-3">
                                     <div className="flex flex-col items-start">
                                       <span>كود التحقق:</span>
-                                      <span className="text-zinc-400 font-mono">YA-CERT-XXXXX</span>
+                                      <span className="text-zinc-500 font-mono">YA-CERT-XXXXX</span>
                                     </div>
-                                    <div className="w-10 h-10 bg-white/5 border border-white/10 rounded flex items-center justify-center text-[6px] text-zinc-600">
+                                    <div className="w-10 h-10 bg-zinc-100/40 border border-zinc-200 rounded flex items-center justify-center text-[6px] text-zinc-600">
                                       QR CODE
                                     </div>
                                   </div>
@@ -1034,13 +1034,13 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                           exit={{ opacity: 0, y: -10 }}
                           className="space-y-6 text-right"
                         >
-                          <div className="flex flex-col md:flex-row items-center md:items-start gap-6 sm:gap-8 bg-gradient-to-br from-[#0c0c12] to-[#060609] border border-white/5 rounded-3xl p-6 sm:p-8 relative overflow-hidden shadow-2xl w-full">
+                          <div className="flex flex-col md:flex-row items-center md:items-start gap-6 sm:gap-8 bg-gradient-to-br from-white to-slate-50/60 border border-zinc-200/60 border border-zinc-200/60 rounded-3xl p-6 sm:p-8 relative overflow-hidden shadow-sm border border-zinc-200/60 w-full">
                             {/* Decorative background glows */}
-                            <div className="absolute -top-20 -right-20 w-40 h-40 bg-[#D6004B]/5 rounded-full blur-3xl pointer-events-none" />
+                            <div className="absolute -top-20 -right-20 w-40 h-40 bg-[#1D4ED8]/5 rounded-full blur-3xl pointer-events-none" />
                             <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-orange-600/5 rounded-full blur-3xl pointer-events-none" />
                             
                             {/* Photo */}
-                            <div className="relative w-44 h-56 sm:w-48 sm:h-64 rounded-2xl overflow-hidden border border-[#D6004B]/20 shadow-[0_0_20px_rgba(214,0,75,0.15)] shrink-0 self-center md:self-auto">
+                            <div className="relative w-44 h-56 sm:w-48 sm:h-64 rounded-2xl overflow-hidden border border-[#1D4ED8]/20 shadow-[0_0_20px_rgba(29, 78, 216,0.15)] shrink-0 self-center md:self-auto">
                               <img 
                                 src="/instructor-youssef.jpg" 
                                 alt="يوسف مصطفى" 
@@ -1051,13 +1051,13 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                             {/* Details */}
                             <div className="space-y-5 flex-grow text-right w-full">
                               <div className="space-y-1">
-                                <span className="text-[10px] text-[#D6004B] font-black uppercase tracking-widest font-alexandria">مؤسس الأكاديمية</span>
-                                <h3 className="text-xl sm:text-2xl font-alexandria font-black text-white leading-tight">يوسف مصطفى</h3>
-                                <p className="text-xs text-zinc-400 font-bold font-cairo">خبير وصانع محتوى بالذكاء الاصطناعي</p>
+                                <span className="text-[10px] text-[#1D4ED8] font-black uppercase tracking-widest font-sans">مؤسس الأكاديمية</span>
+                                <h3 className="text-xl sm:text-2xl font-alexandria font-black text-zinc-900 leading-tight">يوسف مصطفى</h3>
+                                <p className="text-xs text-zinc-500 font-bold font-alexandria">خبير وصانع محتوى بالذكاء الاصطناعي</p>
                               </div>
                               
-                              <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-4 sm:p-5 text-zinc-300 font-cairo text-sm sm:text-base leading-[2] relative">
-                                <span className="absolute -top-3 right-4 bg-[#D6004B] text-white text-[9px] font-black px-2.5 py-0.5 rounded-full font-alexandria">نبذة عن المحاضر</span>
+                              <div className="bg-zinc-50/70 border border-zinc-200/60 rounded-2xl p-4 sm:p-5 text-zinc-700 font-sans text-sm sm:text-base leading-[2] relative">
+                                <span className="absolute -top-3 right-4 bg-[#1D4ED8] text-white text-[9px] font-black px-2.5 py-0.5 rounded-full font-cairo">نبذة عن المحاضر</span>
                                 <p className="pt-2">
                                   خبير ومتخصص في صناعة المحتوى بالذكاء الاصطناعي لأكثر من 3 سنوات ومؤسس أكاديمية جو سكول التعليمية.
                                 </p>
@@ -1068,13 +1068,13 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                               
                               {/* Quick stats grid */}
                               <div className="grid grid-cols-2 gap-4 pt-1">
-                                <div className="bg-white/[0.01] border border-white/5 rounded-xl p-3 text-center">
-                                  <span className="block text-[#D6004B] font-alexandria font-black text-lg sm:text-xl">3+ سنوات</span>
-                                  <span className="text-[10px] text-zinc-500 font-bold font-cairo">الخبرة العملية</span>
+                                <div className="bg-zinc-50/40 border border-zinc-200/60 rounded-2xl p-3 text-center">
+                                  <span className="block text-[#1D4ED8] font-sans font-black text-lg sm:text-xl">3+ سنوات</span>
+                                  <span className="text-[10px] text-zinc-500 font-bold font-alexandria">الخبرة العملية</span>
                                 </div>
-                                <div className="bg-white/[0.01] border border-white/5 rounded-xl p-3 text-center">
-                                  <span className="block text-[#D6004B] font-alexandria font-black text-lg sm:text-xl">2000+</span>
-                                  <span className="text-[10px] text-zinc-500 font-bold font-cairo">طالب متدرب</span>
+                                <div className="bg-zinc-50/40 border border-zinc-200/60 rounded-2xl p-3 text-center">
+                                  <span className="block text-[#1D4ED8] font-sans font-black text-lg sm:text-xl">2000+</span>
+                                  <span className="text-[10px] text-zinc-500 font-bold font-alexandria">طالب متدرب</span>
                                 </div>
                               </div>
                             </div>
@@ -1090,23 +1090,23 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                           exit={{ opacity: 0, y: -10 }}
                           className="space-y-4"
                         >
-                          <div className="flex items-center gap-2 border-b border-white/5 pb-3">
-                            <HelpCircle className="w-5 h-5 text-[#D6004B]" />
-                            <h3 className="text-lg sm:text-xl font-alexandria font-bold text-white">الأسئلة المتكررة والشائعة</h3>
+                          <div className="flex items-center gap-2 border-b border-zinc-200/60 pb-3">
+                            <HelpCircle className="w-5 h-5 text-[#1D4ED8]" />
+                            <h3 className="text-lg sm:text-xl font-sans font-bold text-zinc-900">الأسئلة المتكررة والشائعة</h3>
                           </div>
 
                           <div className="space-y-3">
-                            <div className="bg-[#0a0a0f] border border-white/5 rounded-2xl p-5 space-y-2">
-                              <h4 className="font-alexandria font-bold text-white text-sm sm:text-base">هل الكورس مسجل أم بث مباشر؟</h4>
-                              <p className="text-zinc-400 text-xs sm:text-sm leading-relaxed">المحتوى بأكمله مسجل مسبقاً بجودة سينمائية فائقة حتى تتمكن من الدراسة والمراجعة في أي وقت وبالسرعة التي تفضلها مدى الحياة.</p>
+                            <div className="bg-slate-50 border border-zinc-200/60 rounded-2xl p-5 space-y-2">
+                              <h4 className="font-sans font-bold text-zinc-900 text-sm sm:text-base">هل الكورس مسجل أم بث مباشر؟</h4>
+                              <p className="text-zinc-500 text-xs sm:text-sm leading-relaxed">المحتوى بأكمله مسجل مسبقاً بجودة سينمائية فائقة حتى تتمكن من الدراسة والمراجعة في أي وقت وبالسرعة التي تفضلها مدى الحياة.</p>
                             </div>
-                            <div className="bg-[#0a0a0f] border border-white/5 rounded-2xl p-5 space-y-2">
-                              <h4 className="font-alexandria font-bold text-white text-sm sm:text-base">هل سأحصل على ملفات وقوالب العمل الجاهزة؟</h4>
-                              <p className="text-zinc-400 text-xs sm:text-sm leading-relaxed">نعم بالكامل! كل محاضرة فنية تطبيقية تشتمل على الملفات الجاهزة للتنزيل والتصدير للعمل بها فوراً في مشاريعك الخاصة.</p>
+                            <div className="bg-slate-50 border border-zinc-200/60 rounded-2xl p-5 space-y-2">
+                              <h4 className="font-sans font-bold text-zinc-900 text-sm sm:text-base">هل سأحصل على ملفات وقوالب العمل الجاهزة؟</h4>
+                              <p className="text-zinc-500 text-xs sm:text-sm leading-relaxed">نعم بالكامل! كل محاضرة فنية تطبيقية تشتمل على الملفات الجاهزة للتنزيل والتصدير للعمل بها فوراً في مشاريعك الخاصة.</p>
                             </div>
-                            <div className="bg-[#0a0a0f] border border-white/5 rounded-2xl p-5 space-y-2">
-                              <h4 className="font-alexandria font-bold text-white text-sm sm:text-base">كيف يمكنني التواصل مع المحاضر في حال واجهتني مشكلة؟</h4>
-                              <p className="text-zinc-400 text-xs sm:text-sm leading-relaxed">يوجد مجتمع مخصص للطلاب تحت كل درس ومجموعات مجتمع الدعم الفني المباشر لحل المشاكل والإجابة على أي استفسار.</p>
+                            <div className="bg-slate-50 border border-zinc-200/60 rounded-2xl p-5 space-y-2">
+                              <h4 className="font-sans font-bold text-zinc-900 text-sm sm:text-base">كيف يمكنني التواصل مع المحاضر في حال واجهتني مشكلة؟</h4>
+                              <p className="text-zinc-500 text-xs sm:text-sm leading-relaxed">يوجد مجتمع مخصص للطلاب تحت كل درس ومجموعات مجتمع الدعم الفني المباشر لحل المشاكل والإجابة على أي استفسار.</p>
                             </div>
                           </div>
                         </motion.div>
@@ -1123,24 +1123,24 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                 initial={{ opacity: 0, y: 40 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.15 }}
-                className="lg:col-span-4 hidden lg:block bg-[#0a0a0f] border border-white/5 rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden lg:sticky lg:top-28"
+                className="lg:col-span-4 hidden lg:block bg-slate-50 border border-zinc-200/60 rounded-3xl p-6 sm:p-8 shadow-sm border border-zinc-200/60 relative overflow-hidden lg:sticky lg:top-28"
               >
-                <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-transparent via-[#D6004B] to-transparent animate-pulse" />
+                <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-transparent via-[#1D4ED8] to-transparent animate-pulse" />
                 
-                <span className="text-[10px] text-zinc-500 font-bold block uppercase tracking-widest mb-2 font-alexandria">
+                <span className="text-[10px] text-zinc-500 font-bold block uppercase tracking-widest mb-2 font-sans">
                   {isEnrolled ? "بوابة الطالب" : "انضم للدورة الآن"}
                 </span>
 
                 {isEnrolled ? (
                   <div className="space-y-4 py-4">
-                    <div className="flex items-center gap-2.5 text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-4 py-3.5 rounded-2xl text-xs font-bold justify-center font-cairo">
+                    <div className="flex items-center gap-2.5 text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-4 py-3.5 rounded-2xl text-xs font-bold justify-center font-sans">
                       <CheckCircle2 className="w-5 h-5" />
                       <span>حسابك مفعل ومسجل في القسم</span>
                     </div>
 
                     <Link
                       href={`/learn/${course.slug}/${firstLessonSlug}`}
-                      className="w-full h-14 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-bold text-base shadow-[0_10px_30px_rgba(16,185,129,0.3)] transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer font-alexandria"
+                      className="w-full h-14 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-bold text-base shadow-[0_10px_30px_rgba(16,185,129,0.3)] transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer font-sans"
                     >
                       <span>ادخل مشغل الدروس الفنية</span>
                       <ArrowLeft className="w-5 h-5 rtl:rotate-180" />
@@ -1148,24 +1148,24 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                   </div>
                 ) : (
                   <div className="space-y-6">
-                    <div className="flex flex-col items-center justify-center text-center gap-2 mb-4 bg-white/[0.02] border border-white/5 rounded-2xl p-4">
-                      <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest font-alexandria">استثمار الانضمام للدورة</span>
+                    <div className="flex flex-col items-center justify-center text-center gap-2 mb-4 bg-zinc-50/70 border border-zinc-200/60 rounded-2xl p-4">
+                      <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest font-sans">استثمار الانضمام للدورة</span>
                       <div className="flex items-baseline gap-2 justify-center flex-wrap">
-                        <span className="text-4xl sm:text-5xl font-alexandria font-black text-white tracking-tight">
+                        <span className="text-4xl sm:text-5xl font-sans font-black text-zinc-900 tracking-tight">
                           {coursePricing ? (coursePricing.price === 0 ? "مجاني" : formatPrice(coursePricing.price, currency)) : ""}
                         </span>
                       </div>
                       {coursePricing && coursePricing.original_price > coursePricing.price && (
-                        <div className="flex items-center gap-2 justify-center text-xs font-cairo">
-                          <span className="text-zinc-500 line-through font-alexandria">{formatPrice(coursePricing.original_price, currency)}</span>
+                        <div className="flex items-center gap-2 justify-center text-xs font-sans">
+                          <span className="text-zinc-500 line-through font-cairo">{formatPrice(coursePricing.original_price, currency)}</span>
                           <span className="text-zinc-500 font-medium">بدلاً من</span>
-                          <span className="text-[10px] text-emerald-400 font-bold bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-md animate-pulse">
+                          <span className="text-[10px] text-emerald-400 font-bold bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-xl animate-pulse">
                             وفر {coursePricing.discount_pct}%
                           </span>
                         </div>
                       )}
                       {course.price > 0 && course.enable_gateway_fee !== false && (
-                        <p className="text-[10px] text-zinc-500 text-center leading-relaxed font-cairo mt-1">
+                        <p className="text-[10px] text-zinc-500 text-center leading-relaxed font-sans mt-1">
                           * قد يتم إضافة رسوم معالجة دفع بسيطة أثناء إتمام الطلب.
                         </p>
                       )}
@@ -1178,13 +1178,13 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                           console.log('[CTA_CLICKED]');
                           handleInitiateCheckout();
                         }}
-                        className="primary-hero-cta w-full h-14 bg-gradient-to-r from-[#D6004B] via-[#ff1d6b] to-[#D6004B] text-white rounded-2xl font-black text-lg shadow-[0_10px_30px_rgba(214,0,75,0.4)] transition-all flex items-center justify-center gap-2.5 active:scale-98 cursor-pointer font-alexandria animate-pulse-glow"
+                        className="primary-hero-cta w-full h-14 bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-2xl font-black text-lg shadow-[0_10px_30px_rgba(29, 78, 216,0.4)] transition-all flex items-center justify-center gap-2.5 active:scale-98 cursor-pointer font-sans animate-pulse-glow"
                       >
                         <span>{ctaPrimary}</span>
                         <ArrowLeft className="w-5 h-5 rtl:rotate-180" />
                       </Link>
 
-                      <div className="flex items-center justify-center gap-2 text-zinc-500 text-xs font-cairo">
+                      <div className="flex items-center justify-center gap-2 text-zinc-500 text-xs font-sans">
                         <ShieldCheck className="w-4 h-4 text-emerald-500" />
                         <span>دفع مشفر بالكامل وضمان حماية مطلق</span>
                       </div>
@@ -1192,17 +1192,17 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                   </div>
                 )}
 
-                <div className="border-t border-white/5 my-6 pt-6 space-y-4 text-xs font-bold text-zinc-400 font-cairo">
+                <div className="border-t border-zinc-200/60 my-6 pt-6 space-y-4 text-xs font-bold text-zinc-500 font-sans">
                   <div className="flex items-start gap-3">
-                    <CheckCircle2 className="w-4 h-4 text-[#D6004B] shrink-0 mt-0.5" />
+                    <CheckCircle2 className="w-4 h-4 text-[#1D4ED8] shrink-0 mt-0.5" />
                     <span>إمكانية الوصول للمحاضرات مدى الحياة</span>
                   </div>
                   <div className="flex items-start gap-3">
-                    <CheckCircle2 className="w-4 h-4 text-[#D6004B] shrink-0 mt-0.5" />
+                    <CheckCircle2 className="w-4 h-4 text-[#1D4ED8] shrink-0 mt-0.5" />
                     <span>تحديثات مستمرة وملفات العمل متضمنة</span>
                   </div>
                   <div className="flex items-start gap-3">
-                    <Award className="w-4 h-4 text-[#D6004B] shrink-0 mt-0.5" />
+                    <Award className="w-4 h-4 text-[#1D4ED8] shrink-0 mt-0.5" />
                     <span>شهادة إكمال رقمية بكود QR بعد الإنجاز</span>
                   </div>
                 </div>
@@ -1215,19 +1215,19 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
         {/* ── Student Showcase Videos Infinite Loop Marquee ───────────────────────────── */}
         {course.showcase_videos && course.showcase_videos.length > 0 && (
           <section className="container mx-auto px-4 max-w-6xl mb-16 space-y-6">
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-2 border-b border-white/5 pb-4">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-2 border-b border-zinc-200/60 pb-4">
               <div>
-                <h3 className="text-xl sm:text-2xl font-alexandria font-black text-white flex items-center gap-2 justify-start">
-                  <Sparkles className="w-5 h-5 text-[#D6004B] animate-pulse" />
+                <h3 className="text-xl sm:text-2xl font-sans font-black text-zinc-900 flex items-center gap-2 justify-start">
+                  <Sparkles className="w-5 h-5 text-[#1D4ED8] animate-pulse" />
                   شاهد تجارب وقصص نجاح طلابنا واقعياً
                 </h3>
-                <p className="text-zinc-400 text-xs sm:text-sm font-cairo">اضغط على أي فيديو لمشاهدته وتكبير العرض (أبعاد 9:16)</p>
+                <p className="text-zinc-500 text-xs sm:text-sm font-sans">اضغط على أي فيديو لمشاهدته وتكبير العرض (أبعاد 9:16)</p>
               </div>
             </div>
             
             <div dir="ltr" className="w-full overflow-hidden relative pt-2">
-              <div className="absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-[#0a0a0f] to-transparent z-20 pointer-events-none" />
-              <div className="absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-[#0a0a0f] to-transparent z-20 pointer-events-none" />
+              <div className="absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-white to-transparent z-20 pointer-events-none" />
+              <div className="absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-white to-transparent z-20 pointer-events-none" />
               
               <div className="flex gap-6 animate-marquee-ltr py-2">
                 {marqueeVideos.map((vid: any, idx: number) => (
@@ -1246,26 +1246,26 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
         {/* Smart Call-To-Action Banner (Yellow Box / New Premium Section) */}
         {!isEnrolled && (
           <section className="container mx-auto px-4 max-w-6xl mb-16">
-            <div className="relative bg-gradient-to-br from-zinc-900 via-[#0a0a0f] to-zinc-950 border border-white/10 rounded-[2.5rem] p-8 sm:p-12 overflow-hidden shadow-2xl flex flex-col lg:flex-row items-center justify-between gap-8">
+            <div className="relative bg-gradient-to-br from-zinc-900 via-white to-zinc-950 border border-zinc-200 rounded-[2.5rem] p-8 sm:p-12 overflow-hidden shadow-sm border border-zinc-200/60 flex flex-col lg:flex-row items-center justify-between gap-8">
               {/* background glows */}
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[250px] bg-[#D6004B]/10 rounded-full blur-[80px] pointer-events-none" />
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[250px] bg-[#1D4ED8]/10 rounded-full blur-[80px] pointer-events-none" />
               <div className="absolute -top-10 -right-10 w-40 h-40 bg-orange-500/5 rounded-full blur-3xl pointer-events-none" />
               
               <div className="space-y-4 max-w-2xl text-right z-10">
-                <span className="inline-flex items-center gap-1.5 bg-[#D6004B]/10 border border-[#D6004B]/20 text-[#D6004B] px-3.5 py-1.5 rounded-full text-xs font-bold font-alexandria">
+                <span className="inline-flex items-center gap-1.5 bg-[#1D4ED8]/10 border border-[#1D4ED8]/20 text-[#1D4ED8] px-3.5 py-1.5 rounded-full text-xs font-bold font-sans">
                   <Sparkles className="w-3.5 h-3.5 animate-pulse" />
                   <span>فرصة محدودة للتسجيل</span>
                 </span>
                 
-                <h3 className="text-xl sm:text-3xl font-alexandria font-black text-white leading-tight">
+                <h3 className="text-xl sm:text-3xl font-sans font-black text-zinc-900 leading-tight">
                   هذه فرصتك الحقيقية للاشتراك واحتراف هذا المجال!
                 </h3>
                 
-                <p className="text-zinc-400 text-xs sm:text-sm font-cairo leading-relaxed">
+                <p className="text-zinc-500 text-xs sm:text-sm font-sans leading-relaxed">
                   انضم اليوم إلى مئات المبدعين الذين غيروا مسارهم المهني وبدأوا بإنتاج قصص ومحتوى احترافي باستخدام أقوى تقنيات الذكاء الاصطناعي التوليدي.
                 </p>
 
-                <div className="flex flex-wrap gap-4 pt-2 text-xs text-zinc-300 font-bold font-cairo">
+                <div className="flex flex-wrap gap-4 pt-2 text-xs text-zinc-700 font-bold font-sans">
                   <div className="flex items-center gap-1.5">
                     <Check className="w-4 h-4 text-emerald-500" />
                     <span>وصول كامل مدى الحياة</span>
@@ -1281,31 +1281,31 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                 </div>
               </div>
 
-              <div className="bg-white/[0.02] border border-white/5 p-6 sm:p-8 rounded-3xl flex flex-col items-center justify-center shrink-0 w-full sm:w-[320px] text-center z-10 relative">
+              <div className="bg-zinc-50/70 border border-zinc-200/60 p-6 sm:p-8 rounded-3xl flex flex-col items-center justify-center shrink-0 w-full sm:w-[320px] text-center z-10 relative">
                 <div className="absolute inset-0 bg-grid-lines mask-radial-faded opacity-20 pointer-events-none" />
                 
                 {coursePricing && coursePricing.original_price > 0 && (
-                  <span className="text-xs sm:text-sm text-zinc-500 line-through mb-1 font-alexandria">
+                  <span className="text-xs sm:text-sm text-zinc-500 line-through mb-1 font-sans">
                     {formatPrice(coursePricing.original_price, currency)}
                   </span>
                 )}
                 
                 <div className="flex items-baseline gap-2 mb-2">
-                  <span className="text-3xl sm:text-4xl font-alexandria font-black text-white">
+                  <span className="text-3xl sm:text-4xl font-sans font-black text-zinc-900">
                     {coursePricing ? (coursePricing.price === 0 ? "مجاني" : formatPrice(coursePricing.price, currency)) : ""}
                   </span>
                   {coursePricing && coursePricing.original_price > 0 && (
-                    <span className="text-xs text-emerald-400 font-bold bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-md">
+                    <span className="text-xs text-emerald-400 font-bold bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-xl">
                       وفر {Math.round(((coursePricing.original_price - coursePricing.price) / coursePricing.original_price) * 100)}%
                     </span>
                   )}
                 </div>
                 {course.price > 0 && course.enable_gateway_fee !== false && (
-                  <p className="text-[10px] text-zinc-500 text-center leading-relaxed font-cairo mb-3 -mt-1">
+                  <p className="text-[10px] text-zinc-500 text-center leading-relaxed font-sans mb-3 -mt-1">
                     * قد يتم إضافة رسوم معالجة دفع بسيطة أثناء إتمام الطلب.
                   </p>
                 )}
-                <p className="text-[10px] text-zinc-500 font-medium font-cairo mb-6">احصل على السعر المخفض فوراً اليوم</p>
+                <p className="text-[10px] text-zinc-500 font-medium font-sans mb-6">احصل على السعر المخفض فوراً اليوم</p>
 
                 <Link
                   href={course.price === 0 ? `/learn/${course.slug}/${firstLessonSlug}` : `/checkout/${course.id}`}
@@ -1313,7 +1313,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                     console.log('[CTA_CLICKED]');
                     handleInitiateCheckout();
                   }}
-                  className="primary-hero-cta w-full h-12 bg-[#D6004B] hover:bg-[#b0003d] text-white rounded-2xl font-bold text-sm shadow-[0_10px_25px_rgba(214,0,75,0.3)] transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer font-alexandria"
+                  className="primary-hero-cta w-full h-12 bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-2xl font-bold text-sm shadow-[0_10px_25px_rgba(29, 78, 216,0.3)] transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer font-sans"
                 >
                   <span>{ctaPrimary}</span>
                   <ArrowLeft className="w-4 h-4 rtl:rotate-180" />
@@ -1321,7 +1321,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                 {course.price > 0 && (
                   <button
                     onClick={handleAddToCart}
-                    className="primary-hero-cta w-full mt-2 h-12 bg-white/5 hover:bg-white/10 text-white rounded-2xl font-bold text-sm border border-white/10 transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer font-alexandria"
+                    className="primary-hero-cta w-full mt-2 h-12 bg-zinc-100/40 hover:bg-zinc-100/80 text-zinc-900 rounded-2xl font-bold text-sm border border-zinc-200 transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer font-sans"
                   >
                     <ShoppingCart className="w-4 h-4" />
                     <span>{ctaSecondary}</span>
@@ -1335,20 +1335,20 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
         {/* Smart Category Course Recommendations — Premium Redesign */}
         {recommendedCourses.length > 0 && (
           <section className="container mx-auto px-4 max-w-6xl mt-20 mb-8">
-            <div className="relative bg-gradient-to-b from-white/[0.02] to-transparent border border-white/5 rounded-[2.5rem] p-8 sm:p-12 overflow-hidden">
+            <div className="relative bg-gradient-to-b from-white/[0.02] to-transparent border border-zinc-200/60 rounded-[2.5rem] p-8 sm:p-12 overflow-hidden">
               {/* Background glow */}
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[400px] h-[200px] bg-[#D6004B]/5 rounded-full blur-[80px] pointer-events-none" />
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[400px] h-[200px] bg-[#1D4ED8]/5 rounded-full blur-[80px] pointer-events-none" />
               
               <div className="relative z-10 space-y-8">
                 <div className="text-center space-y-2">
-                  <span className="inline-flex items-center gap-1.5 bg-[#D6004B]/10 border border-[#D6004B]/20 text-[#D6004B] px-3.5 py-1.5 rounded-full text-[10px] font-bold font-alexandria">
+                  <span className="inline-flex items-center gap-1.5 bg-[#1D4ED8]/10 border border-[#1D4ED8]/20 text-[#1D4ED8] px-3.5 py-1.5 rounded-full text-[10px] font-bold font-sans">
                     <Sparkles className="w-3.5 h-3.5 animate-pulse" />
                     <span>أقسام مقترحة لك</span>
                   </span>
-                  <h3 className="text-xl sm:text-2xl font-alexandria font-black text-white">
+                  <h3 className="text-xl sm:text-2xl font-sans font-black text-zinc-900">
                     محتوى ذو صلة قد يعجبك
                   </h3>
-                  <p className="text-zinc-500 text-xs font-cairo max-w-md mx-auto">اكتشف المزيد من الأقسام التدريبية المميزة لتعزيز مهاراتك واحتراف مجالك</p>
+                  <p className="text-zinc-500 text-xs font-sans max-w-md mx-auto">اكتشف المزيد من الأقسام التدريبية المميزة لتعزيز مهاراتك واحتراف مجالك</p>
                 </div>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -1358,7 +1358,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                       <Link
                         key={item.id}
                         href={`/courses/${item.slug}`}
-                        className="group relative bg-[#09090e] border border-white/5 hover:border-[#D6004B]/30 rounded-2xl overflow-hidden shadow-2xl flex flex-col justify-between hover:-translate-y-2 transition-all duration-500 cursor-pointer"
+                        className="group relative bg-slate-50 border border-zinc-200/60 hover:border-[#1D4ED8]/30 rounded-2xl overflow-hidden shadow-sm border border-zinc-200/60 flex flex-col justify-between hover:-translate-y-2 transition-all duration-500 cursor-pointer"
                       >
                         {/* Image */}
                         <div className="relative aspect-video bg-zinc-950 overflow-hidden">
@@ -1369,20 +1369,20 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
                             />
                           ) : (
-                            <div className="absolute inset-0 bg-gradient-to-br from-[#12121c] to-[#09090e] flex items-center justify-center">
+                            <div className="absolute inset-0 bg-gradient-to-br from-white to-slate-50/60 border border-zinc-200/60 flex items-center justify-center">
                               <BookOpen className="w-10 h-10 text-zinc-800" />
                             </div>
                           )}
                           <div className="absolute inset-0 bg-gradient-to-t from-[#09090e] via-transparent to-transparent" />
                           <div className="absolute top-3 right-3 flex gap-2">
-                            <span className="bg-black/60 backdrop-blur-md border border-white/10 px-2.5 py-1 rounded-lg text-[9px] font-black text-[#D6004B] font-alexandria">
+                            <span className="bg-black/60 backdrop-blur-md border border-zinc-200 px-2.5 py-1 rounded-2xl text-[9px] font-black text-[#1D4ED8] font-sans">
                               {item.category}
                             </span>
                           </div>
                           {/* Play icon overlay */}
                           <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                            <div className="w-14 h-14 bg-[#D6004B]/90 backdrop-blur-xl rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(214,0,75,0.4)] border border-white/20">
-                              <Play className="w-6 h-6 text-white fill-current ml-0.5" />
+                            <div className="w-14 h-14 bg-[#1D4ED8]/90 backdrop-blur-xl rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(29, 78, 216,0.4)] border border-zinc-200">
+                              <Play className="w-6 h-6 text-zinc-900 fill-current ml-0.5" />
                             </div>
                           </div>
                         </div>
@@ -1390,39 +1390,39 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                         {/* Content */}
                         <div className="p-5 flex-grow flex flex-col justify-between space-y-4">
                           <div className="space-y-3">
-                            <div className="flex items-center gap-3 text-[10px] text-zinc-500 font-bold font-alexandria">
+                            <div className="flex items-center gap-3 text-[10px] text-zinc-500 font-bold font-sans">
                               <span className="flex items-center gap-1">
                                 <Clock className="w-3.5 h-3.5 text-orange-500" />
                                 {item.duration_hours} ساعة
                               </span>
-                              <span className="w-[1px] h-3 bg-white/10" />
+                              <span className="w-[1px] h-3 bg-zinc-100/80" />
                               <span className="flex items-center gap-1">
-                                <BookOpen className="w-3.5 h-3.5 text-[#D6004B]" />
+                                <BookOpen className="w-3.5 h-3.5 text-[#1D4ED8]" />
                                 {item.lessons_count} محاضرة
                               </span>
-                              <span className="w-[1px] h-3 bg-white/10" />
+                              <span className="w-[1px] h-3 bg-zinc-100/80" />
                               <span className="flex items-center gap-1">
                                 <Star className="w-3 h-3 text-yellow-400 fill-current" />
                                 5.0
                               </span>
                             </div>
 
-                            <h4 className="text-sm font-alexandria font-bold text-white group-hover:text-[#D6004B] transition-colors line-clamp-2 leading-snug">
+                            <h4 className="text-sm font-sans font-bold text-zinc-900 group-hover:text-[#1D4ED8] transition-colors line-clamp-2 leading-snug">
                               {item.title}
                             </h4>
                           </div>
 
-                          <div className="pt-3 border-t border-white/5 flex items-center justify-between">
+                          <div className="pt-3 border-t border-zinc-200/60 flex items-center justify-between">
                             <div className="flex items-center gap-2 flex-wrap">
-                              <span className="text-lg font-alexandria font-black text-white">
+                              <span className="text-lg font-sans font-black text-zinc-900">
                                 {itemPricing.price === 0 ? "مجاني" : formatPrice(itemPricing.price, currency)}
                               </span>
                               {itemPricing.original_price > itemPricing.price && (
-                                <span className="text-[10px] text-zinc-500 line-through font-alexandria">{formatPrice(itemPricing.original_price, currency)}</span>
+                                <span className="text-[10px] text-zinc-500 line-through font-sans">{formatPrice(itemPricing.original_price, currency)}</span>
                               )}
                             </div>
                             
-                            <div className="h-8 px-3.5 bg-[#D6004B]/10 hover:bg-[#D6004B] border border-[#D6004B]/20 hover:border-[#D6004B] text-[#D6004B] hover:text-white rounded-lg text-[10px] font-bold flex items-center justify-center gap-1 transition-all font-alexandria">
+                            <div className="h-8 px-3.5 bg-[#1D4ED8]/10 hover:bg-[#1D4ED8] border border-[#1D4ED8]/20 hover:border-[#1D4ED8] text-[#1D4ED8] hover:text-white rounded-2xl text-[10px] font-bold flex items-center justify-center gap-1 transition-all font-sans">
                               <span>عرض التفاصيل</span>
                               <ArrowLeft className="w-3 h-3 rtl:rotate-180" />
                             </div>
@@ -1498,13 +1498,13 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                 initial={{ scale: 0.9, y: 20 }}
                 animate={{ scale: 1, y: 0 }}
                 exit={{ scale: 0.9, y: 20 }}
-                className="relative w-full max-w-[340px] xs:max-w-[360px] aspect-[9/16] bg-[#07070a] border border-white/10 rounded-2xl overflow-hidden shadow-2xl"
+                className="relative w-full max-w-[340px] xs:max-w-[360px] aspect-[9/16] bg-[#07070a] border border-zinc-200 rounded-2xl overflow-hidden shadow-sm border border-zinc-200/60"
                 onClick={e => e.stopPropagation()}
               >
                 {/* Close Button */}
                 <button 
                   onClick={() => setActiveShowcaseVideo(null)}
-                  className="absolute top-4 right-4 z-[10000] p-2 bg-black/85 hover:bg-black text-white rounded-full transition-colors cursor-pointer border border-white/10"
+                  className="absolute top-4 right-4 z-[10000] p-2 bg-black/85 hover:bg-black text-zinc-900 rounded-full transition-colors cursor-pointer border border-zinc-200"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -1527,17 +1527,17 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                 initial={{ scale: 0.95, y: 20 }}
                 animate={{ scale: 1, y: 0 }}
                 exit={{ scale: 0.95, y: 20 }}
-                className="relative w-full max-w-4xl aspect-video bg-[#07070a] border border-white/10 rounded-3xl overflow-hidden shadow-2xl flex flex-col justify-between"
+                className="relative w-full max-w-4xl aspect-video bg-[#07070a] border border-zinc-200 rounded-3xl overflow-hidden shadow-sm border border-zinc-200/60 flex flex-col justify-between"
                 onClick={e => e.stopPropagation()}
               >
                 {/* Header title */}
-                <div className="absolute top-0 inset-x-0 h-16 bg-gradient-to-b from-black/80 to-transparent px-6 flex items-center justify-between text-white z-[10000] pointer-events-none select-none">
-                  <span className="font-alexandria font-bold text-xs sm:text-sm text-white/90 drop-shadow-md truncate max-w-md pointer-events-auto">
+                <div className="absolute top-0 inset-x-0 h-16 bg-gradient-to-b from-black/80 to-transparent px-6 flex items-center justify-between text-zinc-900 z-[10000] pointer-events-none select-none">
+                  <span className="font-sans font-bold text-xs sm:text-sm text-zinc-900/90 drop-shadow-md truncate max-w-md pointer-events-auto">
                     معاينة مجانية: {activePreviewLesson.title}
                   </span>
                   <button 
                     onClick={() => setActivePreviewLesson(null)}
-                    className="p-2 bg-black/80 hover:bg-black/95 text-white rounded-full transition-colors cursor-pointer border border-white/10 pointer-events-auto shadow-lg"
+                    className="p-2 bg-black/80 hover:bg-black/95 text-zinc-900 rounded-full transition-colors cursor-pointer border border-zinc-200 pointer-events-auto shadow-sm border border-zinc-200/60"
                   >
                     <X className="w-5 h-5" />
                   </button>
@@ -1568,12 +1568,12 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
               animate={{ opacity: 1, y: 0, x: "-50%" }}
               exit={{ opacity: 0, y: 15, x: "-50%" }}
               transition={{ duration: 0.3, ease: "easeInOut" }}
-              className="fixed bottom-6 left-1/2 w-[92%] max-w-[420px] bg-zinc-950/85 backdrop-blur-xl border border-white/[0.08] py-2.5 pl-3.5 pr-5 z-50 flex items-center justify-between lg:hidden gap-4 shadow-[0_0_30px_rgba(214,0,75,0.12),0_12px_40px_rgba(0,0,0,0.65)] rounded-full"
+              className="fixed bottom-6 left-1/2 w-[92%] max-w-[420px] bg-zinc-950/85 backdrop-blur-xl border border-white/[0.08] py-2.5 pl-3.5 pr-5 z-50 flex items-center justify-between lg:hidden gap-4 shadow-[0_0_30px_rgba(29, 78, 216,0.12),0_12px_40px_rgba(0,0,0,0.65)] rounded-full"
             >
               <div className="flex flex-col shrink-0 text-right">
-                <span className="text-[10px] text-zinc-400 font-bold font-cairo leading-none mb-1">استثمار الانضمام للدورة</span>
+                <span className="text-[10px] text-zinc-500 font-bold font-sans leading-none mb-1">استثمار الانضمام للدورة</span>
                 <div className="flex items-baseline gap-1.5 justify-end">
-                  <span className="text-base font-alexandria font-black text-[#D6004B]">
+                  <span className="text-base font-sans font-black text-[#1D4ED8]">
                     {coursePricing ? (coursePricing.price === 0 ? "مجاني" : formatPrice(coursePricing.price, currency)) : ""}
                   </span>
                   {coursePricing && coursePricing.original_price > coursePricing.price && (
@@ -1590,7 +1590,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                     console.log('[CTA_CLICKED]');
                     handleInitiateCheckout();
                   }}
-                  className="h-11 px-4 bg-gradient-to-r from-[#D6004B] to-[#ff1d6b] hover:from-[#ff1d6b] hover:to-[#D6004B] text-white rounded-full text-[11px] font-alexandria font-black flex items-center justify-center transition-all shadow-[0_4px_16px_rgba(214,0,75,0.35)] flex-grow active:scale-95 animate-pulse-glow whitespace-nowrap"
+                  className="h-11 px-4 bg-[#2563EB] hover:bg-[#1D4ED8] hover:from-[#ff1d6b] hover:to-[#1D4ED8] text-white rounded-full text-[11px] font-sans font-black flex items-center justify-center transition-all shadow-[0_4px_16px_rgba(29, 78, 216,0.35)] flex-grow active:scale-95 animate-pulse-glow whitespace-nowrap"
                 >
                   <span>
                     {course.price === 0 
@@ -1603,10 +1603,10 @@ export default function CourseDetailPage({ params }: { params: Promise<{ slug: s
                 {course.price > 0 && (
                   <button
                     onClick={handleAddToCart}
-                    className="h-11 w-11 shrink-0 bg-white/5 hover:bg-white/10 text-white rounded-full border border-white/10 transition-all flex items-center justify-center active:scale-95 hover:border-[#D6004B]/30 cursor-pointer"
+                    className="h-11 w-11 shrink-0 bg-zinc-100/40 hover:bg-zinc-100/80 text-zinc-900 rounded-full border border-zinc-200 transition-all flex items-center justify-center active:scale-95 hover:border-[#1D4ED8]/30 cursor-pointer"
                     title="إضافة إلى السلة"
                   >
-                    <ShoppingCart className="w-4 h-4 text-zinc-300" />
+                    <ShoppingCart className="w-4 h-4 text-zinc-700" />
                   </button>
                 )}
               </div>
@@ -1701,8 +1701,8 @@ function MobileCourseView({
           animation: bounce-subtle 3s ease-in-out infinite;
         }
         @keyframes pulse-glow {
-          0%, 100% { box-shadow: 0 0 15px rgba(214, 0, 75, 0.4); }
-          50% { box-shadow: 0 0 30px rgba(214, 0, 75, 0.7); }
+          0%, 100% { box-shadow: 0 0 15px rgba(29, 78, 216, 0.4); }
+          50% { box-shadow: 0 0 30px rgba(29, 78, 216, 0.7); }
         }
         .animate-pulse-glow {
           animation: pulse-glow 2s infinite;
@@ -1712,18 +1712,18 @@ function MobileCourseView({
 
       {/* 1. Title & Marketing Badges */}
       <div className="text-center pt-2 space-y-3">
-        <h1 className="text-xl sm:text-2xl font-alexandria font-black text-white leading-tight">
+        <h1 className="text-xl sm:text-2xl font-sans font-black text-zinc-900 leading-tight">
           {course.title}
         </h1>
         <div className="flex items-center justify-center gap-1.5 flex-wrap">
-          <span className="bg-[#D6004B]/10 border border-[#D6004B]/20 text-[#D6004B] text-[9px] font-black px-2 py-0.5 rounded-full font-cairo">الأكثر مبيعاً 🔥</span>
-          <span className="bg-white/5 border border-white/10 text-zinc-300 text-[9px] font-black px-2 py-0.5 rounded-full font-cairo">تفعيل تلقائي وفوري ⚡</span>
+          <span className="bg-[#1D4ED8]/10 border border-[#1D4ED8]/20 text-[#1D4ED8] text-[9px] font-black px-2 py-0.5 rounded-full font-sans">الأكثر مبيعاً 🔥</span>
+          <span className="bg-zinc-100/40 border border-zinc-200 text-zinc-700 text-[9px] font-black px-2 py-0.5 rounded-full font-cairo">تفعيل تلقائي وفوري ⚡</span>
           <span className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[9px] font-black px-2 py-0.5 rounded-full font-cairo">ضمان استرداد 🛡️</span>
         </div>
       </div>
 
       {/* 2. Video Player */}
-      <div className="aspect-video bg-[#0a0a0f] border border-white/5 rounded-2xl overflow-hidden relative shadow-2xl group w-full">
+      <div className="aspect-video bg-slate-50 border border-zinc-200/60 rounded-2xl overflow-hidden relative shadow-sm border border-zinc-200/60 group w-full">
         {previewVideoUrl ? (
           isEmbed ? (
             <div className="absolute inset-0 z-10 flex items-center justify-center bg-black">
@@ -1745,11 +1745,11 @@ function MobileCourseView({
                   <motion.div 
                     animate={{ scale: [1, 1.08, 1] }}
                     transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-                    className="relative w-14 h-14 bg-[#D6004B]/90 backdrop-blur-xl border-2 border-white/20 rounded-full flex items-center justify-center mb-3 shadow-[0_0_30px_rgba(214,0,75,0.5)] group-hover/unmute:shadow-[0_0_50px_rgba(214,0,75,0.7)] transition-shadow"
+                    className="relative w-14 h-14 bg-[#1D4ED8]/90 backdrop-blur-xl border-2 border-zinc-200 rounded-full flex items-center justify-center mb-3 shadow-[0_0_30px_rgba(29, 78, 216,0.5)] group-hover/unmute:shadow-[0_0_50px_rgba(29, 78, 216,0.7)] transition-shadow"
                   >
-                    <Play className="w-6 h-6 text-white fill-current ml-0.5" />
+                    <Play className="w-6 h-6 text-zinc-900 fill-current ml-0.5" />
                   </motion.div>
-                  <span className="relative text-[11px] font-cairo font-bold text-white/80 bg-black/50 backdrop-blur-md px-4 py-1.5 rounded-lg border border-white/10 group-hover/unmute:text-white transition-all flex items-center gap-1.5">
+                  <span className="relative text-[11px] font-sans font-bold text-zinc-800 bg-black/50 backdrop-blur-md px-4 py-1.5 rounded-2xl border border-zinc-200 group-hover/unmute:text-zinc-900 transition-all flex items-center gap-1.5">
                     <VolumeX className="w-3 h-3" />
                     اضغط لفتح الصوت
                   </span>
@@ -1765,7 +1765,7 @@ function MobileCourseView({
         ) : course.promo_video_id ? (
           /* Video is expected but URL is still loading — black placeholder */
           <div className="absolute inset-0 flex items-center justify-center bg-black">
-            <Loader2 className="w-7 h-7 text-[#D6004B] animate-spin" />
+            <Loader2 className="w-7 h-7 text-[#1D4ED8] animate-spin" />
           </div>
         ) : (
           <>
@@ -1787,10 +1787,10 @@ function MobileCourseView({
       {/* 3. Small Stats Grid */}
       <div className="grid grid-cols-4 gap-2">
          {/* Card 1: Duration */}
-         <div className="bg-[#0b0b12]/50 border border-white/5 p-2 rounded-xl flex flex-col items-center justify-center text-center hover:border-[#D6004B]/30 hover:bg-[#0b0b12]/70 transition-all select-none">
-            <Clock className="w-4 h-4 text-rose-500 mb-1 shrink-0" />
-            <span className="text-[9px] text-zinc-400 font-bold leading-none mb-0.5">المدة</span>
-            <span className="text-xs text-white font-alexandria font-bold leading-none">
+         <div className="bg-white/50 border border-zinc-200/60 p-2 rounded-2xl flex flex-col items-center justify-center text-center hover:border-[#1D4ED8]/30 hover:bg-white/70 transition-all select-none">
+            <Clock className="w-4 h-4 text-yellow-500 mb-1 shrink-0" />
+            <span className="text-[9px] text-zinc-500 font-bold leading-none mb-0.5">المدة</span>
+            <span className="text-xs text-zinc-900 font-sans font-bold leading-none">
               {course.duration_hours >= 1
                 ? `${course.duration_hours} س`
                 : course.duration_hours > 0
@@ -1801,44 +1801,44 @@ function MobileCourseView({
          </div>
 
          {/* Card 2: Lectures */}
-         <div className="bg-[#0b0b12]/50 border border-white/5 p-2 rounded-xl flex flex-col items-center justify-center text-center hover:border-[#D6004B]/30 hover:bg-[#0b0b12]/70 transition-all select-none">
-            <BookOpen className="w-4 h-4 text-rose-500 mb-1 shrink-0" />
-            <span className="text-[9px] text-zinc-400 font-bold leading-none mb-0.5">المحاضرات</span>
-            <span className="text-xs text-white font-alexandria font-bold leading-none">
+         <div className="bg-white/50 border border-zinc-200/60 p-2 rounded-2xl flex flex-col items-center justify-center text-center hover:border-[#1D4ED8]/30 hover:bg-white/70 transition-all select-none">
+            <BookOpen className="w-4 h-4 text-yellow-500 mb-1 shrink-0" />
+            <span className="text-[9px] text-zinc-500 font-bold leading-none mb-0.5">المحاضرات</span>
+            <span className="text-xs text-zinc-900 font-sans font-bold leading-none">
               {totalLessons > 0 ? totalLessons : course.lessons_count}
             </span>
          </div>
 
          {/* Card 3: Rating */}
-         <div className="bg-[#0b0b12]/50 border border-white/5 p-2 rounded-xl flex flex-col items-center justify-center text-center hover:border-[#D6004B]/30 hover:bg-[#0b0b12]/70 transition-all select-none">
+         <div className="bg-white/50 border border-zinc-200/60 p-2 rounded-2xl flex flex-col items-center justify-center text-center hover:border-[#1D4ED8]/30 hover:bg-white/70 transition-all select-none">
             <Star className="w-4 h-4 text-yellow-400 fill-current mb-1 shrink-0" />
-            <span className="text-[9px] text-zinc-400 font-bold leading-none mb-0.5">التقييم</span>
-            <span className="text-xs text-white font-alexandria font-bold leading-none">
+            <span className="text-[9px] text-zinc-500 font-bold leading-none mb-0.5">التقييم</span>
+            <span className="text-xs text-zinc-900 font-sans font-bold leading-none">
               {averageRating}
             </span>
          </div>
 
          {/* Card 4: Certificate */}
-         <div className="bg-[#0b0b12]/50 border border-white/5 p-2 rounded-xl flex flex-col items-center justify-center text-center hover:border-[#D6004B]/30 hover:bg-[#0b0b12]/70 transition-all select-none">
+         <div className="bg-white/50 border border-zinc-200/60 p-2 rounded-2xl flex flex-col items-center justify-center text-center hover:border-[#1D4ED8]/30 hover:bg-white/70 transition-all select-none">
             <Award className="w-4 h-4 text-emerald-500 mb-1 shrink-0" />
-            <span className="text-[9px] text-zinc-400 font-bold leading-none mb-0.5">الشهادة</span>
+            <span className="text-[9px] text-zinc-500 font-bold leading-none mb-0.5">الشهادة</span>
             <span className="text-[10px] text-emerald-400 font-black leading-none">إحترافية</span>
          </div>
       </div>
 
       {/* 4. Professional CTA */}
-      <div className="bg-gradient-to-br from-[#0e0e1a] to-[#07070d] border border-white/10 rounded-2xl p-5 shadow-[0_15px_50px_rgba(0,0,0,0.5)] relative overflow-hidden">
-         <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-transparent via-[#D6004B] to-transparent animate-pulse" />
+      <div className="bg-gradient-to-br from-white to-slate-50/60 border border-zinc-200/60 border border-zinc-200 rounded-2xl p-5 shadow-[0_15px_50px_rgba(0,0,0,0.04)] relative overflow-hidden">
+         <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-transparent via-[#1D4ED8] to-transparent animate-pulse" />
          
          {isEnrolled ? (
            <div className="space-y-3.5 text-center">
-             <div className="flex items-center gap-2.5 text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3.5 py-2.5 rounded-xl text-xs font-bold justify-center">
+             <div className="flex items-center gap-2.5 text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3.5 py-2.5 rounded-2xl text-xs font-bold justify-center">
                <CheckCircle2 className="w-5 h-5" />
                <span>حسابك مفعل ومسجل في القسم</span>
              </div>
              <Link
                href={`/learn/${course.slug}/${firstLessonSlug}`}
-               className="w-full h-13 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm shadow-[0_8px_20px_rgba(16,185,129,0.2)] transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer font-alexandria"
+               className="w-full h-13 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-bold text-sm shadow-[0_8px_20px_rgba(16,185,129,0.2)] transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer font-sans"
              >
                <span>ادخل مشغل الدروس الفنية</span>
                <ArrowLeft className="w-5 h-5 rtl:rotate-180" />
@@ -1847,24 +1847,24 @@ function MobileCourseView({
          ) : (
            <div className="space-y-5">
              <div className="flex items-center justify-between">
-               <span className="text-[10px] text-zinc-400 font-bold font-alexandria uppercase tracking-wider">سعر الاستثمار الحالي</span>
+               <span className="text-[10px] text-zinc-500 font-bold font-sans uppercase tracking-wider">سعر الاستثمار الحالي</span>
                {coursePricing && coursePricing.original_price > coursePricing.price && (
-                   <span className="text-xs text-zinc-500 line-through font-alexandria">بدلاً من {formatPrice(coursePricing.original_price, currency)}</span>
+                   <span className="text-xs text-zinc-500 line-through font-sans">بدلاً من {formatPrice(coursePricing.original_price, currency)}</span>
                 )}
              </div>
              
              <div className="flex items-baseline justify-between gap-2">
                <div className="flex items-baseline gap-2">
-                 <span className="text-2xl sm:text-3xl font-alexandria font-black text-white">
+                 <span className="text-2xl sm:text-3xl font-sans font-black text-zinc-900">
                     {coursePricing ? (coursePricing.price === 0 ? "مجاني" : formatPrice(coursePricing.price, currency)) : ""}
                  </span>
                  {coursePricing && coursePricing.original_price > coursePricing.price && (
-                    <span className="text-[10px] text-emerald-400 font-bold bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-md animate-pulse">
+                    <span className="text-[10px] text-emerald-400 font-bold bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-xl animate-pulse">
                        وفر {coursePricing.discount_pct}%
                     </span>
                   )}
                </div>
-               <span className="text-[8.5px] text-zinc-400">وصول كامل مدى الحياة</span>
+               <span className="text-[8.5px] text-zinc-500">وصول كامل مدى الحياة</span>
              </div>
 
              <Link
@@ -1873,7 +1873,7 @@ function MobileCourseView({
                  console.log('[CTA_CLICKED]');
                  onInitiateCheckout && onInitiateCheckout();
                }}
-               className="primary-hero-cta w-full h-14 bg-gradient-to-r from-[#D6004B] via-[#ff1d6b] to-[#D6004B] text-white rounded-xl font-black text-base sm:text-lg shadow-[0_10px_30px_rgba(214,0,75,0.4)] transition-all flex items-center justify-center gap-2.5 active:scale-98 cursor-pointer font-alexandria animate-pulse-glow"
+               className="primary-hero-cta w-full h-14 bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-2xl font-black text-base sm:text-lg shadow-[0_10px_30px_rgba(29, 78, 216,0.4)] transition-all flex items-center justify-center gap-2.5 active:scale-98 cursor-pointer font-sans animate-pulse-glow"
              >
                <span>{ctaPrimary}</span>
                <ArrowLeft className="w-4 h-4 rtl:rotate-180" />
@@ -1881,24 +1881,24 @@ function MobileCourseView({
               {course.price > 0 && onAddToCart && (
                 <button
                   onClick={onAddToCart}
-                  className="primary-hero-cta w-full mt-2 h-11 bg-white/5 hover:bg-white/10 text-white rounded-xl font-bold text-xs border border-white/10 transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer font-alexandria"
+                  className="primary-hero-cta w-full mt-2 h-11 bg-zinc-100/40 hover:bg-zinc-100/80 text-zinc-900 rounded-2xl font-bold text-xs border border-zinc-200 transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer font-sans"
                 >
                   <ShoppingCart className="w-4 h-4" />
                   <span>{ctaSecondary}</span>
                 </button>
               )}
 
-             <div className="flex justify-around pt-2 border-t border-white/5 text-[8.5px] text-zinc-400 font-bold font-alexandria">
+             <div className="flex justify-around pt-2 border-t border-zinc-200/60 text-[8.5px] text-zinc-500 font-bold font-sans">
                <div className="flex items-center gap-1">
-                 <CheckCircle2 className="w-3.5 h-3.5 text-[#D6004B]" />
+                 <CheckCircle2 className="w-3.5 h-3.5 text-[#1D4ED8]" />
                  <span>تحديثات مستمرة</span>
                </div>
                <div className="flex items-center gap-1">
-                 <CheckCircle2 className="w-3.5 h-3.5 text-[#D6004B]" />
+                 <CheckCircle2 className="w-3.5 h-3.5 text-[#1D4ED8]" />
                  <span>ملفات العمل</span>
                </div>
                <div className="flex items-center gap-1">
-                 <CheckCircle2 className="w-3.5 h-3.5 text-[#D6004B]" />
+                 <CheckCircle2 className="w-3.5 h-3.5 text-[#1D4ED8]" />
                  <span>ضمان استرجاع</span>
                </div>
              </div>
@@ -1907,9 +1907,9 @@ function MobileCourseView({
       </div>
 
       {/* 5. Mobile Tabbed Content Box */}
-      <div className="bg-[#09090e] border border-white/5 rounded-2xl p-4 space-y-4">
+      <div className="bg-slate-50 border border-zinc-200/60 rounded-2xl p-4 space-y-4">
          {/* Tab switches: scrollable on mobile to fit all 5 tabs nicely */}
-         <div className="flex items-center justify-between overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] border-b border-white/5 pb-2 w-full gap-1 sm:gap-2">
+         <div className="flex items-center justify-between overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] border-b border-zinc-200/60 pb-2 w-full gap-1 sm:gap-2">
             {[
               { id: 'overview', label: 'الوصف', icon: FileText },
               { id: 'curriculum', label: 'المنهج', icon: BookOpen },
@@ -1924,16 +1924,16 @@ function MobileCourseView({
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as any)}
                   className={cn(
-                    "flex flex-col items-center justify-center gap-1 py-2 px-2.5 transition-all relative cursor-pointer font-alexandria font-bold text-xs shrink-0 select-none",
-                    isActive ? "text-[#D6004B]" : "text-zinc-400 hover:text-white"
+                    "flex flex-col items-center justify-center gap-1 py-2 px-2.5 transition-all relative cursor-pointer font-sans font-bold text-xs shrink-0 select-none",
+                    isActive ? "text-[#1D4ED8]" : "text-zinc-500 hover:text-zinc-900"
                   )}
                 >
-                  <TabIcon className={cn("w-4.5 h-4.5 mb-0.5", isActive ? "text-[#D6004B]" : "text-zinc-500")} />
+                  <TabIcon className={cn("w-4.5 h-4.5 mb-0.5", isActive ? "text-[#1D4ED8]" : "text-zinc-500")} />
                   <span className="text-[10px]">{tab.label}</span>
                   {isActive && (
                     <motion.div 
                       layoutId="activeTabIndicatorMobile" 
-                      className="absolute bottom-0 h-[2.5px] bg-[#D6004B] rounded-full w-8" 
+                      className="absolute bottom-0 h-[2.5px] bg-[#1D4ED8] rounded-full w-8" 
                       transition={{ type: "spring", stiffness: 380, damping: 30 }}
                     />
                   )}
@@ -1955,24 +1955,24 @@ function MobileCourseView({
                >
                  {/* Course Description */}
                  {course.description ? (
-                   <div className="text-zinc-300 font-cairo text-xs leading-[1.7] [&_p]:mb-3 [&_p]:leading-[1.7]" dangerouslySetInnerHTML={{ __html: course.description }} />
+                   <div className="text-zinc-700 font-sans text-xs leading-[1.7] [&_p]:mb-3 [&_p]:leading-[1.7]" dangerouslySetInnerHTML={{ __html: course.description }} />
                  ) : (
-                   <p className="text-zinc-400 font-cairo text-xs leading-[1.8]">هذا المسار يحتوي على شرح مفصل وتطبيق شامل لمهارات صناعة المحتوى بالذكاء الاصطناعي وإنتاج الفيديو الإبداعي بأقوى الأدوات الرقمية.</p>
+                   <p className="text-zinc-500 font-sans text-xs leading-[1.8]">هذا المسار يحتوي على شرح مفصل وتطبيق شامل لمهارات صناعة المحتوى بالذكاء الاصطناعي وإنتاج الفيديو الإبداعي بأقوى الأدوات الرقمية.</p>
                  )}
 
                  {/* Checklist: What You'll Learn */}
                  {course.what_will_learn && course.what_will_learn.length > 0 && (
-                   <div className="bg-white/[0.02] backdrop-blur-md border border-white/10 rounded-2xl p-4 space-y-4 shadow-xl relative overflow-hidden">
+                   <div className="bg-zinc-50/70 backdrop-blur-md border border-zinc-200 rounded-2xl p-4 space-y-4 shadow-sm border border-zinc-200/60 relative overflow-hidden">
                      <div className="absolute -top-5 -right-5 w-20 h-20 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none" />
-                     <h3 className="text-xs font-alexandria font-bold text-white flex items-center gap-2 relative z-10">
+                     <h3 className="text-xs font-sans font-bold text-zinc-900 flex items-center gap-2 relative z-10">
                        <CheckCircle2 className="w-4 h-4 text-emerald-500" />
                        ماذا ستتعلم وتنجز عملياً؟
                      </h3>
                      <div className="flex flex-col gap-2 relative z-10">
                        {course.what_will_learn.map((feat, fIdx) => (
-                         <div key={fIdx} className="flex items-start gap-2 bg-white/[0.01] border border-white/[0.03] p-2.5 rounded-xl">
+                         <div key={fIdx} className="flex items-start gap-2 bg-zinc-50/40 border border-white/[0.03] p-2.5 rounded-2xl">
                            <Check className="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" />
-                           <span className="text-zinc-300 text-xs leading-relaxed">{feat}</span>
+                           <span className="text-zinc-700 text-xs leading-relaxed">{feat}</span>
                          </div>
                        ))}
                      </div>
@@ -1981,12 +1981,12 @@ function MobileCourseView({
 
                  {/* Course Requirements */}
                  {course.requirements && course.requirements.length > 0 && (
-                   <div className="bg-[#050508] border border-white/5 rounded-2xl p-4 space-y-3">
-                     <h3 className="text-xs font-alexandria font-bold text-white flex items-center gap-2">
-                       <AlertCircle className="w-4 h-4 text-rose-500" />
+                   <div className="bg-white border border-zinc-200/60 rounded-2xl p-4 space-y-3">
+                     <h3 className="text-xs font-sans font-bold text-zinc-900 flex items-center gap-2">
+                       <AlertCircle className="w-4 h-4 text-yellow-500" />
                        متطلبات البدء في القسم
                      </h3>
-                     <ul className="space-y-2 text-xs text-zinc-400 list-disc pr-4">
+                     <ul className="space-y-2 text-xs text-zinc-500 list-disc pr-4">
                        {course.requirements.map((req, rIdx) => (
                          <li key={rIdx} className="leading-relaxed">{req}</li>
                        ))}
@@ -1996,16 +1996,16 @@ function MobileCourseView({
 
                  {/* Target Audience */}
                  {course.who_is_for && course.who_is_for.length > 0 && (
-                   <div className="bg-[#050508] border border-white/5 rounded-2xl p-4 space-y-3">
-                     <h3 className="text-xs font-alexandria font-bold text-white flex items-center gap-2">
+                   <div className="bg-white border border-zinc-200/60 rounded-2xl p-4 space-y-3">
+                     <h3 className="text-xs font-sans font-bold text-zinc-900 flex items-center gap-2">
                        <Users className="w-4 h-4 text-blue-500" />
                        من هو الفرد المستهدف؟
                      </h3>
                      <div className="flex flex-col gap-2">
                        {course.who_is_for.map((aud, aIdx) => (
-                         <div key={aIdx} className="flex items-center gap-2 bg-white/[0.01] border border-white/[0.03] p-3 rounded-xl">
+                         <div key={aIdx} className="flex items-center gap-2 bg-zinc-50/40 border border-white/[0.03] p-3 rounded-2xl">
                            <div className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0" />
-                           <span className="text-zinc-300 text-xs">{aud}</span>
+                           <span className="text-zinc-700 text-xs">{aud}</span>
                          </div>
                        ))}
                      </div>
@@ -2022,8 +2022,8 @@ function MobileCourseView({
                  exit={{ opacity: 0, y: -10 }}
                  className="space-y-4"
                >
-                 <div className="flex flex-col gap-1 border-b border-white/5 pb-2">
-                   <h3 className="text-xs font-alexandria font-bold text-white">منهج الوحدات والمواضيع الدراسية</h3>
+                 <div className="flex flex-col gap-1 border-b border-zinc-200/60 pb-2">
+                   <h3 className="text-xs font-sans font-bold text-zinc-900">منهج الوحدات والمواضيع الدراسية</h3>
                    <span className="text-[9.5px] text-zinc-500 font-bold">{sections.length} وحدات رئيسية • {totalLessons} محاضرة شاملة</span>
                  </div>
 
@@ -2038,19 +2038,19 @@ function MobileCourseView({
                        return (
                          <div 
                            key={mod.id}
-                           className="bg-[#050508] border border-white/5 rounded-xl overflow-hidden transition-all duration-300"
+                           className="bg-white border border-zinc-200/60 rounded-2xl overflow-hidden transition-all duration-300"
                          >
                            <button
                              onClick={() => setOpenModuleIndex(isOpen ? null : index)}
-                             className="w-full px-4 py-3 flex items-center justify-between gap-3 font-bold text-xs text-white hover:bg-white/[0.02] transition-colors"
+                             className="w-full px-4 py-3 flex items-center justify-between gap-3 font-bold text-xs text-zinc-900 hover:bg-zinc-50/70 transition-colors"
                            >
                              <span className="flex items-center gap-2 text-right">
-                               <BookOpen className="w-4 h-4 text-[#D6004B] shrink-0" />
+                               <BookOpen className="w-4 h-4 text-[#1D4ED8] shrink-0" />
                                <span>{mod.title}</span>
                              </span>
                              <div className="flex items-center gap-1.5 text-[9px] text-zinc-500 shrink-0">
                                <span>{mod.lessons.length} درس</span>
-                               <ChevronDown className={`w-4 h-4 text-zinc-400 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
+                               <ChevronDown className={`w-4 h-4 text-zinc-500 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
                              </div>
                            </button>
 
@@ -2061,7 +2061,7 @@ function MobileCourseView({
                                  animate={{ height: "auto", opacity: 1 }}
                                  exit={{ height: 0, opacity: 0 }}
                                  transition={{ duration: 0.2 }}
-                                 className="overflow-hidden border-t border-white/5 bg-black/40"
+                                 className="overflow-hidden border-t border-zinc-200/60 bg-black/40"
                                >
                                  <div className="py-2 px-4 divide-y divide-white/5">
                                    {mod.lessons.map((lesson) => {
@@ -2077,16 +2077,16 @@ function MobileCourseView({
                                             }
                                           }}
                                           className={`py-2.5 flex items-center justify-between gap-4 text-xs transition-all duration-200 ${
-                                            lesson.is_preview ? "cursor-pointer hover:bg-emerald-500/[0.02] px-2 -mx-2 rounded-xl" : ""
+                                            lesson.is_preview ? "cursor-pointer hover:bg-emerald-500/[0.02] px-2 -mx-2 rounded-2xl" : ""
                                           }`}
                                         >
                                           <div className="flex items-start gap-2.5 text-right min-w-0 flex-1">
                                             <PlayCircle className={`w-4 h-4 shrink-0 mt-0.5 ${
-                                              lesson.is_preview ? "text-emerald-400" : "text-[#D6004B]"
+                                              lesson.is_preview ? "text-emerald-400" : "text-[#1D4ED8]"
                                             }`} />
                                             <div className="flex flex-col min-w-0">
                                               <span className={`font-medium leading-relaxed truncate ${
-                                                lesson.is_preview ? "text-white font-bold" : "text-zinc-200"
+                                                lesson.is_preview ? "text-zinc-900 font-bold" : "text-zinc-800"
                                               }`}>{lesson.title}</span>
                                             </div>
                                           </div>
@@ -2124,16 +2124,16 @@ function MobileCourseView({
                  exit={{ opacity: 0, y: -10 }}
                  className="space-y-4"
                >
-                 <div className="flex items-center gap-2 border-b border-white/5 pb-2">
-                   <Award className="w-4 h-4 text-[#D6004B]" />
-                   <h3 className="text-xs font-alexandria font-bold text-white">الشهادة المهنية المعتمدة</h3>
+                 <div className="flex items-center gap-2 border-b border-zinc-200/60 pb-2">
+                   <Award className="w-4 h-4 text-[#1D4ED8]" />
+                   <h3 className="text-xs font-sans font-bold text-zinc-900">الشهادة المهنية المعتمدة</h3>
                  </div>
-                 <p className="text-zinc-400 text-xs leading-relaxed font-alexandria">
+                 <p className="text-zinc-500 text-xs leading-relaxed font-sans">
                    بمجرد إنتهائك من سماعك جميع محاضرات الدورة ستحصل على شهادة احترافية بإسمك من "جو سكول"، بحيث تعزز من فرص قبولك في أفضل الوظائف.
                  </p>
 
                  {course.certificate_bg_url ? (
-                    <div className="relative w-full aspect-[1.414/1] bg-[#07070a] border border-white/10 rounded-2xl overflow-hidden shadow-2xl flex items-center justify-center" style={{ containerType: 'inline-size' } as any}>
+                    <div className="relative w-full aspect-[1.414/1] bg-[#07070a] border border-zinc-200 rounded-2xl overflow-hidden shadow-sm border border-zinc-200/60 flex items-center justify-center" style={{ containerType: 'inline-size' } as any}>
                       <style dangerouslySetInnerHTML={{__html: `
                         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@700;800;900&family=Alexandria:wght@800;900&family=Alike&display=swap');
                       `}} />
@@ -2174,7 +2174,7 @@ function MobileCourseView({
                       </div>
                     </div>
                  ) : (
-                   <div className="w-full aspect-[1.414/1] bg-white/5 rounded-xl border border-dashed border-white/10 flex items-center justify-center">
+                   <div className="w-full aspect-[1.414/1] bg-zinc-100/40 rounded-2xl border border-dashed border-zinc-200 flex items-center justify-center">
                      <span className="text-zinc-500 font-bold text-xs">لا يوجد صورة لمعاينة الشهادة حالياً</span>
                    </div>
                  )}
@@ -2191,16 +2191,16 @@ function MobileCourseView({
                  exit={{ opacity: 0, y: -10 }}
                  className="space-y-4 text-right"
                >
-                 <div className="flex items-center gap-2 border-b border-white/5 pb-2">
-                   <User className="w-4 h-4 text-[#D6004B]" />
-                   <h3 className="text-xs font-alexandria font-bold text-white">المدرب</h3>
+                 <div className="flex items-center gap-2 border-b border-zinc-200/60 pb-2">
+                   <User className="w-4 h-4 text-[#1D4ED8]" />
+                   <h3 className="text-xs font-sans font-bold text-zinc-900">المدرب</h3>
                  </div>
                  
-                 <div className="flex flex-col items-center gap-4 bg-gradient-to-br from-[#0c0c12] to-[#060609] border border-white/5 rounded-2xl p-4 relative overflow-hidden shadow-xl text-center">
+                 <div className="flex flex-col items-center gap-4 bg-gradient-to-br from-white to-slate-50/60 border border-zinc-200/60 border border-zinc-200/60 rounded-2xl p-4 relative overflow-hidden shadow-sm border border-zinc-200/60 text-center">
                    {/* Decorative background glows */}
-                   <div className="absolute -top-10 -right-10 w-24 h-24 bg-[#D6004B]/5 rounded-full blur-2xl pointer-events-none" />
+                   <div className="absolute -top-10 -right-10 w-24 h-24 bg-[#1D4ED8]/5 rounded-full blur-2xl pointer-events-none" />
                    
-                   <div className="relative w-40 h-52 rounded-xl overflow-hidden border border-[#D6004B]/20 shadow-[0_0_20px_rgba(214,0,75,0.15)] shrink-0">
+                   <div className="relative w-40 h-52 rounded-2xl overflow-hidden border border-[#1D4ED8]/20 shadow-[0_0_20px_rgba(29, 78, 216,0.15)] shrink-0">
                      <img 
                        src="/instructor-youssef.jpg" 
                        alt="يوسف مصطفى" 
@@ -2210,12 +2210,12 @@ function MobileCourseView({
                    
                    <div className="space-y-3 w-full">
                      <div className="space-y-0.5 text-center">
-                       <span className="text-[8px] text-[#D6004B] font-black uppercase tracking-widest font-alexandria">مؤسس الأكاديمية</span>
-                       <h3 className="text-base font-alexandria font-black text-white">يوسف مصطفى</h3>
-                       <p className="text-[10px] text-zinc-400 font-bold font-alexandria">خبير وصانع محتوى بالذكاء الاصطناعي</p>
+                       <span className="text-[8px] text-[#1D4ED8] font-black uppercase tracking-widest font-sans">مؤسس الأكاديمية</span>
+                       <h3 className="text-base font-alexandria font-black text-zinc-900">يوسف مصطفى</h3>
+                       <p className="text-[10px] text-zinc-500 font-bold font-alexandria">خبير وصانع محتوى بالذكاء الاصطناعي</p>
                      </div>
                      
-                     <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3.5 text-zinc-300 font-alexandria text-xs leading-[1.8] text-right">
+                     <div className="bg-zinc-50/70 border border-zinc-200/60 rounded-2xl p-3.5 text-zinc-700 font-sans text-xs leading-[1.8] text-right">
                        <p>
                          خبير ومتخصص في صناعة المحتوى بالذكاء الاصطناعي لأكثر من 3 سنوات ومؤسس أكاديمية جو سكول التعليمية.
                        </p>
@@ -2226,12 +2226,12 @@ function MobileCourseView({
 
                      {/* Stats */}
                      <div className="grid grid-cols-2 gap-3 pt-1">
-                       <div className="bg-white/[0.01] border border-white/5 rounded-lg p-2.5 text-center">
-                         <span className="block text-[#D6004B] font-alexandria font-black text-sm">3+ سنوات</span>
+                       <div className="bg-zinc-50/40 border border-zinc-200/60 rounded-2xl p-2.5 text-center">
+                         <span className="block text-[#1D4ED8] font-sans font-black text-sm">3+ سنوات</span>
                          <span className="text-[8px] text-zinc-500 font-bold font-alexandria">الخبرة العملية</span>
                        </div>
-                       <div className="bg-white/[0.01] border border-white/5 rounded-lg p-2.5 text-center">
-                         <span className="block text-[#D6004B] font-alexandria font-black text-sm">2000+</span>
+                       <div className="bg-zinc-50/40 border border-zinc-200/60 rounded-2xl p-2.5 text-center">
+                         <span className="block text-[#1D4ED8] font-sans font-black text-sm">2000+</span>
                          <span className="text-[8px] text-zinc-500 font-bold font-alexandria">طالب متدرب</span>
                        </div>
                      </div>
@@ -2248,23 +2248,23 @@ function MobileCourseView({
                  exit={{ opacity: 0, y: -10 }}
                  className="space-y-3"
                >
-                 <div className="flex items-center gap-2 border-b border-white/5 pb-2">
-                   <HelpCircle className="w-4 h-4 text-[#D6004B]" />
-                   <h3 className="text-xs font-alexandria font-bold text-white">الأسئلة المتكررة</h3>
+                 <div className="flex items-center gap-2 border-b border-zinc-200/60 pb-2">
+                   <HelpCircle className="w-4 h-4 text-[#1D4ED8]" />
+                   <h3 className="text-xs font-sans font-bold text-zinc-900">الأسئلة المتكررة</h3>
                  </div>
 
                  <div className="space-y-2.5">
-                   <div className="bg-[#050508] border border-white/5 rounded-xl p-4 space-y-1.5">
-                     <h4 className="font-alexandria font-bold text-white text-[11px]">هل الكورس مسجل أم بث مباشر؟</h4>
-                     <p className="text-zinc-400 text-[10px] leading-relaxed font-alexandria">المحتوى بأكمله مسجل مسبقاً بجودة سينمائية فائقة حتى تتمكن من الدراسة والمراجعة في أي وقت وبالسرعة التي تفضلها مدى الحياة.</p>
+                   <div className="bg-white border border-zinc-200/60 rounded-2xl p-4 space-y-1.5">
+                     <h4 className="font-sans font-bold text-zinc-900 text-[11px]">هل الكورس مسجل أم بث مباشر؟</h4>
+                     <p className="text-zinc-500 text-[10px] leading-relaxed font-alexandria">المحتوى بأكمله مسجل مسبقاً بجودة سينمائية فائقة حتى تتمكن من الدراسة والمراجعة في أي وقت وبالسرعة التي تفضلها مدى الحياة.</p>
                    </div>
-                   <div className="bg-[#050508] border border-white/5 rounded-xl p-4 space-y-1.5">
-                     <h4 className="font-alexandria font-bold text-white text-[11px]">هل سأحصل على ملفات وقوالب العمل الجاهزة؟</h4>
-                     <p className="text-zinc-400 text-[10px] leading-relaxed font-alexandria">نعم بالكامل! كل محاضرة فنية تطبيقية تشتمل على الملفات الجاهزة للتنزيل والتصدير للعمل بها فوراً في مشاريعك الخاصة.</p>
+                   <div className="bg-white border border-zinc-200/60 rounded-2xl p-4 space-y-1.5">
+                     <h4 className="font-sans font-bold text-zinc-900 text-[11px]">هل سأحصل على ملفات وقوالب العمل الجاهزة؟</h4>
+                     <p className="text-zinc-500 text-[10px] leading-relaxed font-alexandria">نعم بالكامل! كل محاضرة فنية تطبيقية تشتمل على الملفات الجاهزة للتنزيل والتصدير للعمل بها فوراً في مشاريعك الخاصة.</p>
                    </div>
-                   <div className="bg-[#050508] border border-white/5 rounded-xl p-4 space-y-1.5">
-                     <h4 className="font-alexandria font-bold text-white text-[11px]">كيف يمكنني التواصل مع المحاضر في حال واجهتني مشكلة؟</h4>
-                     <p className="text-zinc-400 text-[10px] leading-relaxed font-alexandria">يوجد مجتمع مخصص للطلاب تحت كل درس ومجموعات مجتمع الدعم الفني المباشر لحل المشاكل والإجابة على أي استفسار.</p>
+                   <div className="bg-white border border-zinc-200/60 rounded-2xl p-4 space-y-1.5">
+                     <h4 className="font-sans font-bold text-zinc-900 text-[11px]">كيف يمكنني التواصل مع المحاضر في حال واجهتني مشكلة؟</h4>
+                     <p className="text-zinc-500 text-[10px] leading-relaxed font-alexandria">يوجد مجتمع مخصص للطلاب تحت كل درس ومجموعات مجتمع الدعم الفني المباشر لحل المشاكل والإجابة على أي استفسار.</p>
                    </div>
                  </div>
                </motion.div>
@@ -2276,14 +2276,14 @@ function MobileCourseView({
       {/* 6. Showcase Videos Loop (Marquee LTR) */}
       {course.showcase_videos && course.showcase_videos.length > 0 && (
         <div className="space-y-4 overflow-hidden py-4">
-           <h3 className="text-base font-alexandria font-black text-center text-white flex items-center gap-2 justify-center">
-             <Sparkles className="w-4 h-4 text-[#D6004B] animate-pulse" />
+           <h3 className="text-base font-sans font-black text-center text-zinc-900 flex items-center gap-2 justify-center">
+             <Sparkles className="w-4 h-4 text-[#1D4ED8] animate-pulse" />
              قصص نجاح وتجارب طلابنا
            </h3>
            
            <div dir="ltr" className="w-full overflow-hidden relative">
-              <div className="absolute inset-y-0 left-0 w-12 bg-gradient-to-r from-[#050505] to-transparent z-20 pointer-events-none" />
-              <div className="absolute inset-y-0 right-0 w-12 bg-gradient-to-l from-[#050505] to-transparent z-20 pointer-events-none" />
+              <div className="absolute inset-y-0 left-0 w-12 bg-gradient-to-r from-white to-transparent z-20 pointer-events-none" />
+              <div className="absolute inset-y-0 right-0 w-12 bg-gradient-to-l from-white to-transparent z-20 pointer-events-none" />
               
               <div className="flex gap-4 animate-marquee-ltr">
                 {marqueeVideos.map((vid: any, idx: number) => (
@@ -2301,19 +2301,19 @@ function MobileCourseView({
 
       {/* 7. Final Urgency CTA Reminder */}
       {!isEnrolled && (
-        <div className="relative bg-gradient-to-br from-[#12080c] via-[#090507] to-[#050508] border border-white/10 rounded-2xl p-5 overflow-hidden shadow-2xl text-center space-y-4">
-           <div className="absolute -top-10 -right-10 w-24 h-24 bg-[#D6004B]/10 rounded-full blur-2xl pointer-events-none" />
+        <div className="relative bg-gradient-to-br from-white to-slate-50/60 border border-zinc-200/60 border border-zinc-200 rounded-2xl p-5 overflow-hidden shadow-sm border border-zinc-200/60 text-center space-y-4">
+           <div className="absolute -top-10 -right-10 w-24 h-24 bg-[#1D4ED8]/10 rounded-full blur-2xl pointer-events-none" />
            
-           <span className="inline-flex items-center gap-1.5 bg-[#D6004B]/15 border border-[#D6004B]/20 text-[#D6004B] px-3 py-1 rounded-full text-[8.5px] font-bold font-alexandria">
+           <span className="inline-flex items-center gap-1.5 bg-[#1D4ED8]/15 border border-[#1D4ED8]/20 text-[#1D4ED8] px-3 py-1 rounded-full text-[8.5px] font-bold font-sans">
              <Sparkles className="w-3 h-3 animate-pulse" />
              <span>العرض ينتهي قريباً جداً</span>
            </span>
            
-           <h3 className="text-sm font-alexandria font-black text-white leading-tight">
+           <h3 className="text-sm font-sans font-black text-zinc-900 leading-tight">
              الخصم مؤقت وسيرجع الكورس لسعره الأصلي قريباً
            </h3>
            
-           <p className="text-zinc-400 text-[10px] font-cairo leading-relaxed">
+           <p className="text-zinc-500 text-[10px] font-sans leading-relaxed">
              ابدأ اليوم واستفد من هذا الاستثمار المميز لاحتراف صناعة المحتوى والذكاء الاصطناعي وبناء مستقبلك الإبداعي والمهني.
            </p>
            
@@ -2323,7 +2323,7 @@ function MobileCourseView({
                console.log('[CTA_CLICKED]');
                onInitiateCheckout && onInitiateCheckout();
              }}
-             className="primary-hero-cta w-full h-13 bg-gradient-to-r from-[#D6004B] via-[#ff1d6b] to-[#D6004B] text-white rounded-xl font-black text-sm sm:text-base shadow-[0_10px_25px_rgba(214,0,75,0.35)] transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer font-alexandria animate-pulse-glow"
+             className="primary-hero-cta w-full h-13 bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-2xl font-black text-sm sm:text-base shadow-[0_10px_25px_rgba(29, 78, 216,0.35)] transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer font-sans animate-pulse-glow"
            >
               <span>{ctaPrimary}</span>
              <ArrowLeft className="w-4 h-4 rtl:rotate-180" />
@@ -2332,9 +2332,9 @@ function MobileCourseView({
            {course.price > 0 && onAddToCart && (
              <button
                onClick={onAddToCart}
-               className="primary-hero-cta w-full mt-2.5 h-13 bg-white/5 hover:bg-white/10 text-white rounded-xl font-black text-sm border border-white/10 transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer font-alexandria"
+               className="primary-hero-cta w-full mt-2.5 h-13 bg-zinc-100/40 hover:bg-zinc-100/80 text-zinc-900 rounded-2xl font-black text-sm border border-zinc-200 transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer font-sans"
              >
-               <ShoppingCart className="w-4 h-4 text-zinc-300" />
+               <ShoppingCart className="w-4 h-4 text-zinc-700" />
                <span>{ctaSecondary}</span>
              </button>
            )}
@@ -2342,19 +2342,19 @@ function MobileCourseView({
       )}
 
       {/* 8. Small Custom Footer */}
-      <footer className="border-t border-white/5 pt-6 pb-24 flex flex-col items-center gap-4 text-center text-zinc-500 text-[9px] w-full">
+      <footer className="border-t border-zinc-200/60 pt-6 pb-24 flex flex-col items-center gap-4 text-center text-zinc-500 text-[9px] w-full">
          <Link href="/" className="flex items-center group">
            <img src="/logo-text.png" alt="JoeSchool" className="h-20 object-contain" />
          </Link>
          
          <div className="flex flex-wrap justify-center gap-3 font-bold">
-           <Link href="/privacy?tab=privacy" className="hover:text-white transition-colors">سياسة الخصوصية</Link>
+           <Link href="/privacy?tab=privacy" className="hover:text-zinc-900 transition-colors">سياسة الخصوصية</Link>
            <span>·</span>
-           <Link href="/privacy?tab=refund" className="hover:text-white transition-colors">سياسة الإسترجاع</Link>
+           <Link href="/privacy?tab=refund" className="hover:text-zinc-900 transition-colors">سياسة الإسترجاع</Link>
            <span>·</span>
-           <Link href="/privacy?tab=terms" className="hover:text-white transition-colors">الشروط والأحكام</Link>
+           <Link href="/privacy?tab=terms" className="hover:text-zinc-900 transition-colors">الشروط والأحكام</Link>
            <span>·</span>
-           <a href="mailto:support@joeschool.com" className="hover:text-white transition-colors">الدعم الفني</a>
+           <a href="mailto:support@joeschool.com" className="hover:text-zinc-900 transition-colors">الدعم الفني</a>
          </div>
 
          <div className="flex justify-center scale-90">

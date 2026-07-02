@@ -20,14 +20,14 @@ export default function SecuritySettings() {
   };
 
   return (
-    <div className="space-y-8 font-sans text-zinc-100 min-h-screen pb-16">
+    <div className="space-y-8 font-sans text-zinc-900 min-h-screen pb-16">
       
       {/* Header */}
-      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6 pb-6 border-b border-white/5">
+      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6 pb-6 border-b border-zinc-200/60">
         <div>
-          <h1 className="text-2xl font-black tracking-tight text-white flex items-center gap-3">
+          <h1 className="text-2xl font-black tracking-tight text-zinc-900 flex items-center gap-3">
             System Security & Auditing
-            <ShieldCheck className="w-6 h-6 text-rose-500" />
+            <ShieldCheck className="w-6 h-6 text-yellow-500" />
           </h1>
           <p className="text-zinc-500 text-xs mt-1">
             Monitor active sessions, administrator audit logs, and secure access configurations for JoeSchool.
@@ -39,17 +39,17 @@ export default function SecuritySettings() {
         
         {/* Sessions Control */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="rounded-2xl bg-[#09090e] border border-white/5 p-6 shadow-2xl space-y-6">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-2">
-              <Lock className="w-4 h-4 text-rose-500" />
+          <div className="rounded-2xl bg-slate-50 border border-zinc-200/60 p-6 shadow-sm border border-zinc-200/60 space-y-6">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-500 flex items-center gap-2">
+              <Lock className="w-4 h-4 text-yellow-500" />
               Active & Authorized Sessions
             </h3>
             
             <div className="space-y-4">
               {sessions.map((session) => (
-                <div key={session.id} className="p-4 rounded-xl bg-white/[0.01] border border-white/5 flex items-center justify-between">
+                <div key={session.id} className="p-4 rounded-2xl bg-zinc-50/40 border border-zinc-200/60 flex items-center justify-between">
                   <div>
-                    <h4 className="text-xs font-bold text-white">{session.device}</h4>
+                    <h4 className="text-xs font-bold text-zinc-900">{session.device}</h4>
                     <p className="text-[10px] text-zinc-500 mt-1 font-semibold">IP Address: {session.ip} · Activity: {session.date}</p>
                   </div>
                   {session.active ? (
@@ -70,19 +70,19 @@ export default function SecuritySettings() {
           </div>
 
           {/* Activity Log */}
-          <div className="rounded-2xl bg-[#09090e] border border-white/5 p-6 shadow-2xl space-y-6">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-2">
-              <Activity className="w-4 h-4 text-rose-500" />
+          <div className="rounded-2xl bg-slate-50 border border-zinc-200/60 p-6 shadow-sm border border-zinc-200/60 space-y-6">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-500 flex items-center gap-2">
+              <Activity className="w-4 h-4 text-yellow-500" />
               Secure Action Audit Log
             </h3>
             <div className="space-y-3">
               {activityLog.map((log, i) => (
-                <div key={i} className="flex justify-between items-center p-3.5 rounded-xl bg-white/[0.01] hover:bg-white/[0.02] transition-all border border-transparent hover:border-white/5">
+                <div key={i} className="flex justify-between items-center p-3.5 rounded-2xl bg-zinc-50/40 hover:bg-zinc-50/70 transition-all border border-transparent hover:border-zinc-200/60">
                   <div>
-                    <p className="text-xs font-bold text-white">{log.action}</p>
+                    <p className="text-xs font-bold text-zinc-900">{log.action}</p>
                     <p className="text-[10px] text-zinc-500 mt-1 font-semibold">By: {log.user} · IP Address: {log.ip}</p>
                   </div>
-                  <span className="text-[9px] text-zinc-400 font-bold font-mono">{log.date}</span>
+                  <span className="text-[9px] text-zinc-500 font-bold font-mono">{log.date}</span>
                 </div>
               ))}
             </div>
@@ -90,29 +90,29 @@ export default function SecuritySettings() {
         </div>
 
         {/* Permissions Side Card */}
-        <div className="rounded-2xl bg-[#09090e] border border-white/5 p-6 shadow-2xl flex flex-col justify-between h-fit">
+        <div className="rounded-2xl bg-slate-50 border border-zinc-200/60 p-6 shadow-sm border border-zinc-200/60 flex flex-col justify-between h-fit">
           <div className="space-y-6">
             <div>
-              <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">Access & Control Level</h3>
+              <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-500">Access & Control Level</h3>
               <p className="text-xs text-zinc-500 leading-relaxed mt-2 font-semibold">
                 Your current account holds full Super Admin capabilities. This grants permission to process payment intentions, trigger webhook deliveries, and execute database write operations.
               </p>
             </div>
             
             <div className="space-y-3">
-              <div className="flex justify-between items-center p-3 rounded-xl bg-white/[0.01] text-xs font-semibold">
+              <div className="flex justify-between items-center p-3 rounded-2xl bg-zinc-50/40 text-xs font-semibold">
                 <span className="text-zinc-500">2FA Security Status</span>
                 <span className="text-emerald-400 font-bold">Enabled & Verified</span>
               </div>
-              <div className="flex justify-between items-center p-3 rounded-xl bg-white/[0.01] text-xs font-semibold">
+              <div className="flex justify-between items-center p-3 rounded-2xl bg-zinc-50/40 text-xs font-semibold">
                 <span className="text-zinc-500">SSL Encrypted Channel</span>
-                <span className="text-zinc-300 font-bold">256-bit Encrypted</span>
+                <span className="text-zinc-700 font-bold">256-bit Encrypted</span>
               </div>
             </div>
           </div>
 
-          <div className="p-4 rounded-xl bg-rose-500/5 border border-rose-500/10 mt-8">
-            <p className="text-[10px] text-rose-400 leading-relaxed font-bold flex gap-1.5 items-start">
+          <div className="p-4 rounded-2xl bg-brand-500/5 border border-zinc-200/60 mt-8">
+            <p className="text-[10px] text-yellow-500 leading-relaxed font-bold flex gap-1.5 items-start">
               <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
               <span>SECURITY NOTICE: Never authenticate or manage settings from public, unencrypted connections.</span>
             </p>

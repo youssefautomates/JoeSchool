@@ -148,21 +148,21 @@ export function WishlistDrawer() {
             animate={{ x: 0 }}
             exit={{ x: "-100%" }}
             transition={{ type: "spring", bounce: 0, duration: 0.4 }}
-            className="fixed top-0 left-0 h-full w-[90%] md:w-[400px] bg-[#0a0a0f] border-r border-white/10 z-[101] shadow-2xl flex flex-col font-cairo text-right"
+            className="fixed top-0 left-0 h-full w-[90%] md:w-[400px] bg-slate-50 border-r border-zinc-200 z-[101] shadow-sm border border-zinc-200/60 flex flex-col font-sans text-right"
             dir="rtl"
           >
             {/* Header */}
-            <div className="p-6 border-b border-white/10 flex items-center justify-between">
+            <div className="p-6 border-b border-zinc-200 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-rose-600/10 flex items-center justify-center text-rose-500">
-                  <Heart className="w-5 h-5 fill-rose-500" />
+                <div className="w-10 h-10 rounded-2xl bg-brand-600/10 flex items-center justify-center text-yellow-500">
+                  <Heart className="w-5 h-5 fill-brand-500" />
                 </div>
-                <h2 className="text-xl font-alexandria font-bold text-white">المفضلة</h2>
-                <span className="bg-white/10 text-white text-xs px-2 py-1 rounded-md">{items.length}</span>
+                <h2 className="text-xl font-sans font-bold text-zinc-900">المفضلة</h2>
+                <span className="bg-zinc-100/80 text-zinc-900 text-xs px-2 py-1 rounded-xl">{items.length}</span>
               </div>
               <button
                 onClick={() => setIsOpen(false)}
-                className="p-2 hover:bg-white/10 rounded-full text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                className="p-2 hover:bg-zinc-100/80 rounded-full text-zinc-500 hover:text-zinc-900 transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -172,12 +172,12 @@ export function WishlistDrawer() {
             <div className="flex-1 overflow-y-auto p-6 space-y-4">
               {loading ? (
                 <div className="h-full flex items-center justify-center">
-                  <div className="w-8 h-8 border-4 border-rose-600/30 border-t-rose-600 rounded-full animate-spin" />
+                  <div className="w-8 h-8 border-4 border-brand-600/30 border-t-brand-600 rounded-full animate-spin" />
                 </div>
               ) : items.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center text-center space-y-4 opacity-50">
                   <Heart className="w-16 h-16 text-zinc-500" />
-                  <p className="text-zinc-400 font-bold">لا توجد عناصر بالمفضلة حالياً</p>
+                  <p className="text-zinc-500 font-bold">لا توجد عناصر بالمفضلة حالياً</p>
                 </div>
               ) : (
                 items.map((item) => {
@@ -197,7 +197,7 @@ export function WishlistDrawer() {
                       ? "bg-purple-500/10 text-purple-400 border-purple-500/20"
                       : item.item_type === "bundle"
                       ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
-                      : "bg-rose-500/10 text-rose-400 border-rose-500/20";
+                      : "bg-brand-500/10 text-yellow-500 border-zinc-200/60";
 
                   const pricing = resolveProductPrice(innerItem, currency);
                   const isFree = pricing.price === 0;
@@ -212,12 +212,12 @@ export function WishlistDrawer() {
                   return (
                     <div
                       key={item.id}
-                      className="flex gap-4 bg-white/5 p-4 rounded-2xl border border-white/5 group relative"
+                      className="flex gap-4 bg-zinc-100/40 p-4 rounded-2xl border border-zinc-200/60 group relative"
                     >
                       <Link
                         href={itemLink}
                         onClick={() => setIsOpen(false)}
-                        className="relative w-20 h-20 rounded-xl overflow-hidden bg-[#050505] shrink-0 border border-white/5 block"
+                        className="relative w-20 h-20 rounded-2xl overflow-hidden bg-white shrink-0 border border-zinc-200/60 block"
                       >
                         <img
                           src={innerItem.image_url || "/placeholder.png"}
@@ -232,12 +232,12 @@ export function WishlistDrawer() {
                             <Link
                               href={itemLink}
                               onClick={() => setIsOpen(false)}
-                              className="text-sm font-bold text-white hover:text-[#D6004B] transition-colors line-clamp-1 block"
+                              className="text-sm font-bold text-zinc-900 hover:text-[#1D4ED8] transition-colors line-clamp-1 block"
                             >
                               {innerItem.title}
                             </Link>
                             <span
-                              className={`inline-block px-2 py-0.5 mt-1 rounded-md text-[8px] font-alexandria font-bold border ${badgeColor}`}
+                              className={`inline-block px-2 py-0.5 mt-1 rounded-xl text-[8px] font-sans font-bold border ${badgeColor}`}
                             >
                               {typeBadge}
                             </span>
@@ -252,14 +252,14 @@ export function WishlistDrawer() {
                           </button>
                         </div>
 
-                        <div className="flex items-center justify-between mt-2 pt-2 border-t border-white/5">
-                          <span className="text-sm font-alexandria font-black text-rose-400">
+                        <div className="flex items-center justify-between mt-2 pt-2 border-t border-zinc-200/60">
+                          <span className="text-sm font-sans font-black text-yellow-500">
                             {isFree ? "مجاني" : formatPrice(pricing.price, currency)}
                           </span>
 
                           <button
                             onClick={() => handleAddToCart(item)}
-                            className="h-8 px-3 rounded-lg bg-[#D6004B] hover:bg-[#b0003d] text-white text-[10px] font-bold flex items-center justify-center gap-1.5 shadow-md shadow-rose-600/10 hover:shadow-rose-600/20 transition-all duration-300 cursor-pointer"
+                            className="h-8 px-3 rounded-2xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-[10px] font-bold flex items-center justify-center gap-1.5 shadow-md shadow-brand-600/10 hover:shadow-brand-600/20 transition-all duration-300 cursor-pointer"
                           >
                             <ShoppingCart className="w-3.5 h-3.5" />
                             <span>شراء</span>
@@ -274,10 +274,10 @@ export function WishlistDrawer() {
 
             {/* Footer */}
             {items.length > 0 && (
-              <div className="p-6 border-t border-white/10 bg-white/[0.02]">
+              <div className="p-6 border-t border-zinc-200 bg-zinc-50/70">
                 <button
                   onClick={() => setIsOpen(false)}
-                  className="w-full h-12 bg-white/5 border border-white/10 hover:bg-white/10 text-white font-cairo font-bold text-sm rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer"
+                  className="w-full h-12 bg-zinc-100/40 border border-zinc-200 hover:bg-zinc-100/80 text-zinc-900 font-sans font-bold text-sm rounded-2xl flex items-center justify-center gap-2 transition-all cursor-pointer"
                 >
                   إغلاق المفضلة
                 </button>

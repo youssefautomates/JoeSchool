@@ -61,13 +61,13 @@ export default function RevenueHeatmap({ orders }: RevenueHeatmapProps) {
   };
 
   const getHeatColor = (amount: number) => {
-    if (amount === 0) return "bg-white/[0.02] border-white/5";
+    if (amount === 0) return "bg-zinc-50/70 border-zinc-200/60";
     
     const intensity = amount / maxRevenueHour;
-    if (intensity < 0.25) return "bg-rose-500/20 border-rose-500/10";
-    if (intensity < 0.5) return "bg-rose-500/40 border-rose-500/20";
-    if (intensity < 0.75) return "bg-rose-600/70 border-rose-600/30";
-    return "bg-rose-600 border-rose-500 shadow-md shadow-rose-600/20";
+    if (intensity < 0.25) return "bg-brand-500/20 border-zinc-200/60";
+    if (intensity < 0.5) return "bg-brand-500/40 border-zinc-200/60";
+    if (intensity < 0.75) return "bg-brand-600/70 border-brand-600/30";
+    return "bg-brand-600 border-brand-500 shadow-md shadow-brand-600/20";
   };
 
   const formatHour = (hour: number) => {
@@ -81,12 +81,12 @@ export default function RevenueHeatmap({ orders }: RevenueHeatmapProps) {
     <div className="w-full flex flex-col justify-between font-sans text-left" dir="ltr">
       
       {/* Header */}
-      <div className="flex items-center justify-between mb-5 pb-4 border-b border-white/5">
+      <div className="flex items-center justify-between mb-5 pb-4 border-b border-zinc-200/60">
         <div className="text-left">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">Hourly Sales Revenue Heatmap</h3>
+          <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-500">Hourly Sales Revenue Heatmap</h3>
           <p className="text-[10px] text-zinc-500 mt-0.5">Distribution of total sales volume by weekday and hour of the day</p>
         </div>
-        <Flame className="w-4 h-4 text-rose-500 shrink-0" />
+        <Flame className="w-4 h-4 text-yellow-500 shrink-0" />
       </div>
 
       {/* Swipeable container */}
@@ -126,15 +126,15 @@ export default function RevenueHeatmap({ orders }: RevenueHeatmapProps) {
           {hoveredCell && (
             <div
               style={{ left: tooltipPos.x, top: tooltipPos.y }}
-              className="absolute z-30 p-2.5 rounded-lg bg-[#060608]/95 border border-white/10 shadow-2xl backdrop-blur-md text-[9px] pointer-events-none w-36 space-y-0.5 text-left font-sans"
+              className="absolute z-30 p-2.5 rounded-2xl bg-[#060608]/95 border border-zinc-200 shadow-sm border border-zinc-200/60 backdrop-blur-md text-[9px] pointer-events-none w-36 space-y-0.5 text-left font-sans"
               dir="ltr"
             >
-              <div className="font-extrabold text-white">
+              <div className="font-extrabold text-zinc-900">
                 {daysOfWeek[hoveredCell.day]} at {formatHour(hoveredCell.hour)}
               </div>
-              <div className="text-zinc-400 font-semibold flex justify-between">
+              <div className="text-zinc-500 font-semibold flex justify-between">
                 <span>Revenue:</span>
-                <span className="text-rose-400 font-mono font-black">{hoveredCell.amount} EGP</span>
+                <span className="text-yellow-500 font-mono font-black">{hoveredCell.amount} EGP</span>
               </div>
             </div>
           )}
@@ -144,11 +144,11 @@ export default function RevenueHeatmap({ orders }: RevenueHeatmapProps) {
       {/* Legend */}
       <div className="flex items-center gap-2 mt-3 text-[8.5px] font-bold text-zinc-500 justify-start">
         <span>Low Sales</span>
-        <div className="w-3.5 h-3.5 bg-white/[0.02] border border-white/5 rounded" />
-        <div className="w-3.5 h-3.5 bg-rose-500/20 border border-rose-500/10 rounded" />
-        <div className="w-3.5 h-3.5 bg-rose-500/40 border border-rose-500/20 rounded" />
-        <div className="w-3.5 h-3.5 bg-rose-600/70 border border-rose-600/30 rounded" />
-        <div className="w-3.5 h-3.5 bg-rose-600 border border-rose-500 rounded" />
+        <div className="w-3.5 h-3.5 bg-zinc-50/70 border border-zinc-200/60 rounded" />
+        <div className="w-3.5 h-3.5 bg-brand-500/20 border border-zinc-200/60 rounded" />
+        <div className="w-3.5 h-3.5 bg-brand-500/40 border border-zinc-200/60 rounded" />
+        <div className="w-3.5 h-3.5 bg-brand-600/70 border border-brand-600/30 rounded" />
+        <div className="w-3.5 h-3.5 bg-brand-600 border border-brand-500 rounded" />
         <span>High Sales</span>
       </div>
     </div>

@@ -52,22 +52,22 @@ export function SalesPopup() {
           exit={{ opacity: 0, y: 20, scale: 0.9 }}
           className="fixed bottom-6 left-6 z-50 max-w-sm"
         >
-          <div className="bg-white/95 backdrop-blur-md border border-rose-100 rounded-xl shadow-xl p-4 flex items-start gap-4 shadow-rose-500/10">
+          <div className="bg-white/95 backdrop-blur-md border border-brand-100 rounded-2xl shadow-sm border border-zinc-200/60 p-4 flex items-start gap-4 shadow-brand-500/10">
             <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center shrink-0 border border-emerald-100">
               <CheckCircle2 className="w-5 h-5 text-emerald-600" />
             </div>
-            <div className="flex-1 font-cairo">
+            <div className="flex-1 font-sans">
               <p className="text-sm text-zinc-600">
                 قام <span className="font-bold text-zinc-900">{data.name}</span> بشراء
               </p>
-              <p className="text-sm font-bold text-rose-600 truncate w-48">
+              <p className="text-sm font-bold text-brand-600 truncate w-48">
                 {data.product}
               </p>
-              <p className="text-xs text-zinc-400 mt-1">{data.time}</p>
+              <p className="text-xs text-zinc-500 mt-1">{data.time}</p>
             </div>
             <button 
               onClick={() => setIsVisible(false)}
-              className="text-zinc-400 hover:text-zinc-600 transition-colors"
+              className="text-zinc-500 hover:text-zinc-600 transition-colors"
             >
               <X className="w-4 h-4" />
             </button>
